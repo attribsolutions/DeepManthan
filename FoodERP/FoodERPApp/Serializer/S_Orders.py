@@ -1,0 +1,89 @@
+from dataclasses import fields
+import json
+from ..models import *
+from rest_framework import serializers
+
+
+
+
+class TC_OrderItemsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = TC_OrderItems
+        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']   
+
+class T_OrderSerializer(serializers.ModelSerializer):
+    OrderItem = TC_OrderItemsSerializer(many=True)
+    class Meta:
+        model = T_Orders
+        fields = ['id','CustomerID','PartyID','OrderAmount','Discreption','CreatedBy', 'OrderItem']
+
+    def create(self, validated_data):
+        OrderItems_data = validated_data.pop('OrderItem')
+        Order = T_Orders.objects.create(**validated_data)
+        for OrderItem_data in OrderItems_data:
+           TC_OrderItems.objects.create(OrderID=Order, **OrderItem_data)
+            
+        return Order
+
+    def update(self, instance, validated_data):
+        
+        # * Order Info
+        instance.CustomerID = validated_data.get(
+            'CustomerID', instance.CustomerID)
+        instance.PartyID = validated_data.get(
+            'PartyID', instance.PartyID)
+        instance.OrderAmount = validated_data.get(
+            'OrderAmount', instance.OrderAmount)
+        instance.Discreption = validated_data.get(
+            'Discreption', instance.Discreption)    
+        instance.save()
+
+        for items in instance.OrderItem.all():
+          items.delete()
+
+        
+
+        for OrderItem_data in validated_data['OrderItem']:
+            Items = TC_OrderItems.objects.create(OrderID=instance, **OrderItem_data)
+        instance.OrderItem.add(Items)
+ 
+     
+
+        return instance  
+
+
+
+
+
+
+    # Order input json
+
+    # {
+      
+    #   "CustomerID": 22,
+    #   "PartyID": 22,
+    #   "OrderAmount": "333",
+    #   "Discreption": "bbb",
+    #   "CreatedBy": 22,
+    #   "OrderItem": [
+    #     {
+    #       "ItemID": "aa",
+    #       "Quantity": "1.00",
+    #       "MRP": "1.00",
+    #       "Rate": "10.00",
+    #       "UnitID": 1,
+    #       "BaseUnitQuantity": "1.00",
+    #       "GST": "5.00"
+    #     },
+    #     {
+    #       "ItemID": 2,
+    #       "Quantity": "2.00",
+    #       "MRP": "2.00",
+    #       "Rate": "12.00",
+    #       "UnitID": 2,
+    #       "BaseUnitQuantity": "2.00",
+    #       "GST": "5.00"
+    #     }
+    #   ]
+    # }
