@@ -26,3 +26,5 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         model = M_Pages
         # fields = ['ID','Name','Description','Module','Submodule','isActive','DisplayIndex','Icon','ActualPagePath']    
         fields ="__all__"
+
+      
