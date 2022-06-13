@@ -20,6 +20,8 @@ from .Views.V_Designations import *
 
 from .Views.V_Login import *
 
+from .Views.V_Items import *
+
 urlpatterns = [
     url(r'Registration', UserRegistrationView.as_view()),
     url(r'Login', UserLoginView.as_view()),
@@ -57,7 +59,8 @@ urlpatterns = [
     url(r'T_Orders', T_OrdersView.as_view()),
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
     url(r'Designations$',M_DesignationsView.as_view()),
-    
+    url(r'M_Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
+    url(r'M_Items', M_ItemsView.as_view()),
 
     
    
