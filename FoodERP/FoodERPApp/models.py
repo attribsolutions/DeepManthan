@@ -286,6 +286,19 @@ class M_Employess(models.Model):
     class Meta :
         db_table = "M_Employess"        
 
+class M_Items(models.Model):
+    ID = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=500)
+    BaseunitID = models.IntegerField
+    GSTPercentage = models.DecimalField(max_digits = 5,decimal_places=2)
+    MRP = models.DecimalField(max_digits = 5,decimal_places=2)
+    isActive = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
 
+    class Meta :
+        db_table ="M_Items"
 
 
