@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'PagesMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
     url(r'PagesMaster', M_PagesView.as_view()),
     url(r'showPagesListOnPageType/([0-9]+)$', showPagesListOnPageType.as_view()),
+    
     url(r'PageAccess', H_PageAccessView.as_view()),
    
 

@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 
-from ..Serializer.S_Pages import M_PagesSerializer
+
 from ..Serializer.S_RoleAccess import *
 
 from ..models import *  
@@ -28,7 +28,7 @@ class RoleAccessClass(RetrieveAPIView):
             people1 = M_RoleAccess.objects.filter(Role=1).filter(Modules=a['ID']).values("Pages")
             Pages=M_Pages.objects.filter(ID__in=people1)
             Pagesfields = ('ID', 'Name', 'DisplayIndex','Icon','ActualPagePath')
-            PageSerializer=M_PagesSerializer(Pages,  many=True, fields=Pagesfields).data
+            PageSerializer=M_PagesSerializerforRoleAccess(Pages,  many=True, fields=Pagesfields).data
             Pagesdata  =list()
             for a1 in PageSerializer:
                
