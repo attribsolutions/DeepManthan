@@ -292,7 +292,7 @@ class T_Invoice(models.Model):
         db_table ="T_Invoice"
     
 class  TC_InvoiceItems(models.Model):
-    InvoiceID = models.ForeignKey(T_Invoice, on_delete=models.CASCADE)
+    InvoiceID = models.ForeignKey(T_Invoice, related_name='InvoiceItems', on_delete=models.CASCADE)
     ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
     HSNCode = models.CharField(max_length=500)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=2)
@@ -325,7 +325,7 @@ class  TC_InvoiceItems(models.Model):
         
 class TC_InvoiceItemBatches(models.Model):
     InvoiceID = models.ForeignKey(T_Invoice, on_delete=models.CASCADE)
-    InvoiceItemID = models.ForeignKey(TC_InvoiceItems, on_delete=models.CASCADE)
+    InvoiceItemID = models.ForeignKey(TC_InvoiceItems, related_name='InvoiceItemBatches', on_delete=models.CASCADE)
     ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
