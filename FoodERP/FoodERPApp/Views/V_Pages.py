@@ -38,7 +38,7 @@ class M_PagesView(CreateAPIView):
                        'IsActive':a1["isActive"],
                        'isShowOnMenu':a1["isShowOnMenu"],
                        'PageType':a1["PageType"],
-                       'RelatedPageID' : a1["PageList"],
+                       'RelatedPageID' : a1["RelatedPageID"],
 
                         })
                 # PageListData.append(response1)
@@ -86,7 +86,7 @@ class M_PagesViewSecond(RetrieveAPIView):
                 'IsActive':HPagesserialize_data["isActive"],
                 'isShowOnMenu':HPagesserialize_data["isShowOnMenu"],
                 'PageType':HPagesserialize_data["PageType"],
-                'RelatedPageID' : HPagesserialize_data["PageList"],
+                'RelatedPageID' : HPagesserialize_data["RelatedPageID"],
                 })  
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PageListData})
         except Exception as e:
