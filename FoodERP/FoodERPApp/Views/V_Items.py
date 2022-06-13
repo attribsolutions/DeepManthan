@@ -23,7 +23,7 @@ class M_ItemsView(CreateAPIView):
                     M_Items_Serializer = M_ItemsSerializer(
                     M_Itemsdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': ''})    
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []]})    
         except Exception as e:
             raise Exception(e)
             
