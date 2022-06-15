@@ -4,10 +4,8 @@ from rest_framework import serializers
 
 from ..models import *
 
-class MC_PagePageAccessSerializer(serializers.ModelSerializer):
+class MC_PagePageAccessSerializer(serializers.Serializer):
     
-        # fields ="__all__"
-        fields = ['ID','PageID','AccessID']
     # class Meta:
     #     model = MC_PagePageAccess
     #     # fields ="__all__"
