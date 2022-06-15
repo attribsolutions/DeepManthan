@@ -25,7 +25,7 @@ class T_OrdersView(CreateAPIView):
                 Orderdata = T_Orders.objects.all()
                 Order_serializer = T_OrderSerializer(
                     Orderdata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Order_serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer.data})
         except Exception as e:
             raise Exception(e)
             print(e)
@@ -38,8 +38,8 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Order Save Successfully'})
-                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': Order_serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully'})
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Order_serializer.errors})
         except Exception as e:
             raise Exception(e)
 
@@ -54,7 +54,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 Orderdata = T_Orders.objects.filter(id=id)
                 Order_serializer = T_OrderSerializer(
                     Orderdata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Order_serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Order_serializer.data})
         except Exception as e:
             raise Exception(e)
             print(e)  
@@ -65,7 +65,7 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Message': 'Order Deleted Successfully'})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully'})
         except Exception as e:
             raise Exception(e)
 
