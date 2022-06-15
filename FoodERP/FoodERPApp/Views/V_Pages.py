@@ -25,33 +25,34 @@ Rp.Name RelatedPageName ,'' PagePageAccess
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id ''')
-                SubmoduleListData=list()
+                # SubmoduleListData=list()
                 # if HPagesdata.exists():
                 HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
-                for a in HPagesserialize_data:
-                    bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
-                    MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
-                    SubmoduleListData.append({
+                # for a in HPagesserialize_data:
+                #     bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
+                #     MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
+                #     SubmoduleListData.append({
                         
-                        "ID": a['ID'],
-                        "Name": a['Name'],
-                        "Description": a['Description'],
-                        "ModuleID": a['ModuleID'],
-                        "ModuleName": a['ModuleName'],
-                        "isActive": a['isActive'],
-                        "DisplayIndex": a['DisplayIndex'],
-                        "Icon": a['Icon'],
-                        "ActualPagePath": a['ActualPagePath'],
-                        "isShowOnMenu": a['isShowOnMenu'],
-                        "PageType": a['PageType'],
-                        "RelatedPageID": a['RelatedPageID'],
-                        "RelatedPageName": a['RelatedPageName'],
-                        "PagePageAccess": MC_PagePageAccess_data
-                    }) 
+                #         "ID": a['ID'],
+                #         "Name": a['Name'],
+                #         "Description": a['Description'],
+                #         "ModuleID": a['ModuleID'],
+                #         "ModuleName": a['ModuleName'],
+                #         "isActive": a['isActive'],
+                #         "DisplayIndex": a['DisplayIndex'],
+                #         "Icon": a['Icon'],
+                #         "ActualPagePath": a['ActualPagePath'],
+                #         "isShowOnMenu": a['isShowOnMenu'],
+                #         "PageType": a['PageType'],
+                #         "RelatedPageID": a['RelatedPageID'],
+                #         "RelatedPageName": a['RelatedPageName'],
+                #         "PagePageAccess": MC_PagePageAccess_data
+                #     }) 
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': SubmoduleListData})
 
 
 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': SubmoduleListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': HPagesserialize_data})
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
         except Exception as e:
             raise Exception(e)
@@ -66,7 +67,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 HPagesserialize_data = M_PagesSerializer1(data=HPagesdata)
                 if HPagesserialize_data.is_valid():
                     HPagesserialize_data.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': HPagesserialize_data.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': HPagesserialize_data.errors})
         except Exception as e:
             raise Exception(e)
@@ -88,9 +89,29 @@ FROM M_Pages p
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                 # if HPagesdata.exists():
+                SubmoduleListData=list()
                 HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
-                
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': HPagesserialize_data})
+                for a in HPagesserialize_data:
+                    bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
+                    MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
+                    SubmoduleListData.append({
+                        
+                        "ID": a['ID'],
+                        "Name": a['Name'],
+                        "Description": a['Description'],
+                        "ModuleID": a['ModuleID'],
+                        "ModuleName": a['ModuleName'],
+                        "isActive": a['isActive'],
+                        "DisplayIndex": a['DisplayIndex'],
+                        "Icon": a['Icon'],
+                        "ActualPagePath": a['ActualPagePath'],
+                        "isShowOnMenu": a['isShowOnMenu'],
+                        "PageType": a['PageType'],
+                        "RelatedPageID": a['RelatedPageID'],
+                        "RelatedPageName": a['RelatedPageName'],
+                        "PagePageAccess": MC_PagePageAccess_data
+                    }) 
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': SubmoduleListData})
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
             raise Exception(e)
