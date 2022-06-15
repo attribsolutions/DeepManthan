@@ -92,11 +92,11 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                 SubmoduleListData=list()
                 HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
                 for a in HPagesserialize_data:
-                    # bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
-                    bb=MC_PagePageAccess.objects.raw('''SELECT mc_pagepageaccess.AccessID_id AccessID,h_pageaccess.Name AccessName 
-                                                        FROM mc_pagepageaccess 
-                                                        join h_pageaccess on h_pageaccess.ID=mc_pagepageaccess.AccessID_id
-                                                        where mc_pagepageaccess.PageID_id=%s''', [id])
+                    bb=MC_PagePageAccess.objects.filter(PageID=id)
+                    # bb=MC_PagePageAccess.objects.raw('''SELECT mc_pagepageaccess.AccessID_id AccessID,h_pageaccess.Name AccessName 
+                    #                                     FROM mc_pagepageaccess 
+                    #                                     join h_pageaccess on h_pageaccess.ID=mc_pagepageaccess.AccessID_id
+                    #                                     where mc_pagepageaccess.PageID_id=%s''', [id])
                     MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
                     SubmoduleListData.append({
                         
