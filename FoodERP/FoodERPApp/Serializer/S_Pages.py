@@ -6,11 +6,14 @@ from ..models import *
 
 class MC_PagePageAccessSerializer(serializers.ModelSerializer):
     
-    class Meta:
-        model = MC_PagePageAccess
         # fields ="__all__"
         fields = ['ID','PageID','AccessID']
-
+    # class Meta:
+    #     model = MC_PagePageAccess
+    #     # fields ="__all__"
+    #     fields = ['ID','PageID','AccessID']
+    AccessID = serializers.IntegerField()
+    AccessName = serializers.CharField(max_length=100)
 
 class M_PagesSerializer(serializers.Serializer):
     
