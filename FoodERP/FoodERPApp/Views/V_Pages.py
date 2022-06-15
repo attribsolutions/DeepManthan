@@ -64,7 +64,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
         try:
             with transaction.atomic():
                 HPagesdata = JSONParser().parse(request)
-                HPagesserialize_data = M_PagesSerializer1(data=HPagesdata)
+                HPagesserialize_data = M_PagesSerializerForPost(data=HPagesdata)
                 if HPagesserialize_data.is_valid():
                     HPagesserialize_data.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': HPagesserialize_data.data})
