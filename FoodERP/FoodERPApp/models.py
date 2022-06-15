@@ -196,7 +196,7 @@ class H_PageAccess(models.Model):
 
 class MC_PagePageAccess(models.Model):
     ID = models.AutoField(primary_key=True)
-    PageID = models.ForeignKey(M_Pages,on_delete=models.CASCADE, null=True)
+    PageID = models.ForeignKey(M_Pages,related_name='PagePageAccess', on_delete=models.CASCADE, null=True)
     AccessID = models.ForeignKey(H_PageAccess ,on_delete=models.CASCADE, null=True)
 
     class Meta:
