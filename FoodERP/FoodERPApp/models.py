@@ -201,6 +201,19 @@ class MC_PagePageAccess(models.Model):
 
     class Meta:
         db_table = "MC_PagePageAccess"   
+
+class M_ItemsGroup(models.Model):
+    ID = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=500)
+    Sequence = models.DecimalField(max_digits = 5,decimal_places=2)
+    isActive = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta :
+        db_table ="M_ItemsGroup"
     
 class M_Items(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -208,6 +221,8 @@ class M_Items(models.Model):
     BaseunitID = models.IntegerField
     GSTPercentage = models.DecimalField(max_digits = 5,decimal_places=2)
     MRP = models.DecimalField(max_digits = 5,decimal_places=2)
+    ItemsGroup = models.ForeignKey(M_ItemsGroup, related_name='ItemsGroup', on_delete=models.CASCADE)
+    Rate =models.DecimalField(max_digits = 5,decimal_places=2)
     isActive = models.BooleanField(default=False)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -292,7 +307,7 @@ class T_Invoice(models.Model):
         db_table ="T_Invoice"
     
 class  TC_InvoiceItems(models.Model):
-    InvoiceID = models.ForeignKey(T_Invoice, on_delete=models.CASCADE)
+    InvoiceID = models.ForeignKey(T_Invoice, related_name='InvoiceItems', on_delete=models.CASCADE)
     ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
     HSNCode = models.CharField(max_length=500)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=2)
@@ -325,7 +340,7 @@ class  TC_InvoiceItems(models.Model):
         
 class TC_InvoiceItemBatches(models.Model):
     InvoiceID = models.ForeignKey(T_Invoice, on_delete=models.CASCADE)
-    InvoiceItemID = models.ForeignKey(TC_InvoiceItems, on_delete=models.CASCADE)
+    InvoiceItemID = models.ForeignKey(TC_InvoiceItems, related_name='InvoiceItemBatches', on_delete=models.CASCADE)
     ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
