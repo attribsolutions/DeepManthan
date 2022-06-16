@@ -196,11 +196,24 @@ class H_PageAccess(models.Model):
 
 class MC_PagePageAccess(models.Model):
     ID = models.AutoField(primary_key=True)
-    PageID = models.ForeignKey(M_Pages,on_delete=models.CASCADE, null=True)
+    PageID = models.ForeignKey(M_Pages,related_name='PagePageAccess', on_delete=models.CASCADE, null=True)
     AccessID = models.ForeignKey(H_PageAccess ,on_delete=models.CASCADE, null=True)
 
     class Meta:
         db_table = "MC_PagePageAccess"   
+
+class M_ItemsGroup(models.Model):
+    ID = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=500)
+    Sequence = models.DecimalField(max_digits = 5,decimal_places=2)
+    isActive = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta :
+        db_table ="M_ItemsGroup"
     
 class M_Items(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -208,6 +221,8 @@ class M_Items(models.Model):
     BaseunitID = models.IntegerField
     GSTPercentage = models.DecimalField(max_digits = 5,decimal_places=2)
     MRP = models.DecimalField(max_digits = 5,decimal_places=2)
+    ItemsGroup = models.ForeignKey(M_ItemsGroup, related_name='ItemsGroup', on_delete=models.CASCADE)
+    Rate =models.DecimalField(max_digits = 5,decimal_places=2)
     isActive = models.BooleanField(default=False)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)

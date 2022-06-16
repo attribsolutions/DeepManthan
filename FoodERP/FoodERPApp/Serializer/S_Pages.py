@@ -1,11 +1,18 @@
+from operator import truediv
+from black import maybe_install_uvloop
 from rest_framework import serializers
-from ..Serializer.S_Modules import *
-from ..Serializer.S_RoleAccess import DynamicFieldsModelSerializer
 
-from ..models import *
+from ..models import M_Pages, MC_PagePageAccess
+
+
+class MC_PagePageAccessSerializer(serializers.Serializer):
+   
+    ID = serializers.IntegerField()
+    Name = serializers.CharField(max_length=100)
 
 class M_PagesSerializer(serializers.Serializer):
-    ID = serializers.IntegerField(read_only=True)
+    
+    ID = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
     Description = serializers.CharField(max_length=100)
     ModuleID = serializers.IntegerField(read_only=True)
@@ -17,14 +24,70 @@ class M_PagesSerializer(serializers.Serializer):
     isShowOnMenu = serializers.BooleanField(default=False)
     PageType = serializers.IntegerField()
     RelatedPageID = serializers.IntegerField()
-    RelatedPageName=serializers.CharField(max_length=100)   
+    RelatedPageName=serializers.CharField(max_length=100) 
+    
+class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PagePageAccess
+        fields ="__all__" 
 
 class M_PagesSerializer1(serializers.ModelSerializer):
-    # Module = H_ModulesSerializer()
-    # SubModule = SubModuleListSerializer()
     class Meta:
         model = M_Pages
-        # fields = ['ID','Name','Description','Module','Submodule','isActive','DisplayIndex','Icon','ActualPagePath']    
-        fields ="__all__"
+        fields ="__all__"   
+   
+    PagePageAccess=MC_PagePageAccessSerializer1(many=True)
+    def create(self, validated_data):
+        PageAccess_data = validated_data.pop('PagePageAccess')
+       
+        Pages = M_Pages.objects.create(**validated_data)
+        for data in PageAccess_data:
+            MC_PagePageAccess.objects.create(
+                PageID=Pages, 
+                **data)
+        return Pages
+
+    def update(self, instance, validated_data):
+            
+            # * Page Info
+            instance.Name = validated_data.get(
+                'Name', instance.Name)
+            instance.Description = validated_data.get(
+                'Description', instance.Description)
+            instance.Module = validated_data.get(
+                'Module', instance.Module)
+            instance.isActive = validated_data.get(
+                'isActive', instance.isActive)
+            instance.DisplayIndex = validated_data.get(
+                'DisplayIndex', instance.DisplayIndex)
+            instance.Icon = validated_data.get(
+                'Icon', instance.Icon)
+            instance.ActualPagePath = validated_data.get(
+                'ActualPagePath', instance.ActualPagePath)
+            instance.isShowOnMenu = validated_data.get(
+                'isShowOnMenu', instance.isShowOnMenu)
+            instance.PageType = validated_data.get(
+                'PageType', instance.PageType)
+            instance.RelatedPageID = validated_data.get(
+                'RelatedPageID', instance.RelatedPageID)
+            
+
+            instance.save()
+
+            for Access in instance.PagePageAccess.all():
+                Access.delete()
+
+            
+
+            for PagePageAccess_data in validated_data['PagePageAccess']:
+                PageAccess = MC_PagePageAccess.objects.create(PageID=instance, **PagePageAccess_data)
+            instance.PagePageAccess.add(PageAccess)
+    
+        
+
+            return instance   
+    
+
+        
 
       
