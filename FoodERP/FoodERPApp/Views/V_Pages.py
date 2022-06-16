@@ -15,48 +15,24 @@ class M_PagesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
+    @transaction.atomic()
     def get(self, request):
         try:
-            # time.sleep(7)
             with transaction.atomic():
                 HPagesdata = M_Pages.objects.raw('''SELECT p.ID,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
-Rp.Name RelatedPageName ,'' PagePageAccess
+Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id ''')
-                # SubmoduleListData=list()
-                # if HPagesdata.exists():
+                
                 HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
-
-                # for a in HPagesserialize_data:
-                #     bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
-                #     MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
-                #     SubmoduleListData.append({
-                        
-                #         "ID": a['ID'],
-                #         "Name": a['Name'],
-                #         "Description": a['Description'],
-                #         "ModuleID": a['ModuleID'],
-                #         "ModuleName": a['ModuleName'],
-                #         "isActive": a['isActive'],
-                #         "DisplayIndex": a['DisplayIndex'],
-                #         "Icon": a['Icon'],
-                #         "ActualPagePath": a['ActualPagePath'],
-                #         "isShowOnMenu": a['isShowOnMenu'],
-                #         "PageType": a['PageType'],
-                #         "RelatedPageID": a['RelatedPageID'],
-                #         "RelatedPageName": a['RelatedPageName'],
-                #         "PagePageAccess": MC_PagePageAccess_data
-                #     }) 
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': SubmoduleListData})
-
-
-
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': HPagesserialize_data})
-                # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
+                
         except Exception as e:
             raise Exception(e)
+            print(e)
 
 
 
