@@ -11,6 +11,7 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
     Name = serializers.CharField(max_length=100)
 
 class M_PagesSerializer(serializers.Serializer):
+    
     ID = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
     Description = serializers.CharField(max_length=100)
