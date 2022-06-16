@@ -19,10 +19,11 @@ class T_OrdersView(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request,id=0):
+    def get(self, request):
         try:
             with transaction.atomic():
                 Orderdata = T_Orders.objects.all()
+                
                 Order_serializer = T_OrderSerializer(
                     Orderdata, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer.data})
@@ -39,7 +40,7 @@ class T_OrdersView(CreateAPIView):
                 if Order_serializer.is_valid():
                     Order_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully'})
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Order_serializer.errors})
+                return JsonResponse({'StatusCode': 400, 'Status': True,  'Message': Order_serializer.errors})
         except Exception as e:
             raise Exception(e)
 
