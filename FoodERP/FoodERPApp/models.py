@@ -196,7 +196,7 @@ class H_PageAccess(models.Model):
 
 class MC_PagePageAccess(models.Model):
     ID = models.AutoField(primary_key=True)
-    PageID = models.ForeignKey(M_Pages,on_delete=models.CASCADE, null=True)
+    PageID = models.ForeignKey(M_Pages,related_name='PagePageAccess', on_delete=models.CASCADE, null=True)
     AccessID = models.ForeignKey(H_PageAccess ,on_delete=models.CASCADE, null=True)
 
     class Meta:
@@ -235,9 +235,9 @@ class M_Items(models.Model):
 class T_Orders(models.Model):
     
     OrderDate = models.DateField(auto_now_add=True)
-    CustomerID = models.IntegerField(blank=True, null=True)
-    PartyID  =  models.IntegerField(blank=True, null=True)
-    OrderAmount =  models.DecimalField(max_digits = 5,decimal_places=2)
+    CustomerID = models.ForeignKey(M_Parties, related_name='CustomerID', on_delete=models.CASCADE)
+    PartyID  =  models.ForeignKey(M_Parties, related_name='PartyID', on_delete=models.CASCADE)
+    OrderAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)

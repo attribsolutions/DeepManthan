@@ -15,47 +15,24 @@ class M_PagesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
+    @transaction.atomic()
     def get(self, request):
         try:
-            # time.sleep(7)
             with transaction.atomic():
                 HPagesdata = M_Pages.objects.raw('''SELECT p.ID,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
-m.ID ModuleID,m.Name ModuleName,RP.ID RelatedPageID,
-Rp.Name RelatedPageName ,'' PagePageAccess
+m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
+Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id ''')
-                # SubmoduleListData=list()
-                # if HPagesdata.exists():
+                
                 HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
-                # for a in HPagesserialize_data:
-                #     bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
-                #     MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
-                #     SubmoduleListData.append({
-                        
-                #         "ID": a['ID'],
-                #         "Name": a['Name'],
-                #         "Description": a['Description'],
-                #         "ModuleID": a['ModuleID'],
-                #         "ModuleName": a['ModuleName'],
-                #         "isActive": a['isActive'],
-                #         "DisplayIndex": a['DisplayIndex'],
-                #         "Icon": a['Icon'],
-                #         "ActualPagePath": a['ActualPagePath'],
-                #         "isShowOnMenu": a['isShowOnMenu'],
-                #         "PageType": a['PageType'],
-                #         "RelatedPageID": a['RelatedPageID'],
-                #         "RelatedPageName": a['RelatedPageName'],
-                #         "PagePageAccess": MC_PagePageAccess_data
-                #     }) 
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': SubmoduleListData})
-
-
-
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': HPagesserialize_data})
-                # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
+                
         except Exception as e:
             raise Exception(e)
+            print(e)
 
 
 
@@ -83,18 +60,26 @@ class M_PagesViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 HPagesdata = M_Pages.objects.raw('''SELECT p.ID,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
-m.ID ModuleID,m.Name ModuleName,RP.ID RelatedPageID,
+m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                 # if HPagesdata.exists():
-                SubmoduleListData=list()
+                PageListData=list()
                 HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
                 for a in HPagesserialize_data:
-                    bb=MC_PagePageAccess.objects.filter(PageID=a["ID"])
+                    # bb=MC_PagePageAccess.objects.filter(PageID=id)
+                    bb=MC_PagePageAccess.objects.raw('''SELECT mc_pagepageaccess.AccessID_id ID,h_pageaccess.Name Name FROM mc_pagepageaccess join h_pageaccess on h_pageaccess.ID=mc_pagepageaccess.AccessID_id where mc_pagepageaccess.PageID_id=%s''', [id])
                     MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
-                    SubmoduleListData.append({
+                    PageAccessListData=list()
+                    for b in MC_PagePageAccess_data:
+                        PageAccessListData.append({
+                            "AccessID" : b['ID'],
+                            "AccessName" : b['Name']
+                        })
+                    
+                    PageListData.append({
                         
                         "ID": a['ID'],
                         "Name": a['Name'],
@@ -109,9 +94,9 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                         "PageType": a['PageType'],
                         "RelatedPageID": a['RelatedPageID'],
                         "RelatedPageName": a['RelatedPageName'],
-                        "PagePageAccess": MC_PagePageAccess_data
+                        "PagePageAccess": PageAccessListData
                     }) 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': SubmoduleListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PageListData})
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
             raise Exception(e)
