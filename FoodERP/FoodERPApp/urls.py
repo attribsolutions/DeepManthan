@@ -72,7 +72,7 @@ urlpatterns = [
   
     url(r'M_Employess', M_EmployessView.as_view()),
 
-   
+    url(r'ItemsGroup', M_EmployessViewSecond.as_view()),
     url(r'ItemsGroup', ItemsGroupView.as_view()),
     
 ]

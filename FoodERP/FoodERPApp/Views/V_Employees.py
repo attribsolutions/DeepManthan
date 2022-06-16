@@ -45,4 +45,47 @@ class M_EmployessView(CreateAPIView):
             raise Exception(e)
             print(e)     
 
+
+class M_EmployessViewSecond(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                M_Employessdata = M_Employess.objects.get(ID=id)
+                M_Employess_Serializer = M_EmployessSerializer(M_Employessdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Employess_Serializer.data})
+        except Exception as e:
+            raise Exception(e)
+
+
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                M_Employessdata = JSONParser().parse(request)
+                M_EmployessdataByID = M_Employess.objects.get(ID=id)
+                M_Employess_Serializer = M_EmployessSerializer(
+                    M_EmployessdataByID, data=M_Employessdata)
+                if M_Employess_Serializer.is_valid():
+                    M_Employess_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Updated Successfully','Data' : ''})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Employess_Serializer.errors,'Data' : ''})
+        except Exception as e:
+            raise Exception(e)
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                M_Employessdata = M_Employess.objects.get(ID=id)
+                M_Employessdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Deleted Successfully','Data':''})
+        except Exception as e:
+            raise Exception(e)
  
