@@ -267,6 +267,7 @@ class M_Designations(models.Model):
     class Meta :
         db_table = "M_Designations"
 
+
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
     Address = models.CharField(max_length=500)
