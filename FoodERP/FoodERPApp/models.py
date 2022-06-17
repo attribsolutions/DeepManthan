@@ -355,5 +355,3 @@ class TC_InvoiceItemBatches(models.Model):
     
     
     
-    
-        
