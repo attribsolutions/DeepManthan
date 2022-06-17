@@ -31,7 +31,24 @@ class M_EmployeesView(CreateAPIView):
             
             print(e)
 
+class M_EmployeesViewSecond(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
 
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Modulesdata = M_Employess.objects.filter(ID=id)
+                if Modulesdata.exists():
+                    Modules_Serializer = M_EmployessSerializer(Modulesdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': ''})    
+        except Exception as e:
+            raise Exception(e)
+            
+            print(e)
 #     @transaction.atomic()
 #     def post(self, request):
 #         try:

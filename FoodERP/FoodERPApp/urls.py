@@ -72,6 +72,7 @@ urlpatterns = [
     url(r'M_Items', M_ItemsView.as_view()),
  
     # url(r'H_Modules/([0-9]+)', H_ModulesViewSecond.as_view()),
+    url(r'M_Employess/([0-9]+)', M_EmployeesViewSecond.as_view()),
     url(r'M_Employess', M_EmployeesView.as_view()),
   
      
