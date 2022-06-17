@@ -22,9 +22,7 @@ from .Views.V_Login import *
 
 from .Views.V_Items import *
 
-from .Views.V_Employees import *
 
-from .Views.V_ItemsGroup import *
 
 
 
@@ -68,11 +66,8 @@ urlpatterns = [
     url(r'Designations$',M_DesignationsView.as_view()),
     url(r'M_Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
     url(r'M_Items', M_ItemsView.as_view()),
-    
-  
-    url(r'M_Employess', M_EmployessView.as_view()),
+ 
 
-    url(r'ItemsGroup', M_EmployessViewSecond.as_view()),
-    url(r'ItemsGroup', ItemsGroupView.as_view()),
-    
+  
+     
 ]
