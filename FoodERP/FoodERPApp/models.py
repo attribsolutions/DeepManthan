@@ -268,7 +268,7 @@ class M_Designations(models.Model):
         db_table = "M_Designations"
 
 
-class M_Employess(models.Model):
+class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
     Address = models.CharField(max_length=500)
     Mobile = models.IntegerField()
@@ -284,7 +284,7 @@ class M_Employess(models.Model):
     UpdatedOn = models.DateTimeField(blank=True, null=True)
 
     class Meta :
-        db_table = "M_Employess"        
+        db_table = "M_Employees"        
 
 
 class T_Invoice(models.Model):
