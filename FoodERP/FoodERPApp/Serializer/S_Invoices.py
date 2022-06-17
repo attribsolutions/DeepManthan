@@ -32,3 +32,25 @@ class T_InvoiceSerializer(serializers.ModelSerializer):
                TC_InvoiceItemBatches.objects.create(InvoiceID=Invoice,InvoiceItemID=InvoiceItemID, **InvoiceItemBatch_data)
         
         return Invoice       
+    
+    def update(self, instance, validated_data):
+        
+        instance.OrderID = validated_data.get(
+            'OrderID', instance.OrderID)
+        instance.CustomerID = validated_data.get(
+            'CustomerID', instance.CustomerID)
+        instance.PartyID = validated_data.get(
+            'PartyID', instance.PartyID)
+        instance.GrandTotal = validated_data.get(
+            'GrandTotal', instance.GrandTotal)
+        instance.RoundOffAmount = validated_data.get(
+            'RoundOffAmount', instance.RoundOffAmount)    
+        instance.save()
+        
+        for items in instance.InvoiceItems.all():
+            items.delete()
+        
+        instance.InvoiceItems = validated_data.get('InvoiceItems')
+        
+       
+        return instance
