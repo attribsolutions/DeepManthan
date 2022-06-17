@@ -2,9 +2,7 @@ from dataclasses import fields
 from ..models import *
 from rest_framework import serializers
 
-
-
-class M_EmployessSerializer(serializers.ModelSerializer):
+class M_EmployeesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = M_Employess
+        model = M_Employees
         fields = '__all__'
