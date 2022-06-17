@@ -84,7 +84,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                         "ID": a['ID'],
                         "Name": a['Name'],
                         "Description": a['Description'],
-                        "ModuleID": a['ModuleID'],
+                        "Module": a['ModuleID'],
                         "ModuleName": a['ModuleName'],
                         "isActive": a['isActive'],
                         "DisplayIndex": a['DisplayIndex'],
