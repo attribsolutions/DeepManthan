@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 from rest_framework.parsers import JSONParser
 
-from  ..Serializer.S_Items import M_ItemsSerializer
+from  ..Serializer.S_Items import *
 from ..models import *
 
  
@@ -35,7 +35,7 @@ class M_ItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Itemsdata = JSONParser().parse(request)
-                M_Items_Serializer = M_ItemsSerializer(data=M_Itemsdata)
+                M_Items_Serializer = M_ItemsSerializer01(data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
                     M_Items_Serializer.save()
                    
@@ -69,7 +69,7 @@ class M_ItemsViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Itemsdata = JSONParser().parse(request)
                 M_ItemsdataByID = M_Items.objects.get(ID=id)
-                M_Items_Serializer = M_ItemsSerializer(
+                M_Items_Serializer = M_ItemsSerializer01(
                     M_ItemsdataByID, data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
                     M_Items_Serializer.save()
