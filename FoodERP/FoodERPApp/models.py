@@ -218,10 +218,11 @@ class M_ItemsGroup(models.Model):
 class M_Items(models.Model):
     ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=500)
-    BaseunitID = models.IntegerField
+    Sequence = models.DecimalField(max_digits = 5,decimal_places=2)
+    BaseunitID = models.IntegerField()
     GSTPercentage = models.DecimalField(max_digits = 5,decimal_places=2)
     MRP = models.DecimalField(max_digits = 5,decimal_places=2)
-    ItemsGroup = models.ForeignKey(M_ItemsGroup, related_name='ItemsGroup', on_delete=models.CASCADE)
+    ItemGroup = models.ForeignKey(M_ItemsGroup, on_delete=models.CASCADE)
     Rate =models.DecimalField(max_digits = 5,decimal_places=2)
     isActive = models.BooleanField(default=False)
     CreatedBy = models.IntegerField(default=False)
@@ -235,8 +236,10 @@ class M_Items(models.Model):
 class T_Orders(models.Model):
     
     OrderDate = models.DateField(auto_now_add=True)
-    CustomerID = models.ForeignKey(M_Parties, related_name='CustomerID', on_delete=models.CASCADE)
-    PartyID  =  models.ForeignKey(M_Parties, related_name='PartyID', on_delete=models.CASCADE)
+    
+    CustomerID = models.ForeignKey(M_Parties, related_name = 'CustomerID', on_delete = models.CASCADE)
+    
+    PartyID = models.ForeignKey(M_Parties, related_name = 'PartyID', on_delete = models.CASCADE)
     OrderAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(blank=True, null=True)
