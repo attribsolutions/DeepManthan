@@ -235,10 +235,9 @@ class M_Items(models.Model):
 class T_Orders(models.Model):
     
     OrderDate = models.DateField(auto_now_add=True)
+    CustomerID = models.IntegerField()
     
-    CustomerID = models.ForeignKey(M_Parties, related_name = 'CustomerID', on_delete = models.CASCADE)
-    
-    PartyID = models.ForeignKey(M_Parties, related_name = 'PartyID', on_delete = models.CASCADE)
+    PartyID  =  models.IntegerField()
     OrderAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(blank=True, null=True)
