@@ -8,7 +8,12 @@ class M_ItemsGroupSerializer(serializers.ModelSerializer):
         fields = ['ID','Name','Sequence']
 
 class M_ItemsSerializer(serializers.ModelSerializer):
-    ItemsGroup=M_ItemsGroupSerializer()
+    ItemGroup=M_ItemsGroupSerializer()
+    class Meta:
+        model =  M_Items
+        fields = '__all__'
+
+class M_ItemsSerializer01(serializers.ModelSerializer):
     class Meta:
         model =  M_Items
         fields = '__all__'
