@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from FoodERPApp.Views.V_Errorhandler import custom404
+from FoodERPApp.Views.V_Errorhandler import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,3 +24,4 @@ urlpatterns = [
 
 handler404 =  'FoodERPApp.Views.V_Errorhandler.custom404'
 handler500 =  'FoodERPApp.Views.V_Errorhandler.custom500'
+ 
