@@ -294,6 +294,7 @@ class M_Employees(models.Model):
     DOB = models.CharField(max_length=100)
     PAN = models.CharField(max_length=100)
     AadharNo = models.CharField(max_length=100)
+    working_hours =  models.DecimalField(max_digits = 15,decimal_places=2)
     Companies = models.ForeignKey(C_Companies, on_delete=models.CASCADE)
     EmployeeType = models.ForeignKey(M_EmployeeType, on_delete=models.CASCADE)
     Designations = models.ForeignKey(M_Designations, on_delete=models.CASCADE) 
