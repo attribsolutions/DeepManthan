@@ -11,7 +11,7 @@ class TC_InvoiceItemBatchesSerializer(serializers.ModelSerializer):
         fields = ['id','ItemID','BatchDate','BatchCode','Quantity','UnitID','MRP','CreatedOn']
         
 class TC_InvoiceItemsSerializer(serializers.ModelSerializer):
-    InvoiceItemBatches = TC_InvoiceItemBatchesSerializer(many=True)
+    InvoiceItemBatches = TC_InvoiceItemBatchesSerializer(many=True) 
     class Meta:
         model = TC_InvoiceItems
         fields = ['id','ItemID','HSNCode','Quantity','UnitID','BaseUnitQuantity','QtyInKg','QtyInNo','QtyInBox','MRP','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','InvoiceItemBatches']   
@@ -50,7 +50,9 @@ class T_InvoiceSerializer(serializers.ModelSerializer):
         for items in instance.InvoiceItems.all():
             items.delete()
         
-        instance.InvoiceItems = validated_data.get('InvoiceItems')
-        
-       
-        return instance
+        for InvoiceItem_data in validated_data['InvoiceItems']:
+            InvoiceItemBatches_data = InvoiceItem_data.pop('InvoiceItemBatches')
+            TC_InvoiceItemsID = TC_InvoiceItems.objects.create(InvoiceID=instance, **InvoiceItem_data)
+            for InvoiceItemBatch_data in InvoiceItemBatches_data:
+               TC_InvoiceItemBatches.objects.create(InvoiceID=instance,InvoiceItemID=TC_InvoiceItemsID, **InvoiceItemBatch_data)
+        return instance 

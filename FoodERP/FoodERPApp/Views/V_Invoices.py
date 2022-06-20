@@ -66,19 +66,16 @@ class T_InvoicesViewSecond(CreateAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
+        
         try:
             with transaction.atomic():
                 Invoiceupdatedata = JSONParser().parse(request)
                 InvoiceupdateByID = T_Invoice.objects.get(id=id)
-                
                 Invoiceupdate_Serializer = T_InvoiceSerializer(InvoiceupdateByID, data=Invoiceupdatedata)
-                return JsonResponse({'Data':Invoiceupdate_Serializer.data})
                 if Invoiceupdate_Serializer.is_valid():
                     Invoiceupdate_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':Invoiceupdate_Serializer.data})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors})
         except Exception as e:
             raise Exception(e)
             print(e)                  
