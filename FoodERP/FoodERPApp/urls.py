@@ -25,7 +25,13 @@ from .Views.V_Items import *
 from .Views.V_Employees import *
 
 from .Views.V_Invoices import *
+
 from .Views.V_ItemsGroup import *
+
+from .Views.V_EmployeeType import *
+
+from .Views.V_State import *
+
 
 
 
@@ -84,5 +90,11 @@ urlpatterns = [
 
     url(r'ItemsGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
     url(r'ItemsGroup', M_ItemsGroupView.as_view()),
+
+    url(r'M_EmployeeType', M_EmployeeTypeView.as_view()),
+
+    url(r'M_State',S_StateView.as_view()),
+
+
      
 ]

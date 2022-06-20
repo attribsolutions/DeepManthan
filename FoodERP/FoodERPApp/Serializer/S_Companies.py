@@ -19,8 +19,11 @@ class C_CompanySerializer2(serializers.ModelSerializer):
         fields = '__all__'
 
 class C_CompanySerializer(serializers.ModelSerializer):
-    
-    
     class Meta:
         model = C_Companies
         fields = '__all__'
+
+class C_CompanySerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = ['ID','Name']

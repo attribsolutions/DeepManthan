@@ -1,4 +1,3 @@
-
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -19,7 +18,7 @@ class M_EmployeesView(CreateAPIView):
             with transaction.atomic():
                 M_Employeesdata = M_Employees.objects.all()
                 if M_Employeesdata.exists():
-                    M_Employees_Serializer = M_EmployeesSerializer(
+                    M_Employees_Serializer = M_EmployeesSerializer1(
                     M_Employeesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer.data })
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
@@ -57,7 +56,7 @@ class M_EmployeesViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 M_Employeesdata = M_Employees.objects.filter(id=id)
                 if M_Employeesdata.exists():
-                    M_Employees_Serializer = M_EmployeesSerializer(M_Employeesdata, many=True)
+                    M_Employees_Serializer = M_EmployeesSerializer1(M_Employeesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': ''})    
         except Exception as e:
