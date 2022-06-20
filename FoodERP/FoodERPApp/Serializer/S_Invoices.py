@@ -55,5 +55,4 @@ class T_InvoiceSerializer(serializers.ModelSerializer):
             TC_InvoiceItemsID = TC_InvoiceItems.objects.create(InvoiceID=instance, **InvoiceItem_data)
             for InvoiceItemBatch_data in InvoiceItemBatches_data:
                TC_InvoiceItemBatches.objects.create(InvoiceID=instance,InvoiceItemID=TC_InvoiceItemsID, **InvoiceItemBatch_data)
-        
         return instance 
