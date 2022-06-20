@@ -12,6 +12,18 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
         model = TC_OrderItems
         fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']   
 
+class T_OrderSerializerforGET(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    OrderDate = serializers.DateField()
+    CustomerID = serializers.IntegerField()
+    customerName=serializers.CharField(max_length=500)
+    PartyID  =  serializers.IntegerField()
+    partyName = serializers.CharField(max_length=500)
+    OrderAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
+    Discreption = serializers.CharField(max_length=500)
+           
+
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     class Meta:

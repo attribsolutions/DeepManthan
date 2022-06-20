@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_Orders import T_OrderSerializer
+from ..Serializer.S_Orders import *
 
 
 
@@ -22,9 +22,13 @@ class T_OrdersView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Orderdata = T_Orders.objects.all()
-                
-                Order_serializer = T_OrderSerializer(
+                # Orderdata = T_Orders.objects.all()
+                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,party.name partyName,customer.name customerName  
+                FROM t_orders
+join m_parties party on party.ID=t_orders.PartyID
+join m_parties customer on customer.ID=t_orders.CustomerID ''')
+                print(str(Orderdata.query))
+                Order_serializer = T_OrderSerializerforGET(
                     Orderdata, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer.data})
         except Exception as e:
