@@ -261,6 +261,14 @@ class TC_OrderItems(models.Model):
     class Meta :
         db_table = "TC_OrderItems"
 
+class M_EmployeeType(models.Model):
+    Name = models.CharField(max_length=100)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta :
+        db_table = "M_EmployeeType"
+
 class M_Designations(models.Model):
     Name = models.CharField(max_length=100)
     CreatedBy = models.IntegerField(blank=True, null=True)
@@ -276,22 +284,7 @@ class M_State(models.Model):
 
     class Meta :
         db_table = "M_State"
- 
-class M_Resion(models.Model):
-    Name = models.CharField(max_length=100)
-    CreatedBy = models.IntegerField(blank=True, null=True)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
 
-    class Meta :
-        db_table = "M_Resion"
-
-class M_EmployeeType(models.Model):
-    Name = models.CharField(max_length=100)
-    CreatedBy = models.IntegerField(blank=True, null=True)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta :
-        db_table = "M_EmployeeType"
 
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
@@ -301,12 +294,10 @@ class M_Employees(models.Model):
     DOB = models.CharField(max_length=100)
     PAN = models.CharField(max_length=100)
     AadharNo = models.IntegerField()
-    EmployeeType = models.IntegerField()
-    State = models.ForeignKey(M_State, related_name='State',on_delete=models.CASCADE)
-    Resion =  models.ForeignKey(M_Resion, related_name='Resion', on_delete=models.CASCADE)
-    Company =  models.ForeignKey(C_Companies, related_name='Companies', on_delete=models.CASCADE)
-    DesignationID = models.ForeignKey(M_Designations, related_name='Designation', on_delete=models.CASCADE)
-    EmployeeType = models.ForeignKey(M_EmployeeType, related_name='EmployeeType', on_delete=models.CASCADE)
+    Companies = models.ForeignKey(C_Companies, on_delete=models.CASCADE)
+    EmployeeType = models.ForeignKey(M_EmployeeType, on_delete=models.CASCADE)
+    Designations = models.ForeignKey(M_Designations, on_delete=models.CASCADE) 
+    State = models.ForeignKey(M_State, on_delete=models.CASCADE)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(blank=True, null=True)
     UpdatedBy = models.IntegerField(blank=True, null=True)

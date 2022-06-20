@@ -56,31 +56,4 @@ class M_DesignationsViewSecond(RetrieveAPIView):
             raise Exception(e)
             print(e)
 
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Designationsdata = JSONParser().parse(request)
-                DesignationsdataByID = M_Designations.objects.get(ID=id)
-                Designations_Serializer = M_DesignationsSerializer(
-                    DesignationsdataByID, data=Designationsdata)
-                if Designations_Serializer.is_valid():
-                    Designations_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Updated Successfully'})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Designations_Serializer.errors})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
 
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Designationsdata = M_Designations.objects.get(ID=id)
-                Designationsdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Deleted Successfully'})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
