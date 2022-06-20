@@ -94,7 +94,7 @@ urlpatterns = [
     url(r'M_EmployeeType', M_EmployeeTypeView.as_view()),
 
     url(r'M_State',S_StateView.as_view()),
-
-
-     
+    
 ]
+  
+

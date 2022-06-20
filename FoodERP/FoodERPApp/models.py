@@ -289,11 +289,11 @@ class M_State(models.Model):
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
     Address = models.CharField(max_length=500)
-    Mobile = models.IntegerField()
+    Mobile = models.CharField(max_length=100)
     email = models.EmailField(max_length=255) 
     DOB = models.CharField(max_length=100)
     PAN = models.CharField(max_length=100)
-    AadharNo = models.IntegerField()
+    AadharNo = models.CharField(max_length=100)
     Companies = models.ForeignKey(C_Companies, on_delete=models.CASCADE)
     EmployeeType = models.ForeignKey(M_EmployeeType, on_delete=models.CASCADE)
     Designations = models.ForeignKey(M_Designations, on_delete=models.CASCADE) 
