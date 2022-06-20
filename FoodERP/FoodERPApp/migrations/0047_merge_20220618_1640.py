@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('FoodERPApp', '0046_m_items_itemgroup'),
-        ('FoodERPApp', '0040_auto_20220618_1216'),
+        # ('FoodERPApp', '0040_auto_20220618_1216'),
     ]
 
     operations = [
