@@ -237,7 +237,6 @@ class T_Orders(models.Model):
     
     OrderDate = models.DateField(auto_now_add=True)
     CustomerID = models.IntegerField()
-    
     PartyID  =  models.IntegerField()
     OrderAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = models.CharField(max_length=500)
@@ -308,16 +307,16 @@ class M_Employees(models.Model):
         db_table = "M_Employees"        
 
 
-class T_Invoice(models.Model):
+class T_Invoices(models.Model):
 
     OrderID = models.ForeignKey(T_Orders, on_delete=models.CASCADE)
     InvoiceDate = models.DateField(auto_now_add=True)
-    CustomerID = models.IntegerField(blank=True, null=True)
+    CustomerID = models.ForeignKey(M_Parties, related_name='Customer', on_delete=models.CASCADE)
     InvoiceNumber  =  models.IntegerField(blank=True, null=True)
     FullInvoiceNumber =  models.CharField(max_length=500)
     CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal =  models.DecimalField(max_digits = 15,decimal_places=2)
-    PartyID = models.IntegerField(blank=True, null=True)
+    PartyID =models.ForeignKey(M_Parties, related_name='Party', on_delete=models.CASCADE)
     RoundOffAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     CreatedBy  =  models.IntegerField(blank=True, null=True)
     CreatedOn =  models.DateTimeField(auto_now_add=True)
@@ -325,10 +324,10 @@ class T_Invoice(models.Model):
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     
     class Meta :
-        db_table ="T_Invoice"
+        db_table ="T_Invoices"
     
 class  TC_InvoiceItems(models.Model):
-    InvoiceID = models.ForeignKey(T_Invoice, related_name='InvoiceItems', on_delete=models.CASCADE)
+    InvoiceID = models.ForeignKey(T_Invoices, related_name='InvoiceItems', on_delete=models.CASCADE)
     ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
     HSNCode = models.CharField(max_length=500)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=2)
@@ -360,7 +359,7 @@ class  TC_InvoiceItems(models.Model):
         
         
 class TC_InvoiceItemBatches(models.Model):
-    InvoiceID = models.ForeignKey(T_Invoice, on_delete=models.CASCADE)
+    InvoiceID = models.ForeignKey(T_Invoices, on_delete=models.CASCADE)
     InvoiceItemID = models.ForeignKey(TC_InvoiceItems, related_name='InvoiceItemBatches', on_delete=models.CASCADE)
     ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
     BatchDate = models.DateField(blank=True, null=True)
