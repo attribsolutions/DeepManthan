@@ -12,7 +12,6 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TC_OrderItems
-        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']   
         fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']
 
 
