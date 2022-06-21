@@ -8,9 +8,27 @@ from rest_framework import serializers
 
 class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
+   
+    
     class Meta:
         model = TC_OrderItems
         fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']   
+        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']
+
+
+class TC_OrderItemsSerializerForGET(serializers.Serializer): 
+    
+    ItemName = serializers.CharField(max_length=500, read_only=True)
+    ItemID = serializers.IntegerField(read_only=True)
+    Quantity  =  serializers.DecimalField(max_digits = 5,decimal_places=2)
+    MRP =  serializers.DecimalField(max_digits = 5,decimal_places=2)
+    Rate =  serializers.DecimalField(max_digits = 5,decimal_places=2)
+    UnitID = serializers.IntegerField( read_only=True )
+    BaseUnitQuantity = serializers.DecimalField(max_digits = 5,decimal_places=2)
+    GST = serializers.DecimalField(max_digits = 5,decimal_places=2) 
+
+
+   
 
 class T_OrderSerializerforGET(serializers.Serializer):
     
@@ -22,6 +40,8 @@ class T_OrderSerializerforGET(serializers.Serializer):
     partyName = serializers.CharField(max_length=500)
     OrderAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = serializers.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField()
            
 
 class T_OrderSerializer(serializers.ModelSerializer):
