@@ -19,12 +19,12 @@ class TC_InvoiceItemsSerializer(serializers.ModelSerializer):
 class T_InvoiceSerializer(serializers.ModelSerializer):
     InvoiceItems = TC_InvoiceItemsSerializer(many=True)
     class Meta:
-        model = T_Invoice
+        model = T_Invoices
         fields = ['id','OrderID','InvoiceDate','CustomerID','InvoiceNumber','FullInvoiceNumber','CustomerGSTTin','GrandTotal','PartyID','RoundOffAmount','CreatedBy','CreatedOn','InvoiceItems']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
-        Invoice = T_Invoice.objects.create(**validated_data)
+        Invoice = T_Invoices.objects.create(**validated_data)
         for InvoiceItem_data in InvoiceItems_data:
             InvoiceItemBatches_data = InvoiceItem_data.pop('InvoiceItemBatches')
             InvoiceItemID =TC_InvoiceItems.objects.create(InvoiceID=Invoice, **InvoiceItem_data)
