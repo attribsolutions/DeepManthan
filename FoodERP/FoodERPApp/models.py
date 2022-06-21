@@ -240,7 +240,7 @@ class T_Orders(models.Model):
     PartyID  =  models.IntegerField()
     OrderAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -249,7 +249,7 @@ class T_Orders(models.Model):
 class TC_OrderItems(models.Model):
     
     OrderID = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
-    ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
+    ItemID = models.ForeignKey(M_Items, related_name='Items', on_delete=models.CASCADE)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=2)
     MRP =  models.DecimalField(max_digits = 5,decimal_places=2)
     Rate =models.DecimalField(max_digits = 5,decimal_places=2)
