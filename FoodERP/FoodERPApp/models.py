@@ -261,6 +261,14 @@ class TC_OrderItems(models.Model):
     class Meta :
         db_table = "TC_OrderItems"
 
+class M_EmployeeType(models.Model):
+    Name = models.CharField(max_length=100)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta :
+        db_table = "M_EmployeeType"
+
 class M_Designations(models.Model):
     Name = models.CharField(max_length=100)
     CreatedBy = models.IntegerField(blank=True, null=True)
@@ -269,17 +277,28 @@ class M_Designations(models.Model):
     class Meta :
         db_table = "M_Designations"
 
+class M_State(models.Model):
+    Name = models.CharField(max_length=100)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta :
+        db_table = "M_State"
+
 
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
     Address = models.CharField(max_length=500)
-    Mobile = models.IntegerField()
+    Mobile = models.CharField(max_length=100)
     email = models.EmailField(max_length=255) 
     DOB = models.CharField(max_length=100)
     PAN = models.CharField(max_length=100)
-    AadharNo = models.IntegerField()
-    EmployeeType = models.IntegerField()
-    DesignationID = models.ForeignKey(M_Designations, related_name='Designation', on_delete=models.CASCADE)
+    AadharNo = models.CharField(max_length=100)
+    working_hours =  models.DecimalField(max_digits = 15,decimal_places=2)
+    Companies = models.ForeignKey(C_Companies, on_delete=models.CASCADE)
+    EmployeeType = models.ForeignKey(M_EmployeeType, on_delete=models.CASCADE)
+    Designations = models.ForeignKey(M_Designations, on_delete=models.CASCADE) 
+    State = models.ForeignKey(M_State, on_delete=models.CASCADE)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(blank=True, null=True)
     UpdatedBy = models.IntegerField(blank=True, null=True)
@@ -354,6 +373,3 @@ class TC_InvoiceItemBatches(models.Model):
     class Meta :
         db_table ="TC_InvoiceItemBatches"
 
-    
-    
-    
