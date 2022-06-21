@@ -23,14 +23,29 @@ class T_OrdersView(CreateAPIView):
         try:
             with transaction.atomic():
                 # Orderdata = T_Orders.objects.all()
-                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,party.name partyName,customer.name customerName  
+                OrderListData=list()
+                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,party.name partyName,customer.name customerName ,t_orders.CreatedBy,t_orders.CreatedOn 
                 FROM t_orders
 join m_parties party on party.ID=t_orders.PartyID
 join m_parties customer on customer.ID=t_orders.CustomerID ''')
-                print(str(Orderdata.query))
+                # print(str(Orderdata.query))
                 Order_serializer = T_OrderSerializerforGET(
-                    Orderdata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer.data})
+                    Orderdata, many=True).data
+                for a in Order_serializer:   
+                    OrderListData.append({
+                        
+                        "ID": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "CustomerID": a['CustomerID'],
+                        "CustomerName": a['customerName'],
+                        "PartyID": a['PartyID'],
+                        "PartyName": a['partyName'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Discreption": a['Discreption'],
+                        
+                    }) 
+
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': OrderListData})
         except Exception as e:
             raise Exception(e)
             print(e)
@@ -56,13 +71,56 @@ class T_OrdersViewSecond(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Orderdata = T_Orders.objects.filter(id=id)
-                Order_serializer = T_OrderSerializer(
-                    Orderdata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Order_serializer.data})
+                
+                OrderListData=list()
+                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,party.name partyName,customer.name customerName ,t_orders.CreatedBy,t_orders.CreatedOn 
+                FROM t_orders
+join m_parties party on party.ID=t_orders.PartyID
+join m_parties customer on customer.ID=t_orders.CustomerID where t_orders.id= %s''', [id])
+                # print(str(Orderdata.query))
+                Order_serializer = T_OrderSerializerforGET(Orderdata, many=True).data
+                OrderItemsListData=list()
+                bb=TC_OrderItems.objects.filter(OrderID=id)
+#                 bb=TC_OrderItems.objects.raw('''SELECT m_items.name ItemName,tc_orderitems.ItemID_id ,tc_orderitems.Quantity,tc_orderitems.MRP,tc_orderitems.Rate,tc_orderitems.UnitID,tc_orderitems.BaseUnitQuantity,
+#  tc_orderitems.GST FROM tc_orderitems
+#  join m_items on m_items.ID=tc_orderitems.ItemID_id where tc_orderitems.OrderID_id=%s''', [id])
+                OrderItems_data = TC_OrderItemsSerializer(bb, many=True).data
+
+
+
+
+
+
+
+
+
+
+
+
+                for a in Order_serializer:
+                    OrderListData.append({
+                        
+                        "ID": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "CustomerID": a['CustomerID'],
+                        "CustomerName": a['customerName'],
+                        "PartyID": a['PartyID'],
+                        "PartyName": a['partyName'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Discreption": a['Discreption'],
+                        "OrderItem" : OrderItems_data
+                    }) 
+
+       
+                    
+
+                    
+                    
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': OrderListData})
+                
         except Exception as e:
             raise Exception(e)
-            print(e)  
+            print(e)     
 
     @transaction.atomic()
     def delete(self, request, id=0):

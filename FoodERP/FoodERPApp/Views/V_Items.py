@@ -18,17 +18,17 @@ class M_ItemsView(CreateAPIView):
     def get(self, request ):
         try:
             with transaction.atomic():
-                M_Itemsdata = M_Items.objects.all()
-                if M_Itemsdata.exists():
-                    M_Items_Serializer = M_ItemsSerializer(
-                    M_Itemsdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
+                sql='''SELECT p.ID,p.Name,p.BaseunitID,p.GSTPercentage,p.MRP,RP.Name ItemGroups,p.Rate,p.isActive,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+FROM M_Items p 
+join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
+Order BY RP.Sequence, p.Sequence'''
+                qs = M_Items.objects.raw(sql)
+                M_Items_Serializer = M_ItemsSerializer02(qs, many=True).data
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
         except Exception as e:
             raise Exception(e)
             
             print(e)
-
 
     @transaction.atomic()
     def post(self, request):
