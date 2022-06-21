@@ -18,7 +18,7 @@ class T_InvoiceView(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Invoicedata = T_Invoice.objects.all()
+                Invoicedata = T_Invoices.objects.all()
                 Invoice_serializer = T_InvoiceSerializer(Invoicedata, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer.data})
         except Exception as e:
@@ -46,7 +46,7 @@ class T_InvoicesViewSecond(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Invoicedata = T_Invoice.objects.filter(id=id)
+                Invoicedata = T_Invoices.objects.filter(id=id)
                 Invoice_serializer = T_InvoiceSerializer(
                     Invoicedata, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer.data})
@@ -58,7 +58,7 @@ class T_InvoicesViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Invoice_Data = T_Invoice.objects.get(id=id)
+                Invoice_Data = T_Invoices.objects.get(id=id)
                 Invoice_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Message': 'Invoice Deleted Successfully'})
         except Exception as e:
@@ -66,11 +66,10 @@ class T_InvoicesViewSecond(CreateAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
-        
         try:
             with transaction.atomic():
                 Invoiceupdatedata = JSONParser().parse(request)
-                InvoiceupdateByID = T_Invoice.objects.get(id=id)
+                InvoiceupdateByID = T_Invoices.objects.get(id=id)
                 Invoiceupdate_Serializer = T_InvoiceSerializer(InvoiceupdateByID, data=Invoiceupdatedata)
                 if Invoiceupdate_Serializer.is_valid():
                     Invoiceupdate_Serializer.save()
