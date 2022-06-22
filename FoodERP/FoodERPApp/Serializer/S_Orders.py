@@ -1,16 +1,18 @@
 from dataclasses import fields
 import json
+from unittest.util import _MAX_LENGTH
 from ..models import *
 from rest_framework import serializers
 
 
-
+class M_ItemsSerializer(serializers.ModelSerializer):
+    class meta:
+        model = M_Items
+        fields='__all__'
 
 class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
-   
-    
-    class Meta:
+   class Meta:
         model = TC_OrderItems
         fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']
 
@@ -30,7 +32,6 @@ class TC_OrderItemsSerializerForGET(serializers.Serializer):
    
 
 class T_OrderSerializerforGET(serializers.Serializer):
-    
     id = serializers.IntegerField()
     OrderDate = serializers.DateField()
     CustomerID = serializers.IntegerField()
@@ -39,9 +40,16 @@ class T_OrderSerializerforGET(serializers.Serializer):
     partyName = serializers.CharField(max_length=500)
     OrderAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
     Discreption = serializers.CharField(max_length=500)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField()
-           
+    CreatedBy = serializers.IntegerField(default=False)
+    CreatedOn = serializers.DateTimeField()
+    ItemName=serializers.CharField(max_length=500)
+    ItemID_id=serializers.IntegerField()
+    Quantity=serializers.DecimalField(max_digits=5,decimal_places=2)
+    MRP=serializers.DecimalField(max_digits=5,decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=5,decimal_places=2)
+    UnitID=serializers.DecimalField(max_digits=5,decimal_places=2)
+    BaseUnitQuantity=serializers.DecimalField(max_digits=5,decimal_places=2)
+    GST=serializers.DecimalField(max_digits=5,decimal_places=2)  
 
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
