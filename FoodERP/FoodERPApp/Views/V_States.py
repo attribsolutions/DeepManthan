@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_State import *
+from ..Serializer.S_States import *
 
 from ..models import *
 
