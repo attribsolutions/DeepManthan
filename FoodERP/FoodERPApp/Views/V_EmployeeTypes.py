@@ -5,11 +5,11 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_State import *
+from ..Serializer.S_EmployeeTypes import  *
 
 from ..models import *
 
-class S_StateView(CreateAPIView):
+class M_EmployeeTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -18,9 +18,9 @@ class S_StateView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                M_Statedata = M_State.objects.all()
-                M_State_serializer =  StateSerializer(M_Statedata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_State_serializer.data})
+                M_EmployeeTypedata = M_EmployeeTypes.objects.all()
+                M_EmployeeType_serializer = M_EmployeeTypeSerializer(M_EmployeeTypedata, many=True)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_EmployeeType_serializer.data})
         except Exception as e:
             raise Exception(e)
             print(e)
@@ -29,14 +29,15 @@ class S_StateView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Statedata = JSONParser().parse(request)
-                M_State_serializer = StateSerializer(data=M_Statedata)
-                if M_State_serializer.is_valid():
-                    M_State_serializer.save()
+                M_EmployeeTypedata = JSONParser().parse(request)
+                M_EmployeeType_serializer = M_EmployeeTypeSerializer(data=M_EmployeeTypedata)
+                if M_EmployeeType_serializer.is_valid():
+                    M_EmployeeType_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Save Successfully'})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_State_serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_EmployeeType_serializer.errors})
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
             print(e)        
+ 
