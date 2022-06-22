@@ -20,7 +20,8 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
 
 class M_ItemsSerializer02(serializers.Serializer):
     ID = serializers.IntegerField()
-    ItemGroups = serializers.CharField()
+    ItemGroupID = serializers.IntegerField()
+    ItemGroupName = serializers.CharField()
     Name = serializers.CharField(max_length=500)
     Sequence = serializers.DecimalField(max_digits = 5,decimal_places=2)
     BaseunitID = serializers.IntegerField()
