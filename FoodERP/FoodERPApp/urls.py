@@ -92,8 +92,8 @@ urlpatterns = [
     url(r'T_Invoices', T_InvoiceView.as_view()),
   
 
-    url(r'ItemsGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
-    url(r'ItemsGroup', M_ItemsGroupView.as_view()),
+    # url(r'ItemGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
+    url(r'ItemGroup', M_ItemsGroupView.as_view()),
 
     url(r'EmployeeTypes', M_EmployeeTypeView.as_view()),
     url(r'States',S_StateView.as_view()),
