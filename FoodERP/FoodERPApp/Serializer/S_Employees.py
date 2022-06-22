@@ -1,8 +1,8 @@
 from ..models import *
 from rest_framework import serializers
-from ..Serializer.S_M_EmployeeType import *
+from ..Serializer.S_EmployeeTypes import *
 from ..Serializer.S_Designations import *
-from ..Serializer.S_State import *
+from ..Serializer.S_States import *
 from ..Serializer.S_Companies import C_CompanySerializer1
 
 class M_EmployeesSerializer(serializers.ModelSerializer):
