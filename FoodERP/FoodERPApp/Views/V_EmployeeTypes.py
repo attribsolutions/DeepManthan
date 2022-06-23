@@ -24,7 +24,7 @@ class M_EmployeeTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_EmployeeType_serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data': []})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -34,12 +34,12 @@ class M_EmployeeTypeView(CreateAPIView):
                 M_EmployeeType_serializer = M_EmployeeTypeSerializer(data=M_EmployeeTypedata)
                 if M_EmployeeType_serializer.is_valid():
                     M_EmployeeType_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Save Successfully','Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': ''})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
             print(e)        
 
 class M_EmployeeTypeViewSecond(RetrieveAPIView):
@@ -52,7 +52,7 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 EmployeeType_data = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_Serializer = M_EmployeeTypeSerializer(EmployeeType_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': EmployeeType_Serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': EmployeeType_Serializer.data})
         except M_EmployeeTypes.DoesNotExist:
             return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Record Not available', 'Data': []})
 
@@ -65,10 +65,10 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 EmployeeType_Serializer = M_EmployeeTypeSerializer(EmployeeType_dataByID, data=EmployeeType_data)
                 if EmployeeType_Serializer.is_valid():
                     EmployeeType_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Updated Successfully','Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': EmployeeType_Serializer.errors,'Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': EmployeeType_Serializer.errors,'Data' : []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
 
@@ -78,6 +78,6 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 EmployeeType_data = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully','Data':''})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully','Data':[]})
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)}) 
