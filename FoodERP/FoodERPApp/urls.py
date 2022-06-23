@@ -85,16 +85,12 @@ urlpatterns = [
     url(r'Designations$',M_DesignationsView.as_view()),
     url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
     url(r'Items', M_ItemsView.as_view()),
- 
     url(r'Employees/([0-9]+)', M_EmployeesViewSecond.as_view()),
     url(r'Employees', M_EmployeesView.as_view()),
-    url(r'T_Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
-    url(r'T_Invoices', T_InvoiceView.as_view()),
-  
-
-    # url(r'ItemGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
+    url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
+    url(r'Invoices', T_InvoiceView.as_view()),
+    url(r'ItemGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
     url(r'ItemGroup', M_ItemsGroupView.as_view()),
-
     url(r'EmployeeTypes', M_EmployeeTypeView.as_view()),
     url(r'States',S_StateView.as_view()),
     
