@@ -24,7 +24,7 @@ class S_StateView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': State_serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data': []})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
          
 
     @transaction.atomic()
@@ -35,12 +35,12 @@ class S_StateView(CreateAPIView):
                 State_serializer = StateSerializer(data=State_data)
                 if State_serializer.is_valid():
                     State_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Save Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  State_serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  State_serializer.errors, 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
             print(e)        
 
 class S_StateViewSecond(RetrieveAPIView):
@@ -54,9 +54,9 @@ class S_StateViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 State_data = M_States.objects.get(id=id)
                 State_serializer = StateSerializer(State_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': State_serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': State_serializer.data})
         except M_States.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Record Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Record Not available', 'Data': []})
             
 
     @transaction.atomic()
@@ -68,12 +68,12 @@ class S_StateViewSecond(RetrieveAPIView):
                 State_serializer = StateSerializer(StatedataByID, data=State_data)
                 if State_serializer.is_valid():
                     State_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Updated Successfully','Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Updated Successfully', 'Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': State_serializer.errors,'Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': State_serializer.errors, 'Data' : []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -81,6 +81,6 @@ class S_StateViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 State_data = M_States.objects.get(id=id)
                 State_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Deleted Successfully','Data':''})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Deleted Successfully','Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})             
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})             
