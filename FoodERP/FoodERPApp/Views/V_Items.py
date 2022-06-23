@@ -68,7 +68,7 @@ join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
-            print(e)
+        
 
     @transaction.atomic()
     def put(self, request, id=0):
