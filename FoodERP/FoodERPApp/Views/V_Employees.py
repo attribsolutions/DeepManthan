@@ -25,6 +25,7 @@ JOIN m_designations ON m_designations.id=m_employees.Designation_id
 JOIN m_employeetypes ON m_employeetypes.id=m_employees.EmployeeType_id
 JOIN m_states ON m_states.id=m_employees.State_id''')
                 M_Employees_Serializer = M_EmployeesSerializer02(query, many=True).data
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer})   
         except Exception as e:
             raise Exception(e)

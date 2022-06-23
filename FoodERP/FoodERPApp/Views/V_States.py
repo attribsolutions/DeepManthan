@@ -15,28 +15,70 @@ class S_StateView(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                M_Statedata = M_States.objects.all()
-                M_State_serializer =  StateSerializer(M_Statedata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_State_serializer.data})
+                State_data = M_States.objects.all()
+                State_serializer =  StateSerializer(State_data, many=True)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': State_serializer.data})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
             print(e)
 
     @transaction.atomic()
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Statedata = JSONParser().parse(request)
-                M_State_serializer = StateSerializer(data=M_Statedata)
-                if M_State_serializer.is_valid():
-                    M_State_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Save Successfully'})
+                State_data = JSONParser().parse(request)
+                State_serializer = StateSerializer(data=State_data)
+                if State_serializer.is_valid():
+                    State_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Save Successfully'})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_State_serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  State_serializer.errors})
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
             print(e)        
+
+class S_StateViewSecond(RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                State_data = M_States.objects.get(id=id)
+                State_serializer = StateSerializer(State_data)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': State_serializer.data})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+            print(e)
+
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                State_data = JSONParser().parse(request)
+                StatedataByID = M_States.objects.get(id=id)
+                State_serializer = StateSerializer(StatedataByID, data=State_data)
+                if State_serializer.is_valid():
+                    State_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Updated Successfully','Data' : ''})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': State_serializer.errors,'Data' : ''})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                State_data = M_States.objects.get(id=id)
+                State_data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Deleted Successfully','Data':''})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})             

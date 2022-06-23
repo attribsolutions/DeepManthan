@@ -16,13 +16,9 @@ from .Views.V_Modules import *
 
 from .Views.V_PageAccess import *
 
-
-
 from .Views.V_Login import *
 
 from .Views.V_Items import *
-
-
 
 from .Views.V_Invoices import *
 
@@ -35,14 +31,6 @@ from .Views.V_EmployeeTypes import *
 from .Views.V_States import *
 
 from .Views.V_Designations import *
-
-
-
-
-
-
-
-
 
 
 urlpatterns = [
@@ -91,8 +79,11 @@ urlpatterns = [
     url(r'Invoices', T_InvoiceView.as_view()),
     url(r'ItemGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
     url(r'ItemGroup', M_ItemsGroupView.as_view()),
+    url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
     url(r'EmployeeTypes', M_EmployeeTypeView.as_view()),
+    url(r'States/([0-9]+)$', S_StateViewSecond.as_view()),
     url(r'States',S_StateView.as_view()),
+    
     
 ]
   
