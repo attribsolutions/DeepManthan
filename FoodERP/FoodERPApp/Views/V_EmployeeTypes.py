@@ -79,5 +79,5 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 EmployeeType_data = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully', 'Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []}) 
+        except M_EmployeeTypes.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []}) 

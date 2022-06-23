@@ -80,5 +80,5 @@ class M_DesignationsViewSecond(RetrieveAPIView):
                 Designations_data = M_Designations.objects.get(id=id)
                 Designations_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Deleted Successfully','Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data':[]})
+        except M_Designations.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []})
