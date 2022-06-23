@@ -15,19 +15,17 @@ class M_ItemsView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def get(self, request ):
+    def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                sql='''SELECT p.ID,p.Name,p.BaseunitID,p.GSTPercentage,p.MRP,RP.Name ItemGroups,p.Rate,p.isActive,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+                query = M_Items.objects.raw('''SELECT p.ID,p.Name,p.BaseunitID,p.GSTPercentage,p.MRP,RP.ID ItemGroupID,RP.Name ItemGroupName,p.Rate,p.isActive,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Items p 
 join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
-Order BY RP.Sequence, p.Sequence'''
-                qs = M_Items.objects.raw(sql)
-                M_Items_Serializer = M_ItemsSerializer02(qs, many=True).data
+Order BY RP.Sequence, p.Sequence''')
+                M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
         except Exception as e:
-            raise Exception(e)
-            
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
             print(e)
 
     @transaction.atomic()
@@ -38,13 +36,12 @@ Order BY RP.Sequence, p.Sequence'''
                 M_Items_Serializer = M_ItemsSerializer01(data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
                     M_Items_Serializer.save()
-                   
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'M_Items Save Successfully','Data' :''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :M_Items_Serializer.data})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': M_Items_Serializer.errors,'Data': ''})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
             print(e)        
  
 
@@ -54,14 +51,18 @@ class M_ItemsViewSecond(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                M_Itemsdata = M_Items.objects.get(ID=id)
-                M_Items_Serializer = M_ItemsSerializer(M_Itemsdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Items_Serializer.data})
+                query = M_Items.objects.raw('''SELECT p.ID,p.Name,p.BaseunitID,p.GSTPercentage,p.MRP,RP.ID ItemGroupID,RP.Name ItemGroupName,p.Rate,p.isActive,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+FROM M_Items p 
+join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
+                M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+            
+            print(e)
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -78,7 +79,7 @@ class M_ItemsViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' : ''})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -88,4 +89,4 @@ class M_ItemsViewSecond(CreateAPIView):
                 M_Itemsdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'M_Items Deleted Successfully','Data':''})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})

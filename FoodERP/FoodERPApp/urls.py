@@ -16,29 +16,21 @@ from .Views.V_Modules import *
 
 from .Views.V_PageAccess import *
 
-from .Views.V_Designations import *
-
 from .Views.V_Login import *
 
 from .Views.V_Items import *
-
-from .Views.V_Employees import *
 
 from .Views.V_Invoices import *
 
 from .Views.V_ItemsGroup import *
 
-from .Views.V_EmployeeType import *
+from .Views.V_Employees import *
 
-from .Views.V_State import *
+from .Views.V_EmployeeTypes import *
 
+from .Views.V_States import *
 
-
-
-
-
-
-
+from .Views.V_Designations import *
 
 
 urlpatterns = [
@@ -79,21 +71,19 @@ urlpatterns = [
     url(r'T_Orders', T_OrdersView.as_view()),
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
     url(r'Designations$',M_DesignationsView.as_view()),
-    url(r'M_Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
-    url(r'M_Items', M_ItemsView.as_view()),
- 
-    url(r'M_Employees/([0-9]+)', M_EmployeesViewSecond.as_view()),
-    url(r'M_Employees', M_EmployeesView.as_view()),
-    url(r'T_Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
-    url(r'T_Invoices', T_InvoiceView.as_view()),
-  
-
-    url(r'ItemsGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
-    url(r'ItemsGroup', M_ItemsGroupView.as_view()),
-
-    url(r'M_EmployeeType', M_EmployeeTypeView.as_view()),
-
-    url(r'M_State',S_StateView.as_view()),
+    url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
+    url(r'Items', M_ItemsView.as_view()),
+    url(r'Employees/([0-9]+)', M_EmployeesViewSecond.as_view()),
+    url(r'Employees', M_EmployeesView.as_view()),
+    url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
+    url(r'Invoices', T_InvoiceView.as_view()),
+    url(r'ItemGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
+    url(r'ItemGroup', M_ItemsGroupView.as_view()),
+    url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
+    url(r'EmployeeTypes', M_EmployeeTypeView.as_view()),
+    url(r'States/([0-9]+)$', S_StateViewSecond.as_view()),
+    url(r'States',S_StateView.as_view()),
+    
     
 ]
   

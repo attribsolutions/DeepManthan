@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_Designations import M_DesignationsSerializer
+from ..Serializer.S_Designations import *
 
 from ..models import *
 
@@ -19,11 +19,13 @@ class M_DesignationsView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Designations_data = M_Designations.objects.all()
-                M_Designations_serializer = M_DesignationsSerializer(M_Designations_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Designations_serializer.data})
+                if M_Designations_data.exists():
+                    M_Designations_serializer = M_DesignationsSerializer(M_Designations_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Designations_serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -33,13 +35,13 @@ class M_DesignationsView(CreateAPIView):
                 Designationsdata_Serializer = M_DesignationsSerializer(data=Designationsdata)
                 if Designationsdata_Serializer.is_valid():
                     Designationsdata_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Save Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Designationsdata_Serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Designationsdata_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)        
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                    
 
 class M_DesignationsViewSecond(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
@@ -49,11 +51,34 @@ class M_DesignationsViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Designations_data = M_Designations.objects.get(id=id)
-                M_Designations_Serializer = M_DesignationsSerializer(M_Designations_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Designations_Serializer.data})
+                Designations_data = M_Designations.objects.get(id=id)
+                Designations_Serializer = M_DesignationsSerializer(Designations_data)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data':Designations_Serializer.data})     
+        except M_Designations.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []})
+            
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Designationsdata = JSONParser().parse(request)
+                DesignationsdataByID = M_Designations.objects.get(id=id)
+                Designations_Serializer = M_DesignationsSerializer(DesignationsdataByID, data=Designationsdata)
+                if Designations_Serializer.is_valid():
+                    Designations_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Updated Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Designations_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Designations_data = M_Designations.objects.get(id=id)
+                Designations_data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Deleted Successfully','Data':[]})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data':[]})
