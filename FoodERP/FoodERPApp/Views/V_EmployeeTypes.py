@@ -65,12 +65,12 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 EmployeeType_Serializer = M_EmployeeTypeSerializer(EmployeeType_dataByID, data=EmployeeType_data)
                 if EmployeeType_Serializer.is_valid():
                     EmployeeType_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Updated Successfully','Data' : []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Updated Successfully', 'Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': EmployeeType_Serializer.errors,'Data' : []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': EmployeeType_Serializer.errors, 'Data' : []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -78,6 +78,6 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 EmployeeType_data = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully','Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully', 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)}) 
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []}) 
