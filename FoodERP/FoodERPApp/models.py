@@ -128,6 +128,21 @@ class C_Companies(models.Model):
     class Meta:
          db_table = "C_Companies"
 
+class M_DivisionType(models.Model):
+    
+    Name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'M_DivisionType'
+        
+class M_PartyType(models.Model):
+    
+    Name = models.CharField(max_length=100)
+    DivisionTypeID=models.IntegerField()
+
+    class Meta:
+        db_table = 'M_PartyType'        
+
 class M_Parties(models.Model):
     ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=500)
