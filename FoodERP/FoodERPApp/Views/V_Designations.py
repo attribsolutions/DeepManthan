@@ -24,8 +24,8 @@ class M_DesignationsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Designations_serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data': []})
+            
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -41,7 +41,7 @@ class M_DesignationsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Designationsdata_Serializer.errors})
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)        
+                    
 
 class M_DesignationsViewSecond(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
@@ -53,11 +53,10 @@ class M_DesignationsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Designations_data = M_Designations.objects.get(id=id)
                 Designations_Serializer = M_DesignationsSerializer(Designations_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Designations_Serializer.data})    
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)
-
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Designations_Serializer.data})     
+        except M_Designations.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Record Not available', 'Data': []})
+            
     @transaction.atomic()
     def put(self, request, id=0):
         try:

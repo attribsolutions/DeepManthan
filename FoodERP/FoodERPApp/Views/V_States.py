@@ -19,11 +19,13 @@ class S_StateView(CreateAPIView):
         try:
             with transaction.atomic():
                 State_data = M_States.objects.all()
-                State_serializer =  StateSerializer(State_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': State_serializer.data})
+                if State_data.exists():
+                    State_serializer =  StateSerializer(State_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': State_serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data': []})
+         
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -53,9 +55,9 @@ class S_StateViewSecond(RetrieveAPIView):
                 State_data = M_States.objects.get(id=id)
                 State_serializer = StateSerializer(State_data)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': State_serializer.data})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)
+        except M_States.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Record Not available', 'Data': []})
+            
 
     @transaction.atomic()
     def put(self, request, id=0):
