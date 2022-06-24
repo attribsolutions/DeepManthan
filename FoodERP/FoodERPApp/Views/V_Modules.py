@@ -55,13 +55,11 @@ class H_ModulesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Modulesdata = H_Modules.objects.filter(ID=id)
-                if Modulesdata.exists():
-                    Modules_Serializer = H_ModulesSerializer(Modulesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Module Not available', 'Data':[]})    
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                Modulesdata = H_Modules.objects.get(ID=id)
+                Modules_Serializer = H_ModulesSerializer(Modulesdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
+        except H_Modules.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})
            
 
     @transaction.atomic()
