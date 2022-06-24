@@ -40,9 +40,9 @@ urlpatterns = [
     url(r'Login', UserLoginView.as_view()),
     
     url(r'UserList/([0-9]+)$', UserListViewSecond.as_view()),
-    url(r'UserList', UserListView.as_view()),
+    url(r'UserList$', UserListView.as_view()),
     
-    url(r'Modules/([0-9]+)', H_ModulesViewSecond.as_view()),
+    url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
     
     url(r'RoleAccess$', RoleAccessClass.as_view()),
@@ -72,20 +72,20 @@ urlpatterns = [
     url(r'Designations$',M_DesignationsView.as_view()),
     url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
     url(r'Items$', M_ItemsView.as_view()),
-    url(r'Employees/([0-9]+)', M_EmployeesViewSecond.as_view()),
+    url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
     url(r'Employees$', M_EmployeesView.as_view()),
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
     url(r'Invoices$', T_InvoiceView.as_view()),
-    url(r'ItemGroup/([0-9]+)', M_ItemsGroupViewSecond.as_view()),
+    url(r'ItemGroup/([0-9]+)$', M_ItemsGroupViewSecond.as_view()),
     url(r'ItemGroup$', M_ItemsGroupView.as_view()),
     url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
     url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     url(r'States/([0-9]+)$', S_StateViewSecond.as_view()),
     url(r'States$',S_StateView.as_view()),
-    url(r'M_Parties/([0-9]+)', M_PartiesViewSecond.as_view()),
+    url(r'M_Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'M_Parties$', M_PartiesView.as_view()),
     url(r'M_DivisionType$', M_DivisionTypeView.as_view()),
-    url(r'GetPartyTypeByDivisionTypeID/([0-9]+)', GetPartyTypeByDivisionTypeID.as_view()),
+    url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'M_PartyType$', M_PartyTypeView.as_view()),
     
     
