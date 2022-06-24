@@ -161,6 +161,10 @@ class M_Parties(models.Model):
     FSSAINo = models.CharField(max_length=500)
     FSSAIExipry = models.DateField(blank=True)
     IsActive =  models.IntegerField()
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'M_Parties'
