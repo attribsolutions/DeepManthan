@@ -114,7 +114,6 @@ left join M_PartyType on m_partytype.id=p.PartyTypeID
 left join M_DivisionType on m_divisiontype.id=p.DividionTypeID
 left join C_Companies on c_companies.ID =p.companyID
 left join M_States on M_states.id=p.state where p.ID = %s''',[id])
-                print(str(M_Parties_data.query))
                
                 M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data})

@@ -25,17 +25,15 @@ class T_OrdersView(CreateAPIView):
                 # Orderdata = T_Orders.objects.all()
                 OrderListData=list()
                 Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,
-                t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName,
-                tc_orderitems.ItemID_id,tc_orderitems.Quantity,tc_orderitems.MRP,tc_orderitems.Rate,
-                tc_orderitems.UnitID,tc_orderitems.BaseUnitQuantity,tc_orderitems.GST,m_items.Name ItemName ,'' a 
+                t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName 
                 FROM t_orders 
                 join m_parties customer on customer.ID=t_orders.CustomerID 
                 join m_parties party on party.ID=t_orders.PartyID 
-                join tc_orderitems on tc_orderitems.OrderID_id=t_orders.id
-                join m_items on m_items.ID=tc_orderitems.ItemID_id
+                
+                
                 ''')
                 # print(str(Orderdata.query))
-                Order_serializer = T_OrderSerializerforGET(Orderdata, many=True).data
+                Order_serializer = T_OrderSerializerforGET1(Orderdata, many=True).data
                 for a in Order_serializer:   
                     OrderListData.append({
                         
