@@ -31,8 +31,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': HPagesserialize_data})
                 
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 
@@ -45,9 +44,9 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 if HPagesserialize_data.is_valid():
                     HPagesserialize_data.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': HPagesserialize_data.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': HPagesserialize_data.errors})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': HPagesserialize_data.errors, 'Data': []})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 class M_PagesViewSecond(RetrieveAPIView):
@@ -97,39 +96,10 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                         "PagePageAccess": PageAccessListData
                     }) 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PageListData})
-                # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Modulesdata = M_Pages.objects.get(ID=id)
-                Modulesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' H_Pages Deleted Successfully'})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Modulesdata = JSONParser().parse(request)
-                ModulesdataByID = M_Pages.objects.get(ID=id)
-                Modules_Serializer = M_PagesSerializer1(
-                    ModulesdataByID, data=Modulesdata)
-                if Modules_Serializer.is_valid():
-                    Modules_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'H_Pages Updated Successfully'})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Modules_Serializer.errors})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
+    
 
 class showPagesListOnPageType(RetrieveAPIView):
     
@@ -148,7 +118,33 @@ class showPagesListOnPageType(RetrieveAPIView):
                     'ID':a1["ID"],
                     'Name':a1["Name"]
                     })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':HPageListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':HPageListData})
         except Exception as e:
-            raise Exception(e)
-            print(e)            
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                    
+
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Pagesdata = JSONParser().parse(request)
+                PagesdataByID = M_Pages.objects.get(ID=id)
+                Pages_Serializer = M_PagesSerializer1(PagesdataByID, data=Pagesdata)
+                if Pages_Serializer.is_valid():
+                    Pages_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Updated Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Pages_Serializer.errors, 'Data':[]})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Modulesdata = M_Pages.objects.get(ID=id)
+                Modulesdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully'})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})  

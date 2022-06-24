@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_Invoices import T_InvoiceSerializer
+from ..Serializer.S_Invoices import *
 
 from ..models import  *
 
@@ -18,9 +18,17 @@ class T_InvoiceView(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Invoicedata = T_Invoices.objects.all()
-                Invoice_serializer = T_InvoiceSerializer(Invoicedata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer.data})
+                query = T_Invoices.objects.raw('''SELECT t_invoices.id,t_invoices.InvoiceDate,t_invoices.InvoiceNumber, t_invoices.FullInvoiceNumber,
+ t_invoices.CustomerGSTTin,t_invoices.GrandTotal,t_invoices.RoundOffAmount,t_invoices.CreatedBy,
+ t_invoices.CreatedOn, t_invoices.UpdatedBy, t_invoices.UpdatedOn,t_invoices.CustomerID_id Customer,A.Name CustomerName,t_invoices.PartyID_id Party,B.Name PartyName,t_invoices.OrderID_id FROM t_invoices
+join m_parties A ON A.ID=t_invoices.CustomerID_id
+join m_parties B ON B.ID=t_invoices.PartyID_id
+''')
+                if not query:
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
+                else:
+                    Invoice_serializer = T_InvoiceSerializerGETList(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer})
         except Exception as e:
             raise Exception(e)
             print(e)
