@@ -1,5 +1,6 @@
 
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
@@ -83,9 +84,9 @@ class H_ModulesViewSecond(RetrieveAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Modulesdata = H_Modules.objects.get(ID=id)
+                Modulesdata = H_Modules.objects.filter(ID=id)
                 Modulesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Deleted Successfully', 'Data' :[]})
-        except H_Modules.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Module Not available', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module  Deleted Successfully', 'Data':[]})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
             
