@@ -86,6 +86,6 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 Modulesdata = H_Modules.objects.get(ID=id)
                 Modulesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Deleted Successfully', 'Data' :[]})
-        except M_ItemsGroup.DoesNotExist:
+        except H_Modules.DoesNotExist:
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Module Not available', 'Data': []})
             
