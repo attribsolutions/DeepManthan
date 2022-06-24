@@ -31,7 +31,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': HPagesserialize_data})
                 
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 
@@ -46,7 +46,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': HPagesserialize_data.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': HPagesserialize_data.errors, 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 class M_PagesViewSecond(RetrieveAPIView):
@@ -97,7 +97,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                     }) 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PageListData})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     
 
@@ -120,7 +120,7 @@ class showPagesListOnPageType(RetrieveAPIView):
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':HPageListData})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
                     
 
     @transaction.atomic()
@@ -137,7 +137,7 @@ class showPagesListOnPageType(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Pages_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -147,4 +147,4 @@ class showPagesListOnPageType(RetrieveAPIView):
                 Modulesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully'})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})  

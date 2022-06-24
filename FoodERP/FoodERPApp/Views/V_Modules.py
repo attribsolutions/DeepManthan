@@ -28,7 +28,7 @@ class H_ModulesView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data })
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
          
 
     @transaction.atomic()
@@ -44,7 +44,7 @@ class H_ModulesView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Modules_Serializer.errors, 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
 
 class H_ModulesViewSecond(RetrieveAPIView):
     
@@ -61,7 +61,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Module Not available', 'Data':[]})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
            
 
     @transaction.atomic()
@@ -78,7 +78,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Modules_Serializer.errors,'Data' :[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -88,5 +88,5 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 Modulesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module  Deleted Successfully', 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
             
