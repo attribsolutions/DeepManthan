@@ -4,6 +4,27 @@ from ..models import *
 from rest_framework import serializers
 
 
+class T_InvoiceSerializerGETList(serializers.Serializer):
+    id=serializers.IntegerField()
+    Customer = serializers.IntegerField()
+    CustomerName=serializers.CharField(max_length=500)
+    Party =serializers.IntegerField()
+    PartyName=serializers.CharField(max_length=500)
+    InvoiceDate = serializers.DateField()
+    InvoiceNumber  =  serializers.IntegerField()
+    FullInvoiceNumber =  serializers.CharField(max_length=500)
+    CustomerGSTTin = serializers.CharField(max_length=500)
+    GrandTotal =  serializers.DecimalField(max_digits = 15,decimal_places=2)
+    RoundOffAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
+    CreatedBy  =  serializers.IntegerField()
+    CreatedOn =  serializers.DateTimeField()
+    UpdatedBy = serializers.IntegerField()
+    UpdatedOn = serializers.DateTimeField()
+   
+    OrderID_id = serializers.IntegerField()
+    
+
+
 class TC_InvoiceItemBatchesSerializer(serializers.ModelSerializer):
     
     class Meta:
