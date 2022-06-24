@@ -58,7 +58,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 if Modulesdata.exists():
                     Modules_Serializer = H_ModulesSerializer(Modulesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Records Not available', 'Data':[]})    
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Module Not available', 'Data':[]})    
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
            
