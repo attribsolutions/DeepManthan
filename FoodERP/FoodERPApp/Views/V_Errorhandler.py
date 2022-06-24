@@ -2,16 +2,18 @@ from django.http import JsonResponse
 
 def custom404(request, exception=None):
     return JsonResponse({
-        'status_code': 404,
-        'status' : True,
-        'Error': 'Page not found'
+        'StatusCode': 404,
+        'Status' : True,
+        'Message': 'Page not found',
+        'Data':[]
     })
 
 def custom500(request, exception=None):
     return JsonResponse({
-        'status_code': 500,
-        'status' : True,
-        'Error':'Internal Server Error'
+        'StatusCode': 500,
+        'Status' : True,
+        'Message':'Internal Server Error',
+        'Data':[]
     }) 
 
  
