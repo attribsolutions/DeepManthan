@@ -30,9 +30,9 @@ JOIN m_states ON m_states.id=m_employees.State_id''')
                     M_Employees_Serializer = M_EmployeesSerializer02(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer})   
         except Exception as e:
-            raise Exception(e)
+           return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
-            print(e)
+         
 
     @transaction.atomic()
     def post(self, request):
@@ -47,8 +47,7 @@ JOIN m_states ON m_states.id=m_employees.State_id''')
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': M_Employees_Serializer.errors,'Data': ''})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class M_EmployeesViewSecond(RetrieveAPIView):
@@ -74,7 +73,7 @@ JOIN m_states ON m_states.id=m_employees.State_id where m_employees.id= %s''',[i
                     M_Employees_Serializer = M_EmployeesSerializer02(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer})   
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -91,8 +90,7 @@ JOIN m_states ON m_states.id=m_employees.State_id where m_employees.id= %s''',[i
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': M_Employees_Serializer.errors,'Data' :[]})    
         except Exception as e:
-            raise Exception(e)
-            print(e)            
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})            
 
     @transaction.atomic()
     def delete(self, request, id=0):

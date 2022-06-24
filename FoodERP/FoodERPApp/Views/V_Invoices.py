@@ -30,8 +30,7 @@ join m_parties B ON B.ID=t_invoices.PartyID_id
                     Invoice_serializer = T_InvoiceSerializerGETList(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -44,7 +43,7 @@ join m_parties B ON B.ID=t_invoices.PartyID_id
                     return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully'})
                 return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': Invoice_serializer.errors})
         except Exception as e:
-            raise Exception(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class T_InvoicesViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -59,8 +58,7 @@ class T_InvoicesViewSecond(CreateAPIView):
                     Invoicedata, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer.data})
         except Exception as e:
-            raise Exception(e)
-            print(e)  
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})  
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -70,7 +68,7 @@ class T_InvoicesViewSecond(CreateAPIView):
                 Invoice_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Message': 'Invoice Deleted Successfully'})
         except Exception as e:
-            raise Exception(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -84,7 +82,6 @@ class T_InvoicesViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':Invoiceupdate_Serializer.data})
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors})
         except Exception as e:
-            raise Exception(e)
-            print(e)                  
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})               
         
 
