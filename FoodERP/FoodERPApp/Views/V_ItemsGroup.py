@@ -23,9 +23,7 @@ class M_ItemsGroupView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsGroup_Serializer.data })
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})      
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
-            
-            print(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -41,8 +39,7 @@ class M_ItemsGroupView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ItemsGroup_Serializer.errors,'Data': ''})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class M_ItemsGroupViewSecond(RetrieveAPIView):
@@ -75,8 +72,7 @@ class M_ItemsGroupViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ItemsGroup_Serializer.errors,'Data' :''})   
         except Exception as e:
-            raise Exception(e)
-            print(e) 
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
     @transaction.atomic()
     def delete(self, request, id=0):

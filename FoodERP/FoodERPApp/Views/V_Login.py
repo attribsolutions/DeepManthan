@@ -30,9 +30,10 @@ class UserRegistrationView(CreateAPIView):
             serializer.save()
             status_code = status.HTTP_201_CREATED
             response = {
-                'success': True,
-                'status code': status_code,
-                'message': 'User registered  successfully',
+                'StatusCode': status_code,
+                'Status': True,
+                'Message': 'User registered  successfully',
+                'Data':[]
             }
 
             return Response(response, status=status_code)
@@ -52,10 +53,8 @@ class UserListView(CreateAPIView):
                 Usersdata = M_Users.objects.all()
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 
-                                     'Data':  Usersdata_Serializer.data })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 
-                                     'Message':  'Records Not available' })                      
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data':  Usersdata_Serializer.data })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data':[] })                      
         except Exception as e:
             raise Exception(e)
 
@@ -72,12 +71,10 @@ class UserListViewSecond(CreateAPIView):
                 UserRolesdata = MC_UserRoles.objects.filter(UserID=id)
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True)
-                   
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Usersdata_Serializer.data})               
-                return JsonResponse({'StatusCode': 200, 'Status': True, 
-                                     'Message':  'User Not available' })                     
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Usersdata_Serializer.data})               
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -85,10 +82,9 @@ class UserListViewSecond(CreateAPIView):
             with transaction.atomic():
                 Usersdata = M_Users.objects.get(ID=id)
                 Usersdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully'})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully', 'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -99,13 +95,13 @@ class UserListViewSecond(CreateAPIView):
                 Usersdata_Serializer = UserRegistrationSerializer(UsersdataByID, data=Usersdata)
                 if Usersdata_Serializer.is_valid():
                     Usersdata_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Updated Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Usersdata_Serializer.errors})
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Usersdata_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)        
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                  
 
 
 class UserLoginView(RetrieveAPIView):

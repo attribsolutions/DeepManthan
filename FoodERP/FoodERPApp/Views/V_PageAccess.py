@@ -24,5 +24,5 @@ class H_PageAccessView(CreateAPIView):
                 H_PageAccess_serializer = H_PageAccessSerializer(H_PageAccess_data, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': H_PageAccess_serializer.data})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+           

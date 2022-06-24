@@ -57,8 +57,8 @@ urlpatterns = [
     url(r'PageAccess$', H_PageAccessView.as_view()),
    
 
-    url(r'Companies/([0-9]+)$', C_CompaniesViewSecond.as_view()),
-    url(r'Companies$', C_CompaniesView.as_view()),
+    url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
+    url(r'Company$', C_CompaniesView.as_view()),
 
     url(r'CompanyGroups/([0-9]+)$', C_CompanyGroupsViewSecond.as_view()),
     url(r'CompanyGroups$', C_CompanyGroupsView.as_view()),
