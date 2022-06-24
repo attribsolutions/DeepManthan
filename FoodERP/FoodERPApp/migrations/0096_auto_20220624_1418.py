@@ -17,22 +17,5 @@ class Migration(migrations.Migration):
             field=models.IntegerField(default=1),
             preserve_default=False,
         ),
-        migrations.AddField(
-            model_name='m_parties',
-            name='CreatedOn',
-            field=models.DateTimeField(auto_now_add=True, default=1),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='m_parties',
-            name='UpdatedBy',
-            field=models.IntegerField(default=django.utils.timezone.now),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='m_parties',
-            name='UpdatedOn',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
-            preserve_default=False,
-        ),
+        
     ]
