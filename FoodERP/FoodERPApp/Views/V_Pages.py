@@ -101,28 +101,6 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
 
     
 
-class showPagesListOnPageType(RetrieveAPIView):
-    
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                HPagesdata = M_Pages.objects.filter(PageType=id)
-                HPagesserialize_data = M_PagesSerializer1(HPagesdata,many=True).data
-                HPageListData = list()
-                for a1 in HPagesserialize_data:
-                    HPageListData.append({
-                    'ID':a1["ID"],
-                    'Name':a1["Name"]
-                    })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':HPageListData})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-                    
-
     @transaction.atomic()
     def put(self, request, id=0):
         try:
@@ -148,3 +126,26 @@ class showPagesListOnPageType(RetrieveAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully'})
         except Exception as e:
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
+
+
+class showPagesListOnPageType(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                HPagesdata = M_Pages.objects.filter(PageType=id)
+                HPagesserialize_data = M_PagesSerializer1(HPagesdata,many=True).data
+                HPageListData = list()
+                for a1 in HPagesserialize_data:
+                    HPageListData.append({
+                    'ID':a1["ID"],
+                    'Name':a1["Name"]
+                    })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':HPageListData})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                    
