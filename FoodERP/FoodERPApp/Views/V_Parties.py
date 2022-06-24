@@ -81,7 +81,7 @@ left join M_States on M_states.id=p.state''')
         except Exception as e:
             raise Exception(e)
             print(e)
-
+ 
     @transaction.atomic()
     def post(self, request):
         try:
