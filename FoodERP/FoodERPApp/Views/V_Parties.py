@@ -125,17 +125,18 @@ left join M_States on M_states.id=p.state where p.ID = %s''',[id])
         try:
             with transaction.atomic():
                 M_Partiesdata = JSONParser().parse(request)
-                M_PartiesdataByID = M_Roles.objects.get(ID=id)
+                M_PartiesdataByID = M_Parties.objects.get(ID=id)
                 M_Parties_Serializer = M_PartiesSerializer(
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
                     M_Parties_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
         except Exception as e:
             raise Exception(e)
+            print(e)
 
     @transaction.atomic()
     def delete(self, request, id=0):
