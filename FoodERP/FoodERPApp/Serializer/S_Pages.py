@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from ..models import M_Pages, MC_PagePageAccess
 
-
 class MC_PagePageAccessSerializer(serializers.Serializer):
    
     ID = serializers.IntegerField()
@@ -74,21 +73,15 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'PageType', instance.PageType)
             instance.RelatedPageID = validated_data.get(
                 'RelatedPageID', instance.RelatedPageID)
-            
-
             instance.save()
 
             for Access in instance.PagePageAccess.all():
                 Access.delete()
 
-            
-
             for PagePageAccess_data in validated_data['PagePageAccess']:
                 PageAccess = MC_PagePageAccess.objects.create(PageID=instance, **PagePageAccess_data)
             instance.PagePageAccess.add(PageAccess)
-    
-        
-
+            
             return instance   
     
 
