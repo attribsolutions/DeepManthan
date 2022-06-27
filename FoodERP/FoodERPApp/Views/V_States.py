@@ -22,9 +22,9 @@ class S_StateView(CreateAPIView):
                 if State_data.exists():
                     State_serializer =  StateSerializer(State_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': State_serializer.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
          
 
     @transaction.atomic()
@@ -38,9 +38,9 @@ class S_StateView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  State_serializer.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  State_serializer.errors, 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             print(e)        
 
 class S_StateViewSecond(RetrieveAPIView):
@@ -56,7 +56,7 @@ class S_StateViewSecond(RetrieveAPIView):
                 State_serializer = StateSerializer(State_data)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': State_serializer.data})
         except M_States.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Record Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Record Not available', 'Data': []})
             
 
     @transaction.atomic()
@@ -83,4 +83,4 @@ class S_StateViewSecond(RetrieveAPIView):
                 State_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Deleted Successfully','Data':[]})
         except M_States.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []})             
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'State Not available', 'Data': []})             

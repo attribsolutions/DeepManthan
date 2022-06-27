@@ -123,7 +123,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
             with transaction.atomic():
                 Modulesdata = M_Pages.objects.get(ID=id)
                 Modulesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully'})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully', 'Data': []})
         except M_Pages.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Page Not available', 'Data': []})  
         
@@ -136,7 +136,7 @@ class showPagesListOnPageType(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.filter(PageType=id)
+                HPagesdata = M_Pages.objects.get(PageType=id)
                 HPagesserialize_data = M_PagesSerializer1(HPagesdata,many=True).data
                 HPageListData = list()
                 for a1 in HPagesserialize_data:

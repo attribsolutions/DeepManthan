@@ -21,11 +21,12 @@ class M_RolesView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Roles_data = M_Roles.objects.all()
-                M_Roles_serializer = M_RolesSerializer(M_Roles_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Roles_serializer.data})
+                if M_Roles_data.exists():
+                    M_Roles_serializer = M_RolesSerializer(M_Roles_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Roles_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Roles Not available', 'Data': []})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
@@ -35,12 +36,12 @@ class M_RolesView(CreateAPIView):
                 M_Roles_Serializer = M_RolesSerializer(data=M_Rolesdata)
             if M_Roles_Serializer.is_valid():
                 M_Roles_Serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Save Successfully','Data' :''})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Save Successfully', 'Data' :[]})
             else:
                 transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Roles_Serializer.errors,'Data' : ''})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Roles_Serializer.errors, 'Data' : []})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 class M_RolesViewSecond(CreateAPIView):
@@ -56,7 +57,7 @@ class M_RolesViewSecond(CreateAPIView):
                 M_Roles_Serializer = M_RolesSerializer(M_Rolesdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Roles_Serializer.data})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -68,12 +69,12 @@ class M_RolesViewSecond(CreateAPIView):
                     M_RolesdataByID, data=M_Rolesdata)
                 if M_Roles_Serializer.is_valid():
                     M_Roles_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Updated Successfully','Data' : ''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Updated Successfully','Data' :[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Roles_Serializer.errors,'Data' : ''})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Roles_Serializer.errors, 'Data' :[]})
         except Exception as e:
-            raise Exception(e)
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -81,6 +82,6 @@ class M_RolesViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Rolesdata = M_Roles.objects.get(ID=id)
                 M_Rolesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Deleted Successfully','Data':''})
-        except Exception as e:
-            raise Exception(e)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Deleted Successfully','Data':[]})
+        except M_Roles.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Roles Not available', 'Data': []})
