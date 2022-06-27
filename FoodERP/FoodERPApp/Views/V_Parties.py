@@ -21,11 +21,12 @@ class M_PartyTypeView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_PartyType_data = M_PartyType.objects.all()
-                M_PartyType_serializer = M_PartyTypeSerializer(M_PartyType_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
+                if M_PartyType_data.exists():
+                    M_PartyType_serializer = M_PartyTypeSerializer(M_PartyType_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Types Not Available', 'Data': []})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+           return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
             
 class GetPartyTypeByDivisionTypeID(CreateAPIView):
     
@@ -37,11 +38,12 @@ class GetPartyTypeByDivisionTypeID(CreateAPIView):
         try:
             with transaction.atomic():
                 M_PartyType_data = M_PartyType.objects.filter(DivisionTypeID=id)
-                M_PartyType_serializer = M_PartyTypeSerializer(M_PartyType_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
+                if M_PartyType_data.exists():
+                    M_PartyType_serializer = M_PartyTypeSerializer(M_PartyType_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
         except Exception as e:
-            raise Exception(e)
-            print(e)            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
             
 class M_DivisionTypeView(CreateAPIView):
     
@@ -53,11 +55,12 @@ class M_DivisionTypeView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_DivisionType_data = M_DivisionType.objects.all()
-                M_DivisionType_serializer = M_DivisionTypeSerializer(M_DivisionType_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_DivisionType_serializer.data})
+                if M_DivisionType_data.exists():
+                    M_DivisionType_serializer = M_DivisionTypeSerializer(M_DivisionType_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':M_DivisionType_serializer.data })
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Division Not available', 'Data': []})    
         except Exception as e:
-            raise Exception(e)
-            print(e)            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
 
 class M_PartiesView(CreateAPIView):
     
@@ -68,7 +71,6 @@ class M_PartiesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                M_Parties_data = M_Parties.objects.all()
                 M_Parties_data=M_Parties.objects.raw('''SELECT p.ID,p.Name,p.PartyTypeID,p.DividionTypeID,p.companyID,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State,p.District,p.GSTN,p.FSSAINo,p.FSSAIExipry,p.IsActive
 ,m_partytype.Name PartyType,m_divisiontype.Name DivisionType,c_companies.Name CompanyName,M_States.Name StateName
 FROM m_parties p
@@ -76,11 +78,13 @@ left join M_PartyType on m_partytype.id=p.PartyTypeID
 left join M_DivisionType on m_divisiontype.id=p.DividionTypeID
 left join C_Companies on c_companies.ID =p.companyID
 left join M_States on M_states.id=p.state''')
-                M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Parties_serializer.data})
+                if not M_Parties_data:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
+                else:
+                    M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Parties_serializer.data})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
@@ -90,12 +94,12 @@ left join M_States on M_states.id=p.state''')
                 M_Parties_Serializer = M_PartiesSerializer(data=M_Partiesdata)
             if M_Parties_Serializer.is_valid():
                 M_Parties_Serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Save Successfully','Data' :''})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Save Successfully','Data' :[]})
             else:
                 transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : ''})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' :[]})
         except Exception as e:
-            raise Exception(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 class M_PartiesViewSecond(CreateAPIView):
@@ -118,7 +122,7 @@ left join M_States on M_states.id=p.state where p.ID = %s''',[id])
                 M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data})
         except Exception as e:
-            raise Exception(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -133,10 +137,9 @@ left join M_States on M_states.id=p.state where p.ID = %s''',[id])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -144,6 +147,7 @@ left join M_States on M_states.id=p.state where p.ID = %s''',[id])
             with transaction.atomic():
                 M_Partiesdata = M_Parties.objects.get(ID=id)
                 M_Partiesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Deleted Successfully','Data':''})
-        except Exception as e:
-            raise Exception(e)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully', 'Data':[]})
+        except M_Parties.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Not available', 'Data': []})    
+            
