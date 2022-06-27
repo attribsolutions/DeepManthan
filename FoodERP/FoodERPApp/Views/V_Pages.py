@@ -133,10 +133,10 @@ class showPagesListOnPageType(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.filter(PageType=id)
+                HPagesdata = M_Pages.objects.filter(PageType=1)
                 HPagesserialize_data = M_PagesSerializer1(HPagesdata,many=True).data
                 HPageListData = list()
                 for a1 in HPagesserialize_data:
