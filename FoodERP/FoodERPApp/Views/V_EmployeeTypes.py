@@ -22,9 +22,9 @@ class M_EmployeeTypeView(CreateAPIView):
                 if M_EmployeeTypedata.exists():
                     M_EmployeeType_serializer = M_EmployeeTypeSerializer(M_EmployeeTypedata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_EmployeeType_serializer.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})    
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -34,12 +34,12 @@ class M_EmployeeTypeView(CreateAPIView):
                 M_EmployeeType_serializer = M_EmployeeTypeSerializer(data=M_EmployeeTypedata)
                 if M_EmployeeType_serializer.is_valid():
                     M_EmployeeType_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Type Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
                    
 
 class M_EmployeeTypeViewSecond(RetrieveAPIView):
@@ -54,7 +54,7 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 EmployeeType_Serializer = M_EmployeeTypeSerializer(EmployeeType_data)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': EmployeeType_Serializer.data})
         except M_EmployeeTypes.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Record Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -68,9 +68,9 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Updated Successfully', 'Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': EmployeeType_Serializer.errors, 'Data' : []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': EmployeeType_Serializer.errors, 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data' : []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -80,4 +80,4 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 EmployeeType_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully', 'Data':[]})
         except M_EmployeeTypes.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []}) 
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'EmployeeType Not available', 'Data': []}) 

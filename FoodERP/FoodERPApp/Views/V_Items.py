@@ -24,12 +24,12 @@ FROM M_Items p
 join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
 Order BY RP.Sequence, p.Sequence''')
                 if not query:
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
     @transaction.atomic()
@@ -43,9 +43,9 @@ Order BY RP.Sequence, p.Sequence''')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :M_Items_Serializer.data})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': M_Items_Serializer.errors,'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
                  
  
 
@@ -62,12 +62,12 @@ class M_ItemsViewSecond(CreateAPIView):
 FROM M_Items p 
 join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
                 if not query:
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Record Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
     @transaction.atomic()
@@ -83,9 +83,9 @@ join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e),'Data' :[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -95,4 +95,4 @@ join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
                 M_Itemsdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','Data':[]})
         except M_Items.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item Not available', 'Data': []})
