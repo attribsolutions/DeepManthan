@@ -24,7 +24,7 @@ class M_EmployeeTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_EmployeeType_serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -39,8 +39,8 @@ class M_EmployeeTypeView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
-            print(e)        
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                   
 
 class M_EmployeeTypeViewSecond(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
@@ -70,7 +70,7 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': EmployeeType_Serializer.errors, 'Data' : []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -79,5 +79,5 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 EmployeeType_data = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'EmployeeType Deleted Successfully', 'Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data' : []}) 
+        except M_EmployeeTypes.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []}) 
