@@ -83,7 +83,7 @@ class H_Modules(models.Model):
 class M_Pages(models.Model):
     ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=100)
-    Description = models.CharField(max_length=100)
+    Description = models.CharField(max_length=100, blank=True)
     Module = models.ForeignKey(H_Modules, related_name = 'M_PagesModule', on_delete = models.CASCADE)
     isActive = models.BooleanField(default=False)
     DisplayIndex = models.IntegerField()
@@ -128,6 +128,21 @@ class C_Companies(models.Model):
     class Meta:
          db_table = "C_Companies"
 
+class M_DivisionType(models.Model):
+    
+    Name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'M_DivisionType'
+        
+class M_PartyType(models.Model):
+    
+    Name = models.CharField(max_length=100)
+    DivisionTypeID=models.IntegerField()
+
+    class Meta:
+        db_table = 'M_PartyType'        
+
 class M_Parties(models.Model):
     ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=500)
@@ -146,6 +161,10 @@ class M_Parties(models.Model):
     FSSAINo = models.CharField(max_length=500)
     FSSAIExipry = models.DateField(blank=True)
     IsActive =  models.IntegerField()
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'M_Parties'
@@ -235,11 +254,11 @@ class M_Items(models.Model):
     
 class T_Orders(models.Model):
     
-    OrderDate = models.DateField(auto_now_add=True)
+    OrderDate = models.DateField(blank=False, null=False)
     CustomerID = models.IntegerField()
     PartyID  =  models.IntegerField()
     OrderAmount = models.DecimalField(max_digits = 5,decimal_places=2)
-    Discreption = models.CharField(max_length=500)
+    Description = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
@@ -256,6 +275,8 @@ class TC_OrderItems(models.Model):
     UnitID = models.IntegerField( )
     BaseUnitQuantity = models.DecimalField(max_digits = 5,decimal_places=2)
     GST = models.DecimalField(max_digits = 5,decimal_places=2)
+    BasicAmount =models.DecimalField(max_digits = 5,decimal_places=2)
+    Amount =models.DecimalField(max_digits = 5,decimal_places=2)
 
     class Meta :
         db_table = "TC_OrderItems"

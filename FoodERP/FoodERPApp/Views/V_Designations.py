@@ -24,7 +24,7 @@ class M_DesignationsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Designations_serializer.data})
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
 
     @transaction.atomic()
@@ -40,7 +40,7 @@ class M_DesignationsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Designationsdata_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
                     
 
 class M_DesignationsViewSecond(RetrieveAPIView):
@@ -71,7 +71,7 @@ class M_DesignationsViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Designations_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -80,5 +80,5 @@ class M_DesignationsViewSecond(RetrieveAPIView):
                 Designations_data = M_Designations.objects.get(id=id)
                 Designations_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Designation Deleted Successfully','Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e),'Data':[]})
+        except M_Designations.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []})

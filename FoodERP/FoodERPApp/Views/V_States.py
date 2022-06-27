@@ -82,5 +82,5 @@ class S_StateViewSecond(RetrieveAPIView):
                 State_data = M_States.objects.get(id=id)
                 State_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Deleted Successfully','Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})             
+        except M_States.DoesNotExist:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not available', 'Data': []})             

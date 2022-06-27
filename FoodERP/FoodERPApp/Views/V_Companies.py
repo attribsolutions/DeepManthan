@@ -20,13 +20,13 @@ class C_CompaniesView(CreateAPIView):
         try:
             with transaction.atomic():
                 Companiesdata = C_Companies.objects.all()
-                Companies_Serializer = C_CompanySerializer2(
-                    Companiesdata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Companies_Serializer.data})
-
+                if Companiesdata.exists():
+                    Companies_Serializer = C_CompanySerializer2(Companiesdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Companies_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Companies Not Available', 'Data': []})    
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -36,13 +36,13 @@ class C_CompaniesView(CreateAPIView):
                 Companies_Serializer = C_CompanySerializer(data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  C_CompanySerializer2.errors})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  C_CompanySerializer2.errors, 'Data':[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e)})
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            
 
 
 class C_CompaniesViewSecond(CreateAPIView):
@@ -56,10 +56,10 @@ class C_CompaniesViewSecond(CreateAPIView):
             with transaction.atomic():
                 Companiesdata = C_Companies.objects.get(ID=id)
                 Companies_Serializer = C_CompanySerializer2(Companiesdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Companies_Serializer.data})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Companies_Serializer.data})
+        except C_Companies.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
+            
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -71,13 +71,13 @@ class C_CompaniesViewSecond(CreateAPIView):
                     CompaniesdataByID, data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Updated Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Companies_Serializer.errors})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -85,10 +85,10 @@ class C_CompaniesViewSecond(CreateAPIView):
             with transaction.atomic():
                 Companiesdata = C_Companies.objects.get(ID=id)
                 Companiesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Deleted Successfully'})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Deleted Successfully', 'Data':[]})
+        except C_Companies.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
+           
 
 
 
@@ -101,13 +101,14 @@ class C_CompanyGroupsView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Companiesdata = C_CompanyGroups.objects.all()
-                Companies_Serializer = C_CompanyGroupsSerializer(
-                    Companiesdata, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Companies_Serializer.data})
+                CompaniesGroupsdata = C_CompanyGroups.objects.all()
+                if CompaniesGroupsdata.exists():
+                    CompaniesGroups_Serializer = C_CompanyGroupsSerializer(CompaniesGroupsdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': CompaniesGroups_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Company Groups Not available', 'Data': []})        
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -118,13 +119,13 @@ class C_CompanyGroupsView(CreateAPIView):
                     data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group Save Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Companies_Serializer.errors})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+           
 
 
 class C_CompanyGroupsViewSecond(CreateAPIView):
@@ -136,13 +137,12 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Companiesdata = C_CompanyGroups.objects.filter(ID=id)
-                Companies_Serializer = C_CompanyGroupsSerializer(
-                    Companiesdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Companies_Serializer.data})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
+                CompaniesGroupsdata = C_CompanyGroups.objects.get(ID=id)
+                CompaniesGroupsdata_Serializer = C_CompanyGroupsSerializer(CompaniesGroupsdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': CompaniesGroupsdata_Serializer.data})
+        except C_CompanyGroups.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
+            
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -154,13 +154,13 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
                     CompaniesGropusdataByID, data=CompaniesGropusdata)
                 if CompaniesGropus_Serializer.is_valid():
                     CompaniesGropus_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group Updated Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': CompaniesGropus_Serializer.errors})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CompaniesGropus_Serializer.errors, 'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+           
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -168,7 +168,7 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
             with transaction.atomic():
                 CompaniesGropusdata = C_CompanyGroups.objects.get(ID=id)
                 CompaniesGropusdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group  Deleted Successfully'})
-        except Exception as e:
-            raise Exception(e)
-            print(e)            
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group  Deleted Successfully', 'Data':[]})
+        except C_CompanyGroups.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
+                       

@@ -1,5 +1,6 @@
 
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
@@ -25,12 +26,10 @@ class H_ModulesView(CreateAPIView):
                     Modules_Serializer = H_ModulesSerializer(
                     Modulesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data })
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
         except Exception as e:
-            raise Exception(e)
-            
-            print(e)
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+         
 
     @transaction.atomic()
     def post(self, request):
@@ -40,14 +39,12 @@ class H_ModulesView(CreateAPIView):
                 Modules_Serializer = H_ModulesSerializer(data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
-                   
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Save Successfully','Data' :''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Modules_Serializer.errors,'Data': ''})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors, 'Data': []})
         except Exception as e:
-            raise Exception(e)
-            print(e)        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
 
 class H_ModulesViewSecond(RetrieveAPIView):
     
@@ -58,26 +55,12 @@ class H_ModulesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Modulesdata = H_Modules.objects.filter(ID=id)
-                if Modulesdata.exists():
-                    Modules_Serializer = H_ModulesSerializer(Modulesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': ''})    
-        except Exception as e:
-            raise Exception(e)
-            
-            print(e)
-
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
                 Modulesdata = H_Modules.objects.get(ID=id)
-                Modulesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Deleted Successfully','Data' : ''})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
+                Modules_Serializer = H_ModulesSerializer(Modulesdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data})
+        except H_Modules.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})
+           
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -85,122 +68,23 @@ class H_ModulesViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Modulesdata = JSONParser().parse(request)
                 ModulesdataByID = H_Modules.objects.get(ID=id)
-               
                 Modules_Serializer = H_ModulesSerializer(ModulesdataByID, data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Updated Successfully','Data':''})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Updated Successfully','Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Modules_Serializer.errors,'Data' :''})
-                
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors,'Data' :[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
 
-
-            # H_Module input JSON
-                # {     
-                # "Name": "admin module1",
-                # "DisplayIndex": 4,
-                # "IsActive": true,
-                # "Icon": "aaaabbb2"
-                # }
-
-# class H_SubModulesView(CreateAPIView):
-    
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-
-#     def get(self, request):
-#         try:
-#             with transaction.atomic():
-#                 SubmoduleListData=list()
-#                 Submodule_data = H_SubModules.objects.all()
-#                 Submoule_serializer_data = H_SubModulesSerializer(Submodule_data,many=True).data
-                
-#                 for a in Submoule_serializer_data:
-#                     SubmoduleListData.append({
-#                     'ID':a["ID"],
-#                     'Name':a["Name"],
-#                     'Icon':a["Icon"],
-#                     'DisplayIndex':a["DisplayIndex"],  
-#                     'ModuleID':a["Module"]['ID'], 
-#                     'ModuleName':a["Module"]['Name'],
-#                     'IsActive':a["IsActive"]
-#                     })  
-
-#                 return JsonResponse({'StatusCode': 200, 'Status': True,'Data': SubmoduleListData})
-#         except Exception as e:
-#             raise Exception(e)
-
-#     @transaction.atomic()
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 userdata = JSONParser().parse(request)
-#                 H_SubModules_Serializer = H_SubModulesSerializer(data=userdata)
-#                 if H_SubModules_Serializer.is_valid():
-#                     H_SubModules_Serializer.save()
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SubModules Save Successfully'})
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'data': H_SubModules_Serializer.errors})
-#         except Exception as e:
-#             raise Exception(e)
-
-
-# class H_SubModulesViewSecond(RetrieveAPIView):
-
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def get(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 SubmoduleListData=list()
-#                 Submodule_data = H_SubModules.objects.get(ID=id)
-#                 Submoule_serializer_data = H_SubModulesSerializer(Submodule_data).data
-                
-#                 for a in Submoule_serializer_data:
-#                     SubmoduleListData.append({
-#                     'ID':a["ID"],
-#                     'Name':a["Name"],
-#                     'Icon':a["Icon"],
-#                     'DisplayIndex':a["DisplayIndex"],  
-#                     'ModuleID':a["Module"]['ID'], 
-#                     'ModuleName':a["Module"]['Name'],
-#                     'IsActive':a["IsActive"]
-#                     })  
-
-#                 return JsonResponse({'StatusCode': 200, 'Status': True,'Data': SubmoduleListData})
-#         except Exception as e:
-#             raise Exception(e)
-
-#     @transaction.atomic()
-#     def delete(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 Modulesdata = H_SubModules.objects.get(ID=id)
-#                 Modulesdata.delete()
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SubModule Deleted Successfully'})
-#         except Exception as e:
-#             raise Exception(e)
-#             print(e)
-
-#     @transaction.atomic()
-#     def put(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 Modulesdata = JSONParser().parse(request)
-#                 ModulesdataByID = H_SubModules.objects.get(ID=id)
-#                 Modules_Serializer = H_SubModulesSerializer(
-#                     ModulesdataByID, data=Modulesdata)
-#                 if Modules_Serializer.is_valid():
-#                     Modules_Serializer.save()
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Updated Successfully'})
-#                 else:
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Modules_Serializer.errors})
-#         except Exception as e:
-#             raise Exception(e)
-#             print(e)                
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Modulesdata = H_Modules.objects.get(ID=id)
+                Modulesdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module  Deleted Successfully', 'Data':[]})
+        except H_Modules.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})    
+            

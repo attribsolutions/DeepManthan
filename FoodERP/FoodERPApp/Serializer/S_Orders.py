@@ -28,7 +28,17 @@ class TC_OrderItemsSerializerForGET(serializers.Serializer):
     BaseUnitQuantity = serializers.DecimalField(max_digits = 5,decimal_places=2)
     GST = serializers.DecimalField(max_digits = 5,decimal_places=2) 
 
-
+class T_OrderSerializerforGET1(serializers.Serializer):
+    id = serializers.IntegerField()
+    OrderDate = serializers.DateField()
+    CustomerID = serializers.IntegerField()
+    customerName=serializers.CharField(max_length=500)
+    PartyID  =  serializers.IntegerField()
+    partyName = serializers.CharField(max_length=500)
+    OrderAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
+    Discreption = serializers.CharField(max_length=500)
+    CreatedBy = serializers.IntegerField(default=False)
+    CreatedOn = serializers.DateTimeField()
    
 
 class T_OrderSerializerforGET(serializers.Serializer):
