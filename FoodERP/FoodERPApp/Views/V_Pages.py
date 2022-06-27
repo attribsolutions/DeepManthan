@@ -136,7 +136,7 @@ class showPagesListOnPageType(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.get(PageType=id)
+                HPagesdata = M_Pages.objects.filter(PageType=id)
                 HPagesserialize_data = M_PagesSerializer1(HPagesdata,many=True).data
                 HPageListData = list()
                 for a1 in HPagesserialize_data:
