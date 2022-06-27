@@ -86,8 +86,8 @@ class C_CompaniesViewSecond(CreateAPIView):
                 Companiesdata = C_Companies.objects.get(ID=id)
                 Companiesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Deleted Successfully', 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except C_Companies.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
            
 
 
@@ -137,11 +137,11 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                CompaniesGroupsdata = C_CompanyGroups.objects.filter(ID=id)
+                CompaniesGroupsdata = C_CompanyGroups.objects.get(ID=id)
                 CompaniesGroupsdata_Serializer = C_CompanyGroupsSerializer(CompaniesGroupsdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': CompaniesGroupsdata_Serializer.data})
         except C_CompanyGroups.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
             
 
     @transaction.atomic()
@@ -170,5 +170,5 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
                 CompaniesGropusdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Group  Deleted Successfully', 'Data':[]})
         except C_CompanyGroups.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
                        
