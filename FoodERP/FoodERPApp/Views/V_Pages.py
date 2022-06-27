@@ -42,7 +42,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 HPagesserialize_data = M_PagesSerializer1(data=HPagesdata)
                 if HPagesserialize_data.is_valid():
                     HPagesserialize_data.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': HPagesserialize_data.data})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,'Message': HPagesserialize_data.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})

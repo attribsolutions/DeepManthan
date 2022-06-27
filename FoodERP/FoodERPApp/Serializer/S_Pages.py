@@ -24,7 +24,11 @@ class M_PagesSerializer(serializers.Serializer):
     isShowOnMenu = serializers.BooleanField(default=False)
     PageType = serializers.IntegerField()
     RelatedPageID = serializers.IntegerField()
-    RelatedPageName=serializers.CharField(max_length=100) 
+    RelatedPageName=serializers.CharField(max_length=100)
+    CreatedBy = serializers.IntegerField(default=False)
+    CreatedOn = serializers.DateTimeField()
+    UpdatedBy = serializers.IntegerField(default=False)
+    UpdatedOn = serializers.DateTimeField() 
     
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
