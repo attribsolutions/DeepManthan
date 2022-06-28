@@ -151,13 +151,14 @@ class M_Parties(models.Model):
     companyID =  models.IntegerField()
     CustomerDivision =  models.IntegerField()
     Email = models.EmailField(max_length=200)
+    MobileNo = models.IntegerField(null=False, blank=False, unique=True)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.IntegerField()
     District = models.IntegerField()
     Taluka = models.IntegerField ()
     City = models.IntegerField()
-    GSTN =  models.CharField(max_length=500)
+    GSTIN =  models.CharField(max_length=500)
     FSSAINo = models.CharField(max_length=500)
     FSSAIExipry = models.DateField(blank=True)
     IsActive =  models.IntegerField()
@@ -187,7 +188,7 @@ class M_Roles(models.Model):
 
 class MC_UserRoles(models.Model):
     ID = models.AutoField(primary_key=True)
-    UserID = models.ForeignKey(M_Users,  on_delete=models.CASCADE)
+    UserID = models.ForeignKey(M_Users, related_name = 'RoleID' ,  on_delete=models.CASCADE)
     RoleID = models.ForeignKey(M_Roles,  on_delete=models.DO_NOTHING)   
 
     class Meta :
