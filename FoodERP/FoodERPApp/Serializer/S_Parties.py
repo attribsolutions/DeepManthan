@@ -31,6 +31,7 @@ class M_Partiesserializer1(serializers.Serializer):
     CustomerDivision =  serializers.IntegerField()
     Email = serializers.EmailField(max_length=200)
     Address = serializers.CharField(max_length=500)
+    MobileNo=serializers.IntegerField()
     PIN = serializers.CharField(max_length=500)
     State = serializers.IntegerField()
     StateName = serializers.CharField(max_length=500)
