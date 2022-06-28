@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -151,7 +152,9 @@ class M_Parties(models.Model):
     companyID =  models.IntegerField()
     CustomerDivision =  models.IntegerField()
     Email = models.EmailField(max_length=200)
-    MobileNo = models.IntegerField(null=False, blank=False, unique=True)
+    MobileNo = models.IntegerField(null=False, blank=False, unique=True,
+    validators=[MinValueValidator(12),
+                MaxValueValidator(12)])
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.IntegerField()
