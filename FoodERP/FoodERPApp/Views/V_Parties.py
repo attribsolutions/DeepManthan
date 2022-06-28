@@ -120,7 +120,7 @@ left join C_Companies on c_companies.ID =p.companyID
 left join M_States on M_states.id=p.state where p.ID = %s''',[id])
                
                 M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
