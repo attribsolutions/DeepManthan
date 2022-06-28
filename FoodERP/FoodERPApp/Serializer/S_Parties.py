@@ -37,7 +37,7 @@ class M_Partiesserializer1(serializers.Serializer):
     District = serializers.IntegerField()
     Taluka = serializers.IntegerField ()
     City = serializers.IntegerField()
-    GSTN =  serializers.CharField(max_length=500)
+    GSTIN =  serializers.CharField(max_length=500)
     FSSAINo = serializers.CharField(max_length=500)
     FSSAIExipry = serializers.DateField()
     IsActive =  serializers.IntegerField()
