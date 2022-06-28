@@ -96,7 +96,7 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                             "RelatedPageName": a['RelatedPageName'],
                             "PagePageAccess": PageAccessListData
                         }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PageListData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PageListData[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
