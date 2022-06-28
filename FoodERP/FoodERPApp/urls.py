@@ -69,11 +69,11 @@ urlpatterns = [
     url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     url(r'States/([0-9]+)$', S_StateViewSecond.as_view()),
     url(r'States$',S_StateView.as_view()),
-    url(r'M_Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
-    url(r'M_Parties$', M_PartiesView.as_view()),
-    url(r'M_DivisionType$', M_DivisionTypeView.as_view()),
+    url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
+    url(r'Parties$', M_PartiesView.as_view()),
+    url(r'DivisionTypes$', M_DivisionTypeView.as_view()),
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
-    url(r'M_PartyType$', M_PartyTypeView.as_view()),
+    url(r'PartyTypes$', M_PartyTypeView.as_view()),
     
     
 ]
