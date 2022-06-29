@@ -301,6 +301,7 @@ class M_Designations(models.Model):
 
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
+    StateCode= models.CharField(max_length=100)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
