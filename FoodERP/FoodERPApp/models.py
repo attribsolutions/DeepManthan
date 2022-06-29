@@ -309,6 +309,15 @@ class M_States(models.Model):
     class Meta :
         db_table = "M_States"
 
+class M_Districts(models.Model):
+    Name = models.CharField(max_length=100)
+    State = models.ForeignKey(M_States, on_delete=models.CASCADE)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True) 
+    
+    class Meta :
+        db_table = "M_Districts"          
+
 
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
@@ -396,4 +405,3 @@ class TC_InvoiceItemBatches(models.Model):
     
     class Meta :
         db_table ="TC_InvoiceItemBatches"
-
