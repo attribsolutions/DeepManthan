@@ -14,7 +14,7 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST']
+        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST','BasicAmount','GSTAmount','Amount']
 
 
 class TC_OrderItemsSerializerForGET(serializers.Serializer): 
@@ -29,14 +29,15 @@ class TC_OrderItemsSerializerForGET(serializers.Serializer):
     GST = serializers.DecimalField(max_digits = 5,decimal_places=2) 
 
 class T_OrderSerializerforGET1(serializers.Serializer):
+    
     id = serializers.IntegerField()
     OrderDate = serializers.DateField()
     CustomerID = serializers.IntegerField()
     customerName=serializers.CharField(max_length=500)
     PartyID  =  serializers.IntegerField()
     partyName = serializers.CharField(max_length=500)
-    OrderAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
-    Discreption = serializers.CharField(max_length=500)
+    OrderAmount = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    Description = serializers.CharField(max_length=500)
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
    
@@ -48,24 +49,29 @@ class T_OrderSerializerforGET(serializers.Serializer):
     customerName=serializers.CharField(max_length=500)
     PartyID  =  serializers.IntegerField()
     partyName = serializers.CharField(max_length=500)
-    OrderAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
-    Discreption = serializers.CharField(max_length=500)
+    OrderAmount = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    Description = serializers.CharField(max_length=500)
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     ItemName=serializers.CharField(max_length=500)
     ItemID_id=serializers.IntegerField()
-    Quantity=serializers.DecimalField(max_digits=5,decimal_places=2)
-    MRP=serializers.DecimalField(max_digits=5,decimal_places=2)
-    Rate=serializers.DecimalField(max_digits=5,decimal_places=2)
-    UnitID=serializers.DecimalField(max_digits=5,decimal_places=2)
-    BaseUnitQuantity=serializers.DecimalField(max_digits=5,decimal_places=2)
-    GST=serializers.DecimalField(max_digits=5,decimal_places=2)  
+    Quantity=serializers.DecimalField(max_digits=20,decimal_places=2)
+    MRP=serializers.DecimalField(max_digits=20,decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=20,decimal_places=2)
+    UnitID=serializers.DecimalField(max_digits=20,decimal_places=2)
+    BaseUnitQuantity=serializers.DecimalField(max_digits=20,decimal_places=2)
+    GST=serializers.DecimalField(max_digits=20,decimal_places=2) 
+    BasicAmount=serializers.DecimalField(max_digits=20,decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=20,decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=20,decimal_places=2)
+
+ 
 
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','CustomerID','PartyID','OrderAmount','Discreption','CreatedBy', 'OrderItem']
+        fields = ['id','OrderDate','CustomerID','PartyID','OrderAmount','Description','CreatedBy', 'OrderItem']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
@@ -80,12 +86,14 @@ class T_OrderSerializer(serializers.ModelSerializer):
         # * Order Info
         instance.CustomerID = validated_data.get(
             'CustomerID', instance.CustomerID)
+        instance.OrderDate = validated_data.get(
+            'OrderDate', instance.OrderDate)    
         instance.PartyID = validated_data.get(
             'PartyID', instance.PartyID)
         instance.OrderAmount = validated_data.get(
             'OrderAmount', instance.OrderAmount)
         instance.Discreption = validated_data.get(
-            'Discreption', instance.Discreption)    
+            'Description', instance.Description)    
         instance.save()
 
         for items in instance.OrderItem.all():
