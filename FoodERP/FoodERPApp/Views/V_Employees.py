@@ -71,7 +71,7 @@ JOIN m_states ON m_states.id=m_employees.State_id where m_employees.id= %s''',[i
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Employee Not available', 'Data': []})
                 else:    
                     M_Employees_Serializer = M_EmployeesSerializer02(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer})   
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer[0]})   
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
