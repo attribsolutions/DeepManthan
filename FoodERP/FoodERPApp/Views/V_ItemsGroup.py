@@ -51,7 +51,7 @@ class M_ItemsGroupViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 ItemsGroupdata = M_ItemsGroup.objects.get(ID=id)
-                ItemsGroup_Serializer = M_ItemsGroupSerializer(ItemsGroupdata, many=True)
+                ItemsGroup_Serializer = M_ItemsGroupSerializer(ItemsGroupdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsGroup_Serializer.data}) 
         except M_ItemsGroup.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})

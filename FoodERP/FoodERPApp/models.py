@@ -278,7 +278,9 @@ class TC_OrderItems(models.Model):
     BaseUnitQuantity = models.DecimalField(max_digits = 5,decimal_places=2)
     GST = models.DecimalField(max_digits = 5,decimal_places=2)
     BasicAmount =models.DecimalField(max_digits = 5,decimal_places=2)
+    GSTAmount =models.DecimalField(max_digits = 5,decimal_places=2)
     Amount =models.DecimalField(max_digits = 5,decimal_places=2)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta :
         db_table = "TC_OrderItems"
@@ -301,6 +303,7 @@ class M_Designations(models.Model):
 
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
+    StateCode= models.CharField(max_length=100)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 

@@ -36,6 +36,7 @@ class M_Partiesserializer1(serializers.Serializer):
     State = serializers.IntegerField()
     StateName = serializers.CharField(max_length=500)
     District = serializers.IntegerField()
+    DistrictName = serializers.CharField(max_length=500)
     Taluka = serializers.IntegerField ()
     City = serializers.IntegerField()
     GSTIN =  serializers.CharField(max_length=500)
