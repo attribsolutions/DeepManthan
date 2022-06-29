@@ -24,33 +24,32 @@ class T_OrdersView(CreateAPIView):
             with transaction.atomic():
                 # Orderdata = T_Orders.objects.all()
                 OrderListData=list()
-                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,
+                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Description,
                 t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName 
                 FROM t_orders 
                 join m_parties customer on customer.ID=t_orders.CustomerID 
-                join m_parties party on party.ID=t_orders.PartyID 
-                
-                
-                ''')
+                join m_parties party on party.ID=t_orders.PartyID''')
                 # print(str(Orderdata.query))
-                Order_serializer = T_OrderSerializerforGET1(Orderdata, many=True).data
-                for a in Order_serializer:   
-                    OrderListData.append({
-                        
-                    "ID": a['id'],
-                    "OrderDate": a['OrderDate'],
-                    "CustomerID": a['CustomerID'],
-                    "CustomerName": a['customerName'],
-                    "PartyID": a['PartyID'],
-                    "PartyName": a['partyName'],
-                    "OrderAmount": a['OrderAmount'],
-                    "Discreption": a['Discreption'],
-                    "CreatedBy" : a['CreatedBy'],
-                    "CreatedOn" : a['CreatedOn']
-                        
-                    }) 
+                if Orderdata:
+                    Order_serializer = T_OrderSerializerforGET1(Orderdata, many=True).data
+                    for a in Order_serializer:   
+                        OrderListData.append({
+                            
+                        "ID": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "CustomerID": a['CustomerID'],
+                        "CustomerName": a['customerName'],
+                        "PartyID": a['PartyID'],
+                        "PartyName": a['partyName'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Description": a['Description'],
+                        "CreatedBy" : a['CreatedBy'],
+                        "CreatedOn" : a['CreatedOn']
+                            
+                        }) 
 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': OrderListData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': OrderListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
             raise Exception(e)
             print(e)
@@ -79,49 +78,55 @@ class T_OrdersViewSecond(CreateAPIView):
                 
                 OrderListData=list()
                 OrderItemsListData=list()
-                qs = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Discreption,
+                
+                qs = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Description,
                 t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName,
                 tc_orderitems.ItemID_id,tc_orderitems.Quantity,tc_orderitems.MRP,tc_orderitems.Rate,
-                tc_orderitems.UnitID,tc_orderitems.BaseUnitQuantity,tc_orderitems.GST,m_items.Name ItemName  
+                tc_orderitems.UnitID,tc_orderitems.BaseUnitQuantity,tc_orderitems.GST,m_items.Name ItemName,tc_orderitems.BasicAmount,tc_orderitems.GSTAmount,tc_orderitems.Amount  
                 FROM t_orders 
                 join m_parties customer on customer.ID=t_orders.CustomerID 
                 join m_parties party on party.ID=t_orders.PartyID 
                 join tc_orderitems on tc_orderitems.OrderID_id=t_orders.id
                 join m_items on m_items.ID=tc_orderitems.ItemID_id 
                 where t_orders.id= %s''', [id])
-                Order_serializer =T_OrderSerializerforGET(qs, many=True).data
-                
-                for a in Order_serializer:
-                        
-                    OrderItemsListData.append({
-                        
-                        "ItemID" : a['ItemID_id'],
-                        "ItemName" : a['ItemName'],
-                        "Quantity": a['Quantity'],
-                        "MRP": a['MRP'],
-                        "Rate": a['Rate'],
-                        "UnitID": a['UnitID'],
-                        "BaseUnitQuantity": a['BaseUnitQuantity'],
-                        "GST": a['GST']
-                        
+                print(str(qs.query))
+                if not qs:
+                    Order_serializer =T_OrderSerializerforGET(qs, many=True).data
+                    
+                    for a in Order_serializer:
+                            
+                        OrderItemsListData.append({
+                            
+                            "ItemID" : a['ItemID_id'],
+                            "ItemName" : a['ItemName'],
+                            "Quantity": a['Quantity'],
+                            "MRP": a['MRP'],
+                            "Rate": a['Rate'],
+                            "UnitID": a['UnitID'],
+                            "BaseUnitQuantity": a['BaseUnitQuantity'],
+                            "GST": a['GST'],
+                            "BasicAmount": a['BasicAmount'],
+                            "GSTAmount": a['GSTAmount'],
+                            "Amount": a['Amount'],
+                            
+                        })
+
+                    OrderListData.append({   
+                        "ID": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "CustomerID": a['CustomerID'],
+                        "CustomerName": a['customerName'],
+                        "PartyID": a['PartyID'],
+                        "PartyName": a['partyName'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Description": a['Description'],
+                        "CreatedBy" : a['CreatedBy'],
+                        "CreatedOn" : a['CreatedOn'],
+                        "OrderItem" : OrderItemsListData
                     })
 
-                OrderListData.append({   
-                    "ID": a['id'],
-                    "OrderDate": a['OrderDate'],
-                    "CustomerID": a['CustomerID'],
-                    "CustomerName": a['customerName'],
-                    "PartyID": a['PartyID'],
-                    "PartyName": a['partyName'],
-                    "OrderAmount": a['OrderAmount'],
-                    "Discreption": a['Discreption'],
-                    "CreatedBy" : a['CreatedBy'],
-                    "CreatedOn" : a['CreatedOn'],
-                    "OrderItem" : OrderItemsListData
-                })
-
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': OrderListData})
-                
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': OrderListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found', 'Data': []})    
         except Exception as e:
             raise Exception(e)
             print(e)     
