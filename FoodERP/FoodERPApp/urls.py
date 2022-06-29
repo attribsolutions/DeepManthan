@@ -14,7 +14,6 @@ from .Views.V_Roles import *
 from .Views.V_RoleAccess import *
 
 from .Views.V_Modules import *
-# from  .Views.V_Login import UserLoginV iew
 
 from .Views.V_PageAccess import *
 
@@ -67,15 +66,14 @@ urlpatterns = [
     url(r'ItemGroups$', M_ItemsGroupView.as_view()),
     url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
     url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
-    url(r'States/([0-9]+)$', S_StateViewSecond.as_view()),
-    url(r'States$',S_StateView.as_view()),
+    url(r'States$',M_StateView.as_view()),
+    url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
     url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'Parties$', M_PartiesView.as_view()),
     url(r'DivisionTypes$', M_DivisionTypeView.as_view()),
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'PartyTypes$', M_PartyTypeView.as_view()),
-    
-    
+      
 ]
   
 

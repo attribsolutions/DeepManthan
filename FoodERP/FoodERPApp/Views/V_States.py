@@ -9,10 +9,16 @@ from ..Serializer.S_States import *
 
 from ..models import *
 
-class S_StateView(CreateAPIView):
+class M_StateView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+
+
+class M_StateView(RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request,id=0):
@@ -25,62 +31,21 @@ class S_StateView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []})    
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-         
+        
+class M_DistrictView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def post(self, request, id=0):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                State_data = JSONParser().parse(request)
-                State_serializer = StateSerializer(data=State_data)
-                if State_serializer.is_valid():
-                    State_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Save Successfully', 'Data': []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  State_serializer.errors, 'Data': []})
+                Districts_data = M_Districts.objects.filter(State=id)
+                if Districts_data.exists():
+                    District_serializer =  DistrictsSerializer(Districts_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': District_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Districts Not available', 'Data': []})    
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-            print(e)        
-
-class S_StateViewSecond(RetrieveAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                State_data = M_States.objects.get(id=id)
-                State_serializer = StateSerializer(State_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': State_serializer.data})
-        except M_States.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Record Not available', 'Data': []})
-            
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                State_data = JSONParser().parse(request)
-                StatedataByID = M_States.objects.get(id=id)
-                State_serializer = StateSerializer(StatedataByID, data=State_data)
-                if State_serializer.is_valid():
-                    State_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Updated Successfully', 'Data' : []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': State_serializer.errors, 'Data' : []})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                State_data = M_States.objects.get(id=id)
-                State_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'State Deleted Successfully','Data':[]})
-        except M_States.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'State Not available', 'Data': []})             
+                          
