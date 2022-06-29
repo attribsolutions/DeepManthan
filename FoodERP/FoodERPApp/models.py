@@ -152,9 +152,7 @@ class M_Parties(models.Model):
     companyID =  models.IntegerField()
     CustomerDivision =  models.IntegerField()
     Email = models.EmailField(max_length=200)
-    MobileNo = models.IntegerField(null=False, blank=False, unique=True,
-    validators=[MinValueValidator(12),
-                MaxValueValidator(12)])
+    MobileNo = models.BigIntegerField(null=False, blank=False, unique=True)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.IntegerField()
