@@ -113,12 +113,13 @@ class M_PartiesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Parties_data=M_Parties.objects.raw('''SELECT p.ID,p.Name,p.PartyTypeID,p.DividionTypeID,p.companyID,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State,p.District,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.IsActive,p.MobileNo
-,m_partytype.Name PartyType,m_divisiontype.Name DivisionType,c_companies.Name CompanyName,M_States.Name StateName
+,m_partytype.Name PartyType,m_divisiontype.Name DivisionType,c_companies.Name CompanyName,M_States.Name StateName,m_districts.Name DistrictName
 FROM m_parties p
 left join M_PartyType on m_partytype.id=p.PartyTypeID
 left join M_DivisionType on m_divisiontype.id=p.DividionTypeID
 left join C_Companies on c_companies.ID =p.companyID
-left join M_States on M_states.id=p.state where p.ID = %s''',[id])
+left join M_States on M_states.id=p.state
+left join M_Districts on m_districts.id=p.District where p.ID = %s''',[id])
                
                 M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data[0]})
