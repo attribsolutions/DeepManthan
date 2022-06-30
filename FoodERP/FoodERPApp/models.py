@@ -85,7 +85,7 @@ class M_Pages(models.Model):
     ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=100)
     Description = models.CharField(max_length=100, blank=True)
-    Module = models.ForeignKey(H_Modules, related_name = 'M_PagesModule', on_delete = models.CASCADE)
+    Module = models.ForeignKey(H_Modules, related_name = 'M_PagesModule', on_delete=models.DO_NOTHING)
     isActive = models.BooleanField(default=False)
     DisplayIndex = models.IntegerField()
     Icon = models.CharField(max_length=100)
@@ -218,7 +218,7 @@ class H_PageAccess(models.Model):
 class MC_PagePageAccess(models.Model):
     ID = models.AutoField(primary_key=True)
     PageID = models.ForeignKey(M_Pages,related_name='PagePageAccess', on_delete=models.CASCADE, null=True)
-    AccessID = models.ForeignKey(H_PageAccess ,on_delete=models.CASCADE, null=True)
+    AccessID = models.ForeignKey(H_PageAccess ,on_delete=models.DO_NOTHING, null=True)
 
     class Meta:
         db_table = "MC_PagePageAccess" 
@@ -249,7 +249,7 @@ class M_Items(models.Model):
     BaseunitID = models.IntegerField()
     GSTPercentage = models.DecimalField(max_digits = 5,decimal_places=2)
     MRP = models.DecimalField(max_digits = 5,decimal_places=2)
-    ItemGroup = models.ForeignKey(M_ItemsGroup, on_delete=models.CASCADE)
+    ItemGroup = models.ForeignKey(M_ItemsGroup, on_delete=models.DO_NOTHING)
     Rate =models.DecimalField(max_digits = 5,decimal_places=2)
     isActive = models.BooleanField(default=False)
     CreatedBy = models.IntegerField(default=False)
@@ -276,7 +276,7 @@ class T_Orders(models.Model):
 class TC_OrderItems(models.Model):
     
     OrderID = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
-    ItemID = models.ForeignKey(M_Items, related_name='Items', on_delete=models.CASCADE)
+    ItemID = models.ForeignKey(M_Items, related_name='Items', on_delete=models.DO_NOTHING)
     Quantity  =  models.DecimalField(max_digits = 10,decimal_places=2)
     MRP =  models.DecimalField(max_digits = 10,decimal_places=2)
     Rate =models.DecimalField(max_digits = 10,decimal_places=2)
@@ -324,7 +324,7 @@ class M_States(models.Model):
 
 class M_Districts(models.Model):
     Name = models.CharField(max_length=100)
-    State = models.ForeignKey(M_States, on_delete=models.CASCADE)
+    State = models.ForeignKey(M_States,on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True) 
     
