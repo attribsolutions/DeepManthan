@@ -49,7 +49,7 @@ class MC_RolePageAccessSerilaizer(serializers.ModelSerializer):
 
     class Meta:
         model = MC_RolePageAccess
-        fields = ['RoleAccess','PageAccess']
+        fields = ['PageAccess']
 
 class M_RoleAccessSerializer(serializers.ModelSerializer):
     RolePageAccess=MC_RolePageAccessSerilaizer(many=True)
@@ -61,7 +61,7 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
         RolePageAccess_datas = validated_data.pop('RolePageAccess')
         RoleAccessID = M_RoleAccess.objects.create(**validated_data)
         for RolePageAccess_data in RolePageAccess_datas:
-           TC_OrderItems.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
+           MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
             
         return RoleAccessID    
 
