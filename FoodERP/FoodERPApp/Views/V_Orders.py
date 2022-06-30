@@ -83,6 +83,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName,
                 tc_orderitems.ItemID_id,tc_orderitems.Quantity,tc_orderitems.MRP,tc_orderitems.Rate,
                 tc_orderitems.UnitID,tc_orderitems.BaseUnitQuantity,tc_orderitems.GST,m_items.Name ItemName,tc_orderitems.BasicAmount,tc_orderitems.GSTAmount,tc_orderitems.Amount  
+                ,tc_orderitems.CGST,tc_orderitems.SGST,tc_orderitems.IGST,tc_orderitems.CGSTPercentage,tc_orderitems.SGSTPercentage,tc_orderitems.IGSTPercentage
                 FROM t_orders 
                 join m_parties customer on customer.ID=t_orders.CustomerID 
                 join m_parties party on party.ID=t_orders.PartyID 
@@ -90,7 +91,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 join m_items on m_items.ID=tc_orderitems.ItemID_id 
                 where t_orders.id= %s''', [id])
                 print(str(qs.query))
-                if not qs:
+                if qs:
                     Order_serializer =T_OrderSerializerforGET(qs, many=True).data
                     
                     for a in Order_serializer:
@@ -107,6 +108,12 @@ class T_OrdersViewSecond(CreateAPIView):
                             "GST": a['GST'],
                             "BasicAmount": a['BasicAmount'],
                             "GSTAmount": a['GSTAmount'],
+                            "CGST":a['CGST'],
+                            "SGST":a['SGST'],
+                            "IGST":a['IGST'],
+                            "CGSTPercentage":a['CGSTPercentage'],
+                            "SGSTPercentage":a['SGSTPercentage'],
+                            "IGSTPercentage":a['IGSTPercentage'],
                             "Amount": a['Amount'],
                             
                         })
