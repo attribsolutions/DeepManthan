@@ -72,7 +72,7 @@ class UserListViewSecond(CreateAPIView):
                 
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
-                   
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Usersdata_Serializer})               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
         except Exception as e:
