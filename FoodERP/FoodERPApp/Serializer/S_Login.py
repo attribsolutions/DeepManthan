@@ -1,10 +1,12 @@
+from dataclasses import field
+from pyexpat import model
 from xml.etree.ElementInclude import include
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 
-from  ..models import M_Users, MC_UserRoles
+from  ..models import M_Roles, M_Users, MC_UserRoles
 
 from rest_framework import serializers
 
@@ -13,7 +15,14 @@ from ..models import M_Users
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
 
+class RolesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Roles
+        fields= ['ID','Name']
+
 class UserRolesSerializer(serializers.ModelSerializer):
+    RoleID=RolesSerializer();
+    
     class Meta:
         model = MC_UserRoles
         fields = '__all__'
@@ -77,6 +86,7 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = '__all__'
+        # fields = ['ID','password','LoginName','last_login','email','AdminPassword','isActive','isSendOTP','EmployeeID','CreatedBy','RoleID']
         
         
         

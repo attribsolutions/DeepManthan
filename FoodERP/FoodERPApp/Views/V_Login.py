@@ -67,11 +67,13 @@ class UserListViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
+                UserData=list()
                 Usersdata = M_Users.objects.filter(ID=id)
-                UserRolesdata = MC_UserRoles.objects.filter(UserID=id)
+                
                 if Usersdata.exists():
-                    Usersdata_Serializer = UserListSerializer(Usersdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Usersdata_Serializer.data})               
+                    Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
+                   
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Usersdata_Serializer})               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
