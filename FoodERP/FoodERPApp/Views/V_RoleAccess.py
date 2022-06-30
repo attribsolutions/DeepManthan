@@ -11,25 +11,6 @@ from ..Serializer.S_RoleAccess import *
 from ..models import *
 
 
-class RoleAccessView(CreateAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                RoleAccessdata = JSONParser().parse(request)
-                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata)
-                if RoleAccessSerialize_data.is_valid():
-                    RoleAccessSerialize_data.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully','Data': []})
-                return JsonResponse({'StatusCode': 406, 'Status': True,'Message': RoleAccessSerialize_data.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-
-
 class RoleAccessClass(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -67,4 +48,17 @@ class RoleAccessClass(RetrieveAPIView):
             "Message" : " ",
             "Data": Moduledata,
         }
-        return Response(response)   
+        return Response(response)
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                RoleAccessdata = JSONParser().parse(request)
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata)
+                if RoleAccessSerialize_data.is_valid():
+                    RoleAccessSerialize_data.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully','Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,'Message': RoleAccessSerialize_data.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
