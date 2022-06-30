@@ -276,7 +276,7 @@ class T_Orders(models.Model):
 class TC_OrderItems(models.Model):
     
     OrderID = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
-    ItemID = models.ForeignKey(M_Items, related_name='Items', on_delete=models.DO_NOTHING)
+    ItemID = models.ForeignKey(M_Items, related_name='Items', on_delete=models.CASCADE)
     Quantity  =  models.DecimalField(max_digits = 10,decimal_places=2)
     MRP =  models.DecimalField(max_digits = 10,decimal_places=2)
     Rate =models.DecimalField(max_digits = 10,decimal_places=2)
