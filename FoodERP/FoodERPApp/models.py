@@ -286,6 +286,12 @@ class TC_OrderItems(models.Model):
     BasicAmount =models.DecimalField(max_digits = 20,decimal_places=2)
     GSTAmount =models.DecimalField(max_digits = 10,decimal_places=2)
     Amount =models.DecimalField(max_digits = 20,decimal_places=2)
+    CGST = models.DecimalField(max_digits = 20,decimal_places=2)
+    SGST = models.DecimalField(max_digits = 20,decimal_places=2)
+    IGST = models.DecimalField(max_digits = 20,decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits = 20,decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits = 20,decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits = 20,decimal_places=2)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta :
