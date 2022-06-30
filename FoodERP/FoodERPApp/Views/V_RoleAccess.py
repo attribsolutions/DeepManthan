@@ -5,11 +5,11 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import connection, transaction
-
+from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_RoleAccess import *
+from ..models import *
 
-from ..models import *  
 
 class RoleAccessClass(RetrieveAPIView):
     
@@ -48,4 +48,17 @@ class RoleAccessClass(RetrieveAPIView):
             "Message" : " ",
             "Data": Moduledata,
         }
-        return Response(response)   
+        return Response(response)
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                RoleAccessdata = JSONParser().parse(request)
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata)
+                if RoleAccessSerialize_data.is_valid():
+                    RoleAccessSerialize_data.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully','Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,'Message': RoleAccessSerialize_data.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       

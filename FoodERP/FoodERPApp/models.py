@@ -207,7 +207,7 @@ class M_RoleAccess(models.Model):
     class Meta:
         db_table ="M_RoleAccess"
 
-
+     
 class H_PageAccess(models.Model):
     ID = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=100)
@@ -221,7 +221,13 @@ class MC_PagePageAccess(models.Model):
     AccessID = models.ForeignKey(H_PageAccess ,on_delete=models.CASCADE, null=True)
 
     class Meta:
-        db_table = "MC_PagePageAccess"   
+        db_table = "MC_PagePageAccess" 
+
+class MC_RolePageAccess(models.Model):
+    RoleAccess = models.ForeignKey(M_RoleAccess,related_name='RolePageAccess', on_delete=models.CASCADE)
+    PageAccess = models.ForeignKey(H_PageAccess,on_delete =models.DO_NOTHING)
+    class Meta:
+        db_table = "MC_RolePageAccess"   
 
 class M_ItemsGroup(models.Model):
     ID = models.AutoField(primary_key=True)
