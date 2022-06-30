@@ -341,10 +341,10 @@ class M_Employees(models.Model):
     PAN = models.CharField(max_length=100)
     AadharNo = models.CharField(max_length=100)
     working_hours =  models.DecimalField(max_digits = 15,decimal_places=2)
-    Companies = models.ForeignKey(C_Companies, on_delete=models.CASCADE)
-    EmployeeType = models.ForeignKey(M_EmployeeTypes, on_delete=models.CASCADE)
-    Designation = models.ForeignKey(M_Designations, on_delete=models.CASCADE) 
-    State = models.ForeignKey(M_States, on_delete=models.CASCADE)
+    Companies = models.ForeignKey(C_Companies, on_delete=models.DO_NOTHING)
+    EmployeeType = models.ForeignKey(M_EmployeeTypes, on_delete=models.DO_NOTHING)
+    Designation = models.ForeignKey(M_Designations, on_delete=models.DO_NOTHING) 
+    State = models.ForeignKey(M_States, on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(blank=True, null=True)
     UpdatedBy = models.IntegerField(blank=True, null=True)
@@ -356,14 +356,14 @@ class M_Employees(models.Model):
 
 class T_Invoices(models.Model):
 
-    OrderID = models.ForeignKey(T_Orders, on_delete=models.CASCADE)
+    OrderID = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
     InvoiceDate = models.DateField(auto_now_add=True)
-    CustomerID = models.ForeignKey(M_Parties, related_name='Customer', on_delete=models.CASCADE)
+    CustomerID = models.ForeignKey(M_Parties, related_name='Customer', on_delete =models.DO_NOTHING)
     InvoiceNumber  =  models.IntegerField(blank=True, null=True)
     FullInvoiceNumber =  models.CharField(max_length=500)
     CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal =  models.DecimalField(max_digits = 15,decimal_places=2)
-    PartyID =models.ForeignKey(M_Parties, related_name='Party', on_delete=models.CASCADE)
+    PartyID =models.ForeignKey(M_Parties, related_name='Party', on_delete =models.DO_NOTHING)
     RoundOffAmount = models.DecimalField(max_digits = 5,decimal_places=2)
     CreatedBy  =  models.IntegerField(blank=True, null=True)
     CreatedOn =  models.DateTimeField(auto_now_add=True)
@@ -375,7 +375,7 @@ class T_Invoices(models.Model):
     
 class  TC_InvoiceItems(models.Model):
     InvoiceID = models.ForeignKey(T_Invoices, related_name='InvoiceItems', on_delete=models.CASCADE)
-    ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
+    ItemID = models.ForeignKey(M_Items,on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=2)
     UnitID = models.IntegerField( )
@@ -408,7 +408,7 @@ class  TC_InvoiceItems(models.Model):
 class TC_InvoiceItemBatches(models.Model):
     InvoiceID = models.ForeignKey(T_Invoices, on_delete=models.CASCADE)
     InvoiceItemID = models.ForeignKey(TC_InvoiceItems, related_name='InvoiceItemBatches', on_delete=models.CASCADE)
-    ItemID = models.ForeignKey(M_Items, on_delete=models.CASCADE)
+    ItemID = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=2)
