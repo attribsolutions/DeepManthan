@@ -14,7 +14,7 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST','BasicAmount','GSTAmount','Amount']
+        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
 
 
 class TC_OrderItemsSerializerForGET(serializers.Serializer): 
@@ -64,6 +64,12 @@ class T_OrderSerializerforGET(serializers.Serializer):
     BasicAmount=serializers.DecimalField(max_digits=20,decimal_places=2)
     GSTAmount=serializers.DecimalField(max_digits=20,decimal_places=2)
     Amount=serializers.DecimalField(max_digits=20,decimal_places=2)
+    CGST = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    SGST = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    IGST = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    CGSTPercentage = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    SGSTPercentage = serializers.DecimalField(max_digits = 20,decimal_places=2)
+    IGSTPercentage = serializers.DecimalField(max_digits = 20,decimal_places=2)
 
  
 
