@@ -19,7 +19,7 @@ class M_ItemsView(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT p.ID,p.Name,p.BaseunitID,p.GSTPercentage,p.MRP,RP.ID ItemGroupID,RP.Name ItemGroupName,p.Rate,p.isActive,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+                query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Items p 
 join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
 Order BY RP.Sequence, p.Sequence''')
@@ -40,7 +40,7 @@ Order BY RP.Sequence, p.Sequence''')
                 M_Items_Serializer = M_ItemsSerializer01(data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
                     M_Items_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :M_Items_Serializer.data})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data': []})
@@ -58,9 +58,10 @@ class M_ItemsViewSecond(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT p.ID,p.Name,p.BaseunitID,p.GSTPercentage,p.MRP,RP.ID ItemGroupID,RP.Name ItemGroupName,p.Rate,p.isActive,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+                query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Items p 
-join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
+JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
+WHERE p.id= %s''',[id])
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
@@ -75,7 +76,7 @@ join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
         try:
             with transaction.atomic():
                 M_Itemsdata = JSONParser().parse(request)
-                M_ItemsdataByID = M_Items.objects.get(ID=id)
+                M_ItemsdataByID = M_Items.objects.get(id=id)
                 M_Items_Serializer = M_ItemsSerializer01(
                     M_ItemsdataByID, data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
@@ -91,7 +92,7 @@ join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID where p.id= %s''',[id])
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Itemsdata = M_Items.objects.get(ID=id)
+                M_Itemsdata = M_Items.objects.get(id=id)
                 M_Itemsdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','Data':[]})
         except M_Items.DoesNotExist:

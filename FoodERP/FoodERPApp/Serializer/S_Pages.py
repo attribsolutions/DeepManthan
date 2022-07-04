@@ -6,12 +6,12 @@ from ..models import M_Pages, MC_PagePageAccess
 
 class MC_PagePageAccessSerializer(serializers.Serializer):
    
-    ID = serializers.IntegerField()
+    id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
 
 class M_PagesSerializer(serializers.Serializer):
     
-    ID = serializers.IntegerField()
+    id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
     Description = serializers.CharField(max_length=100)
     ModuleID = serializers.IntegerField(read_only=True)
@@ -32,8 +32,7 @@ class M_PagesSerializer(serializers.Serializer):
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
         model = MC_PagePageAccess
-        fields ="__all__" 
-
+        fields =['Access']
 class M_PagesSerializer1(serializers.ModelSerializer):
     class Meta:
         model = M_Pages
@@ -46,7 +45,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         Pages = M_Pages.objects.create(**validated_data)
         for data in PageAccess_data:
             MC_PagePageAccess.objects.create(
-                PageID=Pages, 
+                Page=Pages, 
                 **data)
         return Pages
 
@@ -79,7 +78,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 Access.delete()
 
             for PagePageAccess_data in validated_data['PagePageAccess']:
-                PageAccess = MC_PagePageAccess.objects.create(PageID=instance, **PagePageAccess_data)
+                PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)
             instance.PagePageAccess.add(PageAccess)
             
             return instance   

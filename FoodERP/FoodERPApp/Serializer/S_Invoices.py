@@ -6,9 +6,9 @@ from rest_framework import serializers
 
 class T_InvoiceSerializerGETList(serializers.Serializer):
     id=serializers.IntegerField()
-    Customer = serializers.IntegerField()
+    Customer_id = serializers.IntegerField()
     CustomerName=serializers.CharField(max_length=500)
-    Party =serializers.IntegerField()
+    Party_id =serializers.IntegerField()
     PartyName=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
     InvoiceNumber  =  serializers.IntegerField()
@@ -21,7 +21,7 @@ class T_InvoiceSerializerGETList(serializers.Serializer):
     UpdatedBy = serializers.IntegerField()
     UpdatedOn = serializers.DateTimeField()
    
-    OrderID_id = serializers.IntegerField()
+    Order_id = serializers.IntegerField()
     
 
 

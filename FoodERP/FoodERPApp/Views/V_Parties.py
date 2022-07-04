@@ -71,18 +71,18 @@ class M_PartiesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                M_Parties_data=M_Parties.objects.raw('''SELECT p.ID,p.Name,p.PartyTypeID,p.DividionTypeID,p.companyID,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State,p.District,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.IsActive
-,p.MobileNo,m_partytype.Name PartyType,m_divisiontype.Name DivisionType,c_companies.Name CompanyName,M_States.Name StateName,m_districts.Name DistrictName
-FROM m_parties p
-left join M_PartyType on m_partytype.id=p.PartyTypeID
-left join M_DivisionType on m_divisiontype.id=p.DividionTypeID
-left join C_Companies on c_companies.ID =p.companyID
-left join M_States on M_states.id=p.state
-left join M_Districts on m_districts.id=p.District''')
+                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
+,M_PartyType.Name PartyTypeName,M_DivisionType.Name DivisionTypeName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+FROM M_Parties p
+left join M_PartyType on M_PartyType.id=p.PartyType_id
+left join M_DivisionType on M_DivisionType.id=p.DivisionType_id
+left join C_Companies on C_Companies.id =p.Company_id
+left join M_States on M_States.id=p.State_id
+left join M_Districts on M_Districts.id=p.District_id''')
                 if not M_Parties_data:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
-                    M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)    
+                    M_Parties_serializer = M_PartiesSerializer1(M_Parties_data, many=True)    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Parties_serializer.data})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -106,23 +106,26 @@ left join M_Districts on m_districts.id=p.District''')
 class M_PartiesViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Parties_data=M_Parties.objects.raw('''SELECT p.ID,p.Name,p.PartyTypeID,p.DividionTypeID,p.companyID,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State,p.District,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.IsActive,p.MobileNo
-,m_partytype.Name PartyType,m_divisiontype.Name DivisionType,c_companies.Name CompanyName,M_States.Name StateName,m_districts.Name DistrictName
-FROM m_parties p
-left join M_PartyType on m_partytype.id=p.PartyTypeID
-left join M_DivisionType on m_divisiontype.id=p.DividionTypeID
-left join C_Companies on c_companies.ID =p.companyID
-left join M_States on M_states.id=p.state
-left join M_Districts on m_districts.id=p.District where p.ID = %s''',[id])
-               
-                M_Parties_serializer = M_Partiesserializer1(M_Parties_data, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data[0]})
+                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
+,M_PartyType.Name PartyTypeName,M_DivisionType.Name DivisionTypeName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+FROM M_Parties p
+left join M_PartyType on M_PartyType.id=p.PartyType_id
+left join M_DivisionType on M_DivisionType.id=p.DivisionType_id
+left join C_Companies on C_Companies.id =p.Company_id
+left join M_States on M_States.id=p.State_id
+left join M_Districts on M_Districts.id=p.District_id
+ WHERE p.id  = %s''',[id])
+                if not M_Parties_data:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
+                else:
+                    M_Parties_serializer = M_PartiesSerializer1(M_Parties_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
@@ -131,7 +134,7 @@ left join M_Districts on m_districts.id=p.District where p.ID = %s''',[id])
         try:
             with transaction.atomic():
                 M_Partiesdata = JSONParser().parse(request)
-                M_PartiesdataByID = M_Parties.objects.get(ID=id)
+                M_PartiesdataByID = M_Parties.objects.get(id=id)
                 M_Parties_Serializer = M_PartiesSerializer(
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
@@ -141,7 +144,7 @@ left join M_Districts on m_districts.id=p.District where p.ID = %s''',[id])
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e),'Data' : []})
 
     @transaction.atomic()
     def delete(self, request, id=0):

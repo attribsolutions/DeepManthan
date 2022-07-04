@@ -24,22 +24,22 @@ class T_OrdersView(CreateAPIView):
             with transaction.atomic():
                 # Orderdata = T_Orders.objects.all()
                 OrderListData=list()
-                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Description,
+                Orderdata = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.Customer_id,t_orders.Party_id,t_orders.OrderAmount,t_orders.Description,
                 t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName 
                 FROM t_orders 
-                join m_parties customer on customer.ID=t_orders.CustomerID 
-                join m_parties party on party.ID=t_orders.PartyID''')
+                join m_parties customer on customer.ID=t_orders.Customer_id 
+                join m_parties party on party.ID=t_orders.Party_id''')
                 # print(str(Orderdata.query))
                 if Orderdata:
                     Order_serializer = T_OrderSerializerforGET1(Orderdata, many=True).data
                     for a in Order_serializer:   
                         OrderListData.append({
                             
-                        "ID": a['id'],
+                        "id": a['id'],
                         "OrderDate": a['OrderDate'],
-                        "CustomerID": a['CustomerID'],
+                        "Customer_id": a['Customer_id'],
                         "CustomerName": a['customerName'],
-                        "PartyID": a['PartyID'],
+                        "Party_id": a['Party_id'],
                         "PartyName": a['partyName'],
                         "OrderAmount": a['OrderAmount'],
                         "Description": a['Description'],
@@ -62,8 +62,8 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully'})
-                return JsonResponse({'StatusCode': 400, 'Status': True,  'Message': Order_serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully' , 'Data':[] })
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors , 'Data':[]})
         except Exception as e:
             raise Exception(e)
 
@@ -79,16 +79,16 @@ class T_OrdersViewSecond(CreateAPIView):
                 OrderListData=list()
                 OrderItemsListData=list()
                 
-                qs = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.CustomerID,t_orders.PartyID,t_orders.OrderAmount,t_orders.Description,
+                qs = T_Orders.objects.raw('''SELECT t_orders.id,t_orders.OrderDate,t_orders.Customer_id ,t_orders.Party_id ,t_orders.OrderAmount,t_orders.Description,
                 t_orders.CreatedBy,t_orders.CreatedOn,customer.name customerName,party.name partyName,
-                tc_orderitems.ItemID_id,tc_orderitems.Quantity,tc_orderitems.MRP,tc_orderitems.Rate,
-                tc_orderitems.UnitID,tc_orderitems.BaseUnitQuantity,tc_orderitems.GST,m_items.Name ItemName,tc_orderitems.BasicAmount,tc_orderitems.GSTAmount,tc_orderitems.Amount  
+                tc_orderitems.Item_id,tc_orderitems.Quantity,tc_orderitems.MRP,tc_orderitems.Rate,
+                tc_orderitems.Unit_id,tc_orderitems.BaseUnitQuantity,tc_orderitems.GST,m_items.Name ItemName,tc_orderitems.BasicAmount,tc_orderitems.GSTAmount,tc_orderitems.Amount  
                 ,tc_orderitems.CGST,tc_orderitems.SGST,tc_orderitems.IGST,tc_orderitems.CGSTPercentage,tc_orderitems.SGSTPercentage,tc_orderitems.IGSTPercentage
                 FROM t_orders 
-                join m_parties customer on customer.ID=t_orders.CustomerID 
-                join m_parties party on party.ID=t_orders.PartyID 
-                join tc_orderitems on tc_orderitems.OrderID_id=t_orders.id
-                join m_items on m_items.ID=tc_orderitems.ItemID_id 
+                join m_parties customer on customer.ID=t_orders.Customer_id 
+                join m_parties party on party.ID=t_orders.Party_id 
+                join tc_orderitems on tc_orderitems.Order_id=t_orders.id
+                join m_items on m_items.ID=tc_orderitems.Item_id 
                 where t_orders.id= %s''', [id])
                 print(str(qs.query))
                 if qs:
@@ -98,12 +98,12 @@ class T_OrdersViewSecond(CreateAPIView):
                             
                         OrderItemsListData.append({
                             
-                            "ItemID" : a['ItemID_id'],
+                            "Item_id" : a['Item_id'],
                             "ItemName" : a['ItemName'],
                             "Quantity": a['Quantity'],
                             "MRP": a['MRP'],
                             "Rate": a['Rate'],
-                            "UnitID": a['UnitID'],
+                            "Unit_id": a['Unit_id'],
                             "BaseUnitQuantity": a['BaseUnitQuantity'],
                             "GST": a['GST'],
                             "BasicAmount": a['BasicAmount'],
@@ -119,11 +119,11 @@ class T_OrdersViewSecond(CreateAPIView):
                         })
 
                     OrderListData.append({   
-                        "ID": a['id'],
+                        "id": a['id'],
                         "OrderDate": a['OrderDate'],
-                        "CustomerID": a['CustomerID'],
+                        "Customer_id": a['Customer_id'],
                         "CustomerName": a['customerName'],
-                        "PartyID": a['PartyID'],
+                        "Party_id": a['Party_id'],
                         "PartyName": a['partyName'],
                         "OrderAmount": a['OrderAmount'],
                         "Description": a['Description'],
@@ -144,7 +144,7 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully'})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully','Data':[]})
         except Exception as e:
             raise Exception(e)
 
@@ -158,10 +158,10 @@ class T_OrdersViewSecond(CreateAPIView):
                 Orderupdate_Serializer = T_OrderSerializer(OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
                     Orderupdate_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully'})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully','Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Orderupdate_Serializer.errors})
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Orderupdate_Serializer.errors ,'Data':[]})
         except Exception as e:
             raise Exception(e)
             print(e)                  
