@@ -50,7 +50,7 @@ class M_ItemsGroupViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                ItemsGroupdata = M_ItemsGroup.objects.get(ID=id)
+                ItemsGroupdata = M_ItemsGroup.objects.get(id=id)
                 ItemsGroup_Serializer = M_ItemsGroupSerializer(ItemsGroupdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsGroup_Serializer.data}) 
         except M_ItemsGroup.DoesNotExist:
@@ -61,7 +61,7 @@ class M_ItemsGroupViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 ItemsGroupdata = JSONParser().parse(request)
-                ItemsGroupdataaByID = M_ItemsGroup.objects.get(ID=id)
+                ItemsGroupdataaByID = M_ItemsGroup.objects.get(id=id)
                
                 ItemsGroup_Serializer = M_ItemsGroupSerializer(ItemsGroupdataaByID, data=ItemsGroupdata)
                 if ItemsGroup_Serializer.is_valid():

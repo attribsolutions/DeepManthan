@@ -10,8 +10,9 @@ from ..Serializer.S_Pages import *
 
 from ..models import M_Pages
 
+
 class M_PagesView(CreateAPIView):
-    
+
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
@@ -19,20 +20,20 @@ class M_PagesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''SELECT p.ID,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
-                    HPagesserialize_data = M_PagesSerializer(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': HPagesserialize_data})   
+                    HPagesserialize_data = M_PagesSerializer(
+                        query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPagesserialize_data})
         except Exception as e:
-            return  JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-               
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -42,10 +43,10 @@ left join M_Pages RP on p.RelatedPageID=RP.id ''')
                 HPagesserialize_data = M_PagesSerializer1(data=HPagesdata)
                 if HPagesserialize_data.is_valid():
                     HPagesserialize_data.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully','Data': []})
-                return JsonResponse({'StatusCode': 406, 'Status': True,'Message': HPagesserialize_data.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': HPagesserialize_data.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class M_PagesViewSecond(RetrieveAPIView):
@@ -57,31 +58,36 @@ class M_PagesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.raw('''SELECT p.ID,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
-left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
+left join M_Pages RP on p.RelatedPageID=RP.id where p.id= %s''', [id])
                 if not HPagesdata:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []})
-                else:    # if HPagesdata.exists():
-                    PageListData=list()
-                    HPagesserialize_data = M_PagesSerializer(HPagesdata, many=True).data
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:    
+                    PageListData = list()
+                    HPagesserialize_data = M_PagesSerializer(
+                        HPagesdata, many=True).data
                     for a in HPagesserialize_data:
                         # bb=MC_PagePageAccess.objects.filter(PageID=id)
-                        bb=MC_PagePageAccess.objects.raw('''SELECT mc_pagepageaccess.AccessID_id ID,h_pageaccess.Name Name FROM mc_pagepageaccess join h_pageaccess on h_pageaccess.ID=mc_pagepageaccess.AccessID_id where mc_pagepageaccess.PageID_id=%s''', [id])
-                        MC_PagePageAccess_data = MC_PagePageAccessSerializer(bb, many=True).data
-                        PageAccessListData=list()
+                        bb = MC_PagePageAccess.objects.raw('''SELECT mc_pagepageaccess.Access_id id,h_pageaccess.Name Name 
+FROM mc_pagepageaccess 
+join h_pageaccess on h_pageaccess.ID=mc_pagepageaccess.Access_id 
+where mc_pagepageaccess.Page_id=%s''', [id])
+                        MC_PagePageAccess_data = MC_PagePageAccessSerializer(
+                            bb, many=True).data
+                        PageAccessListData = list()
                         for b in MC_PagePageAccess_data:
                             PageAccessListData.append({
-                                "AccessID" : b['ID'],
-                                "AccessName" : b['Name']
+                                "AccessID": b['id'],
+                                "AccessName": b['Name']
                             })
-                        
+
                         PageListData.append({
-                            
-                            "ID": a['ID'],
+
+                            "id": a['id'],
                             "Name": a['Name'],
                             "Description": a['Description'],
                             "Module": a['ModuleID'],
@@ -95,40 +101,42 @@ left join M_Pages RP on p.RelatedPageID=RP.id where p.ID= %s''', [id])
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
                             "PagePageAccess": PageAccessListData
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PageListData[0]})
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
         try:
             with transaction.atomic():
                 Pagesdata = JSONParser().parse(request)
-                PagesdataByID = M_Pages.objects.get(ID=id)
-                Pages_Serializer = M_PagesSerializer1(PagesdataByID, data=Pagesdata)
+                PagesdataByID = M_Pages.objects.get(id=id)
+                Pages_Serializer = M_PagesSerializer1(
+                    PagesdataByID, data=Pagesdata)
                 if Pages_Serializer.is_valid():
                     Pages_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Updated Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Pages_Serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Pages_Serializer.errors, 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-                    
+            raise JsonResponse(
+                {'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Modulesdata = M_Pages.objects.get(ID=id)
+                Modulesdata = M_Pages.objects.get(id=id)
                 Modulesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully', 'Data': []})
         except M_Pages.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Page Not available', 'Data': []})  
-        
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Page Not available', 'Data': []})
+
+
 class showPagesListOnPageType(RetrieveAPIView):
-        
+
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
@@ -137,13 +145,15 @@ class showPagesListOnPageType(RetrieveAPIView):
         try:
             with transaction.atomic():
                 HPagesdata = M_Pages.objects.filter(PageType=1)
-                HPagesserialize_data = M_PagesSerializer1(HPagesdata,many=True).data
+                HPagesserialize_data = M_PagesSerializer1(
+                    HPagesdata, many=True).data
                 HPageListData = list()
                 for a1 in HPagesserialize_data:
                     HPageListData.append({
-                    'ID':a1["ID"],
-                    'Name':a1["Name"]
+                        'id': a1["id"],
+                        'Name': a1["Name"]
                     })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':HPageListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPageListData})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
+            raise JsonResponse(
+                {'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

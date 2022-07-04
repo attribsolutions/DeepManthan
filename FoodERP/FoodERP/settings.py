@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fooderpdatabase',
+        'NAME': 'erpdatabase',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
         'HOST': '192.168.1.114',
@@ -118,7 +118,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
