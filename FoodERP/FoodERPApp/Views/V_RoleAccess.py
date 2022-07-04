@@ -19,7 +19,10 @@ class RoleAccessClass(RetrieveAPIView):
     def get(self, request):
 
         modules = M_RoleAccess.objects.raw(
-            'SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex FROM m_roleaccess join h_modules on h_modules.ID=m_roleaccess.id ORDER BY h_modules.DisplayIndex')
+            '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
+FROM m_roleaccess 
+join h_modules on h_modules.id=m_roleaccess.Modules_id
+ORDER BY h_modules.DisplayIndex''')
         data = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
 
         Moduledata = list()
