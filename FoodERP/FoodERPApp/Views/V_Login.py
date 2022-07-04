@@ -68,11 +68,15 @@ class UserListViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 UserData=list()
-                Usersdata = M_Users.objects.filter(ID=id)
+                Usersdata = M_Users.objects.filter(id=id)
                 
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
                     
+                    # UserData.append({ 
+                    #     "LoginName": Usersdata_Serializer['LoginName'],
+
+                    #  })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Usersdata_Serializer})               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
         except Exception as e:
@@ -140,22 +144,21 @@ class UserLoginView(RetrieveAPIView):
 # {
   
 #   "email": "ram@gmail.com",
-#   "LoginName": "LoginName11",
-#   "password": "1234",
-#   "EmployeeID": "2",
+#   "LoginName": "Pradnya",
+#   "password": "123456",
+#   "Employee": "1",
 #   "isActive": "1",
 #   "AdminPassword": "1234",
 #   "isSendOTP": "1",
-#   "RoleID": [
+#   "CreatedBy": 1,
+#   "UpdatedBy": 1,
+#   "UserRole": [
 #     {
-#       "UserID" : 7,
-#       "RoleID": 1,
-#       "RoleName": "Admin"
+#       "Role": 1
 #     },
 #     {
-#       "UserID" : 7,
-#       "RoleID": 2,
-#       "RoleName": "HR"
+      
+#       "Role": 1
 #     }
 #   ]
 # }

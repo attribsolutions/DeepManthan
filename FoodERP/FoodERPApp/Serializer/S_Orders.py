@@ -14,17 +14,17 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['ItemID','Quantity','MRP','Rate','UnitID','BaseUnitQuantity','GST','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
 
 
 class TC_OrderItemsSerializerForGET(serializers.Serializer): 
     
     ItemName = serializers.CharField(max_length=500, read_only=True)
-    ItemID = serializers.IntegerField(read_only=True)
+    Item_id = serializers.IntegerField(read_only=True)
     Quantity  =  serializers.DecimalField(max_digits = 5,decimal_places=2)
     MRP =  serializers.DecimalField(max_digits = 5,decimal_places=2)
     Rate =  serializers.DecimalField(max_digits = 5,decimal_places=2)
-    UnitID = serializers.IntegerField( read_only=True )
+    Unit_id = serializers.IntegerField( read_only=True )
     BaseUnitQuantity = serializers.DecimalField(max_digits = 5,decimal_places=2)
     GST = serializers.DecimalField(max_digits = 5,decimal_places=2) 
 
@@ -32,9 +32,9 @@ class T_OrderSerializerforGET1(serializers.Serializer):
     
     id = serializers.IntegerField()
     OrderDate = serializers.DateField()
-    CustomerID = serializers.IntegerField()
+    Customer_id = serializers.IntegerField()
     customerName=serializers.CharField(max_length=500)
-    PartyID  =  serializers.IntegerField()
+    Party_id  =  serializers.IntegerField()
     partyName = serializers.CharField(max_length=500)
     OrderAmount = serializers.DecimalField(max_digits = 20,decimal_places=2)
     Description = serializers.CharField(max_length=500)
@@ -45,20 +45,20 @@ class T_OrderSerializerforGET1(serializers.Serializer):
 class T_OrderSerializerforGET(serializers.Serializer):
     id = serializers.IntegerField()
     OrderDate = serializers.DateField()
-    CustomerID = serializers.IntegerField()
+    Customer_id = serializers.IntegerField()
     customerName=serializers.CharField(max_length=500)
-    PartyID  =  serializers.IntegerField()
+    Party_id  =  serializers.IntegerField()
     partyName = serializers.CharField(max_length=500)
     OrderAmount = serializers.DecimalField(max_digits = 20,decimal_places=2)
     Description = serializers.CharField(max_length=500)
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     ItemName=serializers.CharField(max_length=500)
-    ItemID_id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
     Quantity=serializers.DecimalField(max_digits=20,decimal_places=2)
     MRP=serializers.DecimalField(max_digits=20,decimal_places=2)
     Rate=serializers.DecimalField(max_digits=20,decimal_places=2)
-    UnitID=serializers.DecimalField(max_digits=20,decimal_places=2)
+    Unit_id=serializers.DecimalField(max_digits=20,decimal_places=2)
     BaseUnitQuantity=serializers.DecimalField(max_digits=20,decimal_places=2)
     GST=serializers.DecimalField(max_digits=20,decimal_places=2) 
     BasicAmount=serializers.DecimalField(max_digits=20,decimal_places=2)
@@ -77,29 +77,34 @@ class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','CustomerID','PartyID','OrderAmount','Description','CreatedBy', 'OrderItem']
+        fields = ['id','OrderDate','Customer','Party','OrderAmount','Description','CreatedBy', 'UpdatedBy','OrderItem']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
         Order = T_Orders.objects.create(**validated_data)
         for OrderItem_data in OrderItems_data:
-           TC_OrderItems.objects.create(OrderID=Order, **OrderItem_data)
+           TC_OrderItems.objects.create(Order=Order, **OrderItem_data)
             
         return Order
 
     def update(self, instance, validated_data):
         
         # * Order Info
-        instance.CustomerID = validated_data.get(
-            'CustomerID', instance.CustomerID)
+        instance.Customer = validated_data.get(
+            'Customer', instance.Customer)
         instance.OrderDate = validated_data.get(
             'OrderDate', instance.OrderDate)    
-        instance.PartyID = validated_data.get(
-            'PartyID', instance.PartyID)
+        instance.Party = validated_data.get(
+            'Party', instance.Party)
         instance.OrderAmount = validated_data.get(
             'OrderAmount', instance.OrderAmount)
-        instance.Discreption = validated_data.get(
-            'Description', instance.Description)    
+        instance.Description = validated_data.get(
+            'Description', instance.Description)
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy) 
+        instance.UpdatedOn = validated_data.get(
+            'UpdatedOn', instance.UpdatedOn)           
+        
         instance.save()
 
         for items in instance.OrderItem.all():
@@ -108,7 +113,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
         
 
         for OrderItem_data in validated_data['OrderItem']:
-            Items = TC_OrderItems.objects.create(OrderID=instance, **OrderItem_data)
+            Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
         instance.OrderItem.add(Items)
  
      

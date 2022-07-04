@@ -10,20 +10,22 @@ from ..models import *
 class M_EmployeesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    authentication__Class = JSONWebTokenAuthentication
     
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Employees.objects.raw('''SELECT m_employees.id,m_employees.Name,m_employees.Address,m_employees.Mobile,m_employees.email,m_employees.DOB,
-m_employees.PAN,m_employees.AadharNo,m_employees.working_hours,m_employees.CreatedBy,m_employees.CreatedOn,
-m_employees.UpdatedBy,m_employees.UpdatedOn,c_companies.Name CompanyName,m_designations.Name DesignationName,
-m_employeetypes.Name EmployeeTypeName,m_states.Name StateName,m_employees.Companies_id,m_employees.Designation_id,m_employees.EmployeeType_id,m_employees.State_id 
-FROM m_employees
-JOIN c_companies ON c_companies.ID=m_employees.Companies_id
-JOIN m_designations ON m_designations.id=m_employees.Designation_id
-JOIN m_employeetypes ON m_employeetypes.id=m_employees.EmployeeType_id
-JOIN m_states ON m_states.id=m_employees.State_id''')
+                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
+M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
+M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,M_Designations.Name DesignationName,
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.Designation_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+FROM M_Employees
+JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
+JOIN M_Designations ON M_Designations.id=M_Employees.Designation_id
+JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
+JOIN M_States ON M_States.id=M_Employees.State_id
+JOIN M_Districts ON M_Districts.id=M_Employees.District_id
+''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Employees Not available','Data': []})
                 else:    
@@ -53,20 +55,21 @@ JOIN m_states ON m_states.id=m_employees.State_id''')
 class M_EmployeesViewSecond(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    authentication__Class = JSONWebTokenAuthentication
 
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Employees.objects.raw('''SELECT m_employees.id,m_employees.Name,m_employees.Address,m_employees.Mobile,m_employees.email,m_employees.DOB,
-m_employees.PAN,m_employees.AadharNo,m_employees.working_hours,m_employees.CreatedBy,m_employees.CreatedOn,
-m_employees.UpdatedBy,m_employees.UpdatedOn,c_companies.Name CompanyName,m_designations.Name DesignationName,
-m_employeetypes.Name EmployeeTypeName,m_states.Name StateName,m_employees.Companies_id,m_employees.Designation_id,m_employees.EmployeeType_id,m_employees.State_id 
-FROM m_employees
-JOIN c_companies ON c_companies.ID=m_employees.Companies_id
-JOIN m_designations ON m_designations.id=m_employees.Designation_id
-JOIN m_employeetypes ON m_employeetypes.id=m_employees.EmployeeType_id
-JOIN m_states ON m_states.id=m_employees.State_id where m_employees.id= %s''',[id])
+                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
+M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
+M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,M_Designations.Name DesignationName,
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.Designation_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+FROM M_Employees
+JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
+JOIN M_Designations ON M_Designations.id=M_Employees.Designation_id
+JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
+JOIN M_States ON M_States.id=M_Employees.State_id
+JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id= %s''',[id])
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Employee Not available', 'Data': []})
                 else:    
