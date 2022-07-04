@@ -53,7 +53,7 @@ class M_RolesViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Rolesdata = M_Roles.objects.get(ID=id)
+                M_Rolesdata = M_Roles.objects.get(id=id)
                 M_Roles_Serializer = M_RolesSerializer(M_Rolesdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Roles_Serializer.data})
         except Exception as e:
@@ -64,7 +64,7 @@ class M_RolesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Rolesdata = JSONParser().parse(request)
-                M_RolesdataByID = M_Roles.objects.get(ID=id)
+                M_RolesdataByID = M_Roles.objects.get(id=id)
                 M_Roles_Serializer = M_RolesSerializer(
                     M_RolesdataByID, data=M_Rolesdata)
                 if M_Roles_Serializer.is_valid():
@@ -80,7 +80,7 @@ class M_RolesViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Rolesdata = M_Roles.objects.get(ID=id)
+                M_Rolesdata = M_Roles.objects.get(id=id)
                 M_Rolesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Roles Deleted Successfully','Data':[]})
         except M_Roles.DoesNotExist:

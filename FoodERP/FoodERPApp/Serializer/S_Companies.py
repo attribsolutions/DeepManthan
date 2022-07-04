@@ -9,21 +9,46 @@ from ..models import *
 class C_CompanyGroupsSerializer(serializers.ModelSerializer):
     class Meta :
         model= C_CompanyGroups
-        fields = ['ID','Name']
-
-class C_CompanySerializer2(serializers.ModelSerializer):
-    CompanyGroup = C_CompanyGroupsSerializer()
+        fields = ['id','Name']
+        
+        
+        
     
-    class Meta:
-        model = C_Companies
-        fields = '__all__'
 
-class C_CompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = C_Companies
-        fields = '__all__'
-
+# Get ALL Method
 class C_CompanySerializer1(serializers.ModelSerializer):
+ 
+    CompanyGroup= serializers.SlugRelatedField(read_only=True,slug_field='Name')
     class Meta:
         model = C_Companies
-        fields = ['ID','Name']
+        fields = '__all__'
+       
+        
+# POST AND PUT Method
+class C_CompanySerializer2(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = '__all__'
+
+# GET Method
+
+class C_CompanySerializer3(serializers.Serializer):
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=100)
+    Address = serializers.CharField(max_length=100)
+    GSTIN = serializers.CharField(max_length=100)
+    PhoneNo = serializers.CharField(max_length=100)
+    CompanyAbbreviation = serializers.CharField(max_length=100)
+    EmailID = serializers.CharField(max_length=100)
+    CompanyGroup_id = serializers.IntegerField()
+    CompanyGroupName = serializers.CharField(max_length=100)
+    CreatedBy = serializers.IntegerField()
+    UpdatedBy = serializers.IntegerField()
+
+    
+    
+    
+          
+
+
+  

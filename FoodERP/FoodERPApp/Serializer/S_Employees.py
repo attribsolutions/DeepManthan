@@ -26,10 +26,12 @@ class M_EmployeesSerializer02(serializers.Serializer):
     DesignationName = serializers.CharField(max_length=100)
     EmployeeTypeName = serializers.CharField(max_length=100)
     StateName = serializers.CharField(max_length=100)
-    Companies_id = serializers.IntegerField()
+    DistrictName = serializers.CharField(max_length=100)
+    Company_id = serializers.IntegerField()
     Designation_id = serializers.IntegerField()
     EmployeeType_id = serializers.IntegerField()
     State_id = serializers.IntegerField()
+    District_id =serializers.IntegerField()
 
 
    
