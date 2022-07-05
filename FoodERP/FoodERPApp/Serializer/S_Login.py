@@ -34,24 +34,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         for Role_data in Roles_data:
             MC_UserRoles.objects.create(User=user, **Role_data)
         return user
-
-
-
-class UserRegistrationSerializer1(serializers.ModelSerializer):
-    class Meta:
-        model = M_Users
-        fields = '__all__'
-        # fields = ['LoginName','AdminPassword','isActive','Employee']
-        
-        # extra_kwargs = {'password': {'write_only': True}}
     
     def update(self, instance, validated_data):
         
         # * User Info
         instance.LoginName = validated_data.get(
             'LoginName', instance.LoginName)
-        # instance.password = validated_data.get(
-        #     'AdminPassword', instance.password)
+       
         instance.isActive = validated_data.get(
             'isActive', instance.isActive)
         instance.isSendOTP = validated_data.get(
@@ -64,17 +53,24 @@ class UserRegistrationSerializer1(serializers.ModelSerializer):
         instance.save()
 
         for items in instance.UserRole.all():
-          items.delete()
-
-        
+            items.delete()
 
         for RoleID_data in validated_data['UserRole']:
             Items = MC_UserRoles.objects.create(User=instance, **RoleID_data)
-        instance.RoleID.add(Items)
- 
-     
-
+        instance.UserRole.add(Items)
         return instance  
+
+
+
+class UserRegistrationSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = M_Users
+        fields = '__all__'
+        # fields = ['LoginName','AdminPassword','isActive','Employee']
+        
+        # extra_kwargs = {'password': {'write_only': True}}
+    
+    
 
 
 class UserLoginSerializer(serializers.Serializer):
