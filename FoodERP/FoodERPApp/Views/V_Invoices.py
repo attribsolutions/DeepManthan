@@ -68,7 +68,7 @@ class T_InvoicesViewSecond(CreateAPIView):
                 Invoiceupdate_Serializer = T_InvoiceSerializer(InvoiceupdateByID, data=Invoiceupdatedata)
                 if Invoiceupdate_Serializer.is_valid():
                     Invoiceupdate_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':Invoiceupdate_Serializer.data})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':[]})
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors ,'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})               
