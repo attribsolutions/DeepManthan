@@ -146,7 +146,7 @@ class UserListViewSecond(CreateAPIView):
             with transaction.atomic():
                 Usersdata = JSONParser().parse(request)
                 UsersdataByID = M_Users.objects.get(id=id)
-                Usersdata_Serializer = UserRegistrationSerializer1(UsersdataByID, data=Usersdata)
+                Usersdata_Serializer = UserRegistrationSerializer(UsersdataByID, data=Usersdata)
                 if Usersdata_Serializer.is_valid():
                     Usersdata_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Updated Successfully', 'Data':[]})
