@@ -68,7 +68,6 @@ class UserListView(CreateAPIView):
                                 'LoginName': a["LoginName"],
                                 'password': a["password"],
                                 'last_login': a["last_login"],
-                                'email': a["email"],
                                 'isActive': a["isActive"],
                                 'isSendOTP': a["isSendOTP"],
                                 'AdminPassword': a["AdminPassword"],
@@ -115,7 +114,6 @@ class UserListViewSecond(CreateAPIView):
                         'LoginName': a["LoginName"],
                         'password': a["password"],
                         'last_login': a["last_login"],
-                        'email': a["email"],
                         'isActive': a["isActive"],
                         'isSendOTP': a["isSendOTP"],
                         'AdminPassword': a["AdminPassword"],
@@ -127,7 +125,7 @@ class UserListViewSecond(CreateAPIView):
                         'UserRole': RoleData,
 
                     })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': UserData})               
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': UserData[0]})               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -136,7 +134,7 @@ class UserListViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Usersdata = M_Users.objects.get(ID=id)
+                Usersdata = M_Users.objects.get(id=id)
                 Usersdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully', 'Data':[]})
         except Exception as e:
@@ -147,8 +145,8 @@ class UserListViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 Usersdata = JSONParser().parse(request)
-                UsersdataByID = M_Users.objects.get(ID=id)
-                Usersdata_Serializer = UserRegistrationSerializer(UsersdataByID, data=Usersdata)
+                UsersdataByID = M_Users.objects.get(id=id)
+                Usersdata_Serializer = UserRegistrationSerializer1(UsersdataByID, data=Usersdata)
                 if Usersdata_Serializer.is_valid():
                     Usersdata_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Updated Successfully', 'Data':[]})

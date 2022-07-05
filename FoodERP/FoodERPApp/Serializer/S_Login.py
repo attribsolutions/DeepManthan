@@ -50,12 +50,17 @@ class UserRegistrationSerializer1(serializers.ModelSerializer):
         # * Order Info
         instance.LoginName = validated_data.get(
             'LoginName', instance.LoginName)
-        instance.AdminPassword = validated_data.get(
-            'AdminPassword', instance.AdminPassword)
+        instance.password = validated_data.get(
+            'AdminPassword', instance.password)
         instance.isActive = validated_data.get(
             'isActive', instance.isActive)
+        instance.isSendOTP = validated_data.get(
+            'isSendOTP', instance.isSendOTP)
         instance.Employee = validated_data.get(
-            'Employee', instance.Employee)    
+            'Employee', instance.Employee)
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy) 
+                   
         instance.save()
 
         for items in instance.UserRole.all():
@@ -64,7 +69,7 @@ class UserRegistrationSerializer1(serializers.ModelSerializer):
         
 
         for RoleID_data in validated_data['UserRole']:
-            Items = MC_UserRoles.objects.create(UserID=instance, **RoleID_data)
+            Items = MC_UserRoles.objects.create(User=instance, **RoleID_data)
         instance.RoleID.add(Items)
  
      
@@ -85,7 +90,7 @@ class UserLoginSerializer(serializers.Serializer):
 
         if user is None:
             raise serializers.ValidationError(
-                'A user with this email and password is not found.'
+                'A user with this LoginName and password is not found.'
             )
         try:
             payload = JWT_PAYLOAD_HANDLER(user)
@@ -94,7 +99,7 @@ class UserLoginSerializer(serializers.Serializer):
             update_last_login(None, user)
         except M_Users.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'User with given LoginName and password does not exists'
             )
         return {
             'LoginName': user.LoginName,
