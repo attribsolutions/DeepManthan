@@ -41,17 +41,17 @@ class UserRegistrationSerializer1(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = '__all__'
-        fields = ['LoginName','AdminPassword','isActive','Employee']
+        # fields = ['LoginName','AdminPassword','isActive','Employee']
         
-        extra_kwargs = {'password': {'write_only': True}}
+        # extra_kwargs = {'password': {'write_only': True}}
     
     def update(self, instance, validated_data):
         
-        # * Order Info
+        # * User Info
         instance.LoginName = validated_data.get(
             'LoginName', instance.LoginName)
-        instance.password = validated_data.get(
-            'AdminPassword', instance.password)
+        # instance.password = validated_data.get(
+        #     'AdminPassword', instance.password)
         instance.isActive = validated_data.get(
             'isActive', instance.isActive)
         instance.isSendOTP = validated_data.get(
