@@ -37,7 +37,7 @@ class GetPartyTypeByDivisionTypeID(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_PartyType_data = M_PartyType.objects.filter(DivisionTypeID=id)
+                M_PartyType_data = M_PartyType.objects.filter(DivisionType=id)
                 if M_PartyType_data.exists():
                     M_PartyType_serializer = M_PartyTypeSerializer(M_PartyType_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
