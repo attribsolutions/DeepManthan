@@ -108,7 +108,7 @@ class RolesSerializer(serializers.ModelSerializer):
         fields= ['id','Name']
 
 class UserRolesSerializer(serializers.ModelSerializer):
-    Role=RolesSerializer();
+    Role=RolesSerializer()
     # Role= serializers.SlugRelatedField(read_only=True, slug_field='Name' )
     
     class Meta:
