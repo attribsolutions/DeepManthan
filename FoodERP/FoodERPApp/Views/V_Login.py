@@ -50,13 +50,40 @@ class UserListView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
+                PageListData=list()
                 Usersdata = M_Users.objects.all()
                 if Usersdata.exists():
-                    Usersdata_Serializer = UserListSerializer(Usersdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data':  Usersdata_Serializer.data })
+                        Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
+                        UserData=list()
+                        for a in Usersdata_Serializer:
+                            RoleData=list()
+                            for b in a["UserRole"]:
+                                    RoleData.append({
+                                        'Role': b['Role']['id'],
+                                        'Name': b['Role']['Name'],
+                                        
+                                    })
+                            UserData.append({ 
+                                'id': a["id"],
+                                'LoginName': a["LoginName"],
+                                'password': a["password"],
+                                'last_login': a["last_login"],
+                                'isActive': a["isActive"],
+                                'isSendOTP': a["isSendOTP"],
+                                'AdminPassword': a["AdminPassword"],
+                                'CreatedBy': a["CreatedBy"],
+                                'CreatedOn': a["CreatedOn"],
+                                'UpdatedBy': a["UpdatedBy"],
+                                'UpdatedOn': a["UpdatedOn"],
+                                'Employee': a["Employee"],
+                                'UserRole': RoleData,
+
+                            })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': UserData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data':[] })                      
         except Exception as e:
             raise Exception(e)
+        print(e)
 
 class UserListViewSecond(CreateAPIView):
     
@@ -67,17 +94,38 @@ class UserListViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                UserData=list()
+              
+                
                 Usersdata = M_Users.objects.filter(id=id)
                 
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
-                    
-                    # UserData.append({ 
-                    #     "LoginName": Usersdata_Serializer['LoginName'],
+                    UserData=list()
+                    for a in Usersdata_Serializer:
+                       RoleData=list()
+                       for b in a["UserRole"]:
+                            RoleData.append({
+                                'Role': b['Role']['id'],
+                                'Name': b['Role']['Name'],
+                                
+                            })
+                    UserData.append({ 
+                        'id': a["id"],
+                        'LoginName': a["LoginName"],
+                        'password': a["password"],
+                        'last_login': a["last_login"],
+                        'isActive': a["isActive"],
+                        'isSendOTP': a["isSendOTP"],
+                        'AdminPassword': a["AdminPassword"],
+                        'CreatedBy': a["CreatedBy"],
+                        'CreatedOn': a["CreatedOn"],
+                        'UpdatedBy': a["UpdatedBy"],
+                        'UpdatedOn': a["UpdatedOn"],
+                        'Employee': a["Employee"],
+                        'UserRole': RoleData,
 
-                    #  })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Usersdata_Serializer})               
+                    })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': UserData[0]})               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
         except Exception as e:
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -86,7 +134,7 @@ class UserListViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Usersdata = M_Users.objects.get(ID=id)
+                Usersdata = M_Users.objects.get(id=id)
                 Usersdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully', 'Data':[]})
         except Exception as e:
@@ -97,8 +145,8 @@ class UserListViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 Usersdata = JSONParser().parse(request)
-                UsersdataByID = M_Users.objects.get(ID=id)
-                Usersdata_Serializer = UserRegistrationSerializer(UsersdataByID, data=Usersdata)
+                UsersdataByID = M_Users.objects.get(id=id)
+                Usersdata_Serializer = UserRegistrationSerializer1(UsersdataByID, data=Usersdata)
                 if Usersdata_Serializer.is_valid():
                     Usersdata_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Updated Successfully', 'Data':[]})
