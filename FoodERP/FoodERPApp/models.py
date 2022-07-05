@@ -397,7 +397,7 @@ class M_Items(models.Model):
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemUnitsItemID', on_delete=models.DO_NOTHING)
     UnitID = models.ForeignKey(M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
-    BaseUnitQuantity=models.DecimalField(max_digits = 5,decimal_places=2)
+    BaseUnitQuantity=models.DecimalField(max_digits = 5,decimal_places=3)
     IsBase = models.IntegerField()
     IsDefault= models.IntegerField()
     IsSSUnit=models.IntegerField()
@@ -505,7 +505,7 @@ class TC_InvoiceItemBatches(models.Model):
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     Quantity  =  models.DecimalField(max_digits = 5,decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceBatchUnitID', on_delete=models.CASCADE)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceBatchUnitID', on_delete=models.DO_NOTHING)
     MRP = models.DecimalField(max_digits = 15,decimal_places=2)
     CreatedOn =  models.DateTimeField(auto_now_add=True)
 
