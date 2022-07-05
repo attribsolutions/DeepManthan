@@ -20,48 +20,47 @@ class T_InvoiceSerializerGETList(serializers.Serializer):
     CreatedOn =  serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField()
     UpdatedOn = serializers.DateTimeField()
-   
     Order_id = serializers.IntegerField()
+    
     
 
 
 class TC_InvoiceItemBatchesSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = TC_InvoiceItemBatches
-        fields = ['id','ItemID','BatchDate','BatchCode','Quantity','UnitID','MRP','CreatedOn']
+        fields = ['Item','BatchDate','BatchCode','Quantity','Unit','MRP','CreatedOn']
         
 class TC_InvoiceItemsSerializer(serializers.ModelSerializer):
     InvoiceItemBatches = TC_InvoiceItemBatchesSerializer(many=True) 
     class Meta:
         model = TC_InvoiceItems
-        fields = ['id','ItemID','HSNCode','Quantity','UnitID','BaseUnitQuantity','QtyInKg','QtyInNo','QtyInBox','MRP','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','InvoiceItemBatches']   
+        fields = ['Item','HSNCode','Quantity','Unit','BaseUnitQuantity','QtyInKg','QtyInNo','QtyInBox','MRP','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','InvoiceItemBatches']   
         
 class T_InvoiceSerializer(serializers.ModelSerializer):
     InvoiceItems = TC_InvoiceItemsSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','OrderID','InvoiceDate','CustomerID','InvoiceNumber','FullInvoiceNumber','CustomerGSTTin','GrandTotal','PartyID','RoundOffAmount','CreatedBy','CreatedOn','InvoiceItems']
+        fields = ['Order','InvoiceDate','Customer','InvoiceNumber','FullInvoiceNumber','CustomerGSTTin','GrandTotal','Party','RoundOffAmount','CreatedBy','UpdatedBy','InvoiceItems']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
-        Invoice = T_Invoices.objects.create(**validated_data)
+        InvoiceID = T_Invoices.objects.create(**validated_data)
         for InvoiceItem_data in InvoiceItems_data:
             InvoiceItemBatches_data = InvoiceItem_data.pop('InvoiceItemBatches')
-            InvoiceItemID =TC_InvoiceItems.objects.create(InvoiceID=Invoice, **InvoiceItem_data)
+            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
             for InvoiceItemBatch_data in InvoiceItemBatches_data:
-               TC_InvoiceItemBatches.objects.create(InvoiceID=Invoice,InvoiceItemID=InvoiceItemID, **InvoiceItemBatch_data)
+               TC_InvoiceItemBatches.objects.create(Invoice=InvoiceID,InvoiceItem=InvoiceItemID, **InvoiceItemBatch_data)
         
-        return Invoice       
+        return InvoiceID       
     
     def update(self, instance, validated_data):
         
-        instance.OrderID = validated_data.get(
-            'OrderID', instance.OrderID)
-        instance.CustomerID = validated_data.get(
-            'CustomerID', instance.CustomerID)
-        instance.PartyID = validated_data.get(
-            'PartyID', instance.PartyID)
+        instance.Order = validated_data.get(
+            'Order', instance.Order)
+        instance.Customer = validated_data.get(
+            'Customer', instance.Customer)
+        instance.Party = validated_data.get(
+            'Party', instance.Party)
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
         instance.RoundOffAmount = validated_data.get(
@@ -73,7 +72,11 @@ class T_InvoiceSerializer(serializers.ModelSerializer):
         
         for InvoiceItem_data in validated_data['InvoiceItems']:
             InvoiceItemBatches_data = InvoiceItem_data.pop('InvoiceItemBatches')
-            TC_InvoiceItemsID = TC_InvoiceItems.objects.create(InvoiceID=instance, **InvoiceItem_data)
+            TC_InvoiceItemsID = TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
             for InvoiceItemBatch_data in InvoiceItemBatches_data:
-               TC_InvoiceItemBatches.objects.create(InvoiceID=instance,InvoiceItemID=TC_InvoiceItemsID, **InvoiceItemBatch_data)
+               TC_InvoiceItemBatches.objects.create(Invoice=instance,InvoiceItem=TC_InvoiceItemsID, **InvoiceItemBatch_data)
         return instance 
+
+
+
+    

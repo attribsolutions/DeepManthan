@@ -40,8 +40,8 @@ join m_parties B ON B.ID=t_invoices.Party_id
                 Invoice_serializer = T_InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully'})
-                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': Invoice_serializer.errors})
+                    return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -54,21 +54,10 @@ class T_InvoicesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = T_Invoices.objects.get(id=id)
-                Invoice_serializer = T_InvoiceSerializer(
-                    Invoicedata, many=True)
+                Invoice_serializer = T_InvoiceSerializer(Invoicedata)
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer.data})
         except Exception as e:
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})  
-
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Invoice_Data = T_Invoices.objects.get(id=id)
-                Invoice_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Message': 'Invoice Deleted Successfully'})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -80,8 +69,16 @@ class T_InvoicesViewSecond(CreateAPIView):
                 if Invoiceupdate_Serializer.is_valid():
                     Invoiceupdate_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':Invoiceupdate_Serializer.data})
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors ,'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})               
         
-
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoice_Data = T_Invoices.objects.get(id=id)
+                Invoice_Data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Message': 'Invoice Deleted Successfully', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data': []})
