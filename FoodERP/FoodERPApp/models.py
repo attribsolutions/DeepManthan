@@ -217,6 +217,8 @@ class M_Users(AbstractBaseUser):
         M_Employees, related_name='UserEmployee', on_delete=models.DO_NOTHING)
     isActive = models.BooleanField(default=False)
     isSendOTP = models.BooleanField(default=False)
+    isLoginUsingMobile = models.BooleanField(default=False)
+    isLoginUsingEmail = models.BooleanField(default=False)
     AdminPassword = models.CharField(max_length=100)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
