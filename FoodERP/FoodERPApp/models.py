@@ -108,6 +108,7 @@ class M_Parties(models.Model):
     Taluka = models.IntegerField()
     City = models.IntegerField()
     GSTIN = models.CharField(max_length=500)
+    PAN = models.CharField(max_length=500)
     FSSAINo = models.CharField(max_length=500)
     FSSAIExipry = models.DateField(blank=True)
     isActive = models.IntegerField()
