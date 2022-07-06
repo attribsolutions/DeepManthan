@@ -511,3 +511,10 @@ class TC_InvoiceItemBatches(models.Model):
 
     class Meta :
         db_table ="TC_InvoiceItemBatches"
+        
+class Abc(models.Model):
+    Name = models.CharField(max_length=100)
+    CreatedOn = models.DateTimeField(auto_now=True) 
+    
+    class Meta :
+        db_table ="Abc"        
