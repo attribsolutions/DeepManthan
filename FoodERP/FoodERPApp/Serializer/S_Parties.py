@@ -40,6 +40,7 @@ class M_PartiesSerializer1(serializers.Serializer):
     Taluka = serializers.IntegerField ()
     City = serializers.IntegerField()
     GSTIN =  serializers.CharField(max_length=500)
+    PAN =  serializers.CharField(max_length=500)
     FSSAINo = serializers.CharField(max_length=500)
     FSSAIExipry = serializers.DateField()
     isActive =  serializers.IntegerField()
