@@ -55,7 +55,8 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
     RolePageAccess=MC_RolePageAccessSerilaizer(many=True)
     class Meta:
         model = M_RoleAccess
-        fields = ['Role','Company','Division','Modules','Pages','RolePageAccess']
+        fields = ['Role','Company','Division','Modules','Pages','RolePageAccess','CreatedBy','UpdatedBy']
+        
            
     def create(self, validated_data):
         RolePageAccess_datas = validated_data.pop('RolePageAccess')
