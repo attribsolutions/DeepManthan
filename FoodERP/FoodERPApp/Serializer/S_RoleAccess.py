@@ -50,6 +50,29 @@ class MC_RolePageAccessSerilaizer(serializers.ModelSerializer):
     class Meta:
         model = MC_RolePageAccess
         fields = ['PageAccess']
+        
+        
+        
+class M_PagesSerializerforRoleAccessNEW(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+    Description = serializers.CharField(max_length=500)
+    ActualPagePath = serializers.CharField(max_length=500)
+    DisplayIndex = serializers.IntegerField()
+    Icon =  serializers.CharField(max_length=500)
+    isActive =  serializers.IntegerField()
+    isShowOnMenu = serializers.IntegerField()
+    Module_id =  serializers.IntegerField()
+    PageType = serializers.IntegerField()
+    RelatedPageID =  serializers.IntegerField()
+    Pages_id = serializers.IntegerField()
+    
+    
+class MC_RolePageAccessSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)    
+  
 
 class M_RoleAccessSerializer(serializers.ModelSerializer):
     RolePageAccess=MC_RolePageAccessSerilaizer(many=True)
