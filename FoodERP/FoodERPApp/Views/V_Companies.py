@@ -176,4 +176,4 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
         except C_CompanyGroups.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'ID used in another tbale', 'Data': []})  
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group used in another table', 'Data': []})  
