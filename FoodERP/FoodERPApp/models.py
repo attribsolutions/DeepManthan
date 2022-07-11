@@ -98,7 +98,7 @@ class M_Parties(models.Model):
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
     CustomerDivision = models.IntegerField()
     Email = models.EmailField(max_length=200)
-    MobileNo = models.BigIntegerField(null=False, blank=False, unique=True)
+    MobileNo = models.BigIntegerField(null=False, blank=False)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.ForeignKey(
