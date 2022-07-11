@@ -11,7 +11,7 @@ from ..Serializer.S_RoleAccess import *
 from ..models import *
 
 
-class RoleAccessClass(RetrieveAPIView):
+class RoleAccessView(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
@@ -22,30 +22,44 @@ class RoleAccessClass(RetrieveAPIView):
             '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
 FROM m_roleaccess 
 join h_modules on h_modules.id=m_roleaccess.Modules_id
+where Role_id =1
 ORDER BY h_modules.DisplayIndex''')
         data = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
-
         Moduledata = list()
-
         for a in data:
+            id=a['id']
+            query=M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.Description,m_pages.ActualPagePath,m_pages.DisplayIndex,
+m_pages.Icon,m_pages.isActive,m_pages.isShowOnMenu,m_pages.Module_id,
+m_pages.PageType,m_pages.RelatedPageID, 
+Pages_id FROM erpdatabase.m_roleaccess
+JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
+WHERE Role_id=1 AND  Modules_id=%s ''',[id])
 
-            people1 = M_RoleAccess.objects.filter(
-                Role=1).filter(Modules=a['id']).values("Pages")
-            Pages = M_Pages.objects.filter(isActive=1).filter(id__in=people1)
-            Pagesfields = ('id', 'Name', 'DisplayIndex', 'Icon',
-                           'ActualPagePath', 'isShowOnMenu')
-            PageSerializer = M_PagesSerializerforRoleAccess(
-                Pages,  many=True, fields=Pagesfields).data
+           
+            PageSerializer = M_PagesSerializerforRoleAccessNEW(query,  many=True).data
             Pagesdata = list()
             for a1 in PageSerializer:
+                id=a1['id']
+                RolePageAccess=MC_RolePageAccess.objects.raw(''' SELECT mc_rolepageaccess.PageAccess_id id,Name  FROM mc_rolepageaccess 
+                JOIN h_pageaccess ON h_pageaccess.id=mc_rolepageaccess.PageAccess_id  WHERE mc_rolepageaccess.RoleAccess_id=%s ''',[id])
+                RolePageAccessSerializer = MC_RolePageAccessSerializer(RolePageAccess,  many=True).data
+                Pagesdata.append( {
+                    "id": a1['id'],
+                    "Name": a1['Name'],
+                    "DisplayIndex": a1['DisplayIndex'],
+                    "Icon": a1['Icon'],
+                    "ActualPagePath": a1['ActualPagePath'],
+                    "isShowOnMenu": a1['isShowOnMenu'], 
+                    "RolePageAccess" :RolePageAccessSerializer
+             })
 
-                Pagesdata.append(a1)
+
 
             response1 = {
                 "ModuleID": a['id'],
                 "ModuleName": a['Name'],
                 "ModuleData": Pagesdata,
-                # "query":str(Pages.query)
+               
             }
             Moduledata.append(response1)
 
@@ -71,4 +85,36 @@ ORDER BY h_modules.DisplayIndex''')
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-   
+
+class RoleAccessViewSecond(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                M_Partiesdata = JSONParser().parse(request)
+                M_PartiesdataByID = M_Parties.objects.get(id=id)
+                M_Parties_Serializer = M_RoleAccessSerializer(
+                    M_PartiesdataByID, data=M_Partiesdata)
+                if M_Parties_Serializer.is_valid():
+                    M_Parties_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','Data' : []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e),'Data' : []})
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                M_Partiesdata = M_Parties.objects.get(ID=id)
+                M_Partiesdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully', 'Data':[]})
+        except M_Parties.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Not available', 'Data': []})    
+               
