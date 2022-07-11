@@ -44,7 +44,7 @@ WHERE Role_id=1 AND  Modules_id=%s ''',[id])
                 JOIN h_pageaccess ON h_pageaccess.id=mc_rolepageaccess.PageAccess_id  WHERE mc_rolepageaccess.RoleAccess_id=%s ''',[id])
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(RolePageAccess,  many=True).data
                 Pagesdata.append( {
-                    "id": a1['id'],
+                    "id": a1['Pages_id'],
                     "Name": a1['Name'],
                     "DisplayIndex": a1['DisplayIndex'],
                     "Icon": a1['Icon'],
