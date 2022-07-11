@@ -76,6 +76,7 @@ urlpatterns = [
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'PartyTypes$', M_PartyTypeView.as_view()),
     url(r'demo$', AbcView.as_view()),
+   
       
 ]
   
