@@ -105,4 +105,4 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
         except M_Employees.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Employee used in another table', 'Data': []})
