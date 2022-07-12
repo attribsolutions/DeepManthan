@@ -77,7 +77,7 @@ WHERE Role_id=1 AND  Modules_id=%s ''',[id])
             with transaction.atomic():
                 RoleAccessdata = JSONParser().parse(request)
                 RoleAccessSerialize_data = M_RoleAccessSerializer(
-                    data=RoleAccessdata)
+                    data=RoleAccessdata,many=True)
                 if RoleAccessSerialize_data.is_valid():
                     RoleAccessSerialize_data.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
@@ -90,24 +90,7 @@ class RoleAccessViewSecond(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                RoleAccessdata = JSONParser().parse(request)
-                RoleAccessByID = M_RoleAccess.objects.get(id=id)
-                RoleAccess_Serializer = M_RoleAccessSerializer(
-                    RoleAccessByID, data=RoleAccessdata)
-                if RoleAccess_Serializer.is_valid():
-                    RoleAccess_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Updated Successfully','Data' : []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccess_Serializer.errors,'Data' : []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e),'Data' : []})
-
+    
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
