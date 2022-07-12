@@ -4,8 +4,14 @@ from rest_framework import serializers
 
 from ..models import *
 
-class AbcSerializer(serializers.ModelSerializer):
+class MC_RolePageAccessSerializer(serializers.ModelSerializer):
     class Meta :
-        model= Abc
-        fields = ['id','Name']
+        model= MC_RolePageAccess
+        fields = '__all__'
+
+class AbcSerializer(serializers.ModelSerializer):
+    RoleAccess=MC_RolePageAccessSerializer(many=True)
+    class Meta :
+        model= M_RoleAccess
+        fields = '__all__'
         
