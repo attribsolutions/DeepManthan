@@ -95,16 +95,16 @@ class RoleAccessViewSecond(CreateAPIView):
     def put(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Partiesdata = JSONParser().parse(request)
-                M_PartiesdataByID = M_Parties.objects.get(id=id)
-                M_Parties_Serializer = M_RoleAccessSerializer(
-                    M_PartiesdataByID, data=M_Partiesdata)
-                if M_Parties_Serializer.is_valid():
-                    M_Parties_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','Data' : []})
+                RoleAccessdata = JSONParser().parse(request)
+                RoleAccessByID = M_RoleAccess.objects.get(id=id)
+                RoleAccess_Serializer = M_RoleAccessSerializer(
+                    RoleAccessByID, data=RoleAccessdata)
+                if RoleAccess_Serializer.is_valid():
+                    RoleAccess_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccess_Serializer.errors,'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e),'Data' : []})
 
@@ -112,9 +112,9 @@ class RoleAccessViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Partiesdata = M_Parties.objects.get(ID=id)
-                M_Partiesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully', 'Data':[]})
-        except M_Parties.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Not available', 'Data': []})    
+                RoleAccessdata = M_RoleAccess.objects.get(id=id)
+                RoleAccessdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess  Deleted Successfully', 'Data':[]})
+        except M_RoleAccess.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'RoleAccess Not available', 'Data': []})    
                
