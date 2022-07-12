@@ -80,20 +80,8 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
         model = M_RoleAccess
         fields = ['Role','Company','Division','Modules','Pages','RolePageAccess','CreatedBy','UpdatedBy']
         
-           
+        
     def create(self, validated_data):
-        RolePageAccess_datas = validated_data.pop('RolePageAccess')
-        RoleAccessID = M_RoleAccess.objects.create(**validated_data)
-        for RolePageAccess_data in RolePageAccess_datas:
-           MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
-            
-        return RoleAccessID
-    
-    def update(self, instance, validated_data):
-        
-        for items in instance.RolePageAccess.all():
-          items.delete()
-        instance.delete()
         
         RolePageAccess_datas = validated_data.pop('RolePageAccess')
         RoleAccessID = M_RoleAccess.objects.create(**validated_data)
@@ -101,10 +89,12 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
            MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
             
         return RoleAccessID
- 
-     
+        
 
-        return instance     
+        
+        
+        
+   
 
 
    

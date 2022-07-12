@@ -19,11 +19,11 @@ class AbcView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Abcdata = Abc.objects.all()
+                Abcdata = M_RoleAccess.objects.all()
                 if Abcdata.exists():
                     Abc_Serializer = AbcSerializer(Abcdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Abc_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Company Groups Not available', 'Data': []})        
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Data Not available', 'Data': []})        
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
             
