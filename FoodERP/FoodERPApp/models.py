@@ -111,7 +111,7 @@ class M_Parties(models.Model):
     PAN = models.CharField(max_length=500)
     FSSAINo = models.CharField(max_length=500)
     FSSAIExipry = models.DateField(blank=True)
-    isActive = models.IntegerField()
+    isActive =  models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
