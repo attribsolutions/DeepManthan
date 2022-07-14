@@ -43,7 +43,7 @@ class M_PartiesSerializer1(serializers.Serializer):
     PAN =  serializers.CharField(max_length=500)
     FSSAINo = serializers.CharField(max_length=500)
     FSSAIExipry = serializers.DateField()
-    isActive =  serializers.IntegerField()
+    isActive =  serializers.BooleanField()
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
