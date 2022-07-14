@@ -74,13 +74,14 @@ class MC_RolePageAccessSerializer(serializers.Serializer):
     Name = serializers.CharField(max_length=500)    
   
 
+    
 class M_RoleAccessSerializer(serializers.ModelSerializer):
     RolePageAccess=MC_RolePageAccessSerilaizer(many=True)
+    
     class Meta:
         model = M_RoleAccess
         fields = ['Role','Company','Division','Modules','Pages','RolePageAccess','CreatedBy','UpdatedBy']
-        
-        
+         
     def create(self, validated_data):
         
         RolePageAccess_datas = validated_data.pop('RolePageAccess')
@@ -89,7 +90,7 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
            MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
             
         return RoleAccessID
-        
+     
 
         
         

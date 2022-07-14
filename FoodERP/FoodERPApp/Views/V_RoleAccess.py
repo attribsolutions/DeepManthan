@@ -16,6 +16,8 @@ class RoleAccessView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
+    # Role Access GET Method 
+
     def get(self, request):
 
         modules = M_RoleAccess.objects.raw(
@@ -71,16 +73,20 @@ WHERE Role_id=1 AND  Modules_id=%s ''',[id])
         }
         return Response(response)
 
+    # Role Access POST Method first delete record on role,company,division and then Insert data
+    
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
                 RoleAccessdata = JSONParser().parse(request)
-                RoleAccessSerialize_data = M_RoleAccessSerializer(
-                    data=RoleAccessdata,many=True)
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata,many=True)
                 if RoleAccessSerialize_data.is_valid():
+                    # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
+                    RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
+                    RoleAccessdata.delete()
                     RoleAccessSerialize_data.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
