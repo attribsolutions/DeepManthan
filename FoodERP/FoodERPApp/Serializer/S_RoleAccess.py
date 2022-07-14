@@ -50,20 +50,52 @@ class MC_RolePageAccessSerilaizer(serializers.ModelSerializer):
     class Meta:
         model = MC_RolePageAccess
         fields = ['PageAccess']
+        
+        
+        
+class M_PagesSerializerforRoleAccessNEW(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+    Description = serializers.CharField(max_length=500)
+    ActualPagePath = serializers.CharField(max_length=500)
+    DisplayIndex = serializers.IntegerField()
+    Icon =  serializers.CharField(max_length=500)
+    isActive =  serializers.IntegerField()
+    isShowOnMenu = serializers.IntegerField()
+    Module_id =  serializers.IntegerField()
+    PageType = serializers.IntegerField()
+    RelatedPageID =  serializers.IntegerField()
+    Pages_id = serializers.IntegerField()
+    
+    
+class MC_RolePageAccessSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)    
+  
 
+    
 class M_RoleAccessSerializer(serializers.ModelSerializer):
     RolePageAccess=MC_RolePageAccessSerilaizer(many=True)
+    
     class Meta:
         model = M_RoleAccess
-        fields = ['Role','Company','Division','Modules','Pages','RolePageAccess']
-           
+        fields = ['Role','Company','Division','Modules','Pages','RolePageAccess','CreatedBy','UpdatedBy']
+         
     def create(self, validated_data):
+        
         RolePageAccess_datas = validated_data.pop('RolePageAccess')
         RoleAccessID = M_RoleAccess.objects.create(**validated_data)
         for RolePageAccess_data in RolePageAccess_datas:
            MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
             
-        return RoleAccessID    
+        return RoleAccessID
+     
+
+        
+        
+        
+   
 
 
    

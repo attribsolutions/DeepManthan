@@ -71,7 +71,7 @@ class M_PartiesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
+                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.PAN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
 ,M_PartyType.Name PartyTypeName,M_DivisionType.Name DivisionTypeName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Parties p
 left join M_PartyType on M_PartyType.id=p.PartyType_id
@@ -112,7 +112,7 @@ class M_PartiesViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
+                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.CustomerDivision,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.PAN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
 ,M_PartyType.Name PartyTypeName,M_DivisionType.Name DivisionTypeName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Parties p
 left join M_PartyType on M_PartyType.id=p.PartyType_id
@@ -125,7 +125,7 @@ left join M_Districts on M_Districts.id=p.District_id
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializer1(M_Parties_data, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer.data[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 

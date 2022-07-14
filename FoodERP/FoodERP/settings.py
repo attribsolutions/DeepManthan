@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
+    'activity_log',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'activity_log.middleware.ActivityLogMiddleware',
 ]
 
 ROOT_URLCONF = 'FoodERP.urls'
@@ -73,6 +75,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
+# For writing log to another DB
+
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 
 # Database
@@ -86,10 +92,35 @@ DATABASES = {
         'PASSWORD': 'P@ssw0rd',
         'HOST': '192.168.1.114',
         'PORT': '3306'
+    },
+    'logs': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'erpdatabase_logs',
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',
+        'HOST': '192.168.1.114',
+        'PORT': '3306'
     }
 }
 
+ACTIVITYLOG_AUTOCREATE_DB = False
+# Log anonymous actions?
+ACTIVITYLOG_ANONYMOUS = True
+# Update last activity datetime in user profile. Needs updates for user model.
+ACTIVITYLOG_LAST_ACTIVITY = True
 
+# Only this methods will be logged
+ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
+
+# List of response statuses, which logged. By default - all logged.
+# Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
+ACTIVITYLOG_STATUSES = (200, )
+
+# List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
+# ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
+
+# URL substrings, which ignores
+ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 

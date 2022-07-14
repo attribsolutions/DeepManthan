@@ -40,6 +40,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # * User Info
         instance.LoginName = validated_data.get(
             'LoginName', instance.LoginName)
+
+        # instance.password = validated_data.get(
+        #     'password', instance.set_password(instance.password))
+            
+        instance.AdminPassword = validated_data.get(
+            'password', instance.password)     
        
         instance.isActive = validated_data.get(
             'isActive', instance.isActive)
@@ -49,7 +55,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'Employee', instance.Employee)
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy) 
-                   
+        
+        instance.set_password('1234567')           
         instance.save()
 
         for items in instance.UserRole.all():

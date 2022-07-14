@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Pages import *
@@ -133,7 +133,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' Page Deleted Successfully', 'Data': []})
         except M_Pages.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Page Not available', 'Data': []})
-
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Page used in another table', 'Data': []})
 
 class showPagesListOnPageType(RetrieveAPIView):
 

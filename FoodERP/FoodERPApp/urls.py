@@ -43,7 +43,8 @@ urlpatterns = [
     url(r'UserList$', UserListView.as_view()),
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
-    url(r'RoleAccess$', RoleAccessClass.as_view()),
+    url(r'RoleAccess/([0-9]+)$', RoleAccessViewSecond.as_view()),
+    url(r'RoleAccess$', RoleAccessView.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
     url(r'PagesMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
@@ -76,6 +77,7 @@ urlpatterns = [
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'PartyTypes$', M_PartyTypeView.as_view()),
     url(r'demo$', AbcView.as_view()),
+   
       
 ]
   
