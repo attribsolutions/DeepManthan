@@ -17,15 +17,60 @@ class RoleAccessView(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     # Role Access GET Method 
+    
+    def get(self,request,id=0):
+        try:
+            with transaction.atomic():
+                query= M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_Roles.Name RoleName,M_DivisionType.Name DivisionName,C_Companies.Name CompanyName
+FROM M_RoleAccess
+join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
+join M_DivisionType  ON M_DivisionType.id=M_RoleAccess.Division_id
+join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id group by Role_id,Company_id,Division_id''')
+                if not query:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data':[]})
+                else:
+                    M_Items_Serializer = M_RoleAccessSerializerGETList(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})
+                    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+    
+    
 
-    def get(self, request):
+    # Role Access POST Method first delete record on role,company,division and then Insert data
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                RoleAccessdata = JSONParser().parse(request)
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata,many=True)
+                if RoleAccessSerialize_data.is_valid():
+                    # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
+                    RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
+                    RoleAccessdata.delete()
+                    RoleAccessSerialize_data.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+
+class RoleAccessViewSecond(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    
+    def get(self, request,id=0):
+    
         modules = M_RoleAccess.objects.raw(
             '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
 FROM m_roleaccess 
 join h_modules on h_modules.id=m_roleaccess.Modules_id
-where Role_id =1
-ORDER BY h_modules.DisplayIndex''')
+where Role_id =%s AND M_RoleAccess.Company_id=1 AND M_RoleAccess.Division_id=1 
+ORDER BY h_modules.DisplayIndex''',[id])
         data = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
         Moduledata = list()
         for a in data:
@@ -72,30 +117,6 @@ WHERE Role_id=1 AND  Modules_id=%s ''',[id])
             "Data": Moduledata,
         }
         return Response(response)
-
-    # Role Access POST Method first delete record on role,company,division and then Insert data
-    
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                RoleAccessdata = JSONParser().parse(request)
-                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata,many=True)
-                if RoleAccessSerialize_data.is_valid():
-                    # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
-                    RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
-                    RoleAccessdata.delete()
-                    RoleAccessSerialize_data.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
-class RoleAccessViewSecond(CreateAPIView):
-    
-    permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -106,4 +127,8 @@ class RoleAccessViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess  Deleted Successfully', 'Data':[]})
         except M_RoleAccess.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'RoleAccess Not available', 'Data': []})    
-               
+
+        
+    
+
+                              
