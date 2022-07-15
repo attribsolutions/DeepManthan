@@ -46,11 +46,11 @@ class C_CompanyGroups(models.Model):
 class C_Companies(models.Model):
 
     Name = models.CharField(max_length=100)
-    Address = models.CharField(max_length=100)
+    Address = models.CharField(max_length=100,null=True,blank=True)
     GSTIN = models.CharField(max_length=100)
-    PhoneNo = models.CharField(max_length=100)
+    PhoneNo = models.CharField(max_length=100 ,null=True,blank=True)
     CompanyAbbreviation = models.CharField(max_length=100)
-    EmailID = models.CharField(max_length=100)
+    EmailID = models.CharField(max_length=100,null=True,blank=True)
     CompanyGroup = models.ForeignKey(
         C_CompanyGroups, related_name='CompanyGroup', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
@@ -98,7 +98,8 @@ class M_Parties(models.Model):
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
     CustomerDivision = models.IntegerField()
     Email = models.EmailField(max_length=200)
-    MobileNo = models.BigIntegerField(null=False, blank=False)
+    MobileNo = models.BigIntegerField()
+    AlternateContactNo =models.CharField(max_length=500)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.ForeignKey(

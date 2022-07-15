@@ -32,6 +32,7 @@ class M_PartiesSerializer1(serializers.Serializer):
     Email = serializers.EmailField(max_length=200)
     Address = serializers.CharField(max_length=500)
     MobileNo=serializers.IntegerField()
+    AlternateContactNo=serializers.CharField(max_length=500)
     PIN = serializers.CharField(max_length=500)
     State_id = serializers.IntegerField()
     StateName = serializers.CharField(max_length=500)
