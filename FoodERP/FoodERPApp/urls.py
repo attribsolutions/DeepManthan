@@ -44,7 +44,7 @@ urlpatterns = [
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
     url(r'RoleAccess$', RoleAccessView.as_view()),
-    url(r'RoleAccessSecond/([0-9]+)$', RoleAccessViewSecond.as_view()),
+    url(r'RoleAccessSecond/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessViewSecond.as_view()),
     url(r'RoleAccessList$', RoleAccessViewList.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
