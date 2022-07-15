@@ -63,14 +63,14 @@ class RoleAccessViewSecond(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
     
     
-    def get(self, request):
+    def get(self, request,id=0):
     
         modules = M_RoleAccess.objects.raw(
             '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
 FROM m_roleaccess 
 join h_modules on h_modules.id=m_roleaccess.Modules_id
-where Role_id =1 AND M_RoleAccess.Company_id=1 AND M_RoleAccess.Division_id=1 
-ORDER BY h_modules.DisplayIndex''')
+where Role_id =%s AND M_RoleAccess.Company_id=1 AND M_RoleAccess.Division_id=1 
+ORDER BY h_modules.DisplayIndex''',[id])
         data = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
         Moduledata = list()
         for a in data:
