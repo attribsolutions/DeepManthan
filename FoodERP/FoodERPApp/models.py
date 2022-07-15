@@ -46,11 +46,11 @@ class C_CompanyGroups(models.Model):
 class C_Companies(models.Model):
 
     Name = models.CharField(max_length=100)
-    Address = models.CharField(max_length=100,null=True)
+    Address = models.CharField(max_length=100,null=True,blank=True)
     GSTIN = models.CharField(max_length=100)
-    PhoneNo = models.CharField(max_length=100 ,null=True)
+    PhoneNo = models.CharField(max_length=100 ,null=True,blank=True)
     CompanyAbbreviation = models.CharField(max_length=100)
-    EmailID = models.CharField(max_length=100,null=True)
+    EmailID = models.CharField(max_length=100,null=True,blank=True)
     CompanyGroup = models.ForeignKey(
         C_CompanyGroups, related_name='CompanyGroup', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
