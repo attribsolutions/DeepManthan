@@ -209,6 +209,6 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 "ModuleName": a['ModuleName'],
                 "ModuleData": PageListData,}
                         
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':[PageListData] })
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
