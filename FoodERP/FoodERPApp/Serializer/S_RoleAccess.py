@@ -62,7 +62,7 @@ class M_PagesSerializerforRoleAccessNEW(serializers.Serializer):
     DisplayIndex = serializers.IntegerField()
     Icon =  serializers.CharField(max_length=500)
     isActive =  serializers.IntegerField()
-    isShowOnMenu = serializers.IntegerField()
+    isShowOnMenu = serializers.BooleanField(default=False)
     Module_id =  serializers.IntegerField()
     PageType = serializers.IntegerField()
     RelatedPageID =  serializers.IntegerField()
