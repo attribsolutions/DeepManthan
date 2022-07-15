@@ -93,7 +93,11 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
      
 
         
-        
+class M_RoleAccessSerializerGETList(serializers.Serializer):
+    id = serializers.IntegerField()
+    RoleName = serializers.CharField(max_length=500)
+    DivisionName = serializers.CharField(max_length=500) 
+    CompanyName = serializers.CharField(max_length=500)     
         
    
 
