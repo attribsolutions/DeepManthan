@@ -93,7 +93,7 @@ DATABASES = {
         'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    # },
+    # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'erpdatabase_logs',
