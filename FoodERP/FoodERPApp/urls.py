@@ -39,6 +39,7 @@ from .Views.V_abc import *
 urlpatterns = [
     url(r'Registration', UserRegistrationView.as_view()),
     url(r'Login', UserLoginView.as_view()),
+    url(r'ChangePassword', ChangePasswordView.as_view()),
     url(r'UserList/([0-9]+)$', UserListViewSecond.as_view()),
     url(r'UserList$', UserListView.as_view()),
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
