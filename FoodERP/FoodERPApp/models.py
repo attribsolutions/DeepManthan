@@ -517,8 +517,9 @@ class TC_InvoiceItemBatches(models.Model):
         db_table ="TC_InvoiceItemBatches"
         
 class Abc(models.Model):
-    Name = models.CharField(max_length=100)
-    CreatedOn = models.DateTimeField(auto_now=True) 
+    phone_number =models.CharField(max_length=12,unique=True) 
+    otp=models.CharField(max_length=6,default=False)
     
     class Meta :
-        db_table ="Abc"        
+        db_table ="Abc"   
+                  
