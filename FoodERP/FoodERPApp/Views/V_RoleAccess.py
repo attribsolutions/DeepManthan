@@ -115,7 +115,7 @@ class RoleAccessViewList(RetrieveAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-class RoleAccessViewNEWUpdated(RetrieveAPIView):
+class RoleAccessViewNewUpdated(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
