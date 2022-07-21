@@ -99,6 +99,25 @@ class M_RoleAccessSerializerGETList(serializers.Serializer):
     DivisionName = serializers.CharField(max_length=500) 
     CompanyName = serializers.CharField(max_length=500)     
         
+
+class M_RoleAccessSerializerNewUpdated(serializers.Serializer):
+    id = serializers.IntegerField()
+    moduleid = serializers.IntegerField()
+    ModuleName = serializers.CharField(max_length=500)
+    pageid = serializers.IntegerField() 
+    PageName = serializers.CharField(max_length=500)
+
+class MC_RolePageAccessSerializerNewUpdated(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+
+class M_PageAccessSerializerNewUpdated(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+   
+   
    
 
 
