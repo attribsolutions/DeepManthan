@@ -259,9 +259,10 @@ class H_Modules(models.Model):
 
 
 class M_Pages(models.Model):
-
+    PageHeading=models.CharField(max_length=500,blank=True)
     Name = models.CharField(max_length=100)
-    Description = models.CharField(max_length=100, blank=True)
+    PageDescription = models.CharField(max_length=500, blank=True)
+    PageDescriptionDetails = models.CharField(max_length=500, blank=True)
     Module = models.ForeignKey(
         H_Modules, related_name='PagesModule', on_delete=models.DO_NOTHING)
     isActive = models.BooleanField(default=False)

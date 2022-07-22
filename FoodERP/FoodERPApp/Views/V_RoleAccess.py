@@ -28,7 +28,7 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
         Moduledata = list()
         for a in data:
             id = a['id']
-            query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.Description,m_pages.ActualPagePath,m_pages.DisplayIndex,
+            query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageDescription,m_pages.ActualPagePath,m_pages.DisplayIndex,
 m_pages.Icon,m_pages.isActive,m_pages.isShowOnMenu,m_pages.Module_id,
 m_pages.PageType,m_pages.RelatedPageID, 
 Pages_id FROM erpdatabase.m_roleaccess
@@ -168,4 +168,41 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
         }
         return Response(response)
 
-   
+class RoleAccessGetPagesOnModule(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    def get(self, request, moduleid=0):
+        try:
+            with transaction.atomic():
+                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE Module_id=%s''',[moduleid])
+                if not query:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
+                else:
+                    PageSerializer = M_PageSerializerNewUpdated(
+                        query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+class RoleAccessGetPagesAccessOnPage(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    def get(self, request, moduleid=0):
+        try:
+            with transaction.atomic():
+                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE Module_id=%s''',[moduleid])
+                if not query:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
+                else:
+                    PageSerializer = M_PageSerializerNewUpdated(
+                        query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+       
