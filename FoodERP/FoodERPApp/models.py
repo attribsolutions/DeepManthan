@@ -345,10 +345,8 @@ class H_PageAccess(models.Model):
 # M_Pages child table
 class MC_PagePageAccess(models.Model):
 
-    Page = models.ForeignKey(
-        M_Pages, related_name='PagePageAccess', on_delete=models.CASCADE)
-    Access = models.ForeignKey(
-        H_PageAccess, on_delete=models.DO_NOTHING, null=True)
+    Page = models.ForeignKey(M_Pages, related_name='PagePageAccess', on_delete=models.CASCADE)
+    Access = models.ForeignKey(H_PageAccess, on_delete=models.DO_NOTHING)
 
     class Meta:
         db_table = "MC_PagePageAccess"
