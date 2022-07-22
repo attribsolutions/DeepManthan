@@ -1,5 +1,6 @@
 from datetime import datetime
 from pickle import TRUE
+from typing import Sequence
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -336,6 +337,7 @@ class H_PageAccess(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
+    Sequence = models.IntegerField()
 
     class Meta:
         db_table = 'H_PageAccess'
