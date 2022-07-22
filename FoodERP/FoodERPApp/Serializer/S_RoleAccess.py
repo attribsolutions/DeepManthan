@@ -121,7 +121,19 @@ class M_PageAccessSerializerNewUpdated(serializers.Serializer):
    
 class M_PageSerializerNewUpdated(serializers.Serializer):
     id=serializers.IntegerField()
-    Name = serializers.CharField(max_length=500)     
+    Name = serializers.CharField(max_length=500)
+    
+    
+class M_PageSerializerAddPage(serializers.Serializer):
+    moduleid = serializers.IntegerField()
+    ModuleName = serializers.CharField(max_length=500)
+    id = serializers.IntegerField() 
+    PageName = serializers.CharField(max_length=500)
+    
+class M_PageAccessSerializerAddPage(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)             
    
 
 
