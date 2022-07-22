@@ -171,6 +171,53 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
         }
         return Response(response)
 
+class RoleAccessViewAddPage(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    def get(self, request, pageid=0):
+        roleaccessquery = M_Pages.objects.raw('''SELECT h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id id, m_pages.name PageName FROM m_pages JOIN h_modules ON h_modules.id=m_pages.Module_id WHERE m_pages.id=%s''',[pageid])
+        # return JsonResponse({'query':  str(roleaccessquery.query)})
+        RoleAccessdata = M_PageSerializerAddPage(roleaccessquery, many=True).data
+        # return JsonResponse({'data':  RoleAccessdata})
+        Moduledata = list()
+        for a in RoleAccessdata:
+            pageaccessquery =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_pagepageaccess.Access_id,0) id from h_pageaccess left JOIN mc_pagepageaccess ON mc_pagepageaccess.Access_id=h_pageaccess.id AND mc_pagepageaccess.Page_id=%s ''', [pageid])
+            # return JsonResponse({'query':  str(pageaccessquery.query)})
+            PageAccessSerializer = M_PageAccessSerializerAddPage(pageaccessquery,many=True).data
+            Moduledata.append({
+                "ModuleID": a['moduleid'],
+                "ModuleName": a['ModuleName'],
+                "PageID": a['id'],
+                "PageName": a['PageName'],
+                "RoleAccess_IsSave": 0,
+                "RoleAccess_IsEdit": 0,
+                "RoleAccess_IsDelete": 0,
+                "RoleAccess_IsEditSelf": 0,
+                "RoleAccess_IsDeleteSelf": 0,
+                "RoleAccess_IsShow": 0,
+                "RoleAccess_IsView": 0,
+                "RoleAccess_IsTopOfTheDivision": 0,
+                "PageAccess_IsSave": PageAccessSerializer[0]['id'],
+                "PageAccess_IsEdit": PageAccessSerializer[1]['id'],
+                "PageAccess_IsDelete": PageAccessSerializer[2]['id'],
+                "PageAccess_IsEditSelf": PageAccessSerializer[3]['id'],
+                "PageAccess_IsDeleteSelf": PageAccessSerializer[4]['id'],
+                "PageAccess_IsShow": PageAccessSerializer[5]['id'],
+                "PageAccess_IsView": PageAccessSerializer[6]['id'],
+                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[7]['id']
+
+            })
+
+        response = {
+            "StatusCode": 200,
+            "Status": True,
+            "Message": " ",
+            "Data": Moduledata,
+        }
+        return Response(response)    
+
 class RoleAccessGetPagesOnModule(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)

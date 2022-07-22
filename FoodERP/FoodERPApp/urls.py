@@ -81,6 +81,7 @@ urlpatterns = [
     url(r'demo$', AbcView.as_view()),
     url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
+    url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     
    
       
