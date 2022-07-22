@@ -13,7 +13,9 @@ class M_PagesSerializer(serializers.Serializer):
     
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
-    Description = serializers.CharField(max_length=100)
+    PageHeading=serializers.CharField(max_length=500)
+    PageDescription = serializers.CharField(max_length=500)
+    PageDescriptionDetails = serializers.CharField(max_length=500)
     ModuleID = serializers.IntegerField(read_only=True)
     ModuleName=serializers.CharField(max_length=100)
     isActive = serializers.BooleanField(default=False)

@@ -20,7 +20,7 @@ class M_PagesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
@@ -58,7 +58,7 @@ class M_PagesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
@@ -89,7 +89,9 @@ where mc_pagepageaccess.Page_id=%s''', [id])
 
                             "id": a['id'],
                             "Name": a['Name'],
-                            "Description": a['Description'],
+                            "PageHeading": a['PageHeading'],
+                            "PageDescription": a['PageDescription'],
+                            "PageDescriptionDetails": a['PageDescriptionDetails'],
                             "Module": a['ModuleID'],
                             "ModuleName": a['ModuleName'],
                             "isActive": a['isActive'],
@@ -168,7 +170,7 @@ class PagesMasterForRoleAccessView(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 

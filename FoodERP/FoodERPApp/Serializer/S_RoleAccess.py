@@ -57,7 +57,7 @@ class M_PagesSerializerforRoleAccessNEW(serializers.Serializer):
     
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
-    Description = serializers.CharField(max_length=500)
+    PageDescription = serializers.CharField(max_length=500)
     ActualPagePath = serializers.CharField(max_length=500)
     DisplayIndex = serializers.IntegerField()
     Icon =  serializers.CharField(max_length=500)
@@ -117,7 +117,9 @@ class M_PageAccessSerializerNewUpdated(serializers.Serializer):
     id=serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
    
-   
+class M_PageSerializerNewUpdated(serializers.Serializer):
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)     
    
 
 
