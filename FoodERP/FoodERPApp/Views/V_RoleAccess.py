@@ -28,7 +28,7 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
         Moduledata = list()
         for a in data:
             id = a['id']
-            query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageDescription,m_pages.ActualPagePath,m_pages.DisplayIndex,
+            query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageHeading,m_pages.PageDescription,m_pages.PageDescriptionDetails,m_pages.ActualPagePath,m_pages.DisplayIndex,
 m_pages.Icon,m_pages.isActive,m_pages.isShowOnMenu,m_pages.Module_id,
 m_pages.PageType,m_pages.RelatedPageID, 
 Pages_id FROM erpdatabase.m_roleaccess
@@ -47,6 +47,9 @@ WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
                 Pagesdata.append({
                     "id": a1['Pages_id'],
                     "Name": a1['Name'],
+                    "PageHeading": a1['PageHeading'],
+                    "PageDescription": a1['PageDescription'],
+                    "PageDescriptionDetails": a1['PageDescriptionDetails'],
                     "DisplayIndex": a1['DisplayIndex'],
                     "Icon": a1['Icon'],
                     "ActualPagePath": a1['ActualPagePath'],
