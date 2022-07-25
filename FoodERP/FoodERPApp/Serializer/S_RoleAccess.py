@@ -56,6 +56,7 @@ class MC_RolePageAccessSerilaizer(serializers.ModelSerializer):
 class M_PagesSerializerforRoleAccessNEW(serializers.Serializer):
     
     id = serializers.IntegerField()
+    RelatedPageID=serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
     PageHeading=serializers.CharField(max_length=500)
     PageDescription = serializers.CharField(max_length=500)

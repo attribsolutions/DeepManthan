@@ -30,8 +30,7 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
             id = a['id']
             query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageHeading,m_pages.PageDescription,m_pages.PageDescriptionDetails,m_pages.ActualPagePath,m_pages.DisplayIndex,
 m_pages.Icon,m_pages.isActive,m_pages.isShowOnMenu,m_pages.Module_id,
-m_pages.PageType,m_pages.RelatedPageID, 
-Pages_id FROM erpdatabase.m_roleaccess
+m_pages.PageType,m_pages.RelatedPageID,Pages_id FROM erpdatabase.m_roleaccess
 JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
 WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
 
@@ -46,6 +45,7 @@ WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
                     RolePageAccess,  many=True).data
                 Pagesdata.append({
                     "id": a1['Pages_id'],
+                    "RelatedPageID": a1['RelatedPageID'],
                     "Name": a1['Name'],
                     "PageHeading": a1['PageHeading'],
                     "PageDescription": a1['PageDescription'],
