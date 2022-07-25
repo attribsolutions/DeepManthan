@@ -77,8 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
-# DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-# DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 
 # Database
