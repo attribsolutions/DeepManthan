@@ -20,7 +20,7 @@ class M_PagesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
@@ -58,7 +58,7 @@ class M_PagesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.Description,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
 m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
@@ -89,7 +89,9 @@ where mc_pagepageaccess.Page_id=%s''', [id])
 
                             "id": a['id'],
                             "Name": a['Name'],
-                            "Description": a['Description'],
+                            "PageHeading": a['PageHeading'],
+                            "PageDescription": a['PageDescription'],
+                            "PageDescriptionDetails": a['PageDescriptionDetails'],
                             "Module": a['ModuleID'],
                             "ModuleName": a['ModuleName'],
                             "isActive": a['isActive'],
@@ -158,3 +160,57 @@ class showPagesListOnPageType(RetrieveAPIView):
         except Exception as e:
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class PagesMasterForRoleAccessView(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
+m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
+Rp.Name RelatedPageName 
+FROM M_Pages p 
+join H_Modules m on p.Module_id= m.ID
+left join M_Pages RP on p.RelatedPageID=RP.id where p.id= %s''', [id])
+                if not HPagesdata:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:    
+                    PageListData = list()
+                    HPagesserialize_data = M_PagesSerializer(
+                        HPagesdata, many=True).data
+                    for a in HPagesserialize_data:
+                        # bb=MC_PagePageAccess.objects.filter(PageID=id)
+                        bb = MC_PagePageAccess.objects.raw('''SELECT mc_pagepageaccess.Access_id id,h_pageaccess.Name Name 
+FROM mc_pagepageaccess 
+join h_pageaccess on h_pageaccess.ID=mc_pagepageaccess.Access_id 
+where mc_pagepageaccess.Page_id=%s''', [id])
+                        MC_PagePageAccess_data = MC_PagePageAccessSerializer(
+                            bb, many=True).data
+                        PageAccessListData = list()
+                        for b in MC_PagePageAccess_data:
+                            PageAccessListData.append({
+                                "id": b['id'],
+                                "Name": b['Name']
+                            })
+
+                        PageListData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "DisplayIndex": a['DisplayIndex'],
+                            "Icon": a['Icon'],
+                            "ActualPagePath": a['ActualPagePath'],
+                            "isShowOnMenu": a['isShowOnMenu'],
+                            "RolePageAccess": PageAccessListData
+                        })
+                    PageListData = {
+                "ModuleID": a['ModuleID'],
+                "ModuleName": a['ModuleName'],
+                "ModuleData": PageListData,}
+                        
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':[PageListData] })
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

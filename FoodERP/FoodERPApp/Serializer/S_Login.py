@@ -37,26 +37,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         
-        # * User Info
-        instance.LoginName = validated_data.get(
-            'LoginName', instance.LoginName)
-
-        # instance.password = validated_data.get(
-        #     'password', instance.set_password(instance.password))
-            
-        instance.AdminPassword = validated_data.get(
-            'password', instance.password)     
-       
-        instance.isActive = validated_data.get(
-            'isActive', instance.isActive)
-        instance.isSendOTP = validated_data.get(
-            'isSendOTP', instance.isSendOTP)
-        instance.Employee = validated_data.get(
-            'Employee', instance.Employee)
-        instance.UpdatedBy = validated_data.get(
-            'UpdatedBy', instance.UpdatedBy) 
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
         
-        instance.set_password('1234567')           
+        password = validated_data.pop('password', None)
+        if password is not None:
+            instance.set_password(password)           
         instance.save()
 
         for items in instance.UserRole.all():
@@ -66,6 +52,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             Items = MC_UserRoles.objects.create(User=instance, **RoleID_data)
         instance.UserRole.add(Items)
         return instance  
+
+       
 
 
 
@@ -134,5 +122,37 @@ class UserListSerializer(serializers.ModelSerializer):
         
         
         
-        
+ 
+class ChangePasswordSerializer(serializers.Serializer):
+    
+    LoginName = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=128, write_only=True)
+    newpassword = serializers.CharField(max_length=128, write_only=True)
+    
+    def validate(self, data):
+        LoginName = data.get("LoginName", None)
+        password = data.get("password", None)
+        newpassword = data.get("newpassword", None)
+        user = authenticate(LoginName=LoginName, password=password)
+
+        if user is None:
+            raise serializers.ValidationError(
+                'A user with this LoginName and password is not found.'
+            )
+        try:
+            
+           
+            user.set_password(newpassword)
+            user.save()
+           
+            
+        except M_Users.DoesNotExist:
+            raise serializers.ValidationError(
+                'User with given LoginName and password does not exists'
+            )
+        return {
+            'LoginName': user.LoginName
+            
+        }
+
  

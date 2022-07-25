@@ -1,5 +1,6 @@
 from datetime import datetime
 from pickle import TRUE
+from typing import Sequence
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -46,13 +47,14 @@ class C_CompanyGroups(models.Model):
 class C_Companies(models.Model):
 
     Name = models.CharField(max_length=100)
-    Address = models.CharField(max_length=100)
+    Address = models.CharField(max_length=100,null=True,blank=True)
     GSTIN = models.CharField(max_length=100)
-    PhoneNo = models.CharField(max_length=100)
+    PhoneNo = models.CharField(max_length=100 ,null=True,blank=True)
     CompanyAbbreviation = models.CharField(max_length=100)
-    EmailID = models.CharField(max_length=100)
+    EmailID = models.CharField(max_length=100,null=True,blank=True)
     CompanyGroup = models.ForeignKey(
         C_CompanyGroups, related_name='CompanyGroup', on_delete=models.DO_NOTHING)
+    
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -96,9 +98,12 @@ class M_Parties(models.Model):
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
+    IsSCM = models.ForeignKey(
+        C_Companies, related_name='IsSCM', on_delete=models.DO_NOTHING,null=True)
     CustomerDivision = models.IntegerField()
     Email = models.EmailField(max_length=200)
-    MobileNo = models.BigIntegerField(null=False, blank=False)
+    MobileNo = models.BigIntegerField()
+    AlternateContactNo =models.CharField(max_length=500)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.ForeignKey(
@@ -258,9 +263,10 @@ class H_Modules(models.Model):
 
 
 class M_Pages(models.Model):
-
+    PageHeading=models.CharField(max_length=500,blank=True)
     Name = models.CharField(max_length=100)
-    Description = models.CharField(max_length=100, blank=True)
+    PageDescription = models.CharField(max_length=500, blank=True)
+    PageDescriptionDetails = models.CharField(max_length=500, blank=True)
     Module = models.ForeignKey(
         H_Modules, related_name='PagesModule', on_delete=models.DO_NOTHING)
     isActive = models.BooleanField(default=False)
@@ -334,6 +340,7 @@ class H_PageAccess(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
+    Sequence = models.IntegerField()
 
     class Meta:
         db_table = 'H_PageAccess'
@@ -341,10 +348,8 @@ class H_PageAccess(models.Model):
 # M_Pages child table
 class MC_PagePageAccess(models.Model):
 
-    Page = models.ForeignKey(
-        M_Pages, related_name='PagePageAccess', on_delete=models.CASCADE)
-    Access = models.ForeignKey(
-        H_PageAccess, on_delete=models.DO_NOTHING, null=True)
+    Page = models.ForeignKey(M_Pages, related_name='PagePageAccess', on_delete=models.CASCADE)
+    Access = models.ForeignKey(H_PageAccess, on_delete=models.DO_NOTHING)
 
     class Meta:
         db_table = "MC_PagePageAccess"
@@ -516,8 +521,9 @@ class TC_InvoiceItemBatches(models.Model):
         db_table ="TC_InvoiceItemBatches"
         
 class Abc(models.Model):
-    Name = models.CharField(max_length=100)
-    CreatedOn = models.DateTimeField(auto_now=True) 
+    phone_number =models.CharField(max_length=12,unique=True) 
+    otp=models.CharField(max_length=6,default=False)
     
     class Meta :
-        db_table ="Abc"        
+        db_table ="Abc"   
+                  

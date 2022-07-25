@@ -57,12 +57,14 @@ class M_PagesSerializerforRoleAccessNEW(serializers.Serializer):
     
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
-    Description = serializers.CharField(max_length=500)
+    PageHeading=serializers.CharField(max_length=500)
+    PageDescription = serializers.CharField(max_length=500)
+    PageDescriptionDetails = serializers.CharField(max_length=500)
     ActualPagePath = serializers.CharField(max_length=500)
     DisplayIndex = serializers.IntegerField()
     Icon =  serializers.CharField(max_length=500)
     isActive =  serializers.IntegerField()
-    isShowOnMenu = serializers.IntegerField()
+    isShowOnMenu = serializers.BooleanField(default=False)
     Module_id =  serializers.IntegerField()
     PageType = serializers.IntegerField()
     RelatedPageID =  serializers.IntegerField()
@@ -93,8 +95,45 @@ class M_RoleAccessSerializer(serializers.ModelSerializer):
      
 
         
+class M_RoleAccessSerializerGETList(serializers.Serializer):
+    id = serializers.IntegerField()
+    RoleName = serializers.CharField(max_length=500)
+    DivisionName = serializers.CharField(max_length=500) 
+    CompanyName = serializers.CharField(max_length=500)     
         
-        
+
+class M_RoleAccessSerializerNewUpdated(serializers.Serializer):
+    id = serializers.IntegerField()
+    moduleid = serializers.IntegerField()
+    ModuleName = serializers.CharField(max_length=500)
+    pageid = serializers.IntegerField() 
+    PageName = serializers.CharField(max_length=500)
+
+class MC_RolePageAccessSerializerNewUpdated(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+
+class M_PageAccessSerializerNewUpdated(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+   
+class M_PageSerializerNewUpdated(serializers.Serializer):
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+    
+    
+class M_PageSerializerAddPage(serializers.Serializer):
+    moduleid = serializers.IntegerField()
+    ModuleName = serializers.CharField(max_length=500)
+    id = serializers.IntegerField() 
+    PageName = serializers.CharField(max_length=500)
+    
+class M_PageAccessSerializerAddPage(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)             
    
 
 

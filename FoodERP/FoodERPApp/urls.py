@@ -39,16 +39,18 @@ from .Views.V_abc import *
 urlpatterns = [
     url(r'Registration', UserRegistrationView.as_view()),
     url(r'Login', UserLoginView.as_view()),
+    url(r'ChangePassword', ChangePasswordView.as_view()),
     url(r'UserList/([0-9]+)$', UserListViewSecond.as_view()),
     url(r'UserList$', UserListView.as_view()),
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
-    url(r'RoleAccess/([0-9]+)$', RoleAccessViewSecond.as_view()),
-    url(r'RoleAccess$', RoleAccessView.as_view()),
+    url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
+    url(r'RoleAccessList$', RoleAccessViewList.as_view()),
+    url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
-    url(r'PagesMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
-    url(r'PagesMaster$', M_PagesView.as_view()),
+    url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
+    url(r'PageMaster$', M_PagesView.as_view()),
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageAccess$', H_PageAccessView.as_view()),
     url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
@@ -77,6 +79,10 @@ urlpatterns = [
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'PartyTypes$', M_PartyTypeView.as_view()),
     url(r'demo$', AbcView.as_view()),
+    url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
+    url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
+    url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
+    
    
       
 ]

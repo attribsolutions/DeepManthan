@@ -77,8 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
-DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+# DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+# DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 
 # Database
@@ -92,15 +92,16 @@ DATABASES = {
         'PASSWORD': 'P@ssw0rd',
         'HOST': '192.168.1.114',
         'PORT': '3306'
-    },
-    'logs': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'erpdatabase_logs',
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',
-        'HOST': '192.168.1.114',
-        'PORT': '3306'
     }
+    # ,
+    # 'logs': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'erpdatabase_logs',
+    #     'USER': 'pk',
+    #     'PASSWORD': 'P@ssw0rd',
+    #     'HOST': '192.168.1.114',
+    #     'PORT': '3306'
+    # }
 }
 
 ACTIVITYLOG_AUTOCREATE_DB = False

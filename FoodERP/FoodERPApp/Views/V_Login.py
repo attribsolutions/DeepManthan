@@ -176,7 +176,28 @@ class UserLoginView(RetrieveAPIView):
         }
         status_code = status.HTTP_200_OK
 
-        return Response(response, status=status_code)
+        return Response(response, status=status_code)\
+
+
+class ChangePasswordView(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    serializer_class =ChangePasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        response = {
+            'Status': 'True',
+            'StatusCode': status.HTTP_200_OK,
+            'Message': 'Password change successfully',
+            # 'token': serializer.data,
+        }
+        status_code = status.HTTP_200_OK
+
+        return Response(response, status=status_code)            
 
 
 

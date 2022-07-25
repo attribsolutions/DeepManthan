@@ -13,7 +13,9 @@ class M_PagesSerializer(serializers.Serializer):
     
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
-    Description = serializers.CharField(max_length=100)
+    PageHeading=serializers.CharField(max_length=500)
+    PageDescription = serializers.CharField(max_length=500)
+    PageDescriptionDetails = serializers.CharField(max_length=500)
     ModuleID = serializers.IntegerField(read_only=True)
     ModuleName=serializers.CharField(max_length=100)
     isActive = serializers.BooleanField(default=False)
@@ -43,6 +45,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         PageAccess_data = validated_data.pop('PagePageAccess')
        
         Pages = M_Pages.objects.create(**validated_data)
+        
         for data in PageAccess_data:
             MC_PagePageAccess.objects.create(
                 Page=Pages, 
@@ -54,8 +57,12 @@ class M_PagesSerializer1(serializers.ModelSerializer):
             # * Page Info
             instance.Name = validated_data.get(
                 'Name', instance.Name)
-            instance.Description = validated_data.get(
-                'Description', instance.Description)
+            instance.PageHeading = validated_data.get(
+                'PageHeading', instance.PageHeading)
+            instance.PageDescription = validated_data.get(
+                'PageDescription', instance.PageDescription)
+            instance.PageDescriptionDetails = validated_data.get(
+                'PageDescriptionDetails', instance.PageDescriptionDetails)
             instance.Module = validated_data.get(
                 'Module', instance.Module)
             instance.isActive = validated_data.get(
