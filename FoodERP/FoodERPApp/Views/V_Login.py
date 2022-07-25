@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from ..models import *
-from  ..Serializer.S_Login import   *
+from ..Serializer.S_Login import   *
 # from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework import status
 from rest_framework.response import Response
