@@ -1,5 +1,7 @@
 from django.urls import re_path as url
 
+from .Views.V_Login import ChangePasswordView, UserListView, UserListViewSecond, UserLoginView, UserRegistrationView
+
 from .Views.V_Parties import *
 
 
@@ -17,7 +19,7 @@ from .Views.V_Modules import *
 
 from .Views.V_PageAccess import *
 
-from .Views.V_Login import *
+# from .Views.V_Login import *
 
 from .Views.V_Items import *
 
