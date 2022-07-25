@@ -216,6 +216,3 @@ JWT_AUTH = {
     'rest_framework_jwt.utils.jwt_payload_handler',
 
 }
-
-
-
