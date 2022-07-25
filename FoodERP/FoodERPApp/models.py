@@ -54,6 +54,7 @@ class C_Companies(models.Model):
     EmailID = models.CharField(max_length=100,null=True,blank=True)
     CompanyGroup = models.ForeignKey(
         C_CompanyGroups, related_name='CompanyGroup', on_delete=models.DO_NOTHING)
+    
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -97,6 +98,8 @@ class M_Parties(models.Model):
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
+    IsSCM = models.ForeignKey(
+        C_Companies, related_name='IsSCM', on_delete=models.DO_NOTHING)
     CustomerDivision = models.IntegerField()
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
