@@ -130,6 +130,7 @@ class M_PageSerializerAddPage(serializers.Serializer):
     moduleid = serializers.IntegerField()
     ModuleName = serializers.CharField(max_length=500)
     id = serializers.IntegerField() 
+    RelatedPageID = serializers.IntegerField() 
     PageName = serializers.CharField(max_length=500)
     
 class M_PageAccessSerializerAddPage(serializers.Serializer):
