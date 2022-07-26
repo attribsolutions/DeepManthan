@@ -108,6 +108,7 @@ class M_RoleAccessSerializerNewUpdated(serializers.Serializer):
     moduleid = serializers.IntegerField()
     ModuleName = serializers.CharField(max_length=500)
     pageid = serializers.IntegerField() 
+    RelatedPageID = serializers.IntegerField() 
     PageName = serializers.CharField(max_length=500)
 
 class MC_RolePageAccessSerializerNewUpdated(serializers.Serializer):
