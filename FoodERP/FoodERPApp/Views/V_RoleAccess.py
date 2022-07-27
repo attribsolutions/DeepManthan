@@ -102,10 +102,10 @@ class RoleAccessViewList(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_Roles.Name RoleName,M_DivisionType.Name DivisionName,C_Companies.Name CompanyName
+                query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_Roles.Name RoleName,M_Parties.Name DivisionName,C_Companies.Name CompanyName
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
-    join M_DivisionType  ON M_DivisionType.id=M_RoleAccess.Division_id
+    join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
     join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id group by Role_id,Company_id,Division_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
@@ -124,7 +124,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request,Division=0,Role=0):
-        roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid, m_pages.name PageName  FROM erpdatabase.m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id WHERE Division_id=%s AND Role_id=%s ''',([Division],[Role]))
+        roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM erpdatabase.m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id WHERE Division_id=%s AND Role_id=%s ''',([Division],[Role]))
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_RoleAccessSerializerNewUpdated(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -143,6 +143,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['pageid'],
+                "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
                 "RoleAccess_IsSave": RolePageAccessSerializer[0]['id'],
                 "RoleAccess_IsEdit": RolePageAccessSerializer[1]['id'],
@@ -177,7 +178,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, pageid=0):
-        roleaccessquery = M_Pages.objects.raw('''SELECT h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id id, m_pages.name PageName FROM m_pages JOIN h_modules ON h_modules.id=m_pages.Module_id WHERE m_pages.id=%s''',[pageid])
+        roleaccessquery = M_Pages.objects.raw('''SELECT h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id id,m_pages.RelatedPageID, m_pages.name PageName FROM m_pages JOIN h_modules ON h_modules.id=m_pages.Module_id WHERE m_pages.id=%s''',[pageid])
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_PageSerializerAddPage(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -190,6 +191,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['id'],
+                "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
                 "RoleAccess_IsSave": 0,
                 "RoleAccess_IsEdit": 0,
