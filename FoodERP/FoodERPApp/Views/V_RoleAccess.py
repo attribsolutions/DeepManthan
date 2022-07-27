@@ -18,6 +18,7 @@ class RoleAccessView(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, Role=0, Division=0, Company=0):
+    # def get(self, request, Role=0):
         modules = M_RoleAccess.objects.raw(
             '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
 FROM m_roleaccess 
@@ -145,22 +146,24 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageID": a['pageid'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
-                "RoleAccess_IsSave": RolePageAccessSerializer[0]['id'],
-                "RoleAccess_IsEdit": RolePageAccessSerializer[1]['id'],
-                "RoleAccess_IsDelete": RolePageAccessSerializer[2]['id'],
-                "RoleAccess_IsEditSelf": RolePageAccessSerializer[3]['id'],
-                "RoleAccess_IsDeleteSelf": RolePageAccessSerializer[4]['id'],
-                "RoleAccess_IsShow": RolePageAccessSerializer[5]['id'],
-                "RoleAccess_IsView": RolePageAccessSerializer[6]['id'],
-                "RoleAccess_IsTopOfTheDivision": RolePageAccessSerializer[7]['id'],
-                "PageAccess_IsSave": PageAccessSerializer[0]['id'],
-                "PageAccess_IsEdit": PageAccessSerializer[1]['id'],
-                "PageAccess_IsDelete": PageAccessSerializer[2]['id'],
-                "PageAccess_IsEditSelf": PageAccessSerializer[3]['id'],
-                "PageAccess_IsDeleteSelf": PageAccessSerializer[4]['id'],
-                "PageAccess_IsShow": PageAccessSerializer[5]['id'],
-                "PageAccess_IsView": PageAccessSerializer[6]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[7]['id']
+                "RoleAccess_IsShowOnMenu": RolePageAccessSerializer[0]['id'],
+                "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
+                "RoleAccess_IsView": RolePageAccessSerializer[2]['id'],
+                "RoleAccess_IsEdit": RolePageAccessSerializer[3]['id'],
+                "RoleAccess_IsDelete": RolePageAccessSerializer[4]['id'],
+                "RoleAccess_IsEditSelf": RolePageAccessSerializer[5]['id'],
+                "RoleAccess_IsDeleteSelf": RolePageAccessSerializer[6]['id'],
+                "RoleAccess_IsPrint": RolePageAccessSerializer[7]['id'],
+                "RoleAccess_IsTopOfTheDivision": RolePageAccessSerializer[8]['id'],
+                "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
+                "PageAccess_IsSave": PageAccessSerializer[1]['id'],
+                "PageAccess_IsView": PageAccessSerializer[2]['id'],
+                "PageAccess_IsEdit": PageAccessSerializer[3]['id'],
+                "PageAccess_IsDelete": PageAccessSerializer[4]['id'],
+                "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
+                "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
+                "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
+                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id']
 
             })
 
@@ -228,7 +231,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
     def get(self, request, moduleid=0):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE Module_id=%s''',[moduleid])
+                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and   Module_id=%s''',[moduleid])
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
