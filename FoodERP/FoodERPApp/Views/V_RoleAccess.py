@@ -18,6 +18,7 @@ class RoleAccessView(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, Role=0, Division=0, Company=0):
+    # def get(self, request, Role=0):
         modules = M_RoleAccess.objects.raw(
             '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
 FROM m_roleaccess 
@@ -228,7 +229,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
     def get(self, request, moduleid=0):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE Module_id=%s''',[moduleid])
+                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and   Module_id=%s''',[moduleid])
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
