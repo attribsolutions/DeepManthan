@@ -1,3 +1,4 @@
+from msilib import sequence
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -20,7 +21,7 @@ class H_PageAccessView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                H_PageAccess_data = H_PageAccess.objects.all()
+                H_PageAccess_data = H_PageAccess.objects.all().order_by('Sequence')
                 if H_PageAccess_data.exists():
                     H_PageAccess_serializer = H_PageAccessSerializer(H_PageAccess_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': H_PageAccess_serializer.data })
