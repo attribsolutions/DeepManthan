@@ -25,20 +25,26 @@ class UserRegistrationView(CreateAPIView):
     authentication_class = () 
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            status_code = status.HTTP_201_CREATED
-            response = {
-                'StatusCode': status_code,
-                'Status': True,
-                'Message': 'User registered  successfully',
-                'Data':[]
-            }
+        # try:
+        #     with transaction.atomic():
+                
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                    serializer.save()
+                    status_code = status.HTTP_201_CREATED
+                    response = {
+                        'StatusCode': status_code,
+                        'Status': True,
+                        'Message': 'User registered  successfully',
+                        'Data':[]
+                    }
 
-            return Response(response, status=status_code)
-        return Response(serializer.errors)
-
+                    return Response(response, status=status_code)
+            else:
+                    # transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': serializer.errors, 'Data' : []})
+        # except Exception as e:
+        #     raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
    
 class UserListView(CreateAPIView):

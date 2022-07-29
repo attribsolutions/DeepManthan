@@ -225,6 +225,7 @@ class M_Users(AbstractBaseUser):
     isLoginUsingMobile = models.BooleanField(default=False)
     isLoginUsingEmail = models.BooleanField(default=False)
     AdminPassword = models.CharField(max_length=100)
+    OTP =models.CharField(max_length=1002,null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -290,6 +291,7 @@ class M_Roles(models.Model):
     Name = models.CharField(max_length=100)
     Description = models.CharField(max_length=100)
     isActive = models.BooleanField(default=False)
+    isSCMRole = models.BooleanField(default=False)
     Dashboard = models.CharField(max_length=200)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -306,6 +308,7 @@ class M_Roles(models.Model):
 class MC_UserRoles(models.Model):
 
     User = models.ForeignKey(M_Users, related_name='UserRole',  on_delete=models.CASCADE)
+    Party = models.ForeignKey(M_Parties,related_name='userparty',  on_delete=models.DO_NOTHING)
     Role = models.ForeignKey(M_Roles,related_name='Role',  on_delete=models.DO_NOTHING)
 
     class Meta:
