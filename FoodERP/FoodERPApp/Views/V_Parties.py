@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Parties import *
@@ -150,9 +150,10 @@ left join M_Districts on M_Districts.id=p.District_id
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Partiesdata = M_Parties.objects.get(ID=id)
+                M_Partiesdata = M_Parties.objects.get(id=id)
                 M_Partiesdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully', 'Data':[]})
         except M_Parties.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Not available', 'Data': []})    
-            
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party used in another table', 'Data': []})    
