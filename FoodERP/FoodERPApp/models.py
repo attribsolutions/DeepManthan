@@ -184,7 +184,7 @@ class UserManager(BaseUserManager):
     https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example
     '''
 
-    def create_user(self,  LoginName, Employee, isActive, isSendOTP, AdminPassword, CreatedBy,  UpdatedBy,password=None):
+    def create_user(self,  LoginName, Employee, isActive, isSendOTP, AdminPassword,isLoginUsingMobile,isLoginUsingEmail, CreatedBy,  UpdatedBy,password=None):
         """
         Create and return a `User` with  username and password.
         """
@@ -198,9 +198,11 @@ class UserManager(BaseUserManager):
             isActive=isActive,
             AdminPassword=password,
             isSendOTP=isSendOTP,
+            isLoginUsingEmail=isLoginUsingEmail,
+            isLoginUsingMobile=isLoginUsingMobile,
             CreatedBy=CreatedBy,
-           
             UpdatedBy=UpdatedBy,
+           
             
 
 
@@ -214,9 +216,6 @@ class UserManager(BaseUserManager):
 class M_Users(AbstractBaseUser):
 
     LoginName = models.CharField(max_length=100, unique=True)
-    # email = models.EmailField(
-    #     verbose_name='email address',
-    #     max_length=255)
     Employee = models.ForeignKey(
         M_Employees, related_name='UserEmployee', on_delete=models.DO_NOTHING)
     isActive = models.BooleanField(default=False)
