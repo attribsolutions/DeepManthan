@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from django.core.mail import send_mail
+from ..helpers import send_otp_to_phone
+
 from ..models import *
 from ..Serializer.S_SendMail import *
 
@@ -46,8 +48,8 @@ class SendViewMail(RetrieveAPIView):
                     send_mail(subject , message , email_from , recipient_list)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data' : []})
         else:
-            Mobile  = str(phone)
-            Employee = M_Employees.objects.filter(Mobile__exact = Mobile).values('id','Name')
+            PhoneNo  = str(phone)
+            Employee = M_Employees.objects.filter(Mobile__exact = PhoneNo).values('id','Name')
             # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '111111111', 'Data' :str(Employee.query)})
             if Employee.exists():
                 Employeedata_Serializer = Employeeserializer(Employee, many=True).data
@@ -59,6 +61,8 @@ class SendViewMail(RetrieveAPIView):
                     LoginName = Usersdata_Serializer[0]['LoginName']
                     otp = random.randint(1000, 9999)
                     userOTP = M_Users.objects.filter(Employee = Employeedata_Serializer[0]['id']).update(OTP=otp)
+                    send_otp_to_phone(otp,PhoneNo)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data' : otp})
                     # subject = 'Your Account Verification mail'
                     # newline = '\n'
                     # message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
