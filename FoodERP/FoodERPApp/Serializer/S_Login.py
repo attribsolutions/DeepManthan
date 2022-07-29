@@ -18,7 +18,7 @@ JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
 class MC_UserRolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_UserRoles
-        fields =  ['Role']
+        fields =  ['Role','Party']
         
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -37,8 +37,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
+        # for (key, value) in validated_data.items():
+        #     setattr(instance, key, value)
+
+        instance.isActive = validated_data.get(
+            'isActive', instance.isActive)  
+        instance.isSendOTP = validated_data.get(
+            'isSendOTP', instance.isSendOTP)  
+        instance.isLoginUsingMobile = validated_data.get(
+            'isLoginUsingMobile', instance.isLoginUsingMobile)
+        instance.isLoginUsingEmail = validated_data.get(
+            'isLoginUsingEmail', instance.isLoginUsingEmail)
+        instance.AdminPassword = validated_data.get(
+            'password', instance.password)   
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy)
+        instance.Employee_id = validated_data.get(
+            'Employee_id', instance.Employee_id)                       
         
         password = validated_data.pop('password', None)
         if password is not None:
