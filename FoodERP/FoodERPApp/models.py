@@ -307,7 +307,7 @@ class M_Roles(models.Model):
 class MC_UserRoles(models.Model):
 
     User = models.ForeignKey(M_Users, related_name='UserRole',  on_delete=models.CASCADE)
-    Party = models.ForeignKey(M_Parties,related_name='userparty',  on_delete=models.DO_NOTHING)
+    Party = models.ForeignKey(M_Parties,related_name='userparty',  on_delete=models.DO_NOTHING,null=True)
     Role = models.ForeignKey(M_Roles,related_name='Role',  on_delete=models.DO_NOTHING)
 
     class Meta:
