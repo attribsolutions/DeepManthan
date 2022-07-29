@@ -196,23 +196,24 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "PageID": a['id'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
+                "RoleAccess_IsShowOnMenu": 0,
                 "RoleAccess_IsSave": 0,
+                "RoleAccess_IsView": 0,
                 "RoleAccess_IsEdit": 0,
                 "RoleAccess_IsDelete": 0,
                 "RoleAccess_IsEditSelf": 0,
                 "RoleAccess_IsDeleteSelf": 0,
-                "RoleAccess_IsShow": 0,
-                "RoleAccess_IsView": 0,
+                "RoleAccess_IsPrint": 0,
                 "RoleAccess_IsTopOfTheDivision": 0,
-                "PageAccess_IsSave": PageAccessSerializer[0]['id'],
-                "PageAccess_IsEdit": PageAccessSerializer[1]['id'],
-                "PageAccess_IsDelete": PageAccessSerializer[2]['id'],
-                "PageAccess_IsEditSelf": PageAccessSerializer[3]['id'],
-                "PageAccess_IsDeleteSelf": PageAccessSerializer[4]['id'],
-                "PageAccess_IsShow": PageAccessSerializer[5]['id'],
-                "PageAccess_IsView": PageAccessSerializer[6]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[7]['id']
-
+                "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
+                "PageAccess_IsSave": PageAccessSerializer[1]['id'],
+                "PageAccess_IsView": PageAccessSerializer[2]['id'],
+                "PageAccess_IsEdit": PageAccessSerializer[3]['id'],
+                "PageAccess_IsDelete": PageAccessSerializer[4]['id'],
+                "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
+                "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
+                "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
+                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id']
             })
 
         response = {
