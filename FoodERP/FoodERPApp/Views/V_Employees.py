@@ -35,7 +35,6 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
          
-
     @transaction.atomic()
     def post(self, request):
         try:
