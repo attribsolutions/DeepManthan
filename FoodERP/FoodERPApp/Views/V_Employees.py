@@ -35,7 +35,6 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
          
-
     @transaction.atomic()
     def post(self, request):
         try:
@@ -46,7 +45,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
                     M_Employees_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Data Save Successfully','Data' :[]})
                 else:
-                    transaction.set_rollback(True)
+                    # transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors,'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

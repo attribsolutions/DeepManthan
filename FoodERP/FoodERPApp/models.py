@@ -157,8 +157,7 @@ class M_Employees(models.Model):
     PAN = models.CharField(max_length=100)
     AadharNo = models.CharField(max_length=100)
     working_hours = models.DecimalField(max_digits=15, decimal_places=2)
-    Party=models.ForeignKey(
-        M_Parties, related_name='EmployeesParty', on_delete=models.DO_NOTHING,null=True)
+
     Company = models.ForeignKey(
         C_Companies, related_name='EmployeesCompany', on_delete=models.DO_NOTHING)
     EmployeeType = models.ForeignKey(
