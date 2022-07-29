@@ -214,6 +214,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
                 "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
                 "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id']
+                
+                
             })
 
         response = {
