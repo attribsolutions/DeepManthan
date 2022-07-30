@@ -25,7 +25,7 @@ m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
-left join M_Pages RP on p.RelatedPageID=RP.id ''')
+left join M_Pages RP on p.RelatedPageID=RP.id Order By m.DisplayIndex,p.DisplayIndex ''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
