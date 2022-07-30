@@ -84,9 +84,10 @@ class M_PagesSerializer1(serializers.ModelSerializer):
             for Access in instance.PagePageAccess.all():
                 Access.delete()
 
-            for PagePageAccess_data in validated_data['PagePageAccess']:
-                PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)
-            instance.PagePageAccess.add(PageAccess)
+            if (instance.PageType !=1):
+                for PagePageAccess_data in validated_data['PagePageAccess']:
+                    PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)
+                instance.PagePageAccess.add(PageAccess)
             
             return instance   
     
