@@ -22,7 +22,7 @@ class M_PagesSerializer(serializers.Serializer):
     DisplayIndex = serializers.IntegerField()
     Icon = serializers.CharField(max_length=100)
     ActualPagePath = serializers.CharField(max_length=100)
-    isShowOnMenu = serializers.BooleanField(default=False)
+    # isShowOnMenu = serializers.BooleanField(default=False)
     PageType = serializers.IntegerField()
     RelatedPageID = serializers.IntegerField()
     RelatedPageName=serializers.CharField(max_length=100)
@@ -73,8 +73,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'Icon', instance.Icon)
             instance.ActualPagePath = validated_data.get(
                 'ActualPagePath', instance.ActualPagePath)
-            instance.isShowOnMenu = validated_data.get(
-                'isShowOnMenu', instance.isShowOnMenu)
+            # instance.isShowOnMenu = validated_data.get(
+            #     'isShowOnMenu', instance.isShowOnMenu)
             instance.PageType = validated_data.get(
                 'PageType', instance.PageType)
             instance.RelatedPageID = validated_data.get(
