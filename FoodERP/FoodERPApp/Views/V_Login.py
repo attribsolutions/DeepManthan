@@ -76,6 +76,8 @@ class UserListView(CreateAPIView):
                                 'last_login': a["last_login"],
                                 'isActive': a["isActive"],
                                 'isSendOTP': a["isSendOTP"],
+                                'isLoginUsingMobile' : a["isLoginUsingMobile"],
+                                'isLoginUsingEmail' : a["isLoginUsingEmail"],
                                 'AdminPassword': a["AdminPassword"],
                                 'CreatedBy': a["CreatedBy"],
                                 'CreatedOn': a["CreatedOn"],
@@ -122,6 +124,8 @@ class UserListViewSecond(CreateAPIView):
                         'last_login': a["last_login"],
                         'isActive': a["isActive"],
                         'isSendOTP': a["isSendOTP"],
+                        'isLoginUsingMobile' : a["isLoginUsingMobile"],
+                        'isLoginUsingEmail' : a["isLoginUsingEmail"],
                         'AdminPassword': a["AdminPassword"],
                         'CreatedBy': a["CreatedBy"],
                         'CreatedOn': a["CreatedOn"],
@@ -179,6 +183,8 @@ class UserLoginView(RetrieveAPIView):
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
             'token': serializer.data['token'],
+            # 'UserID': serializer.data['UserID'],
+            # 'OTP': serializer.data['OTP'],
         }
         status_code = status.HTTP_200_OK
 
