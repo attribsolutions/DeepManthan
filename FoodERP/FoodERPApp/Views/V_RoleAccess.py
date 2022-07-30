@@ -30,7 +30,7 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
         for a in data:
             id = a['id']
             query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageHeading,m_pages.PageDescription,m_pages.PageDescriptionDetails,m_pages.ActualPagePath,m_pages.DisplayIndex,
-m_pages.Icon,m_pages.isActive,m_pages.isShowOnMenu,m_pages.Module_id,
+m_pages.Icon,m_pages.isActive,m_pages.Module_id,
 m_pages.PageType,m_pages.RelatedPageID,Pages_id FROM m_roleaccess
 JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
 WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
@@ -54,7 +54,7 @@ WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
                     "DisplayIndex": a1['DisplayIndex'],
                     "Icon": a1['Icon'],
                     "ActualPagePath": a1['ActualPagePath'],
-                    "isShowOnMenu": a1['isShowOnMenu'],
+                    # "isShowOnMenu": a1['isShowOnMenu'],
                     "RolePageAccess": RolePageAccessSerializer
                 })
 
