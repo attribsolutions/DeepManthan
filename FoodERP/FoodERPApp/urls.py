@@ -87,7 +87,8 @@ urlpatterns = [
     url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
-    url(r'sendmail$', SendViewMail.as_view())
+    url(r'sendmail$', SendViewMail.as_view()),
+    url(r'VerifyOTP$', VerifyOTPwithUserData.as_view())
    
       
 ]

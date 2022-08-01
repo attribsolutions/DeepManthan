@@ -1,3 +1,4 @@
+from genericpath import exists
 import random
 from urllib import response
 from django.conf import settings
@@ -28,7 +29,7 @@ class SendViewMail(RetrieveAPIView):
         if Email:
             email  = str(Email)
             Employee = M_Employees.objects.filter(email__exact = email).values('id','Name')
-            
+            # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data': str(Employee) })
             if Employee.exists():
                 Employeedata_Serializer = Employeeserializer(Employee, many=True).data
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data' :Employeedata_Serializer[0]['id']})
@@ -81,6 +82,27 @@ class SendViewMail(RetrieveAPIView):
         # recipient_list= ['pradnyaubale12@gmail.com','hemantwaghmare13@gmail.com']
         # send_mail(subject , message , email_from , recipient_list)
         # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data' : []})
+class VerifyOTPwithUserData(RetrieveAPIView):
     
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        LoginName = request.data.get("LoginName")
+        verifyOTP = request.data.get('OTP')
+        if LoginName and verifyOTP:
+            userquery = M_Users.objects.filter(LoginName__exact=repr(LoginName),OTP__exact=repr(verifyOTP)).values('id')
+            # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'LoginName And OTP Matched Successfully', 'Data':str(userquery.query)})
+            if userquery is not None:    
+                VerifyOTPUsersdata_Serializer = Userserializer(userquery,many=True)
+            
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'LoginName And OTP Matched Successfully', 'Data':[]})
+                userOTP = M_Users.objects.filter(id = Usersdata_Serializer[0]['id']).update(OTP=None)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'LoginName And OTP Matched Successfully', 'Data': str(userOTP.query)})
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '111111 Please Enter Correct LoginName and OTP ', 'Data' :[]})
+        # else:
+        #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Please Enter correct LoginName and OTP', 'Data' :[]})       
+        
     
     
