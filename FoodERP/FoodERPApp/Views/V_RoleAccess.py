@@ -30,7 +30,7 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
         for a in data:
             id = a['id']
             query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageHeading,m_pages.PageDescription,m_pages.PageDescriptionDetails,m_pages.ActualPagePath,m_pages.DisplayIndex,
-m_pages.Icon,m_pages.isActive,m_pages.isShowOnMenu,m_pages.Module_id,
+m_pages.Icon,m_pages.isActive,m_pages.Module_id,
 m_pages.PageType,m_pages.RelatedPageID,Pages_id FROM m_roleaccess
 JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
 WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
@@ -54,7 +54,7 @@ WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
                     "DisplayIndex": a1['DisplayIndex'],
                     "Icon": a1['Icon'],
                     "ActualPagePath": a1['ActualPagePath'],
-                    "isShowOnMenu": a1['isShowOnMenu'],
+                    # "isShowOnMenu": a1['isShowOnMenu'],
                     "RolePageAccess": RolePageAccessSerializer
                 })
 
@@ -107,7 +107,7 @@ class RoleAccessViewList(RetrieveAPIView):
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
     join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
-    join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id group by Role_id,Company_id,Division_id''')
+    join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id group by Role_id,M_RoleAccess.Company_id,Division_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
