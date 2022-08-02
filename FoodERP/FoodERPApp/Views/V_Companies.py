@@ -178,3 +178,28 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group used in another table', 'Data': []})  
+
+''' Below class used on Party Master Company Dropdown Populate Here we Check Division is IsSCM Or not. If IsSCM Then We show IsSCM Company Else Other'''
+class GetCompanyByDivisionType(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                DivisionType = M_DivisionType.objects.filter(id=id).values('id','Name','IsSCM')
+                # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':str(DivisionType.query) })
+                if DivisionType.exists():
+                    DivisionTypedata_Serializer = DivisionTypeserializer(DivisionType, many=True).data
+                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': DivisionTypedata_Serializer[0]['IsSCM'] })
+                    CompaniesData = C_Companies.objects.filter(IsSCM=DivisionTypedata_Serializer[0]['IsSCM'])
+                    if CompaniesData.exists():
+                        C_Companiesdata_Serializer = C_CompanySerializer2(CompaniesData, many=True).data
+                        # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': DivisionTypedata_Serializer })
+                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':C_Companiesdata_Serializer })
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
+                 
