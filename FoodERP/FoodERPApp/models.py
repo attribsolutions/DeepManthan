@@ -59,7 +59,7 @@ class C_Companies(models.Model):
     EmailID = models.CharField(max_length=100, null=True, blank=True)
     CompanyGroup = models.ForeignKey(
         C_CompanyGroups, related_name='CompanyGroup', on_delete=models.DO_NOTHING)
-
+    IsSCM =models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
