@@ -10,6 +10,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class M_DivisionType(models.Model):
     Name = models.CharField(max_length=100)
+    IsSCM =models.BooleanField(default=False)  
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
