@@ -107,7 +107,7 @@ class RoleAccessViewList(RetrieveAPIView):
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
     join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
-    join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id group by Role_id,Company_id,Division_id''')
+    join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id group by Role_id,M_RoleAccess.Company_id,Division_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
