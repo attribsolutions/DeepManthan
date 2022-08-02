@@ -45,6 +45,18 @@ class C_CompanySerializer3(serializers.Serializer):
     CreatedBy = serializers.IntegerField()
     UpdatedBy = serializers.IntegerField()
 
+
+class DivisionTypeserializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=100)
+    IsSCM =serializers.BooleanField()
+    
+
+    
+    
+
+    
+ 
     
     
     
