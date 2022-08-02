@@ -82,6 +82,7 @@ urlpatterns = [
     url(r'Parties$', M_PartiesView.as_view()),
     url(r'DivisionTypes$', M_DivisionTypeView.as_view()),
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
+    url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'PartyTypes$', M_PartyTypeView.as_view()),
     url(r'demo$', AbcView.as_view()),
     url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
