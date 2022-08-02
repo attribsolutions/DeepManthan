@@ -98,7 +98,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "DisplayIndex": a['DisplayIndex'],
                             "Icon": a['Icon'],
                             "ActualPagePath": a['ActualPagePath'],
-                            "isShowOnMenu": a['isShowOnMenu'],
+                            # "isShowOnMenu": a['isShowOnMenu'],
                             "PageType": a['PageType'],
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
@@ -203,7 +203,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "DisplayIndex": a['DisplayIndex'],
                             "Icon": a['Icon'],
                             "ActualPagePath": a['ActualPagePath'],
-                            "isShowOnMenu": a['isShowOnMenu'],
+                            # "isShowOnMenu": a['isShowOnMenu'],
                             "RolePageAccess": PageAccessListData
                         })
                     PageListData = {
