@@ -93,7 +93,7 @@ class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
     PartyType = models.ForeignKey(
-        M_PartyType, related_name='PartiesPartyType', on_delete=models.DO_NOTHING)
+        M_PartyType, related_name='PartiesPartyType', on_delete=models.DO_NOTHING ,blank=True)
     DivisionType = models.ForeignKey(
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
