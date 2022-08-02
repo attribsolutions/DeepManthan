@@ -53,7 +53,7 @@ class C_CompaniesViewSecond(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = C_Companies.objects.raw('''SELECT c_companies.id,c_companies.Name,c_companies.Address,c_companies.GSTIN,c_companies.PhoneNo,c_companies.GSTIN,c_companies.CompanyAbbreviation,c_companies.EmailID,c_companies.CreatedBy,c_companies.CreatedOn,c_companies.UpdatedBy,c_companies.UpdatedOn,c_companies.CompanyGroup_id,c_companygroups.Name CompanyGroupName FROM erpdatabase.c_companies
+                query = C_Companies.objects.raw('''SELECT c_companies.id,c_companies.Name,c_companies.Address,c_companies.GSTIN,c_companies.PhoneNo,c_companies.GSTIN,c_companies.CompanyAbbreviation,c_companies.EmailID,c_companies.CreatedBy,c_companies.CreatedOn,c_companies.UpdatedBy,c_companies.UpdatedOn,c_companies.CompanyGroup_id,c_companygroups.Name CompanyGroupName FROM c_companies
 JOIN c_companygroups ON c_companygroups.id=c_companies.CompanyGroup_id
 WHERE c_companies.id = %s''',[id])
                 if not query:
