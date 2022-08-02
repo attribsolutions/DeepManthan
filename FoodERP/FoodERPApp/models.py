@@ -103,7 +103,7 @@ class M_Parties(models.Model):
     CustomerDivision = models.IntegerField()
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
-    AlternateContactNo =models.CharField(max_length=500 ,null=True)
+    AlternateContactNo =models.CharField(max_length=500 ,null=True,blank=True)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.ForeignKey(
