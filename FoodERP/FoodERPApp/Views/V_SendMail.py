@@ -25,7 +25,7 @@ class SendViewMail(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request):
         Email = request.data.get('Email')
         phone = request.data.get('Phone')
         if Email:
@@ -53,7 +53,11 @@ class SendViewMail(RetrieveAPIView):
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = [Email]
                     send_mail(subject, message, email_from, recipient_list)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
+                else:
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})
+            else: 
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})   
         else:
             PhoneNo = str(phone)
             Employee = M_Employees.objects.filter(
@@ -98,20 +102,23 @@ class VerifyOTPwithUserData(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request):
         try:
             with transaction.atomic():
                 LoginName = request.data.get("LoginName")
                 verifyOTP = request.data.get('OTP')
                 if LoginName and verifyOTP:
-                    User = M_Users.objects.filter(LoginName__exact=str(LoginName)).filter(OTP__exact=str(verifyOTP)).values('id', 'LoginName')
+                    User = M_Users.objects.filter(LoginName__exact=str(LoginName)).filter(
+                        OTP__exact=str(verifyOTP)).values('id', 'LoginName')
                     if User.exists():
-                        Userdata_Serializer = Userserializer(User, many=True).data
-                        userOTP = M_Users.objects.filter(id=Userdata_Serializer[0]['id']).update(OTP=None)
-                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'LoginName And  OTP Match Successfully... ' , 'Data':[]})
+                        Userdata_Serializer = Userserializer(
+                            User, many=True).data
+                        userOTP = M_Users.objects.filter(
+                            id=Userdata_Serializer[0]['id']).update(OTP=None)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'LoginName And  OTP Match Successfully... ', 'Data': []})
                     else:
-                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please Enter Correct LoginName and OTP..' , 'Data': []})
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Please Enter Correct Login Name and OTP..', 'Data': []})
                 else:
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please Enter Correct LoginName and OTP..' , 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Please Enter Correct Login Name and OTP..', 'Data': []})
         except:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '' , 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': []})
