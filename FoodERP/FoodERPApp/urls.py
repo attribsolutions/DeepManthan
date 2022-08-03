@@ -92,7 +92,7 @@ urlpatterns = [
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'PartyType/([0-9]+)$', PartyTypesViewSecond.as_view()),
     url(r'PartyType$', PartyTypesView.as_view()),
-    url(r'sendmail$', SendViewMail.as_view()),
+    url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view())
    
       
