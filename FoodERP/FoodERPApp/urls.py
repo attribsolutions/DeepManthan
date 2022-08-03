@@ -37,6 +37,8 @@ from .Views.V_Designations import *
 
 from .Views.V_PartyTypes import  *
 
+from .Views.V_DivisionTypes import *
+
 from .Views.V_abc import * 
 
 from .Views.V_SendMail import * 
@@ -92,6 +94,8 @@ urlpatterns = [
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'PartyType/([0-9]+)$', PartyTypesViewSecond.as_view()),
     url(r'PartyType$', PartyTypesView.as_view()),
+    url(r'DivisionTypes/([0-9]+)$', M_DivisionTypeViewSecond.as_view()),
+    url(r'DivisionTypes$', M_DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view())
    
