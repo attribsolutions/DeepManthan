@@ -3,10 +3,6 @@ from ..models import *
 from rest_framework import serializers
 
 
-class M_PartyTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model =  M_PartyType
-        fields = '__all__'
         
                 
 class M_PartiesSerializer(serializers.ModelSerializer):
