@@ -96,8 +96,8 @@ urlpatterns = [
     url(r'DivisionTypes/([0-9]+)$', DivisionTypeViewSecond.as_view()),
     url(r'DivisionTypes$', DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
-    url(r'VerifyOTP$', VerifyOTPwithUserData.as_view())
-   
+    url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
+    url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
       
 ]
   
