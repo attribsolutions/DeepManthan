@@ -1,6 +1,6 @@
 from django.urls import re_path as url
 
-from .Views.V_Login import ChangePasswordView, UserListView, UserListViewSecond, UserLoginView, UserRegistrationView
+from .Views.V_Login import ChangePasswordView, RegenrateToken, UserListView, UserListViewSecond, UserLoginView, UserRegistrationView
 
 from .Views.V_Parties import *
 
@@ -98,6 +98,7 @@ urlpatterns = [
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
+    url(r'Regenrate$', RegenrateToken.as_view()),
       
 ]
   
