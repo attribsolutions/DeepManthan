@@ -84,7 +84,6 @@ urlpatterns = [
     url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
     url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'Parties$', M_PartiesView.as_view()),
-    url(r'DivisionTypes$', M_DivisionTypeView.as_view()),
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'PartyTypes$', M_PartyTypeView.as_view()),
@@ -94,8 +93,8 @@ urlpatterns = [
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'PartyType/([0-9]+)$', PartyTypesViewSecond.as_view()),
     url(r'PartyType$', PartyTypesView.as_view()),
-    url(r'DivisionTypes/([0-9]+)$', M_DivisionTypeViewSecond.as_view()),
-    url(r'DivisionTypes$', M_DivisionTypeView.as_view()),
+    url(r'DivisionTypes/([0-9]+)$', DivisionTypeViewSecond.as_view()),
+    url(r'DivisionTypes$', DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view())
    
