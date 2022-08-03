@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 
-from  ..models import M_Roles, M_Users, MC_UserRoles
+from  ..models import C_CompanyGroups, M_Employees, M_Roles, M_Users, MC_UserRoles
 
 from rest_framework import serializers
 
@@ -88,7 +88,7 @@ class UserLoginSerializer(serializers.Serializer):
     LoginName = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
-    
+    EmployeeID = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
         LoginName = data.get("LoginName", None)
@@ -113,6 +113,7 @@ class UserLoginSerializer(serializers.Serializer):
             )
         return {
             'LoginName': user.LoginName,
+            'EmployeeID':user.Employee_id,
             'token': jwt_token
         }
 
@@ -174,4 +175,13 @@ class ChangePasswordSerializer(serializers.Serializer):
             
         }
 
- 
+class M_employeesSerializer(serializers.ModelSerializer):
+   
+    class Meta:
+        model = M_Employees
+        fields = '__all__' 
+
+class C_CompanyGroupSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = C_CompanyGroups
+        fields = '__all__'
