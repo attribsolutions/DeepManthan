@@ -16,6 +16,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.db import connection, transaction
 
+from rest_framework.views import APIView
+import jwt
+
 # Create your views here.
 
 class UserRegistrationView(CreateAPIView):
@@ -167,7 +170,6 @@ class UserListViewSecond(CreateAPIView):
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
                   
 
-import jwt
 class UserLoginView(RetrieveAPIView):
     
     permission_classes = ()
@@ -235,6 +237,22 @@ class ChangePasswordView(RetrieveAPIView):
         return Response(response, status=status_code)            
 
 
+
+class RegenrateToken(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    def post(self, request):
+        OldToken = request.data['OldToken']
+        Other_Fields = request.data['Other_Fields']
+        Decode= jwt.decode(OldToken ,None,None)
+        payload_data = {
+            'Decode' : Decode,
+            'Other_Fields' : Other_Fields
+        }
+        my_secret = 'my_super_secret'
+        return Response({jwt.encode(payload=payload_data, key=my_secret)})
 
 
 

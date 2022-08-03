@@ -1,6 +1,6 @@
 from django.urls import re_path as url
 
-from .Views.V_Login import ChangePasswordView, UserListView, UserListViewSecond, UserLoginView, UserRegistrationView
+from .Views.V_Login import ChangePasswordView, RegenrateToken, UserListView, UserListViewSecond, UserLoginView, UserRegistrationView
 
 from .Views.V_Parties import *
 
@@ -86,18 +86,18 @@ urlpatterns = [
     url(r'Parties$', M_PartiesView.as_view()),
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
-    url(r'PartyTypes$', M_PartyTypeView.as_view()),
     url(r'demo$', AbcView.as_view()),
     url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
-    url(r'PartyType/([0-9]+)$', PartyTypesViewSecond.as_view()),
-    url(r'PartyType$', PartyTypesView.as_view()),
+    url(r'PartyTypes/([0-9]+)$', PartyTypesViewSecond.as_view()),
+    url(r'PartyTypes$', PartyTypesView.as_view()),
     url(r'DivisionTypes/([0-9]+)$', DivisionTypeViewSecond.as_view()),
     url(r'DivisionTypes$', DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
+    url(r'Regenrate$', RegenrateToken.as_view()),
       
 ]
   
