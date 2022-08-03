@@ -21,8 +21,8 @@ from ..Serializer.S_SendMail import *
 
 class SendViewMail(RetrieveAPIView):
 
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    permission_classes = ()
+    authentication_class = ()
 
     @transaction.atomic()
     def post(self, request):
@@ -98,8 +98,8 @@ class SendViewMail(RetrieveAPIView):
 
 class VerifyOTPwithUserData(RetrieveAPIView):
 
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    permission_classes = ()
+    authentication_class = ()
 
     @transaction.atomic()
     def post(self, request):

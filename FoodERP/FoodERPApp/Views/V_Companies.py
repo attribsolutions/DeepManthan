@@ -5,6 +5,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from ..Serializer.S_EmployeeTypes import M_EmployeeTypeSerializer
+
 from ..Serializer.S_Companies import *
 
 from ..models import C_Companies
@@ -202,4 +204,23 @@ class GetCompanyByDivisionType(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
-                 
+
+class GetCompanyByEmployeeType(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                EmployeeTypesdata = M_EmployeeTypes.objects.get(id=id)
+                EmployeeTypesdata_Serializer = M_EmployeeTypeSerializer(EmployeeTypesdata).data
+                
+                Companiesdata = C_Companies.objects.filter(IsSCM=EmployeeTypesdata_Serializer['IsSCM'])
+                Companiesdata_Serializer = C_CompanySerializer2(Companiesdata, many=True)
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Companiesdata_Serializer.data})
+        except C_CompanyGroups.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
+            
