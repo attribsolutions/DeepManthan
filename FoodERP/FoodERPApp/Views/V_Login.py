@@ -202,7 +202,7 @@ class UserLoginView(RetrieveAPIView):
             'Status': 'True',
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
-            'Token': serializer.data['token'],
+            'token': serializer.data['token'],
             
             'Token2' : extendtoken()
             # 'UserID': serializer.data['UserID'],
