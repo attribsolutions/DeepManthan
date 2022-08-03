@@ -167,7 +167,7 @@ class UserListViewSecond(CreateAPIView):
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
                   
 
-
+import jwt
 class UserLoginView(RetrieveAPIView):
     
     permission_classes = ()
@@ -178,11 +178,33 @@ class UserLoginView(RetrieveAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        LoginName = serializer.data['LoginName']
+        EmployeeID= serializer.data['EmployeeID']
+        GETLoginName =M_Employees.objects.get(id=EmployeeID)
+        EmployeesSerializer_data=M_employeesSerializer(GETLoginName).data
+        CompanyGroupID = C_CompanyGroups.objects.get(id=EmployeeID)
+        CompanyGroupSerializer_data = C_CompanyGroupSerializer(CompanyGroupID).data	
+         	        
+         
+        def extendtoken():
+            payload_data =  {
+                "LoginName": LoginName,
+                "EmployeeID": EmployeeID,
+                "EmployeeNfame": EmployeesSerializer_data['Name'],
+                'CompanyGroupID' : CompanyGroupSerializer_data['id']
+            }
+            my_secret = 'my_super_secret'
+            return{jwt.encode(payload=payload_data, key=my_secret)}
+             
+
+         
         response = {
             'Status': 'True',
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
-            'token': serializer.data['token'],
+            'Token': serializer.data['token'],
+            
+            'Token2' : extendtoken()
             # 'UserID': serializer.data['UserID'],
             # 'OTP': serializer.data['OTP'],
         }
@@ -190,6 +212,7 @@ class UserLoginView(RetrieveAPIView):
 
         return Response(response, status=status_code)\
 
+        
 
 class ChangePasswordView(RetrieveAPIView):
     
