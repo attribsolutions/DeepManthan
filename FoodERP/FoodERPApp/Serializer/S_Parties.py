@@ -8,10 +8,6 @@ class M_PartyTypeSerializer(serializers.ModelSerializer):
         model =  M_PartyType
         fields = '__all__'
         
-class M_DivisionTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model =  M_DivisionType
-        fields = '__all__'
                 
 class M_PartiesSerializer(serializers.ModelSerializer):
     class Meta:
