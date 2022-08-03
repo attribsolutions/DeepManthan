@@ -2,12 +2,6 @@ from ..models import *
 from rest_framework import serializers
 
 
-class M_EmployeesSerializer01(serializers.ModelSerializer):
-    class Meta:
-        model =  M_Employees
-        fields = '__all__'
-
- 
 class M_EmployeesSerializer02(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
@@ -33,5 +27,69 @@ class M_EmployeesSerializer02(serializers.Serializer):
     State_id = serializers.IntegerField()
     District_id =serializers.IntegerField()
 
+class MC_EmployeePartiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  MC_EmployeeParties
+        fields = ['Party']
 
-   
+class M_EmployeesSerializer(serializers.ModelSerializer):
+    EmployeeParties=MC_EmployeePartiesSerializer(many=True)
+    class Meta:
+        model =  M_Employees
+        fields = '__all__'   
+
+    def create(self, validated_data):
+        EmployeePartys_data = validated_data.pop('EmployeeParties')
+        Employees = M_Employees.objects.create(**validated_data)
+        for EmployeeParty_data in EmployeePartys_data:
+            MC_EmployeeParties.objects.create(Employee=Employees, **EmployeeParty_data)
+        return Employees         
+
+    def update(self, instance, validated_data):
+        
+        instance.Name = validated_data.get(
+            'Name', instance.Name)
+        instance.Address = validated_data.get(
+            'Address', instance.Address)    
+        instance.Mobile = validated_data.get(
+            'Mobile', instance.Mobile)
+        instance.email = validated_data.get(
+            'email', instance.email)
+        instance.DOB = validated_data.get(
+            'DOB', instance.DOB)
+        instance.PAN = validated_data.get(
+            'PAN', instance.PAN)
+        instance.AadharNo = validated_data.get(
+            'AadharNo', instance.AadharNo)
+        instance.working_hours = validated_data.get(
+            'working_hours', instance.working_hours) 
+        instance.Company = validated_data.get(
+            'Company', instance.Company)
+        instance.Designation = validated_data.get(
+            'Designation', instance.Designation)
+        instance.EmployeeType = validated_data.get(
+            'EmployeeType', instance.EmployeeType)
+        instance.State = validated_data.get(
+            'State', instance.State)
+        instance.District = validated_data.get(
+            'District', instance.District)                                
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy) 
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy)           
+        
+       
+        instance.save()
+
+        for items in instance.EmployeeParties.all():
+          items.delete()
+
+        
+
+        for OrderItem_data in validated_data['EmployeeParties']:
+            Items = MC_EmployeeParties.objects.create(Employee=instance, **OrderItem_data)
+        instance.EmployeeParties.add(Items)
+ 
+     
+
+        return instance      
