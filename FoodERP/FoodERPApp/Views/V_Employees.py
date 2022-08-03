@@ -40,12 +40,12 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
         try:
             with transaction.atomic():
                 M_Employeesdata = JSONParser().parse(request)
-                M_Employees_Serializer = M_EmployeesSerializer01(data=M_Employeesdata)
+                M_Employees_Serializer = M_EmployeesSerializer(data=M_Employeesdata)
                 if M_Employees_Serializer.is_valid():
                     M_Employees_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Data Save Successfully','Data' :[]})
                 else:
-                    # transaction.set_rollback(True)
+                    transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors,'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -84,7 +84,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                 M_Employeesdata = JSONParser().parse(request)
                 M_EmployeesdataByID = M_Employees.objects.get(id=id)
                
-                M_Employees_Serializer = M_EmployeesSerializer01(M_EmployeesdataByID, data=M_Employeesdata)
+                M_Employees_Serializer = M_EmployeesSerializer(M_EmployeesdataByID, data=M_Employeesdata)
                 if M_Employees_Serializer.is_valid():
                     M_Employees_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Updated Successfully','Data':[]})
