@@ -256,12 +256,6 @@ class RegenrateToken(APIView):
 
 
 
-
-
-
-
-
-
 # Registration Input json
 # {
   
