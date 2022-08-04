@@ -56,7 +56,7 @@ urlpatterns = [
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
     url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
-    url(r'RoleAccessList$', RoleAccessViewList.as_view()),
+    url(r'RoleAccessList/([0-9]+)/([0-9]+)$', RoleAccessViewList.as_view()),
     url(r'RoleAccess$', RoleAccessView.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
