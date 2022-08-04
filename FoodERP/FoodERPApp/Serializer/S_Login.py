@@ -186,3 +186,8 @@ class C_CompanyGroupSerializer(serializers.ModelSerializer):
      class Meta:
         model = C_CompanyGroups
         fields = '__all__'
+
+class M_UserPartiesSerializer(serializers.Serializer):
+    Employeeparty= serializers.IntegerField()
+
+             
