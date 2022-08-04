@@ -132,9 +132,14 @@ class UserRolesSerializer(serializers.ModelSerializer):
         fields= ['Role']
         
 
-
+class M_employeesSerializer(serializers.ModelSerializer):   
+    class Meta:
+        model = M_Employees
+        fields = '__all__' 
+        
 class UserListSerializer(serializers.ModelSerializer):
     UserRole = UserRolesSerializer(many=True, read_only=True)
+    Employee = M_employeesSerializer(read_only=True)
     class Meta:
         model = M_Users
         fields = '__all__'
@@ -175,11 +180,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             
         }
 
-class M_employeesSerializer(serializers.ModelSerializer):
-   
-    class Meta:
-        model = M_Employees
-        fields = '__all__' 
+
 
 class C_CompanyGroupSerializer(serializers.ModelSerializer):
      class Meta:
