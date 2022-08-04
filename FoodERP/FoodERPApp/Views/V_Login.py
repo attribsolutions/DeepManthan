@@ -86,7 +86,8 @@ class UserListView(CreateAPIView):
                                 'CreatedOn': a["CreatedOn"],
                                 'UpdatedBy': a["UpdatedBy"],
                                 'UpdatedOn': a["UpdatedOn"],
-                                'Employee': a["Employee"],
+                                'Employee': a["Employee"]["id"],
+                                'EmployeeName': a["Employee"]["Name"],
                                 'UserRole': RoleData,
 
                             })
@@ -134,7 +135,8 @@ class UserListViewSecond(CreateAPIView):
                         'CreatedOn': a["CreatedOn"],
                         'UpdatedBy': a["UpdatedBy"],
                         'UpdatedOn': a["UpdatedOn"],
-                        'Employee': a["Employee"],
+                        'Employee': a["Employee"]["id"],
+                        'EmployeeName': a["Employee"]["Name"],
                         'UserRole': RoleData,
 
                     })
@@ -253,12 +255,6 @@ class RegenrateToken(APIView):
         }
         my_secret = 'my_super_secret'
         return Response({jwt.encode(payload=payload_data, key=my_secret)})
-
-
-
-
-
-
 
 
 
