@@ -137,7 +137,7 @@ class M_EmployeeTypes(models.Model):
     ''' If IsPartyConnection Flag is True then we are able to assign multipal Parties from Employee Master  '''
     IsPartyConnection=models.BooleanField(default=False)
     IsSCM =models.BooleanField(default=False)
-    Description= models.CharField(max_length=100)
+    Description= models.CharField(max_length=100,blank=True,null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
