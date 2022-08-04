@@ -257,27 +257,49 @@ class RegenrateToken(APIView):
         return Response({jwt.encode(payload=payload_data, key=my_secret)})
 
 
+class UserPartiesViewSecond(CreateAPIView):
 
-
-
-class UserPartiesViewSecond(RetrieveAPIView):
-    
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    def get(self, request,id=0):
+    @transaction.atomic()
+    def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = MC_EmployeeParties.objects.raw('''SELECT mc_employeeparties.Party_id as Employeeparty FROM mc_employeeparties where mc_employeeparties.Employee_id=1''')
+                query = MC_EmployeeParties.objects.raw('''SELECT  a.Party_id as id   ,b.Role_id as R_id from (SELECT mc_employeeparties.Party_id,'0' RoleID FROM mc_employeeparties where Employee_id=1)a left join (select mc_userroles.Party_id,mc_userroles.Role_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=1)b on a.Party_id=b.Party_id''')
+                # query = MC_EmployeeParties.objects.raw('''SELECT Party_id as id FROM mc_employeeparties where Employee_id=%s''',[id])
                 if not query:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []}) 
                 else:
-                    M_Items_Serializer = M_UserPartiesSerializer(
-                        query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
+                    M_UserParties_Serializer = M_UserPartiesSerializer(query, many=True).data
 
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_UserParties_Serializer[0]})  
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'erroe', 'Data': []})
+
+
+ 
+
+# class M_ItemsViewSecond(CreateAPIView):
+
+#     permission_classes = (IsAuthenticated,)
+#     authentication_class = JSONWebTokenAuthentication
+
+#     @transaction.atomic()
+#     def get(self, request, id=0 ):
+#         try:
+#             with transaction.atomic():
+#                 query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+# FROM M_Items p 
+# JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
+# WHERE p.id= %s''',[id])
+#                 if not query:
+#                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+#                 else:
+#                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
+#                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer[0]})   
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 # Registration Input json
