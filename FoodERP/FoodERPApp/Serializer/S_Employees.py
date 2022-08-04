@@ -93,3 +93,12 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
      
 
         return instance      
+
+
+class EmployeepartiesDataSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
+    Name = serializers.CharField(max_length=100)
+
+     
+  
+    
