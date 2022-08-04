@@ -104,6 +104,7 @@ urlpatterns = [
     url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
+    url(r'UserPartiesForUserMaster$', UserPartiesViewSecond.as_view()),
     
     
 

@@ -258,6 +258,28 @@ class RegenrateToken(APIView):
 
 
 
+
+
+class UserPartiesViewSecond(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                query = MC_EmployeeParties.objects.raw('''SELECT mc_employeeparties.Party_id as Employeeparty FROM mc_employeeparties where mc_employeeparties.Employee_id=1''')
+                if not query:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
+                else:
+                    M_Items_Serializer = M_UserPartiesSerializer(
+                        query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
 # Registration Input json
 # {
   
