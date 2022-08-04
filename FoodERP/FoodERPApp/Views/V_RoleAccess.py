@@ -100,14 +100,14 @@ class RoleAccessViewList(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    def get(self, request, Role=0,Division=0):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
                 query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_RoleAccess.Role_id,M_Roles.Name RoleName,M_RoleAccess.Division_id,M_Parties.Name DivisionName,M_RoleAccess.Company_id,C_Companies.Name CompanyName
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
     join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
-    join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id WHERE M_RoleAccess.Role_id=%s AND M_RoleAccess.Division_id=%s  group by Role_id,Division_id,Company_id''',([Role],[Division]))
+    join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id  group by Role_id,Division_id,Company_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
