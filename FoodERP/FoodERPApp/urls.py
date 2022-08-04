@@ -97,7 +97,7 @@ urlpatterns = [
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
-    url(r'Regenrate$', RegenrateToken.as_view()),
+    url(r'RegenrateToken$', RegenrateToken.as_view()),
       
 ]
   
