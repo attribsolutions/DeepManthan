@@ -1,6 +1,6 @@
 from django.urls import re_path as url
 
-from .Views.V_Login import ChangePasswordView, RegenrateToken, UserListView, UserListViewSecond, UserLoginView, UserRegistrationView
+from .Views.V_Login import *
 
 from .Views.V_Parties import *
 
@@ -45,6 +45,9 @@ from .Views.V_SendMail import *
 
 
 urlpatterns = [
+    
+    # Master APIs IN Projects Add Page ,List Page
+    
     url(r'Registration', UserRegistrationView.as_view()),
     url(r'Login', UserLoginView.as_view()),
     url(r'ChangePassword', ChangePasswordView.as_view()),
@@ -53,14 +56,12 @@ urlpatterns = [
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
     url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
-    url(r'RoleAccessList$', RoleAccessViewList.as_view()),
+    url(r'RoleAccessList/([0-9]+)/([0-9]+)$', RoleAccessViewList.as_view()),
     url(r'RoleAccess$', RoleAccessView.as_view()),
-    url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
     url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
     url(r'PageMaster$', M_PagesView.as_view()),
-    url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageAccess$', H_PageAccessView.as_view()),
     url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
     url(r'Company$', C_CompaniesView.as_view()),
@@ -81,23 +82,31 @@ urlpatterns = [
     url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
     url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     url(r'States$',M_StateView.as_view()),
-    url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
     url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'Parties$', M_PartiesView.as_view()),
-    url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
-    url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'demo$', AbcView.as_view()),
     url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
-    url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
-    url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'PartyTypes/([0-9]+)$', PartyTypesViewSecond.as_view()),
     url(r'PartyTypes$', PartyTypesView.as_view()),
     url(r'DivisionTypes/([0-9]+)$', DivisionTypeViewSecond.as_view()),
     url(r'DivisionTypes$', DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
+    
+    # Dependencies APIs IN Projects 
+    
+    url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
+    url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
+    url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
+    url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
+    url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
+    url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
+    url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
-      
+    
+    
+
+     
 ]
   
