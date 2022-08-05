@@ -33,7 +33,7 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
 m_pages.Icon,m_pages.isActive,m_pages.Module_id,
 m_pages.PageType,m_pages.RelatedPageID,Pages_id FROM m_roleaccess
 JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
-WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
+WHERE Role_id=%s AND  Modules_id=%s and Division_id=%s and Company_id=%s  ''', ([Role], [id],[Division],[Company]))
 
             PageSerializer = M_PagesSerializerforRoleAccessNEW(
                 query,  many=True).data
