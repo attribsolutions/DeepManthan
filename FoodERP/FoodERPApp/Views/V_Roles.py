@@ -25,8 +25,8 @@ class M_RolesView(CreateAPIView):
                     M_Roles_serializer = M_RolesSerializer(M_Roles_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Roles_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Role Not available', 'Data': []})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
@@ -40,8 +40,8 @@ class M_RolesView(CreateAPIView):
             else:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Roles_Serializer.errors, 'Data' : []})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
 
 
 class M_RolesViewSecond(CreateAPIView):
@@ -56,8 +56,10 @@ class M_RolesViewSecond(CreateAPIView):
                 M_Rolesdata = M_Roles.objects.get(id=id)
                 M_Roles_Serializer = M_RolesSerializer(M_Rolesdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Roles_Serializer.data})
+        except  M_Roles.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'M_Roles Not available', 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -74,7 +76,7 @@ class M_RolesViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Roles_Serializer.errors, 'Data' :[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Executiono Error', 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):

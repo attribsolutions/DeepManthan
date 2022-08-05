@@ -26,8 +26,8 @@ class C_CompaniesView(CreateAPIView):
                     Companies_Serializer = C_CompanySerializer1(Companiesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Companies_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Companies Not Available', 'Data': []})    
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
 
 
     @transaction.atomic()
@@ -42,8 +42,8 @@ class C_CompaniesView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Companies_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
             
 
 
@@ -63,8 +63,8 @@ WHERE c_companies.id = %s''',[id])
                 else:    
                     Companies_Serializer = C_CompanySerializer3(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Companies_Serializer[0]})   
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Error', 'Data': []})
             
 
     @transaction.atomic()
@@ -81,8 +81,8 @@ WHERE c_companies.id = %s''',[id])
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Error', 'Data':[]})
         
 
     @transaction.atomic()
@@ -113,8 +113,8 @@ class C_CompanyGroupsView(CreateAPIView):
                     CompaniesGroups_Serializer = C_CompanyGroupsSerializer(CompaniesGroupsdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': CompaniesGroups_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Company Groups Not available', 'Data': []})        
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
             
 
     @transaction.atomic()
@@ -130,8 +130,8 @@ class C_CompanyGroupsView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Erroe', 'Data':[]})
            
 
 
@@ -149,7 +149,8 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': CompaniesGroupsdata_Serializer.data})
         except C_CompanyGroups.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Group Not available', 'Data': []})
-            
+        except Exception :
+            return JsonResponse({'StatusCode' : 400,'Status': True, 'Message':'Execution Error', 'Data': []}) 
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -165,8 +166,8 @@ class C_CompanyGroupsViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CompaniesGropus_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
            
 
     @transaction.atomic()
@@ -202,8 +203,8 @@ class GetCompanyByDivisionType(CreateAPIView):
                         # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': DivisionTypedata_Serializer })
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':C_Companiesdata_Serializer })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})            
 
 class GetCompanyByEmployeeType(CreateAPIView):
     

@@ -23,8 +23,8 @@ class M_EmployeeTypeView(CreateAPIView):
                     M_EmployeeType_serializer = M_EmployeeTypeSerializer(M_EmployeeTypedata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_EmployeeType_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})    
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -38,8 +38,8 @@ class M_EmployeeTypeView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
                    
 
 class M_EmployeeTypeViewSecond(RetrieveAPIView):
@@ -69,8 +69,8 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': EmployeeType_Serializer.errors, 'Data' : []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data' : []})
+        except Exception : 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data' : []})
 
     @transaction.atomic()
     def delete(self, request, id=0):

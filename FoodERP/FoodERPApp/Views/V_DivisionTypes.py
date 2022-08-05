@@ -20,10 +20,11 @@ class DivisionTypeView(CreateAPIView):
                 DivisionTypesdata = M_DivisionType.objects.all()
                 if DivisionTypesdata.exists():
                     DivisionTypesdata_serializer = DivisionTypeSerializer(DivisionTypesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':DivisionTypesdata_serializer.data })
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': DivisionTypesdata_serializer.data })
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Division Not available', 'Data': []})    
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception' , 'Data':[]})
+
 
     @transaction.atomic()
     def post(self, request):
@@ -37,8 +38,8 @@ class DivisionTypeView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  DivisionTypes_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception   :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception'  , 'Data':[]})
             
 
 
@@ -59,8 +60,8 @@ WHERE m_divisiontype.id = %s''',[id])
                 else:    
                     PartyTypes_Serializer = DivisionTypeSerializer2(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer[0]})   
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
             
         
     @transaction.atomic()
@@ -77,8 +78,8 @@ WHERE m_divisiontype.id = %s''',[id])
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': DivisionTypesdata_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
         
 
     @transaction.atomic()

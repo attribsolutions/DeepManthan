@@ -25,8 +25,8 @@ class PartyTypesView(CreateAPIView):
                     PartyTypes_Serializer = PartyTypesSerializer(PartyTypesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party Types Not Available', 'Data': []})    
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
 
 
     @transaction.atomic()
@@ -41,8 +41,8 @@ class PartyTypesView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypes_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
             
 
 class PartyTypesViewSecond(CreateAPIView):
@@ -61,8 +61,8 @@ WHERE m_partytype.id = %s''',[id])
                 else:    
                     PartyTypes_Serializer = PartyTypesSerializer2(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer[0]})   
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
             
 
     @transaction.atomic()
@@ -79,8 +79,8 @@ WHERE m_partytype.id = %s''',[id])
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyTypedata_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
         
 
     @transaction.atomic()

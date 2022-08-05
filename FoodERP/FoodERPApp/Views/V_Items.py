@@ -28,8 +28,8 @@ Order BY RP.Sequence, p.Sequence''')
                 else:
                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
         
 
     @transaction.atomic()
@@ -44,8 +44,8 @@ Order BY RP.Sequence, p.Sequence''')
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found', 'Data':[]})
                  
  
 
@@ -67,8 +67,8 @@ JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
                 else:
                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer[0]})   
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
         
 
     @transaction.atomic()
@@ -85,8 +85,8 @@ JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e),'Data' :[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):

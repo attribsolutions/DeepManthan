@@ -32,8 +32,8 @@ left join M_Pages RP on p.RelatedPageID=RP.id Order By m.DisplayIndex,p.DisplayI
                     HPagesserialize_data = M_PagesSerializer(
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPagesserialize_data})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Execution Error', 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -45,8 +45,8 @@ left join M_Pages RP on p.RelatedPageID=RP.id Order By m.DisplayIndex,p.DisplayI
                     HPagesserialize_data.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': HPagesserialize_data.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data': []})
 
 
 class M_PagesViewSecond(RetrieveAPIView):
@@ -105,8 +105,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "PagePageAccess": PageAccessListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -122,9 +122,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Pages_Serializer.errors, 'Data': []})
-        except Exception as e:
-            raise JsonResponse(
-                {'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -157,9 +156,8 @@ class showPagesListOnPageType(RetrieveAPIView):
                         'Name': a1["Name"]
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPageListData})
-        except Exception as e:
-            raise JsonResponse(
-                {'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
 
 class PagesMasterForRoleAccessView(RetrieveAPIView):
     
@@ -212,5 +210,5 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 "ModuleData": PageListData,}
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':[PageListData] })
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Execution Error', 'Data': []})
