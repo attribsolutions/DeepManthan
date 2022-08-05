@@ -279,7 +279,25 @@ class UserPartiesViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
 
 
- 
+class GetEmployeeViewForUserCreation(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name FROM M_Employees where M_Employees.id 
+NOT IN (SELECT Employee_id From m_users) ''')
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
+                else:
+                    M_Employees_Serializer =EmployeeSerializerForUserCreation (
+                        query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
+     
  
 
 # Registration Input json
