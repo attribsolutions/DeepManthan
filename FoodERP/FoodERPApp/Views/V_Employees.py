@@ -33,8 +33,8 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
                     M_Employees_Serializer = M_EmployeesSerializer02(
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -49,8 +49,8 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
 
 class M_EmployeesViewSecond(RetrieveAPIView):
@@ -116,16 +116,9 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                         'EmployeeParties' : EmployeeParties
                         })
  
-                    return JsonResponse ( {
-                            "StatusCode": 200,
-                            "Status": True,
-                            "Message": " ",
-                            "Data": GetAllData
-                        }  )   
-                    # return JsonResponse({'Data': response})
-                    # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Employees_Serializer[0]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                    return JsonResponse ( {"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]}  )   
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -142,8 +135,8 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):

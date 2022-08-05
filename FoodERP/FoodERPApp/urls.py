@@ -107,4 +107,3 @@ urlpatterns = [
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
      
 ]
-  
