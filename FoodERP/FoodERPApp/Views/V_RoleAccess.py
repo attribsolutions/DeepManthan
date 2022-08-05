@@ -91,8 +91,8 @@ WHERE Role_id=%s AND  Modules_id=%s ''', ([Role], [id]))
                     RoleAccessSerialize_data.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data': []})
 
 
 class RoleAccessViewList(RetrieveAPIView):
@@ -115,8 +115,8 @@ class RoleAccessViewList(RetrieveAPIView):
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
 
 
 class RoleAccessViewNewUpdated(RetrieveAPIView):
@@ -248,8 +248,8 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
                     PageSerializer = M_PageSerializerNewUpdated(
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
         
         
 class RoleAccessGetPagesAccessOnPage(RetrieveAPIView):
@@ -267,7 +267,6 @@ class RoleAccessGetPagesAccessOnPage(RetrieveAPIView):
                     PageSerializer = M_PageSerializerNewUpdated(
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
-
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})        
        

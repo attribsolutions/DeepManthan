@@ -93,9 +93,10 @@ class UserListView(CreateAPIView):
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': UserData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data':[] })                      
-        except Exception as e:
-            raise Exception(e)
-        print(e)
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[] })                      
+        
+        
 
 class UserListViewSecond(CreateAPIView):
     
@@ -142,8 +143,8 @@ class UserListViewSecond(CreateAPIView):
                     })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': UserData[0]})               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data':'' })                     
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -152,8 +153,8 @@ class UserListViewSecond(CreateAPIView):
                 Usersdata = M_Users.objects.get(id=id)
                 Usersdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully', 'Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Execution Errors', 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -168,8 +169,8 @@ class UserListViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Usersdata_Serializer.errors, 'Data':[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
                   
 
 class UserLoginView(RetrieveAPIView):
@@ -268,15 +269,14 @@ class UserPartiesViewSecond(CreateAPIView):
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw('''SELECT  a.id,a.Party_id,b.Role_id  from (SELECT mc_employeeparties.id,mc_employeeparties.Party_id,'0' RoleID FROM mc_employeeparties where Employee_id=1)a left join (select mc_userroles.Party_id,mc_userroles.Role_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=1)b on a.Party_id=b.Party_id''')
                 print(str(query.query))
-                
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []}) 
                 else:
                     M_UserParties_Serializer = M_UserPartiesSerializer(query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_UserParties_Serializer})  
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'erroe', 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
 
 
  

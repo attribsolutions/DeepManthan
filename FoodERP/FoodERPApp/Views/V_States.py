@@ -29,8 +29,8 @@ class M_StateView(RetrieveAPIView):
                     State_serializer =  StateSerializer(State_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': State_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []})    
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
         
 class M_DistrictView(CreateAPIView):
     
@@ -46,6 +46,6 @@ class M_DistrictView(CreateAPIView):
                     District_serializer =  DistrictsSerializer(Districts_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': District_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Districts Not available', 'Data': []})    
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except Exception:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
                           
