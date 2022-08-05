@@ -105,9 +105,6 @@ urlpatterns = [
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
-    
-    
-
      
 ]
   
