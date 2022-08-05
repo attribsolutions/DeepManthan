@@ -11,7 +11,7 @@ class Employeeserializer(serializers.Serializer):
 class Userserializer(serializers.Serializer):
     id = serializers.IntegerField()
     LoginName = serializers.CharField(max_length=500)         
-       
+    AdminPassword = serializers.CharField(max_length=500)    
                
    
 
