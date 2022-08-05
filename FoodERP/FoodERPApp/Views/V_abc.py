@@ -24,8 +24,8 @@ class AbcView(CreateAPIView):
                     Abc_Serializer = AbcSerializer(Abcdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Abc_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Data Not available', 'Data': []})        
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
             
     
     

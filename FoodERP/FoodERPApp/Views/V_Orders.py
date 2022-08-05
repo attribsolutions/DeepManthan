@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Orders import *
@@ -50,9 +50,9 @@ class T_OrdersView(CreateAPIView):
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': OrderListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
-        except Exception as e:
-            raise Exception(e)
-            print(e)
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})
+             
 
     @transaction.atomic()
     def post(self, request):
@@ -64,8 +64,8 @@ class T_OrdersView(CreateAPIView):
                     Order_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully' , 'Data':[] })
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors , 'Data':[]})
-        except Exception as e:
-            raise Exception(e)
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})
 
 class T_OrdersViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -134,9 +134,8 @@ class T_OrdersViewSecond(CreateAPIView):
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': OrderListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found', 'Data': []})    
-        except Exception as e:
-            raise Exception(e)
-            print(e)     
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})     
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -145,8 +144,10 @@ class T_OrdersViewSecond(CreateAPIView):
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully','Data':[]})
-        except Exception as e:
-            raise Exception(e)
+        except T_Orders.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'T_Orders used in another tbale', 'Data': []}) 
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -163,5 +164,4 @@ class T_OrdersViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Orderupdate_Serializer.errors ,'Data':[]})
         except Exception as e:
-            raise Exception(e)
-            print(e)                  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})                 
