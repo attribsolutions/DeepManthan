@@ -55,13 +55,13 @@ class M_ItemsViewSecond(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0 ):
+    def get(self, request):
         try:
             with transaction.atomic():
                 query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Items p 
 JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
-WHERE p.id= %s''',[id])
+''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:

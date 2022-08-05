@@ -187,7 +187,12 @@ class C_CompanyGroupSerializer(serializers.ModelSerializer):
         model = C_CompanyGroups
         fields = '__all__'
 
+ 
 class M_UserPartiesSerializer(serializers.Serializer):
-    Employeeparty= serializers.IntegerField()
-
+  
+    id = serializers.IntegerField()
+    Name=serializers.CharField(max_length=500)
+    Party_id=serializers.IntegerField()
+    Role_id = serializers.IntegerField()
+ 
              
