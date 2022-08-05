@@ -87,8 +87,10 @@ class SendViewMail(RetrieveAPIView):
                         otp = random.randint(1000, 9999)
                         userOTP = M_Users.objects.filter(
                             Employee=Employeedata_Serializer[0]['id']).update(OTP=otp)
-                        send_otp_to_phone(otp, PhoneNo)
-                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data': otp})
+                        newline = '\n'
+                        message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
+                        send_otp_to_phone(PhoneNo,message)
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
                         # subject = 'Your Account Verification mail'
                         # newline = '\n'
                         # message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
