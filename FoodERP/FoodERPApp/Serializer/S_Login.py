@@ -191,6 +191,7 @@ class C_CompanyGroupSerializer(serializers.ModelSerializer):
 class M_UserPartiesSerializer(serializers.Serializer):
   
     id = serializers.IntegerField()
-    R_id = serializers.IntegerField()
+    Party_id=serializers.IntegerField()
+    Role_id = serializers.IntegerField()
  
              
