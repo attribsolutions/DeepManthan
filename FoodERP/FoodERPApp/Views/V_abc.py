@@ -19,7 +19,7 @@ class AbcView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Abcdata = M_RoleAccess.objects.all()
+                Abcdata = Abc.objects.all()
                 if Abcdata.exists():
                     Abc_Serializer = AbcSerializer(Abcdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Abc_Serializer.data})
