@@ -97,7 +97,7 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
 
 class EmployeepartiesDataSerializer(serializers.Serializer):
     id= serializers.IntegerField()
-    lable = serializers.CharField(max_length=100)
+    Name = serializers.CharField(max_length=100)
 
      
   
