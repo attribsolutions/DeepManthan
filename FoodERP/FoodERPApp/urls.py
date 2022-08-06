@@ -108,4 +108,7 @@ urlpatterns = [
     
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
      
+
+     
+    url(r'CopyMRoleAcess$',CopyMRoleAcessView.as_view()),
 ]
