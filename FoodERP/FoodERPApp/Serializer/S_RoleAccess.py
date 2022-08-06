@@ -143,4 +143,20 @@ class M_PageAccessSerializerAddPage(serializers.Serializer):
    
 
 
-   
+class CopyMRoleAcessSerializer(serializers.ModelSerializer):
+    RoleAccess=MC_RolePageAccessSerilaizer(many=True)
+
+    class Meta:
+        model = M_RoleAccess
+        fields = ['Company','Division', 'Modules','Pages','RoleAccess','CreatedBy','UpdatedBy']
+
+        # def create(self, validated_data):
+
+        
+        #     RolePageAccess_datas = validated_data.pop('RolePageAccess')
+        #     RoleAccessID = M_RoleAccess.objects.create(**validated_data)
+        #     for RolePageAccess_data in RolePageAccess_datas:
+        #         MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
+                
+        #     return RoleAccessID
+ 
