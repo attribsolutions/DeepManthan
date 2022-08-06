@@ -12,6 +12,6 @@ class DivisionTypeSerializer(serializers.ModelSerializer):
 class DivisionTypeSerializer2(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
-    IsSCM = serializers.BooleanField
+    IsSCM = serializers.BooleanField()
 
    
