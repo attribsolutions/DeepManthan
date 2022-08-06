@@ -20,11 +20,14 @@ class PartyTypesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                PartyTypesdata = M_PartyType.objects.all()
-                if PartyTypesdata.exists():
-                    PartyTypes_Serializer = PartyTypesSerializer(PartyTypesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party Types Not Available', 'Data': []})    
+                query = M_PartyType.objects.raw('''SELECT m_partytype.id,m_partytype.Name,m_divisiontype.Name DivisionTypeName FROM m_partytype
+JOIN m_divisiontype ON m_divisiontype.id=m_partytype.DivisionType_id''')
+                # PartyTypesdata = M_PartyType.objects.all()
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data': []})
+                else:    
+                    PartyTypes_Serializer = PartyTypesSerializer2(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer})       
         except Exception  :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
 
