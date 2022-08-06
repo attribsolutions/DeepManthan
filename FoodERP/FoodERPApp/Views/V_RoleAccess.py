@@ -270,3 +270,38 @@ class RoleAccessGetPagesAccessOnPage(RetrieveAPIView):
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})        
        
+
+
+class CopyMRoleAcessView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):       
+        Role = request.data['Role']
+        Division  = request.data['Division']
+        NewRole = request.data['NewRole']
+        NewDivision = request.data['NewDivision']
+        try:
+            with transaction.atomic():
+                PartyTypesdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id =Division)
+                if PartyTypesdata.exists():
+                    for a in PartyTypesdata:
+                        
+                        PartyTypes_Serializer = CopyMRoleAcessSerializer(PartyTypesdata, many=True)
+                        Add_data = list(PartyTypes_Serializer.data)
+                        Add_data.append({
+                            'Role': NewRole,
+                            'Division' :NewDivision
+                        })
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':Add_data})    
+
+                    RoleAccessSerialize_data = M_RoleAccessSerializer(data=Add_data, many=True)
+                    if RoleAccessSerialize_data.is_valid():
+                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Abcd', 'Data': RoleAccessSerialize_data.data})
+                    # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
+                    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Error', 'Data': []})    
+        except Exception  :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
