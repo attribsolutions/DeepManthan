@@ -193,7 +193,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name=serializers.CharField(max_length=500)
     Party_id=serializers.IntegerField()
-    Role_id = serializers.IntegerField()
+    # Role_id = serializers.IntegerField()
  
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     
