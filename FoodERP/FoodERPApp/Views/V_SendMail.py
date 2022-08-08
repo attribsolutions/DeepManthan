@@ -49,6 +49,7 @@ class SendViewMail(RetrieveAPIView):
                 if userquery.exists():
                     Usersdata_Serializer = Userserializer(
                         userquery, many=True).data
+                    UserID= Usersdata_Serializer[0]['id']
                     LoginName = Usersdata_Serializer[0]['LoginName']
                     otp = random.randint(1000, 9999)
                     userOTP = M_Users.objects.filter(
@@ -56,7 +57,7 @@ class SendViewMail(RetrieveAPIView):
                    
                     subject = 'Your Account Verification mail'
                     newline = '\n'
-                    message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
+                    message = f'''Your UserID: {UserID} {newline} Your Login Name: {LoginName} {newline} Your OTP is {otp} '''
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = [Email]
                     send_mail(subject, message, email_from, recipient_list)
