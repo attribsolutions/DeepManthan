@@ -287,21 +287,22 @@ class CopyMRoleAcessView(CreateAPIView):
             with transaction.atomic():
                 PartyTypesdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id =Division)
                 if PartyTypesdata.exists():
-                    for a in PartyTypesdata:
-                        
-                        PartyTypes_Serializer = CopyMRoleAcessSerializer(PartyTypesdata, many=True)
-                        Add_data = list(PartyTypes_Serializer.data)
-                        Add_data.append({
-                            'Role': NewRole,
-                            'Division' :NewDivision
-                        })
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':Add_data})    
-
-                    RoleAccessSerialize_data = M_RoleAccessSerializer(data=Add_data, many=True)
+                    serializersdata = CopyMRoleAcessSerializer(PartyTypesdata, many=True)
+                    additionaldata=list()
+                    for a in serializersdata.data:
+                        a.update({'Role': NewRole,'Division':NewDivision})
+                        additionaldata.append(a)
+                    # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':additionaldata})    
+                    RoleAccessSerialize_data = CopyMRoleAcessSerializer(data=additionaldata, many=True)
                     if RoleAccessSerialize_data.is_valid():
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Abcd', 'Data': RoleAccessSerialize_data.data})
-                    # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
+                        # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':RoleAccessSerialize_data.data}) 
+                        RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
+                            Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
+                        RoleAccessdata.delete()
+                        RoleAccessSerialize_data.save()
                     
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Error', 'Data': []})    
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Copy Role Access Save Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Execution Error', 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data': []})
