@@ -111,18 +111,18 @@ class VerifyOTPwithUserData(RetrieveAPIView):
     def post(self, request,*args,**kwargs):
         try:
             with transaction.atomic():
-                LoginName = request.data.get("LoginName")
+                UserID = request.data.get("UserID")
                 verifyOTP = request.data.get('OTP')
                 newpassword = request.data.get("newpassword")
-                if LoginName and verifyOTP and newpassword:
-                    User = M_Users.objects.filter(LoginName__exact=str(LoginName)).filter(
+                if UserID and verifyOTP and newpassword:
+                    User = M_Users.objects.filter(id=str(UserID)).filter(
                         OTP__exact=str(verifyOTP)).values('id', 'LoginName','AdminPassword')
                   
                     if User.exists():
                         Userdata_Serializer = Userserializer(User, many=True).data
                         # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'', 'Data': Userdata_Serializer })
                         userOTP = M_Users.objects.filter(id=Userdata_Serializer[0]['id']).update(OTP=None,AdminPassword=newpassword)
-                        user=authenticate(LoginName=LoginName,password=Userdata_Serializer[0]['AdminPassword'])
+                        user=authenticate(LoginName=Userdata_Serializer[0]['LoginName'],password=Userdata_Serializer[0]['AdminPassword'])
                         user.set_password(newpassword)
                         user.save()
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'LoginName And  OTP Match Successfully... ', 'Data': []})
