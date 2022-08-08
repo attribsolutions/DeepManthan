@@ -148,15 +148,14 @@ class CopyMRoleAcessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = M_RoleAccess
-        fields = ['Company','Division', 'Modules','Pages','RoleAccess','CreatedBy','UpdatedBy']
-
-        # def create(self, validated_data):
+        fields = ['Company','Modules','Pages','RoleAccess','CreatedBy','UpdatedBy']
+    
+    def create(self, validated_data):
+        
+        CopyRolePageAccess_datalist = validated_data.pop('RoleAccess')
+        RoleAccessID = M_RoleAccess.objects.create(**validated_data)
+        for RolePageAccess_data in CopyRolePageAccess_datalist:
+           MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
+        return RoleAccessID    
 
         
-        #     RolePageAccess_datas = validated_data.pop('RolePageAccess')
-        #     RoleAccessID = M_RoleAccess.objects.create(**validated_data)
-        #     for RolePageAccess_data in RolePageAccess_datas:
-        #         MC_RolePageAccess.objects.create(RoleAccess=RoleAccessID, **RolePageAccess_data)
-                
-        #     return RoleAccessID
- 
