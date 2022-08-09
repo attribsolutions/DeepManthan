@@ -149,7 +149,14 @@ class CopyMRoleAcessSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_RoleAccess
         fields = ['Company','Modules','Pages','RoleAccess','CreatedBy','UpdatedBy']
-    
+
+
+class InsertCopyMRoleAcessSerializer(serializers.ModelSerializer):
+    RoleAccess=MC_RolePageAccessSerilaizer(many=True)
+
+    class Meta:
+        model = M_RoleAccess
+        fields = ['Role','Company','Division','Modules','Pages','RoleAccess','CreatedBy','UpdatedBy']    
     def create(self, validated_data):
         
         CopyRolePageAccess_datalist = validated_data.pop('RoleAccess')

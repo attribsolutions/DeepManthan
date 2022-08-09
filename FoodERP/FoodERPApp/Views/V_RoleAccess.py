@@ -293,11 +293,12 @@ class CopyMRoleAcessView(CreateAPIView):
                         a.update({'Role': NewRole,'Division':NewDivision})
                         additionaldata.append(a)
                     # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':additionaldata})    
-                    RoleAccessSerialize_data = CopyMRoleAcessSerializer(data=additionaldata, many=True)
+                    RoleAccessSerialize_data = InsertCopyMRoleAcessSerializer(data=additionaldata, many=True)
                     if RoleAccessSerialize_data.is_valid():
                         # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':RoleAccessSerialize_data.data}) 
                         RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
                             Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
+                        # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':str(RoleAccessdata.query)}) 
                         RoleAccessdata.delete()
                         RoleAccessSerialize_data.save()
                     
