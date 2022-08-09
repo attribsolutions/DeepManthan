@@ -52,6 +52,11 @@ class DivisionTypeserializer(serializers.Serializer):
     IsSCM =serializers.BooleanField()
     
 
+    class C_CompanySerializer(serializers.ModelSerializer):
+        class Meta:
+            model = C_Companies
+            fields = 'CompanyGroup'
+
     
     
 
