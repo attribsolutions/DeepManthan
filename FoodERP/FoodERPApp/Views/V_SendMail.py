@@ -57,7 +57,7 @@ class SendViewMail(RetrieveAPIView):
                    
                     subject = 'Your Account Verification mail'
                     newline = '\n'
-                    message = f'''Your UserID: {UserID} {newline} Your Login Name: {LoginName} {newline} Your OTP is {otp} '''
+                    message = f'''Your UserID: {UserID} {newline}Your Login Name: {LoginName} {newline} Your OTP: {otp} '''
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = [Email]
                     send_mail(subject, message, email_from, recipient_list)
@@ -117,7 +117,7 @@ class VerifyOTPwithUserData(RetrieveAPIView):
                 if UserID and verifyOTP and newpassword:
                     User = M_Users.objects.filter(id=str(UserID)).filter(
                         OTP__exact=str(verifyOTP)).values('id', 'LoginName','AdminPassword')
-                  
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'LoginName And  OTP Match Successfully... ', 'Data': []})
                     if User.exists():
                         Userdata_Serializer = Userserializer(User, many=True).data
                         # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'', 'Data': Userdata_Serializer })
