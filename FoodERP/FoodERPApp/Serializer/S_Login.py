@@ -114,7 +114,8 @@ class UserLoginSerializer(serializers.Serializer):
         return {
             'LoginName': user.LoginName,
             'EmployeeID':user.Employee_id,
-            'token': jwt_token
+            'token': jwt_token,
+            'User_id' : user.id
         }
 
 
@@ -205,3 +206,9 @@ class UserListSerializerforgetdata(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = ['Employee']
+
+
+
+class UserListSerializergetdata(serializers.Serializer):
+
+    id = serializers.IntegerField()
