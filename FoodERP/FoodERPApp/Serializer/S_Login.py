@@ -114,7 +114,8 @@ class UserLoginSerializer(serializers.Serializer):
         return {
             'LoginName': user.LoginName,
             'EmployeeID':user.Employee_id,
-            'token': jwt_token
+            'token': jwt_token,
+            'User_id' : user.id
         }
 
 

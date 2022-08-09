@@ -186,17 +186,13 @@ class UserLoginView(RetrieveAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        LoginName = serializer.data['LoginName']
-        # GETUserid = M_Users.objects.filter(LoginName = LoginName)
-        GETUserid = M_Users.objects.raw('''select id from m_users where LoginName =%s''',[LoginName])
-        UserIDofUser = UserListSerializergetdata(GETUserid, many= True).data
-        
+ 
         response = {
             'Status': 'True',
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
             'token': serializer.data['token'],
-            'User_ID' : UserIDofUser[0]['id']
+            'User_id':serializer.data['User_id']  
             
             # 'UserID': serializer.data['UserID'],
             # 'OTP': serializer.data['OTP'],
