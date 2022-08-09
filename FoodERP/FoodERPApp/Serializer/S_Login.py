@@ -48,17 +48,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'isLoginUsingMobile', instance.isLoginUsingMobile)
         instance.isLoginUsingEmail = validated_data.get(
             'isLoginUsingEmail', instance.isLoginUsingEmail)
-        instance.AdminPassword = validated_data.get(
-            'password', instance.password)   
+        # instance.AdminPassword = validated_data.get(
+        #     'password', instance.password)   
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
         instance.Employee_id = validated_data.get(
             'Employee_id', instance.Employee_id)                       
         
-        password = validated_data.pop('password', None)
-        if password is not None:
-            instance.set_password(password)           
-        instance.save()
+        # password = validated_data.pop('password', None)
+        # if password is not None:
+        #     instance.set_password(password)           
+        # instance.save()
 
         for items in instance.UserRole.all():
             items.delete()
@@ -193,7 +193,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name=serializers.CharField(max_length=500)
     Party_id=serializers.IntegerField()
-    Role_id = serializers.IntegerField()
+    # Role_id = serializers.IntegerField()
  
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     
