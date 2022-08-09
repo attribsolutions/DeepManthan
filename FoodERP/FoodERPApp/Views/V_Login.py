@@ -184,7 +184,19 @@ class UserLoginView(RetrieveAPIView):
     serializer_class = UserLoginSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        aa = request.data.get('LoginName') 
+        LoginName=str(aa)
+        findUser=M_Users.objects.raw('''SELECT m_employees.id id,m_employees.Name EmployeeName,m_users.id UserID,m_users.LoginName  FROM m_employees join m_users on m_employees.id=m_users.Employee_id
+        where (m_users.isLoginUsingEmail=1 and m_employees.email = %s) OR (m_users.isLoginUsingMobile=1 and  m_employees.Mobile=%s) OR (m_users.LoginName=%s) ''',([LoginName],[LoginName],[LoginName]))
+        if not findUser:
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data' : []})
+        FindUserSerializer_data=FindUserSerializer(findUser ,many=True).data
+        a={
+            "LoginName" : FindUserSerializer_data[0]['LoginName'],
+            "password" : request.data.get('password') 
+        }
+       
+        serializer = self.serializer_class(data=a)
         serializer.is_valid(raise_exception=True)
  
         response = {
@@ -192,10 +204,9 @@ class UserLoginView(RetrieveAPIView):
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
             'token': serializer.data['token'],
-            'User_id':serializer.data['User_id']  
+            'UserID':serializer.data['UserID']  
             
-            # 'UserID': serializer.data['UserID'],
-            # 'OTP': serializer.data['OTP'],
+            
         }
         status_code = status.HTTP_200_OK
 

@@ -82,6 +82,11 @@ class UserRegistrationSerializer1(serializers.ModelSerializer):
     
     
 
+class FindUserSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    EmployeeName=serializers.CharField(max_length=128) 
+    UserID=serializers.IntegerField()
+    LoginName=serializers.CharField(max_length=128)
 
 class UserLoginSerializer(serializers.Serializer):
     
@@ -89,6 +94,7 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
     EmployeeID = serializers.CharField(max_length=255, read_only=True)
+    UserID= serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
         LoginName = data.get("LoginName", None)
@@ -115,7 +121,7 @@ class UserLoginSerializer(serializers.Serializer):
             'LoginName': user.LoginName,
             'EmployeeID':user.Employee_id,
             'token': jwt_token,
-            'User_id' : user.id
+            'UserID' : user.id
         }
 
 
