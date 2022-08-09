@@ -205,3 +205,9 @@ class UserListSerializerforgetdata(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = ['Employee']
+
+
+
+class UserListSerializergetdata(serializers.Serializer):
+
+    id = serializers.IntegerField()

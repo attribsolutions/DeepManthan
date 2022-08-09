@@ -187,38 +187,23 @@ class UserLoginView(RetrieveAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         LoginName = serializer.data['LoginName']
-        EmployeeID= serializer.data['EmployeeID']
-        GETLoginName =M_Employees.objects.get(id=EmployeeID)
-        EmployeesSerializer_data=M_employeesSerializer(GETLoginName).data
-        CompanyGroupID = C_CompanyGroups.objects.get(id=EmployeeID)
-        CompanyGroupSerializer_data = C_CompanyGroupSerializer(CompanyGroupID).data	
-         	        
-         
-        def extendtoken():
-            payload_data =  {
-                "LoginName": LoginName,
-                "EmployeeID": EmployeeID,
-                "EmployeeNfame": EmployeesSerializer_data['Name'],
-                'CompanyGroupID' : CompanyGroupSerializer_data['id']
-            }
-            my_secret = 'my_super_secret'
-            return{jwt.encode(payload=payload_data, key=my_secret)}
-             
-
-         
+        # GETUserid = M_Users.objects.filter(LoginName = LoginName)
+        GETUserid = M_Users.objects.raw('''select id from m_users where LoginName =%s''',[LoginName])
+        UserIDofUser = UserListSerializergetdata(GETUserid, many= True).data
+        
         response = {
             'Status': 'True',
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
             'token': serializer.data['token'],
+            'User_ID' : UserIDofUser[0]['id']
             
-            'Token2' : extendtoken()
             # 'UserID': serializer.data['UserID'],
             # 'OTP': serializer.data['OTP'],
         }
         status_code = status.HTTP_200_OK
 
-        return Response(response, status=status_code)\
+        return Response(response, status=status_code)
 
         
 
