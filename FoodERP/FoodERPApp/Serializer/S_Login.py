@@ -198,4 +198,10 @@ class M_UserPartiesSerializer(serializers.Serializer):
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     
     id = serializers.IntegerField()
-    Name=serializers.CharField(max_length=500)            
+    Name=serializers.CharField(max_length=500)  
+
+
+class UserListSerializerforgetdata(serializers.ModelSerializer):
+    class Meta:
+        model = M_Users
+        fields = ['Employee']
