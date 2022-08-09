@@ -1,4 +1,7 @@
+import re
 from django.http import JsonResponse
+
+from ..Serializer.S_Employees import *
 from ..models import *
 from ..Serializer.S_Login import   *
 # from rest_framework.generics import CreateAPIView, RetrieveAPIView
@@ -299,6 +302,41 @@ NOT IN (SELECT Employee_id From m_users) ''')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
      
  
+
+
+class GerUserDetialsView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    def post(self, request):
+        UserId = request.data['UserId']
+        Userdata = M_Users.objects.filter(id= UserId)
+        EmployeeID = UserListSerializerforgetdata(Userdata, many = True).data
+      
+        company = M_Employees.objects.filter(id = EmployeeID[0]['Employee'])
+        CompanyID = M_EmployeesSerializerforgetdata(company,many = True).data
+
+        company_Group= M_Employees.objects.filter(id = CompanyID[0]['Company'])
+        CompanyGroupID = M_EmployeesSerializerforgetdata(company_Group,many = True).data
+        
+
+        a =list()
+        a.append({
+            "UserID" : UserId ,
+            "EmployeeID" : EmployeeID[0]["Employee"],
+            "CompanyID":CompanyID[0]["Company"],
+            "CompanyGroup" :CompanyGroupID[0]["Company"]
+            
+        })
+      
+       
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
+              
+          
+     
+
+  
 
 # Registration Input json
 # {
