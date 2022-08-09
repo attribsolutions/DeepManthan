@@ -89,7 +89,7 @@ WHERE m_divisiontype.id = %s''',[id])
                 DivisionTypedata = M_DivisionType.objects.get(id=id)
                 DivisionTypedata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Division Type Deleted Successfully', 'Data':[]})
-        except M_PartyType.DoesNotExist:
+        except M_DivisionType.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Division Type Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Division Type used in another table', 'Data': []})   

@@ -222,7 +222,5 @@ class GetCompanyByEmployeeType(CreateAPIView):
                 Companiesdata_Serializer = C_CompanySerializer2(Companiesdata, many=True)
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Companiesdata_Serializer.data})
-        except M_EmployeeTypes.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Employee Types Not available', 'Data': []})
-        except C_Companies.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})    
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
