@@ -1,5 +1,6 @@
 from datetime import datetime
 from pickle import TRUE
+from statistics import mode
 from typing import Sequence
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
@@ -577,6 +578,8 @@ class TC_InvoiceItemBatches(models.Model):
 class Abc(models.Model):
     phone_number = models.CharField(max_length=12, unique=True)
     otp = models.CharField(max_length=6, default=False)
-
+    Name = models.CharField(max_length=100)
+    SurName=models.CharField(max_length=100)
+    pincode=models.IntegerField()
     class Meta:
         db_table = "Abc"
