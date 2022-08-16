@@ -174,7 +174,7 @@ class M_Employees(models.Model):
     EmployeeType = models.ForeignKey(
         M_EmployeeTypes, related_name='EmployeeType', on_delete=models.DO_NOTHING)
     Designation = models.ForeignKey(
-        M_Designations, related_name='EmployeesDesignation', on_delete=models.DO_NOTHING)
+        M_Designations, related_name='EmployeesDesignation', on_delete=models.DO_NOTHING, null=True)
     State = models.ForeignKey(
         M_States, related_name='EmployeesState', on_delete=models.DO_NOTHING)
     District = models.ForeignKey(
@@ -192,7 +192,7 @@ class MC_EmployeeParties(models.Model):
     Employee = models.ForeignKey(
         M_Employees, related_name='EmployeeParties', on_delete=models.CASCADE)
     Party = models.ForeignKey(
-        M_Parties, related_name='Employeeparty',  on_delete=models.DO_NOTHING)
+        M_Parties, related_name='Employeeparty',  on_delete=models.DO_NOTHING ,null=True)
 
     class Meta:
         db_table = "MC_EmployeeParties"
