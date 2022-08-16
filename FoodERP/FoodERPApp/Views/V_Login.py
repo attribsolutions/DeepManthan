@@ -118,13 +118,16 @@ class UserListViewSecond(CreateAPIView):
                 
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
+                    print(Usersdata_Serializer)
                     UserData=list()
                     for a in Usersdata_Serializer:
                        RoleData=list()
                        for b in a["UserRole"]:
                             RoleData.append({
                                 'Role': b['Role']['id'],
-                                'Name': b['Role']['Name'],
+                                'RoleName': b['Role']['Name'],
+                                'Party': b['Party']['id'],
+                                'PartyName': b['Party']['Name'],
                                 
                             })
                     UserData.append({ 
