@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 
-from  ..models import C_CompanyGroups, M_Employees, M_Roles, M_Users, MC_UserRoles
+from  ..models import C_CompanyGroups, M_Employees, M_Parties, M_Roles, M_Users, MC_UserRoles
 
 from rest_framework import serializers
 
@@ -130,13 +130,19 @@ class RolesSerializer(serializers.ModelSerializer):
         model = M_Roles
         fields= ['id','Name']
 
+class PartySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields= ['id','Name']        
+
 class UserRolesSerializer(serializers.ModelSerializer):
     Role=RolesSerializer()
+    Party=PartySerializer()
     # Role= serializers.SlugRelatedField(read_only=True, slug_field='Name' )
     
     class Meta:
         model = MC_UserRoles
-        fields= ['Role']
+        fields= ['Role','Party']
         
 
 class M_employeesSerializer(serializers.ModelSerializer):   
@@ -200,7 +206,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name=serializers.CharField(max_length=500)
     Party_id=serializers.IntegerField()
-    # Role_id = serializers.IntegerField()
+    Role_id = serializers.IntegerField()
  
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     

@@ -143,7 +143,7 @@ class M_PageAccessSerializerAddPage(serializers.Serializer):
    
 
 
-class CopyMRoleAcessSerializer(serializers.ModelSerializer):
+class CopyRoleAccessSerializer(serializers.ModelSerializer):
     RoleAccess=MC_RolePageAccessSerilaizer(many=True)
 
     class Meta:
@@ -151,7 +151,7 @@ class CopyMRoleAcessSerializer(serializers.ModelSerializer):
         fields = ['Company','Modules','Pages','RoleAccess','CreatedBy','UpdatedBy']
 
 
-class InsertCopyMRoleAcessSerializer(serializers.ModelSerializer):
+class InsertCopyRoleAccessSerializer(serializers.ModelSerializer):
     RoleAccess=MC_RolePageAccessSerilaizer(many=True)
 
     class Meta:

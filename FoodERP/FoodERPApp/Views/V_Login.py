@@ -1,6 +1,8 @@
 import re
 from django.http import JsonResponse
 
+from ..Serializer.S_Companies import C_CompanySerializer2
+
 from ..Serializer.S_Employees import *
 from ..models import *
 from ..Serializer.S_Login import   *
@@ -116,13 +118,16 @@ class UserListViewSecond(CreateAPIView):
                 
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
+                    print(Usersdata_Serializer)
                     UserData=list()
                     for a in Usersdata_Serializer:
                        RoleData=list()
                        for b in a["UserRole"]:
                             RoleData.append({
                                 'Role': b['Role']['id'],
-                                'Name': b['Role']['Name'],
+                                'RoleName': b['Role']['Name'],
+                                'Party': b['Party']['id'],
+                                'PartyName': b['Party']['Name'],
                                 
                             })
                     UserData.append({ 
@@ -265,7 +270,7 @@ class UserPartiesViewSecond(CreateAPIView):
                 query = MC_EmployeeParties.objects.raw('''SELECT  a.id,m_parties.Name,a.Party_id,b.Role_id  from (SELECT mc_employeeparties.id,mc_employeeparties.Party_id,'0' RoleID FROM mc_employeeparties where Employee_id=%s)a left join (select mc_userroles.Party_id,mc_userroles.Role_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=%s)b on a.Party_id=b.Party_id join m_parties on m_parties.id=a.Party_id''',([id],[id]))
                 # print(str(query.query))
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []}) 
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'UserParties Not available', 'Data': []}) 
                 else:
                     M_UserParties_Serializer = M_UserPartiesSerializer(query, many=True).data
 
@@ -304,13 +309,16 @@ class GerUserDetialsView(APIView):
     def post(self, request):
         UserId = request.data['UserId']
         Userdata = M_Users.objects.filter(id= UserId)
+       
         EmployeeID = UserListSerializerforgetdata(Userdata, many = True).data
-      
+        
+        
         company = M_Employees.objects.filter(id = EmployeeID[0]['Employee'])
         CompanyID = M_EmployeesSerializerforgetdata(company,many = True).data
-
-        company_Group= M_Employees.objects.filter(id = CompanyID[0]['Company'])
-        CompanyGroupID = M_EmployeesSerializerforgetdata(company_Group,many = True).data
+        
+        
+        company_Group= C_Companies.objects.filter(id = CompanyID[0]['Company'])
+        CompanyGroupID = C_CompanySerializer2(company_Group,many = True).data
         
 
         a =list()
@@ -318,7 +326,7 @@ class GerUserDetialsView(APIView):
             "UserID" : UserId ,
             "EmployeeID" : EmployeeID[0]["Employee"],
             "CompanyID":CompanyID[0]["Company"],
-            "CompanyGroup" :CompanyGroupID[0]["Company"]
+            "CompanyGroup" :CompanyGroupID[0]["CompanyGroup"]
             
         })
       
