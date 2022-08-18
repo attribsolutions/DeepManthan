@@ -272,7 +272,7 @@ class RoleAccessGetPagesAccessOnPage(RetrieveAPIView):
        
 
 
-class CopyMRoleAcessView(CreateAPIView):
+class CopyRoleAccessView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
@@ -285,15 +285,15 @@ class CopyMRoleAcessView(CreateAPIView):
         NewDivision = request.data['NewDivision']
         try:
             with transaction.atomic():
-                PartyTypesdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id =Division)
-                if PartyTypesdata.exists():
-                    serializersdata = CopyMRoleAcessSerializer(PartyTypesdata, many=True)
+                CopyRoleAccessdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id =Division)
+                if CopyRoleAccessdata.exists():
+                    serializersdata = CopyRoleAccessSerializer(CopyRoleAccessdata, many=True)
                     additionaldata=list()
                     for a in serializersdata.data:
                         a.update({'Role': NewRole,'Division':NewDivision})
                         additionaldata.append(a)
                     # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':additionaldata})    
-                    RoleAccessSerialize_data = InsertCopyMRoleAcessSerializer(data=additionaldata, many=True)
+                    RoleAccessSerialize_data = InsertCopyRoleAccessSerializer(data=additionaldata, many=True)
                     if RoleAccessSerialize_data.is_valid():
                         # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':RoleAccessSerialize_data.data}) 
                         RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
