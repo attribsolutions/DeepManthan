@@ -268,10 +268,10 @@ class UserPartiesViewSecond(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = MC_EmployeeParties.objects.raw('''SELECT  a.id, b.Role_id,m_roles.Name As RoleName,a.Party_id,m_parties.Name AS PartyName from (SELECT mc_employeeparties.id,mc_employeeparties.Party_id,'0' RoleID FROM mc_employeeparties where Employee_id=%s)a left join (select mc_userroles.Party_id,mc_userroles.Role_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=%s)b on a.Party_id=b.Party_id join m_parties on m_parties.id=a.Party_id join m_roles on m_roles.id=b.Role_id''',([id],[id]))
-                print(str(query.query))
+                query = MC_EmployeeParties.objects.raw('''SELECT  a.id,m_parties.Name,a.Party_id,b.Role_id  from (SELECT mc_employeeparties.id,mc_employeeparties.Party_id,'0' RoleID FROM mc_employeeparties where Employee_id=%s)a left join (select mc_userroles.Party_id,mc_userroles.Role_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=%s)b on a.Party_id=b.Party_id join m_parties on m_parties.id=a.Party_id''',([id],[id]))
+                # print(str(query.query))
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'UserParties Not available', 'Data': []}) 
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []}) 
                 else:
                     M_UserParties_Serializer = M_UserPartiesSerializer(query, many=True).data
 
