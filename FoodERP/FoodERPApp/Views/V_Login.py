@@ -130,6 +130,7 @@ class UserListViewSecond(CreateAPIView):
                                 'PartyName': b['Party']['Name'],
                                 
                             })
+                            
                     UserData.append({ 
                         'id': a["id"],
                         'LoginName': a["LoginName"],
