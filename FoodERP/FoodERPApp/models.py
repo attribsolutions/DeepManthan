@@ -431,10 +431,12 @@ class M_Items(models.Model):
         M_Units, related_name='BaseUnitID', on_delete=models.DO_NOTHING)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
+    BarCode = models.CharField(max_length=500) 
     ItemGroup = models.ForeignKey(
         M_ItemsGroup, related_name='ItemGroup', on_delete=models.DO_NOTHING)
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
     isActive = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='images')  
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
@@ -501,6 +503,8 @@ class M_Products(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "M_Products"
 
 
 class T_Orders(models.Model):
