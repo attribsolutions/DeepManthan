@@ -204,7 +204,7 @@ class C_CompanyGroupSerializer(serializers.ModelSerializer):
 class M_UserPartiesSerializer(serializers.Serializer):
   
     id = serializers.IntegerField()
-    Role_id = serializers.IntegerField()
+    Role = serializers.IntegerField()
     RoleName=serializers.CharField(max_length=500)
     Party_id=serializers.IntegerField()
     PartyName=serializers.CharField(max_length=500)
