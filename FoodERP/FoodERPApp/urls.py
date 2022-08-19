@@ -107,6 +107,6 @@ urlpatterns = [
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
     
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
-    url(r'CopyRoleAccess$',CopyRoleAccessView.as_view()),
+    url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
     url(r'GerUserDetials$',GerUserDetialsView.as_view()),
 ]
