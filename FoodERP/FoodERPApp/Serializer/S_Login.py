@@ -210,21 +210,29 @@ class M_UserPartiesSerializer(serializers.Serializer):
     PartyName=serializers.CharField(max_length=500)
     
     
-
- 
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     
     id = serializers.IntegerField()
     Name=serializers.CharField(max_length=500)  
-
 
 class UserListSerializerforgetdata(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = ['Employee']
 
-
-
 class UserListSerializergetdata(serializers.Serializer):
-
     id = serializers.IntegerField()
+    
+class SingleGetUserListUserPartiesSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Party_id = serializers.IntegerField()
+    PartyName=serializers.CharField(max_length=500)
+ 
+class SingleGetUserListUserPartyRoleSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Role_id = serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)    
+    
+
+    
+    
