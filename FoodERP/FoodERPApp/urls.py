@@ -41,8 +41,13 @@ from .Views.V_DivisionTypes import *
 
 from .Views.V_abc import * 
 
-from .Views.V_SendMail import * 
+from .Views.V_SendMail import *
 
+from .Views.V_ProductCategoryTypes import *  
+
+from .Views.V_ProductCategory import * 
+
+from .Views.V_SubProductCategory import *   
 
 urlpatterns = [
     
@@ -92,6 +97,12 @@ urlpatterns = [
     url(r'DivisionTypes$', DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
+    url(r'ProductCategoryTypes/([0-9]+)$', M_ProductCategoryTypeViewSecond.as_view()),
+    url(r'ProductCategoryTypes$', M_ProductCategoryTypeView.as_view()),
+    url(r'ProductCategory/([0-9]+)$', ProductCategoryViewSecond.as_view()),
+    url(r'ProductCategory$', ProductCategoryView.as_view()),
+    url(r'ProductSubCategory/([0-9]+)$', SubProductCategoryViewSecond.as_view()),
+    url(r'ProductSubCategory$', SubProductCategoryView.as_view()),
     
     # Dependencies APIs IN Projects 
     
