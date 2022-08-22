@@ -445,6 +445,25 @@ class M_Items(models.Model):
     class Meta:
         db_table = "M_Items"
 
+'''Table MC_ItemsGMMH details  - Items GST,MRP,Margin,HSNCode'''
+class MC_ItemsGMMH(models.Model):
+    
+    Item = models.ForeignKey(
+        M_Items, related_name='ItemGstDetails', on_delete=models.DO_NOTHING)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    MRP = models.DecimalField(max_digits=20, decimal_places=2)
+    Margin = models.DecimalField(max_digits=20, decimal_places=2)
+    HSNCode = models.CharField(max_length=500)
+    FromDate = models.DateTimeField()
+    ToDate = models.DateTimeField()
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "MC_ItemsGMMH"
+        
 
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(
