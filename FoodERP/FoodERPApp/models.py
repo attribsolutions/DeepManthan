@@ -432,8 +432,7 @@ class M_Items(models.Model):
     # GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     # MRP = models.DecimalField(max_digits=20, decimal_places=2)
     BarCode = models.CharField(max_length=500) 
-    # ItemGroup = models.ForeignKey(
-    #     M_ItemsGroup, related_name='ItemGroup', on_delete=models.DO_NOTHING)
+    ItemGroup = models.ForeignKey(M_ItemsGroup, related_name='ItemGroup', on_delete=models.DO_NOTHING)
     # Rate = models.DecimalField(max_digits=20, decimal_places=2)
     isActive = models.BooleanField(default=False)
     image = models.ImageField(upload_to='images')  
@@ -464,12 +463,12 @@ class MC_ItemsGMMH(models.Model):
     class Meta:
         db_table = "MC_ItemsGMMH"
         
-class MC_ItemsShelfLife(models.Model):
+class M_ItemsShelfLife(models.Model):
    Name = models.CharField(max_length=500)
    Days = models.IntegerField(default=False)
    
    class Meta:
-        db_table = "MC_ItemsShelfLife"       
+        db_table = "M_ItemsShelfLife"       
         
 
 class MC_ItemUnits(models.Model):

@@ -72,13 +72,13 @@ class UserListView(CreateAPIView):
                         Usersdata, many=True).data
                     UserData = list()
                     for a in Usersdata_Serializer:
-                        RoleData = list()
-                        for b in a["UserRole"]:
-                            RoleData.append({
-                                'Role': b['Role']['id'],
-                                'Name': b['Role']['Name'],
+                        # RoleData = list()
+                        # for b in a["UserRole"]:
+                        #     RoleData.append({
+                        #         'Role': b['Role']['id'],
+                        #         'Name': b['Role']['Name'],
 
-                            })
+                        #     })
                         UserData.append({
                             'id': a["id"],
                             'LoginName': a["LoginName"],
@@ -95,7 +95,7 @@ class UserListView(CreateAPIView):
                             'UpdatedOn': a["UpdatedOn"],
                             'Employee': a["Employee"]["id"],
                             'EmployeeName': a["Employee"]["Name"],
-                            'UserRole': RoleData,
+                            # 'UserRole': RoleData,
 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData})
