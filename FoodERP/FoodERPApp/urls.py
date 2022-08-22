@@ -47,7 +47,9 @@ from .Views.V_ProductCategoryTypes import *
 
 from .Views.V_ProductCategory import * 
 
-from .Views.V_SubProductCategory import *   
+from .Views.V_SubProductCategory import *
+
+from .Views.V_Units import *    
 
 urlpatterns = [
     
@@ -103,6 +105,7 @@ urlpatterns = [
     url(r'ProductCategory$', ProductCategoryView.as_view()),
     url(r'ProductSubCategory/([0-9]+)$', SubProductCategoryViewSecond.as_view()),
     url(r'ProductSubCategory$', SubProductCategoryView.as_view()),
+    url(r'UnitList$', M_UnitsView.as_view()),
     
     # Dependencies APIs IN Projects 
     
