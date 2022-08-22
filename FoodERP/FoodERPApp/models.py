@@ -463,12 +463,12 @@ class MC_ItemsGMMH(models.Model):
     class Meta:
         db_table = "MC_ItemsGMMH"
         
-class MC_ItemsShelfLife(models.Model):
+class M_ItemsShelfLife(models.Model):
    Name = models.CharField(max_length=500)
    Days = models.IntegerField(default=False)
    
    class Meta:
-        db_table = "MC_ItemsShelfLife"       
+        db_table = "M_ItemsShelfLife"       
         
 
 class MC_ItemUnits(models.Model):
