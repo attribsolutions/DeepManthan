@@ -466,7 +466,10 @@ class MC_ItemsGMMH(models.Model):
         
 class MC_ItemsShelfLife(models.Model):
    Name = models.CharField(max_length=500)
-   Days = models.IntegerField(default=False)       
+   Days = models.IntegerField(default=False)
+   
+   class Meta:
+        db_table = "MC_ItemsShelfLife"       
         
 
 class MC_ItemUnits(models.Model):
