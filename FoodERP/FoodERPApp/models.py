@@ -464,6 +464,10 @@ class MC_ItemsGMMH(models.Model):
     class Meta:
         db_table = "MC_ItemsGMMH"
         
+class MC_ItemsShelfLife(models.Model):
+   Name = models.CharField(max_length=500)
+   Days = models.IntegerField(default=False)       
+        
 
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(
