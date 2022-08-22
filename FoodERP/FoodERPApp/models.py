@@ -394,6 +394,38 @@ class MC_RolePageAccess(models.Model):
     class Meta:
         db_table = "MC_RolePageAccess"
 
+class M_ProductCategoryType(models.Model):
+    Name = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "M_ProductCategoryType"
+
+class M_ProductCategory(models.Model):
+    Name = models.CharField(max_length=500)
+    ProductCategoryType = models.ForeignKey(
+        M_ProductCategoryType, related_name='ProductCategoryType', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    class Meta:
+        db_table = "M_ProductCategory"
+
+class M_ProductSubCategory(models.Model):
+    Name = models.CharField(max_length=500)
+    ProductCategory = models.ForeignKey(
+        M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    class Meta:
+        db_table = "M_ProductSubCategory"        
+
 
 class M_ItemsGroup(models.Model):
 
@@ -484,39 +516,6 @@ class MC_ItemUnits(models.Model):
 
     class Meta:
         db_table = "MC_ItemUnits"
-
-class M_ProductCategoryType(models.Model):
-    Name = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "M_ProductCategoryType"
-
-class M_ProductCategory(models.Model):
-    Name = models.CharField(max_length=500)
-    ProductCategoryType = models.ForeignKey(
-        M_ProductCategoryType, related_name='ProductCategoryType', on_delete=models.DO_NOTHING)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
-    class Meta:
-        db_table = "M_ProductCategory"
-
-class M_ProductSubCategory(models.Model):
-    Name = models.CharField(max_length=500)
-    ProductCategory = models.ForeignKey(
-        M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
-    class Meta:
-        db_table = "M_ProductSubCategory"
-
 
 class MC_ItemCategoryDetails(models.Model):
     # Name = models.CharField(max_length=500)
