@@ -518,8 +518,8 @@ class M_ProductSubCategory(models.Model):
         db_table = "M_ProductSubCategory"
 
 
-class M_Products(models.Model):
-    Name = models.CharField(max_length=500)
+class MC_ItemCategoryDetails(models.Model):
+    # Name = models.CharField(max_length=500)
     ProductCategory = models.ForeignKey(
         M_ProductCategory, related_name='MProductCategory', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(
@@ -529,7 +529,7 @@ class M_Products(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "M_Products"
+        db_table = "MC_ItemCategoryDetails"
 
 
 class T_Orders(models.Model):
