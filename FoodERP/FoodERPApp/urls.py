@@ -99,12 +99,12 @@ urlpatterns = [
     url(r'DivisionTypes$', DivisionTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
-    url(r'ProductCategoryTypes/([0-9]+)$', M_ProductCategoryTypeViewSecond.as_view()),
-    url(r'ProductCategoryTypes$', M_ProductCategoryTypeView.as_view()),
-    url(r'ProductCategory/([0-9]+)$', ProductCategoryViewSecond.as_view()),
-    url(r'ProductCategory$', ProductCategoryView.as_view()),
-    url(r'ProductSubCategory/([0-9]+)$', SubProductCategoryViewSecond.as_view()),
-    url(r'ProductSubCategory$', SubProductCategoryView.as_view()),
+    url(r'CategoryTypes/([0-9]+)$', M_ProductCategoryTypeViewSecond.as_view()),
+    url(r'CategoryTypes$', M_ProductCategoryTypeView.as_view()),
+    url(r'Category/([0-9]+)$', ProductCategoryViewSecond.as_view()),
+    url(r'Category$', ProductCategoryView.as_view()),
+    url(r'SubCategory/([0-9]+)$', SubProductCategoryViewSecond.as_view()),
+    url(r'SubCategory$', SubProductCategoryView.as_view()),
     url(r'UnitList$', M_UnitsView.as_view()),
     
     # Dependencies APIs IN Projects 
