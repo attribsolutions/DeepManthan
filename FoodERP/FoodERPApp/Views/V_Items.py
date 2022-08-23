@@ -15,29 +15,28 @@ class M_ItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     
-    @transaction.atomic()
-    def get(self, request, id=0 ):
-        try:
-            with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
-FROM M_Items p 
-join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
-Order BY RP.Sequence, p.Sequence''')
-                if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-                else:
-                    M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
+#     @transaction.atomic()
+#     def get(self, request, id=0 ):
+#         try:
+#             with transaction.atomic():
+#                 query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+# FROM M_Items p 
+# join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
+# Order BY RP.Sequence, p.Sequence''')
+#                 if not query:
+#                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+#                 else:
+#                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
+#                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
+#         except Exception :
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
         
-
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
                 M_Itemsdata = JSONParser().parse(request)
-                M_Items_Serializer = M_ItemsSerializer01(data=M_Itemsdata)
+                M_Items_Serializer = ItemSerializer(data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
                     M_Items_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
@@ -46,7 +45,8 @@ Order BY RP.Sequence, p.Sequence''')
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data': []})
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found', 'Data':[]})
-                 
+        
+    
  
 
 class M_ItemsViewSecond(CreateAPIView):
@@ -71,22 +71,22 @@ JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
         
 
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                M_Itemsdata = JSONParser().parse(request)
-                M_ItemsdataByID = M_Items.objects.get(id=id)
-                M_Items_Serializer = M_ItemsSerializer01(
-                    M_ItemsdataByID, data=M_Itemsdata)
-                if M_Items_Serializer.is_valid():
-                    M_Items_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','Data' : []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
+    # @transaction.atomic()
+    # def put(self, request, id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             M_Itemsdata = JSONParser().parse(request)
+    #             M_ItemsdataByID = M_Items.objects.get(id=id)
+    #             M_Items_Serializer = M_ItemsSerializer01(
+    #                 M_ItemsdataByID, data=M_Itemsdata)
+    #             if M_Items_Serializer.is_valid():
+    #                 M_Items_Serializer.save()
+    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','Data' : []})
+    #             else:
+    #                 transaction.set_rollback(True)
+    #                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
+    #     except Exception :
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):

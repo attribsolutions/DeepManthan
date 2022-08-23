@@ -435,15 +435,6 @@ class M_ProductSubCategory(models.Model):
         db_table = "M_ProductSubCategory"        
 
 
-class M_ItemsGroup(models.Model):
-
-    Name = models.CharField(max_length=500)
-    Sequence = models.DecimalField(max_digits=5, decimal_places=2)
-    isActive = models.BooleanField(default=False)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "M_ItemsGroup"
