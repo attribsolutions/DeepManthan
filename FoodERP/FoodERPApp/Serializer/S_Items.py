@@ -58,19 +58,20 @@ class ItemSerializer(serializers.ModelSerializer):
 
     ItemUnitDetails = MC_ItemUnitsSerializer(many=True)
     
-    ItemImagesdetails = MC_ItemsImagesSerializer(many=True)
+    # ItemImagesdetails = MC_ItemsImagesSerializer(many=True) ,'ItemImagesdetails'
     
 
     class Meta:
         model = M_Items
         fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive',
-                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemGstDetails', 'ItemUnitDetails','ItemImagesdetails']
+                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemGstDetails', 'ItemUnitDetails']
 
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
         ItemGsts_data = validated_data.pop('ItemGstDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
-        ItemImages_data = validated_data.pop('ItemImagedetails')
+        # ItemImages_data = validated_data.pop('ItemImagedetails')
+        
         ItemID= M_Items.objects.create(**validated_data)
         for ItemCategory_data in ItemCategorys_data:
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=ItemID, **ItemCategory_data)
@@ -83,8 +84,8 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemUnits = MC_ItemUnits.objects.create(
                 Item=ItemID, **ItemUnit_data)
                 
-        for ItemImage_data in ItemImages_data:
-            ItemImage = MC_ItemsGMMH.objects.create(
-                Item=ItemID, **ItemImage_data)     
+        # for ItemImage_data in ItemImages_data:
+        #     ItemImage = MC_ItemsGMMH.objects.create(
+        #         Item=ItemID, **ItemImage_data)     
 
         return ItemID
