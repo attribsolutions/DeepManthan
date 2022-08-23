@@ -521,12 +521,9 @@ class MC_ItemsImages(models.Model):
 
 
 class MC_ItemCategoryDetails(models.Model):
-    # Name = models.CharField(max_length=500)
     ProductCategory = models.ForeignKey(M_ProductCategory, related_name='MProductCategory', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ProductItem', on_delete=models.DO_NOTHING)     
-    CreatedBy = models.IntegerField(default=False)
+    Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.DO_NOTHING)     
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "MC_ItemCategoryDetails"
