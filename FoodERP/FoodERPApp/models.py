@@ -104,9 +104,7 @@ class M_Parties(models.Model):
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
-    # IsSCM = models.ForeignKey(
-    #     C_Companies, related_name='IsSCM', on_delete=models.DO_NOTHING, null=True)
-    CustomerDivision = models.IntegerField()
+   
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
     AlternateContactNo = models.CharField(
