@@ -1,5 +1,7 @@
 from django.urls import re_path as url
 
+from .Views.V_SuperAdmin import SuperAdminView
+
 from .Views.V_Login import *
 
 from .Views.V_Parties import *
@@ -123,4 +125,5 @@ urlpatterns = [
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
     url(r'GerUserDetials$',GerUserDetialsView.as_view()),
+    url(r'SuperAdmin$',SuperAdminView.as_view()),
 ]
