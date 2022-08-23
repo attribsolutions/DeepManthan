@@ -47,7 +47,7 @@ class MC_ItemsGMMHSerializer(serializers.ModelSerializer):
 class ItemCategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemCategoryDetails
-        fields = ['ProductCategory']
+        fields = ['CategoryType', 'Category', 'SubCategory']
 
 
 class ItemSerializer(serializers.ModelSerializer):
