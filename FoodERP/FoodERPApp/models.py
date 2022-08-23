@@ -437,7 +437,7 @@ class M_ProductSubCategory(models.Model):
 
 
     class Meta:
-        db_table = "M_ItemsGroup"
+        db_table = "M_ProductSubCategory"
 
 
 class M_Units(models.Model):
