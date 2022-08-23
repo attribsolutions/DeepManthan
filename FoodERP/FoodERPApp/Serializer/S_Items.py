@@ -41,7 +41,7 @@ class MC_ItemUnitsSerializer(serializers.ModelSerializer):
 class MC_ItemsGMMHSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemsGMMH
-        fields = ['GSTPercentage', 'MRP', 'Margin', 'HSNCode', 'FromDate', 'ToDate']
+        fields = ['GSTPercentage', 'MRP', 'Margin', 'HSNCode']
          
 
 class ItemCategoryDetailsSerializer(serializers.ModelSerializer):
