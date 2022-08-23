@@ -27,8 +27,6 @@ from .Views.V_Items import *
 
 from .Views.V_Invoices import *
 
-from .Views.V_ItemsGroup import *
-
 from .Views.V_Employees import *
 
 from .Views.V_EmployeeTypes import *
@@ -86,8 +84,6 @@ urlpatterns = [
     url(r'Employees$', M_EmployeesView.as_view()),
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
     url(r'Invoices$', T_InvoiceView.as_view()),
-    url(r'ItemGroups/([0-9]+)$', M_ItemsGroupViewSecond.as_view()),
-    url(r'ItemGroups$', M_ItemsGroupView.as_view()),
     url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
     url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     url(r'States$',M_StateView.as_view()),
