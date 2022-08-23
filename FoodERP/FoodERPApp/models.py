@@ -434,12 +434,6 @@ class M_ProductSubCategory(models.Model):
     class Meta:
         db_table = "M_ProductSubCategory"        
 
-
-
-    class Meta:
-        db_table = "M_ProductSubCategory"
-
-
 class M_Units(models.Model):
     Name = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
@@ -479,8 +473,6 @@ class MC_ItemsGMMH(models.Model):
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Margin = models.DecimalField(max_digits=20, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
-    FromDate = models.DateField()
-    ToDate = models.DateField()
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
@@ -512,7 +504,9 @@ class MC_ItemsImages(models.Model):
 
 
 class MC_ItemCategoryDetails(models.Model):
-    ProductCategory = models.ForeignKey(M_ProductCategory, related_name='MProductCategory', on_delete=models.DO_NOTHING)
+    CategoryType = models.ForeignKey(M_ProductCategoryType, related_name='CategoryType', on_delete=models.DO_NOTHING)
+    Category = models.ForeignKey(M_ProductCategory, related_name='Category', on_delete=models.DO_NOTHING)
+    SubCategory = models.ForeignKey(M_ProductSubCategory, related_name='SubCategory', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.DO_NOTHING)     
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
