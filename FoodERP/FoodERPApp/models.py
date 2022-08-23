@@ -105,6 +105,7 @@ class M_Parties(models.Model):
     Company = models.ForeignKey(
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
    
+
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
     AlternateContactNo = models.CharField(
