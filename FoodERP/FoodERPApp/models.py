@@ -489,8 +489,8 @@ class MC_ItemsGMMH(models.Model):
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Margin = models.DecimalField(max_digits=20, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
-    FromDate = models.DateTimeField()
-    ToDate = models.DateTimeField()
+    FromDate = models.DateField()
+    ToDate = models.DateField()
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
@@ -508,7 +508,6 @@ class MC_ItemUnits(models.Model):
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
     IsBase = models.IntegerField()
     IsDefault = models.IntegerField()
-    IsSSUnit = models.IntegerField()
     IsDeleted = models.BooleanField(default=False)
 
     class Meta:
@@ -517,16 +516,15 @@ class MC_ItemUnits(models.Model):
 class MC_ItemsImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
-    Item_pic = models.FileField()      
+    Item_pic = models.FileField() 
+    class Meta:
+        db_table = "MC_ItemsImages"     
 
 
 class MC_ItemCategoryDetails(models.Model):
-    # Name = models.CharField(max_length=500)
     ProductCategory = models.ForeignKey(M_ProductCategory, related_name='MProductCategory', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ProductItem', on_delete=models.DO_NOTHING)     
-    CreatedBy = models.IntegerField(default=False)
+    Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.DO_NOTHING)     
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "MC_ItemCategoryDetails"
