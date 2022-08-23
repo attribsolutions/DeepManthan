@@ -508,7 +508,6 @@ class MC_ItemUnits(models.Model):
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
     IsBase = models.IntegerField()
     IsDefault = models.IntegerField()
-    IsSSUnit = models.IntegerField()
     IsDeleted = models.BooleanField(default=False)
 
     class Meta:
@@ -517,7 +516,9 @@ class MC_ItemUnits(models.Model):
 class MC_ItemsImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
-    Item_pic = models.FileField()      
+    Item_pic = models.FileField() 
+    class Meta:
+        db_table = "MC_ItemsImages"     
 
 
 class MC_ItemCategoryDetails(models.Model):
