@@ -29,3 +29,19 @@ class AbcView(CreateAPIView):
             
     
     
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                M_Rolesdata = JSONParser().parse(request)
+                M_Roles_Serializer = AbcSerializer(data=M_Rolesdata)
+            if M_Roles_Serializer.is_valid():
+                M_Roles_Serializer.save()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Save Successfully', 'Data' :[]})
+            else:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Roles_Serializer.errors, 'Data' : []})
+        except Exception :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
+
+    
