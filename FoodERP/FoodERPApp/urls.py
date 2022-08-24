@@ -117,9 +117,10 @@ urlpatterns = [
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
-    
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
     url(r'GerUserDetials$',GerUserDetialsView.as_view()),
     url(r'SuperAdmin$',SuperAdminView.as_view()),
+    url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
+    url(r'GetSubCategoryByCategoryID/([0-9]+)$', GetSubCategoryByCategoryID.as_view()),
 ]
