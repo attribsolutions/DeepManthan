@@ -640,10 +640,7 @@ class TC_InvoiceItemBatches(models.Model):
 
 
 class Abc(models.Model):
-    phone_number = models.CharField(max_length=12, unique=True)
-    otp = models.CharField(max_length=6, default=False)
-    Name = models.CharField(max_length=100)
-    SurName=models.CharField(max_length=100)
-    pincode=models.IntegerField()
+   
+    Image = models.FileField()
     class Meta:
         db_table = "Abc"
