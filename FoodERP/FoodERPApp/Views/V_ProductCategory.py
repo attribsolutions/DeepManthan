@@ -89,8 +89,25 @@ WHERE m_productcategory.id = %s''',[id])
                 ProductCategorydata = M_ProductCategory.objects.get(id=id)
                 ProductCategorydata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Deleted Successfully', 'Data':[]})
-        except M_PartyType.DoesNotExist:
+        except M_ProductCategory.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Product Category Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Product Category used in another table', 'Data': []})   
 
+
+class GetCategoryByCategoryTypeID(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Category_data = M_ProductCategory.objects.filter(ProductCategoryType=id)
+                if Category_data.exists():
+                    Category_serializer = ProductCategorySerializer(Category_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Category_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Category Not available ', 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})  
