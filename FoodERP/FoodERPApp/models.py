@@ -643,6 +643,7 @@ class Abc(models.Model):
    
   file = models.FileField(blank=False, null=False)
   remark = models.CharField(max_length=20)
+  picture = models.ImageField(upload_to='ItemMaster',blank=True)
 
   class Meta:
         db_table = "Abc"
