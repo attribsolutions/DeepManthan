@@ -123,489 +123,466 @@ class SuperAdminView(CreateAPIView):
 
 
                 
-    #             statesJSON =([
-    # {
-    #   "Name": "Andaman and Nicobar Islands",
-    #   "StateCode": "AN",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Andhra Pradesh",
-    #   "StateCode": "AP",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Andhra Pradesh (New)",
-    #   "StateCode": "AD",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Arunachal Pradesh",
-    #   "StateCode": "AR",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Assam",
-    #   "StateCode": "AS",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Bihar",
-    #   "StateCode": "BH",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Chandigarh",
-    #   "StateCode": "CH",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Chattisgarh",
-    #   "StateCode": "CT",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Dadra and Nagar Haveli",
-    #   "StateCode": "DN",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Daman and Diu",
-    #   "StateCode": "DD",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Delhi",
-    #   "StateCode": "DL",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Goa",
-    #   "StateCode": "GA",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Gujarat",
-    #   "StateCode": "GJ",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Haryana",
-    #   "StateCode": "HR",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Himachal Pradesh",
-    #   "StateCode": "HP",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Jammu and Kashmir",
-    #   "StateCode": "JK",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Jharkhand",
-    #   "StateCode": "JH",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Karnataka",
-    #   "StateCode": "KA",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Kerala",
-    #   "StateCode": "KL",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Lakshadweep Islands",
-    #   "StateCode": "LD",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Madhya Pradesh",
-    #   "StateCode": "MP",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Maharashtra",
-    #   "StateCode": "MH",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Manipur",
-    #   "StateCode": "MN",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Meghalaya",
-    #   "StateCode": "ME",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Mizoram",
-    #   "StateCode": "MI",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Nagaland",
-    #   "StateCode": "NL",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Odisha",
-    #   "StateCode": "OR",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Pondicherry",
-    #   "StateCode": "PY",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Punjab",
-    #   "StateCode": "PB",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Rajasthan",
-    #   "StateCode": "RJ",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Sikkim",
-    #   "StateCode": "SK",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Tamil Nadu",
-    #   "StateCode": "TN",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Telangana",
-    #   "StateCode": "TS",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Tripura",
-    #   "StateCode": "TR",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Uttar Pradesh",
-    #   "StateCode": "UP",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "Uttarakhand",
-    #   "StateCode": "UT",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # },
-    # {
-    #   "Name": "West Bengal",
-    #   "StateCode": "WB",
-    #   "CreatedBy": 1,
-    #   "UpdatedBy": 1
-    # }])
-
-
-    
-                statesJSON ={
+                statesJSON =[
+    {
+      "Name": "Andaman and Nicobar Islands",
+      "StateCode": "AN",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Andhra Pradesh",
+      "StateCode": "AP",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Andhra Pradesh (New)",
+      "StateCode": "AD",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Arunachal Pradesh",
+      "StateCode": "AR",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Assam",
+      "StateCode": "AS",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Bihar",
+      "StateCode": "BH",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Chandigarh",
+      "StateCode": "CH",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Chattisgarh",
+      "StateCode": "CT",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Dadra and Nagar Haveli",
+      "StateCode": "DN",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Daman and Diu",
+      "StateCode": "DD",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Delhi",
+      "StateCode": "DL",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Goa",
+      "StateCode": "GA",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Gujarat",
+      "StateCode": "GJ",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Haryana",
+      "StateCode": "HR",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Himachal Pradesh",
+      "StateCode": "HP",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Jammu and Kashmir",
+      "StateCode": "JK",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Jharkhand",
+      "StateCode": "JH",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Karnataka",
+      "StateCode": "KA",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Kerala",
+      "StateCode": "KL",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Lakshadweep Islands",
+      "StateCode": "LD",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Madhya Pradesh",
+      "StateCode": "MP",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
       "Name": "Maharashtra",
       "StateCode": "MH",
       "CreatedBy": 1,
       "UpdatedBy": 1
-    }
-                print(statesJSON)
+    },
+    {
+      "Name": "Manipur",
+      "StateCode": "MN",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Meghalaya",
+      "StateCode": "ME",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Mizoram",
+      "StateCode": "MI",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Nagaland",
+      "StateCode": "NL",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Odisha",
+      "StateCode": "OR",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Pondicherry",
+      "StateCode": "PY",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Punjab",
+      "StateCode": "PB",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Rajasthan",
+      "StateCode": "RJ",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Sikkim",
+      "StateCode": "SK",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Tamil Nadu",
+      "StateCode": "TN",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Telangana",
+      "StateCode": "TS",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Tripura",
+      "StateCode": "TR",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Uttar Pradesh",
+      "StateCode": "UP",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Uttarakhand",
+      "StateCode": "UT",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "West Bengal",
+      "StateCode": "WB",
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    }]
+
+                states_Serializer = StateSerializer(data=statesJSON , many=True)
                 
-                states_Serializer = StateSerializer(data=statesJSON)
-                print('States2')
                 if states_Serializer.is_valid():
-                    print('States3')
-                    states_Serializer.save()
-                    print('States4')
+                   states_Serializer.save()
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': states_Serializer.errors, 'Data': []})
                 
                 
 
-#                 DistrictJSON =   [
-#     {
-#       "Name": "Ahmednagar",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Akola",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Amravati",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Aurangabad",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Beed",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Bhandara",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Buldhana",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Chandrapur",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Dhule",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Gadchiroli",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Gondia",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Hingoli",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Jalgaon",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Jalna",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Kolhapur",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Latur",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Mumbai City",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Mumbai Suburban",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Nagpur",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Nanded",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Nandurbar",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Nashik",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Osmanabad",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Palghar",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Parbhani",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Pune",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Raigad",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Ratnagiri",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Sangli",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Satara",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Sindhudurg",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Solapur",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Thane",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Wardha",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Washim",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     },
-#     {
-#       "Name": "Yavatmal",
-#       "State": 22,
-#       "CreatedBy": 1,
-#       "UpdatedBy": 1
-#     }
-#   ]
-
-                DistrictJSON={
+                DistrictJSON =   [
+    {
+      "Name": "Ahmednagar",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Akola",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Amravati",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Aurangabad",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Beed",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Bhandara",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Buldhana",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Chandrapur",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Dhule",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Gadchiroli",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Gondia",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Hingoli",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Jalgaon",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Jalna",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Kolhapur",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Latur",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Mumbai City",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Mumbai Suburban",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Nagpur",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Nanded",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Nandurbar",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Nashik",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Osmanabad",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Palghar",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Parbhani",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
       "Name": "Pune",
-      "State": 1,
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Raigad",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Ratnagiri",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Sangli",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Satara",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Sindhudurg",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Solapur",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Thane",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Wardha",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Washim",
+      "State": 22,
+      "CreatedBy": 1,
+      "UpdatedBy": 1
+    },
+    {
+      "Name": "Yavatmal",
+      "State": 22,
       "CreatedBy": 1,
       "UpdatedBy": 1
     }
-                
-                District_Serializer = DistrictsSerializer(data=DistrictJSON)
+  ]
+
+                   
+                District_Serializer = DistrictsSerializer(data=DistrictJSON, many=True)
                 if District_Serializer.is_valid():
                     District_Serializer.save()
-                    print('District')
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': District_Serializer.errors, 'Data': []})
-                
-                
-                
-                
                 
                 
                 EmployeeJSON = {

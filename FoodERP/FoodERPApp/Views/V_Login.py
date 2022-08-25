@@ -287,10 +287,10 @@ class UserPartiesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  a.id,b.Role_id Role,m_roles.Name AS RoleName,a.Party_id,m_parties.Name AS PartyName  from (SELECT mc_employeeparties.id,mc_employeeparties.Party_id,'0' RoleID FROM mc_employeeparties where Employee_id=%s)a left join (select mc_userroles.Party_id,mc_userroles.Role_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=%s)b on a.Party_id=b.Party_id join m_parties on m_parties.id=a.Party_id Left join m_roles on m_roles.id=b.Role_id''', ([id], [id]))
+                    '''SELECT  a.id,b.Role_id Role,m_roles.Name AS RoleName,a.Party_id,m_parties.Name AS PartyName ,a.Employee_id from (SELECT mc_employeeparties.id,mc_employeeparties.Party_id,'0' RoleID,Employee_id FROM mc_employeeparties where Employee_id=%s)a left join (select mc_userroles.Party_id,mc_userroles.Role_id,Employee_id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id WHERE m_users.Employee_id=%s)b on a.Party_id=b.Party_id left join m_parties on m_parties.id=a.Party_id Left join m_roles on m_roles.id=b.Role_id''', ([id], [id]))
                 # print(str(query.query))
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
                     M_UserParties_Serializer = M_UserPartiesSerializer(
                         query, many=True).data
@@ -298,6 +298,35 @@ class UserPartiesViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
         except Exception:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+
+class UserPartiesForLoginPage(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = MC_EmployeeParties.objects.raw(
+                    '''SELECT  mc_userroles.id,mc_userroles.Role_id Role,m_roles.Name AS RoleName,mc_userroles.Party_id,m_parties.Name AS PartyName ,m_users.Employee_id
+
+                     FROM erp.mc_userroles
+                     JOIN m_users on m_users.id=mc_userroles.User_id
+                     left JOIN m_parties on m_parties.id=mc_userroles.Party_id
+                     Left JOIN m_roles on m_roles.id=mc_userroles.Role_id		 
+                     WHERE m_users.Employee_id=%s group by mc_userroles.Party_id''', [id])
+                # print(str(query.query))
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
+                else:
+                    M_UserParties_Serializer = M_UserPartiesSerializer(
+                        query, many=True).data
+
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
+        except Exception:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+
 
 
 class GetEmployeeViewForUserCreation(CreateAPIView):
