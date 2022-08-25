@@ -641,8 +641,9 @@ class TC_InvoiceItemBatches(models.Model):
 
 class Abc(models.Model):
    
-    
-    # Image = models.FileField()
-    class Meta:
+  file = models.FileField(blank=False, null=False)
+  remark = models.CharField(max_length=20)
+
+  class Meta:
         db_table = "Abc"
         
