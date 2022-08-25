@@ -476,17 +476,17 @@ class MC_ItemCategoryDetails(models.Model):
         db_table = "MC_ItemCategoryDetails"
         
         
-class MC_ItemUnits(models.Model):
-    Item = models.ForeignKey(
-        M_Items, related_name='ItemUnitsID', on_delete=models.DO_NOTHING)
-    UnitID = models.ForeignKey(
-        M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
-    BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
+# class MC_ItemUnits(models.Model):
+#     Item = models.ForeignKey(
+#         M_Items, related_name='ItemUnitsID', on_delete=models.DO_NOTHING)
+#     UnitID = models.ForeignKey(
+#         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
+#     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
     
-    IsDeleted = models.BooleanField(default=False)
+#     IsDeleted = models.BooleanField(default=False)
 
-    class Meta:
-        db_table = "MC_ItemUnits"                
+#     class Meta:
+#         db_table = "MC_ItemUnits"                
 
 class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
@@ -560,8 +560,8 @@ class TC_OrderItems(models.Model):
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=10, decimal_places=2)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='OrderUnitID', on_delete=models.CASCADE)
+    # Unit = models.ForeignKey(
+    #     MC_ItemUnits, related_name='OrderUnitID', on_delete=models.CASCADE)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=2)
     GST = models.DecimalField(max_digits=5, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -607,8 +607,8 @@ class TC_InvoiceItems(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.DO_NOTHING)
+    # Unit = models.ForeignKey(
+    #     MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     QtyInKg = models.DecimalField(max_digits=10, decimal_places=3)
     QtyInNo = models.DecimalField(max_digits=10, decimal_places=3)
@@ -643,8 +643,8 @@ class TC_InvoiceItemBatches(models.Model):
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='InvoiceBatchUnitID', on_delete=models.DO_NOTHING)
+    # Unit = models.ForeignKey(
+    #     MC_ItemUnits, related_name='InvoiceBatchUnitID', on_delete=models.DO_NOTHING)
     MRP = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
