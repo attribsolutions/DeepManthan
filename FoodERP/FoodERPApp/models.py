@@ -493,13 +493,13 @@ class MC_ItemImages(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
     Item_pic = models.TextField()
     class Meta:
-        db_table = "MC_ItemsImages" 
+        db_table = "MC_ItemImages" 
 
 class MC_ItemDivisions(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemDivisiondetails', on_delete=models.DO_NOTHING)
     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
-        db_table = "MC_ItemsDivisions"
+        db_table = "MC_ItemDivisions"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
 class MC_ItemGMH(models.Model):
@@ -515,7 +515,7 @@ class MC_ItemGMH(models.Model):
     UpdatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "MC_ItemsGMH"
+        db_table = "MC_ItemGMH"
         
 
 class MC_ItemMargin(models.Model):
@@ -524,20 +524,14 @@ class MC_ItemMargin(models.Model):
     Margin = models.DecimalField(max_digits=10, decimal_places=2)
     PriceList = models.IntegerField(default=False)
     class Meta:
-        db_table = "MC_ItemsMargin"
-
-                
-    
+        db_table = "MC_ItemMargin"
 
 
-
-        
-
-class M_ItemsShelfLife(models.Model):
+class M_ItemShelfLife(models.Model):
     Name = models.CharField(max_length=500)
     Days = models.IntegerField(default=False)
     class Meta:
-        db_table = "M_ItemsShelfLife"
+        db_table = "M_ItemShelfLife"
         
 class T_Orders(models.Model):
 
