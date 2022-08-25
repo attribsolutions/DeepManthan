@@ -26,25 +26,32 @@ class M_ItemsSerializer02(serializers.Serializer):
     UpdatedOn = serializers.DateTimeField()
 
 
-class MC_ItemsImagesSerializer(serializers.ModelSerializer):
+class ItemMarginSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemsImages
-        fields = ['ImageType', 'Item_pic']
+        model = MC_ItemMargin
+        fields = ['PriceList', 'Margin']
 
-
-
-class MC_ItemUnitsSerializer(serializers.ModelSerializer):
+class ItemGMHSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemGMH
+        fields = ['GSTPercentage', 'MRP', 'HSNCode']
+        
+        
+class ItemDivisionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemDivisions
+        fields = ['Division']          
+        
+class ItemImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemImages
+        fields = ['ImageType', 'Item_pic']        
+         
+class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity', 'IsBase', 'IsDefault']
-
-
-class MC_ItemsGMMHSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MC_ItemsGMH
-        fields = ['GSTPercentage', 'MRP', 'Margin', 'HSNCode']
-         
-
+        fields = ['UnitID', 'BaseUnitQuantity' ]
+        
 class ItemCategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemCategoryDetails
@@ -54,39 +61,49 @@ class ItemCategoryDetailsSerializer(serializers.ModelSerializer):
 class ItemSerializer(serializers.ModelSerializer):
     
     ItemCategoryDetails = ItemCategoryDetailsSerializer(many=True)
-
-    ItemGstDetails = MC_ItemsGMMHSerializer(many=True)
-
-    ItemUnitDetails = MC_ItemUnitsSerializer(many=True)
     
-    # ItemImagesdetails = MC_ItemsImagesSerializer(many=True) ,'ItemImagesdetails'
+    ItemUnitDetails = ItemUnitsSerializer(many=True)
+    
+    ItemImagesdetails = ItemImagesSerializer(many=True)
+    
+    ItemDivisiondetails = ItemDivisionsSerializer(many=True) 
+    
+    ItemGstDetails = ItemGMHSerializer(many=True)
+
+    ItemMarginDetails = ItemMarginSerializer(many=True)
+    
     
 
     class Meta:
         model = M_Items
         fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive',
-                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemGstDetails', 'ItemUnitDetails']
+                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagedetails', 'ItemDivisiondetails', 'ItemGstDetails' ,'ItemMarginDetails']
 
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
-        ItemGsts_data = validated_data.pop('ItemGstDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
-        # ItemImages_data = validated_data.pop('ItemImagedetails')
-        
+        ItemImages_data = validated_data.pop('ItemImagedetails')
+        ItemDivisions_data = validated_data.pop('ItemDivisiondetails')
+        ItemGsts_data = validated_data.pop('ItemGstDetails')
+        ItemMargins_data = validated_data.pop('ItemMarginDetails')
         ItemID= M_Items.objects.create(**validated_data)
+        
         for ItemCategory_data in ItemCategorys_data:
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=ItemID, **ItemCategory_data)
 
-        for ItemGst_data in ItemGsts_data:
-            ItemGstMrpMargin = MC_ItemsGMH.objects.create(
-                Item=ItemID, **ItemGst_data)
-
         for ItemUnit_data in ItemUnits_data:
-            ItemUnits = MC_ItemUnits.objects.create(
-                Item=ItemID, **ItemUnit_data)
-                
-        # for ItemImage_data in ItemImages_data:
-        #     ItemImage = MC_ItemsGMMH.objects.create(
-        #         Item=ItemID, **ItemImage_data)     
+            ItemUnits = MC_ItemUnits.objects.create(Item=ItemID, **ItemUnit_data)
+            
+        for ItemImage_data in ItemImages_data:
+            ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
+        
+        for ItemDivision_data in ItemDivisions_data:
+            ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
+        
+        for ItemGst_data in ItemGsts_data:
+            ItemGstMrp = MC_ItemGMH.objects.create(Item=ItemID, **ItemGst_data)
+        
+        for ItemMargin_data in ItemMargins_data:
+            ItemMargin = MC_ItemGMH.objects.create(Item=ItemID, **ItemMargin_data)             
 
         return ItemID
