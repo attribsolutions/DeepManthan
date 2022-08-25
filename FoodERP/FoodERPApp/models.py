@@ -463,25 +463,19 @@ class M_Items(models.Model):
 
     class Meta:
         db_table = "M_Items"
-
-'''Table MC_ItemsGMMH details  - Items GST,MRP,Margin,HSNCode'''
-class MC_ItemsGMMH(models.Model):
-    
-    Item = models.ForeignKey(
-        M_Items, related_name='ItemGstDetails', on_delete=models.DO_NOTHING)
-    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    MRP = models.DecimalField(max_digits=20, decimal_places=2)
-    Margin = models.DecimalField(max_digits=20, decimal_places=2)
-    HSNCode = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "MC_ItemsGMMH"
         
-
+        
+class MC_ItemCategoryDetails(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.DO_NOTHING)  
+    CategoryType = models.ForeignKey(M_ProductCategoryType, related_name='CategoryType', on_delete=models.DO_NOTHING)
+    Category = models.ForeignKey(M_ProductCategory, related_name='Category', on_delete=models.DO_NOTHING)
+    SubCategory = models.ForeignKey(M_ProductSubCategory, related_name='SubCategory', on_delete=models.DO_NOTHING)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "MC_ItemCategoryDetails"
+        
+        
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(
         M_Items, related_name='ItemUnitsID', on_delete=models.DO_NOTHING)
@@ -493,25 +487,49 @@ class MC_ItemUnits(models.Model):
     IsDeleted = models.BooleanField(default=False)
 
     class Meta:
-        db_table = "MC_ItemUnits"
-                
+        db_table = "MC_ItemUnits"                
+
 class MC_ItemsImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
     Item_pic = models.FileField() 
     class Meta:
-        db_table = "MC_ItemsImages"     
+        db_table = "MC_ItemsImages" 
 
-
-class MC_ItemCategoryDetails(models.Model):
-    CategoryType = models.ForeignKey(M_ProductCategoryType, related_name='CategoryType', on_delete=models.DO_NOTHING)
-    Category = models.ForeignKey(M_ProductCategory, related_name='Category', on_delete=models.DO_NOTHING)
-    SubCategory = models.ForeignKey(M_ProductSubCategory, related_name='SubCategory', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.DO_NOTHING)     
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+class MC_ItemsDivisions(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemDivision', on_delete=models.DO_NOTHING)
+    Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
-        db_table = "MC_ItemCategoryDetails"
+        db_table = "MC_ItemsDivisions"
+
+'''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
+class MC_ItemsGMH(models.Model):
+    
+    Item = models.ForeignKey(
+        M_Items, related_name='ItemGstDetails', on_delete=models.DO_NOTHING)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    MRP = models.DecimalField(max_digits=20, decimal_places=2)
+    HSNCode = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "MC_ItemsGMH"
+        
+
+class MC_ItemsMargin(models.Model):
+    Item = models.ForeignKey(
+        M_Items, related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
+    Margin = models.DecimalField(max_digits=10, decimal_places=2)
+    PriceList = models.IntegerField(default=False)
+
+                
+    
+
+
+
         
 
 class M_ItemsShelfLife(models.Model):
