@@ -126,7 +126,7 @@ urlpatterns = [
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
 
           #PartyDropdownforloginpage/EmployeeID
-    url(r'PartyDropdownForLoginPage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
+    url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
     url(r'GerUserDetials$',GerUserDetialsView.as_view()),
