@@ -37,10 +37,10 @@ class ItemGMHSerializer(serializers.ModelSerializer):
         fields = ['GSTPercentage', 'MRP', 'HSNCode']
         
         
-# class ItemDivisionsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = MC_ItemsDivisions
-#         fields = ['Division']          
+class ItemDivisionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemDivisions
+        fields = ['Division']          
         
 class ItemImagesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,7 +66,7 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemImagesdetails = ItemImagesSerializer(many=True)
     
-    # ItemDivisiondetails = ItemDivisionsSerializer(many=True) 
+    ItemDivisiondetails = ItemDivisionsSerializer(many=True) 
     
     ItemGstDetails = ItemGMHSerializer(many=True)
 
@@ -97,8 +97,8 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemImage_data in ItemImages_data:
             ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
         
-        # for ItemDivision_data in ItemDivisions_data:
-        #     ItemDivision = MC_ItemsDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
+        for ItemDivision_data in ItemDivisions_data:
+            ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
         
         for ItemGst_data in ItemGsts_data:
             ItemGstMrp = MC_ItemGMH.objects.create(Item=ItemID, **ItemGst_data)
