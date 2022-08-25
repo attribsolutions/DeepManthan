@@ -39,6 +39,9 @@ class M_RoleAccessSerializerfordistinctModule(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     Name = serializers.CharField(required=False, allow_blank=True, max_length=100) 
 
+class M_RoleAccessSerializerforRole(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+
 class M_PagesSerializerforRoleAccess(DynamicFieldsModelSerializer):
     
     class Meta:

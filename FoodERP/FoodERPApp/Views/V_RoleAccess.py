@@ -17,15 +17,31 @@ class RoleAccessView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    def get(self, request, Role=0, Division=0, Company=0):
+    # def get(self, request, Role=0, Division=0, Company=0):
         # def get(self, request, Role=0):
+
+    def get(self, request, PartyID=0, EmployeeID=0,aa=0):    
+        Company=1
+        Division=PartyID
+        if not PartyID == 0 :
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM newerpdatabase.mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',(PartyID,EmployeeID))
+        else:
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM newerpdatabase.mc_userroles join m_users on m_users.id=mc_userroles.User_id where m_users.Employee_id=%s''',EmployeeID)
+        
+        qq = M_RoleAccessSerializerforRole(Role, many=True).data
+        roles=list()
+        for a in qq:
+            roles.append(a['id'])
+        
         modules = M_RoleAccess.objects.raw(
-            '''SELECT distinct Modules_id id ,h_modules.id, h_modules.Name,h_modules.DisplayIndex 
+            '''SELECT distinct Modules_id id ,h_modules.Name
 FROM m_roleaccess 
 join h_modules on h_modules.id=m_roleaccess.Modules_id
-where Role_id =%s AND M_RoleAccess.Division_id=%s AND M_RoleAccess.Company_id=%s
-ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
+where Role_id IN %s  AND M_RoleAccess.Division_id=%s AND M_RoleAccess.Company_id=%s
+ORDER BY h_modules.DisplayIndex''', (tuple(roles), Division, Company))
+        
         data = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
+        
         Moduledata = list()
         for a in data:
             id = a['id']
@@ -33,10 +49,11 @@ ORDER BY h_modules.DisplayIndex''', ([Role], [Division], [Company]))
 m_pages.Icon,m_pages.isActive,m_pages.Module_id,
 m_pages.PageType,m_pages.RelatedPageID,Pages_id FROM m_roleaccess
 JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
-WHERE Role_id=%s AND  Modules_id=%s and Division_id=%s and Company_id=%s  ''', ([Role], [id],[Division],[Company]))
+WHERE Role_id IN %s AND  Modules_id=%s and Division_id=%s and Company_id=%s  ''', (tuple(roles), [id],[Division],[Company]))
 
             PageSerializer = M_PagesSerializerforRoleAccessNEW(
                 query,  many=True).data
+             
             Pagesdata = list()
             for a1 in PageSerializer:
                 id = a1['id']

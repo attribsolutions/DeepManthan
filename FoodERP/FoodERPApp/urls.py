@@ -63,7 +63,7 @@ urlpatterns = [
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
        #SideMenu
-    url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
+    url(r'RoleAccess/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
        #ListPage
     url(r'RoleAccessList$', RoleAccessViewList.as_view()),
        #Post
@@ -125,8 +125,8 @@ urlpatterns = [
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
 
-          #PartyDropdownforloginpage/PartyID/EmployeeID
-    url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
+          #PartyDropdownforloginpage/EmployeeID
+    url(r'PartyDropdownForLoginPage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
     url(r'GerUserDetials$',GerUserDetialsView.as_view()),
