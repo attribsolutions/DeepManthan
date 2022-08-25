@@ -104,6 +104,6 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemGstMrp = MC_ItemGMH.objects.create(Item=ItemID, **ItemGst_data)
         
         for ItemMargin_data in ItemMargins_data:
-            ItemMargin = MC_ItemGMH.objects.create(Item=ItemID, **ItemMargin_data)             
+            ItemMargin = MC_ItemMargin.objects.create(Item=ItemID, **ItemMargin_data)             
 
         return ItemID
