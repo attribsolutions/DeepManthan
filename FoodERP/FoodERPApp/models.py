@@ -495,11 +495,11 @@ class MC_ItemImages(models.Model):
     class Meta:
         db_table = "MC_ItemImages" 
 
-class MC_ItemDivisions(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemDivisiondetails', on_delete=models.DO_NOTHING)
-    Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
-    class Meta:
-        db_table = "MC_ItemDivisions"
+# class MC_ItemsDivisions(models.Model):
+#     Item = models.ForeignKey(M_Items, related_name='ItemDivisiondetails', on_delete=models.DO_NOTHING)
+#     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
+#     class Meta:
+#         db_table = "MC_ItemsDivisions"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
 class MC_ItemGMH(models.Model):
