@@ -495,11 +495,11 @@ class MC_ItemImages(models.Model):
     class Meta:
         db_table = "MC_ItemsImages" 
 
-class MC_ItemDivisions(models.Model):
+class MC_ItemsDivisions(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemDivisiondetails', on_delete=models.DO_NOTHING)
     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
-        db_table = "MC_ItemsDivisions"
+        db_table = "MC_ItemDivisions"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
 class MC_ItemGMH(models.Model):
@@ -526,12 +526,6 @@ class MC_ItemMargin(models.Model):
     class Meta:
         db_table = "MC_ItemsMargin"
 
-                
-    
-
-
-
-        
 
 class M_ItemsShelfLife(models.Model):
     Name = models.CharField(max_length=500)

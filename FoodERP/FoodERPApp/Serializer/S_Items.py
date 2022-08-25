@@ -39,7 +39,7 @@ class ItemGMHSerializer(serializers.ModelSerializer):
         
 class ItemDivisionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemDivisions
+        model = MC_ItemsDivisions
         fields = ['Division']          
         
 class ItemImagesSerializer(serializers.ModelSerializer):
@@ -98,7 +98,7 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
         
         for ItemDivision_data in ItemDivisions_data:
-            ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
+            ItemDivision = MC_ItemsDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
         
         for ItemGst_data in ItemGsts_data:
             ItemGstMrp = MC_ItemGMH.objects.create(Item=ItemID, **ItemGst_data)
