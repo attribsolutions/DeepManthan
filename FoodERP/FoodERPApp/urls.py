@@ -62,9 +62,14 @@ urlpatterns = [
     url(r'UserList$', UserListView.as_view()),
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
+       #SideMenu
     url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
+       #ListPage
     url(r'RoleAccessList$', RoleAccessViewList.as_view()),
+       #Post
     url(r'RoleAccess$', RoleAccessView.as_view()),
+       #RoleAccess PAge Go button and Edit Button
+    url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
     url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
@@ -90,7 +95,7 @@ urlpatterns = [
     url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'Parties$', M_PartiesView.as_view()),
     url(r'demo$', AbcView.as_view()),
-    url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
+    
     url(r'PartyTypes/([0-9]+)$', PartyTypesViewSecond.as_view()),
     url(r'PartyTypes$', PartyTypesView.as_view()),
     url(r'DivisionTypes/([0-9]+)$', DivisionTypeViewSecond.as_view()),
@@ -113,7 +118,9 @@ urlpatterns = [
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
+        #RoleAccessGetPagesOnModule
     url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
+        #RoleAccess Page AddPage Button
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
