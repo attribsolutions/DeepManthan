@@ -25,6 +25,7 @@ class M_ItemsSerializer02(serializers.Serializer):
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
 
+
 class MC_ItemsImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemsImages
@@ -40,7 +41,7 @@ class MC_ItemUnitsSerializer(serializers.ModelSerializer):
 
 class MC_ItemsGMMHSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemsGMMH
+        model = MC_ItemsGMH
         fields = ['GSTPercentage', 'MRP', 'Margin', 'HSNCode']
          
 
@@ -77,7 +78,7 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=ItemID, **ItemCategory_data)
 
         for ItemGst_data in ItemGsts_data:
-            ItemGstMrpMargin = MC_ItemsGMMH.objects.create(
+            ItemGstMrpMargin = MC_ItemsGMH.objects.create(
                 Item=ItemID, **ItemGst_data)
 
         for ItemUnit_data in ItemUnits_data:
