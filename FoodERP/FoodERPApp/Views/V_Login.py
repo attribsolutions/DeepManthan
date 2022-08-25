@@ -303,6 +303,7 @@ class UserPartiesForLoginPage(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
+    serializer_class = M_UserPartiesSerializer
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -320,7 +321,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = M_UserPartiesSerializer(
+                    M_UserParties_Serializer = self.serializer_class(
                         query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
