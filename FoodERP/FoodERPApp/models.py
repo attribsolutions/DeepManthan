@@ -492,7 +492,7 @@ class MC_ItemUnits(models.Model):
 class MC_ItemsImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
-    Item_pic = models.FileField() 
+    Item_pic = models.TextField()
     class Meta:
         db_table = "MC_ItemsImages" 
 
@@ -524,6 +524,8 @@ class MC_ItemsMargin(models.Model):
         M_Items, related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
     Margin = models.DecimalField(max_digits=10, decimal_places=2)
     PriceList = models.IntegerField(default=False)
+    class Meta:
+        db_table = "MC_ItemsMargin"
 
                 
     
