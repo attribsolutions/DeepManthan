@@ -47,10 +47,10 @@ class ItemImagesSerializer(serializers.ModelSerializer):
         model = MC_ItemImages
         fields = ['ImageType', 'Item_pic']        
          
-class ItemUnitsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity' ]
+# class ItemUnitsSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MC_ItemUnits
+#         fields = ['UnitID', 'BaseUnitQuantity' ]
         
 class ItemCategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,7 +62,7 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemCategoryDetails = ItemCategoryDetailsSerializer(many=True)
     
-    ItemUnitDetails = ItemUnitsSerializer(many=True)
+    # ItemUnitDetails = ItemUnitsSerializer(many=True)
     
     ItemImagesdetails = ItemImagesSerializer(many=True)
     
@@ -91,8 +91,8 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemCategory_data in ItemCategorys_data:
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=ItemID, **ItemCategory_data)
 
-        for ItemUnit_data in ItemUnits_data:
-            ItemUnits = MC_ItemUnits.objects.create(Item=ItemID, **ItemUnit_data)
+        # for ItemUnit_data in ItemUnits_data:
+        #     ItemUnits = MC_ItemUnits.objects.create(Item=ItemID, **ItemUnit_data)
             
         for ItemImage_data in ItemImages_data:
             ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
