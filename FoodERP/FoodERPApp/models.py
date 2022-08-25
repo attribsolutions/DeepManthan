@@ -482,28 +482,27 @@ class MC_ItemUnits(models.Model):
     UnitID = models.ForeignKey(
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
-    IsBase = models.IntegerField()
-    IsDefault = models.IntegerField()
+    
     IsDeleted = models.BooleanField(default=False)
 
     class Meta:
         db_table = "MC_ItemUnits"                
 
-class MC_ItemsImages(models.Model):
+class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
     Item_pic = models.TextField()
     class Meta:
         db_table = "MC_ItemsImages" 
 
-class MC_ItemsDivisions(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemDivision', on_delete=models.DO_NOTHING)
+class MC_ItemDivisions(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemDivisiondetails', on_delete=models.DO_NOTHING)
     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
         db_table = "MC_ItemsDivisions"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
-class MC_ItemsGMH(models.Model):
+class MC_ItemGMH(models.Model):
     
     Item = models.ForeignKey(
         M_Items, related_name='ItemGstDetails', on_delete=models.DO_NOTHING)
@@ -519,7 +518,7 @@ class MC_ItemsGMH(models.Model):
         db_table = "MC_ItemsGMH"
         
 
-class MC_ItemsMargin(models.Model):
+class MC_ItemMargin(models.Model):
     Item = models.ForeignKey(
         M_Items, related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
     Margin = models.DecimalField(max_digits=10, decimal_places=2)
