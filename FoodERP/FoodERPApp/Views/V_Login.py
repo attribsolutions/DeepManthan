@@ -312,7 +312,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                 query = MC_EmployeeParties.objects.raw(
                     '''SELECT  mc_userroles.id,mc_userroles.Role_id Role,m_roles.Name AS RoleName,mc_userroles.Party_id,m_parties.Name AS PartyName ,m_users.Employee_id
 
-                     FROM mc_userroles
+                     FROM  mc_userroles
                      JOIN m_users on m_users.id=mc_userroles.User_id
                      left JOIN m_parties on m_parties.id=mc_userroles.Party_id
                      Left JOIN m_roles on m_roles.id=mc_userroles.Role_id		 
