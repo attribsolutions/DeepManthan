@@ -490,13 +490,13 @@ class MC_ItemUnits(models.Model):
 
 class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ItemImagesdetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.DO_NOTHING)
     Item_pic = models.TextField()
     class Meta:
         db_table = "MC_ItemImages" 
 
 class MC_ItemDivisions(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemDivisiondetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='ItemDivisionDetails', on_delete=models.DO_NOTHING)
     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
         db_table = "MC_ItemDivisions"
@@ -509,9 +509,7 @@ class MC_ItemGMH(models.Model):
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
