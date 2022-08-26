@@ -499,7 +499,7 @@ class MC_ItemDivisions(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemDivisionDetails', on_delete=models.DO_NOTHING)
     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
-        db_table = "MC_ItemDivisions"
+        db_table = "MC_ItemDivisionss"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
 class MC_ItemGMH(models.Model):

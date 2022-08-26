@@ -11,9 +11,9 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
 
 class M_ItemsSerializer02(serializers.Serializer):
     id = serializers.IntegerField()
-    ItemGroup_id = serializers.IntegerField()
-    ItemGroupName = serializers.CharField()
+   
     Name = serializers.CharField(max_length=500)
+    BaseUnitName = serializers.CharField(max_length=500)
     Sequence = serializers.DecimalField(max_digits=5, decimal_places=2)
     BaseUnitID_id = serializers.IntegerField()
     GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
