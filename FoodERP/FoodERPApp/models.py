@@ -343,7 +343,7 @@ class M_RoleAccess(models.Model):
     Company = models.ForeignKey(
         C_Companies, related_name='RoleAccessCompany', on_delete=models.DO_NOTHING)
     Division = models.ForeignKey(
-        M_Parties, related_name='RoleAccessDividion', on_delete=models.DO_NOTHING)
+        M_Parties, related_name='RoleAccessDividion', on_delete=models.DO_NOTHING,null=True,blank=True)
     Modules = models.ForeignKey(
         H_Modules, related_name='RoleAccessModules', on_delete=models.DO_NOTHING)
     Pages = models.ForeignKey(
@@ -356,6 +356,10 @@ class M_RoleAccess(models.Model):
     class Meta:
         db_table = "M_RoleAccess"
 
+class MC_RolesEmployeeTypes(models.Model):
+    Role = models.ForeignKey(M_Roles, related_name='RoleEmployeeTypes', on_delete=models.DO_NOTHING)
+    EmployeeType = models.ForeignKey(M_EmployeeTypes, on_delete=models.DO_NOTHING)
+    
 
 class H_PageAccess(models.Model):
 
