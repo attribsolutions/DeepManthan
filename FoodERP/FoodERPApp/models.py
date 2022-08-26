@@ -359,6 +359,8 @@ class M_RoleAccess(models.Model):
 class MC_RolesEmployeeTypes(models.Model):
     Role = models.ForeignKey(M_Roles, related_name='RoleEmployeeTypes', on_delete=models.DO_NOTHING)
     EmployeeType = models.ForeignKey(M_EmployeeTypes, on_delete=models.DO_NOTHING)
+    class Meta:
+        db_table = "MC_RolesEmployeeTypes"
     
 
 class H_PageAccess(models.Model):
