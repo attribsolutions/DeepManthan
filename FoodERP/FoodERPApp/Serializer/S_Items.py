@@ -64,28 +64,29 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemUnitDetails = ItemUnitsSerializer(many=True)
     
-    ItemImagesdetails = ItemImagesSerializer(many=True)
+    ItemImagesDetails = ItemImagesSerializer(many=True)
     
-    ItemDivisiondetails = ItemDivisionsSerializer(many=True) 
+    ItemDivisionDetails = ItemDivisionsSerializer(many=True) 
     
     ItemGstDetails = ItemGMHSerializer(many=True)
 
-    ItemMarginDetails = ItemMarginSerializer(many=True)
+    # ItemMarginDetails = ItemMarginSerializer(many=True)
     
+   
     
 
     class Meta:
         model = M_Items
         fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive',
-                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagedetails', 'ItemDivisiondetails', 'ItemGstDetails' ,'ItemMarginDetails']
+                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemGstDetails' ]
 
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
-        ItemImages_data = validated_data.pop('ItemImagedetails')
-        ItemDivisions_data = validated_data.pop('ItemDivisiondetails')
+        ItemImages_data = validated_data.pop('ItemImagesDetails')
+        ItemDivisions_data = validated_data.pop('ItemDivisionDetails')
         ItemGsts_data = validated_data.pop('ItemGstDetails')
-        ItemMargins_data = validated_data.pop('ItemMarginDetails')
+        # ItemMargins_data = validated_data.pop('ItemMarginDetails')
         ItemID= M_Items.objects.create(**validated_data)
         
         for ItemCategory_data in ItemCategorys_data:
@@ -103,7 +104,7 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemGst_data in ItemGsts_data:
             ItemGstMrp = MC_ItemGMH.objects.create(Item=ItemID, **ItemGst_data)
         
-        for ItemMargin_data in ItemMargins_data:
-            ItemMargin = MC_ItemGMH.objects.create(Item=ItemID, **ItemMargin_data)             
+        # for ItemMargin_data in ItemMargins_data:
+        #     ItemMargin = MC_ItemMargin.objects.create(Item=ItemID, **ItemMargin_data)             
 
         return ItemID
