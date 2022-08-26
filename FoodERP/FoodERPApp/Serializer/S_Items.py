@@ -70,15 +70,13 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemGstDetails = ItemGMHSerializer(many=True)
 
-    # ItemMarginDetails = ItemMarginSerializer(many=True)
+    ItemMarginDetails = ItemMarginSerializer(many=True)
     
    
-    
-
     class Meta:
         model = M_Items
         fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive',
-                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemGstDetails' ]
+                  'CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemGstDetails', 'ItemMarginDetails' ]
 
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
@@ -86,7 +84,7 @@ class ItemSerializer(serializers.ModelSerializer):
         ItemImages_data = validated_data.pop('ItemImagesDetails')
         ItemDivisions_data = validated_data.pop('ItemDivisionDetails')
         ItemGsts_data = validated_data.pop('ItemGstDetails')
-        # ItemMargins_data = validated_data.pop('ItemMarginDetails')
+        ItemMargins_data = validated_data.pop('ItemMarginDetails')
         ItemID= M_Items.objects.create(**validated_data)
         
         for ItemCategory_data in ItemCategorys_data:
@@ -104,7 +102,7 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemGst_data in ItemGsts_data:
             ItemGstMrp = MC_ItemGMH.objects.create(Item=ItemID, **ItemGst_data)
         
-        # for ItemMargin_data in ItemMargins_data:
-        #     ItemMargin = MC_ItemMargin.objects.create(Item=ItemID, **ItemMargin_data)             
+        for ItemMargin_data in ItemMargins_data:
+            ItemMargin = MC_ItemMargin.objects.create(Item=ItemID, **ItemMargin_data)             
 
         return ItemID
