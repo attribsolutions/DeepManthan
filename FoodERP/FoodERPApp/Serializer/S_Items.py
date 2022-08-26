@@ -11,19 +11,14 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
 
 class M_ItemsSerializer02(serializers.Serializer):
     id = serializers.IntegerField()
-   
     Name = serializers.CharField(max_length=500)
     BaseUnitName = serializers.CharField(max_length=500)
-    Sequence = serializers.DecimalField(max_digits=5, decimal_places=2)
-    BaseUnitID_id = serializers.IntegerField()
-    GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
-    MRP = serializers.DecimalField(max_digits=20, decimal_places=2)
-    Rate = serializers.DecimalField(max_digits=20, decimal_places=2)
-    isActive = serializers.BooleanField(default=False)
-    CreatedBy = serializers.IntegerField(default=False)
-    CreatedOn = serializers.DateTimeField()
-    UpdatedBy = serializers.IntegerField(default=False)
-    UpdatedOn = serializers.DateTimeField()
+    CompanyName = serializers.CharField(max_length=500)
+    CategoryTypeName = serializers.CharField(max_length=500)
+    CategoryName = serializers.CharField(max_length=500)
+    SubCategoryName = serializers.CharField(max_length=500)
+   
+
 
 
 class ItemMarginSerializer(serializers.ModelSerializer):
