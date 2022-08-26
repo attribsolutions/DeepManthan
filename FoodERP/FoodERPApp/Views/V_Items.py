@@ -15,21 +15,25 @@ class M_ItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     
-#     @transaction.atomic()
-#     def get(self, request, id=0 ):
-#         try:
-#             with transaction.atomic():
-#                 query = M_Items.objects.raw('''SELECT p.id,p.Name,p.BaseUnitID_id,p.GSTPercentage,p.MRP,p.ItemGroup_id,RP.Name ItemGroupName,p.Rate,p.isActive,p.Sequence,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
-# FROM M_Items p 
-# join M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
-# Order BY RP.Sequence, p.Sequence''')
-#                 if not query:
-#                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-#                 else:
-#                     M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
-#                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
-#         except Exception :
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
+    @transaction.atomic()
+    def get(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                query = M_Items.objects.raw('''SELECT m_items.id,m_items.Name,m_units.Name BaseUnitName,c_companies.Name Company,m_productcategorytype.Name CategoryTypeName  ,m_productcategory.Name CategoryName,m_productsubcategory.Name SubCategoryName  FROM m_items 
+join m_units on m_units.id= m_items.BaseUnitID_id
+join c_companies on c_companies.id= m_items.Company_id
+join mc_itemcategorydetails on mc_itemcategorydetails.Item_id=m_items.id
+join m_productcategorytype on m_productcategorytype.id=mc_itemcategorydetails.CategoryType_id
+join m_productcategory on m_productcategory.id= mc_itemcategorydetails.Category_id
+join m_productsubcategory on m_productsubcategory.id =mc_itemcategorydetails.SubCategory_id 
+Order BY m_items.Sequence''')
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    M_Items_Serializer = M_ItemsSerializer02(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': M_Items_Serializer})   
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
         
     @transaction.atomic()
     def post(self, request):
