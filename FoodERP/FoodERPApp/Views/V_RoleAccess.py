@@ -24,9 +24,9 @@ class RoleAccessView(RetrieveAPIView):
         Company=1
         Division=PartyID
         if not PartyID == 0 :
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM newerpdatabase.mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',(PartyID,EmployeeID))
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',(PartyID,EmployeeID))
         else:
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM newerpdatabase.mc_userroles join m_users on m_users.id=mc_userroles.User_id where m_users.Employee_id=%s''',EmployeeID)
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where m_users.Employee_id=%s''',EmployeeID)
         
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
         roles=list()
@@ -39,7 +39,7 @@ FROM m_roleaccess
 join h_modules on h_modules.id=m_roleaccess.Modules_id
 where Role_id IN %s  AND M_RoleAccess.Division_id=%s AND M_RoleAccess.Company_id=%s
 ORDER BY h_modules.DisplayIndex''', (tuple(roles), Division, Company))
-        
+        print(modules)
         data = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
         
         Moduledata = list()
