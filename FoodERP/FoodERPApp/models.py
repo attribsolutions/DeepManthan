@@ -449,7 +449,11 @@ class M_Units(models.Model):
 
     class Meta:
         db_table = "M_Units"
-
+        
+class MRP_Types(models.Model):
+    Name = models.CharField(max_length=500)
+    class Meta:
+        db_table = "MRP_Types"
 
 class M_Items(models.Model):
 
