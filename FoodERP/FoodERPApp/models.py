@@ -687,13 +687,9 @@ class Vehical(models.Model):
         db_table = "Vehical"
 
 class VehicalsDivisions(models.Model):
-    
     Vehical = models.ForeignKey(Vehical, related_name='Vehical', on_delete=models.DO_NOTHING) 
     Division = models.ForeignKey(Drivers, related_name='Division', on_delete=models.DO_NOTHING) 
             
-    
-       
-
 
 class Abc(models.Model):
    
