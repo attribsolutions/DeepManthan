@@ -508,10 +508,10 @@ class MC_ItemDivisions(models.Model):
         db_table = "MC_ItemDivisions"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
-class MC_ItemGMH(models.Model):
+class MC_ItemMRP(models.Model):
     
     Item = models.ForeignKey(
-        M_Items, related_name='ItemGstDetails', on_delete=models.DO_NOTHING)
+        M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
@@ -519,7 +519,7 @@ class MC_ItemGMH(models.Model):
     UpdatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "MC_ItemGMH"
+        db_table = "MC_ItemMRP"
         
 
 class MC_ItemMargin(models.Model):
