@@ -19,6 +19,12 @@ class M_ItemsSerializer02(serializers.Serializer):
     SubCategoryName = serializers.CharField(max_length=500)
    
 
+class MRPTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_MRPTypes
+        fields = '__all__'
+
+
 class ImageTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_ImageTypes
@@ -33,7 +39,7 @@ class ItemMarginSerializer(serializers.ModelSerializer):
 class ItemMRPSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemMRP
-        fields = ['GSTPercentage', 'MRP', 'HSNCode']
+        fields = ['GSTPercentage','MRPType', 'MRP', 'HSNCode']
         
         
 class ItemDivisionsSerializer(serializers.ModelSerializer):

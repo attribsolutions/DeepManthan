@@ -110,6 +110,7 @@ urlpatterns = [
     url(r'SubCategory$', SubProductCategoryView.as_view()),
     url(r'UnitList$', M_UnitsView.as_view()),
     
+    
     # Dependencies APIs IN Projects 
     
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
@@ -134,4 +135,5 @@ urlpatterns = [
     url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
     url(r'GetSubCategoryByCategoryID/([0-9]+)$', GetSubCategoryByCategoryID.as_view()),
     url(r'ImageTypes$', M_ImageTypesView.as_view()),
+    url(r'MRPTypes$', M_MRPTypesView.as_view()),
 ]
