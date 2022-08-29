@@ -359,6 +359,8 @@ class M_RoleAccess(models.Model):
 class MC_RolesEmployeeTypes(models.Model):
     Role = models.ForeignKey(M_Roles, related_name='RoleEmployeeTypes', on_delete=models.DO_NOTHING)
     EmployeeType = models.ForeignKey(M_EmployeeTypes, on_delete=models.DO_NOTHING)
+    class Meta:
+        db_table = "MC_RolesEmployeeTypes"
     
 
 class H_PageAccess(models.Model):
@@ -447,7 +449,11 @@ class M_Units(models.Model):
 
     class Meta:
         db_table = "M_Units"
-
+        
+class MRP_Types(models.Model):
+    Name = models.CharField(max_length=500)
+    class Meta:
+        db_table = "MRP_Types"
 
 class M_Items(models.Model):
 
@@ -506,18 +512,20 @@ class MC_ItemDivisions(models.Model):
         db_table = "MC_ItemDivisions"
 
 '''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
-class MC_ItemGMH(models.Model):
+class MC_ItemMRP(models.Model):
     
     Item = models.ForeignKey(
-        M_Items, related_name='ItemGstDetails', on_delete=models.DO_NOTHING)
+        M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
+    MRPType = models.ForeignKey(
+        MRP_Types, related_name='MRPType', on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "MC_ItemGMH"
+        db_table = "MC_ItemMRP"
         
 
 class MC_ItemMargin(models.Model):
@@ -652,7 +660,36 @@ class TC_InvoiceItemBatches(models.Model):
 
     class Meta:
         db_table = "TC_InvoiceItemBatches"
+        
+class Drivers(models.Model):
+    Name =  models.CharField(max_length=300)
+    DOB = models.DateField()
+    Address = models.CharField(max_length=500)
+    class Meta:
+        db_table = "Drivers"
+    
+    
+class VehicleTypes(models.Model):
+    Name= models.CharField(max_length=300)
+    class Meta:
+        db_table = "VehicleTypes" 
 
+        
+class Vehical(models.Model):
+    VehicalNumber= models.CharField(max_length=300)
+    Driver =models.ForeignKey(
+        Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
+    Description = models.CharField(max_length=300)
+    VehicalType = models.CharField(max_length=300)
+    class Meta:
+        db_table = "Vehical"
+
+class VehicalsDivisions(models.Model):
+    Vehical = models.ForeignKey(Vehical, related_name='Vehical', on_delete=models.DO_NOTHING) 
+    Division = models.ForeignKey(Drivers, related_name='Division', on_delete=models.DO_NOTHING) 
+    class Meta:
+        db_table = "VehicalsDivisions"
+            
 
 class Abc(models.Model):
    
@@ -663,3 +700,4 @@ class Abc(models.Model):
   class Meta:
         db_table = "Abc"
         
+
