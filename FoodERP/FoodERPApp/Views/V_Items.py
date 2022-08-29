@@ -96,4 +96,23 @@ JOIN M_ItemsGroup RP ON p.ItemGroup_id=RP.ID
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []})     
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []}) 
+
+
+class M_ImageTypesView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                ImageTypesdata = M_ImageTypes.objects.all()
+                if ImageTypesdata.exists():
+                    ImageTypes_Serializer = ImageTypesSerializer(ImageTypesdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ImageTypes_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'ImageTypes Not Available', 'Data': []})    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            
