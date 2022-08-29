@@ -303,6 +303,7 @@ class UserPartiesForLoginPage(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
+    serializer_class = M_UserPartiesSerializer
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -311,7 +312,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                 query = MC_EmployeeParties.objects.raw(
                     '''SELECT  mc_userroles.id,mc_userroles.Role_id Role,m_roles.Name AS RoleName,mc_userroles.Party_id,m_parties.Name AS PartyName ,m_users.Employee_id
 
-                     FROM erp.mc_userroles
+                     FROM  mc_userroles
                      JOIN m_users on m_users.id=mc_userroles.User_id
                      left JOIN m_parties on m_parties.id=mc_userroles.Party_id
                      Left JOIN m_roles on m_roles.id=mc_userroles.Role_id		 
@@ -320,7 +321,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = M_UserPartiesSerializer(
+                    M_UserParties_Serializer = self.serializer_class(
                         query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
