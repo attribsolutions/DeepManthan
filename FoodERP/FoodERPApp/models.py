@@ -518,6 +518,8 @@ class MC_ItemMRP(models.Model):
         M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
+    MRPType = models.ForeignKey(
+        MRP_Types, related_name='MRPType', on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
