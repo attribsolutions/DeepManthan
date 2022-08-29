@@ -115,4 +115,20 @@ class M_ImageTypesView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'ImageTypes Not Available', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-            
+
+class M_MRPTypesView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                MRPTypesdata = M_MRPTypes.objects.all()
+                if MRPTypesdata.exists():
+                    MRPTypes_Serializer = MRPTypesSerializer(MRPTypesdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': MRPTypes_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Types Not Available', 'Data': []})    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
