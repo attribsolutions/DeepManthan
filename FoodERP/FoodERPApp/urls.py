@@ -133,4 +133,5 @@ urlpatterns = [
     url(r'SuperAdmin$',SuperAdminView.as_view()),
     url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
     url(r'GetSubCategoryByCategoryID/([0-9]+)$', GetSubCategoryByCategoryID.as_view()),
+    url(r'ImageTypes$', M_ImageTypesView.as_view()),
 ]

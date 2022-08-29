@@ -19,6 +19,10 @@ class M_ItemsSerializer02(serializers.Serializer):
     SubCategoryName = serializers.CharField(max_length=500)
    
 
+class ImageTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_ImageTypes
+        fields = '__all__'
 
 
 class ItemMarginSerializer(serializers.ModelSerializer):
