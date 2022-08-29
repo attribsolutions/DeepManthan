@@ -661,7 +661,36 @@ class TC_InvoiceItemBatches(models.Model):
         db_table = "TC_InvoiceItemBatches"
 
 
+class M_Drivers(models.Model):
+    Name =  models.CharField(max_length=300)
+    DOB = models.DateField()
+    Address = models.CharField(max_length=500)
+    UID = models.CharField(max_length=500)
+    class Meta:
+        db_table = "M_Drivers"
+    
+    
+class M_VehicleTypes(models.Model):
+    Name= models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_VehicleTypes" 
 
+        
+class M_Vehicles(models.Model):
+    VehicleNumber= models.CharField(max_length=300)
+    Description = models.CharField(max_length=300)
+    Driver =models.ForeignKey(
+        M_Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
+    VehicleType = models.ForeignKey(
+        M_VehicleTypes, related_name='VehicleType', on_delete=models.DO_NOTHING) 
+    class Meta:
+        db_table = "M_Vehicles"
+
+class MC_VehiclesDivisions(models.Model):
+    Vehicle = models.ForeignKey(M_Vehicles, related_name='Vehicle', on_delete=models.DO_NOTHING) 
+    Division = models.ForeignKey(M_Parties, related_name='VehicleDivision', on_delete=models.DO_NOTHING) 
+    class Meta:
+        db_table = "MC_VehiclesDivisions"
 
                     
         
