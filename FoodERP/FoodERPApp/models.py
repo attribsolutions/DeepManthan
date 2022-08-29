@@ -661,36 +661,7 @@ class TC_InvoiceItemBatches(models.Model):
     class Meta:
         db_table = "TC_InvoiceItemBatches"
         
-class Drivers(models.Model):
-    Name =  models.CharField(max_length=300)
-    DOB = models.DateField()
-    Address = models.CharField(max_length=500)
-    class Meta:
-        db_table = "Drivers"
-    
-    
-class VehicleTypes(models.Model):
-    Name= models.CharField(max_length=300)
-    class Meta:
-        db_table = "VehicleTypes" 
-
-        
-class Vehical(models.Model):
-    VehicalNumber= models.CharField(max_length=300)
-    Driver =models.ForeignKey(
-        Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
-    Description = models.CharField(max_length=300)
-    VehicalType = models.CharField(max_length=300)
-    class Meta:
-        db_table = "Vehical"
-
-class VehicalsDivisions(models.Model):
-    Vehical = models.ForeignKey(Vehical, related_name='Vehical', on_delete=models.DO_NOTHING) 
-    Division = models.ForeignKey(Drivers, related_name='Division', on_delete=models.DO_NOTHING) 
-    class Meta:
-        db_table = "VehicalsDivisions"
             
-
 class Abc(models.Model):
    
   file = models.FileField(blank=False, null=False)
