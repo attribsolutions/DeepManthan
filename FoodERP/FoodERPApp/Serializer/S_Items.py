@@ -39,7 +39,7 @@ class ItemMarginSerializer(serializers.ModelSerializer):
 class ItemMRPSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemMRP
-        fields = ['GSTPercentage', 'MRP', 'HSNCode']
+        fields = ['GSTPercentage','MRPType', 'MRP', 'HSNCode']
         
         
 class ItemDivisionsSerializer(serializers.ModelSerializer):

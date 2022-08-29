@@ -110,6 +110,7 @@ urlpatterns = [
     url(r'SubCategory$', SubProductCategoryView.as_view()),
     url(r'UnitList$', M_UnitsView.as_view()),
     
+    
     # Dependencies APIs IN Projects 
     
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
