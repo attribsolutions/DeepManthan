@@ -450,10 +450,10 @@ class M_Units(models.Model):
     class Meta:
         db_table = "M_Units"
         
-class MRP_Types(models.Model):
+class M_MRPTypes(models.Model):
     Name = models.CharField(max_length=500)
     class Meta:
-        db_table = "MRP_Types"
+        db_table = "M_MRPTypes"
 
 class M_Items(models.Model):
 
@@ -519,7 +519,7 @@ class MC_ItemMRP(models.Model):
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     MRPType = models.ForeignKey(
-        MRP_Types, related_name='MRPType', on_delete=models.DO_NOTHING)
+        M_MRPTypes, related_name='MRPType', on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
@@ -661,36 +661,7 @@ class TC_InvoiceItemBatches(models.Model):
     class Meta:
         db_table = "TC_InvoiceItemBatches"
         
-class Drivers(models.Model):
-    Name =  models.CharField(max_length=300)
-    DOB = models.DateField()
-    Address = models.CharField(max_length=500)
-    class Meta:
-        db_table = "Drivers"
-    
-    
-class VehicleTypes(models.Model):
-    Name= models.CharField(max_length=300)
-    class Meta:
-        db_table = "VehicleTypes" 
-
-        
-class Vehical(models.Model):
-    VehicalNumber= models.CharField(max_length=300)
-    Driver =models.ForeignKey(
-        Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
-    Description = models.CharField(max_length=300)
-    VehicalType = models.CharField(max_length=300)
-    class Meta:
-        db_table = "Vehical"
-
-class VehicalsDivisions(models.Model):
-    Vehical = models.ForeignKey(Vehical, related_name='Vehical', on_delete=models.DO_NOTHING) 
-    Division = models.ForeignKey(Drivers, related_name='Division', on_delete=models.DO_NOTHING) 
-    class Meta:
-        db_table = "VehicalsDivisions"
             
-
 class Abc(models.Model):
    
   file = models.FileField(blank=False, null=False)
