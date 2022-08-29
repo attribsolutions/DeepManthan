@@ -518,8 +518,7 @@ class MC_ItemMRP(models.Model):
         M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
-    MRPType = models.ForeignKey(
-        M_MRPTypes, related_name='MRPType', on_delete=models.DO_NOTHING)
+    MRPType = models.ForeignKey(M_MRPTypes, related_name='MRPType', on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
@@ -660,6 +659,39 @@ class TC_InvoiceItemBatches(models.Model):
 
     class Meta:
         db_table = "TC_InvoiceItemBatches"
+
+
+
+class M_Drivers(models.Model):
+    Name =  models.CharField(max_length=300)
+    DOB = models.DateField()
+    Address = models.CharField(max_length=500)
+    class Meta:
+        db_table = "M_Drivers"
+    
+    
+class M_VehicleTypes(models.Model):
+    Name= models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_VehicleTypes" 
+
+        
+class M_Vehicals(models.Model):
+    VehicalNumber= models.CharField(max_length=300)
+    Driver =models.ForeignKey(
+        M_Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
+    Description = models.CharField(max_length=300)
+    VehicalType = models.ForeignKey(
+        M_VehicleTypes, related_name='VehicleType', on_delete=models.DO_NOTHING) 
+    class Meta:
+        db_table = "M_Vehicals"
+
+class MC_VehicalsDivisions(models.Model):
+    Vehical = models.ForeignKey(M_Vehicals, related_name='Vehical', on_delete=models.DO_NOTHING) 
+    Division = models.ForeignKey(M_Parties, related_name='VehicalDivision', on_delete=models.DO_NOTHING) 
+    class Meta:
+        db_table = "MC_VehicalsDivisions"
+                    
         
             
 class Abc(models.Model):
