@@ -56,7 +56,7 @@ class T_InvoicesViewSecond(CreateAPIView):
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoice_serializer = T_InvoiceSerializer(Invoicedata)
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': Invoice_serializer.data})
-        except M_EmployeeTypes.DoesNotExist:
+        except T_Invoices.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'T_Invoices Not available', 'Data': []})
    
 
