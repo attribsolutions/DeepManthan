@@ -1,3 +1,4 @@
+from asyncore import read
 from dataclasses import field
 from ..models import *
 from rest_framework import serializers
@@ -9,7 +10,7 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class M_ItemsSerializer02(serializers.Serializer):
+class ItemsSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
     BaseUnitName = serializers.CharField(max_length=500)
@@ -111,3 +112,152 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemMargin = MC_ItemMargin.objects.create(Item=ItemID, **ItemMargin_data)             
 
         return ItemID
+    
+    def update(self, instance, validated_data):
+
+        instance.Name = validated_data.get(
+            'Name', instance.Name)
+        instance.ShortName = validated_data.get(
+            'ShortName', instance.ShortName)
+        instance.Sequence = validated_data.get(
+            'Sequence', instance.Sequence)
+        instance.Company = validated_data.get(
+            'Company', instance.Company)
+        instance.BaseUnitID = validated_data.get(
+            'BaseUnitID', instance.BaseUnitID)
+        instance.BarCode = validated_data.get(
+            'BarCode', instance.BarCode)
+        instance.isActive = validated_data.get(
+            'isActive', instance.isActive)    
+        instance.save()
+        
+        for a in instance.ItemCategoryDetails.all():
+            a.delete()
+        for b in instance.ItemUnitDetails.all():
+            b.delete()
+        for c in instance.ItemImagesDetails.all():
+            c.delete()
+        for d in instance.ItemDivisionDetails.all():
+            d.delete()
+        for e in instance.ItemMRPDetails.all():
+            e.delete()  
+        for f in instance.ItemMarginDetails.all():
+            f.delete()                    
+        
+        
+        for ItemCategory_data in  validated_data['ItemCategoryDetails']:
+            ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=instance, **ItemCategory_data)
+
+        for ItemUnit_data in validated_data['ItemUnitDetails']:
+            ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)
+            
+        for ItemImage_data in validated_data['ItemImagesDetails']:
+            ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
+        
+        for ItemDivision_data in validated_data['ItemDivisionDetails']:
+            ItemDivision = MC_ItemDivisions.objects.create(Item=instance, **ItemDivision_data)    
+        
+        for ItemMRP_data in validated_data['ItemMRPDetails']:
+            ItemGstMrp = MC_ItemMRP.objects.create(Item=instance, **ItemMRP_data)
+        
+        for ItemMargin_data in validated_data['ItemMarginDetails']:
+            ItemMargin = MC_ItemMargin.objects.create(Item=instance, **ItemMargin_data)
+        
+        return instance      
+
+class UnitSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Units
+        fields = ['Name']
+        
+        
+class ItemMarginSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemMargin
+        fields = ['PriceList', 'Margin']
+
+class ItemMRPSerializerSecond(serializers.ModelSerializer):
+    MRPType = MRPTypesSerializer(read_only=True)
+    class Meta:
+        model = MC_ItemMRP
+        fields = ['GSTPercentage','MRPType', 'MRP', 'HSNCode']        
+        
+class PartiesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name']
+         
+class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
+    Division = PartiesSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemDivisions
+        fields = [ 'Division']
+                   
+class ImageTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_ImageTypes
+        fields = ['id','Name']
+        
+class ItemImagesSerializerSecond(serializers.ModelSerializer):
+    
+    ImageType = ImageTypesSerializer(read_only=True)
+    class Meta:
+        model = MC_ItemImages
+        fields = ['Item_pic', 'ImageType']
+         
+class ItemUnitsSerializerSecond(serializers.ModelSerializer):
+    UnitID = UnitSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemUnits
+        fields = ['UnitID', 'BaseUnitQuantity' ]
+        
+class ItemSubCategorySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_ProductSubCategory
+        fields = ['Name']
+
+class ItemCategorySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_ProductCategory
+        fields = ['Name']
+        
+class ItemCategoryTypeSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_ProductCategoryType
+        fields = ['Name']
+
+class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
+    SubCategory = ItemSubCategorySerializerSecond(read_only=True)
+    Category = ItemCategorySerializerSecond(read_only=True)
+    CategoryType = ItemCategoryTypeSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemCategoryDetails
+        fields = ['Category','CategoryType','SubCategory']
+
+class CompanySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = ['id','Name']
+    
+class ItemSerializerSecond(serializers.ModelSerializer):
+    BaseUnitID = UnitSerializerSecond()
+    Company=CompanySerializerSecond()
+    ItemCategoryDetails = ItemCategoryDetailsSerializerSecond(read_only=True,many=True)
+    ItemUnitDetails =ItemUnitsSerializerSecond(many=True)
+    ItemImagesDetails = ItemImagesSerializerSecond(read_only=True,many=True)
+    ItemDivisionDetails = ItemDivisionsSerializerSecond(many=True)
+    ItemMRPDetails = ItemMRPSerializerSecond(many=True)
+    ItemMarginDetails = ItemMarginSerializerSecond(many=True)
+   
+    
+    class Meta:
+        model = M_Items
+        # fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails']
+        fields='__all__'
+    
+    
+   
+    
+
+
+
