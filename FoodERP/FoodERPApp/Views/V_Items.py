@@ -19,7 +19,7 @@ class M_ItemsView(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT m_items.id,m_items.Name,m_units.Name BaseUnitName,c_companies.Name CompanyName, m_productcategorytype.Name CategoryTypeName  ,m_productcategory.Name CategoryName,m_productsubcategory.Name SubCategoryName  FROM m_items join m_units on m_units.id= m_items.BaseUnitID_id join c_companies on c_companies.id= m_items.Company_id join mc_itemcategorydetails on mc_itemcategorydetails.Item_id=m_items.id join m_productcategorytype on m_productcategorytype.id=mc_itemcategorydetails.CategoryType_id join m_productcategory on m_productcategory.id= mc_itemcategorydetails.Category_id join m_productsubcategory on m_productsubcategory.id =mc_itemcategorydetails.SubCategory_id Order BY m_items.Sequence''')
+                query = M_Items.objects.raw('''SELECT m_items.id,m_items.Name,m_items.ShortName,m_units.Name BaseUnitName,c_companies.Name CompanyName,m_items.BarCode  FROM m_items join m_units on m_units.id= m_items.BaseUnitID_id join c_companies on c_companies.id= m_items.Company_id Order BY m_items.Sequence''')
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
