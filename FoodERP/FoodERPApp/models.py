@@ -488,7 +488,7 @@ class MC_ItemCategoryDetails(models.Model):
         
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(
-        M_Items, related_name='ItemUnitsID', on_delete=models.DO_NOTHING)
+        M_Items, related_name='ItemUnitDetails', on_delete=models.DO_NOTHING)
     UnitID = models.ForeignKey(
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
