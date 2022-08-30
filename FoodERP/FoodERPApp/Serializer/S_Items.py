@@ -13,11 +13,10 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
 class ItemsSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
+    ShortName = serializers.CharField(max_length=500)
     BaseUnitName = serializers.CharField(max_length=500)
     CompanyName = serializers.CharField(max_length=500)
-    CategoryTypeName = serializers.CharField(max_length=500)
-    CategoryName = serializers.CharField(max_length=500)
-    SubCategoryName = serializers.CharField(max_length=500)
+    BarCode = serializers.CharField(max_length=500)
    
 
 class MRPTypesSerializer(serializers.ModelSerializer):
@@ -168,19 +167,19 @@ class ItemSerializer(serializers.ModelSerializer):
 class UnitSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Units
-        fields = ['Name']
+        fields = ['id','Name']
         
         
 class ItemMarginSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemMargin
-        fields = ['PriceList', 'Margin']
+        fields = ['id','PriceList', 'Margin']
 
 class ItemMRPSerializerSecond(serializers.ModelSerializer):
     MRPType = MRPTypesSerializer(read_only=True)
     class Meta:
         model = MC_ItemMRP
-        fields = ['GSTPercentage','MRPType', 'MRP', 'HSNCode']        
+        fields = ['id','GSTPercentage','MRPType', 'MRP', 'HSNCode']        
         
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -191,7 +190,7 @@ class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
     Division = PartiesSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemDivisions
-        fields = [ 'Division']
+        fields = ['id','Division']
                    
 class ImageTypesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -203,28 +202,28 @@ class ItemImagesSerializerSecond(serializers.ModelSerializer):
     ImageType = ImageTypesSerializer(read_only=True)
     class Meta:
         model = MC_ItemImages
-        fields = ['Item_pic', 'ImageType']
+        fields = ['id','Item_pic', 'ImageType']
          
 class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity' ]
+        fields = ['id','UnitID', 'BaseUnitQuantity' ]
         
 class ItemSubCategorySerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_ProductSubCategory
-        fields = ['Name']
+        fields = ['id','Name']
 
 class ItemCategorySerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_ProductCategory
-        fields = ['Name']
+        fields = ['id','Name']
         
 class ItemCategoryTypeSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_ProductCategoryType
-        fields = ['Name']
+        fields = ['id','Name']
 
 class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
     SubCategory = ItemSubCategorySerializerSecond(read_only=True)
@@ -232,7 +231,7 @@ class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
     CategoryType = ItemCategoryTypeSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemCategoryDetails
-        fields = ['Category','CategoryType','SubCategory']
+        fields = ['id','Category','CategoryType','SubCategory']
 
 class CompanySerializerSecond(serializers.ModelSerializer):
     class Meta:
