@@ -594,6 +594,93 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': District_Serializer.errors, 'Data': []})
 
+                DivisionType={
+      "id": 1,
+      "Name": "Manufacturer",
+      "IsSCM": 0,
+      "CreatedBy": 1,
+      "CreatedOn": "2022-07-29T00:00:00",
+      "UpdatedBy": 1,
+      "UpdatedOn": "2022-08-06T15:32:44.695393"
+    }
+                DivisionTypes_Serializer = DivisionTypeSerializer(data=DivisionType)
+                if DivisionTypes_Serializer.is_valid():
+                    DivisionTypes_Serializer.save()
+                    
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  DivisionTypes_Serializer.errors, 'Data':[]})
+                
+                
+                PartyType={
+      "id": 1,
+      "Name": "SuperStockiest",
+      "DivisionType": 1 ,
+      "DivisionTypeName": "Supply Chain Member",
+      "CreatedBy": 1,
+      "UpdatedBy": 1,
+    }
+                PartyTypes_Serializer = PartyTypesSerializer(data=PartyType)
+                if PartyTypes_Serializer.is_valid():
+                    PartyTypes_Serializer.save()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Save Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypes_Serializer.errors, 'Data':[]})
+                
+                
+                
+                
+                
+                
+                
+                
+                Division={
+     
+      "Name": "Chiatle CSS Manufacturer",
+      "PartyType": 1,
+      "PartyTypeName": "SuperStockiest",
+      "DivisionType": 1,
+      "DivisionTypeName": "Manufacturer",
+      "Company": 1,
+      "CompanyName": "Chitale Bandhu Mithaiwale",
+      "Email": "chiatlecss@gmail.com",
+      "Address": "Pune",
+      "MobileNo": 7894561230,
+      "AlternateContactNo": "7418529630",
+      "PIN": "400191",
+      "State": 22,
+      "StateName": "Maharashtra",
+      "District": 1,
+      "DistrictName": "Ahmednagar",
+      "Taluka": 0,
+      "City": 0,
+      "GSTIN": "27AAAAA0000A1Z5",
+      "PAN": "DDDDD4455A",
+      "FSSAINo": "12345698745632",
+      "FSSAIExipry": "2022-07-29",
+      "isActive": 1,
+      "CreatedBy": 1,
+      "UpdatedBy": 1,
+      
+    }
+
+                
+                
+                M_Parties_Serializer = M_PartiesSerializer(data=Division)
+                if M_Parties_Serializer.is_valid():
+                    M_Parties_Serializer.save()
+                    
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' :[]})
+                
+                
+                
+                
+                
+                
+                
                 EmployeeJSON = {
 
                     "Name": "Super Admin",
@@ -612,7 +699,7 @@ class SuperAdminView(CreateAPIView):
                                 "State": 1,
                                 "District": 1,
                                 "EmployeeParties": [
-                                    {"Party":  ""}
+                                    {"Party":  1}
                                 ]
 
                 }
@@ -638,7 +725,7 @@ class SuperAdminView(CreateAPIView):
                     "UpdatedBy": 1,
                     "UserRole": [
                                 {
-                                    "Party": "",
+                                    "Party": 1,
                                     "Role": 1
                                 }
                     ]
@@ -771,6 +858,25 @@ class SuperAdminView(CreateAPIView):
                 print('Page1')
                 HPagesdata = [
 
+                     {
+                        "Name": "Company Master",
+                        "PageHeading": "Company Master",
+                        "PageDescription": "Page Description : Company Master",
+                        "PageDescriptionDetails": "Page Description Details :Company Master",
+                        "Module": 1,
+                        "ModuleName": "Administration",
+                        "isActive": 1,
+                        "DisplayIndex": 9,
+                        "Icon": "Company Master Icon",
+                        "ActualPagePath": "CompanyMaster",
+                        "PageType": 1,
+                        "RelatedPageID": 0,
+                        "RelatedPageName": NULL,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "PagePageAccess": []
+                    },
+                    
                     {
                         "Name": "Company List",
                         "PageHeading": "Company List",
@@ -783,7 +889,7 @@ class SuperAdminView(CreateAPIView):
                         "Icon": "Company List Icon",
                         "ActualPagePath": "CompanyList",
                         "PageType": 2,
-                        "RelatedPageID": 18,
+                        "RelatedPageID": 1,
                         "RelatedPageName": "Company Master",
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
@@ -814,17 +920,18 @@ class SuperAdminView(CreateAPIView):
                             }
                         ]
                     },
+                   
                     {
-                        "Name": "Company Master",
-                        "PageHeading": "Company Master",
-                        "PageDescription": "Page Description : Company Master",
-                        "PageDescriptionDetails": "Page Description Details :Company Master",
+                        "Name": "User Master",
+                        "PageHeading": "Registration",
+                        "PageDescription": "Registration Page",
+                        "PageDescriptionDetails": "New User Registration",
                         "Module": 1,
                         "ModuleName": "Administration",
                         "isActive": 1,
-                        "DisplayIndex": 9,
-                        "Icon": "Company Master Icon",
-                        "ActualPagePath": "CompanyMaster",
+                        "DisplayIndex": 3,
+                        "Icon": "fa-fa-paw",
+                        "ActualPagePath": "UserMaster",
                         "PageType": 1,
                         "RelatedPageID": 0,
                         "RelatedPageName": NULL,
@@ -844,7 +951,7 @@ class SuperAdminView(CreateAPIView):
                         "Icon": "fa-fa-paw",
                         "ActualPagePath": "UserList",
                         "PageType": 2,
-                        "RelatedPageID": 5,
+                        "RelatedPageID": 3,
                         "RelatedPageName": "User Master",
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
@@ -874,24 +981,6 @@ class SuperAdminView(CreateAPIView):
                                 "AccessName": "IsEdit"
                             }
                         ]
-                    },
-                    {
-                        "Name": "User Master",
-                        "PageHeading": "Registration",
-                        "PageDescription": "Registration Page",
-                        "PageDescriptionDetails": "New User Registration",
-                        "Module": 1,
-                        "ModuleName": "Administration",
-                        "isActive": 1,
-                        "DisplayIndex": 3,
-                        "Icon": "fa-fa-paw",
-                        "ActualPagePath": "UserMaster",
-                        "PageType": 1,
-                        "RelatedPageID": 0,
-                        "RelatedPageName": NULL,
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
-                        "PagePageAccess": []
                     }
 
 
@@ -909,88 +998,6 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserialize_data.errors, 'Data': []})
 
-                DivisionType={
-      "id": 1,
-      "Name": "Manufacturer",
-      "IsSCM": 0,
-      "CreatedBy": 1,
-      "CreatedOn": "2022-07-29T00:00:00",
-      "UpdatedBy": 1,
-      "UpdatedOn": "2022-08-06T15:32:44.695393"
-    }
-                DivisionTypes_Serializer = DivisionTypeSerializer(data=DivisionType)
-                if DivisionTypes_Serializer.is_valid():
-                    DivisionTypes_Serializer.save()
-                    
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  DivisionTypes_Serializer.errors, 'Data':[]})
-                
-                
-                PartyType={
-      "id": 1,
-      "Name": "SuperStockiest",
-      "DivisionType": 1 ,
-      "DivisionTypeName": "Supply Chain Member",
-      "CreatedBy": 1,
-      "UpdatedBy": 1,
-    }
-                PartyTypes_Serializer = PartyTypesSerializer(data=PartyType)
-                if PartyTypes_Serializer.is_valid():
-                    PartyTypes_Serializer.save()
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Save Successfully', 'Data':[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypes_Serializer.errors, 'Data':[]})
-                
-                
-                
-                
-                
-                
-                
-                
-                Division={
-     
-      "Name": "Chiatle CSS Manufacturer",
-      "PartyType": 1,
-      "PartyTypeName": "SuperStockiest",
-      "DivisionType": 1,
-      "DivisionTypeName": "Manufacturer",
-      "Company": 1,
-      "CompanyName": "Chitale Bandhu Mithaiwale",
-      "Email": "chiatlecss@gmail.com",
-      "Address": "Pune",
-      "MobileNo": 7894561230,
-      "AlternateContactNo": "7418529630",
-      "PIN": "400191",
-      "State": 22,
-      "StateName": "Maharashtra",
-      "District": 1,
-      "DistrictName": "Ahmednagar",
-      "Taluka": 0,
-      "City": 0,
-      "GSTIN": "27AAAAA0000A1Z5",
-      "PAN": "DDDDD4455A",
-      "FSSAINo": "12345698745632",
-      "FSSAIExipry": "2022-07-29",
-      "isActive": 1,
-      "CreatedBy": 1,
-      "UpdatedBy": 1,
-      
-    }
-
-                
-                
-                M_Parties_Serializer = M_PartiesSerializer(data=Division)
-                if M_Parties_Serializer.is_valid():
-                    M_Parties_Serializer.save()
-                    
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' :[]})
-                
-                
                 
                 
                 
