@@ -341,7 +341,7 @@ class M_RoleAccess(models.Model):
     Role = models.ForeignKey(
         M_Roles, related_name='RoleAccessRole', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
-        C_Companies, related_name='RoleAccessCompany', on_delete=models.DO_NOTHING)
+        C_Companies, related_name='RoleAccessCompany', on_delete=models.DO_NOTHING ,null=True,blank=True)
     Division = models.ForeignKey(
         M_Parties, related_name='RoleAccessDividion', on_delete=models.DO_NOTHING,null=True,blank=True)
     Modules = models.ForeignKey(
