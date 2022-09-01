@@ -476,7 +476,7 @@ class M_Items(models.Model):
         
         
 class MC_ItemCategoryDetails(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.DO_NOTHING)  
+    Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.CASCADE)  
     CategoryType = models.ForeignKey(M_ProductCategoryType, related_name='CategoryType', on_delete=models.DO_NOTHING)
     Category = models.ForeignKey(M_ProductCategory, related_name='Category', on_delete=models.DO_NOTHING)
     SubCategory = models.ForeignKey(M_ProductSubCategory, related_name='SubCategory', on_delete=models.DO_NOTHING)
@@ -488,7 +488,7 @@ class MC_ItemCategoryDetails(models.Model):
         
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(
-        M_Items, related_name='ItemUnitDetails', on_delete=models.DO_NOTHING)
+        M_Items, related_name='ItemUnitDetails', on_delete=models.CASCADE)
     UnitID = models.ForeignKey(
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
@@ -500,13 +500,13 @@ class MC_ItemUnits(models.Model):
 
 class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE)
     Item_pic = models.TextField()
     class Meta:
         db_table = "MC_ItemImages" 
 
 class MC_ItemDivisions(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemDivisionDetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='ItemDivisionDetails', on_delete=models.CASCADE)
     Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
     class Meta:
         db_table = "MC_ItemDivisions"
@@ -515,7 +515,7 @@ class MC_ItemDivisions(models.Model):
 class MC_ItemMRP(models.Model):
     
     Item = models.ForeignKey(
-        M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
+        M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     MRPType = models.ForeignKey(M_MRPTypes, related_name='MRPType', on_delete=models.DO_NOTHING)
@@ -529,7 +529,7 @@ class MC_ItemMRP(models.Model):
 
 class MC_ItemMargin(models.Model):
     Item = models.ForeignKey(
-        M_Items, related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
+        M_Items, related_name='ItemMarginDetails', on_delete=models.CASCADE)
     Margin = models.DecimalField(max_digits=10, decimal_places=2)
     PriceList = models.IntegerField(default=False)
     class Meta:
