@@ -687,8 +687,8 @@ class M_Vehicles(models.Model):
         db_table = "M_Vehicles"
 
 class MC_VehiclesDivisions(models.Model):
-    Vehicle = models.ForeignKey(M_Vehicles, related_name='Vehicle', on_delete=models.DO_NOTHING) 
-    Division = models.ForeignKey(M_Parties, related_name='VehicleDivision', on_delete=models.DO_NOTHING) 
+    Vehicle = models.ForeignKey(M_Vehicles, related_name='VehicleDivisions', on_delete=models.DO_NOTHING) 
+    Division = models.ForeignKey(M_Parties, related_name='VDivision', on_delete=models.DO_NOTHING) 
     class Meta:
         db_table = "MC_VehiclesDivisions"
 

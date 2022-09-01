@@ -14,11 +14,17 @@ class M_VehicleTypesSerializer(serializers.ModelSerializer):
         fields = ['id','Name']  
 
        
-class M_VehiclesSerializer(serializers.Serializer):
+class M_VehiclesSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     VehicleNumber = serializers.CharField(max_length=500)
     Description = serializers.CharField(max_length=500)
     DriverName = serializers.CharField(max_length=500)
     Vehicletype = serializers.CharField(max_length=500)
+
+
+class M_VehiclesSerializer(serializers.ModelSerializer):
+    class Meta :
+        model= M_Vehicles
+        fields = '__all__'    
                           
         

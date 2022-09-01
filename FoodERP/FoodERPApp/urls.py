@@ -113,7 +113,8 @@ urlpatterns = [
     url(r'UnitList$', M_UnitsView.as_view()),
     url(r'DriverList$', M_DriverView.as_view()),
     url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
-    url(r'VehicleList$', M_VehicleView.as_view()),
+   #  url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
+    url(r'Vehicle$', M_VehicleView.as_view()),
     
     
     
