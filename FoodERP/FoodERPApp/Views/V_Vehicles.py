@@ -55,11 +55,25 @@ class M_VehicleView(CreateAPIView):
             with transaction.atomic():
                 query = M_Vehicles.objects.raw('''SELECT m_vehicles.id, m_vehicles.VehicleNumber, m_vehicles.Description, m_drivers.Name DriverName,m_vehicletypes.Name Vehicletype FROM  m_vehicles JOIN  m_drivers ON m_drivers.id = m_vehicles.Driver_id JOIN  m_vehicletypes ON m_vehicletypes.id = m_vehicles.VehicleType_id ''')
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Vehicle Not available', 'Data': []})
                 else:
-                    Vehicles_Serializer = M_VehiclesSerializer(query, many=True)
+                    Vehicles_Serializer = M_VehiclesSerializerList(query, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Vehicles_Serializer.data})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-                        
+    @transaction.atomic()
+    def post(self, request,id=0):
+        try:
+            with transaction.atomic():
+                Vehiclesdata = JSONParser().parse(request)
+                Vehicles_Serializer = M_VehiclesSerializer(data=Vehiclesdata)
+            if Vehicles_Serializer.is_valid():
+                Vehicles_Serializer.save()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Save Successfully', 'Data' :[]})
+            else:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Vehicles_Serializer.errors, 'Data' : []})
+        except Exception as e :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+                    
