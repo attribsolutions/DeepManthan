@@ -138,3 +138,15 @@ class M_VehicleViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Vehicle_Serializer.errors,'Data' :[]})
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
+    
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Vehiclesdata = M_Vehicles.objects.get(id=id)
+                Vehiclesdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
+        except M_Vehicles.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Not available', 'Data': []})
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle used in another table', 'Data': []}) 
