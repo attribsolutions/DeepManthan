@@ -239,8 +239,8 @@ class CompanySerializerSecond(serializers.ModelSerializer):
         fields = ['id','Name']
     
 class ItemSerializerSecond(serializers.ModelSerializer):
-    BaseUnitID = UnitSerializerSecond()
     Company=CompanySerializerSecond()
+    BaseUnitID = UnitSerializerSecond()
     ItemCategoryDetails = ItemCategoryDetailsSerializerSecond(read_only=True,many=True)
     ItemUnitDetails =ItemUnitsSerializerSecond(many=True)
     ItemImagesDetails = ItemImagesSerializerSecond(read_only=True,many=True)
