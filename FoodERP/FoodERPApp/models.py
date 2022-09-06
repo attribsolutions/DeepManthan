@@ -293,19 +293,6 @@ class M_FieldValidations(models.Model):
     class Meta:
         db_table = "M_FieldValidations"
 
-class MC_PageFieldMaster(models.Model):
-    
-    ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ControlType', on_delete=models.DO_NOTHING)
-    FieldLabel = models.CharField(max_length=300) 
-    IsCompulsory = models.BooleanField(default=False)      
-    FieldValidation = models.ForeignKey(M_FieldValidations, related_name='FieldValidation', on_delete=models.DO_NOTHING)        
-    ListPageSeq = models.IntegerField()
-    ShowInListPage = models.BooleanField(default=False) 
-    ShowInDownload = models.BooleanField(default=False)
-    DownloadDefaultSelect = models.BooleanField(default=False) 
-    LinktoField = models.CharField(max_length=300)
-    class Meta:
-        db_table = "MC_PageFieldMaster"
            
 
 class M_Pages(models.Model):
@@ -330,7 +317,20 @@ class M_Pages(models.Model):
     class Meta:
         db_table = "M_Pages"
 
-
+class MC_PageFieldMaster(models.Model):
+    
+    ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ControlType', on_delete=models.DO_NOTHING)
+    FieldLabel = models.CharField(max_length=300) 
+    IsCompulsory = models.BooleanField(default=False)      
+    FieldValidation = models.ForeignKey(M_FieldValidations, related_name='FieldValidation', on_delete=models.DO_NOTHING)        
+    ListPageSeq = models.IntegerField()
+    ShowInListPage = models.BooleanField(default=False) 
+    ShowInDownload = models.BooleanField(default=False)
+    DownloadDefaultSelect = models.BooleanField(default=False) 
+    Page = models.ForeignKey(M_Pages, related_name='Page', on_delete=models.DO_NOTHING)
+    # LinktoField = models.CharField(max_length=300)
+    class Meta:
+        db_table = "MC_PageFieldMaster"
 class M_Roles(models.Model):
 
     Name = models.CharField(max_length=100)
