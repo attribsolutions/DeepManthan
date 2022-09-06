@@ -149,7 +149,7 @@ class M_ItemsViewSecond(CreateAPIView):
                     })
                     
                 
-                return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Data': ItemData[0]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
    
