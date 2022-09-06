@@ -280,6 +280,18 @@ class H_Modules(models.Model):
     class Meta:
         db_table = "H_Modules"
 
+class M_ControlTypeMaster(models.Model):
+    
+    Name = models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_ControlTypeMaster"
+
+class M_FieldValidations(models.Model):
+    
+    Name = models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_FieldValidations"
+                
 
 class M_Pages(models.Model):
     PageHeading = models.CharField(max_length=500, blank=True)
