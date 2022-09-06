@@ -1,5 +1,6 @@
 from datetime import datetime
 from pickle import TRUE
+from pyexpat import model
 from statistics import mode
 from typing import Sequence
 from django.db import models
@@ -280,6 +281,32 @@ class H_Modules(models.Model):
     class Meta:
         db_table = "H_Modules"
 
+class M_ControlTypeMaster(models.Model):
+    
+    Name = models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_ControlTypeMaster"
+
+class M_FieldValidations(models.Model):
+    
+    Name = models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_FieldValidations"
+
+class MC_PageFieldMaster(models.Model):
+    
+    ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ControlType', on_delete=models.DO_NOTHING)
+    FieldLabel = models.CharField(max_length=300) 
+    IsCompulsory = models.BooleanField(default=False)      
+    FieldValidation = models.ForeignKey(M_FieldValidations, related_name='FieldValidation', on_delete=models.DO_NOTHING)        
+    ListPageSeq = models.IntegerField()
+    ShowInListPage = models.BooleanField(default=False) 
+    ShowInDownload = models.BooleanField(default=False)
+    DownloadDefaultSelect = models.BooleanField(default=False) 
+    LinktoField = models.CharField(max_length=300)
+    class Meta:
+        db_table = "MC_PageFieldMaster"
+           
 
 class M_Pages(models.Model):
     PageHeading = models.CharField(max_length=500, blank=True)
@@ -466,6 +493,7 @@ class M_Items(models.Model):
         M_Units, related_name='BaseUnitID', on_delete=models.DO_NOTHING)
     BarCode = models.CharField(max_length=500) 
     isActive = models.BooleanField(default=False)
+    LinkedItem = models.IntegerField(blank=True, null=True)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
