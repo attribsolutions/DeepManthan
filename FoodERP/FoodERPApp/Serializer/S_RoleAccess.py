@@ -1,5 +1,8 @@
+from asyncio.windows_events import NULL
 from dataclasses import fields
 from rest_framework import serializers
+
+from ..Serializer.S_Pages import *
 from ..Serializer.S_Modules import *
 
 from ..Serializer.S_Roles import M_RolesSerializer
@@ -34,10 +37,13 @@ class M_RoleAccessSerializer1(DynamicFieldsModelSerializer):
         model = M_RoleAccess
         fields = '__all__'
         
-
-class M_RoleAccessSerializerfordistinctModule(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    Name = serializers.CharField(required=False, allow_blank=True, max_length=100) 
+        
+class M_RoleAccessSerializerfordistinctModule(serializers.ModelSerializer):
+    
+    # Modules_id=H_ModulesSerializer2()
+    class Meta:
+        model = M_RoleAccess
+        fields =['Modules_id']
 
 class M_RoleAccessSerializerforRole(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -169,3 +175,9 @@ class InsertCopyRoleAccessSerializer(serializers.ModelSerializer):
         return RoleAccessID    
 
         
+class RoleAccessserializerforsidemenu(serializers.ModelSerializer):
+    Pages=M_PagesSerializer2()
+    
+    class Meta:
+        model= M_RoleAccess
+        fields ="__all__" 
