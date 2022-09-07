@@ -1,3 +1,5 @@
+from asyncio.windows_events import NULL
+from contextlib import nullcontext
 import re
 from django.http import JsonResponse
 
@@ -40,7 +42,7 @@ class UserRegistrationView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            status_code = status.HTTP_201_CREATED
+            status_code = 200
             response = {
                 'StatusCode': status_code,
                 'Status': True,
@@ -120,7 +122,7 @@ class UserListViewSecond(CreateAPIView):
                     UserData = list()
                     for a in Usersdata_Serializer:
                         RoleData = list()
-                        UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT mc_userroles.id,mc_userroles.Party_id ,m_parties.Name PartyName FROM mc_userroles join m_parties on m_parties.id= mc_userroles.Party_id Where mc_userroles.User_id=%s group by Party_id ''',[id])
+                        UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT mc_userroles.id,mc_userroles.Party_id ,m_parties.Name PartyName FROM mc_userroles left join m_parties on m_parties.id= mc_userroles.Party_id Where mc_userroles.User_id=%s group by Party_id ''',[id])
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
@@ -128,9 +130,13 @@ class UserListViewSecond(CreateAPIView):
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartiesSerializerData})  
                             for b in SingleGetUserListUserPartiesSerializerData:
                                 PartyID=b['Party_id']
-                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':PartyID})  
-                                PartyRoles = MC_UserRoles.objects.raw('''SELECT mc_userroles.id,mc_userroles.Role_id ,m_roles.Name RoleName FROM mc_userroles join m_roles on m_roles.id= mc_userroles.Role_id Where mc_userroles.Party_id=%s and  mc_userroles.User_id=%s ''',([PartyID],[id]))
                                 
+                                if PartyID is None:
+                                    PartyRoles = MC_UserRoles.objects.raw('''SELECT mc_userroles.id,mc_userroles.Role_id ,m_roles.Name RoleName FROM mc_userroles join m_roles on m_roles.id= mc_userroles.Role_id Where mc_userroles.Party_id is null and  mc_userroles.User_id=%s ''',([id]))
+                                else:    
+                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ccccccccccc', 'Data':PartyID})  
+                                    PartyRoles = MC_UserRoles.objects.raw('''SELECT mc_userroles.id,mc_userroles.Role_id ,m_roles.Name RoleName FROM mc_userroles join m_roles on m_roles.id= mc_userroles.Role_id Where mc_userroles.Party_id=%s and  mc_userroles.User_id=%s ''',([PartyID],[id]))
+                               
                                 SingleGetUserListUserPartyRoleData = SingleGetUserListUserPartyRoleSerializer(PartyRoles,  many=True).data
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartyRoleData})    
                                 PartyRoleData = list()
