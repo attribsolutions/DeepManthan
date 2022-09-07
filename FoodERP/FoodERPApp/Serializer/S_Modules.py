@@ -9,3 +9,8 @@ class H_ModulesSerializer(serializers.ModelSerializer):
         model = H_Modules
         fields = '__all__'
 
+
+class H_ModulesSerializer2(serializers.ModelSerializer):
+    class Meta:
+        model = H_Modules
+        fields = ['id','Name']

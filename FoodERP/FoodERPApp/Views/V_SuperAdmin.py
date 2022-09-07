@@ -40,11 +40,15 @@ class SuperAdminView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
+
+
+
+#===========================------EmployeeTyep------========================================================================= 
                 EmployeeTypeJSON = {
                     "Name": "SuperAdmin",
                     "IsPartyConnection": 0,
                     "IsSCM": 0,
-                    "Description": "SuperAdmin",
+                    "Description": "SuperAdmin", 
                     "CreatedBy": 1,
                     "UpdatedBy": 1
                 }
@@ -57,6 +61,8 @@ class SuperAdminView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  EmployeeType_Serializer.errors, 'Data': []})
+
+#=============================------Role-------=========================================================================== 
 
                 RoleJSON = {
                     "Name": "SuperAdmin",
@@ -76,6 +82,8 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Role_Serializer.errors, 'Data': []})
 
+#============================-----Designation------========================================================================= 
+
                 DesignationJSON = {
                     "Name": "SuperAdmin",
                     "CreatedBy": 1,
@@ -92,6 +100,7 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Designationsdata_Serializer.errors, 'Data': []})
 
+#============================-----Designation-----=========================================================================
                 CompanyGroupJSON = {
                     "Name": "Attrib Solutions",
                     "IsSCM": 0,
@@ -110,6 +119,8 @@ class SuperAdminView(CreateAPIView):
 
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CompaniesGroup_Serializer.errors, 'Data': []})
+
+#================================----Company----================================================================================ 
 
                 CompanyJSON = {
                     "CompanyGroup": 1,
@@ -133,7 +144,8 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Companies_Serializer.errors, 'Data': []})
 
-                print('States0')
+#================================----state----================================================================================ 
+
 
                 statesJSON = [
                     {
@@ -363,9 +375,12 @@ class SuperAdminView(CreateAPIView):
 
                 if states_Serializer.is_valid():
                     states_Serializer.save()
+                    print('state')
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': states_Serializer.errors, 'Data': []})
+
+#================================----District----================================================================================ 
 
                 DistrictJSON = [
                     {
@@ -590,97 +605,14 @@ class SuperAdminView(CreateAPIView):
                     data=DistrictJSON, many=True)
                 if District_Serializer.is_valid():
                     District_Serializer.save()
+                    print('District')
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': District_Serializer.errors, 'Data': []})
 
-                DivisionType={
-      "id": 1,
-      "Name": "Manufacturer",
-      "IsSCM": 0,
-      "CreatedBy": 1,
-      "CreatedOn": "2022-07-29T00:00:00",
-      "UpdatedBy": 1,
-      "UpdatedOn": "2022-08-06T15:32:44.695393"
-    }
-                DivisionTypes_Serializer = DivisionTypeSerializer(data=DivisionType)
-                if DivisionTypes_Serializer.is_valid():
-                    DivisionTypes_Serializer.save()
-                    
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  DivisionTypes_Serializer.errors, 'Data':[]})
-                
-                
-                PartyType={
-      "id": 1,
-      "Name": "SuperStockiest",
-      "DivisionType": 1 ,
-      "DivisionTypeName": "Supply Chain Member",
-      "CreatedBy": 1,
-      "UpdatedBy": 1,
-    }
-                PartyTypes_Serializer = PartyTypesSerializer(data=PartyType)
-                if PartyTypes_Serializer.is_valid():
-                    PartyTypes_Serializer.save()
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Save Successfully', 'Data':[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypes_Serializer.errors, 'Data':[]})
-                
-                
-                
-                
-                
-                
-                
-                
-                Division={
-     
-      "Name": "Chiatle CSS Manufacturer",
-      "PartyType": 1,
-      "PartyTypeName": "SuperStockiest",
-      "DivisionType": 1,
-      "DivisionTypeName": "Manufacturer",
-      "Company": 1,
-      "CompanyName": "Chitale Bandhu Mithaiwale",
-      "Email": "chiatlecss@gmail.com",
-      "Address": "Pune",
-      "MobileNo": 7894561230,
-      "AlternateContactNo": "7418529630",
-      "PIN": "400191",
-      "State": 22,
-      "StateName": "Maharashtra",
-      "District": 1,
-      "DistrictName": "Ahmednagar",
-      "Taluka": 0,
-      "City": 0,
-      "GSTIN": "27AAAAA0000A1Z5",
-      "PAN": "DDDDD4455A",
-      "FSSAINo": "12345698745632",
-      "FSSAIExipry": "2022-07-29",
-      "isActive": 1,
-      "CreatedBy": 1,
-      "UpdatedBy": 1,
-      
-    }
+#================================----EMployee----================================================================================ 
 
-                
-                
-                M_Parties_Serializer = M_PartiesSerializer(data=Division)
-                if M_Parties_Serializer.is_valid():
-                    M_Parties_Serializer.save()
-                    
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' :[]})
-                
-                
-                
-                
-                
-                
-                
+    
                 EmployeeJSON = {
 
                     "Name": "Super Admin",
@@ -699,7 +631,7 @@ class SuperAdminView(CreateAPIView):
                                 "State": 1,
                                 "District": 1,
                                 "EmployeeParties": [
-                                    {"Party":  1}
+                                    {"Party":  ""}
                                 ]
 
                 }
@@ -711,6 +643,8 @@ class SuperAdminView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Employee_Serializer.errors, 'Data': []})
+
+#================================----User----================================================================================ 
 
                 UserJSON = {
                     "LoginName": "SuperAdmin",
@@ -725,7 +659,7 @@ class SuperAdminView(CreateAPIView):
                     "UpdatedBy": 1,
                     "UserRole": [
                                 {
-                                    "Party": 1,
+                                    "Party": "",
                                     "Role": 1
                                 }
                     ]
@@ -738,6 +672,8 @@ class SuperAdminView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Employee_Serializer.errors, 'Data': []})
+
+#================================----Modules----================================================================================ 
 
                 Modulesdata = {
 
@@ -759,6 +695,8 @@ class SuperAdminView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors, 'Data': []})
+
+#================================----Pageaccess----================================================================================ 
 
                 Pageaccess = [
                     {
@@ -855,7 +793,9 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserializea_data.errors, 'Data': []})
 
-                print('Page1')
+#================================----HPages----================================================================================ 
+
+               
                 HPagesdata = [
 
                      {
@@ -982,15 +922,12 @@ class SuperAdminView(CreateAPIView):
                             }
                         ]
                     }
-
-
-
                 ]
+
 
                 HPagesserialize_data = M_PagesSerializer1(
                     data=HPagesdata, many=True)
                 if HPagesserialize_data.is_valid():
-
                     HPagesserialize_data.save()
                     print('pages')
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
@@ -998,20 +935,13 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserialize_data.errors, 'Data': []})
 
-                
-                
-                
-                
-                
-                
-                
-                
+#================================----RoleAccessdata----================================================================================ 
                 
                 RoleAccessdata = [
                     {
                         "Role": 1,
-                        "Company": 1,
-                        "Division": 1,
+                        "Company": "",
+                        "Division": "",
                         "Modules": 1,
                         "Pages": 1,
                         "CreatedBy": 1,
@@ -1036,8 +966,8 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": 1,
-                        "Division": 1,
+                        "Company": "",
+                        "Division": "",
                         "Modules": 1,
                         "Pages": 2,
                         "CreatedBy": 1,
@@ -1059,8 +989,8 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": 1,
-                        "Division": 1,
+                        "Company": "",
+                        "Division": "",
                         "Modules": 1,
                         "Pages": 3,
                         "CreatedBy": 1,
@@ -1085,8 +1015,8 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": 1,
-                        "Division": 1,
+                        "Company": "",
+                        "Division": "",
                         "Modules": 1,
                         "Pages": 4,
                         "CreatedBy": 1,
@@ -1113,7 +1043,7 @@ class SuperAdminView(CreateAPIView):
                 ]
                 RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
                 if RoleAccessSerialize_data.is_valid():
-                    print('roleaccess1')
+                   
                     RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
                         Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
                     RoleAccessdata.delete()
@@ -1122,6 +1052,8 @@ class SuperAdminView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccessSerialize_data.errors, 'Data': []})
+
+#========================================================================================================================== 
 
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'SuperAdmin Created.....!', 'Data': []})
         except Exception as e:
