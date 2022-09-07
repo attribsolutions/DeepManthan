@@ -11,6 +11,22 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
 
+class MC_PagePageAccessSerializerSecond(serializers.Serializer):
+       
+    id = serializers.IntegerField()
+    ControlType_id = serializers.IntegerField()
+    CName = serializers.CharField(max_length=100)
+    FieldLabel = serializers.CharField(max_length=300)
+    IsCompulsory = serializers.BooleanField(default=False)      
+    FieldValidation_id = serializers.IntegerField()
+    FName = serializers.CharField(max_length=100)         
+    ListPageSeq = serializers.IntegerField()
+    ShowInListPage = serializers.BooleanField(default=False) 
+    ShowInDownload = serializers.BooleanField(default=False)
+    DownloadDefaultSelect = serializers.BooleanField(default=False) 
+
+        
+
 class M_PagesSerializer(serializers.Serializer):
     
     id = serializers.IntegerField()
