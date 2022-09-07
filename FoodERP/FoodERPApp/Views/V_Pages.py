@@ -85,6 +85,30 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 "AccessName": b['Name']
                             })
 
+                        PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, FieldLabel, IsCompulsory, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,
+ ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName FROM mc_pagefieldmaster
+ JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id
+ JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id 
+ where mc_pagefieldmaster.Page_id=%s''', [id])
+                        MC_PageFieldMaster_data = MC_PagePageAccessSerializerSecond(
+                            PageFieldQuery, many=True).data
+                        MC_PageFieldMasterListData = list()
+                        for c in MC_PageFieldMaster_data:
+                            MC_PageFieldMasterListData.append({
+                               
+                                "ControlType":  c['ControlType_id'],
+                                "ControlTypeName":c['CName'],
+                                "FieldLabel": c['FieldLabel'],
+                                "IsCompulsory":c['IsCompulsory'],      
+                                "FieldValidation": c['FieldValidation_id'], 
+                                "FieldValidationName":c['FName'],      
+                                "ListPageSeq": c['ListPageSeq'],
+                                "ShowInListPage": c['ShowInListPage'],
+                                "ShowInDownload": c['ShowInDownload'],
+                                "DownloadDefaultSelect":c['DownloadDefaultSelect'],
+                            })
+                        
+                        
                         PageListData.append({
 
                             "id": a['id'],
@@ -102,7 +126,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "PageType": a['PageType'],
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
-                            "PagePageAccess": PageAccessListData
+                            "PagePageAccess": PageAccessListData,
+                            "PageFieldMaster":MC_PageFieldMasterListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception :
