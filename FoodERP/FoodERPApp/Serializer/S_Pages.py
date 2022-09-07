@@ -1,8 +1,10 @@
+from dataclasses import fields
 from operator import truediv
+from pyexpat import model
 from black import maybe_install_uvloop
 from rest_framework import serializers
 
-from ..models import M_Pages, MC_PagePageAccess
+from ..models import M_Pages, MC_PageFieldMaster, MC_PagePageAccess
 
 class MC_PagePageAccessSerializer(serializers.Serializer):
    
@@ -30,6 +32,11 @@ class M_PagesSerializer(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField() 
+
+class MC_PageFieldMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PageFieldMaster
+        fields = ['FieldLabel', 'IsCompulsory', 'ListPageSeq', 'ShowInListPage', 'ShowInDownload', 'DownloadDefaultSelect', 'ControlType', 'FieldValidation']     
     
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
@@ -41,15 +48,19 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         fields ="__all__"   
    
     PagePageAccess=MC_PagePageAccessSerializer1(many=True)
+    PageFieldMaster = MC_PageFieldMasterSerializer(many=True)
     def create(self, validated_data):
         PageAccess_data = validated_data.pop('PagePageAccess')
+        PageFieldMaster_data = validated_data.pop('PageFieldMaster')
        
         Pages = M_Pages.objects.create(**validated_data)
         
         for data in PageAccess_data:
-            MC_PagePageAccess.objects.create(
-                Page=Pages, 
-                **data)
+            MC_PagePageAccess.objects.create(Page=Pages, **data)
+        
+        for PageFielddata in PageFieldMaster_data:
+            MC_PageFieldMaster.objects.create(Page=Pages, **PageFielddata)
+              
         return Pages
 
     def update(self, instance, validated_data):
