@@ -9,12 +9,12 @@ class M_VehiclesSerializerList(serializers.Serializer):
     DriverName = serializers.CharField(max_length=500)
     Vehicletype = serializers.CharField(max_length=500)
 
-class M_DriverSerializer(serializers.ModelSerializer):
+class DriverSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_Drivers
         fields = ['id','Name']
                
-class M_VehicleTypesSerializer(serializers.ModelSerializer):
+class VehicleTypesSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_VehicleTypes
         fields = ['id','Name']  
@@ -74,8 +74,8 @@ class VehiclesDivisionsSerializerSecond(serializers.ModelSerializer):
 
 class VehiclesSerializerSecond(serializers.ModelSerializer):
     VehicleDivisions = VehiclesDivisionsSerializerSecond(read_only=True,many=True)
-    Driver = M_DriverSerializer()
-    VehicleType= M_VehicleTypesSerializer()
+    Driver = DriverSerializer()
+    VehicleType= VehicleTypesSerializer()
     class Meta :
         model= M_Vehicles
         fields = '__all__'    
