@@ -2,7 +2,7 @@ from operator import truediv
 from black import maybe_install_uvloop
 from rest_framework import serializers
 
-from ..models import M_Pages, MC_PagePageAccess
+from ..models import *
 
 class MC_PagePageAccessSerializer(serializers.Serializer):
    
