@@ -53,6 +53,10 @@ from .Views.V_Units import *
 
 from .Views.V_Vehicles import *    
 
+from .Views.V_Drivers import *
+
+from .Views.V_VehicleTypes import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -111,7 +115,9 @@ urlpatterns = [
     url(r'SubCategorys/([0-9]+)$', SubProductCategoryViewSecond.as_view()),
     url(r'SubCategorys$', SubProductCategoryView.as_view()),
     url(r'UnitList$', M_UnitsView.as_view()),
-    url(r'DriverList$', M_DriverView.as_view()),
+    url(r'Driver/([0-9]+)$', M_DriverViewSecond.as_view()),
+    url(r'Driver$', M_DriverView.as_view()),
+    url(r'VehicleTypes/([0-9]+)$', M_VehicleTypesViewSecond.as_view()),
     url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
     url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
     url(r'Vehicle$', M_VehicleView.as_view()),
