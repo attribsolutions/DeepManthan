@@ -10,25 +10,6 @@ from ..Serializer.S_Vehicles import *
 from ..models import *
 
 
-class M_VehicleTypesView(CreateAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                VehicleTypesdata = M_VehicleTypes.objects.all()
-                if VehicleTypesdata.exists():
-                    VehicleTypes_Serializer = M_VehicleTypesSerializer(
-                        VehicleTypesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleTypes_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Types Not Available', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
 class M_VehicleView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
