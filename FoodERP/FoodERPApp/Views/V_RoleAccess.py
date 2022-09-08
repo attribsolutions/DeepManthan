@@ -193,6 +193,13 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id,'a' as Name FROM m_roleaccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id=%s    ''',([RelatedPageID],[Role],[Division]))
             RelatedPageRoleAccessdata = MC_RolePageAccessSerializerNewUpdated(RelatedPageroleaccessquery, many=True).data
             # return JsonResponse({'data':  RelatedPageRoleAccessdata})
+            
+            # rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [id])
+            # # return JsonResponse({'query':  str(rolepageaccessquery.query)})
+            # RolePageAccessSerializerforListPAge = MC_RolePageAccessSerializerNewUpdated(rolepageaccessqueryforlistPage,  many=True).data
+            # # return JsonResponse({'query':  RolePageAccessSerializerforListPAge})
+            
+            
             roleaccessID=RelatedPageRoleAccessdata[0]['id']
             rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [roleaccessID])
             # return JsonResponse({'query':  str(rolepageaccessquery.query)})
@@ -207,7 +214,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageID": a['pageid'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
-                "RoleAccess_IsShowOnMenu": RolePageAccessSerializer[0]['id'],
+                "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
+                # "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
                 "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
                 "RoleAccess_IsView": RolePageAccessSerializer[2]['id'],
                 "RoleAccess_IsEdit": RolePageAccessSerializer[3]['id'],
