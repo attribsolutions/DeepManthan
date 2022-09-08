@@ -125,8 +125,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "PageType": a['PageType'],
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
-                            "PagePageAccess": PageAccessListData
-                            # "PageFieldMaster":MC_PageFieldMasterListData
+                            "PagePageAccess": PageAccessListData,
+                            "PageFieldMaster": MC_PageFieldMasterListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception :
