@@ -9,6 +9,8 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
 
+   
+
 class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
        
     id = serializers.IntegerField()
@@ -51,6 +53,11 @@ class M_PagesSerializer2(serializers.ModelSerializer):
         model = M_Pages
         fields ="__all__" 
 
+class MC_PageFieldMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PageFieldMaster
+        fields = ['ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect']         
+
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
         model = MC_PagePageAccess
@@ -62,9 +69,10 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         fields ="__all__"   
    
     PagePageAccess=MC_PagePageAccessSerializer1(many=True)
+    # PageFieldMaster=MC_PageFieldMasterSerializer(many=True)
     def create(self, validated_data):
         PageAccess_data = validated_data.pop('PagePageAccess')
-        # PageFieldMaster = validated_data.pop('PageFieldMaster')
+        PageFieldMaster = validated_data.pop('PageFieldMaster')
        
         Pages = M_Pages.objects.create(**validated_data)
         
