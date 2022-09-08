@@ -90,7 +90,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
  JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id
  JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id 
  where mc_pagefieldmaster.Page_id=%s''', [id])
-                        MC_PageFieldMaster_data = MC_PagePageAccessSerializerSecond(
+                        MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
                             PageFieldQuery, many=True).data
                         MC_PageFieldMasterListData = list()
                         for c in MC_PageFieldMaster_data:
@@ -122,12 +122,11 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "DisplayIndex": a['DisplayIndex'],
                             "Icon": a['Icon'],
                             "ActualPagePath": a['ActualPagePath'],
-                            # "isShowOnMenu": a['isShowOnMenu'],
                             "PageType": a['PageType'],
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
-                            "PagePageAccess": PageAccessListData,
-                            "PageFieldMaster":MC_PageFieldMasterListData
+                            "PagePageAccess": PageAccessListData
+                            # "PageFieldMaster":MC_PageFieldMasterListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception :
