@@ -376,6 +376,7 @@ class GerUserDetialsView(APIView):
         a = list()
         a.append({
             "UserID": UserId,
+            "UserName":EmployeeID[0]["LoginName"],
             "EmployeeID": EmployeeID[0]["Employee"],
             "CompanyID": CompanyID[0]["Company"],
             "CompanyGroup": CompanyGroupID[0]["CompanyGroup"]
