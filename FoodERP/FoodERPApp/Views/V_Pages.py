@@ -21,7 +21,7 @@ class M_PagesView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
-m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
+m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
@@ -59,7 +59,7 @@ class M_PagesViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,
-m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,
+m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,
 Rp.Name RelatedPageName 
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
@@ -125,6 +125,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "PageType": a['PageType'],
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
+                            "IsDivisionRequired":a['IsDivisionRequired'],
                             "PagePageAccess": PageAccessListData,
                             "PageFieldMaster": MC_PageFieldMasterListData
                         })
