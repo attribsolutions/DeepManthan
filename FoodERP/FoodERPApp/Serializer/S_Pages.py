@@ -112,6 +112,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'PageType', instance.PageType)
             instance.RelatedPageID = validated_data.get(
                 'RelatedPageID', instance.RelatedPageID)
+            instance.IsDivisionRequired = validated_data.get(
+                'IsDivisionRequired', instance.IsDivisionRequired)
             instance.save()
 
             for Access in instance.PagePageAccess.all():
