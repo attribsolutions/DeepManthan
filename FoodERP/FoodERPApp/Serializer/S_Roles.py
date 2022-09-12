@@ -15,7 +15,7 @@ class M_RolesSerializer(serializers.ModelSerializer):
     RoleEmployeeTypes= RoleEmployeeTypesSerializer(many=True)
     class Meta:
         model =  M_Roles 
-        fields = ['id','Name','Description','isActive','isSCMRole','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes']
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes']
         
     def create(self, validated_data):
         RoleEmployeeTypes_data = validated_data.pop('RoleEmployeeTypes')

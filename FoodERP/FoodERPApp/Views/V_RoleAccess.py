@@ -305,10 +305,15 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     
-    def get(self, request, moduleid=0):
+    def get(self, request, moduleid=0,Division=0):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and   Module_id=%s''',[moduleid])
+                
+                if int(Division) > 0:
+                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and m_pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
+                else:
+                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and m_pages.IsDivisionRequired=0 and  Module_id=%s''',[moduleid])
+                        
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
