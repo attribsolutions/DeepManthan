@@ -43,6 +43,7 @@ class M_PagesSerializer(serializers.Serializer):
     PageType = serializers.IntegerField()
     RelatedPageID = serializers.IntegerField()
     RelatedPageName=serializers.CharField(max_length=100)
+    IsDivisionRequired = serializers.BooleanField(default=False)
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
