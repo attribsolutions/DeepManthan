@@ -219,7 +219,7 @@ class EmployeeSerializerForUserCreation(serializers.Serializer):
 class UserListSerializerforgetdata(serializers.ModelSerializer):
     class Meta:
         model = M_Users
-        fields = ['Employee']
+        fields = ['Employee','LoginName']
 
 class UserListSerializergetdata(serializers.Serializer):
     id = serializers.IntegerField()
