@@ -306,7 +306,7 @@ class M_Pages(models.Model):
     DisplayIndex = models.IntegerField()
     Icon = models.CharField(max_length=100)
     ActualPagePath = models.CharField(max_length=100)
-    # isShowOnMenu = models.BooleanField(default=False)
+    IsDivisionRequired = models.BooleanField(default=False)
     PageType = models.IntegerField()
     RelatedPageID = models.IntegerField()
     CreatedBy = models.IntegerField()
