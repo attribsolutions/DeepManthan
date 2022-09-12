@@ -57,99 +57,99 @@ class M_ItemsViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 Itemsquery = M_Items.objects.filter(id=id)
-                # return JsonResponse({'query':  str(Itemsquery.query)})
-                Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
-                ItemData=list()
-                for a in Itemsdata:
-                    
-                    CategoryDetails=list()
-                    for b in a['ItemCategoryDetails']:
-                        CategoryDetails.append({
-                            # "id": b['id'],
-                            "CategoryType": b['CategoryType']['id'],
-                            "CategoryTypeName": b['CategoryType']['Name'],
-                            "Category": b['Category']['id'],
-                            "CategoryName": b['Category']['Name'],
-                            "SubCategory": b['SubCategory']['id'],
-                            "SubCategoryName": b['SubCategory']['Name'],
-                        })
+                if Itemsquery.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
+                    ItemData=list()
+                    for a in Itemsdata:
                         
-                    UnitDetails=list()
-                    for c in a['ItemUnitDetails']:
-                        UnitDetails.append({
-                            # "id": c['id'],
-                            "UnitID": c['UnitID']['id'],
-                            "UnitName": c['UnitID']['Name'],
-                            "BaseUnitQuantity": c['BaseUnitQuantity'],
-                          
-                        })
-                        
-                    ImagesDetails=list()
-                    for d in a['ItemImagesDetails']:
-                        ImagesDetails.append({
-                            # "id": d['id'],
-                            "Item_pic": d['Item_pic'],
-                            "ImageType": d['ImageType']['id'],
-                            "ImageTypeName": d['ImageType']['Name'],
+                        CategoryDetails=list()
+                        for b in a['ItemCategoryDetails']:
+                            CategoryDetails.append({
+                                # "id": b['id'],
+                                "CategoryType": b['CategoryType']['id'],
+                                "CategoryTypeName": b['CategoryType']['Name'],
+                                "Category": b['Category']['id'],
+                                "CategoryName": b['Category']['Name'],
+                                "SubCategory": b['SubCategory']['id'],
+                                "SubCategoryName": b['SubCategory']['Name'],
+                            })
                             
-                        })        
-                    
-                    DivisionDetails=list()
-                    for e in a['ItemDivisionDetails']:
-                        DivisionDetails.append({
-                            # "id": e['id'],
-                            "Division": e['Division']['id'],
-                            "DivisionName": e['Division']['Name'],
+                        UnitDetails=list()
+                        for c in a['ItemUnitDetails']:
+                            UnitDetails.append({
+                                # "id": c['id'],
+                                "UnitID": c['UnitID']['id'],
+                                "UnitName": c['UnitID']['Name'],
+                                "BaseUnitQuantity": c['BaseUnitQuantity'],
                             
-                        })    
-                    
-                    MRPDetails=list()
-                    for f in a['ItemMRPDetails']:
-                        MRPDetails.append({
-                            # "id": f['id'],
-                            "GSTPercentage": f['GSTPercentage'],
-                            "MRPType": f['MRPType']['id'],
-                            "MRPTypeName": f['MRPType']['Name'],
-                            "MRP": f['MRP'],
-                            "HSNCode": f['HSNCode'],
-                           
-                        })
-                    
-                    MarginDetails=list()
-                    for g in a['ItemMarginDetails']:
-                        MarginDetails.append({
-                            # "id": g['id'],
-                            "PriceList": g['PriceList'],
-                            "Margin": g['Margin'],   
-                        })        
+                            })
+                            
+                        ImagesDetails=list()
+                        for d in a['ItemImagesDetails']:
+                            ImagesDetails.append({
+                                # "id": d['id'],
+                                "Item_pic": d['Item_pic'],
+                                "ImageType": d['ImageType']['id'],
+                                "ImageTypeName": d['ImageType']['Name'],
+                                
+                            })        
                         
+                        DivisionDetails=list()
+                        for e in a['ItemDivisionDetails']:
+                            DivisionDetails.append({
+                                # "id": e['id'],
+                                "Division": e['Division']['id'],
+                                "DivisionName": e['Division']['Name'],
+                                
+                            })    
+                        
+                        MRPDetails=list()
+                        for f in a['ItemMRPDetails']:
+                            MRPDetails.append({
+                                # "id": f['id'],
+                                "GSTPercentage": f['GSTPercentage'],
+                                "MRPType": f['MRPType']['id'],
+                                "MRPTypeName": f['MRPType']['Name'],
+                                "MRP": f['MRP'],
+                                "HSNCode": f['HSNCode'],
+                            
+                            })
+                        
+                        MarginDetails=list()
+                        for g in a['ItemMarginDetails']:
+                            MarginDetails.append({
+                                # "id": g['id'],
+                                "PriceList": g['PriceList'],
+                                "Margin": g['Margin'],   
+                            })        
+                            
+                        
+                        ItemData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "ShortName": a['ShortName'],
+                            "Company": a['Company']['id'],
+                            "CompanyName": a['Company']['Name'],
+                            "BaseUnitID": a['BaseUnitID']['id'],
+                            "BaseUnitName": a['BaseUnitID']['Name'],
+                            "BarCode": a['BarCode'],
+                            "Sequence": a['Sequence'],
+                            "isActive":a['isActive'] ,
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn'],
+                            "ItemCategoryDetails" : CategoryDetails,
+                            "ItemUnitDetails": UnitDetails, 
+                            "ItemImagesDetails" : ImagesDetails,
+                            "ItemDivisionDetails": DivisionDetails,
+                            "ItemMRPDetails":MRPDetails,
+                            "ItemMarginDetails":MarginDetails 
                     
-                    ItemData.append({
-                        "id": a['id'],
-                        "Name": a['Name'],
-                        "ShortName": a['ShortName'],
-                        "Company": a['Company']['id'],
-                        "CompanyName": a['Company']['Name'],
-                        "BaseUnitID": a['BaseUnitID']['id'],
-                        "BaseUnitName": a['BaseUnitID']['Name'],
-                        "BarCode": a['BarCode'],
-                        "Sequence": a['Sequence'],
-                        "isActive":a['isActive'] ,
-                        "CreatedBy": a['CreatedBy'],
-                        "CreatedOn": a['CreatedOn'],
-                        "UpdatedBy": a['UpdatedBy'],
-                        "UpdatedOn": a['UpdatedOn'],
-                        "ItemCategoryDetails" : CategoryDetails,
-                        "ItemUnitDetails": UnitDetails, 
-                        "ItemImagesDetails" : ImagesDetails,
-                        "ItemDivisionDetails": DivisionDetails,
-                        "ItemMRPDetails":MRPDetails,
-                        "ItemMarginDetails":MarginDetails 
-                   
-                    })
-                    
-                
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
    
