@@ -121,25 +121,23 @@ urlpatterns = [
     url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
     url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
     url(r'Vehicle$', M_VehicleView.as_view()),
-    
-    
-    
+   
     # Dependencies APIs IN Projects 
-    
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
     url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
-        #RoleAccessGetPagesOnModule
-    url(r'RoleAccessGetPages/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
-        #RoleAccess Page AddPage Button
+    #RoleAccessGetPagesOnModule
+    
+    url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
+    #RoleAccess Page AddPage Button
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
 
-          #PartyDropdownforloginpage/EmployeeID
+    #PartyDropdownforloginpage/EmployeeID
     url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
