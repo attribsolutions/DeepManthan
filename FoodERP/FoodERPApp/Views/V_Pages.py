@@ -125,6 +125,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "PageType": a['PageType'],
                             "RelatedPageID": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
+                            "IsDivisionRequired":a['IsDivisionRequired'],
                             "PagePageAccess": PageAccessListData,
                             "PageFieldMaster": MC_PageFieldMasterListData
                         })
