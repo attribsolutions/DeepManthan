@@ -9,8 +9,6 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
 
-   
-
 class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
        
     id = serializers.IntegerField()
@@ -70,7 +68,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         fields ="__all__"   
    
     PagePageAccess=MC_PagePageAccessSerializer1(many=True)
-    # PageFieldMaster=MC_PageFieldMasterSerializer(many=True)
+    PageFieldMaster=MC_PageFieldMasterSerializer(many=True)
     def create(self, validated_data):
         PageAccess_data = validated_data.pop('PagePageAccess')
         PageFieldMaster = validated_data.pop('PageFieldMaster')
@@ -80,8 +78,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         for data in PageAccess_data:
             MC_PagePageAccess.objects.create(Page=Pages, **data)
             
-        # for PageFielddata in  PageFieldMaster:
-        #     MC_PageFieldMaster.objects.create(Page=Pages,**PageFielddata) 
+        for PageFielddata in  PageFieldMaster:
+            MC_PageFieldMaster.objects.create(Page=Pages,**PageFielddata) 
               
         return Pages
 
@@ -119,8 +117,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
             for Access in instance.PagePageAccess.all():
                 Access.delete()
                 
-            # for PageField in instance.PageFieldMaster.all():
-            #     PageField.delete()
+            for PageField in instance.PageFieldMaster.all():
+                PageField.delete()
                 
 
             if (instance.PageType !=1):
@@ -128,9 +126,9 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                     PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)
                 instance.PagePageAccess.add(PageAccess)
                 
-                # for PageField_data in validated_data['PageFieldMaster']:
-                #     PageField = MC_PageFieldMaster.objects.create(Page=instance, **PageField_data)
-                # instance.PageFieldMaster.add(PageField)
+                for PageField_data in validated_data['PageFieldMaster']:
+                    PageField = MC_PageFieldMaster.objects.create(Page=instance, **PageField_data)
+                instance.PageFieldMaster.add(PageField)
             
             return instance   
     
