@@ -130,6 +130,7 @@ urlpatterns = [
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
     #RoleAccessGetPagesOnModule
+    
     url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     #RoleAccess Page AddPage Button
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
