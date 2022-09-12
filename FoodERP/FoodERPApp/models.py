@@ -337,6 +337,7 @@ class M_Roles(models.Model):
     Description = models.CharField(max_length=100)
     isActive = models.BooleanField(default=False)
     isSCMRole = models.BooleanField(default=False)
+    IsPartyConnection = models.BooleanField(default=False)
     Dashboard = models.CharField(max_length=200)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
