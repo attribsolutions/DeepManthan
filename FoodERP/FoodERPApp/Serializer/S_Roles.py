@@ -35,6 +35,8 @@ class M_RolesSerializer(serializers.ModelSerializer):
             'isActive', instance.isActive)
         instance.isSCMRole = validated_data.get(
             'isSCMRole', instance.isSCMRole)
+        instance.IsPartyConnection = validated_data.get(
+            'IsPartyConnection', instance.IsPartyConnection)
         instance.Dashboard = validated_data.get(
             'Dashboard', instance.Dashboard)
         instance.UpdatedBy = validated_data.get(
