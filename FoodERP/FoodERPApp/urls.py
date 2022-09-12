@@ -68,13 +68,13 @@ urlpatterns = [
     url(r'UserList$', UserListView.as_view()),
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
-       #SideMenu
+       #SideMenu Partyid/Employeeid
     url(r'RoleAccess/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
        #ListPage
     url(r'RoleAccessList$', RoleAccessViewList.as_view()),
        #Post
     url(r'RoleAccess$', RoleAccessView.as_view()),
-       #RoleAccess PAge Go button and Edit Button
+       #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
     url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
@@ -129,8 +129,7 @@ urlpatterns = [
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
-    #RoleAccessGetPagesOnModule
-    
+    #RoleAccessGetPagesOnModule moduleid/Divisionid
     url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     #RoleAccess Page AddPage Button
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
