@@ -63,7 +63,7 @@ class RoleAccessView(RetrieveAPIView):
         # return Response(str(modules.query))
         # print(str(modules.query))
         serializerdata = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
-        print(serializerdata)
+        # print(serializerdata)
         Moduledata = list()
                
         for a in serializerdata:
@@ -96,7 +96,7 @@ class RoleAccessView(RetrieveAPIView):
                 JOIN h_pageaccess ON h_pageaccess.id=mc_rolepageaccess.PageAccess_id  WHERE mc_rolepageaccess.RoleAccess_id=%s ''', [id])
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(
                     RolePageAccess,  many=True).data
-                print(str(RolePageAccess.query))
+                # print(str(RolePageAccess.query))
                 Pagesdata.append({
                     "id": a1['Pages']['id'], 
                     "RelatedPageID": a1['Pages']['RelatedPageID'],
@@ -107,7 +107,6 @@ class RoleAccessView(RetrieveAPIView):
                     "DisplayIndex": a1['Pages']['DisplayIndex'],
                     "Icon": a1['Pages']['Icon'],
                     "ActualPagePath": a1['Pages']['ActualPagePath'],
-                    # "isShowOnMenu": a1['isShowOnMenu'],
                     "RolePageAccess": RolePageAccessSerializer
                 })
 
