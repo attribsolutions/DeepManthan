@@ -121,6 +121,10 @@ urlpatterns = [
     url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
     url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
     url(r'Vehicle$', M_VehicleView.as_view()),
+    url(r'ImageTypes$', M_ImageTypesView.as_view()),
+    url(r'MRPTypes$', M_MRPTypesView.as_view()),
+    url(r'ControlTypes$', ControlTypeMasterView.as_view()),
+    url(r'FieldValidations$', FieldValidationsView.as_view()),
    
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
@@ -144,6 +148,5 @@ urlpatterns = [
     url(r'SuperAdmin$',SuperAdminView.as_view()),
     url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
     url(r'GetSubCategoryByCategoryID/([0-9]+)$', GetSubCategoryByCategoryID.as_view()),
-    url(r'ImageTypes$', M_ImageTypesView.as_view()),
-    url(r'MRPTypes$', M_MRPTypesView.as_view()),
+    
 ]
