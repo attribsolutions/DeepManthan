@@ -8,10 +8,8 @@ class RoleEmployeeTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  MC_RolesEmployeeTypes
         fields = ['EmployeeType']
-    
 
 class M_RolesSerializer(serializers.ModelSerializer):
-    
     RoleEmployeeTypes= RoleEmployeeTypesSerializer(many=True)
     class Meta:
         model =  M_Roles 
@@ -54,7 +52,23 @@ class M_RolesSerializer(serializers.ModelSerializer):
         for OrderItem_data in validated_data['RoleEmployeeTypes']:
             Items = MC_RolesEmployeeTypes.objects.create(Role=instance, **OrderItem_data)
         instance.RoleEmployeeTypes.add(Items)
- 
-     
 
-        return instance     
+        return instance
+    
+
+class EmployeeTypesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_EmployeeTypes
+        fields = ['id','Name']
+        
+class RoleEmployeeTypesSerializerSecond(serializers.ModelSerializer):
+    EmployeeType = EmployeeTypesSerializerSecond()
+    class Meta:
+        model =  MC_RolesEmployeeTypes
+        fields = ['EmployeeType']
+        
+class M_RolesSerializerSecond(serializers.ModelSerializer):
+    RoleEmployeeTypes= RoleEmployeeTypesSerializerSecond(many=True,read_only=True)
+    class Meta:
+        model =  M_Roles 
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes']          
