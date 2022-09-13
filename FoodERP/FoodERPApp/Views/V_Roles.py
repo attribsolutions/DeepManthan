@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_Roles import M_RolesSerializer
+from ..Serializer.S_Roles import *
 
 from ..models import *
 
@@ -53,9 +53,35 @@ class M_RolesViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Rolesdata = M_Roles.objects.get(id=id)
-                M_Roles_Serializer = M_RolesSerializer(M_Rolesdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Roles_Serializer.data})
+                M_Rolesdata = M_Roles.objects.filter(id=id)
+                if M_Rolesdata.exists():
+                    M_Roles_Serializer = M_RolesSerializerSecond(M_Rolesdata, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Roles_Serializer})
+                    RolesData=list()
+                    for a in M_Roles_Serializer:
+                        
+                        RoleEmployeeTypesdata=list()
+                        for b in a['RoleEmployeeTypes']:
+                            RoleEmployeeTypesdata.append({
+                               "EmployeeType":b['EmployeeType']['id'],
+                               "EmployeeTypeName":b['EmployeeType']['Name'] 
+                            })
+                            
+                        RolesData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "Description": a['Description'],
+                            "isActive": a['isActive'],
+                            "isSCMRole":a['isSCMRole'],
+                            "IsPartyConnection": a['IsPartyConnection'],
+                            "Dashboard": a['Dashboard'],
+                            "CreatedBy":a['CreatedBy'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "RoleEmployeeTypes":RoleEmployeeTypesdata
+                            
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': RolesData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'M_Roles Not available ', 'Data': []})
         except  M_Roles.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'M_Roles Not available', 'Data': []})
         except Exception as e:
