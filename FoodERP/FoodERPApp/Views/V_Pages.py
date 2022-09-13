@@ -237,3 +237,37 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':[PageListData] })
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Execution Error', 'Data': []})
+
+class ControlTypeMasterView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                ControlTypedata = M_ControlTypeMaster.objects.all()
+                if ControlTypedata.exists():
+                    ControlTypedata_Serializer = ControlTypeMasterSerializer(ControlTypedata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ControlTypedata_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'ControlTypes Not Available', 'Data': []})    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+class FieldValidationsView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                FieldValidationsdata = M_FieldValidations.objects.all()
+                if FieldValidationsdata.exists():
+                    FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': FieldValidations_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Field Validations Not Available', 'Data': []})    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})         

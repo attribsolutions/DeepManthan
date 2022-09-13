@@ -4,6 +4,18 @@ from rest_framework import serializers
 
 from ..models import *
 
+
+class ControlTypeMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_ControlTypeMaster
+        fields = ['id','Name']
+
+class FieldValidationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_FieldValidations
+        fields = ['id','Name']        
+
+
 class MC_PagePageAccessSerializer(serializers.Serializer):
    
     id = serializers.IntegerField()
