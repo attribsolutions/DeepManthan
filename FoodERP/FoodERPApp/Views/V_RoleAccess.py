@@ -199,9 +199,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             RelatedPageRoleAccessdata = MC_RolePageAccessSerializerNewUpdated(RelatedPageroleaccessquery, many=True).data
             # return JsonResponse({'data':  RelatedPageRoleAccessdata})
             
-            # rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [id])
+            rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [id])
             # # return JsonResponse({'query':  str(rolepageaccessquery.query)})
-            # RolePageAccessSerializerforListPAge = MC_RolePageAccessSerializerNewUpdated(rolepageaccessqueryforlistPage,  many=True).data
+            RolePageAccessSerializerforListPAge = MC_RolePageAccessSerializerNewUpdated(rolepageaccessqueryforlistPage,  many=True).data
             # # return JsonResponse({'query':  RolePageAccessSerializerforListPAge})
             
             
@@ -220,7 +220,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
                 "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
-                # "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
+                "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
                 "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
                 "RoleAccess_IsView": RolePageAccessSerializer[2]['id'],
                 "RoleAccess_IsEdit": RolePageAccessSerializer[3]['id'],
