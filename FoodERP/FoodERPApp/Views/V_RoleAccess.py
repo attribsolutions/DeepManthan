@@ -53,12 +53,12 @@ class RoleAccessView(RetrieveAPIView):
         #     '''SELECT distinct Modules_id id ,h_modules.Name FROM m_roleaccess 
         #     join h_modules on h_modules.id=m_roleaccess.Modules_id 
         #     WHERE  Role_id IN %s  AND (%s) AND (%s) ORDER BY h_modules.DisplayIndex''', ( y,Division, Company)) 
-        # print(PartyID)
+        # print(PartyID)Company_id__isnull=True,
         if (int(PartyID) > 0)  :
        
-            modules= M_RoleAccess.objects.filter(Division=PartyID , Company_id__isnull=True,Role_id__in=y).values('Modules_id').distinct()    
+            modules= M_RoleAccess.objects.filter(Division=PartyID , Role_id__in=y).values('Modules_id').distinct()    
         else:
-            modules= M_RoleAccess.objects.filter(Division__isnull=True , Company_id__isnull=True,Role_id__in=y).values('Modules_id').distinct()    
+            modules= M_RoleAccess.objects.filter(Division__isnull=True , Role_id__in=y).values('Modules_id').distinct()    
 
         # return Response(str(modules.query))
         # print(str(modules.query))
@@ -80,9 +80,9 @@ class RoleAccessView(RetrieveAPIView):
     
             if (int(PartyID) > 0)  :
 
-                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company_id__isnull=True)
+                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID)
             else :
-                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company_id__isnull=True)
+                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True)
 
             # print(str(query.query) )  
           
