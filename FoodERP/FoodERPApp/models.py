@@ -287,13 +287,14 @@ class M_ControlTypeMaster(models.Model):
     class Meta:
         db_table = "M_ControlTypeMaster"
 
+
 class M_FieldValidations(models.Model):
-    
+    ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='FieldControlType', on_delete=models.DO_NOTHING)
     Name = models.CharField(max_length=300)
+    RegularExpression = models.CharField(max_length=300)
     class Meta:
         db_table = "M_FieldValidations"
-
-           
+         
 
 class M_Pages(models.Model):
     PageHeading = models.CharField(max_length=500, blank=True)
