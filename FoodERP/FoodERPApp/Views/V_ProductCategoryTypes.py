@@ -21,7 +21,7 @@ class M_ProductCategoryTypeView(CreateAPIView):
                 if M_ProductCategoryType_data.exists():
                     M_ProductCategoryType_data_serializer = M_ProductCategoryTypeSerializer(M_ProductCategoryType_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_ProductCategoryType_data_serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Product Category Type Not available', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Category Type Not available', 'Data': []})
         except Exception :
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
 
@@ -33,7 +33,7 @@ class M_ProductCategoryTypeView(CreateAPIView):
                 M_ProductCategoryType_serializer = M_ProductCategoryTypeSerializer(data=M_ProductCategoryType_data)
             if M_ProductCategoryType_serializer.is_valid():
                 M_ProductCategoryType_serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Type Save Successfully', 'Data' :[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Category Type Save Successfully', 'Data' :[]})
             else:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_ProductCategoryType_serializer.errors, 'Data' : []})
@@ -54,7 +54,7 @@ class M_ProductCategoryTypeViewSecond(CreateAPIView):
                 M_ProductCategoryType_serializer = M_ProductCategoryTypeSerializer(M_ProductCategoryType_data)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_ProductCategoryType_serializer.data})
         except  M_Roles.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Product Category Type Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Type Not available', 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
 
@@ -68,7 +68,7 @@ class M_ProductCategoryTypeViewSecond(CreateAPIView):
                     M_ProductCategoryTypedataByID, data=M_ProductCategoryType_data)
                 if M_ProductCategoryType_serializer.is_valid():
                     M_ProductCategoryType_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Type Updated Successfully','Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Category Type Updated Successfully','Data' :[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_ProductCategoryType_serializer.errors, 'Data' :[]})
@@ -81,8 +81,8 @@ class M_ProductCategoryTypeViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_ProductCategoryType_data = M_ProductCategoryType.objects.get(id=id)
                 M_ProductCategoryType_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Type Deleted Successfully','Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Category Type Deleted Successfully','Data':[]})
         except M_ProductCategoryType.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Product Category Type Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category Type Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Product Category Type used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category Type used in another table', 'Data': []})

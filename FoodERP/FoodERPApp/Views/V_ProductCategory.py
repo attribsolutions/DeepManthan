@@ -20,7 +20,7 @@ class ProductCategoryView(CreateAPIView):
                 query = M_ProductCategory.objects.raw('''SELECT m_productcategory.id,m_productcategory.Name,m_productcategorytype.Name ProductCategoryTypeName FROM m_productcategory
 JOIN m_productcategorytype ON m_productcategorytype.id=m_productcategory.ProductCategoryType_id''')
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Product Category Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Category Not available', 'Data': []})
                 else:    
                     ProductCategory_Serializer = ProductCategorySerializer2(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ProductCategory_Serializer})       
@@ -36,7 +36,7 @@ JOIN m_productcategorytype ON m_productcategorytype.id=m_productcategory.Product
                 ProductCategory_Serializer = ProductCategorySerializer(data=ProductCategory_data)
                 if ProductCategory_Serializer.is_valid():
                     ProductCategory_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Category Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ProductCategory_Serializer.errors, 'Data':[]})
@@ -56,7 +56,7 @@ class ProductCategoryViewSecond(CreateAPIView):
 JOIN m_productcategorytype ON m_productcategorytype.id=m_productcategory.ProductCategoryType_id
 WHERE m_productcategory.id = %s''',[id])
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Product Category Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Category Not available', 'Data': []})
                 else:    
                     ProductCategory_Serializer = ProductCategorySerializer2(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ProductCategory_Serializer[0]})   
@@ -74,7 +74,7 @@ WHERE m_productcategory.id = %s''',[id])
                     ProductCategorydataByID, data=ProductCategorydata)
                 if ProductCategorydata_Serializer.is_valid():
                     ProductCategorydata_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Updated Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Category Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ProductCategorydata_Serializer.errors, 'Data':[]})
@@ -88,11 +88,11 @@ WHERE m_productcategory.id = %s''',[id])
             with transaction.atomic():
                 ProductCategorydata = M_ProductCategory.objects.get(id=id)
                 ProductCategorydata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Product Category Deleted Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Category Deleted Successfully', 'Data':[]})
         except M_ProductCategory.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Product Category Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Product Category used in another table', 'Data': []})   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category used in another table', 'Data': []})   
 
 
 class GetCategoryByCategoryTypeID(CreateAPIView):
