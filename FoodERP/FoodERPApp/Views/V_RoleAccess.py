@@ -18,23 +18,21 @@ class RoleAccessView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    
-
     def get(self, request, PartyID=0, EmployeeID=0):    
         Company="M_RoleAccess.Company_id is null"
         Division=PartyID
-        # print(PartyID)
+      
         if (int(PartyID) > 0)  :
             Division="M_RoleAccess.Division_id = "+PartyID
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',(PartyID,EmployeeID))
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',[PartyID,EmployeeID])
         else:
             Division="M_RoleAccess.Division_id is null "
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id IS NULL and m_users.Employee_id=%s''',EmployeeID)
-        
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id IS NULL and m_users.Employee_id=%s ''',[EmployeeID])
+           
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
         
-        # print(qq)
+       
         if(len(qq) == 1):
             roles=list()
             roles.append(qq[0]['id'])
@@ -54,6 +52,7 @@ class RoleAccessView(RetrieveAPIView):
         #     join h_modules on h_modules.id=m_roleaccess.Modules_id 
         #     WHERE  Role_id IN %s  AND (%s) AND (%s) ORDER BY h_modules.DisplayIndex''', ( y,Division, Company)) 
         # print(PartyID)
+
         if (int(PartyID) > 0)  :
        
             modules= M_RoleAccess.objects.filter(Division=PartyID ,Company_id__isnull=True, Role_id__in=y).values('Modules_id').distinct()    
