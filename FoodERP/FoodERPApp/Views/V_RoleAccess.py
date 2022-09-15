@@ -229,6 +229,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "RoleAccess_IsDeleteSelf": RolePageAccessSerializer[6]['id'],
                 "RoleAccess_IsPrint": RolePageAccessSerializer[7]['id'],
                 "RoleAccess_IsTopOfTheDivision": RolePageAccessSerializer[8]['id'],
+                "RoleAccess_Pdfdownload": RolePageAccessSerializer[9]['id'],
+                "RoleAccess_Exceldownload": RolePageAccessSerializer[10]['id'],
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
@@ -237,7 +239,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
                 "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
                 "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id']
+                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
+                "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
+                "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
 
             })
 
@@ -287,7 +291,9 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
                 "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
                 "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id']
+                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
+                "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
+                "PageAccess_Exceldownload": PageAccessSerializer[10]['id']
                  
             })
 
