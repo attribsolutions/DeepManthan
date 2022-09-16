@@ -24,10 +24,12 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
 class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
        
     id = serializers.IntegerField()
+    ControlID = serializers.IntegerField()
     ControlType_id = serializers.IntegerField()
     CName = serializers.CharField(max_length=100)
     FieldLabel = serializers.CharField(max_length=300)
-    IsCompulsory = serializers.BooleanField(default=False)      
+    IsCompulsory = serializers.BooleanField(default=False)
+    DefaultSort =  serializers.BooleanField(default=False)    
     FieldValidation_id = serializers.IntegerField()
     FName = serializers.CharField(max_length=100)         
     ListPageSeq = serializers.IntegerField()
