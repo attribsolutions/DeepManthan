@@ -13,7 +13,7 @@ class ControlTypeMasterSerializer(serializers.ModelSerializer):
 class FieldValidationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_FieldValidations
-        fields = ['id','Name']        
+        fields = ['id','Name','RegularExpression']        
 
 
 class MC_PagePageAccessSerializer(serializers.Serializer):
