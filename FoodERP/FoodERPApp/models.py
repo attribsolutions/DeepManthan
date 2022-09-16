@@ -12,7 +12,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class M_DivisionType(models.Model):
     Name = models.CharField(max_length=100)
-    IsSCM =models.BooleanField(default=False)  
+    IsSCM =models.BooleanField(default=False)
+    IsDivision = models.BooleanField(default=False) 
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -95,10 +96,10 @@ class M_Districts(models.Model):
     class Meta:
         db_table = "M_Districts"
 
-class AddressTypes(models.Model):
+class M_AddressTypes(models.Model):
     Name = models.CharField(max_length=500)
     class Meta:
-        db_table = "AddressTypes"
+        db_table = "M_AddressTypes"
     
 class M_Parties(models.Model):
 
