@@ -13,7 +13,7 @@ class ControlTypeMasterSerializer(serializers.ModelSerializer):
 class FieldValidationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_FieldValidations
-        fields = ['id','Name']        
+        fields = ['id','Name','RegularExpression']        
 
 
 class MC_PagePageAccessSerializer(serializers.Serializer):
@@ -24,10 +24,12 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
 class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
        
     id = serializers.IntegerField()
+    ControlID = serializers.IntegerField()
     ControlType_id = serializers.IntegerField()
     CName = serializers.CharField(max_length=100)
     FieldLabel = serializers.CharField(max_length=300)
-    IsCompulsory = serializers.BooleanField(default=False)      
+    IsCompulsory = serializers.BooleanField(default=False)
+    DefaultSort =  serializers.BooleanField(default=False)    
     FieldValidation_id = serializers.IntegerField()
     FName = serializers.CharField(max_length=100)         
     ListPageSeq = serializers.IntegerField()
@@ -116,8 +118,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'Icon', instance.Icon)
             instance.ActualPagePath = validated_data.get(
                 'ActualPagePath', instance.ActualPagePath)
-            # instance.isShowOnMenu = validated_data.get(
-            #     'isShowOnMenu', instance.isShowOnMenu)
+            
             instance.PageType = validated_data.get(
                 'PageType', instance.PageType)
             instance.RelatedPageID = validated_data.get(
