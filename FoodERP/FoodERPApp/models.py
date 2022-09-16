@@ -95,7 +95,11 @@ class M_Districts(models.Model):
     class Meta:
         db_table = "M_Districts"
 
-
+class AddressTypes(models.Model):
+    Name = models.CharField(max_length=500)
+    class Meta:
+        db_table = "AddressTypes"
+    
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
