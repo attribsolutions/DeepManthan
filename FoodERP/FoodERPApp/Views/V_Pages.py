@@ -261,10 +261,10 @@ class FieldValidationsView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                FieldValidationsdata = M_FieldValidations.objects.all()
+                FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=id)
                 if FieldValidationsdata.exists():
                     FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': FieldValidations_Serializer.data})

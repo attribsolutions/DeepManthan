@@ -124,8 +124,7 @@ urlpatterns = [
     url(r'ImageTypes$', M_ImageTypesView.as_view()),
     url(r'MRPTypes$', M_MRPTypesView.as_view()),
     url(r'ControlTypes$', ControlTypeMasterView.as_view()),
-    url(r'FieldValidations$', FieldValidationsView.as_view()),
-   
+    url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
@@ -133,6 +132,7 @@ urlpatterns = [
     url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
+  
     #RoleAccessGetPagesOnModule moduleid/Divisionid
     url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     #RoleAccess Page AddPage Button
