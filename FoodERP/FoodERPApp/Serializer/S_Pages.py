@@ -118,8 +118,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'Icon', instance.Icon)
             instance.ActualPagePath = validated_data.get(
                 'ActualPagePath', instance.ActualPagePath)
-            # instance.isShowOnMenu = validated_data.get(
-            #     'isShowOnMenu', instance.isShowOnMenu)
+            
             instance.PageType = validated_data.get(
                 'PageType', instance.PageType)
             instance.RelatedPageID = validated_data.get(
