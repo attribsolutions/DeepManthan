@@ -360,12 +360,18 @@ class CopyRoleAccessView(CreateAPIView):
         NewDivision = request.data['NewDivision']
         try:
             with transaction.atomic():
-                CopyRoleAccessdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id =Division)
+                if int(Division) > 0:
+                    CopyRoleAccessdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id =Division)
+                else:
+                    CopyRoleAccessdata = M_RoleAccess.objects.filter(Role_id= Role,Division_id__isnull=True)
                 if CopyRoleAccessdata.exists():
                     serializersdata = CopyRoleAccessSerializer(CopyRoleAccessdata, many=True)
                     additionaldata=list()
                     for a in serializersdata.data:
-                        a.update({'Role': NewRole,'Division':NewDivision})
+                        if int(NewDivision) > 0:
+                            a.update({'Role': NewRole,'Division':NewDivision})
+                        else:   
+                            a.update({'Role': NewRole,'Division':''})
                         additionaldata.append(a)
                     # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '0', 'Data':additionaldata})    
                     RoleAccessSerialize_data = InsertCopyRoleAccessSerializer(data=additionaldata, many=True)
