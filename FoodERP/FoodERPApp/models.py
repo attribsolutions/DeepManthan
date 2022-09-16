@@ -387,7 +387,7 @@ class M_RoleAccess(models.Model):
         db_table = "M_RoleAccess"
 
 class MC_RolesEmployeeTypes(models.Model):
-    Role = models.ForeignKey(M_Roles, related_name='RoleEmployeeTypes', on_delete=models.DO_NOTHING)
+    Role = models.ForeignKey(M_Roles, related_name='RoleEmployeeTypes', on_delete=models.CASCADE)
     EmployeeType = models.ForeignKey(M_EmployeeTypes, on_delete=models.DO_NOTHING)
     class Meta:
         db_table = "MC_RolesEmployeeTypes"
