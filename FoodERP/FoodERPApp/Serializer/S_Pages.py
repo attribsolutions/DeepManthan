@@ -69,7 +69,7 @@ class M_PagesSerializer2(serializers.ModelSerializer):
 class MC_PageFieldMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PageFieldMaster
-        fields = ['ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect']         
+        fields = ['ControlID','ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect','DefaultSort']         
 
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
