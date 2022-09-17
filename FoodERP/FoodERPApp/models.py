@@ -75,12 +75,6 @@ class C_Companies(models.Model):
     class Meta:
         db_table = "C_Companies"
         
-class M_PriceList(models.Model):
-    Name = models.CharField(max_length=100)
-    MkupMkDn = models.IntegerField()
-    BasePriceListID= models.IntegerField()
-    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING)
-    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING)
 
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
@@ -114,8 +108,8 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PriceList = models.ForeignKey(
-        M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING, blank=True)
+    PartyType = models.ForeignKey(
+        M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING, blank=True)
     DivisionType = models.ForeignKey(
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
