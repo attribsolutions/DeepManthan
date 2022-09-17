@@ -334,7 +334,7 @@ class MC_PageFieldMaster(models.Model):
     ShowInListPage = models.BooleanField(default=False) 
     ShowInDownload = models.BooleanField(default=False)
     DownloadDefaultSelect = models.BooleanField(default=False) 
-    Page = models.ForeignKey(M_Pages, related_name='PageFieldMaster', on_delete=models.CASCADE)
+    Page = models.ForeignKey(M_Pages, related_name='PageFieldMaster', on_delete=models.CASCADE,null=True,blank=True)
     # LinktoField = models.CharField(max_length=300)
     class Meta:
         db_table = "MC_PageFieldMaster"
