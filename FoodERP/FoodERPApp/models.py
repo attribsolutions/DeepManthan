@@ -10,6 +10,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 
+
+
+
 class M_DivisionType(models.Model):
     Name = models.CharField(max_length=100)
     IsSCM =models.BooleanField(default=False)
@@ -36,6 +39,7 @@ class M_PartyType(models.Model):
         db_table = 'M_PartyType'
 
 
+    
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -70,7 +74,13 @@ class C_Companies(models.Model):
 
     class Meta:
         db_table = "C_Companies"
-
+        
+class M_PriceList(models.Model):
+    Name = models.CharField(max_length=100)
+    MkupMkDn = models.IntegerField()
+    BasePriceListID= models.IntegerField()
+    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING)
+    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING)
 
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
