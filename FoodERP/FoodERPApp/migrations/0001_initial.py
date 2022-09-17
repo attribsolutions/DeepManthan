@@ -736,7 +736,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='ProductCategoryType', to='FoodERPApp.M_ProductCategoryType'),
         ),
         migrations.CreateModel(
-            name='M_PartyType',
+            name='M_PriceList',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('Name', models.CharField(max_length=100)),
@@ -747,13 +747,13 @@ class Migration(migrations.Migration):
                 ('DivisionType', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='PartyTypeDivision', to='FoodERPApp.M_DivisionType')),
             ],
             options={
-                'db_table': 'M_PartyType',
+                'db_table': 'M_PriceList',
             },
         ),
         migrations.AddField(
             model_name='m_parties',
             name='PartyType',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='PartiesPartyType', to='FoodERPApp.M_PartyType'),
+            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='PartiesPartyType', to='FoodERPApp.M_PriceList'),
         ),
         migrations.AddField(
             model_name='m_parties',

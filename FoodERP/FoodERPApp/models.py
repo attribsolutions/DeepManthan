@@ -10,6 +10,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 
+
+
+
 class M_DivisionType(models.Model):
     Name = models.CharField(max_length=100)
     IsSCM =models.BooleanField(default=False)
@@ -36,6 +39,7 @@ class M_PartyType(models.Model):
         db_table = 'M_PartyType'
 
 
+    
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -70,7 +74,7 @@ class C_Companies(models.Model):
 
     class Meta:
         db_table = "C_Companies"
-
+        
 
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
@@ -105,7 +109,7 @@ class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
     PartyType = models.ForeignKey(
-        M_PartyType, related_name='PartiesPartyType', on_delete=models.DO_NOTHING, blank=True)
+        M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING, blank=True)
     DivisionType = models.ForeignKey(
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
@@ -345,6 +349,7 @@ class MC_PageFieldMaster(models.Model):
     # LinktoField = models.CharField(max_length=300)
     class Meta:
         db_table = "MC_PageFieldMaster"
+        
 class M_Roles(models.Model):
 
     Name = models.CharField(max_length=100)

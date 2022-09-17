@@ -69,10 +69,14 @@ class UserListView(CreateAPIView):
             with transaction.atomic():
                 PageListData = list()
                 Usersdata = M_Users.objects.all()
+                
                 if Usersdata.exists():
-                    Usersdata_Serializer = UserListSerializer(
-                        Usersdata, many=True).data
+                   
+                    Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
+                    
                     UserData = list()
+                    
+                    # print(Usersdata_Serializer)
                     for a in Usersdata_Serializer:
                         # RoleData = list()
                         # for b in a["UserRole"]:
@@ -81,6 +85,7 @@ class UserListView(CreateAPIView):
                         #         'Name': b['Role']['Name'],
 
                         #     })
+                        
                         UserData.append({
                             'id': a["id"],
                             'LoginName': a["LoginName"],
@@ -100,6 +105,7 @@ class UserListView(CreateAPIView):
                             # 'UserRole': RoleData,
 
                         })
+                       
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
         except Exception:
