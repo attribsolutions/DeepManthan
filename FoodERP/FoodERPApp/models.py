@@ -110,8 +110,6 @@ class M_Parties(models.Model):
         M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
-   
-
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
     AlternateContactNo = models.CharField(
@@ -136,7 +134,16 @@ class M_Parties(models.Model):
 
     class Meta:
         db_table = 'M_Parties'
-
+        
+class MC_PartyAddress(models.Model):
+    
+    Party = models.ForeignKey(M_Parties, related_name='PartyAddress',  on_delete=models.DO_NOTHING)
+    AddressType = models.ForeignKey(M_AddressTypes, related_name='AddressType', on_delete=models.DO_NOTHING)
+    Address = models.CharField(max_length=500)
+    class Meta:
+        db_table = 'MC_PartyAddress'
+     
+     
 
 class M_EmployeeTypes(models.Model):
     Name = models.CharField(max_length=100)
