@@ -151,7 +151,7 @@ class M_employeesSerializer(serializers.ModelSerializer):
         fields = '__all__' 
         
 class UserListSerializer(serializers.ModelSerializer):
-    UserRole = UserRolesSerializer(many=True, read_only=True)
+    # UserRole = UserRolesSerializer(many=True, read_only=True)
     Employee = M_employeesSerializer(read_only=True)
     class Meta:
         model = M_Users
