@@ -3,7 +3,10 @@ from ..models import *
 from rest_framework import serializers
 
 
-        
+class AddressTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  M_AddressTypes
+        fields = '__all__'        
                 
 class M_PartiesSerializer(serializers.ModelSerializer):
     class Meta:

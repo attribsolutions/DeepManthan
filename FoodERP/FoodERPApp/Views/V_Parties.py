@@ -124,4 +124,22 @@ left join M_Districts on M_Districts.id=p.District_id
         except M_Parties.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Not available', 'Data': []})    
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party used in another table', 'Data': []})    
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party used in another table', 'Data': []})
+
+class AddressTypesView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                Address_data = M_AddressTypes.objects.all()
+                if Address_data.exists():
+                    Address_serializer = AddressTypesSerializer(Address_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Address_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Role Not available', 'Data': []})
+        except Exception :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
+                

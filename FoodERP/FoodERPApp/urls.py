@@ -125,6 +125,7 @@ urlpatterns = [
     url(r'MRPTypes$', M_MRPTypesView.as_view()),
     url(r'ControlTypes$', ControlTypeMasterView.as_view()),
     url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
+    url(r'AddressTypes$',AddressTypesView.as_view()),
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
