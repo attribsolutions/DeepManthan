@@ -9,7 +9,7 @@ from ..models import *
 class C_CompanyGroupsSerializer(serializers.ModelSerializer):
     class Meta :
         model= C_CompanyGroups
-        fields = ['id','Name','IsSCM']
+        fields = ['id','Name','IsSCM','CreatedBy','UpdatedBy']
         
 class C_CompanyGroupsSerializer1(serializers.ModelSerializer):
     class Meta :
