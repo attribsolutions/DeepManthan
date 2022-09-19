@@ -104,15 +104,12 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PartyType = models.ForeignKey(M_PriceList, related_name='PartyType', on_delete=models.DO_NOTHING, blank=True)
-    DivisionType = models.ForeignKey(
-        M_PartyType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
-    Company = models.ForeignKey(
-        C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
+    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING, blank=True)
+    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
-    AlternateContactNo = models.CharField(
-        max_length=500, null=True, blank=True)
+    AlternateContactNo = models.CharField(max_length=500, null=True, blank=True)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.ForeignKey(
