@@ -131,7 +131,7 @@ class C_CompanyGroupsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
         except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Erroe', 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data':[]})
            
 
 
