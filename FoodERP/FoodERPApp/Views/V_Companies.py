@@ -192,15 +192,15 @@ class GetCompanyByDivisionType(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                DivisionType = M_DivisionType.objects.filter(id=id).values('id','Name','IsSCM')
-                # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':str(DivisionType.query) })
-                if DivisionType.exists():
-                    DivisionTypedata_Serializer = DivisionTypeserializer(DivisionType, many=True).data
-                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': DivisionTypedata_Serializer[0]['IsSCM'] })
-                    CompaniesData = C_Companies.objects.filter(IsSCM=DivisionTypedata_Serializer[0]['IsSCM'])
+                PartyType = M_PartyType.objects.filter(id=id).values('id','Name','IsSCM','IsDivision')
+                # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':str(PartyType.query) })
+                if PartyType.exists():
+                    PartyTypedata_Serializer = PartyTypeserializer(PartyType, many=True).data
+                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': PartyTypedata_Serializer[0]['IsSCM'] })
+                    CompaniesData = C_Companies.objects.filter(IsSCM=PartyTypedata_Serializer[0]['IsSCM'])
                     if CompaniesData.exists():
                         C_Companiesdata_Serializer = C_CompanySerializer2(CompaniesData, many=True).data
-                        # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': DivisionTypedata_Serializer })
+                        # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': C_Companiesdata_Serializer })
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':C_Companiesdata_Serializer })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
         except Exception :

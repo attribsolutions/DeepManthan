@@ -49,10 +49,11 @@ class C_CompanySerializer3(serializers.Serializer):
     UpdatedBy = serializers.IntegerField()
 
 
-class DivisionTypeserializer(serializers.Serializer):
+class PartyTypeserializer(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
     IsSCM =serializers.BooleanField()
+    IsDivision =serializers.BooleanField()
     
 
     class C_CompanySerializer(serializers.ModelSerializer):
