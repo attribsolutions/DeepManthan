@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_PartyTypes import PartyTypesSerializer
+from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
 from ..Serializer.S_Parties import *
 
@@ -22,7 +22,7 @@ class GetPartyTypeByDivisionTypeID(CreateAPIView):
             with transaction.atomic():
                 M_PartyType_data = M_PartyType.objects.filter(DivisionType=id)
                 if M_PartyType_data.exists():
-                    M_PartyType_serializer = PartyTypesSerializer(M_PartyType_data, many=True)
+                    M_PartyType_serializer = PartyTypeSerializer(M_PartyType_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
         except Exception :
