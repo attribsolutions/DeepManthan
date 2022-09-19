@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 class DivisionTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model =  M_DivisionType
+        model =  M_PartyType
         fields = '__all__'
 
 

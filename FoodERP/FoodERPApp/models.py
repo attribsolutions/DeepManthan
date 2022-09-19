@@ -10,7 +10,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
     
-class M_DivisionType(models.Model):
+class M_PartyType(models.Model):
     Name = models.CharField(max_length=100)
     IsSCM =models.BooleanField(default=False)
     IsDivision = models.BooleanField(default=False) 
@@ -20,20 +20,20 @@ class M_DivisionType(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'M_DivisionType'
+        db_table = 'M_PartyType'
 
 
-class M_PartyType(models.Model):
+class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
     DivisionType = models.ForeignKey(
-        M_DivisionType, related_name='PartyTypeDivision', on_delete=models.DO_NOTHING)
+        M_PartyType, related_name='PartyTypeDivision', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'M_PartyType'
+        db_table = 'M_PriceList'
 
 
     
@@ -105,9 +105,9 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING, blank=True)
+    PartyType = models.ForeignKey(M_PriceList, related_name='PartyType', on_delete=models.DO_NOTHING, blank=True)
     DivisionType = models.ForeignKey(
-        M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
+        M_PartyType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
     Company = models.ForeignKey(
         C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
     Email = models.EmailField(max_length=200)
