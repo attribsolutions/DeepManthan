@@ -16,6 +16,8 @@ class M_PartyType2(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = 'M_PartyType2'
     
 class M_DivisionType(models.Model):
     Name = models.CharField(max_length=100)
