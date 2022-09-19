@@ -8,9 +8,8 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
-
-    
-class M_DivisionType(models.Model):
+   
+class M_PartyType(models.Model):
     Name = models.CharField(max_length=100)
     IsSCM =models.BooleanField(default=False)
     IsDivision = models.BooleanField(default=False) 
@@ -20,23 +19,8 @@ class M_DivisionType(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'M_DivisionType'
-
-
-class M_PartyType(models.Model):
-    Name = models.CharField(max_length=100)
-    DivisionType = models.ForeignKey(
-        M_DivisionType, related_name='PartyTypeDivision', on_delete=models.DO_NOTHING)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-
-    class Meta:
         db_table = 'M_PartyType'
-
-
-    
+ 
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -73,6 +57,21 @@ class C_Companies(models.Model):
         db_table = "C_Companies"
         
 
+class M_PriceList(models.Model):
+    Name = models.CharField(max_length=100)
+    #PLPartyType means PriceListPartyType
+    PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.DO_NOTHING)
+    BasePriceListID = models.IntegerField()
+    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING,null=True,blank=True)
+    MkUpMkDn = models.IntegerField()
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'M_PriceList'        
+
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
     StateCode = models.CharField(max_length=100)
@@ -105,15 +104,12 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING, blank=True)
-    DivisionType = models.ForeignKey(
-        M_DivisionType, related_name='PartiesDivision', on_delete=models.DO_NOTHING)
-    Company = models.ForeignKey(
-        C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
+    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING, blank=True)
+    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
-    AlternateContactNo = models.CharField(
-        max_length=500, null=True, blank=True)
+    AlternateContactNo = models.CharField(max_length=500, null=True, blank=True)
     Address = models.CharField(max_length=500)
     PIN = models.CharField(max_length=500)
     State = models.ForeignKey(

@@ -8,7 +8,7 @@ from ..models import *
 class PartyTypesSerializer(serializers.ModelSerializer):
  
     class Meta:
-        model = M_PartyType
+        model = M_PriceList
         fields = '__all__'
 
 class PartyTypesSerializer2(serializers.Serializer):
