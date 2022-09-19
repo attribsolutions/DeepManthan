@@ -8,11 +8,15 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
-
-
-
-
-
+class M_PartyType2(models.Model):
+    Name = models.CharField(max_length=100)
+    IsSCM =models.BooleanField(default=False)
+    IsDivision = models.BooleanField(default=False) 
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
 class M_DivisionType(models.Model):
     Name = models.CharField(max_length=100)
     IsSCM =models.BooleanField(default=False)
