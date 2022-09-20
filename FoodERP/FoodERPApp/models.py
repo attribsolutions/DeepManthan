@@ -62,7 +62,7 @@ class M_PriceList(models.Model):
     '''PLPartyType means PriceListPartyType'''
     PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.DO_NOTHING)
     BasePriceListID = models.IntegerField()
-    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING)
     MkUpMkDn = models.IntegerField()
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
