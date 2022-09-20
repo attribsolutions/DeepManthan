@@ -24,7 +24,7 @@ class PriceListView(CreateAPIView):
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
                 else:
-                    PriceList_Serializer = PriceListSerializer(
+                    PriceList_Serializer = PriceListSerializerSecond(
                         query, many=True).data
                     PriceListData = list()
                     for a in PriceList_Serializer:
@@ -51,7 +51,7 @@ class PriceListView(CreateAPIView):
         try:
             with transaction.atomic():
                 PriceListdata = JSONParser().parse(request)
-                PriceListdata_Serializer = PriceListGETSerializer(
+                PriceListdata_Serializer = PriceListSerializer(
                     data=PriceListdata)
                 if PriceListdata_Serializer.is_valid():
                     PriceListdata_Serializer.save()
@@ -71,15 +71,29 @@ class PriceListViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_PriceList.objects.raw('''SELECT m_pricelist.id,m_pricelist.Name,m_divisiontype.Name DivisionTypeName FROM m_pricelist
-JOIN m_partytype ON m_partytype.id=m_pricelist.PLPartyType_id
-WHERE m_pricelist.id = %s''', [id])
+                query = M_PriceList.objects.filter(id=id)
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
                 else:
-                    PriceListdata_Serializer = PriceListSerializer2(
+                    PriceList_Serializer = PriceListSerializerSecond(
                         query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListdata_Serializer[0]})
+                    PriceListData = list()
+                    for a in PriceList_Serializer:
+                        PriceListData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "BasePriceListID": a['BasePriceListID'],
+                            "MkUpMkDn": a['MkUpMkDn'],
+                            "PLPartyType": a['PLPartyType']['id'],
+                            "PLPartyTypeName": a['PLPartyType']['Name'],
+                            "Company":a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData[0]})
         except Exception:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
 
