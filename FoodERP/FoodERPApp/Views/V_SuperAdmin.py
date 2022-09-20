@@ -6,7 +6,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-# from ..Serializer.S_DivisionTypes import DivisionTypeSerializer
+
 from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
 from ..Serializer.S_Parties import M_PartiesSerializer
@@ -42,19 +42,27 @@ class SuperAdminView(CreateAPIView):
             with transaction.atomic():
 
 
-
+                # aaa=M_Users.objects.filter(LoginName__exact='S')
 #===========================------EmployeeTyep------========================================================================= 
-                EmployeeTypeJSON = {
+                EmployeeTypeJSON = [{
                     "Name": "SuperAdmin",
                     "IsPartyConnection": 0,
                     "IsSCM": 0,
                     "Description": "SuperAdmin", 
                     "CreatedBy": 1,
                     "UpdatedBy": 1
+                },
+                {
+                    "Name": "Admin",
+                    "IsPartyConnection": 0,
+                    "IsSCM": 0,
+                    "Description": "Admin", 
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1
                 }
-
+                ]
                 EmployeeType_Serializer = EmployeeTypeSerializer(
-                    data=EmployeeTypeJSON)
+                    data=EmployeeTypeJSON ,many=True)
                 if EmployeeType_Serializer.is_valid():
                     EmployeeType_Serializer.save()
                     print('EmployeeType')
@@ -64,7 +72,7 @@ class SuperAdminView(CreateAPIView):
 
 #=============================------Role-------=========================================================================== 
 
-                RoleJSON = {
+                RoleJSON =[ {
                     "Name": "SuperAdmin",
                     "Description": "SuperAdmin",
                     "isActive":  1,
@@ -72,9 +80,18 @@ class SuperAdminView(CreateAPIView):
                     "Dashboard": "SuperAdminDashboard",
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
+                },
+                {
+                    "Name": "Admin",
+                    "Description": "Admin",
+                    "isActive":  1,
+                    "isSCMRole": 0,
+                    "Dashboard": "AdminDashboard",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
                 }
-
-                Role_Serializer = RoleSerializer(data=RoleJSON)
+                ]
+                Role_Serializer = RoleSerializer(data=RoleJSON,many=True)
                 if Role_Serializer.is_valid():
                     Role_Serializer.save()
                     print('Role')
@@ -84,14 +101,18 @@ class SuperAdminView(CreateAPIView):
 
 #============================-----Designation------========================================================================= 
 
-                DesignationJSON = {
+                DesignationJSON = [{
                     "Name": "SuperAdmin",
                     "CreatedBy": 1,
                     "UpdatedBy": 1
+                },
+                {   "Name": "Admin",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1
                 }
-
+                ]
                 Designationsdata_Serializer = M_DesignationsSerializer(
-                    data=DesignationJSON)
+                    data=DesignationJSON,many=True)
                 if Designationsdata_Serializer.is_valid():
                     Designationsdata_Serializer.save()
                     print('Designations')
@@ -675,19 +696,28 @@ class SuperAdminView(CreateAPIView):
 
 #================================----Modules----================================================================================ 
 
-                Modulesdata = {
+                Modulesdata = [{
 
                     "Name": "Administration",
                     "DisplayIndex": 1,
                     "isActive": 1,
                     "Icon": "home",
-                    "CreatedBy": 9,
-                    "CreatedOn": "2022-07-29T15:42:32.858922",
-                    "UpdatedBy": 9,
-                    "UpdatedOn": "2022-08-04T11:31:50.396215"
-                }
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    
+                },
+                {
 
-                Modules_Serializer = H_ModulesSerializer(data=Modulesdata)
+                    "Name": "Master",
+                    "DisplayIndex": 2,
+                    "isActive": 1,
+                    "Icon": "home",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    
+                }
+                ]
+                Modules_Serializer = H_ModulesSerializer(data=Modulesdata, many=True)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
                     print('Module')
@@ -806,7 +836,7 @@ class SuperAdminView(CreateAPIView):
                         "Module": 1,
                         "ModuleName": "Administration",
                         "isActive": 1,
-                        "DisplayIndex": 9,
+                        "DisplayIndex": 3,
                         "Icon": "Company Master Icon",
                         "ActualPagePath": "CompanyMaster",
                         "PageType": 1,
@@ -825,7 +855,7 @@ class SuperAdminView(CreateAPIView):
                         "Module": 1,
                         "ModuleName": "Administration",
                         "isActive": 1,
-                        "DisplayIndex": 10,
+                        "DisplayIndex": 4,
                         "Icon": "Company List Icon",
                         "ActualPagePath": "CompanyList",
                         "PageType": 2,
@@ -860,6 +890,372 @@ class SuperAdminView(CreateAPIView):
                             }
                         ]
                     },
+                    {
+                                "Name": "CompanyGroup Master",
+                                "PageHeading": "CompanyGroup Master",
+                                "PageDescription": "CompanyGroup Master",
+                                "PageDescriptionDetails": "Page Description Details : CompanyGroup Master",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 1,
+                                "Icon": "dfgdf",
+                                "ActualPagePath": "CompanyGroupMaster",
+                                "PageType": 1,
+                                "RelatedPageID": 0,
+                                "RelatedPageName": NULL,
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": []
+                    },
+                    {
+                                "Name": "CompanyGroup List",
+                                "PageHeading": "CompanyGroup List",
+                                "PageDescription": "CompanyGroup List",
+                                "PageDescriptionDetails": "Page Description Details : CompanyGroup List",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 2,
+                                "Icon": "erht",
+                                "ActualPagePath": "CompanyGroupList",
+                                "PageType": 2,
+                                "RelatedPageID": 3,
+                                "RelatedPageName": "CompanyGroupMaster",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": [
+                                    {
+                                    "Access": 1,
+                                    "AccessName": "IsShowOnMenu"
+                                    },
+                                    {
+                                    "Access": 2,
+                                    "AccessName": "IsSave"
+                                    },
+                                    {
+                                    "Access": 3,
+                                    "AccessName": "IsView"
+                                    },
+                                    {
+                                    "Access": 6,
+                                    "AccessName": "IsEditSelf"
+                                    },
+                                    {
+                                    "Access": 4,
+                                    "AccessName": "IsEdit"
+                                    },
+                                    {
+                                    "Access": 5,
+                                    "AccessName": "IsDelete"
+                                    },
+                                    {
+                                    "Access": 8,
+                                    "AccessName": "IsPrint"
+                                    }
+                                ]
+                    },
+                    {
+                                "Name": "Module Master",
+                                "PageHeading": "Module Master",
+                                "PageDescription": "Module Master",
+                                "PageDescriptionDetails": "Module Master",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 5,
+                                "Icon": "dfasdf",
+                                "ActualPagePath": "ModuleMaster",
+                                "PageType": 1,
+                                "RelatedPageID": 0,
+                                "RelatedPageName": "Module List",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": []
+                    },
+                    {
+                                "Name": "Module List",
+                                "PageHeading": "Module List",
+                                "PageDescription": "Module List",
+                                "PageDescriptionDetails": "Module List",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 6,
+                                "Icon": "xfgd",
+                                "ActualPagePath": "ModuleList",
+                                "PageType": 2,
+                                "RelatedPageID": 5,
+                                "RelatedPageName": "Module Master",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": [
+                                    {
+                                    "Access": 1,
+                                    "AccessName": "IsShowOnMenu"
+                                    },
+                                    {
+                                    "Access": 2,
+                                    "AccessName": "IsSave"
+                                    },
+                                    {
+                                    "Access": 3,
+                                    "AccessName": "IsView"
+                                    },
+                                    {
+                                    "Access": 6,
+                                    "AccessName": "IsEditSelf"
+                                    },
+                                    {
+                                    "Access": 4,
+                                    "AccessName": "IsEdit"
+                                    },
+                                    {
+                                    "Access": 5,
+                                    "AccessName": "IsDelete"
+                                    }
+                                ]
+                    },
+                    {
+                                "Name": "PageMaster",
+                                "PageHeading": "PageMaster",
+                                "PageDescription": "PageMaster",
+                                "PageDescriptionDetails": "PageMaster",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 7,
+                                "Icon": "fa-fa-paw",
+                                "ActualPagePath": "PageMaster",
+                                "PageType": 1,
+                                "RelatedPageID": 0,
+                                "RelatedPageName": "PageList",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": []
+                    },
+                    {
+                                "Name": "PageList",
+                                "PageHeading": "PageList",
+                                "PageDescription": "PageList",
+                                "PageDescriptionDetails": "PageList",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 8,
+                                "Icon": "fa-fa-paw",
+                                "ActualPagePath": "PageList",
+                                "PageType": 2,
+                                "RelatedPageID": 7,
+                                "RelatedPageName": "PageMaster",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": [
+                                    {
+                                    "Access": 1,
+                                    "AccessName": "IsShowOnMenu"
+                                    },
+                                    {
+                                    "Access": 2,
+                                    "AccessName": "IsSave"
+                                    },
+                                    {
+                                    "Access": 5,
+                                    "AccessName": "IsDelete"
+                                    },
+                                    {
+                                    "Access": 3,
+                                    "AccessName": "IsView"
+                                    },
+                                    {
+                                    "Access": 6,
+                                    "AccessName": "IsEditSelf"
+                                    },
+                                    {
+                                    "Access": 4,
+                                    "AccessName": "IsEdit"
+                                    }
+                                ]
+                    },
+                    {
+                                "Name": "Role Access",
+                                "PageHeading": "Role Access",
+                                "PageDescription": "Role Access",
+                                "PageDescriptionDetails": "Role Access",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 9,
+                                "Icon": "a",
+                                "ActualPagePath": "RoleAccess",
+                                "PageType": 1,
+                                "RelatedPageID": 0,
+                                "RelatedPageName": NULL,
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": []
+                    },
+                    {
+                                "Name": "RoleAccess List",
+                                "PageHeading": "RoleAccess List",
+                                "PageDescription": "RoleAccess List",
+                                "PageDescriptionDetails": "RoleAccess List",
+                                "Module": 1,
+                                "ModuleName": "Administration",
+                                "isActive": 1,
+                                "DisplayIndex": 10,
+                                "Icon": "wsd",
+                                "ActualPagePath": "RoleAccessList",
+                                "PageType": 2,
+                                "RelatedPageID": 9,
+                                "RelatedPageName": "Role Access",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": [
+                                    {
+                                    "Access": 1,
+                                    "AccessName": "IsShowOnMenu"
+                                    },
+                                    {
+                                    "Access": 2,
+                                    "AccessName": "IsSave"
+                                    },
+                                    {
+                                    "Access": 3,
+                                    "AccessName": "IsView"
+                                    },
+                                    {
+                                    "Access": 6,
+                                    "AccessName": "IsEditSelf"
+                                    },
+                                    {
+                                    "Access": 4,
+                                    "AccessName": "IsEdit"
+                                    },
+                                    {
+                                    "Access": 5,
+                                    "AccessName": "IsDelete"
+                                    }
+                                ]
+                    },
+                    # {
+                    #             "Name": "Role Master",
+                    #             "PageHeading": "Role Master",
+                    #             "PageDescription": "Role Master",
+                    #             "PageDescriptionDetails": "Role Master",
+                    #             "Module": 1,
+                    #             "ModuleName": "Administration",
+                    #             "isActive": 1,
+                    #             "DisplayIndex": 12,
+                    #             "Icon": "sfdgsdfgsg",
+                    #             "ActualPagePath": "RoleMaster",
+                    #             "PageType": 1,
+                    #             "RelatedPageID": 0,
+                    #             "RelatedPageName": NULL,
+                    #             "PagePageAccess": []
+                    # },
+                    # {
+                    #             "Name": "Role List",
+                    #             "PageHeading": "Role List",
+                    #             "PageDescription": "Role List",
+                    #             "PageDescriptionDetails": "Role List",
+                    #             "Module": 1,
+                    #             "ModuleName": "Administration",
+                    #             "isActive": 1,
+                    #             "DisplayIndex": 13,
+                    #             "Icon": "adfg",
+                    #             "ActualPagePath": "RoleList",
+                    #             "PageType": 2,
+                    #             "RelatedPageID": 11,
+                    #             "RelatedPageName": "Role Master",
+                    #             "PagePageAccess": [
+                    #                 {
+                    #                 "AccessID": 1,
+                    #                 "AccessName": "IsShowOnMenu"
+                    #                 },
+                    #                 {
+                    #                 "AccessID": 2,
+                    #                 "AccessName": "IsSave"
+                    #                 },
+                    #                 {
+                    #                 "AccessID": 3,
+                    #                 "AccessName": "IsView"
+                    #                 },
+                    #                 {
+                    #                 "AccessID": 6,
+                    #                 "AccessName": "IsEditSelf"
+                    #                 },
+                    #                 {
+                    #                 "AccessID": 4,
+                    #                 "AccessName": "IsEdit"
+                    #                 },
+                    #                 {
+                    #                 "AccessID": 5,
+                    #                 "AccessName": "IsDelete"
+                    #                 }
+                    #             ]
+                    # },
+                    {
+                                "Name": "Employee Master",
+                                "PageHeading": "Employee Master",
+                                "PageDescription": "Employee Master",
+                                "PageDescriptionDetails": "Employee Master",
+                                "Module": 2,
+                                "ModuleName": "Master",
+                                "isActive": 1,
+                                "DisplayIndex": 1,
+                                "Icon": "sdfc",
+                                "ActualPagePath": "EmployeeMaster",
+                                "PageType": 1,
+                                "RelatedPageID": 0,
+                                "RelatedPageName": "Employee List",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": []
+                    },
+                    {
+                                "Name": "Employee List",
+                                "PageHeading": "Employee List",
+                                "PageDescription": "Employee List",
+                                "PageDescriptionDetails": "Employee List",
+                                "Module": 2,
+                                "ModuleName": "Master",
+                                "isActive": 1,
+                                "DisplayIndex": 2,
+                                "Icon": "sf",
+                                "ActualPagePath": "EmployeeList",
+                                "PageType": 2,
+                                "RelatedPageID": 11,
+                                "RelatedPageName": "Employee Master",
+                                "CreatedBy": 1,
+                                "UpdatedBy": 1,
+                                "PagePageAccess": [
+                                    {
+                                    "Access": 1,
+                                    "AccessName": "IsShowOnMenu"
+                                    },
+                                    {
+                                    "Access": 2,
+                                    "AccessName": "IsSave"
+                                    },
+                                    {
+                                    "Access": 3,
+                                    "AccessName": "IsView"
+                                    },
+                                    {
+                                    "Access": 6,
+                                    "AccessName": "IsEditSelf"
+                                    },
+                                    {
+                                    "Access": 4,
+                                    "AccessName": "IsEdit"
+                                    },
+                                    {
+                                    "Access": 5,
+                                    "AccessName": "IsDelete"
+                                    }
+                                ]
+                    },
                    
                     {
                         "Name": "User Master",
@@ -869,7 +1265,7 @@ class SuperAdminView(CreateAPIView):
                         "Module": 1,
                         "ModuleName": "Administration",
                         "isActive": 1,
-                        "DisplayIndex": 3,
+                        "DisplayIndex": 11,
                         "Icon": "fa-fa-paw",
                         "ActualPagePath": "UserMaster",
                         "PageType": 1,
@@ -887,11 +1283,11 @@ class SuperAdminView(CreateAPIView):
                         "Module": 1,
                         "ModuleName": "Administration",
                         "isActive": 1,
-                        "DisplayIndex": 4,
+                        "DisplayIndex": 12,
                         "Icon": "fa-fa-paw",
                         "ActualPagePath": "UserList",
                         "PageType": 2,
-                        "RelatedPageID": 3,
+                        "RelatedPageID": 13,
                         "RelatedPageName": "User Master",
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
@@ -947,9 +1343,7 @@ class SuperAdminView(CreateAPIView):
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
                         "RolePageAccess": [
-                            {
-                                "PageAccess": 1
-                            },
+                            
                             {
                                 "PageAccess": 2
                             },
@@ -974,6 +1368,9 @@ class SuperAdminView(CreateAPIView):
                         "UpdatedBy": 1,
                         "RolePageAccess": [
                             {
+                                "PageAccess": 1
+                            },
+                            {
                                 "PageAccess": 2
                             },
                             {
@@ -993,6 +1390,31 @@ class SuperAdminView(CreateAPIView):
                         "Division": "",
                         "Modules": 1,
                         "Pages": 3,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 4,
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
                         "RolePageAccess": [
@@ -1018,7 +1440,231 @@ class SuperAdminView(CreateAPIView):
                         "Company": "",
                         "Division": "",
                         "Modules": 1,
-                        "Pages": 4,
+                        "Pages": 5,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 6,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            {
+                                "PageAccess": 1
+                            },
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 7,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 8,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            {
+                                "PageAccess": 1
+                            },
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 9,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 10,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            {
+                                "PageAccess": 1
+                            },
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 2,
+                        "Pages": 11,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 2,
+                        "Pages": 12,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            {
+                                "PageAccess": 1
+                            },
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 13,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company": "",
+                        "Division": "",
+                        "Modules": 1,
+                        "Pages": 14,
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
                         "RolePageAccess": [
