@@ -19,6 +19,7 @@ class RoleAccessView(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, PartyID=0, EmployeeID=0):    
+        print(request.session.get('UserName'))
         Company="M_RoleAccess.Company_id is null"
         Division=PartyID
       
