@@ -1,11 +1,15 @@
 from dataclasses import fields
+
+from ..Serializer.S_PartyTypes import PartyTypeSerializer
 from ..models import *
 from rest_framework import serializers
 
-class DivissionsSerializer(serializers.ModelSerializer):
+
+class DivisionsSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model =  M_Parties
-        fields = '__all__' 
+        fields = ['id','Name'] 
 
 class AddressTypesSerializer(serializers.ModelSerializer):
     class Meta:
