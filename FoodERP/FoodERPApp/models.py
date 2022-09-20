@@ -547,6 +547,18 @@ class MC_ItemDivisions(models.Model):
     class Meta:
         db_table = "MC_ItemDivisions"
 
+class MC_ItemGSTHSNCode(models.Model):
+    EffectiveDate = models.DateField()
+    Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    HSNCode = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "MC_ItemGSTHSNCode"        
+
 class M_ItemShelfLife(models.Model):
     Name = models.CharField(max_length=500)
     Days = models.IntegerField(default=False)
