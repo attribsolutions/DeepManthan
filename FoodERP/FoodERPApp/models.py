@@ -104,7 +104,7 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING, blank=True)
+    # PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING, blank=True)
     PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING,blank=True)
     Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
     Email = models.EmailField(max_length=200)
