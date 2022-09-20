@@ -17,13 +17,6 @@ class ItemsSerializerList(serializers.Serializer):
     BaseUnitName = serializers.CharField(max_length=500)
     CompanyName = serializers.CharField(max_length=500)
     BarCode = serializers.CharField(max_length=500)
-   
-
-class MRPTypesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = M_MRPTypes
-        fields = '__all__'
-
 
 class ImageTypesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,13 +26,13 @@ class ImageTypesSerializer(serializers.ModelSerializer):
 
 class ItemMarginSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemMargin
-        fields = ['PriceList', 'Margin']
+        model = M_MarginMaster
+        fields = ['EffectiveDate', 'Margin', 'IsDelete', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
 
 class ItemMRPSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemMRP
-        fields = ['GSTPercentage','MRPType', 'MRP', 'HSNCode']
+        model = M_MRPMaster
+        fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']
         
         
 class ItemDivisionsSerializer(serializers.ModelSerializer):
@@ -104,10 +97,10 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
         
         for ItemMRP_data in ItemMRPs_data:
-            ItemGstMrp = MC_ItemMRP.objects.create(Item=ItemID, **ItemMRP_data)
+            ItemMrp = M_MRPMaster.objects.create(Item=ItemID, **ItemMRP_data)
         
         for ItemMargin_data in ItemMargins_data:
-            ItemMargin = MC_ItemMargin.objects.create(Item=ItemID, **ItemMargin_data)             
+            ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)             
 
         return ItemID
     
@@ -156,10 +149,10 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemDivision = MC_ItemDivisions.objects.create(Item=instance, **ItemDivision_data)    
         
         for ItemMRP_data in validated_data['ItemMRPDetails']:
-            ItemGstMrp = MC_ItemMRP.objects.create(Item=instance, **ItemMRP_data)
+            ItemGstMrp = M_MRPMaster.objects.create(Item=instance, **ItemMRP_data)
         
         for ItemMargin_data in validated_data['ItemMarginDetails']:
-            ItemMargin = MC_ItemMargin.objects.create(Item=instance, **ItemMargin_data)
+            ItemMargin = M_MarginMaster.objects.create(Item=instance, **ItemMargin_data)
         
         return instance      
 
@@ -171,14 +164,14 @@ class UnitSerializerSecond(serializers.ModelSerializer):
         
 class ItemMarginSerializerSecond(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemMargin
-        fields = ['id','PriceList', 'Margin']
+        model = M_MarginMaster
+        fields = ['EffectiveDate', 'Margin', 'IsDelete', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
 
 class ItemMRPSerializerSecond(serializers.ModelSerializer):
-    MRPType = MRPTypesSerializer(read_only=True)
+   
     class Meta:
-        model = MC_ItemMRP
-        fields = ['id','GSTPercentage','MRPType', 'MRP', 'HSNCode']        
+        model = M_MRPMaster
+        fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']        
         
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
