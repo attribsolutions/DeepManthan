@@ -24,6 +24,11 @@ class ImageTypesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ItemGSTHSNSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemGSTHSNCode
+        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
+    
 class ItemMarginSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_MarginMaster
@@ -70,11 +75,13 @@ class ItemSerializer(serializers.ModelSerializer):
 
     ItemMarginDetails = ItemMarginSerializer(many=True)
     
+    ItemGSTHSNDetails = ItemGSTHSNSerializer(many=True)
+    
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','LinkedItem','CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails' ]
-
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','LinkedItem','CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
+       
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
@@ -82,6 +89,7 @@ class ItemSerializer(serializers.ModelSerializer):
         ItemDivisions_data = validated_data.pop('ItemDivisionDetails')
         ItemMRPs_data = validated_data.pop('ItemMRPDetails')
         ItemMargins_data = validated_data.pop('ItemMarginDetails')
+        ItemGSTHSNs_data = validated_data.pop('ItemGSTHSNDetails')
         ItemID= M_Items.objects.create(**validated_data)
         
         for ItemCategory_data in ItemCategorys_data:
@@ -100,7 +108,10 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemMrp = M_MRPMaster.objects.create(Item=ItemID, **ItemMRP_data)
         
         for ItemMargin_data in ItemMargins_data:
-            ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)             
+            ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)
+        
+        for ItemGSTHSN_data in ItemGSTHSNs_data:
+            ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  
 
         return ItemID
     
@@ -134,7 +145,8 @@ class ItemSerializer(serializers.ModelSerializer):
             e.delete()  
         for f in instance.ItemMarginDetails.all():
             f.delete()                    
-        
+        for g in instance.ItemGSTHSNDetails.all():
+            g.delete()
         
         for ItemCategory_data in  validated_data['ItemCategoryDetails']:
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=instance, **ItemCategory_data)
@@ -154,6 +166,9 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemMargin_data in validated_data['ItemMarginDetails']:
             ItemMargin = M_MarginMaster.objects.create(Item=instance, **ItemMargin_data)
         
+        for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
+            ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=instance, **ItemMargin_data)    
+        
         return instance      
 
 class UnitSerializerSecond(serializers.ModelSerializer):
@@ -165,7 +180,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
 class ItemMarginSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_MarginMaster
-        fields = ['EffectiveDate', 'Margin', 'IsDelete', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
+        fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
 
 class ItemMRPSerializerSecond(serializers.ModelSerializer):
    
