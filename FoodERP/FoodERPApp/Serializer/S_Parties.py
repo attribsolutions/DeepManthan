@@ -2,6 +2,10 @@ from dataclasses import fields
 from ..models import *
 from rest_framework import serializers
 
+class DivissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  M_Parties
+        fields = '__all__' 
 
 class AddressTypesSerializer(serializers.ModelSerializer):
     class Meta:

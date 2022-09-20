@@ -10,6 +10,24 @@ from ..Serializer.S_PartyTypes import PartyTypeSerializer
 from ..Serializer.S_Parties import *
 
 from ..models import *
+
+
+class DivisionsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Divisiondata = M_Parties.objects.filter(IsDivision=1)
+                if Divisiondata.exists():
+                    Division_serializer = DivissionsSerializer(Divisiondata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Division_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Division Not available ', 'Data': []})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]}) 
+     
         
 class GetPartyTypeByDivisionTypeID(CreateAPIView):
     
