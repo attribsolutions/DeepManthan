@@ -9,6 +9,7 @@ class PriceListGETSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_PriceList
         fields = '__all__'
+        
 class C_CompanySerializer(serializers.ModelSerializer):
     class Meta :
         model= C_Companies
