@@ -10,6 +10,7 @@ class DivisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = ['id','Name'] 
+        # fields = '__all__'      
 
 class AddressTypesSerializer(serializers.ModelSerializer):
     class Meta:
