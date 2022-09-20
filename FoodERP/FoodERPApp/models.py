@@ -604,7 +604,7 @@ class M_MRPMaster(models.Model):
         db_table = "M_MRPMaster"
 
 class M_MarginMaster(models.Model):
-    PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING,null=True,blank=True)
+    PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING)
     Customer =models.ForeignKey(M_Parties, related_name='MarginCustomer', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
     Item = Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
