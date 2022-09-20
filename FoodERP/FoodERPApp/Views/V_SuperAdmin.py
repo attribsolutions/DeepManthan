@@ -6,8 +6,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Serializer.S_DivisionTypes import DivisionTypeSerializer
-from ..Serializer.S_PartyTypes import PartyTypesSerializer
+# from ..Serializer.S_DivisionTypes import DivisionTypeSerializer
+from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
 from ..Serializer.S_Parties import M_PartiesSerializer
 
