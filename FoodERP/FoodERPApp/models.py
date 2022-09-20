@@ -489,12 +489,6 @@ class M_Units(models.Model):
     class Meta:
         db_table = "M_Units"
         
-class M_MRPTypes(models.Model):
-    Name = models.CharField(max_length=500)
-    class Meta:
-        db_table = "M_MRPTypes"
-        
-
         
 class M_Items(models.Model):
 
@@ -553,29 +547,16 @@ class MC_ItemDivisions(models.Model):
     class Meta:
         db_table = "MC_ItemDivisions"
 
-'''Table MC_ItemsGMH details  - Items GST,MRP,HSNCode'''
-class MC_ItemMRP(models.Model):
-    
-    Item = models.ForeignKey(
-        M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
+class MC_ItemGSTHSNCode(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    MRP = models.DecimalField(max_digits=20, decimal_places=2)
-    MRPType = models.ForeignKey(M_MRPTypes, related_name='MRPType', on_delete=models.DO_NOTHING)
     HSNCode = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now_add=True)
-
     class Meta:
-        db_table = "MC_ItemMRP"
-        
-
-class MC_ItemMargin(models.Model):
-    Item = models.ForeignKey(
-        M_Items, related_name='ItemMarginDetails', on_delete=models.CASCADE)
-    Margin = models.DecimalField(max_digits=10, decimal_places=2)
-    PriceList = models.IntegerField(default=False)
-    class Meta:
-        db_table = "MC_ItemMargin"
+        db_table = "MC_ItemGSTHSNCode"
 
 
 class M_ItemShelfLife(models.Model):
@@ -588,11 +569,11 @@ class M_ItemShelfLife(models.Model):
 class M_MRPMaster(models.Model):
     
     '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
-    Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.DO_NOTHING,null=True,blank=True)
     'Customer means M_Parties ID'
-    Customer =models.ForeignKey(M_Parties, related_name='MRPCustomer', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
-    Item = Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Item = Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MRPCompany', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
@@ -605,9 +586,9 @@ class M_MRPMaster(models.Model):
 
 class M_MarginMaster(models.Model):
     PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING)
-    Customer =models.ForeignKey(M_Parties, related_name='MarginCustomer', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Party =models.ForeignKey(M_Parties, related_name='MarginParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
-    Item = Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Item = Item = models.ForeignKey(M_Items,related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
     Margin = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MarginCompany', on_delete=models.DO_NOTHING)
     IsDelete = models.BooleanField(default=False)
