@@ -59,7 +59,7 @@ class C_Companies(models.Model):
 
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
-    #PLPartyType means PriceListPartyType
+    '''PLPartyType means PriceListPartyType'''
     PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.DO_NOTHING)
     BasePriceListID = models.IntegerField()
     Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING,null=True,blank=True)
@@ -493,7 +493,9 @@ class M_MRPTypes(models.Model):
     Name = models.CharField(max_length=500)
     class Meta:
         db_table = "M_MRPTypes"
+        
 
+        
 class M_Items(models.Model):
 
     Name = models.CharField(max_length=500)
@@ -581,6 +583,41 @@ class M_ItemShelfLife(models.Model):
     Days = models.IntegerField(default=False)
     class Meta:
         db_table = "M_ItemShelfLife"
+
+
+class M_MRPMaster(models.Model):
+    
+    '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
+    Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.DO_NOTHING,null=True,blank=True)
+    'Customer means M_Parties ID'
+    Customer =models.ForeignKey(M_Parties, related_name='MRPCustomer', on_delete=models.DO_NOTHING,null=True,blank=True)
+    EffectiveDate = models.DateField()
+    Item = Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    MRP = models.DecimalField(max_digits=20, decimal_places=2)
+    Company = models.ForeignKey(C_Companies, related_name='MRPCompany', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+     
+    class Meta:
+        db_table = "M_MRPMaster"
+
+class M_MarginMaster(models.Model):
+    PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Customer =models.ForeignKey(M_Parties, related_name='MarginCustomer', on_delete=models.DO_NOTHING,null=True,blank=True)
+    EffectiveDate = models.DateField()
+    Item = Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Margin = models.DecimalField(max_digits=20, decimal_places=2)
+    Company = models.ForeignKey(C_Companies, related_name='MarginCompany', on_delete=models.DO_NOTHING)
+    IsDelete = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "M_MarginMaster"        
+
         
 class T_Orders(models.Model):
 

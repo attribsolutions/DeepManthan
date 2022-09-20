@@ -6,7 +6,6 @@ from .Views.V_Login import *
 
 from .Views.V_Parties import *
 
-
 from .Views.V_Orders import *
 
 from .Views.V_Companies import *
@@ -35,9 +34,9 @@ from .Views.V_States import *
 
 from .Views.V_Designations import *
 
-from .Views.V_PartyTypes import  *
+from .Views.V_PriceLists import  *
 
-from .Views.V_DivisionTypes import *
+from .Views.V_PartyTypes import *
 
 from .Views.V_abc import * 
 
@@ -102,10 +101,10 @@ urlpatterns = [
     url(r'Parties$', M_PartiesView.as_view()),
     url(r'demo$', AbcView.as_view()),
     
-    url(r'PartyTypes/([0-9]+)$', PartyTypesViewSecond.as_view()),
-    url(r'PartyTypes$', PartyTypesView.as_view()),
-    url(r'DivisionTypes/([0-9]+)$', DivisionTypeViewSecond.as_view()),
-    url(r'DivisionTypes$', DivisionTypeView.as_view()),
+    url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
+    url(r'PriceList$', PriceListView.as_view()),
+    url(r'PartyTypes/([0-9]+)$', PartyTypeViewSecond.as_view()),
+    url(r'PartyTypes$', PartyTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
     url(r'CategoryTypes/([0-9]+)$', M_ProductCategoryTypeViewSecond.as_view()),
