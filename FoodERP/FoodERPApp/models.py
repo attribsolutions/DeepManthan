@@ -548,7 +548,7 @@ class MC_ItemDivisions(models.Model):
         db_table = "MC_ItemDivisions"
 
 class MC_ItemGSTHSNCode(models.Model):
-    # EffectiveDate = models.DateField()
+    EffectiveDate = models.DateField()
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
