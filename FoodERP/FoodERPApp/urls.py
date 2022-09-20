@@ -100,6 +100,7 @@ urlpatterns = [
     url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'Parties$', M_PartiesView.as_view()),
     url(r'demo$', AbcView.as_view()),
+    url(r'Divisions$', DivisionsView.as_view()),
     
     url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
     url(r'PriceList$', PriceListView.as_view()),
