@@ -52,13 +52,11 @@ class PartyTypeViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_PartyType.objects.raw('''SELECT m_partytype.id,m_partytype.Name,m_partytype.IsSCM FROM m_partytype
-
-WHERE m_partytype.id = %s''',[id])
+                query = M_PartyType.objects.filter(id=id)
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data': []})
                 else:    
-                    PartyTypes_Serializer = PartyTypeSerializer2(query, many=True).data
+                    PartyTypes_Serializer = PartyTypeSerializer(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer[0]})   
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
