@@ -573,7 +573,7 @@ class M_MRPMaster(models.Model):
     'Customer means M_Parties ID'
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
-    Item = Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MRPCompany', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
@@ -588,7 +588,7 @@ class M_MarginMaster(models.Model):
     PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING)
     Party =models.ForeignKey(M_Parties, related_name='MarginParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
-    Item = Item = models.ForeignKey(M_Items,related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items,related_name='ItemMarginDetails', on_delete=models.CASCADE)
     Margin = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MarginCompany', on_delete=models.DO_NOTHING)
     IsDelete = models.BooleanField(default=False)
