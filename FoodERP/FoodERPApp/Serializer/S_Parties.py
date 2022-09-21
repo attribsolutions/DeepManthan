@@ -1,6 +1,6 @@
+from asyncore import read
 from dataclasses import fields
 
-from ..Serializer.S_PartyTypes import PartyTypeSerializer
 from ..models import *
 from rest_framework import serializers
 
@@ -11,7 +11,6 @@ class DivisionsSerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id','Name'] 
               
-
 class AddressTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_AddressTypes
@@ -81,9 +80,7 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             PartyAddress = MC_ItemGSTHSNCode.objects.create(Item=instance, **PartyAddress_data) 
                   
         return instance
-       
-
-        
+            
 class M_PartiesSerializer1(serializers.Serializer):
 
     id = serializers.IntegerField()
@@ -114,5 +111,53 @@ class M_PartiesSerializer1(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
+
+
+class AddressTypesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_AddressTypes
+        fields = '__all__'
+    
+class PartyAddressSerializerSecond(serializers.ModelSerializer):
+    AddressType = AddressTypesSerializerSecond()
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType'] 
+
+class DistrictSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_PriceList
+        fields = ['id','Name']
+        
+class StateSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_States
+        fields = ['id','Name'] 
+        
+class CompanySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  C_Companies
+        fields = ['id','Name']
+        
+class PartyTypeSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_PartyType
+        fields = ['id','Name']
+
+class PriceListSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_PriceList
+        fields = ['id','Name']                           
+    
+class M_PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyAddress = PartyAddressSerializerSecond(many=True)
+    District= DistrictSerializerSecond()
+    State= StateSerializerSecond()
+    Company = CompanySerializerSecond()
+    PartyType = PartyTypeSerializerSecond()
+    PriceList=PriceListSerializerSecond()
+    class Meta:
+        model =  M_Parties
+        fields = '__all__'   
     
     
