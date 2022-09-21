@@ -104,7 +104,7 @@ class PriceListViewSecond(CreateAPIView):
                         
                         child=getchildnode(aa)
                         PriceListData.append({ 
-                            "ID": a['id'],
+                            "id": a['id'],
                             "Name": a['Name'],
                             "childern":child
                             })
