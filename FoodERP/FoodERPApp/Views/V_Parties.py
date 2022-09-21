@@ -28,25 +28,7 @@ class DivisionsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Division Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
-     
-        
-class GetPartyTypeByDivisionTypeID(CreateAPIView):
-    
-    permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                M_PartyType_data = M_PartyType.objects.filter(DivisionType=id)
-                if M_PartyType_data.exists():
-                    M_PartyType_serializer = PartyTypeSerializer(M_PartyType_data, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_PartyType_serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})            
-            
+                 
 class M_PartiesView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
