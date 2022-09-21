@@ -118,6 +118,8 @@ class M_Parties(models.Model):
     City = models.IntegerField()
     GSTIN = models.CharField(max_length=500)
     PAN = models.CharField(max_length=500)
+    '''IsDivison this Flag depends on Partytypes if PartyTypes's IsDivision Flag is Set M_Parties IsDivision also set '''
+    IsDivision = models.BooleanField(default=False)
     isActive = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
