@@ -384,7 +384,7 @@ class GerUserDetialsView(APIView):
         request.session['EmployeeID'] = EmployeeID[0]["Employee"]
         request.session['CompanyID'] = CompanyID[0]["Company"]
         request.session['CompanyGroup'] = CompanyGroupID[0]["CompanyGroup"]
-
+        print(request.session.get('UserName'))
 
         a = list()
         a.append({
