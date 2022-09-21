@@ -84,8 +84,8 @@ left join M_Districts on M_Districts.id=p.District_id''')
             else:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' :[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class M_PartiesViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -95,11 +95,11 @@ class M_PartiesViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.DivisionType_id,p.Company_id,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.PAN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
-,M_PartyType.Name PartyTypeName,M_DivisionType.Name DivisionTypeName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
+                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.PriceList_id,p.Company_id,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.PAN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
+,M_PartyType.Name PartyTypeName,m_pricelist.Name PriceListName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
 FROM M_Parties p
 left join M_PartyType on M_PartyType.id=p.PartyType_id
-left join M_DivisionType on M_DivisionType.id=p.DivisionType_id
+left join m_pricelist on m_pricelist.id=p.PriceList_id
 left join C_Companies on C_Companies.id =p.Company_id
 left join M_States on M_States.id=p.State_id
 left join M_Districts on M_Districts.id=p.District_id
