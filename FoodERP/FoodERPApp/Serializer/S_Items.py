@@ -9,7 +9,6 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
         model = M_Items
         fields = '__all__'
 
-
 class ItemsSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
@@ -22,7 +21,6 @@ class ImageTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_ImageTypes
         fields = '__all__'
-
 
 class ItemGSTHSNSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,8 +36,7 @@ class ItemMRPSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_MRPMaster
         fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']
-        
-        
+         
 class ItemDivisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemDivisions
@@ -169,30 +166,45 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
             ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=instance, **ItemMargin_data)    
         
-        return instance      
+        return instance 
+         
 
 class UnitSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Units
         fields = ['id','Name']
         
+class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemGSTHSNCode
+        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
+
+class CompanySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = ['id','Name'] 
         
+class PartiesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name'] 
+                      
 class ItemMarginSerializerSecond(serializers.ModelSerializer):
+    Company = CompanySerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+    
     class Meta:
         model = M_MarginMaster
         fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
 
 class ItemMRPSerializerSecond(serializers.ModelSerializer):
-   
+    Company = CompanySerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+    Division = PartiesSerializerSecond(read_only=True)
     class Meta:
         model = M_MRPMaster
         fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']        
-        
-class PartiesSerializerSecond(serializers.ModelSerializer):
-    class Meta:
-        model = M_Parties
-        fields = ['id','Name']
-         
+              
 class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
     Division = PartiesSerializerSecond(read_only=True)
     class Meta:
@@ -205,7 +217,6 @@ class ImageTypesSerializer(serializers.ModelSerializer):
         fields = ['id','Name']
         
 class ItemImagesSerializerSecond(serializers.ModelSerializer):
-    
     ImageType = ImageTypesSerializer(read_only=True)
     class Meta:
         model = MC_ItemImages
@@ -240,11 +251,6 @@ class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
         model = MC_ItemCategoryDetails
         fields = ['id','Category','CategoryType','SubCategory']
 
-class CompanySerializerSecond(serializers.ModelSerializer):
-    class Meta:
-        model = C_Companies
-        fields = ['id','Name']
-    
 class ItemSerializerSecond(serializers.ModelSerializer):
     Company=CompanySerializerSecond()
     BaseUnitID = UnitSerializerSecond()
@@ -254,11 +260,10 @@ class ItemSerializerSecond(serializers.ModelSerializer):
     ItemDivisionDetails = ItemDivisionsSerializerSecond(many=True)
     ItemMRPDetails = ItemMRPSerializerSecond(many=True)
     ItemMarginDetails = ItemMarginSerializerSecond(many=True)
-   
+    ItemGSTHSNDetails = ItemGSTHSNSerializerSecond(many=True)
     
     class Meta:
         model = M_Items
-        # fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails']
         fields='__all__'
     
     
