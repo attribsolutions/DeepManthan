@@ -164,7 +164,7 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemMargin = M_MarginMaster.objects.create(Item=instance, **ItemMargin_data)
         
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
-            ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=instance, **ItemMargin_data)    
+            ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data)    
         
         return instance 
          

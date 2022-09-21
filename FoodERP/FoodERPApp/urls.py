@@ -129,7 +129,7 @@ urlpatterns = [
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
     url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
-    url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
+   #  url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
   
