@@ -28,11 +28,10 @@ class M_PartiesSerializer1(serializers.Serializer):
     Name = serializers.CharField(max_length=500)
     PartyType_id = serializers.IntegerField( )
     PartyTypeName = serializers.CharField(max_length=500)
-    DivisionType_id =  serializers.IntegerField()
-    DivisionTypeName = serializers.CharField(max_length=500)
+    PriceList_id =  serializers.IntegerField()
+    PriceListName = serializers.CharField(max_length=500)
     Company_id =  serializers.IntegerField()
     CompanyName = serializers.CharField(max_length=500)
-
     Email = serializers.EmailField(max_length=200)
     Address = serializers.CharField(max_length=500)
     MobileNo=serializers.IntegerField()
