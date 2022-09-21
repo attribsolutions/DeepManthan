@@ -108,23 +108,39 @@ class M_ItemsViewSecond(CreateAPIView):
                         for f in a['ItemMRPDetails']:
                             MRPDetails.append({
                                 # "id": f['id'],
-                                "GSTPercentage": f['GSTPercentage'],
-                                "MRPType": f['MRPType']['id'],
-                                "MRPTypeName": f['MRPType']['Name'],
+                                "EffectiveDate": f['EffectiveDate'],
+                                "Company": f['Company']['Name'],
                                 "MRP": f['MRP'],
-                                "HSNCode": f['HSNCode'],
-                            
+                                "Party": f['Party']['Name'],
+                                "Division":f['Division']['Name'],
+                                "CreatedBy":f['CreatedBy'],
+                                "UpdatedBy":f['UpdatedBy']
                             })
                         
                         MarginDetails=list()
                         for g in a['ItemMarginDetails']:
                             MarginDetails.append({
-                                # "id": g['id'],
-                                "PriceList": g['PriceList'],
-                                "Margin": g['Margin'],   
-                            })        
-                            
+                                "EffectiveDate": g['EffectiveDate'],
+                                "Company": g['Company']['Name'],
+                                "Party": g['Party']['Name'],
+                                "Margin": g['Margin'],
+                                "CreatedBy":g['CreatedBy'],
+                                "UpdatedBy":g['UpdatedBy'],
+                                "PriceList":g['PriceList']
+                                   
+                            })
                         
+                        GSTHSNDetails=list()
+                        for h in a['ItemGSTHSNDetails']:
+                            GSTHSNDetails.append({
+                                "EffectiveDate": h['EffectiveDate'],
+                                "GSTPercentage": h['GSTPercentage'],
+                                "HSNCode": h['HSNCode'],
+                                "CreatedBy":h['CreatedBy'],
+                                "UpdatedBy":h['UpdatedBy']
+                                
+                            })            
+                            
                         ItemData.append({
                             "id": a['id'],
                             "Name": a['Name'],
@@ -136,6 +152,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "BarCode": a['BarCode'],
                             "Sequence": a['Sequence'],
                             "isActive":a['isActive'] ,
+                            "LinkedItem":a['LinkedItem'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
@@ -145,8 +162,8 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemImagesDetails" : ImagesDetails,
                             "ItemDivisionDetails": DivisionDetails,
                             "ItemMRPDetails":MRPDetails,
-                            "ItemMarginDetails":MarginDetails 
-                    
+                            "ItemMarginDetails":MarginDetails, 
+                            "ItemGSTHSNDetails":GSTHSNDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})

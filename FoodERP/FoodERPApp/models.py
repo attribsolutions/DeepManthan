@@ -110,8 +110,6 @@ class M_Parties(models.Model):
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
     AlternateContactNo = models.CharField(max_length=500, null=True, blank=True)
-    Address = models.CharField(max_length=500)
-    PIN = models.CharField(max_length=500)
     State = models.ForeignKey(
         M_States, related_name='PartiesState', on_delete=models.DO_NOTHING)
     District = models.ForeignKey(
@@ -120,8 +118,6 @@ class M_Parties(models.Model):
     City = models.IntegerField()
     GSTIN = models.CharField(max_length=500)
     PAN = models.CharField(max_length=500)
-    FSSAINo = models.CharField(max_length=500)
-    FSSAIExipry = models.DateField(blank=True)
     isActive = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -131,13 +127,16 @@ class M_Parties(models.Model):
     class Meta:
         db_table = 'M_Parties'
         
-class MC_PartyAddress(models.Model):
+# class MC_PartyAddress(models.Model):
     
-    Party = models.ForeignKey(M_Parties, related_name='PartyAddress',  on_delete=models.DO_NOTHING)
-    AddressType = models.ForeignKey(M_AddressTypes, related_name='AddressType', on_delete=models.DO_NOTHING)
-    Address = models.CharField(max_length=500)
-    class Meta:
-        db_table = 'MC_PartyAddress'
+#     Party = models.ForeignKey(M_Parties, related_name='PartyAddress',  on_delete=models.DO_NOTHING)
+#     AddressType = models.ForeignKey(M_AddressTypes, related_name='AddressType', on_delete=models.DO_NOTHING)
+#     Address = models.CharField(max_length=500)
+#     FSSAINo = models.CharField(max_length=500)
+#     FSSAIExipry = models.DateField(blank=True)
+#     PIN = models.CharField(max_length=500)
+#     class Meta:
+#         db_table = 'MC_PartyAddress'
      
      
 
@@ -573,7 +572,7 @@ class M_MRPMaster(models.Model):
     'Customer means M_Parties ID'
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
-    Item = Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MRPCompany', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
@@ -588,7 +587,7 @@ class M_MarginMaster(models.Model):
     PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING)
     Party =models.ForeignKey(M_Parties, related_name='MarginParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
-    Item = Item = models.ForeignKey(M_Items,related_name='ItemMarginDetails', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items,related_name='ItemMarginDetails', on_delete=models.CASCADE)
     Margin = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MarginCompany', on_delete=models.DO_NOTHING)
     IsDelete = models.BooleanField(default=False)
