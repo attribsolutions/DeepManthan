@@ -15,12 +15,29 @@ class DivisionsSerializer(serializers.ModelSerializer):
 class AddressTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_AddressTypes
-        fields = '__all__'        
-                
+        fields = '__all__'
+        
+class PartyAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType']                
+
 class M_PartiesSerializer(serializers.ModelSerializer):
+    PartyAddress = PartyAddressSerializer(many=True)
     class Meta:
         model =  M_Parties
         fields = '__all__'
+        
+    def create(self, validated_data):
+        PartyAddress_data = validated_data.pop('PartyAddress')
+        PartyID= M_Parties.objects.create(**validated_data)
+        
+        for PartyAddress in PartyAddress_data:
+            Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
+               
+        return PartyID
+       
+
         
 class M_PartiesSerializer1(serializers.Serializer):
 
@@ -52,3 +69,5 @@ class M_PartiesSerializer1(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
+    
+    
