@@ -379,6 +379,13 @@ class GerUserDetialsView(APIView):
         company_Group = C_Companies.objects.filter(id=CompanyID[0]['Company'])
         CompanyGroupID = C_CompanySerializer2(company_Group, many=True).data
 
+        request.session['UserID'] = UserId
+        request.session['UserName'] = EmployeeID[0]["LoginName"]
+        request.session['EmployeeID'] = EmployeeID[0]["Employee"]
+        request.session['CompanyID'] = CompanyID[0]["Company"]
+        request.session['CompanyGroup'] = CompanyGroupID[0]["CompanyGroup"]
+        print(request.session.get('UserName'))
+
         a = list()
         a.append({
             "UserID": UserId,

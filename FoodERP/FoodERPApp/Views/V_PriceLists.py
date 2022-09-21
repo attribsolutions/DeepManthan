@@ -10,6 +10,27 @@ from ..Serializer.S_PriceLists import *
 from ..models import *
 
 
+def getchildnode(ParentID):
+    
+    Modulesdata = M_PriceList.objects.filter(BasePriceListID=ParentID)
+    cdata=list()
+    if Modulesdata.exists():
+        Modules_Serializer = PriceListSerializer(Modulesdata, many=True).data
+        for z in Modules_Serializer:
+        
+            cchild=getchildnode(z["id"])
+            cdata.append({
+                "id":z["id"],
+                "Name":z["Name"],
+                "childern":cchild
+            })
+        
+       
+        return cdata
+    else:
+        return []
+
+
 class PriceListView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -71,29 +92,23 @@ class PriceListViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_PriceList.objects.filter(id=id)
+                query = M_PriceList.objects.filter(PLPartyType_id=id,BasePriceListID=0)
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
                 else:
-                    PriceList_Serializer = PriceListSerializerSecond(
-                        query, many=True).data
+                    PriceList_Serializer = PriceListSerializer(query, many=True).data
+                    
                     PriceListData = list()
                     for a in PriceList_Serializer:
-                        PriceListData.append({
-                            "id": a['id'],
+                        aa=a['id']
+                        
+                        child=getchildnode(aa)
+                        PriceListData.append({ 
+                            "ID": a['id'],
                             "Name": a['Name'],
-                            "BasePriceListID": a['BasePriceListID'],
-                            "MkUpMkDn": a['MkUpMkDn'],
-                            "PLPartyType": a['PLPartyType']['id'],
-                            "PLPartyTypeName": a['PLPartyType']['Name'],
-                            "Company":a['Company']['id'],
-                            "CompanyName":a['Company']['Name'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData[0]})
+                            "childern":child
+                            })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
         except Exception:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
 

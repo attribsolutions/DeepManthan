@@ -19,10 +19,12 @@ class RoleAccessView(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, PartyID=0, EmployeeID=0):    
+        
         Company="M_RoleAccess.Company_id is null"
         Division=PartyID
+        # print(request.session.get('UserName'))
       
-        if (int(PartyID) > 0)  :
+        if (int(PartyID) > 0)  : 
             Division="M_RoleAccess.Division_id = "+PartyID
             Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',[PartyID,EmployeeID])
         else:
