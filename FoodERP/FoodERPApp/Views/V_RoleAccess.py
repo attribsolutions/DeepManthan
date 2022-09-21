@@ -22,7 +22,7 @@ class RoleAccessView(RetrieveAPIView):
         
         Company="M_RoleAccess.Company_id is null"
         Division=PartyID
-        print(request.session.get('UserName'))
+        # print(request.session.get('UserName'))
       
         if (int(PartyID) > 0)  : 
             Division="M_RoleAccess.Division_id = "+PartyID
