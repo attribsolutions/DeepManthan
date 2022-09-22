@@ -1,6 +1,6 @@
+from asyncore import read
 from dataclasses import fields
 
-from ..Serializer.S_PartyTypes import PartyTypeSerializer
 from ..models import *
 from rest_framework import serializers
 
@@ -10,18 +10,77 @@ class DivisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = ['id','Name'] 
-        # fields = '__all__'      
-
+              
 class AddressTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_AddressTypes
-        fields = '__all__'        
-                
+        fields = '__all__'
+        
+class PartyAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType']                
+
 class M_PartiesSerializer(serializers.ModelSerializer):
+    PartyAddress = PartyAddressSerializer(many=True)
     class Meta:
         model =  M_Parties
         fields = '__all__'
         
+    def create(self, validated_data):
+    
+        PartyAddress_data = validated_data.pop('PartyAddress')
+        PartyID= M_Parties.objects.create(**validated_data)
+        
+        for PartyAddress in PartyAddress_data:
+            Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
+               
+        return PartyID
+    
+    def update(self, instance, validated_data):
+        instance.Name = validated_data.get(
+            'Name', instance.Name)
+        instance.PriceList = validated_data.get(
+            'PriceList', instance.PriceList)
+        instance.PartyType = validated_data.get(
+            'PartyType', instance.PartyType)
+        instance.Company = validated_data.get(
+            'Company', instance.Company)
+        instance.Email = validated_data.get(
+            'Email', instance.Email)
+        instance.MobileNo = validated_data.get(
+            'MobileNo', instance.MobileNo)
+        instance.AlternateContactNo = validated_data.get(
+            'AlternateContactNo', instance.AlternateContactNo)
+        instance.State = validated_data.get(
+            'State', instance.State)
+        instance.District = validated_data.get(
+            'District', instance.District)
+        instance.Taluka = validated_data.get(
+            'Taluka', instance.Taluka)
+        instance.City = validated_data.get(
+            'City', instance.City)
+        instance.GSTIN = validated_data.get(
+            'GSTIN', instance.GSTIN)
+        instance.PAN = validated_data.get(
+            'PAN', instance.PAN)
+        instance.IsDivision = validated_data.get(
+            'IsDivision', instance.IsDivision)
+        instance.District = validated_data.get(
+            'District', instance.District)
+        instance.isActive = validated_data.get(
+            'isActive', instance.isActive)
+            
+        instance.save()   
+        
+        for a in instance.PartyAddress.all():
+            a.delete()
+        
+        for PartyAddress_data in validated_data['PartyAddress']:
+            PartyAddress = MC_ItemGSTHSNCode.objects.create(Item=instance, **PartyAddress_data) 
+                  
+        return instance
+            
 class M_PartiesSerializer1(serializers.Serializer):
 
     id = serializers.IntegerField()
@@ -52,3 +111,55 @@ class M_PartiesSerializer1(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
+
+
+class AddressTypesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_AddressTypes
+        fields = '__all__'
+    
+class PartyAddressSerializerSecond(serializers.ModelSerializer):
+    AddressType = AddressTypesSerializerSecond()
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType'] 
+
+class DistrictSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_PriceList
+        fields = ['id','Name']
+        
+class StateSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_States
+        fields = ['id','Name'] 
+        
+class CompanySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  C_Companies
+        fields = ['id','Name']
+        
+class PartyTypeSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_PartyType
+        fields = ['id','Name']
+
+class PriceListSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_PriceList
+        fields = ['id','Name']                           
+    
+class M_PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyAddress = PartyAddressSerializerSecond(many=True)
+    District= DistrictSerializerSecond()
+    State= StateSerializerSecond()
+    Company = CompanySerializerSecond()
+    PartyType = PartyTypeSerializerSecond()
+    PriceList=PriceListSerializerSecond()
+    class Meta:
+        model =  M_Parties
+        fields = '__all__'
+
+
+
+  
