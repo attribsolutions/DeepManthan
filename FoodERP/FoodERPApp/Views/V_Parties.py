@@ -54,7 +54,7 @@ class M_PartiesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query=M_Parties.objects.all()
+                query=M_Parties.objects.select_related()
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query.query)}) 
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
@@ -66,7 +66,8 @@ class M_PartiesView(CreateAPIView):
                             "id": a['id'],
                             "Name": a['Name'],
                             "isActive":a['isActive'],
-                            "PriceListName":a['PriceList']['Name']                            
+                            "PriceListName":a['PriceList']['Name'],
+                            "PartyTypeName":a['PartyType']['Name']                           
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartiesData})
         except Exception :
