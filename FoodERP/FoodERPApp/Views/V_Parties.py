@@ -62,12 +62,17 @@ class M_PartiesView(CreateAPIView):
                     M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
                     PartiesData=list()
                     for a in M_Parties_serializer:
+                        id =  a['id']
+                        query1=MC_PartyAddress.objects.filter(Party=id,IsDefault=1)
+                        # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query1.query)})
+                        Partyaddress_serializer = PartyAddressSerializerSecond(query1, many=True).data
                         PartiesData.append({
                             "id": a['id'],
                             "Name": a['Name'],
                             "isActive":a['isActive'],
                             "PriceListName":a['PriceList']['Name'],
-                            "PartyTypeName":a['PartyType']['Name']                           
+                            "PartyTypeName":a['PartyType']['Name'],
+                            "PartyAddress":Partyaddress_serializer[0]['Address']                       
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartiesData})
         except Exception :
