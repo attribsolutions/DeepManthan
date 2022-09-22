@@ -54,20 +54,21 @@ class M_PartiesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                M_Parties_data=M_Parties.objects.raw('''SELECT p.id,p.Name,p.PartyType_id,p.PriceList_id,p.Company_id,p.Email,p.Address,p.PIN,p.State_id,p.District_id ,p.GSTIN,p.PAN,p.FSSAINo,p.FSSAIExipry,p.isActive,p.MobileNo
-,p.AlternateContactNo,M_PartyType.Name PartyTypeName,m_pricelist.Name PriceListName,C_Companies.Name CompanyName,M_States.Name StateName,M_Districts.Name DistrictName,p.CreatedBy,p.CreatedOn,p.UpdatedBy,p.UpdatedOn
-FROM M_Parties p
-left join M_PartyType on M_PartyType.id=p.PartyType_id
-left join m_pricelist on m_pricelist.id=p.PriceList_id
-left join C_Companies on C_Companies.id =p.Company_id
-left join M_States on M_States.id=p.State_id
-left join M_Districts on M_Districts.id=p.District_id''')
-                # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(M_Parties_data.query)}) 
-                if not M_Parties_data:
+                query=M_Parties.objects.all()
+                # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query.query)}) 
+                if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
-                    M_Parties_serializer = M_PartiesSerializer1(M_Parties_data, many=True)    
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Parties_serializer.data})
+                    M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
+                    PartiesData=list()
+                    for a in M_Parties_serializer:
+                        PartiesData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "isActive":a['isActive'],
+                            "PriceListName":a['PriceList']['Name']                            
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartiesData})
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
 

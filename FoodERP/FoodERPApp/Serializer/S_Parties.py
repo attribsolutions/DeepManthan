@@ -158,6 +158,8 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PriceList=PriceListSerializerSecond()
     class Meta:
         model =  M_Parties
-        fields = '__all__'   
-    
-    
+        fields = '__all__'
+
+
+
+  
