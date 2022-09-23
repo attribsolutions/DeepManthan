@@ -23,7 +23,7 @@ def getchildnode(ParentID):
                 "value":z["id"],
                 "label":z["Name"],
                 # "MkUpMkDn":z["MkUpMkDn"],
-                "childern":cchild
+                "children":cchild
             })
         return cdata
     else:
