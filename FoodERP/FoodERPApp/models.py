@@ -604,10 +604,8 @@ class M_MarginMaster(models.Model):
 class T_Orders(models.Model):
 
     OrderDate = models.DateField()
-    Customer = models.ForeignKey(
-        M_Items, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
-    Party = models.ForeignKey(
-        M_Items, related_name='OrderParty', on_delete=models.DO_NOTHING)
+    Customer = models.ForeignKey(M_Parties, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
+    Party = models.ForeignKey(M_Parties, related_name='OrderParty', on_delete=models.DO_NOTHING)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
@@ -621,17 +619,15 @@ class T_Orders(models.Model):
 
 class TC_OrderItems(models.Model):
 
-    Order = models.ForeignKey(
-        T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
-    Item = models.ForeignKey(
-        M_Items, related_name='Items', on_delete=models.DO_NOTHING)
+    Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, related_name='Items', on_delete=models.DO_NOTHING)
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    MRP = models.DecimalField(max_digits=10, decimal_places=2)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ItemMRP', on_delete=models.DO_NOTHING)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='OrderUnitID', on_delete=models.CASCADE)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=2)
-    GST = models.DecimalField(max_digits=5, decimal_places=2)
+    GST = models.ForeignKey(MC_ItemGSTHSNCode, related_name='ItemGST', on_delete=models.DO_NOTHING)
+    Margin = models.ForeignKey(M_MarginMaster, related_name='ItemMargin', on_delete=models.DO_NOTHING)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=10, decimal_places=2)
     Amount = models.DecimalField(max_digits=20, decimal_places=2)
