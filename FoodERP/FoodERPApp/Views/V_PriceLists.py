@@ -22,7 +22,7 @@ def getchildnode(ParentID):
             cdata.append({
                 "value":z["id"],
                 "label":z["Name"],
-                # "MkUpMkDn":z["MkUpMkDn"],
+                "MkUpMkDn":z["MkUpMkDn"],
                 "children":cchild
             })
         return cdata
@@ -105,7 +105,7 @@ class PriceListViewSecond(CreateAPIView):
                         PriceListData.append({ 
                             "value": a['id'],
                             "label": a['Name'],
-                            # "MkUpMkDn":a["MkUpMkDn"],
+                            "MkUpMkDn":a["MkUpMkDn"],
                             "children":child
                             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
