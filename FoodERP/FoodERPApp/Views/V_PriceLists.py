@@ -106,7 +106,7 @@ class PriceListViewSecond(CreateAPIView):
                             "value": a['id'],
                             "label": a['Name'],
                             # "MkUpMkDn":a["MkUpMkDn"],
-                            "childern":child
+                            "children":child
                             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
         except Exception:
@@ -140,32 +140,3 @@ class PriceListViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List used in another table', 'Data': []})
-
-class PriceListViewThird(CreateAPIView):
-    
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                query = M_PriceList.objects.filter(BasePriceListID=0)
-                if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
-                else:
-                    PriceList_Serializer = PriceListSerializer(query, many=True).data
-                    
-                    PriceListData = list()
-                    for a in PriceList_Serializer:
-                        aa=a['id']
-                        
-                        child=getchildnode(aa)
-                        PriceListData.append({ 
-                            "value": a['id'],
-                            "label": a['Name'],
-                            "MkUpMkDn":a["MkUpMkDn"],
-                            "childern":child
-                            })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []}) 
