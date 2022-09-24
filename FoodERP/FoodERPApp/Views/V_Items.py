@@ -152,7 +152,6 @@ class M_ItemsViewSecond(CreateAPIView):
                             "BarCode": a['BarCode'],
                             "Sequence": a['Sequence'],
                             "isActive":a['isActive'] ,
-                            "LinkedItem":a['LinkedItem'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
