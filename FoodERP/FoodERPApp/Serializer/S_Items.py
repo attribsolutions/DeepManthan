@@ -178,6 +178,12 @@ class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemGSTHSNCode
         fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
+        
+class PriceListSerializerSecond(serializers.ModelSerializer):
+     class Meta:
+        model = M_PriceList
+        fields = ['id','Name']
+    
 
 class CompanySerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -192,11 +198,17 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
 class ItemMarginSerializerSecond(serializers.ModelSerializer):
     Company = CompanySerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
-    
+    PriceList  = PriceListSerializerSecond(read_only=True)
     class Meta:
         model = M_MarginMaster
         fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
-
+        
+class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
+    Division = PartiesSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemDivisions
+        fields = ['id','Division']
+        
 class ItemMRPSerializerSecond(serializers.ModelSerializer):
     Company = CompanySerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
@@ -204,12 +216,6 @@ class ItemMRPSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_MRPMaster
         fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']        
-              
-class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
-    Division = PartiesSerializerSecond(read_only=True)
-    class Meta:
-        model = MC_ItemDivisions
-        fields = ['id','Division']
                    
 class ImageTypesSerializer(serializers.ModelSerializer):
     class Meta:
