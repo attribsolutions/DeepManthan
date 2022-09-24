@@ -71,14 +71,6 @@ urlpatterns = [
     url(r'UserList$', UserListView.as_view()),
     url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
     url(r'Modules$', H_ModulesView.as_view()),
-       #SideMenu Partyid/Employeeid
-    url(r'RoleAccess/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
-       #ListPage
-    url(r'RoleAccessList$', RoleAccessViewList.as_view()),
-       #Post
-    url(r'RoleAccess$', RoleAccessView.as_view()),
-       #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
-    url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
     url(r'Roles$', M_RolesView.as_view()),
     url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
@@ -135,17 +127,20 @@ urlpatterns = [
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
     url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
     url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()), 
-   #  url(r'GetPartyTypeByDivisionTypeID/([0-9]+)$', GetPartyTypeByDivisionTypeID.as_view()),
     url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
     url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
-  
+    #SideMenu Partyid/Employeeid
+    url(r'RoleAccess/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
+    #ListPage API 
+    url(r'RoleAccessList$', RoleAccessViewList.as_view()),
+    #Post Method API
+    url(r'RoleAccess$', RoleAccessView.as_view()),
+    #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
+    url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
     #RoleAccessGetPagesOnModule moduleid/Divisionid
     url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
     #RoleAccess Page AddPage Button
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
-    url(r'RegenrateToken$', RegenrateToken.as_view()),
-    url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
-
     #PartyDropdownforloginpage/EmployeeID
     url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
@@ -154,5 +149,7 @@ urlpatterns = [
     url(r'SuperAdmin$',SuperAdminView.as_view()),
     url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
     url(r'GetSubCategoryByCategoryID/([0-9]+)$', GetSubCategoryByCategoryID.as_view()),
+    url(r'RegenrateToken$', RegenrateToken.as_view()),
+    url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
     
 ]
