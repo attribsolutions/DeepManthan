@@ -30,7 +30,7 @@ class ItemGSTHSNSerializer(serializers.ModelSerializer):
 class ItemMarginSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_MarginMaster
-        fields = ['EffectiveDate', 'Margin', 'IsDelete', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
+        fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
 
 class ItemMRPSerializer(serializers.ModelSerializer):
     class Meta:
@@ -77,7 +77,7 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','LinkedItem','CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
