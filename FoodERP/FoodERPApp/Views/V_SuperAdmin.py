@@ -809,6 +809,24 @@ class SuperAdminView(CreateAPIView):
                         "UpdatedBy": 1,
                         "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 9
+                    },
+                    {
+                        "id": 10,
+                        "Name": "Pdfdownload",
+                        "CreatedBy": 1,
+                        "CreatedOn": "2022-07-29T00:00:00",
+                        "UpdatedBy": 1,
+                        "UpdatedOn": "2022-07-29T00:00:00",
+                        "Sequence": 10
+                    },
+                    {
+                        "id": 11,
+                        "Name": "Exceldownload",
+                        "CreatedBy": 1,
+                        "CreatedOn": "2022-07-29T00:00:00",
+                        "UpdatedBy": 1,
+                        "UpdatedOn": "2022-07-29T00:00:00",
+                        "Sequence": 11
                     }
                 ]
 
@@ -844,7 +862,8 @@ class SuperAdminView(CreateAPIView):
                         "RelatedPageName": NULL,
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
-                        "PagePageAccess": []
+                        "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     
                     {
@@ -888,7 +907,8 @@ class SuperAdminView(CreateAPIView):
                                 "Access": 6,
                                 "AccessName": "IsEditSelf"
                             }
-                        ]
+                        ],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "CompanyGroup Master",
@@ -906,7 +926,8 @@ class SuperAdminView(CreateAPIView):
                                 "RelatedPageName": NULL,
                                 "CreatedBy": 1,
                                 "UpdatedBy": 1,
-                                "PagePageAccess": []
+                                "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "CompanyGroup List",
@@ -953,7 +974,8 @@ class SuperAdminView(CreateAPIView):
                                     "Access": 8,
                                     "AccessName": "IsPrint"
                                     }
-                                ]
+                                ],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "Module Master",
@@ -971,7 +993,8 @@ class SuperAdminView(CreateAPIView):
                                 "RelatedPageName": "Module List",
                                 "CreatedBy": 1,
                                 "UpdatedBy": 1,
-                                "PagePageAccess": []
+                                "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "Module List",
@@ -1014,7 +1037,8 @@ class SuperAdminView(CreateAPIView):
                                     "Access": 5,
                                     "AccessName": "IsDelete"
                                     }
-                                ]
+                                ],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "PageMaster",
@@ -1032,7 +1056,8 @@ class SuperAdminView(CreateAPIView):
                                 "RelatedPageName": "PageList",
                                 "CreatedBy": 1,
                                 "UpdatedBy": 1,
-                                "PagePageAccess": []
+                                "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "PageList",
@@ -1075,7 +1100,8 @@ class SuperAdminView(CreateAPIView):
                                     "Access": 4,
                                     "AccessName": "IsEdit"
                                     }
-                                ]
+                                ],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "Role Access",
@@ -1093,7 +1119,8 @@ class SuperAdminView(CreateAPIView):
                                 "RelatedPageName": NULL,
                                 "CreatedBy": 1,
                                 "UpdatedBy": 1,
-                                "PagePageAccess": []
+                                "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "RoleAccess List",
@@ -1136,7 +1163,8 @@ class SuperAdminView(CreateAPIView):
                                     "Access": 5,
                                     "AccessName": "IsDelete"
                                     }
-                                ]
+                                ],
+                        "PageFieldMaster": []
                     },
                     # {
                     #             "Name": "Role Master",
@@ -1211,7 +1239,8 @@ class SuperAdminView(CreateAPIView):
                                 "RelatedPageName": "Employee List",
                                 "CreatedBy": 1,
                                 "UpdatedBy": 1,
-                                "PagePageAccess": []
+                                "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     {
                                 "Name": "Employee List",
@@ -1254,7 +1283,8 @@ class SuperAdminView(CreateAPIView):
                                     "Access": 5,
                                     "AccessName": "IsDelete"
                                     }
-                                ]
+                                ],
+                        "PageFieldMaster": []
                     },
                    
                     {
@@ -1273,7 +1303,8 @@ class SuperAdminView(CreateAPIView):
                         "RelatedPageName": NULL,
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
-                        "PagePageAccess": []
+                        "PagePageAccess": [],
+                        "PageFieldMaster": []
                     },
                     {
                         "Name": "User List",
@@ -1316,7 +1347,8 @@ class SuperAdminView(CreateAPIView):
                                 "Access": 4,
                                 "AccessName": "IsEdit"
                             }
-                        ]
+                        ],
+                        "PageFieldMaster": []
                     }
                 ]
 
