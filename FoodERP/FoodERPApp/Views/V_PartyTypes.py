@@ -21,7 +21,7 @@ class PartyTypeView(CreateAPIView):
                 if PartyTypedata.exists():
                     PartyTypedata_serializer = PartyTypeSerializer(PartyTypedata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypedata_serializer.data })
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party Type available', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party Type Not available', 'Data': []})    
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception' , 'Data':[]})
 

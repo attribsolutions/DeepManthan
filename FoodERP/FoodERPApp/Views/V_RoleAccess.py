@@ -284,6 +284,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RoleAccess_IsDeleteSelf": 0,
                 "RoleAccess_IsPrint": 0,
                 "RoleAccess_IsTopOfTheDivision": 0,
+                "RoleAccess_Pdfdownload": 0,
+                "RoleAccess_Exceldownload": 0,
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
