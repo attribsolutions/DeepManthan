@@ -109,10 +109,13 @@ class M_ItemsViewSecond(CreateAPIView):
                             MRPDetails.append({
                                 # "id": f['id'],
                                 "EffectiveDate": f['EffectiveDate'],
-                                "Company": f['Company']['Name'],
+                                "Company": f['Company']['id'],
+                                "CompanyName": f['Company']['Name'],
                                 "MRP": f['MRP'],
-                                "Party": f['Party']['Name'],
-                                "Division":f['Division']['Name'],
+                                "Party": f['Party']['id'],
+                                "PartyName": f['Party']['Name'],
+                                "Division":f['Division']['id'],
+                                "DivisionName":f['Division']['Name'],
                                 "CreatedBy":f['CreatedBy'],
                                 "UpdatedBy":f['UpdatedBy']
                             })
@@ -121,12 +124,15 @@ class M_ItemsViewSecond(CreateAPIView):
                         for g in a['ItemMarginDetails']:
                             MarginDetails.append({
                                 "EffectiveDate": g['EffectiveDate'],
-                                "Company": g['Company']['Name'],
-                                "Party": g['Party']['Name'],
+                                "Company": g['Company']['id'],
+                                "CompanyName": g['Company']['Name'],
+                                "Party": g['Party']['id'],
+                                "PartyName": g['Party']['Name'],
                                 "Margin": g['Margin'],
                                 "CreatedBy":g['CreatedBy'],
                                 "UpdatedBy":g['UpdatedBy'],
-                                "PriceList":g['PriceList']
+                                "PriceList":g['PriceList']['id'],
+                                "PriceListName":g['PriceList']['Name'],
                                    
                             })
                         
