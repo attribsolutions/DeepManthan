@@ -77,7 +77,7 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             a.delete()
         
         for PartyAddress_data in validated_data['PartyAddress']:
-            PartyAddress = MC_ItemGSTHSNCode.objects.create(Item=instance, **PartyAddress_data) 
+            Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_data)  
                   
         return instance
             
