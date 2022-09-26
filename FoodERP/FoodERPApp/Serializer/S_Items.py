@@ -203,6 +203,15 @@ class ItemMarginSerializerSecond(serializers.ModelSerializer):
         model = M_MarginMaster
         fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
         
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(ItemMarginSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+         
+        if not ret.get("Party", None):
+            ret["Party"] = {"id": None, "Name": None}    
+        return ret     
+        
 class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
     Division = PartiesSerializerSecond(read_only=True)
     class Meta:
@@ -216,7 +225,18 @@ class ItemMRPSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_MRPMaster
         fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']        
-                   
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(ItemMRPSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Division", None):
+            ret["Division"] = {"id": None, "Name": None}
+            
+        if not ret.get("Party", None):
+            ret["Party"] = {"id": None, "Name": None}    
+        return ret  
+                 
 class ImageTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_ImageTypes
