@@ -68,6 +68,7 @@ class M_PartiesView(CreateAPIView):
                         # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query1.query)})
                         Partyaddress_serializer = PartyAddressSerializerSecond(query1,many=True).data
                         PartyData.append({
+                            "id":a['id'],
                             "Name": a['Name'],
                             "isActive":a['isActive'],
                             "PriceListName":a['PriceList']['Name'],
