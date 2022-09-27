@@ -70,6 +70,9 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             'District', instance.District)
         instance.isActive = validated_data.get(
             'isActive', instance.isActive)
+        
+        instance.MkUpMkDn = validated_data.get(
+            'MkUpMkDn', instance.MkUpMkDn)
             
         instance.save()   
         
