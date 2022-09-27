@@ -177,7 +177,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
 class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemGSTHSNCode
-        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
+        fields = ['id','EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
         
 class PriceListSerializerSecond(serializers.ModelSerializer):
      class Meta:
@@ -201,7 +201,7 @@ class ItemMarginSerializerSecond(serializers.ModelSerializer):
     PriceList  = PriceListSerializerSecond(read_only=True)
     class Meta:
         model = M_MarginMaster
-        fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
+        fields = ['id','EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
@@ -224,7 +224,7 @@ class ItemMRPSerializerSecond(serializers.ModelSerializer):
     Division = PartiesSerializerSecond(read_only=True)
     class Meta:
         model = M_MRPMaster
-        fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']        
+        fields = ['id','EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']        
     
     def to_representation(self, instance):
         # get representation from ModelSerializer
