@@ -109,11 +109,10 @@ class M_PartiesViewSecond(CreateAPIView):
                     M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True).data
                     PartiesData=list()
                     for a in M_Parties_serializer:
-                        
                         PartyAddresslist=list()
                         for b in a['PartyAddress']:
                             PartyAddresslist.append({
-                                # "id": b['id'],
+                                "id": b['id'],
                                 "Address": b['Address'],
                                 "FSSAINo": b['FSSAINo'],
                                 "FSSAIExipry": b['FSSAIExipry'],
