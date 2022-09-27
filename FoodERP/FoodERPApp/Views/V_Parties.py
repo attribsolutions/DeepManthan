@@ -134,6 +134,7 @@ class M_PartiesViewSecond(CreateAPIView):
                             "PAN": a['PAN'],
                             "isActive":a['isActive'] ,
                             "IsDivision": a['IsDivision'],
+                            "MkUpMkDn":a['MkUpMkDn'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
