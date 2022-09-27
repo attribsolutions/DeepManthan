@@ -54,29 +54,29 @@ class M_PartiesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query=M_Parties.objects.select_related()
+                query=M_Parties.objects.all()
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query.query)}) 
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
-                    PartiesData=list()
+                    # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':M_Parties_serializer})
+                    PartyData=list()
                     for a in M_Parties_serializer:
                         id =  a['id']
                         query1=MC_PartyAddress.objects.filter(Party=id,IsDefault=1)
                         # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query1.query)})
-                        Partyaddress_serializer = PartyAddressSerializerSecond(query1, many=True).data
-                        PartiesData.append({
-                            "id": a['id'],
+                        Partyaddress_serializer = PartyAddressSerializerSecond(query1,many=True).data
+                        PartyData.append({
                             "Name": a['Name'],
                             "isActive":a['isActive'],
                             "PriceListName":a['PriceList']['Name'],
                             "PartyTypeName":a['PartyType']['Name'],
-                            "PartyAddress":Partyaddress_serializer[0]['Address']                       
+                            # "PartyAddress":Partyaddress_serializer[0]            
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartiesData})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartyData})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
