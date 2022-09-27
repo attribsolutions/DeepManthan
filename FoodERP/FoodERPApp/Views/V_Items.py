@@ -66,7 +66,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         CategoryDetails=list()
                         for b in a['ItemCategoryDetails']:
                             CategoryDetails.append({
-                                # "id": b['id'],
+                                "id": b['id'],
                                 "CategoryType": b['CategoryType']['id'],
                                 "CategoryTypeName": b['CategoryType']['Name'],
                                 "Category": b['Category']['id'],
@@ -78,7 +78,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         UnitDetails=list()
                         for c in a['ItemUnitDetails']:
                             UnitDetails.append({
-                                # "id": c['id'],
+                                "id": c['id'],
                                 "UnitID": c['UnitID']['id'],
                                 "UnitName": c['UnitID']['Name'],
                                 "BaseUnitQuantity": c['BaseUnitQuantity'],
@@ -88,7 +88,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         ImagesDetails=list()
                         for d in a['ItemImagesDetails']:
                             ImagesDetails.append({
-                                # "id": d['id'],
+                                "id": d['id'],
                                 "Item_pic": d['Item_pic'],
                                 "ImageType": d['ImageType']['id'],
                                 "ImageTypeName": d['ImageType']['Name'],
@@ -98,7 +98,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         DivisionDetails=list()
                         for e in a['ItemDivisionDetails']:
                             DivisionDetails.append({
-                                # "id": e['id'],
+                                "id": e['id'],
                                 "Division": e['Division']['id'],
                                 "DivisionName": e['Division']['Name'],
                                 
@@ -107,7 +107,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         MRPDetails=list()
                         for f in a['ItemMRPDetails']:
                             MRPDetails.append({
-                                # "id": f['id'],
+                                "id": f['id'],
                                 "EffectiveDate": f['EffectiveDate'],
                                 "Company": f['Company']['id'],
                                 "CompanyName": f['Company']['Name'],
@@ -123,6 +123,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         MarginDetails=list()
                         for g in a['ItemMarginDetails']:
                             MarginDetails.append({
+                                "id": g['id'],
                                 "EffectiveDate": g['EffectiveDate'],
                                 "Company": g['Company']['id'],
                                 "CompanyName": g['Company']['Name'],
@@ -139,6 +140,7 @@ class M_ItemsViewSecond(CreateAPIView):
                         GSTHSNDetails=list()
                         for h in a['ItemGSTHSNDetails']:
                             GSTHSNDetails.append({
+                                "id": h['id'],
                                 "EffectiveDate": h['EffectiveDate'],
                                 "GSTPercentage": h['GSTPercentage'],
                                 "HSNCode": h['HSNCode'],

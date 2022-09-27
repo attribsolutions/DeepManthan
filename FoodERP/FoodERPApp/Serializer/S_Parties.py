@@ -119,7 +119,7 @@ class AddressTypesSerializerSecond(serializers.ModelSerializer):
         fields = '__all__'
     
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
-    AddressType = AddressTypesSerializerSecond()
+    AddressType = AddressTypesSerializerSecond(read_only=True)
     class Meta:
         model = MC_PartyAddress
         fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType'] 
