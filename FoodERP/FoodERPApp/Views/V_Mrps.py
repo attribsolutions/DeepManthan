@@ -7,7 +7,11 @@ from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Mrps import *
 
+from ..Serializer.S_Items import *
+
 from ..Serializer.S_Parties import *
+
+from .V_CommFunction import *
 
 from ..models import *
 
@@ -31,8 +35,6 @@ class M_MRPsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
-    
-    
     @transaction.atomic()
     def post(self, request):
         try:
@@ -47,3 +49,38 @@ class M_MRPsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Mrps_Serializer.errors,'Data' :[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class GETMrpDetails(CreateAPIView): 
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                DivisionID = request.data['Division']
+                PartyID = request.data['Party']
+                EffectiveDate = request.data['EffectiveDate']
+                query = M_Items.objects.all()
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    Items_Serializer = M_ItemsSerializer01(query, many=True).data
+                    ItemList = list()
+                    for a in Items_Serializer:
+                        Item= a['id']
+                        MRP = GetCurrentDateMRP(Item,DivisionID,PartyID,EffectiveDate)
+                        ItemList.append({
+                            "id": Item,
+                            "Name": a['Name'],
+                            "CurrentMRP": MRP,
+                            "MRP":""
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+    
+    
+    
+           

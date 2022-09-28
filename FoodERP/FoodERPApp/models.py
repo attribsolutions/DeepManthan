@@ -330,7 +330,8 @@ class M_Pages(models.Model):
         db_table = "M_Pages"
 
 class MC_PageFieldMaster(models.Model):
-    ControlID= models.IntegerField()
+    # ControlID= models.IntegerField()
+    ControlID = models.CharField(max_length=300)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ControlType', on_delete=models.DO_NOTHING)
     FieldLabel = models.CharField(max_length=300)
     DefaultSort = models.BooleanField(default=False)   
@@ -579,6 +580,7 @@ class M_MRPMaster(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MRPCompany', on_delete=models.DO_NOTHING)
+    CommonID = models.IntegerField()
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -588,6 +590,7 @@ class M_MRPMaster(models.Model):
         db_table = "M_MRPMaster"
 
 class M_MarginMaster(models.Model):
+    CommonID = models.IntegerField()
     PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.DO_NOTHING)
     Party =models.ForeignKey(M_Parties, related_name='MarginParty', on_delete=models.DO_NOTHING,null=True,blank=True)
     EffectiveDate = models.DateField()
