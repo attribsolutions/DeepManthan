@@ -556,6 +556,7 @@ class MC_ItemGSTHSNCode(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
+    CommonID = models.IntegerField(null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
