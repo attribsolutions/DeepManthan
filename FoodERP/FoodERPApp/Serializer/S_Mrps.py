@@ -20,4 +20,5 @@ class M_MRPsSerializerSecond(serializers.Serializer):
     CompanyName = serializers.CharField(max_length=100)
     DivisionName = serializers.CharField(max_length=100)
     PartyName = serializers.CharField(max_length=100)
+    CommonID= serializers.IntegerField() 
   
