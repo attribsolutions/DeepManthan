@@ -5,6 +5,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from django.db.models import Max
+
 from ..Serializer.S_Margins import *
 
 from ..Serializer.S_Items import *
@@ -23,9 +25,20 @@ class M_MarginsView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         try:
-            with transaction.atomic(): 
-                M_Marginsdata = JSONParser().parse(request)
-                M_Margins_Serializer = M_MarginsSerializer(data=M_Marginsdata,many=True)
+            with transaction.atomic():
+                MaxCommonID=M_MRPMaster.objects.aggregate(Max('CommonID')) 
+                print(MaxCommonID)
+                a=MaxCommonID['CommonID__max'] 
+                if a is None:
+                    a=1
+                else:
+                    a=a+1
+                M_Marginsdata = JSONParser().parse(request)    
+                additionaldata= list()
+                for b in M_Marginsdata:
+                    b.update({'CommonID': a})
+                    additionaldata.append(b)     
+                M_Margins_Serializer = M_MarginsSerializer(data=additionaldata,many=True)
             if M_Margins_Serializer.is_valid():
                 M_Margins_Serializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margins Save Successfully','Data' :[]})
