@@ -22,18 +22,28 @@ class M_MarginsView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                Margindata = M_MarginMaster.objects.raw('''SELECT m_marginmaster.id,m_marginmaster.EffectiveDate,m_marginmaster.Company_id,m_marginmaster.PriceList_id,m_marginmaster.Party_id,c_companies.Name CompanyName, m_pricelist.Name PriceListName,m_parties.Name PartyName  FROM m_marginmaster left join c_companies on c_companies.id = m_marginmaster.Company_id left join m_pricelist  on m_pricelist.id = m_marginmaster.PriceList_id left join m_parties on m_parties.id = m_marginmaster.Party_id group by EffectiveDate,Party_id,PriceList_id Order BY EffectiveDate Desc''')
+                # print(str(MRPdata.query))
+                if not Margindata:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    Margindata_Serializer = M_MarginsSerializerSecond(Margindata, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Margindata_Serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+    
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
-                MaxCommonID=M_MarginMaster.objects.aggregate(Max('CommonID')) 
-                print(MaxCommonID)
-                a=MaxCommonID['CommonID__max'] 
-                if a is None:
-                    a=1
-                else:
-                    a=a+1
-                M_Marginsdata = JSONParser().parse(request)    
+                M_Marginsdata = JSONParser().parse(request)
+                a=GetMaxValue(M_MarginMaster,'CommonID')    
                 additionaldata= list()
                 for b in M_Marginsdata:
                     b.update({'CommonID': a})
