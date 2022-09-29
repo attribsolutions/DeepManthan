@@ -1,7 +1,10 @@
 from asyncore import read
 from dataclasses import field
+from ..Views.V_CommFunction import *
 from ..models import *
 from rest_framework import serializers
+from django.db.models import Max
+
 
 
 class M_ItemsSerializer01(serializers.ModelSerializer):
@@ -101,11 +104,13 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemDivision_data in ItemDivisions_data:
             ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
         
+        a=GetMaxValue(M_MRPMaster,'CommonID')
         for ItemMRP_data in ItemMRPs_data:
-            ItemMrp = M_MRPMaster.objects.create(Item=ItemID, **ItemMRP_data)
+            ItemMrp = M_MRPMaster.objects.create(Item=ItemID,CommonID=a, **ItemMRP_data)
         
+        b=GetMaxValue(M_MarginMaster,'CommonID')
         for ItemMargin_data in ItemMargins_data:
-            ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)
+            ItemMargin = M_MarginMaster.objects.create(Item=ItemID,CommonID=b, **ItemMargin_data)
         
         for ItemGSTHSN_data in ItemGSTHSNs_data:
             ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  

@@ -6,12 +6,10 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
 from django.db.models import Q
-
+from django.db.models import Max
 from ..Serializer.S_Mrps import *
 from ..Serializer.S_Margins import *
 from ..models import *
-
-
 
 def GetCurrentDateMRP(ItemID,DivisionID,PartyID,EffectiveDate):
     if int(DivisionID)>0:
@@ -50,4 +48,14 @@ def GetCurrentDateMargin(ItemID,PriceListID,PartyID,EffectiveDate):
         Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
         return  Margin_Serializer[0]['Margin']
     else:
-        return 0    
+        return 0
+
+def GetMaxValue(TableName,ColumnName):
+    MaxCommonID=TableName.objects.aggregate(Max(ColumnName)) 
+    a=MaxCommonID['CommonID__max'] 
+    if a is None:
+        a=1
+    else:
+        a=a+1
+    return a    
+            
