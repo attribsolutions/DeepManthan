@@ -40,14 +40,8 @@ class M_MRPsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                MaxCommonID=M_MRPMaster.objects.aggregate(Max('CommonID')) 
-                print(MaxCommonID)
-                a=MaxCommonID['CommonID__max'] 
-                if a is None:
-                    a=1
-                else:
-                    a=a+1    
                 M_Mrpsdata = JSONParser().parse(request)
+                a=GetMaxValue(M_MRPMaster,'CommonID') 
                 additionaldata= list()
                 for b in M_Mrpsdata:
                     b.update({'CommonID': a})
