@@ -3,6 +3,7 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
+from django.db.models import Max
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Mrps import *
@@ -38,9 +39,21 @@ class M_MRPsView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         try:
-            with transaction.atomic(): 
+            with transaction.atomic():
+                MaxCommonID=M_MRPMaster.objects.aggregate(Max('CommonID')) 
+                print(MaxCommonID)
+                a=MaxCommonID['CommonID__max'] 
+                if a is None:
+                    a=1
+                else:
+                    a=a+1    
                 M_Mrpsdata = JSONParser().parse(request)
-                M_Mrps_Serializer = M_MRPsSerializer(data=M_Mrpsdata,many=True)
+                additionaldata= list()
+                for b in M_Mrpsdata:
+                    b.update({'CommonID': a})
+                    additionaldata.append(b)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully','Data' : additionaldata })
+                M_Mrps_Serializer = M_MRPsSerializer(data=additionaldata,many=True)
             if M_Mrps_Serializer.is_valid():
                 M_Mrps_Serializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully','Data' :[]})
