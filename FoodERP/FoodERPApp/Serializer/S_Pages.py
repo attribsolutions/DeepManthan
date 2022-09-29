@@ -13,7 +13,7 @@ class ControlTypeMasterSerializer(serializers.ModelSerializer):
 class FieldValidationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_FieldValidations
-        fields = ['id','Name','RegularExpression']        
+        fields = ['id','Name','RegularExpression','InValidMsg']        
 
 
 class MC_PagePageAccessSerializer(serializers.Serializer):
@@ -36,8 +36,8 @@ class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
     ShowInListPage = serializers.BooleanField(default=False) 
     ShowInDownload = serializers.BooleanField(default=False)
     DownloadDefaultSelect = serializers.BooleanField(default=False) 
-
-        
+    RegularExpression = serializers.CharField(max_length=300)
+    InValidMsg = serializers.CharField(max_length=300)   
 
 class M_PagesSerializer(serializers.Serializer):
     

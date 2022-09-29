@@ -22,9 +22,9 @@ def GetCurrentDateMRP(ItemID,DivisionID,PartyID,EffectiveDate):
     else:
         P=Q(Party_id__isnull=True)
     
-    ItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=ItemID,EffectiveDate__lte=EffectiveDate).order_by('-EffectiveDate')
+    ItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=ItemID,EffectiveDate__lte=EffectiveDate).order_by('-EffectiveDate','-id')[:1]
     
-    # print(str(ItemMRPdata.query))
+    print(str(ItemMRPdata.query))
     # return str(ItemMRPdata.query)
     if ItemMRPdata.exists():
         MRP_Serializer = M_MRPsSerializer(ItemMRPdata, many=True).data
@@ -40,7 +40,7 @@ def GetCurrentDateMargin(ItemID,PriceListID,PartyID,EffectiveDate):
     else:
         P=Q(Party_id__isnull=True)
     
-    ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=ItemID,PriceList_id=PriceListID,EffectiveDate__lte=EffectiveDate).order_by('-EffectiveDate')
+    ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=ItemID,PriceList_id=PriceListID,EffectiveDate__lte=EffectiveDate).order_by('-EffectiveDate','-id')[:1]
     
     # print(str(ItemMargindata.query))
 
