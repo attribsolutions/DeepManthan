@@ -26,7 +26,7 @@ class M_MarginsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                MaxCommonID=M_MRPMaster.objects.aggregate(Max('CommonID')) 
+                MaxCommonID=M_MarginMaster.objects.aggregate(Max('CommonID')) 
                 print(MaxCommonID)
                 a=MaxCommonID['CommonID__max'] 
                 if a is None:
