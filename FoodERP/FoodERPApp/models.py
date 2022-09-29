@@ -330,7 +330,7 @@ class M_Pages(models.Model):
         db_table = "M_Pages"
 
 class MC_PageFieldMaster(models.Model):
-    # ControlID= models.IntegerField()
+    
     ControlID = models.CharField(max_length=300)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ControlType', on_delete=models.DO_NOTHING)
     FieldLabel = models.CharField(max_length=300)
@@ -342,7 +342,7 @@ class MC_PageFieldMaster(models.Model):
     ShowInDownload = models.BooleanField(default=False)
     DownloadDefaultSelect = models.BooleanField(default=False) 
     Page = models.ForeignKey(M_Pages, related_name='PageFieldMaster', on_delete=models.CASCADE,null=True,blank=True)
-    # LinktoField = models.CharField(max_length=300)
+    InValidMsg = models.CharField(max_length=300)
     class Meta:
         db_table = "MC_PageFieldMaster"
         
