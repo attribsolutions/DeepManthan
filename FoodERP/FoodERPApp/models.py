@@ -303,6 +303,7 @@ class M_FieldValidations(models.Model):
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='FieldControlType', on_delete=models.DO_NOTHING)
     Name = models.CharField(max_length=300)
     RegularExpression = models.CharField(max_length=300)
+    InValidMsg = models.CharField(max_length=300)
     class Meta:
         db_table = "M_FieldValidations"
          
@@ -342,7 +343,7 @@ class MC_PageFieldMaster(models.Model):
     ShowInDownload = models.BooleanField(default=False)
     DownloadDefaultSelect = models.BooleanField(default=False) 
     Page = models.ForeignKey(M_Pages, related_name='PageFieldMaster', on_delete=models.CASCADE,null=True,blank=True)
-    InValidMsg = models.CharField(max_length=300)
+
     class Meta:
         db_table = "MC_PageFieldMaster"
         
