@@ -606,6 +606,12 @@ class M_MarginMaster(models.Model):
     class Meta:
         db_table = "M_MarginMaster"        
 
+
+class M_TermsAndConditions(models.Model):
+    Name = models.CharField(max_length=500)
+    class Meta:
+        db_table = "M_TermsAndConditions"
+    
         
 class T_Orders(models.Model):
 
