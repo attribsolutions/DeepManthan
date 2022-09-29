@@ -122,6 +122,8 @@ urlpatterns = [
     url(r'AddressTypes$',AddressTypesView.as_view()),
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Margins$',M_MarginsView.as_view()),
+    url(r'GetMRP$',GETMrpDetails.as_view()),
+    url(r'GetMargin$',GETMarginDetails.as_view()),
     
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
