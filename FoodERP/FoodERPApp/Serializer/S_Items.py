@@ -28,17 +28,17 @@ class ImageTypesSerializer(serializers.ModelSerializer):
 class ItemGSTHSNSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemGSTHSNCode
-        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
+        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy','CommonID']
     
 class ItemMarginSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_MarginMaster
-        fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party']
+        fields = ['EffectiveDate', 'Margin', 'CreatedBy', 'UpdatedBy', 'Company', 'PriceList', 'Party','CommonID']
 
 class ItemMRPSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_MRPMaster
-        fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division']
+        fields = ['EffectiveDate', 'MRP', 'CreatedBy','UpdatedBy','Company','Party', 'Division','CommonID']
          
 class ItemDivisionsSerializer(serializers.ModelSerializer):
     class Meta:
