@@ -104,16 +104,19 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemDivision_data in ItemDivisions_data:
             ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
         
-        a=GetMaxValue(M_MRPMaster,'CommonID')
+        
         for ItemMRP_data in ItemMRPs_data:
+            a=GetMaxValue(M_MRPMaster,'CommonID')
             ItemMrp = M_MRPMaster.objects.create(Item=ItemID,CommonID=a, **ItemMRP_data)
         
-        b=GetMaxValue(M_MarginMaster,'CommonID')
+        
         for ItemMargin_data in ItemMargins_data:
+            b=GetMaxValue(M_MarginMaster,'CommonID')
             ItemMargin = M_MarginMaster.objects.create(Item=ItemID,CommonID=b, **ItemMargin_data)
         
-        c=GetMaxValue(MC_ItemGSTHSNCode,'CommonID')
+        
         for ItemGSTHSN_data in ItemGSTHSNs_data:
+            c=GetMaxValue(MC_ItemGSTHSNCode,'CommonID')
             ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=ItemID,CommonID=c, **ItemGSTHSN_data)                  
 
         return ItemID
