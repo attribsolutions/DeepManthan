@@ -617,7 +617,7 @@ class T_Orders(models.Model):
 
     OrderDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
-    Party = models.ForeignKey(M_Parties, related_name='OrderParty', on_delete=models.DO_NOTHING)
+    Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
@@ -759,7 +759,17 @@ class MC_VehiclesDivisions(models.Model):
     class Meta:
         db_table = "MC_VehiclesDivisions"
 
-                    
+class  MC_PartySubParty(models.Model):
+    Party = models.ForeignKey(M_Parties, related_name='Party', on_delete=models.CASCADE)
+    SubParty = models.ForeignKey(M_Parties, related_name='SubParty', on_delete=models.CASCADE)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "MC_PartySubParty"
+   
+                        
         
             
 class Abc(models.Model):
