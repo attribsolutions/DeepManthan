@@ -81,8 +81,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                         PageAccessListData = list()
                         for b in MC_PagePageAccess_data:
                             PageAccessListData.append({
-                                "accessId": b['id'],
-                                "accessName": b['Name']
+                                "AccessID": b['id'],
+                                "AccessName": b['Name']
                             })
                         
                         PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression,m_fieldvalidations.InValidMsg FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [id])
@@ -93,42 +93,42 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                         for c in MC_PageFieldMaster_data:
                             MC_PageFieldMasterListData.append({
                                 
-                                "controlId":  c['ControlID'],
-                                "controlType":  c['ControlType_id'],
-                                "controlTypeName":c['CName'],
-                                "fieldLabel": c['FieldLabel'],
-                                "isCompulsory":c['IsCompulsory'],
-                                "defaultSort":c['DefaultSort'],      
-                                "fieldValidation": c['FieldValidation_id'], 
-                                "fieldValidationName":c['FName'],      
-                                "listPageSeq": c['ListPageSeq'],
-                                "showInListPage": c['ShowInListPage'],
-                                "showInDownload": c['ShowInDownload'],
-                                "shownloadDefaultSelect":c['DownloadDefaultSelect'],
-                                "regularExpression":c['RegularExpression'],
-                                "inValidMsg":c['InValidMsg'],
+                                "ControlID":  c['ControlID'],
+                                "ControlType":  c['ControlType_id'],
+                                "ControlTypeName":c['CName'],
+                                "FieldLabel": c['FieldLabel'],
+                                "IsCompulsory":c['IsCompulsory'],
+                                "DefaultSort":c['DefaultSort'],      
+                                "FieldValidation": c['FieldValidation_id'], 
+                                "FieldValidationName":c['FName'],      
+                                "ListPageSeq": c['ListPageSeq'],
+                                "ShowInListPage": c['ShowInListPage'],
+                                "ShowInDownload": c['ShowInDownload'],
+                                "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
+                                "RegularExpression":c['RegularExpression'],
+                                "InValidMsg":c['InValidMsg'],
                             })
                         
                         
                         PageListData.append({
 
                             "id": a['id'],
-                            "name": a['Name'],
-                            "pageHeading": a['PageHeading'],
-                            "pageDescription": a['PageDescription'],
-                            "pageDescriptionDetails": a['PageDescriptionDetails'],
-                            "module": a['ModuleID'],
-                            "moduleName": a['ModuleName'],
+                            "Name": a['Name'],
+                            "PageHeading": a['PageHeading'],
+                            "PageDescription": a['PageDescription'],
+                            "PageDescriptionDetails": a['PageDescriptionDetails'],
+                            "Module": a['ModuleID'],
+                            "ModuleName": a['ModuleName'],
                             "isActive": a['isActive'],
-                            "displayIndex": a['DisplayIndex'],
-                            "icon": a['Icon'],
-                            "actualPagePath": a['ActualPagePath'],
-                            "pageType": a['PageType'],
-                            "relatedPageId": a['RelatedPageID'],
-                            "relatedPageName": a['RelatedPageName'],
-                            "isDivisionRequired":a['IsDivisionRequired'],
-                            "pagePageAccess": PageAccessListData,
-                            "pageFieldMaster": MC_PageFieldMasterListData
+                            "DisplayIndex": a['DisplayIndex'],
+                            "Icon": a['Icon'],
+                            "ActualPagePath": a['ActualPagePath'],
+                            "PageType": a['PageType'],
+                            "RelatedPageId": a['RelatedPageID'],
+                            "RelatedPageName": a['RelatedPageName'],
+                            "IsDivisionRequired":a['IsDivisionRequired'],
+                            "PagePageAccess": PageAccessListData,
+                            "PageFieldMaster": MC_PageFieldMasterListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception :
@@ -223,17 +223,17 @@ where mc_pagepageaccess.Page_id=%s''', [id])
 
                         PageListData.append({
                             "id": a['id'],
-                            "name": a['Name'],
-                            "displayIndex": a['DisplayIndex'],
-                            "icon": a['Icon'],
-                            "actualPagePath": a['ActualPagePath'],
+                            "Name": a['Name'],
+                            "DisplayIndex": a['DisplayIndex'],
+                            "Icon": a['Icon'],
+                            "ActualPagePath": a['ActualPagePath'],
                             # "isShowOnMenu": a['isShowOnMenu'],
-                            "rolePageAccess": PageAccessListData
+                            "RolePageAccess": PageAccessListData
                         })
                     PageListData = {
-                "moduleId": a['ModuleID'],
-                "moduleName": a['ModuleName'],
-                "moduleData": PageListData,}
+                "ModuleID": a['ModuleID'],
+                "ModuleName": a['ModuleName'],
+                "ModuleData": PageListData,}
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':[PageListData] })
         except Exception :
