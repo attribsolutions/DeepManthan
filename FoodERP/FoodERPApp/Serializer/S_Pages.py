@@ -24,7 +24,7 @@ class MC_PagePageAccessSerializer(serializers.Serializer):
 class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
        
     id = serializers.IntegerField()
-    ControlID = serializers.IntegerField()
+    ControlID = serializers.CharField(max_length=100)
     ControlType_id = serializers.IntegerField()
     CName = serializers.CharField(max_length=100)
     FieldLabel = serializers.CharField(max_length=300)
