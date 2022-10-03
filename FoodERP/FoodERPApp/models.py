@@ -450,8 +450,20 @@ class M_ImageTypes(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "M_ImageTypes"         
-
+        db_table = "M_ImageTypes"
+        
+        
+        
+class M_CategoryType(models.Model):
+    Name = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "M_CategoryType"
+    
+    
 class M_ProductCategoryType(models.Model):
     Name = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(default=False)
