@@ -452,8 +452,7 @@ class M_ImageTypes(models.Model):
     class Meta:
         db_table = "M_ImageTypes"
         
-        
-        
+            
 class M_CategoryType(models.Model):
     Name = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(default=False)
