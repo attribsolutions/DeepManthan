@@ -479,7 +479,6 @@ class M_GroupType(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = "M_GroupType"
 
@@ -493,18 +492,16 @@ class M_Group(models.Model):
     class Meta:
         db_table = "M_Group"
 
-# class MC_SubGroup(models.Model):
-#     Name = models.CharField(max_length=500)
-#     ProductCategory = models.ForeignKey(
-#         M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
-#     CreatedBy = models.IntegerField(default=False)
-#     CreatedOn = models.DateTimeField(auto_now_add=True)
-#     UpdatedBy = models.IntegerField(default=False)
-#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
-#     class Meta:
-#         db_table = "MC_SubGroup"        
+class MC_SubGroup(models.Model):
+    Name = models.CharField(max_length=500)
+    Group = models.ForeignKey(M_Group, related_name='Group', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    class Meta:
+        db_table = "MC_SubGroup"        
                 
-    
     
 class M_ProductCategoryType(models.Model):
     Name = models.CharField(max_length=500)
