@@ -73,6 +73,11 @@ class T_OrderSerializerforGET(serializers.Serializer):
 
  
 
+class M_TermsAndConditionsSerializer(serializers.ModelSerializer):
+    class Meta : 
+        model = M_TermsAndConditions
+        fields = '__all__'
+
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     class Meta:

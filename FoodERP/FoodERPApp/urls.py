@@ -124,6 +124,7 @@ urlpatterns = [
     url(r'Margins$',M_MarginsView.as_view()),
     url(r'GetMRP$',GETMrpDetails.as_view()),
     url(r'GetMargin$',GETMarginDetails.as_view()),
+    url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
     
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
