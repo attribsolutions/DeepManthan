@@ -462,6 +462,16 @@ class M_CategoryType(models.Model):
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "M_CategoryType"
+
+class M_Category(models.Model):
+    Name = models.CharField(max_length=500)
+    CategoryType = models.ForeignKey(M_CategoryType, related_name='CategoryType', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "M_Category"        
     
     
 class M_ProductCategoryType(models.Model):
