@@ -11,7 +11,22 @@ from ..Serializer.S_Orders import *
 
 from ..models import  *
 
-      
+class TermsAndCondtions(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication  
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                Order_serializer = M_TermsAndConditionsSerializer(data=Orderdata)
+                if Order_serializer.is_valid():
+                    Order_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'TermsAndCondtions Save Successfully' , 'Data':[] })
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors , 'Data':[]})
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})   
 
 
 class T_OrdersView(CreateAPIView):
