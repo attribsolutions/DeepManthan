@@ -471,7 +471,40 @@ class M_Category(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "M_Category"        
+        db_table = "M_Category"
+        
+class M_GroupType(models.Model):
+    Name = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "M_GroupType"
+
+# class M_Group(models.Model):
+#     Name = models.CharField(max_length=500)
+#     ProductCategoryType = models.ForeignKey(
+#         M_ProductCategoryType, related_name='ProductCategoryType', on_delete=models.DO_NOTHING)
+#     CreatedBy = models.IntegerField(default=False)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField(default=False)
+#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
+#     class Meta:
+#         db_table = "M_Group"
+
+# class MC_SubGroup(models.Model):
+#     Name = models.CharField(max_length=500)
+#     ProductCategory = models.ForeignKey(
+#         M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
+#     CreatedBy = models.IntegerField(default=False)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField(default=False)
+#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
+#     class Meta:
+#         db_table = "MC_SubGroup"        
+                
     
     
 class M_ProductCategoryType(models.Model):
