@@ -36,7 +36,8 @@ class CategoryView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Category Not available ', 'Data': []})
         except M_Category.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Not available', 'Data': []})
-
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
@@ -50,8 +51,8 @@ class CategoryView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Category_Serializer.errors, 'Data':[]})
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
             
 
 class CategoryViewSecond(CreateAPIView):
@@ -83,6 +84,8 @@ class CategoryViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Category Not available ', 'Data': []})
         except M_Category.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
@@ -99,8 +102,8 @@ class CategoryViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Categorydata_Serializer.errors, 'Data':[]})
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
     @transaction.atomic()
@@ -113,7 +116,9 @@ class CategoryViewSecond(CreateAPIView):
         except M_Category.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category used in another table', 'Data': []})   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Category used in another table', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
 
 class GetCategoryByCategoryTypeID(CreateAPIView):

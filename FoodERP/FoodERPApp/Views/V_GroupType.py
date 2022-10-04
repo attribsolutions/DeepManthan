@@ -53,7 +53,7 @@ class GroupTypeViewSecond(CreateAPIView):
                 GroupTypedata = M_GroupType.objects.get(id=id)
                 GroupType_serializer = GroupTypeSerializer(GroupTypedata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': GroupType_serializer.data})
-        except  M_CategoryType.DoesNotExist:
+        except  M_GroupType.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Group Type Not available', 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})

@@ -51,8 +51,8 @@ class SubGroupView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  SubGroup_Serializer.errors, 'Data': []})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class SubGroupViewSecond(CreateAPIView):
     
@@ -81,8 +81,8 @@ class SubGroupViewSecond(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubGroupList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubGroup Not available ', 'Data': []})
-        except MC_SubGroup.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'SubGroup Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
@@ -99,8 +99,8 @@ class SubGroupViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SubGroup_Serializer.errors, 'Data':[]})
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
     @transaction.atomic()
