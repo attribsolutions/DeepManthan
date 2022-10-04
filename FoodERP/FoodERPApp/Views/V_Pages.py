@@ -86,7 +86,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 "AccessName": b['Name']
                             })
                         
-                        PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [id])
+                        PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [id])
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(PageFieldQuery.query)})
                        
                         MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
@@ -109,6 +109,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 "ShowInDownload": c['ShowInDownload'],
                                 "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
                                 "RegularExpression":c['RegularExpression'],
+                                "InValidMsg":c['InValidMsg'],
                                 
                             })
                         
