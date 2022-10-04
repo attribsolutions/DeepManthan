@@ -22,8 +22,8 @@ class CategoryTypeView(CreateAPIView):
                     CategoryType_serializer = CategoryTypeSerializer(CategoryType_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CategoryType_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Category Type Not available', 'Data': []})
-        except Exception :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
@@ -37,8 +37,8 @@ class CategoryTypeView(CreateAPIView):
             else:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CategoryType_serializer.errors, 'Data' : []})
-        except Exception :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 class CategoryTypeViewSecond(CreateAPIView):
@@ -56,7 +56,7 @@ class CategoryTypeViewSecond(CreateAPIView):
         except  M_CategoryType.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Type Not available', 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -73,7 +73,7 @@ class CategoryTypeViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CategoryType_serializer.errors, 'Data' :[]})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Executiono Error', 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
