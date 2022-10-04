@@ -32,7 +32,8 @@ class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
     ListPageSeq = serializers.IntegerField()
     ShowInListPage = serializers.BooleanField(default=False) 
     ShowInDownload = serializers.BooleanField(default=False)
-    DownloadDefaultSelect = serializers.BooleanField(default=False) 
+    DownloadDefaultSelect = serializers.BooleanField(default=False)
+    InValidMsg = serializers.CharField(max_length=300) 
     RegularExpression = serializers.CharField(max_length=300)
     
 
