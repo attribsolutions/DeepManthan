@@ -21,7 +21,9 @@ from ..Serializer.S_Pages import M_PagesSerializer1
 
 from ..Serializer.S_States import DistrictsSerializer, StateSerializer
 
-from ..Serializer.S_Companies import C_CompanyGroupsSerializer, C_CompanyGroupsSerializer1, C_CompanySerializer2
+from ..Serializer.S_Companies import  C_CompanySerializer2
+
+from ..Serializer.S_CompanyGroup import C_CompanyGroupSerializer
 
 from ..Serializer.S_Designations import M_DesignationsSerializer
 
@@ -129,7 +131,7 @@ class SuperAdminView(CreateAPIView):
                     "UpdatedBy": 1,
                 }
 
-                CompaniesGroup_Serializer = C_CompanyGroupsSerializer1(
+                CompaniesGroup_Serializer = C_CompanyGroupSerializer(
                     data=CompanyGroupJSON)
 
                 if CompaniesGroup_Serializer.is_valid():
