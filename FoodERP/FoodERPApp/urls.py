@@ -10,6 +10,8 @@ from .Views.V_Orders import *
 
 from .Views.V_Companies import *
 
+from .Views.V_CompanyGroup import *
+
 from .Views.V_Pages import *
 
 from .Views.V_Roles import *
@@ -82,8 +84,8 @@ urlpatterns = [
     url(r'PageAccess$', H_PageAccessView.as_view()),
     url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
     url(r'Company$', C_CompaniesView.as_view()),
-    url(r'CompanyGroups/([0-9]+)$', C_CompanyGroupsViewSecond.as_view()),
-    url(r'CompanyGroups$', C_CompanyGroupsView.as_view()),
+    url(r'CompanyGroups/([0-9]+)$', C_CompanyGroupViewSecond.as_view()),
+    url(r'CompanyGroups$', C_CompanyGroupView.as_view()),
     url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
     url(r'Orders$', T_OrdersView.as_view()),
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
