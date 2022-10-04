@@ -55,15 +55,23 @@ class ItemUnitsSerializer(serializers.ModelSerializer):
         model = MC_ItemUnits
         fields = ['UnitID', 'BaseUnitQuantity' ]
         
+        
+class ItemGroupDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemGroupDetails
+        fields = ['GroupType', 'Group', 'SubGroup']        
+        
 class ItemCategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemCategoryDetails
-        fields = ['CategoryType', 'Category', 'SubCategory']
+        fields = ['CategoryType', 'Category']
 
 
 class ItemSerializer(serializers.ModelSerializer):
     
     ItemCategoryDetails = ItemCategoryDetailsSerializer(many=True)
+     
+    ItemGroupDetails = ItemGroupDetailsSerializer(many=True)
     
     ItemUnitDetails = ItemUnitsSerializer(many=True)
     
@@ -80,10 +88,11 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CreatedBy', 'UpdatedBy','ItemCategoryDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
+        ItemGroups_data = validated_data.pop('ItemGroupDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
         ItemImages_data = validated_data.pop('ItemImagesDetails')
         ItemDivisions_data = validated_data.pop('ItemDivisionDetails')
@@ -94,6 +103,9 @@ class ItemSerializer(serializers.ModelSerializer):
         
         for ItemCategory_data in ItemCategorys_data:
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=ItemID, **ItemCategory_data)
+        
+        for ItemGroup_data in ItemGroups_data:
+            ItemGroups = MC_ItemGroupDetails.objects.create(Item=ItemID, **ItemGroup_data)    
 
         for ItemUnit_data in ItemUnits_data:
             ItemUnits = MC_ItemUnits.objects.create(Item=ItemID, **ItemUnit_data)
@@ -139,22 +151,31 @@ class ItemSerializer(serializers.ModelSerializer):
         
         for a in instance.ItemCategoryDetails.all():
             a.delete()
-        for b in instance.ItemUnitDetails.all():
+        
+        for b in instance.ItemGroupDetails.all():
             b.delete()
-        for c in instance.ItemImagesDetails.all():
+                
+        for c in instance.ItemUnitDetails.all():
             c.delete()
-        for d in instance.ItemDivisionDetails.all():
+            
+        for d in instance.ItemImagesDetails.all():
             d.delete()
+            
+        for e in instance.ItemDivisionDetails.all():
+            e.delete()
          
-        # for e in instance.ItemMRPDetails.all():
-        #     e.delete()  
-        # for f in instance.ItemMarginDetails.all():
-        #     f.delete()                    
-        # for g in instance.ItemGSTHSNDetails.all():
-        #     g.delete()
+        # for f in instance.ItemMRPDetails.all():
+        #     f.delete()  
+        # for g in instance.ItemMarginDetails.all():
+        #     g.delete()                    
+        # for h in instance.ItemGSTHSNDetails.all():
+        #     h.delete()
         
         for ItemCategory_data in  validated_data['ItemCategoryDetails']:
             ItemCategorys = MC_ItemCategoryDetails.objects.create(Item=instance, **ItemCategory_data)
+        
+        for ItemGroup_data in  validated_data['ItemGroupDetails']:
+            ItemCategorys = MC_ItemGroupDetails.objects.create(Item=instance, **ItemGroup_data)    
 
         for ItemUnit_data in validated_data['ItemUnitDetails']:
             ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)
@@ -264,34 +285,55 @@ class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
         fields = ['id','UnitID', 'BaseUnitQuantity' ]
-        
-class ItemSubCategorySerializerSecond(serializers.ModelSerializer):
+
+class ItemSubGroupSerializerSecond(serializers.ModelSerializer):
     class Meta:
-        model = M_ProductSubCategory
+        model = MC_SubGroup
         fields = ['id','Name']
+
+class ItemGroupSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Group
+        fields = ['id','Name']
+        
+class ItemGroupTypeSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_GroupType
+        fields = ['id','Name']        
+        
 
 class ItemCategorySerializerSecond(serializers.ModelSerializer):
     class Meta:
-        model = M_ProductCategory
+        model = M_Category
         fields = ['id','Name']
         
 class ItemCategoryTypeSerializerSecond(serializers.ModelSerializer):
     class Meta:
-        model = M_ProductCategoryType
+        model = M_CategoryType
         fields = ['id','Name']
 
+class ItemGroupDetailsSerializerSecond(serializers.ModelSerializer):
+    SubGroup = ItemSubGroupSerializerSecond(read_only=True)
+    Group = ItemGroupSerializerSecond(read_only=True)
+    GroupType = ItemGroupTypeSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemCategoryDetails
+        fields = ['id','GroupType','Group','SubGroup']
+
+
 class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
-    SubCategory = ItemSubCategorySerializerSecond(read_only=True)
+   
     Category = ItemCategorySerializerSecond(read_only=True)
     CategoryType = ItemCategoryTypeSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemCategoryDetails
-        fields = ['id','Category','CategoryType','SubCategory']
+        fields = ['id','CategoryType','Category']
 
 class ItemSerializerSecond(serializers.ModelSerializer):
     Company=CompanySerializerSecond()
     BaseUnitID = UnitSerializerSecond()
     ItemCategoryDetails = ItemCategoryDetailsSerializerSecond(read_only=True,many=True)
+    ItemGroupDetails = ItemGroupDetailsSerializerSecond(read_only=True,many=True)
     ItemUnitDetails =ItemUnitsSerializerSecond(many=True)
     ItemImagesDetails = ItemImagesSerializerSecond(read_only=True,many=True)
     ItemDivisionDetails = ItemDivisionsSerializerSecond(many=True)

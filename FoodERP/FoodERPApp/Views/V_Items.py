@@ -71,81 +71,91 @@ class M_ItemsViewSecond(CreateAPIView):
                                 "CategoryTypeName": b['CategoryType']['Name'],
                                 "Category": b['Category']['id'],
                                 "CategoryName": b['Category']['Name'],
-                                "SubCategory": b['SubCategory']['id'],
-                                "SubCategoryName": b['SubCategory']['Name'],
                             })
-                            
-                        UnitDetails=list()
-                        for c in a['ItemUnitDetails']:
-                            UnitDetails.append({
+                        
+                        GroupDetails=list()
+                        for c in a['ItemGroupDetails']:
+                            GroupDetails.append({
                                 "id": c['id'],
-                                "UnitID": c['UnitID']['id'],
-                                "UnitName": c['UnitID']['Name'],
-                                "BaseUnitQuantity": c['BaseUnitQuantity'],
+                                "GroupType": c['GroupType']['id'],
+                                "GroupTypeName": c['GroupType']['Name'],
+                                "Group": c['Group']['id'],
+                                "GroupName": c['Group']['Name'],
+                                "SubGroup": c['SubGroup']['id'],
+                                "SubGroupName": c['SubGroup']['Name'],
+                            })
+                        
+                        UnitDetails=list()
+                        for d in a['ItemUnitDetails']:
+                            UnitDetails.append({
+                                "id": d['id'],
+                                "UnitID": d['UnitID']['id'],
+                                "UnitName": d['UnitID']['Name'],
+                                "BaseUnitQuantity": d['BaseUnitQuantity'],
                             
                             })
                             
                         ImagesDetails=list()
-                        for d in a['ItemImagesDetails']:
+                        for e in a['ItemImagesDetails']:
                             ImagesDetails.append({
-                                "id": d['id'],
-                                "Item_pic": d['Item_pic'],
-                                "ImageType": d['ImageType']['id'],
-                                "ImageTypeName": d['ImageType']['Name'],
+                                "id": e['id'],
+                                "Item_pic": e['Item_pic'],
+                                "ImageType": e['ImageType']['id'],
+                                "ImageTypeName": e['ImageType']['Name'],
                                 
                             })        
                         
                         DivisionDetails=list()
-                        for e in a['ItemDivisionDetails']:
+                        for f in a['ItemDivisionDetails']:
                             DivisionDetails.append({
-                                "id": e['id'],
-                                "Division": e['Division']['id'],
-                                "DivisionName": e['Division']['Name'],
+                                "id": f['id'],
+                                "Division": f['Division']['id'],
+                                "DivisionName": f['Division']['Name'],
                                 
                             })    
                         
                         MRPDetails=list()
-                        for f in a['ItemMRPDetails']:
+                        for g in a['ItemMRPDetails']:
                             MRPDetails.append({
-                                "id": f['id'],
-                                "EffectiveDate": f['EffectiveDate'],
-                                "Company": f['Company']['id'],
-                                "CompanyName": f['Company']['Name'],
-                                "MRP": f['MRP'],
-                                "Party": f['Party']['id'],
-                                "PartyName": f['Party']['Name'],
-                                "Division":f['Division']['id'],
-                                "DivisionName":f['Division']['Name'],
-                                "CreatedBy":f['CreatedBy'],
-                                "UpdatedBy":f['UpdatedBy']
-                            })
-                        
-                        MarginDetails=list()
-                        for g in a['ItemMarginDetails']:
-                            MarginDetails.append({
                                 "id": g['id'],
                                 "EffectiveDate": g['EffectiveDate'],
                                 "Company": g['Company']['id'],
                                 "CompanyName": g['Company']['Name'],
+                                "MRP": g['MRP'],
                                 "Party": g['Party']['id'],
                                 "PartyName": g['Party']['Name'],
-                                "Margin": g['Margin'],
+                                "Division":g['Division']['id'],
+                                "DivisionName":g['Division']['Name'],
                                 "CreatedBy":g['CreatedBy'],
-                                "UpdatedBy":g['UpdatedBy'],
-                                "PriceList":g['PriceList']['id'],
-                                "PriceListName":g['PriceList']['Name'],
+                                "UpdatedBy":g['UpdatedBy']
+                            })
+                        
+                        MarginDetails=list()
+                        for h in a['ItemMarginDetails']:
+                            MarginDetails.append({
+                                "id": h['id'],
+                                "EffectiveDate": h['EffectiveDate'],
+                                "Company": h['Company']['id'],
+                                "CompanyName": h['Company']['Name'],
+                                "Party": h['Party']['id'],
+                                "PartyName": h['Party']['Name'],
+                                "Margin": h['Margin'],
+                                "CreatedBy":h['CreatedBy'],
+                                "UpdatedBy":h['UpdatedBy'],
+                                "PriceList":h['PriceList']['id'],
+                                "PriceListName":h['PriceList']['Name'],
                                    
                             })
                         
                         GSTHSNDetails=list()
-                        for h in a['ItemGSTHSNDetails']:
+                        for i in a['ItemGSTHSNDetails']:
                             GSTHSNDetails.append({
-                                "id": h['id'],
-                                "EffectiveDate": h['EffectiveDate'],
-                                "GSTPercentage": h['GSTPercentage'],
-                                "HSNCode": h['HSNCode'],
-                                "CreatedBy":h['CreatedBy'],
-                                "UpdatedBy":h['UpdatedBy']
+                                "id": i['id'],
+                                "EffectiveDate": i['EffectiveDate'],
+                                "GSTPercentage": i['GSTPercentage'],
+                                "HSNCode": i['HSNCode'],
+                                "CreatedBy":i['CreatedBy'],
+                                "UpdatedBy":i['UpdatedBy']
                                 
                             })            
                             
@@ -165,6 +175,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
                             "ItemCategoryDetails" : CategoryDetails,
+                            "ItemGroupDetails" : GroupDetails,
                             "ItemUnitDetails": UnitDetails, 
                             "ItemImagesDetails" : ImagesDetails,
                             "ItemDivisionDetails": DivisionDetails,
