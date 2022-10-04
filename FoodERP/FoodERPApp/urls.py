@@ -42,11 +42,15 @@ from .Views.V_abc import *
 
 from .Views.V_SendMail import *
 
-from .Views.V_ProductCategoryTypes import *  
+from .Views.V_CategoryType import *  
 
-from .Views.V_ProductCategory import * 
+from .Views.V_Category import *
 
-from .Views.V_SubProductCategory import *
+from .Views.V_GroupType import * 
+
+from .Views.V_Group import * 
+
+from .Views.V_SubGroup import *
 
 from .Views.V_Units import * 
 
@@ -103,12 +107,16 @@ urlpatterns = [
     url(r'PartyTypes$', PartyTypeView.as_view()),
     url(r'SendMail$', SendViewMail.as_view()),
     url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
-    url(r'CategoryTypes/([0-9]+)$', M_ProductCategoryTypeViewSecond.as_view()),
-    url(r'CategoryTypes$', M_ProductCategoryTypeView.as_view()),
-    url(r'Category/([0-9]+)$', ProductCategoryViewSecond.as_view()),
-    url(r'Category$', ProductCategoryView.as_view()),
-    url(r'SubCategorys/([0-9]+)$', SubProductCategoryViewSecond.as_view()),
-    url(r'SubCategorys$', SubProductCategoryView.as_view()),
+    url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
+    url(r'CategoryTypes$', CategoryTypeView.as_view()),
+    url(r'Category/([0-9]+)$', CategoryViewSecond.as_view()),
+    url(r'Category$', CategoryView.as_view()),
+    url(r'GroupTypes/([0-9]+)$', GroupTypeViewSecond.as_view()),
+    url(r'GroupTypes$', GroupTypeView.as_view()),
+    url(r'Group/([0-9]+)$', GroupViewSecond.as_view()),
+    url(r'Group$', GroupView.as_view()),
+    url(r'SubGroups/([0-9]+)$', SubGroupViewSecond.as_view()),
+    url(r'SubGroups$', SubGroupView.as_view()),
     url(r'UnitList$', M_UnitsView.as_view()),
     url(r'Driver/([0-9]+)$', M_DriverViewSecond.as_view()),
     url(r'Driver$', M_DriverView.as_view()),
@@ -151,7 +159,8 @@ urlpatterns = [
     url(r'GerUserDetials$',GerUserDetialsView.as_view()),
     url(r'SuperAdmin$',SuperAdminView.as_view()),
     url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
-    url(r'GetSubCategoryByCategoryID/([0-9]+)$', GetSubCategoryByCategoryID.as_view()),
+    url(r'GetGroupByGroupTypeID/([0-9]+)$', GetGroupByGroupTypeID.as_view()),
+    url(r'GetSubGroupByGroupID/([0-9]+)$', GetSubGroupByGroupID.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
     

@@ -503,37 +503,37 @@ class MC_SubGroup(models.Model):
         db_table = "MC_SubGroup"        
                 
     
-class M_ProductCategoryType(models.Model):
-    Name = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+# class M_ProductCategoryType(models.Model):
+#     Name = models.CharField(max_length=500)
+#     CreatedBy = models.IntegerField(default=False)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField(default=False)
+#     UpdatedOn = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        db_table = "M_ProductCategoryType"
+#     class Meta:
+#         db_table = "M_ProductCategoryType"
 
-class M_ProductCategory(models.Model):
-    Name = models.CharField(max_length=500)
-    ProductCategoryType = models.ForeignKey(
-        M_ProductCategoryType, related_name='ProductCategoryType', on_delete=models.DO_NOTHING)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
-    class Meta:
-        db_table = "M_ProductCategory"
+# class M_ProductCategory(models.Model):
+#     Name = models.CharField(max_length=500)
+#     ProductCategoryType = models.ForeignKey(
+#         M_ProductCategoryType, related_name='ProductCategoryType', on_delete=models.DO_NOTHING)
+#     CreatedBy = models.IntegerField(default=False)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField(default=False)
+#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
+#     class Meta:
+#         db_table = "M_ProductCategory"
 
-class M_ProductSubCategory(models.Model):
-    Name = models.CharField(max_length=500)
-    ProductCategory = models.ForeignKey(
-        M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
-    class Meta:
-        db_table = "M_ProductSubCategory"        
+# class M_ProductSubCategory(models.Model):
+#     Name = models.CharField(max_length=500)
+#     ProductCategory = models.ForeignKey(
+#         M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
+#     CreatedBy = models.IntegerField(default=False)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField(default=False)
+#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
+#     class Meta:
+#         db_table = "M_ProductSubCategory"        
 
 class M_Units(models.Model):
     Name = models.CharField(max_length=500)
@@ -569,15 +569,24 @@ class M_Items(models.Model):
         
 class MC_ItemCategoryDetails(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemCategoryDetails', on_delete=models.CASCADE)  
-    CategoryType = models.ForeignKey(M_ProductCategoryType, related_name='CategoryType', on_delete=models.DO_NOTHING)
-    Category = models.ForeignKey(M_ProductCategory, related_name='Category', on_delete=models.DO_NOTHING)
-    SubCategory = models.ForeignKey(M_ProductSubCategory, related_name='SubCategory', on_delete=models.DO_NOTHING)
+    CategoryType = models.ForeignKey(M_CategoryType, related_name='ItemCategoryType', on_delete=models.DO_NOTHING)
+    Category = models.ForeignKey(M_Category, related_name='ItemCategory', on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "MC_ItemCategoryDetails"
-        
-        
+
+class MC_ItemGroupDetails(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemGroupDetails', on_delete=models.CASCADE)  
+    GroupType = models.ForeignKey(M_GroupType, related_name='ItemGroupType', on_delete=models.DO_NOTHING)
+    Group = models.ForeignKey(M_Group, related_name='ItemGroup', on_delete=models.DO_NOTHING)
+    SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup', on_delete=models.DO_NOTHING)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "MC_ItemGroupDetails"
+
+     
 class MC_ItemUnits(models.Model):
     Item = models.ForeignKey(
         M_Items, related_name='ItemUnitDetails', on_delete=models.CASCADE)
