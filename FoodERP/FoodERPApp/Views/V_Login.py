@@ -3,7 +3,7 @@ from contextlib import nullcontext
 import re
 from django.http import JsonResponse
 
-from ..Serializer.S_Companies import C_CompanySerializer2
+from ..Serializer.S_Companies import C_CompanySerializer
 
 from ..Serializer.S_Employees import *
 from ..models import *
@@ -377,7 +377,7 @@ class GerUserDetialsView(APIView):
         CompanyID = M_EmployeesSerializerforgetdata(company, many=True).data
 
         company_Group = C_Companies.objects.filter(id=CompanyID[0]['Company'])
-        CompanyGroupID = C_CompanySerializer2(company_Group, many=True).data
+        CompanyGroupID = C_CompanySerializer(company_Group, many=True).data
 
         request.session['UserID'] = UserId
         request.session['UserName'] = EmployeeID[0]["LoginName"]
