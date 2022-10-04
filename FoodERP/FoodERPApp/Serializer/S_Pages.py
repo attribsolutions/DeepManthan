@@ -15,14 +15,11 @@ class FieldValidationsSerializer(serializers.ModelSerializer):
         model = M_FieldValidations
         fields = ['id','Name','RegularExpression']        
 
-
 class MC_PagePageAccessSerializer(serializers.Serializer):
-   
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
 
 class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
-       
     id = serializers.IntegerField()
     ControlID = serializers.CharField(max_length=100)
     ControlType_id = serializers.IntegerField()
@@ -69,7 +66,7 @@ class M_PagesSerializer2(serializers.ModelSerializer):
 class MC_PageFieldMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PageFieldMaster
-        fields = ['ControlID','ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect','DefaultSort']         
+        fields = ['ControlID','ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect','DefaultSort','InValidMsg']         
 
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
