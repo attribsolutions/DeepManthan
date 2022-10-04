@@ -23,7 +23,7 @@ class C_CompaniesView(CreateAPIView):
             with transaction.atomic():
                 Companiesdata = C_Companies.objects.all()
                 if Companiesdata.exists():
-                    Companies_Serializer = C_CompanySerializer1(Companiesdata, many=True)
+                    Companies_Serializer = C_CompanySerializerSecond(Companiesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Companies_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Companies Not Available', 'Data': []})    
         except Exception :
@@ -35,7 +35,7 @@ class C_CompaniesView(CreateAPIView):
         try:
             with transaction.atomic():
                 Companiesdata = JSONParser().parse(request)
-                Companies_Serializer = C_CompanySerializer2(data=Companiesdata)
+                Companies_Serializer = C_CompanySerializer(data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully', 'Data':[]})
@@ -52,20 +52,37 @@ class C_CompaniesViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     
-    def get(self, request, id=0 ):
+    @transaction.atomic()
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                query = C_Companies.objects.raw('''SELECT c_companies.id,c_companies.Name,c_companies.Address,c_companies.GSTIN,c_companies.PhoneNo,c_companies.GSTIN,c_companies.CompanyAbbreviation,c_companies.EmailID,c_companies.CreatedBy,c_companies.CreatedOn,c_companies.UpdatedBy,c_companies.UpdatedOn,c_companies.CompanyGroup_id,c_companygroups.Name CompanyGroupName FROM c_companies
-JOIN c_companygroups ON c_companygroups.id=c_companies.CompanyGroup_id
-WHERE c_companies.id = %s''',[id])
-                if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Employee Not available', 'Data': []})
-                else:    
-                    Companies_Serializer = C_CompanySerializer3(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Companies_Serializer[0]})   
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Error', 'Data': []})
-            
+                Groupquery = C_Companies.objects.filter(id=id)
+                if Groupquery.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Companydata = C_CompanySerializerSecond(Groupquery, many=True).data
+                    CompanyList=list()
+                    for a in Companydata:
+                        CompanyList.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "CompanyGroup": a['CompanyGroup']['id'],
+                            "CompanyGroupName": a['CompanyGroup']['Name'],
+                            "Address": a['Address'],
+                            "GSTIN": a['GSTIN'],
+                            "PhoneNo": a['PhoneNo'],
+                            "CompanyAbbreviation": a['CompanyAbbreviation'],
+                            "EmailID": a['EmailID'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -73,7 +90,7 @@ WHERE c_companies.id = %s''',[id])
             with transaction.atomic():
                 Companiesdata = JSONParser().parse(request)
                 CompaniesdataByID = C_Companies.objects.get(id=id)
-                Companies_Serializer = C_CompanySerializer2(
+                Companies_Serializer = C_CompanySerializer(
                     CompaniesdataByID, data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
@@ -99,8 +116,6 @@ WHERE c_companies.id = %s''',[id])
 
 
 
-
-
 ''' Below class used on Party Master Company Dropdown Populate Here we Check Division is IsSCM Or not. If IsSCM Then We show IsSCM Company Else Other'''
 class GetCompanyByDivisionType(CreateAPIView):
     
@@ -118,7 +133,7 @@ class GetCompanyByDivisionType(CreateAPIView):
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': PartyTypedata_Serializer[0]['IsSCM'] })
                     CompaniesData = C_Companies.objects.filter(IsSCM=PartyTypedata_Serializer[0]['IsSCM'])
                     if CompaniesData.exists():
-                        C_Companiesdata_Serializer = C_CompanySerializer2(CompaniesData, many=True).data
+                        C_Companiesdata_Serializer = C_CompanySerializer(CompaniesData, many=True).data
                         # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': C_Companiesdata_Serializer })
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':C_Companiesdata_Serializer })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
@@ -138,7 +153,7 @@ class GetCompanyByEmployeeType(CreateAPIView):
                 EmployeeTypesdata_Serializer = M_EmployeeTypeSerializer(EmployeeTypesdata).data
                 
                 Companiesdata = C_Companies.objects.filter(IsSCM=EmployeeTypesdata_Serializer['IsSCM'])
-                Companiesdata_Serializer = C_CompanySerializer2(Companiesdata, many=True)
+                Companiesdata_Serializer = C_CompanySerializer(Companiesdata, many=True)
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Companiesdata_Serializer.data})
         except Exception :
