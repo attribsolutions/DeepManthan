@@ -126,8 +126,8 @@ class GetSubGroupByGroupID(CreateAPIView):
             with transaction.atomic():
                 SubGroupquery = MC_SubGroup.objects.filter(Group_id=id)
                 if SubGroupquery.exists():
-                    # return JsonResponse({'query':  str(Itemsquery.query)})
-                    SubGroupdata = GroupSerializerSecond(SubGroupquery, many=True).data
+                    # return JsonResponse({'query':  str(SubGroupquery.query)})
+                    SubGroupdata = SubGroupSerializerSecond(SubGroupquery, many=True).data
                     SubGroupList=list()
                     for a in SubGroupdata:
                         SubGroupList.append({
