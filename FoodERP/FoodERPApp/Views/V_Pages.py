@@ -64,6 +64,7 @@ Rp.Name RelatedPageName
 FROM M_Pages p 
 join H_Modules m on p.Module_id= m.ID
 left join M_Pages RP on p.RelatedPageID=RP.id where p.id= %s''', [id])
+                
                 if not HPagesdata:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:    
@@ -85,10 +86,12 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 "AccessName": b['Name']
                             })
                         
-                        PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [id])
+                        PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [id])
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(PageFieldQuery.query)})
+                       
                         MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
                             PageFieldQuery, many=True).data
+                        
                         MC_PageFieldMasterListData = list()
                         for c in MC_PageFieldMaster_data:
                             MC_PageFieldMasterListData.append({
@@ -106,10 +109,10 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 "ShowInDownload": c['ShowInDownload'],
                                 "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
                                 "RegularExpression":c['RegularExpression'],
-                                "InValidMsg":c['InValidMsg'],
+                                
                             })
                         
-                        
+                       
                         PageListData.append({
 
                             "id": a['id'],
@@ -148,8 +151,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Pages_Serializer.errors, 'Data': []})
-        except Exception :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+        except Exception  :
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error' , 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -227,6 +230,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "DisplayIndex": a['DisplayIndex'],
                             "Icon": a['Icon'],
                             "ActualPagePath": a['ActualPagePath'],
+                            # "isShowOnMenu": a['isShowOnMenu'],
                             "RolePageAccess": PageAccessListData
                         })
                     PageListData = {
@@ -270,4 +274,4 @@ class FieldValidationsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': FieldValidations_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Field Validations Not Available', 'Data': []})    
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})         
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
