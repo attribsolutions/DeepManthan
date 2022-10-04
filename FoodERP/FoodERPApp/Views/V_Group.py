@@ -36,8 +36,8 @@ class GroupView(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
-        except M_Category.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Group Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
@@ -51,8 +51,8 @@ class GroupView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Group_Serializer.errors, 'Data': []})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GroupViewSecond(CreateAPIView):
     
@@ -81,8 +81,8 @@ class GroupViewSecond(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
-        except M_Group.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Group Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
@@ -99,8 +99,8 @@ class GroupViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Group_Serializer.errors, 'Data':[]})
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
     @transaction.atomic()
@@ -142,5 +142,5 @@ class GetGroupByGroupTypeID(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
-        except M_Group.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Group Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
