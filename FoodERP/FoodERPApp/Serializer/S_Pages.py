@@ -144,5 +144,3 @@ class M_PagesSerializer1(serializers.ModelSerializer):
     
 
         
-
-      
