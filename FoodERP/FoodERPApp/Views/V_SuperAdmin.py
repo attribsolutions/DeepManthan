@@ -21,7 +21,7 @@ from ..Serializer.S_Pages import M_PagesSerializer1
 
 from ..Serializer.S_States import DistrictsSerializer, StateSerializer
 
-from ..Serializer.S_Companies import  C_CompanySerializer2
+from ..Serializer.S_Companies import  C_CompanySerializer
 
 from ..Serializer.S_CompanyGroup import C_CompanyGroupSerializer
 
@@ -159,7 +159,7 @@ class SuperAdminView(CreateAPIView):
 
                 }
 
-                Companies_Serializer = C_CompanySerializer2(data=CompanyJSON)
+                Companies_Serializer = C_CompanySerializer(data=CompanyJSON)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
                     print('Company')
