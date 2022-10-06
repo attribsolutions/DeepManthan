@@ -64,6 +64,28 @@ class MRPMaster:
             EffectiveDateMRP = " "
         return EffectiveDateMRP
     
+    def GetEffectiveDateMRPID(self):
+        if int(self.DivisionID)>0:
+            D=Q(Division_id=self.DivisionID)
+        else:
+            D=Q(Division_id__isnull=True)
+        
+        if int(self.PartyID)>0:
+            P=Q(Party_id=self.PartyID)
+        else:
+            P=Q(Party_id__isnull=True)
+        
+        EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+       
+        if EffectiveDateItemMRPdata.exists():
+            MRP_Serializer = M_MRPsSerializer(EffectiveDateItemMRPdata, many=True).data
+            EffectiveDateID =   MRP_Serializer[0]['id']
+        else:
+            EffectiveDateID = " "
+        return EffectiveDateID
+    
+    
+    
 ###################################################################################################################
 
 class MarginMaster:
