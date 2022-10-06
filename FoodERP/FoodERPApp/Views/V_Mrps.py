@@ -41,10 +41,11 @@ class M_MRPsView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Mrpsdata = JSONParser().parse(request)
-                a=GetMaxValue(M_MRPMaster,'CommonID') 
+                a=MaxValueMaster(M_MRPMaster,'CommonID')
+                jsondata=a.GetMaxValue() 
                 additionaldata= list()
                 for b in M_Mrpsdata:
-                    b.update({'CommonID': a})
+                    b.update({'CommonID': jsondata})
                     additionaldata.append(b)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully','Data' : additionaldata })
                 M_Mrps_Serializer = M_MRPsSerializer(data=additionaldata,many=True)
@@ -76,16 +77,38 @@ class GETMrpDetails(CreateAPIView):
                     ItemList = list()
                     for a in Items_Serializer:
                         Item= a['id']
-                        MRP = GetCurrentDateMRP(Item,DivisionID,PartyID,EffectiveDate)
+                        
+                        b=MRPMaster(Item,DivisionID,PartyID,EffectiveDate)
+                        TodaysMRP=b.GetTodaysDateMRP()
+                        EffectiveDateMRP=b.GetEffectiveDateMRP()
                         ItemList.append({
                             "id": Item,
                             "Name": a['Name'],
-                            "CurrentMRP": MRP,
-                            "MRP":""
+                            "CurrentMRP": TodaysMRP,
+                            "MRP": EffectiveDateMRP
+                          
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class M_MRPsViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                MRPdata = M_MRPMaster.objects.raw('''SELECT m_mrpmaster.id,m_mrpmaster.EffectiveDate,m_mrpmaster.Company_id,m_mrpmaster.Division_id,m_mrpmaster.Party_id,m_mrpmaster.CommonID,c_companies.Name CompanyName,a.Name DivisionName,m_parties.Name PartyName  FROM m_mrpmaster left join c_companies on c_companies.id = m_mrpmaster.Company_id left join m_parties a on a.id = m_mrpmaster.Division_id left join m_parties on m_parties.id = m_mrpmaster.Party_id where m_mrpmaster.CommonID is not null  group by EffectiveDate,Party_id,Division_id Order BY EffectiveDate Desc''')
+                # print(str(MRPdata.query))
+                if not MRPdata:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Not available', 'Data': []})
+                else:
+                    MRPdata_Serializer = M_MRPsSerializerSecond(MRPdata, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPdata_Serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
     
     
     

@@ -43,10 +43,11 @@ class M_MarginsView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Marginsdata = JSONParser().parse(request)
-                a=GetMaxValue(M_MarginMaster,'CommonID')    
+                a=MaxValueMaster(M_MarginMaster,'CommonID')
+                jsondata=a.GetMaxValue()     
                 additionaldata= list()
                 for b in M_Marginsdata:
-                    b.update({'CommonID': a})
+                    b.update({'CommonID': jsondata})
                     additionaldata.append(b)     
                 M_Margins_Serializer = M_MarginsSerializer(data=additionaldata,many=True)
             if M_Margins_Serializer.is_valid():
@@ -77,12 +78,14 @@ class GETMarginDetails(CreateAPIView):
                     ItemList = list()
                     for a in Items_Serializer:
                         Item= a['id']
-                        Margin = GetCurrentDateMargin(Item,PriceListID,PartyID,EffectiveDate)
+                        b = MarginMaster(Item,PriceListID,PartyID,EffectiveDate)
+                        TodaysDateMargin=b.GetTodaysDateMargin()
+                        EffectiveDateMargin=b.GetEffectiveDateMargin()
                         ItemList.append({
                             "id": Item,
                             "Name": a['Name'],
-                            "CurrentMargin": Margin,
-                            "Margin":""
+                            "CurrentMargin": TodaysDateMargin,
+                            "Margin":EffectiveDateMargin
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList})
         except Exception as e:
