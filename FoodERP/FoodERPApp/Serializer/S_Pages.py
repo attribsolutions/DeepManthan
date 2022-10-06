@@ -54,6 +54,7 @@ class M_PagesSerializer(serializers.Serializer):
     RelatedPageID = serializers.IntegerField()
     RelatedPageName=serializers.CharField(max_length=100)
     IsDivisionRequired = serializers.BooleanField(default=False)
+    IsEditPopuporComponent = serializers.BooleanField(default=False)
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
@@ -123,6 +124,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'RelatedPageID', instance.RelatedPageID)
             instance.IsDivisionRequired = validated_data.get(
                 'IsDivisionRequired', instance.IsDivisionRequired)
+            instance.IsEditPopuporComponent = validated_data.get(
+                'IsEditPopuporComponent', instance.IsEditPopuporComponent)
             instance.save()
 
             for Access in instance.PagePageAccess.all():
