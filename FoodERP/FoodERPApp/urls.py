@@ -133,7 +133,7 @@ urlpatterns = [
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
     url(r'Margins$',M_MarginsView.as_view()),
-    url(r'Margins/([0-9]+)$',M_MarginsViewSecond.as_view()),
+    url(r'Margins/([0-9]+)$', M_MarginsViewSecond.as_view()),
     url(r'GetMRP$',GETMrpDetails.as_view()),
     url(r'GetMargin$',GETMarginDetails.as_view()),
     url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
