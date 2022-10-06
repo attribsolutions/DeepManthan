@@ -61,23 +61,21 @@ class RoleAccessView(RetrieveAPIView):
         else:
             modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company_id__isnull=True, Role_id__in=y).values('Modules_id').distinct()   
 
+        queryset=H_Modules.objects.filter(id__in=modules).order_by("DisplayIndex")
+        serializerdata = H_ModulesSerializer(queryset, many=True).data
+
         # return Response(str(modules.query))
         # print(str(modules.query))
-        serializerdata = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
+        # serializerdata = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
         # print(serializerdata)
         Moduledata = list()
                
         for a in serializerdata:
-            id = a['Modules_id']
+            id = a['id']
             Modulesdata = H_Modules.objects.get(id=id)
             Modules_Serializer = H_ModulesSerializer(Modulesdata).data
              
-#             query = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id,m_pages.Name,m_pages.PageHeading,m_pages.PageDescription,m_pages.PageDescriptionDetails,m_pages.ActualPagePath,m_pages.DisplayIndex,
-# m_pages.Icon,m_pages.isActive,m_pages.Module_id,
-# m_pages.PageType,m_pages.RelatedPageID,Pages_id 
-# FROM m_roleaccess
-# JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id 
-# WHERE Role_id IN  %s AND  Modules_id=%s and %s and %s  ''', (y, id,Division,Company))
+
     
             if (int(PartyID) > 0)  :
 
@@ -112,8 +110,8 @@ class RoleAccessView(RetrieveAPIView):
                 })
 
             response1 = {
-                "ModuleID": a['Modules_id'],
-                "ModuleName":Modules_Serializer["Name"],
+                "ModuleID": a['id'],
+                "ModuleName":a["Name"],
                 "ModuleData": Pagesdata,
 
             }
