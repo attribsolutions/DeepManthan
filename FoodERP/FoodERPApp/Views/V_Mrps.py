@@ -41,10 +41,11 @@ class M_MRPsView(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Mrpsdata = JSONParser().parse(request)
-                a=GetMaxValue(M_MRPMaster,'CommonID') 
+                a=MaxValueMaster(M_MRPMaster,'CommonID')
+                jsondata=a.GetMaxValue() 
                 additionaldata= list()
                 for b in M_Mrpsdata:
-                    b.update({'CommonID': a})
+                    b.update({'CommonID': jsondata})
                     additionaldata.append(b)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully','Data' : additionaldata })
                 M_Mrps_Serializer = M_MRPsSerializer(data=additionaldata,many=True)
@@ -76,12 +77,16 @@ class GETMrpDetails(CreateAPIView):
                     ItemList = list()
                     for a in Items_Serializer:
                         Item= a['id']
-                        MRP = GetCurrentDateMRP(Item,DivisionID,PartyID,EffectiveDate)
+                        
+                        b=MRPMaster(Item,DivisionID,PartyID,EffectiveDate)
+                        TodaysMRP=b.GetTodaysDateMRP()
+                        EffectiveDateMRP=b.GetEffectiveDateMRP()
                         ItemList.append({
                             "id": Item,
                             "Name": a['Name'],
-                            "CurrentMRP": MRP,
-                            "MRP":MRP
+                            "CurrentMRP": TodaysMRP,
+                            "MRP": EffectiveDateMRP
+                          
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
