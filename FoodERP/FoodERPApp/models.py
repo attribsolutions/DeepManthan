@@ -320,6 +320,8 @@ class M_Pages(models.Model):
     Icon = models.CharField(max_length=100)
     ActualPagePath = models.CharField(max_length=100)
     IsDivisionRequired = models.BooleanField(default=False)
+    ''' IsEditPopuporComponent if flag set edit option open in Popup else go to component'''
+    IsEditPopuporComponent = models.BooleanField(default=False)
     PageType = models.IntegerField()
     RelatedPageID = models.IntegerField()
     CreatedBy = models.IntegerField()
