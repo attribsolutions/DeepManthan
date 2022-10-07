@@ -502,40 +502,7 @@ class MC_SubGroup(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)    
     class Meta:
-        db_table = "MC_SubGroup"        
-                
-    
-# class M_ProductCategoryType(models.Model):
-#     Name = models.CharField(max_length=500)
-#     CreatedBy = models.IntegerField(default=False)
-#     CreatedOn = models.DateTimeField(auto_now_add=True)
-#     UpdatedBy = models.IntegerField(default=False)
-#     UpdatedOn = models.DateTimeField(auto_now_add=True)
-
-#     class Meta:
-#         db_table = "M_ProductCategoryType"
-
-# class M_ProductCategory(models.Model):
-#     Name = models.CharField(max_length=500)
-#     ProductCategoryType = models.ForeignKey(
-#         M_ProductCategoryType, related_name='ProductCategoryType', on_delete=models.DO_NOTHING)
-#     CreatedBy = models.IntegerField(default=False)
-#     CreatedOn = models.DateTimeField(auto_now_add=True)
-#     UpdatedBy = models.IntegerField(default=False)
-#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
-#     class Meta:
-#         db_table = "M_ProductCategory"
-
-# class M_ProductSubCategory(models.Model):
-#     Name = models.CharField(max_length=500)
-#     ProductCategory = models.ForeignKey(
-#         M_ProductCategory, related_name='ProductCategory', on_delete=models.DO_NOTHING)
-#     CreatedBy = models.IntegerField(default=False)
-#     CreatedOn = models.DateTimeField(auto_now_add=True)
-#     UpdatedBy = models.IntegerField(default=False)
-#     UpdatedOn = models.DateTimeField(auto_now_add=True)    
-#     class Meta:
-#         db_table = "M_ProductSubCategory"        
+        db_table = "MC_SubGroup"                             
 
 class M_Units(models.Model):
     Name = models.CharField(max_length=500)
@@ -543,13 +510,10 @@ class M_Units(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-
     class Meta:
         db_table = "M_Units"
-        
-        
+              
 class M_Items(models.Model):
-
     Name = models.CharField(max_length=500)
     ShortName = models.CharField(max_length=500)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2)
@@ -564,7 +528,6 @@ class M_Items(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = "M_Items"
         
@@ -595,9 +558,7 @@ class MC_ItemUnits(models.Model):
     UnitID = models.ForeignKey(
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
-    
     IsDeleted = models.BooleanField(default=False)
-
     class Meta:
         db_table = "MC_ItemUnits"                
 
@@ -614,19 +575,6 @@ class MC_ItemDivisions(models.Model):
     class Meta:
         db_table = "MC_ItemDivisions"
 
-# class MC_ItemGSTHSNCode(models.Model):
-#     EffectiveDate = models.DateField()
-#     Item = models.ForeignKey(M_Items, related_name='GSTHSNDetails', on_delete=models.CASCADE)
-#     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-#     HSNCode = models.CharField(max_length=500)
-#     CommonID = models.IntegerField(null=True,blank=True)
-#     CreatedBy = models.IntegerField()
-#     CreatedOn = models.DateTimeField(auto_now_add=True)
-#     UpdatedBy = models.IntegerField()
-#     UpdatedOn = models.DateTimeField(auto_now_add=True)
-#     class Meta:
-#         db_table = "MC_ItemGSTHSNCode"
-
 class M_GSTHSNCode(models.Model):
     EffectiveDate = models.DateField()
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
@@ -639,18 +587,14 @@ class M_GSTHSNCode(models.Model):
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "M_GSTHSNCode"          
-        
-                
-
+                   
 class M_ItemShelfLife(models.Model):
     Name = models.CharField(max_length=500)
     Days = models.IntegerField(default=False)
     class Meta:
         db_table = "M_ItemShelfLife"
 
-
 class M_MRPMaster(models.Model):
-    
     '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
     Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.DO_NOTHING,null=True,blank=True)
     'Customer means M_Parties ID'
@@ -688,10 +632,9 @@ class M_TermsAndConditions(models.Model):
     Name = models.CharField(max_length=500)
     class Meta:
         db_table = "M_TermsAndConditions"
-    
-        
-class T_Orders(models.Model):
 
+       
+class T_Orders(models.Model):
     OrderDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
@@ -701,13 +644,11 @@ class T_Orders(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = "T_Orders"
 
 
 class TC_OrderItems(models.Model):
-
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='Items', on_delete=models.DO_NOTHING)
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
@@ -733,7 +674,6 @@ class TC_OrderItems(models.Model):
 
 
 class T_Invoices(models.Model):
-
     Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
     InvoiceDate = models.DateField()
     Customer = models.ForeignKey(
