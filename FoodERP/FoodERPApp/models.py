@@ -614,7 +614,20 @@ class MC_ItemDivisions(models.Model):
     class Meta:
         db_table = "MC_ItemDivisions"
 
-class MC_ItemGSTHSNCode(models.Model):
+# class MC_ItemGSTHSNCode(models.Model):
+#     EffectiveDate = models.DateField()
+#     Item = models.ForeignKey(M_Items, related_name='GSTHSNDetails', on_delete=models.CASCADE)
+#     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+#     HSNCode = models.CharField(max_length=500)
+#     CommonID = models.IntegerField(null=True,blank=True)
+#     CreatedBy = models.IntegerField()
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField()
+#     UpdatedOn = models.DateTimeField(auto_now_add=True)
+#     class Meta:
+#         db_table = "MC_ItemGSTHSNCode"
+
+class M_GSTHSNCode(models.Model):
     EffectiveDate = models.DateField()
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
@@ -625,7 +638,9 @@ class MC_ItemGSTHSNCode(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "MC_ItemGSTHSNCode"        
+        db_table = "M_GSTHSNCode"          
+        
+                
 
 class M_ItemShelfLife(models.Model):
     Name = models.CharField(max_length=500)
@@ -700,7 +715,7 @@ class TC_OrderItems(models.Model):
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=2)
-    GST = models.ForeignKey(MC_ItemGSTHSNCode, related_name='ItemGST', on_delete=models.DO_NOTHING)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ItemGST', on_delete=models.DO_NOTHING)
     Margin = models.ForeignKey(M_MarginMaster, related_name='ItemMargin', on_delete=models.DO_NOTHING)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=10, decimal_places=2)
