@@ -28,7 +28,7 @@ class ImageTypesSerializer(serializers.ModelSerializer):
 class ItemGSTHSNSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_GSTHSNCode
-        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy','CommonID']
+        fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy','Company', 'UpdatedBy','CommonID']
     
 class ItemMarginSerializer(serializers.ModelSerializer):
     class Meta:
@@ -209,7 +209,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
 class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_GSTHSNCode
-        fields = ['id','EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
+        fields = ['id','EffectiveDate', 'GSTPercentage', 'HSNCode','Company', 'CreatedBy', 'UpdatedBy']
         
 class PriceListSerializerSecond(serializers.ModelSerializer):
      class Meta:

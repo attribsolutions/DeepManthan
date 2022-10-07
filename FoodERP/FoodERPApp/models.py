@@ -581,6 +581,7 @@ class M_GSTHSNCode(models.Model):
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     HSNCode = models.CharField(max_length=500)
     CommonID = models.IntegerField(null=True,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='GstCompany', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
