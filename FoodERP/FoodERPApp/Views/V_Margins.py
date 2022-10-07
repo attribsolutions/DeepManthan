@@ -79,21 +79,29 @@ class GETMarginDetails(CreateAPIView):
                     for a in Items_Serializer:
                         Item= a['id']
                         b = MarginMaster(Item,PriceListID,PartyID,EffectiveDate)
-                        TodaysDateMargin=b.GetTodaysDateMargin()
+                        TodaysMargin=b.GetTodaysDateMargin()
                         EffectiveDateMargin=b.GetEffectiveDateMargin()
+                        ID = b.GetEffectiveDateMarginID()
                         ItemList.append({
-                            "id": Item,
+                            "id": ID,
+                            "Item": Item,
                             "Name": a['Name'],
-                            "CurrentMargin": TodaysDateMargin,
+                            "CurrentMargin": TodaysMargin,
                             "Margin":EffectiveDateMargin
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+''' MRP Master List Delete Api Depend on ID '''
+
 class M_MarginsViewSecond(CreateAPIView):   
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+    
+    
+    
+    
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -106,4 +114,26 @@ class M_MarginsViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
+
+
+
+''' Margin Master List Delete Api Depend on CommonID '''
+class M_MarginsViewThird(CreateAPIView):
+    
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        Query = M_MarginMaster.objects.filter(CommonID=id)
+        # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':str(Query.query)})
+        Margin_Serializer = M_MarginsSerializer(Query, many=True).data
+        for a in Margin_Serializer:
+            deletedID = a['id']
+            try:
+                with transaction.atomic():
+                    Margindata = M_MarginMaster.objects.get(id=deletedID)
+                    Margindata.delete()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
+            except IntegrityError:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
+    
     

@@ -94,6 +94,7 @@ class GETMrpDetails(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+''' MRP Master List Delete Api Depend on ID '''
 class M_MRPsViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -106,10 +107,33 @@ class M_MRPsViewSecond(CreateAPIView):
                 MRPdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
         except M_MRPMaster.DoesNotExist:
+            transaction.set_rollback(True)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP Not available', 'Data': []})
-        except IntegrityError:   
+        except IntegrityError:
+            transaction.set_rollback(True)   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
-    
-    
+
+
+''' MRP Master List Delete Api Depend on CommonID '''
+class M_MRPsViewThird(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        Query = M_MRPMaster.objects.filter(CommonID=id)
+        # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':str(Query.query)})
+        MRP_Serializer = M_MRPsSerializer(Query, many=True).data
+        for a in MRP_Serializer:
+            deletedID = a['id']
+            try:
+                with transaction.atomic():
+                    MRPdata = M_MRPMaster.objects.get(id=deletedID)
+                    MRPdata.delete()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
+            except IntegrityError:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
+
     
            
