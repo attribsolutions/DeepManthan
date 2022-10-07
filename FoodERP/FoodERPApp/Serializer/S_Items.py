@@ -116,17 +116,13 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemDivision_data in ItemDivisions_data:
             ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
         
-        
         for ItemMRP_data in ItemMRPs_data:
-         
             ItemMrp = M_MRPMaster.objects.create(Item=ItemID, **ItemMRP_data)
         
         for ItemMargin_data in ItemMargins_data:
-       
             ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)
         
         for ItemGSTHSN_data in ItemGSTHSNs_data:
-          
             ItemGSTHSN = M_GSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  
             
         return ItemID
