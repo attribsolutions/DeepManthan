@@ -27,7 +27,7 @@ class ImageTypesSerializer(serializers.ModelSerializer):
 
 class ItemGSTHSNSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemGSTHSNCode
+        model = M_GSTHSNCode
         fields = ['EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy','CommonID']
     
 class ItemMarginSerializer(serializers.ModelSerializer):
@@ -127,7 +127,7 @@ class ItemSerializer(serializers.ModelSerializer):
         
         for ItemGSTHSN_data in ItemGSTHSNs_data:
           
-            ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  
+            ItemGSTHSN = M_GSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  
             
         return ItemID
     
@@ -196,7 +196,7 @@ class ItemSerializer(serializers.ModelSerializer):
         
         
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
-            ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data)    
+            ItemGSTHSN = M_GSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data)    
         
         return instance 
          
@@ -208,7 +208,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
         
 class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemGSTHSNCode
+        model = M_GSTHSNCode
         fields = ['id','EffectiveDate', 'GSTPercentage', 'HSNCode', 'CreatedBy', 'UpdatedBy']
         
 class PriceListSerializerSecond(serializers.ModelSerializer):
