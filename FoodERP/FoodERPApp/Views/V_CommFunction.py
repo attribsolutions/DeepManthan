@@ -134,6 +134,24 @@ class MarginMaster:
                 
         return EffectiveDateMargin
 
+    def GetEffectiveDateMarginID(self):
+        
+        if int(self.PartyID)>0:
+            P=Q(Party_id=self.PartyID)
+        else:
+            P=Q(Party_id__isnull=True)
+        
+        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        # print(str(ItemMargindata.query))
+
+        if ItemMargindata.exists():
+            Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
+            EffectiveDateMarginID=   Margin_Serializer[0]['id']
+        else:
+            EffectiveDateMarginID = " "
+                
+        return EffectiveDateMarginID
+    
 
 class MaxValueMaster:
 
