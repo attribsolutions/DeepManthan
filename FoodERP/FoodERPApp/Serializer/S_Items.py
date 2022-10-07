@@ -118,15 +118,15 @@ class ItemSerializer(serializers.ModelSerializer):
         
         
         for ItemMRP_data in ItemMRPs_data:
-            a=GetMaxValue(M_MRPMaster,'CommonID')
+         
             ItemMrp = M_MRPMaster.objects.create(Item=ItemID, **ItemMRP_data)
         
         for ItemMargin_data in ItemMargins_data:
-            b=GetMaxValue(M_MarginMaster,'CommonID')
+       
             ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)
         
         for ItemGSTHSN_data in ItemGSTHSNs_data:
-            c=GetMaxValue(MC_ItemGSTHSNCode,'CommonID')
+          
             ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  
             
         return ItemID
@@ -186,15 +186,15 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemDivision_data in validated_data['ItemDivisionDetails']:
             ItemDivision = MC_ItemDivisions.objects.create(Item=instance, **ItemDivision_data)    
         
-        a=GetMaxValue(M_MRPMaster,'CommonID')  
+       
         for ItemMRP_data in validated_data['ItemMRPDetails']:
             ItemGstMrp = M_MRPMaster.objects.create(Item=instance, **ItemMRP_data)
         
-        b=GetMaxValue(M_MarginMaster,'CommonID')
+      
         for ItemMargin_data in validated_data['ItemMarginDetails']:
             ItemMargin = M_MarginMaster.objects.create(Item=instance, **ItemMargin_data)
         
-        c=GetMaxValue(MC_ItemGSTHSNCode,'CommonID')
+        
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
             ItemGSTHSN = MC_ItemGSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data)    
         
