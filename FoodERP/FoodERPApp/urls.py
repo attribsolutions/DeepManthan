@@ -66,6 +66,8 @@ from .Views.V_Mrps import *
 
 from .Views.V_Margins import *
 
+from .Views.V_GSTHSNCode import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -136,8 +138,15 @@ urlpatterns = [
     url(r'Margins$',M_MarginsView.as_view()),
     url(r'Margins/([0-9]+)$', M_MarginsViewSecond.as_view()),
     url(r'DeleteMarginOnList/([0-9]+)$', M_MarginsViewThird.as_view()),
+    
+    url(r'GstHsnCode$',M_GstHsnCodeView.as_view()),
+    url(r'GstHsnCode/([0-9]+)$', M_GSTHSNCodeViewSecond.as_view()),
+    url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
+    
     url(r'GetMRP$',GETMrpDetails.as_view()),
     url(r'GetMargin$',GETMarginDetails.as_view()),
+    url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
+    
     url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
     
     # Dependencies APIs IN Projects 
