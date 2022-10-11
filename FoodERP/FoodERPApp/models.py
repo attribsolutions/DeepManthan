@@ -546,7 +546,7 @@ class MC_ItemGroupDetails(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemGroupDetails', on_delete=models.CASCADE)  
     GroupType = models.ForeignKey(M_GroupType, related_name='ItemGroupType', on_delete=models.DO_NOTHING)
     Group = models.ForeignKey(M_Group, related_name='ItemGroup', on_delete=models.DO_NOTHING)
-    SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup', on_delete=models.DO_NOTHING)
+    SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup',null=True, on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
