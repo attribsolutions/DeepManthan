@@ -64,11 +64,21 @@ class MRPMaster:
         # print(str(TodayDateItemMRPdata.query))
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(TodayDateItemMRPdata, many=True).data
-            TodaysMRP=MRP_Serializer[0]['MRP']
+            MRPs=MRP_Serializer[0]['MRP']
+            Date=MRP_Serializer[0]['EffectiveDate']
+            MRPDetails=list()
+            MRPDetails.append({
+                "TodaysMRP":MRPs,
+                "Date": Date,
+            })
         else:
-            TodaysMRP= ""
+            MRPDetails=list()
+            MRPDetails.append({
+                "TodaysMRP":"",
+                "Date": "",
+            })
             
-        return TodaysMRP
+        return MRPDetails
      
     def GetEffectiveDateMRP(self):
         if int(self.DivisionID)>0:
@@ -137,11 +147,22 @@ class MarginMaster:
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
-            TodaysMargin =  Margin_Serializer[0]['Margin']
+            Margin =  Margin_Serializer[0]['Margin']
+            Date =  Margin_Serializer[0]['EffectiveDate']
+            MarginDetails=list()
+            MarginDetails.append({
+                "TodaysMargin":Margin,
+                "Date": Date,
+            })
+            
         else:
-            TodaysMargin = ""
+            MarginDetails=list()
+            MarginDetails.append({
+                "TodaysMRP":"",
+                "Date": "",
+            })
 
-        return TodaysMargin
+        return MarginDetails
     
     def GetEffectiveDateMargin(self):
         
