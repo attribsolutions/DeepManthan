@@ -40,9 +40,6 @@ class MaxValueMaster:
         return a    
 
 
-
-
-
 class MRPMaster:
     
     today = date.today() 

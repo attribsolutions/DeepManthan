@@ -132,9 +132,11 @@ urlpatterns = [
     url(r'ControlTypes$', ControlTypeMasterView.as_view()),
     url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
     url(r'AddressTypes$',AddressTypesView.as_view()),
+    
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
     url(r'DeleteMrpOnList/([0-9]+)$',M_MRPsViewThird.as_view()),
+    
     url(r'Margins$',M_MarginsView.as_view()),
     url(r'Margins/([0-9]+)$', M_MarginsViewSecond.as_view()),
     url(r'DeleteMarginOnList/([0-9]+)$', M_MarginsViewThird.as_view()),
