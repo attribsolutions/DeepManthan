@@ -66,7 +66,7 @@ class MRPMaster:
             MRP_Serializer = M_MRPsSerializer(TodayDateItemMRPdata, many=True).data
             TodaysMRP=MRP_Serializer[0]['MRP']
         else:
-            TodaysMRP= " "
+            TodaysMRP= ""
             
         return TodaysMRP
      
@@ -88,7 +88,7 @@ class MRPMaster:
             MRP_Serializer = M_MRPsSerializer(EffectiveDateItemMRPdata, many=True).data
             EffectiveDateMRP =   MRP_Serializer[0]['MRP']
         else:
-            EffectiveDateMRP = " "
+            EffectiveDateMRP = ""
         return EffectiveDateMRP
     
     def GetEffectiveDateMRPID(self):
@@ -108,7 +108,7 @@ class MRPMaster:
             MRP_Serializer = M_MRPsSerializer(EffectiveDateItemMRPdata, many=True).data
             EffectiveDateID =   MRP_Serializer[0]['id']
         else:
-            EffectiveDateID = " "
+            EffectiveDateID = ""
         return EffectiveDateID
     
     
@@ -139,7 +139,7 @@ class MarginMaster:
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
             TodaysMargin =  Margin_Serializer[0]['Margin']
         else:
-            TodaysMargin = " "
+            TodaysMargin = ""
 
         return TodaysMargin
     
@@ -157,7 +157,7 @@ class MarginMaster:
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
             EffectiveDateMargin=   Margin_Serializer[0]['Margin']
         else:
-            EffectiveDateMargin = " "
+            EffectiveDateMargin = ""
                 
         return EffectiveDateMargin
 
@@ -175,7 +175,7 @@ class MarginMaster:
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
             EffectiveDateMarginID=   Margin_Serializer[0]['id']
         else:
-            EffectiveDateMarginID = " "
+            EffectiveDateMarginID = ""
                 
         return EffectiveDateMarginID
     
@@ -204,8 +204,8 @@ class GSTHsnCodeMaster:
         else:
             Details=list()
             Details.append({
-                "GST":" ",
-                "HSNCode": " ",
+                "GST":"",
+                "HSNCode": "",
             })
             
         return Details
@@ -225,8 +225,8 @@ class GSTHsnCodeMaster:
         else:
             Details=list()
             Details.append({
-                "GST":" ",
-                "HSNCode": " ",
+                "GST":"",
+                "HSNCode": "",
             })
         return Details   
        
@@ -238,5 +238,5 @@ class GSTHsnCodeMaster:
             GstHsnCode_Serializer = M_GstHsnCodeSerializer(EffectiveDateGstHsndata, many=True).data
             EffectiveDateID =   GstHsnCode_Serializer[0]['id']
         else:
-            EffectiveDateID = " "
+            EffectiveDateID = ""
         return EffectiveDateID        
