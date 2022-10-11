@@ -155,8 +155,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                 "GSTPercentage": i['GSTPercentage'],
                                 "HSNCode": i['HSNCode'],
                                 "CreatedBy":i['CreatedBy'],
-                                "UpdatedBy":i['UpdatedBy']
-                                
+                                "UpdatedBy":i['UpdatedBy'] 
                             })            
                             
                         ItemData.append({
