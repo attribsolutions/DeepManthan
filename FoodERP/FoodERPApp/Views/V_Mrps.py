@@ -86,7 +86,8 @@ class GETMrpDetails(CreateAPIView):
                             "id":ID,
                             "Item": Item,
                             "Name": a['Name'],
-                            "CurrentMRP": TodaysMRP,
+                            "CurrentMRP": TodaysMRP[0]["TodaysMRP"],
+                            "CurrentDate":TodaysMRP[0]["Date"],
                             "MRP": EffectiveDateMRP
                           
                         })

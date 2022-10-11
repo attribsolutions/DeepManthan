@@ -86,7 +86,8 @@ class GETMarginDetails(CreateAPIView):
                             "id": ID,
                             "Item": Item,
                             "Name": a['Name'],
-                            "CurrentMargin": TodaysMargin,
+                            "CurrentMargin": TodaysMargin[0]["TodaysMargin"],
+                            "CurrentDate":TodaysMargin[0]["Date"],
                             "Margin":EffectiveDateMargin
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList})
