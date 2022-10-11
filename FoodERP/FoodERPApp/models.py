@@ -517,12 +517,12 @@ class M_Units(models.Model):
 class M_Items(models.Model):
     Name = models.CharField(max_length=500)
     ShortName = models.CharField(max_length=500)
-    Sequence = models.DecimalField(max_digits=5, decimal_places=2)
+    Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     Company = models.ForeignKey(
         C_Companies, related_name='ItemCompany', on_delete=models.DO_NOTHING)
     BaseUnitID = models.ForeignKey(
         M_Units, related_name='BaseUnitID', on_delete=models.DO_NOTHING)
-    BarCode = models.CharField(max_length=500) 
+    BarCode = models.CharField(max_length=500,null=True,blank=True) 
     isActive = models.BooleanField(default=False)
    
     CreatedBy = models.IntegerField(default=False)
