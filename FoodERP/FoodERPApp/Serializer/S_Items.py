@@ -312,7 +312,14 @@ class ItemGroupDetailsSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemCategoryDetails
         fields = ['id','GroupType','Group','SubGroup']
-
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(ItemGroupDetailsSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("SubGroup", None):
+            ret["SubGroup"] = {"id": None, "Name": None}  
+        return ret
 
 class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
    
