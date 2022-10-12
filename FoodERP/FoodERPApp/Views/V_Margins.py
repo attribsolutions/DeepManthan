@@ -133,6 +133,9 @@ class M_MarginsViewThird(CreateAPIView):
                     Margindata = M_MarginMaster.objects.get(id=deletedID)
                     Margindata.delete()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
+            except M_MarginMaster.DoesNotExist:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})    
             except IntegrityError:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
