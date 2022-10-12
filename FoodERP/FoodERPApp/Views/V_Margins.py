@@ -99,10 +99,6 @@ class GETMarginDetails(CreateAPIView):
 class M_MarginsViewSecond(CreateAPIView):   
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-    
-    
-    
-    
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -120,6 +116,8 @@ class M_MarginsViewSecond(CreateAPIView):
 
 ''' Margin Master List Delete Api Depend on CommonID '''
 class M_MarginsViewThird(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -133,6 +131,9 @@ class M_MarginsViewThird(CreateAPIView):
                     Margindata = M_MarginMaster.objects.get(id=deletedID)
                     Margindata.delete()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
+            except M_MarginMaster.DoesNotExist:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})    
             except IntegrityError:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
