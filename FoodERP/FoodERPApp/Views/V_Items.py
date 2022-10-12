@@ -127,7 +127,8 @@ class M_ItemsViewSecond(CreateAPIView):
                                 "Division":g['Division']['id'],
                                 "DivisionName":g['Division']['Name'],
                                 "CreatedBy":g['CreatedBy'],
-                                "UpdatedBy":g['UpdatedBy']
+                                "UpdatedBy":g['UpdatedBy'],
+                                "IsAdd":"False"
                             })
                         
                         MarginDetails=list()
@@ -144,6 +145,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                 "UpdatedBy":h['UpdatedBy'],
                                 "PriceList":h['PriceList']['id'],
                                 "PriceListName":h['PriceList']['Name'],
+                                "IsAdd":"False"
                                    
                             })
                         
@@ -157,7 +159,8 @@ class M_ItemsViewSecond(CreateAPIView):
                                 "Company": i['Company']['id'],
                                 "CompanyName": i['Company']['Name'],
                                 "CreatedBy":i['CreatedBy'],
-                                "UpdatedBy":i['UpdatedBy'] 
+                                "UpdatedBy":i['UpdatedBy'],
+                                "IsAdd":"False" 
                             })            
                             
                         ItemData.append({
