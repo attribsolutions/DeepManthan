@@ -193,6 +193,10 @@ class ItemSerializer(serializers.ModelSerializer):
         
         return instance 
          
+class CompanySerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = ['id','Name'] 
 
 class UnitSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -200,6 +204,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
         fields = ['id','Name']
         
 class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
+    Company = CompanySerializerSecond(read_only=True)
     class Meta:
         model = M_GSTHSNCode
         fields = ['id','EffectiveDate', 'GSTPercentage', 'HSNCode','Company', 'CreatedBy', 'UpdatedBy']
@@ -210,10 +215,7 @@ class PriceListSerializerSecond(serializers.ModelSerializer):
         fields = ['id','Name']
     
 
-class CompanySerializerSecond(serializers.ModelSerializer):
-    class Meta:
-        model = C_Companies
-        fields = ['id','Name'] 
+
         
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
