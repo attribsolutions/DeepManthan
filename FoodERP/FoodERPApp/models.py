@@ -427,15 +427,12 @@ class H_PageAccess(models.Model):
 
 class MC_PagePageAccess(models.Model):
 
-    Page = models.ForeignKey(
-        M_Pages, related_name='PagePageAccess', on_delete=models.CASCADE)
+    Page = models.ForeignKey(M_Pages, related_name='PagePageAccess', on_delete=models.CASCADE)
     Access = models.ForeignKey(H_PageAccess, on_delete=models.DO_NOTHING)
-
     class Meta:
         db_table = "MC_PagePageAccess"
 
 # RoleAccess child table
-
 
 class MC_RolePageAccess(models.Model):
     RoleAccess = models.ForeignKey(
@@ -524,7 +521,6 @@ class M_Items(models.Model):
         M_Units, related_name='BaseUnitID', on_delete=models.DO_NOTHING)
     BarCode = models.CharField(max_length=500,null=True,blank=True) 
     isActive = models.BooleanField(default=False)
-   
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
@@ -780,11 +776,11 @@ class MC_VehiclesDivisions(models.Model):
         db_table = "MC_VehiclesDivisions"
 
 class  MC_PartySubParty(models.Model):
-    Party = models.ForeignKey(M_Parties, related_name='Party', on_delete=models.CASCADE)
-    SubParty = models.ForeignKey(M_Parties, related_name='SubParty', on_delete=models.CASCADE)
-    CreatedBy = models.IntegerField()
+    Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.CASCADE)
+    SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
+    CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
+    UpdatedBy = models.IntegerField(blank=True, null=True)
     UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "MC_PartySubParty"
