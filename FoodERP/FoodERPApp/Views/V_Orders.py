@@ -28,6 +28,18 @@ class TermsAndCondtions(CreateAPIView):
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})   
 
+    @transaction.atomic()
+    def get(self, request ):
+        try:
+            with transaction.atomic():
+                Modulesdata = M_TermsAndConditions.objects.all()
+                if Modulesdata.exists():
+                    Modules_Serializer = M_TermsAndConditionsSerializer(
+                    Modulesdata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data })
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'TermsAndConditions Not available', 'Data': []})    
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
 
 class T_OrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
