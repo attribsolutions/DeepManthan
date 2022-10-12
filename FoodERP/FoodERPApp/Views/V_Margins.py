@@ -99,10 +99,6 @@ class GETMarginDetails(CreateAPIView):
 class M_MarginsViewSecond(CreateAPIView):   
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-    
-    
-    
-    
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -120,6 +116,8 @@ class M_MarginsViewSecond(CreateAPIView):
 
 ''' Margin Master List Delete Api Depend on CommonID '''
 class M_MarginsViewThird(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def delete(self, request, id=0):
