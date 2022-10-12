@@ -158,7 +158,7 @@ class MarginMaster:
         else:
             MarginDetails=list()
             MarginDetails.append({
-                "TodaysMRP":"",
+                "TodaysMargin":"",
                 "Date": "",
             })
 
