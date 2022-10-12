@@ -154,6 +154,8 @@ class M_ItemsViewSecond(CreateAPIView):
                                 "EffectiveDate": i['EffectiveDate'],
                                 "GSTPercentage": i['GSTPercentage'],
                                 "HSNCode": i['HSNCode'],
+                                "Company": i['Company']['id'],
+                                "CompanyName": i['Company']['Name'],
                                 "CreatedBy":i['CreatedBy'],
                                 "UpdatedBy":i['UpdatedBy'] 
                             })            
