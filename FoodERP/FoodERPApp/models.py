@@ -785,9 +785,7 @@ class  MC_PartySubParty(models.Model):
     class Meta:
         db_table = "MC_PartySubParty"
    
-                        
-        
-            
+                                    
 class Abc(models.Model):
    
   file = models.FileField(blank=False, null=False)
