@@ -134,7 +134,9 @@ urlpatterns = [
     url(r'ControlTypes$', ControlTypeMasterView.as_view()),
     url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
     url(r'AddressTypes$',AddressTypesView.as_view()),
+    url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
     url(r'PartySubParty$',PartySubPartyView.as_view()),
+  
     
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
