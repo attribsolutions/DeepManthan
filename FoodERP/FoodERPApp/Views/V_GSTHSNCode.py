@@ -27,7 +27,7 @@ class M_GstHsnCodeView(CreateAPIView):
                 if not GstHsndata:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
                 else:
-                    GstHsndata_Serializer = M_MRPsSerializerSecond(GstHsndata, many=True).data
+                    GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -42,7 +42,7 @@ class M_GstHsnCodeView(CreateAPIView):
                 jsondata=a.GetMaxValue() 
                 additionaldata= list()
                 for b in GstHsnCodedata:
-                    b.update({'CommonID': jsondata})
+                    b.update({"CommonID": jsondata})
                     additionaldata.append(b)
                 M_GstHsncodeSerializer = M_GstHsnCodeSerializer(data=additionaldata,many=True)
             if M_GstHsncodeSerializer.is_valid():
