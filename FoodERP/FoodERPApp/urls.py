@@ -68,6 +68,8 @@ from .Views.V_Margins import *
 
 from .Views.V_GSTHSNCode import *
 
+from .Views.V_PartySubParty import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -132,6 +134,7 @@ urlpatterns = [
     url(r'ControlTypes$', ControlTypeMasterView.as_view()),
     url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
     url(r'AddressTypes$',AddressTypesView.as_view()),
+    url(r'PartySubParty$',PartySubPartyView.as_view()),
     
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
