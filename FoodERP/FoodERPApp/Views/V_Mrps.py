@@ -129,8 +129,7 @@ class M_MRPsViewThird(CreateAPIView):
             deletedID = a['id']
             try:
                 with transaction.atomic():
-                    MRPdata = M_MRPMaster.objects.get(id=deletedID)
-                    MRPdata.delete()
+                    MRPdata = M_MRPMaster.objects.filter(id=deletedID).update(IsDeleted=1)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
             except IntegrityError:
                 transaction.set_rollback(True)
