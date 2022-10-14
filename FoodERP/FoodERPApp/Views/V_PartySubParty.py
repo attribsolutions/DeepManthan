@@ -31,7 +31,7 @@ class PartySubPartyView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartySubpartiesdata = JSONParser().parse(request)
-                PartySubparties_Serializer = PartySubPartySerializer(data=PartySubpartiesdata)
+                PartySubparties_Serializer = PartySubPartySerializer(data=PartySubpartiesdata, many=True)
                 if PartySubparties_Serializer.is_valid():
                     PartySubparties_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Subparty Save Successfully', 'Data':[]})
