@@ -125,15 +125,23 @@ class M_MRPsViewThird(CreateAPIView):
         Query = M_MRPMaster.objects.filter(CommonID=id)
         # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':str(Query.query)})
         MRP_Serializer = M_MRPsSerializer(Query, many=True).data
+        # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':MRP_Serializer})
         for a in MRP_Serializer:
-            deletedID = a['id']
+            deletedID = a['id'] 
+            print(deletedID)
             try:
                 with transaction.atomic():
                     MRPdata = M_MRPMaster.objects.filter(id=deletedID).update(IsDeleted=1)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
-            except IntegrityError:
+            except M_MRPMaster.DoesNotExist:
                 transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP Not available', 'Data': []})    
+            except IntegrityError:
+                transaction.set_rollback(True)   
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
+           
+            
+                
 
     
            

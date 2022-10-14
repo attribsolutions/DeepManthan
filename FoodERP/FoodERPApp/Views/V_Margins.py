@@ -128,14 +128,12 @@ class M_MarginsViewThird(CreateAPIView):
             deletedID = a['id']
             try:
                 with transaction.atomic():
-                    Margindata = M_MarginMaster.objects.filter(id=deletedID).update(IsDeleted=1)
-                    # Margindata.delete()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
+                    Margindata = M_MarginMaster.objects.filter(id=deletedID).update(IsDeleted=1) 
             except M_MarginMaster.DoesNotExist:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})    
             except IntegrityError:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
-    
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
     

@@ -90,13 +90,14 @@ class M_GSTHSNCodeViewThird(CreateAPIView):
             deletedID = a['id']
             try:
                 with transaction.atomic():
-                    GSTHSNCodedata = M_GSTHSNCode.objects.filter(id=deletedID).update(IsDeleted = 1)
-                    # GSTHSNCodedata.delete()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GST and HSNCode Deleted Successfully','Data':[]})
+                    GSTHSNCodedata = M_GSTHSNCode.objects.filter(id=deletedID).update(IsDeleted = 1)   
+            except M_GSTHSNCode.DoesNotExist:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'GST and HSNCode  Not available', 'Data': []})         
             except IntegrityError:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'GST and HSNCode used in another table', 'Data': []}) 
-
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GST and HSNCode Deleted Successfully','Data':[]})
 
 class GETGstHsnDetails(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
