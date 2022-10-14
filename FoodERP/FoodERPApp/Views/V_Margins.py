@@ -27,7 +27,7 @@ class M_MarginsView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Margindata = M_MarginMaster.objects.raw('''SELECT m_marginmaster.id,m_marginmaster.EffectiveDate,m_marginmaster.Company_id,m_marginmaster.PriceList_id,m_marginmaster.Party_id,m_marginmaster.CommonID,c_companies.Name CompanyName, m_pricelist.Name PriceListName,m_parties.Name PartyName  FROM m_marginmaster  left join c_companies on c_companies.id = m_marginmaster.Company_id left join m_pricelist  on m_pricelist.id = m_marginmaster.PriceList_id left join m_parties on m_parties.id = m_marginmaster.Party_id where m_marginmaster.CommonID>0 group by EffectiveDate,Party_id,PriceList_id Order BY EffectiveDate Desc''')
+                Margindata = M_MarginMaster.objects.raw('''SELECT m_marginmaster.id,m_marginmaster.EffectiveDate,m_marginmaster.Company_id,m_marginmaster.PriceList_id,m_marginmaster.Party_id,m_marginmaster.CommonID,c_companies.Name CompanyName, m_pricelist.Name PriceListName,m_parties.Name PartyName  FROM m_marginmaster  left join c_companies on c_companies.id = m_marginmaster.Company_id left join m_pricelist  on m_pricelist.id = m_marginmaster.PriceList_id left join m_parties on m_parties.id = m_marginmaster.Party_id where m_marginmaster.CommonID>0 AND m_marginmaster.IsDeleted=0 group by EffectiveDate,Party_id,PriceList_id Order BY EffectiveDate Desc''')
                 # print(str(MRPdata.query))
                 if not Margindata:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -104,7 +104,7 @@ class M_MarginsViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Margindata = M_MarginMaster.objects.get(id=id)
+                Margindata = M_MarginMaster.objects.filter(id=id).update(IsDeleted=1)
                 Margindata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
         except M_MarginMaster.DoesNotExist:
@@ -128,8 +128,8 @@ class M_MarginsViewThird(CreateAPIView):
             deletedID = a['id']
             try:
                 with transaction.atomic():
-                    Margindata = M_MarginMaster.objects.get(id=deletedID)
-                    Margindata.delete()
+                    Margindata = M_MarginMaster.objects.filter(id=deletedID).update(IsDeleted=1)
+                    # Margindata.delete()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
             except M_MarginMaster.DoesNotExist:
                 transaction.set_rollback(True)
