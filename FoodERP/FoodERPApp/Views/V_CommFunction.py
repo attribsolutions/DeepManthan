@@ -60,7 +60,7 @@ class MRPMaster:
         else:
             P=Q(Party_id__isnull=True)
         
-        TodayDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate__lte=self.today).order_by('-EffectiveDate','-id')[:1]
+        TodayDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(TodayDateItemMRPdata.query))
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(TodayDateItemMRPdata, many=True).data
@@ -91,7 +91,7 @@ class MRPMaster:
         else:
             P=Q(Party_id__isnull=True)
         
-        EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(EffectiveDateItemMRPdata.query))
         # return str(EffectiveDateItemMRPdata.query)
         if EffectiveDateItemMRPdata.exists():
@@ -112,7 +112,7 @@ class MRPMaster:
         else:
             P=Q(Party_id__isnull=True)
         
-        EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
        
         if EffectiveDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(EffectiveDateItemMRPdata, many=True).data
@@ -142,7 +142,7 @@ class MarginMaster:
         else:
             P=Q(Party_id__isnull=True)
         
-        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate__lte=self.today).order_by('-EffectiveDate','-id')[:1]
+        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(ItemMargindata.query))
 
         if ItemMargindata.exists():
@@ -171,7 +171,7 @@ class MarginMaster:
         else:
             P=Q(Party_id__isnull=True)
         
-        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(ItemMargindata.query))
 
         if ItemMargindata.exists():
@@ -189,7 +189,7 @@ class MarginMaster:
         else:
             P=Q(Party_id__isnull=True)
         
-        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(ItemMargindata.query))
 
         if ItemMargindata.exists():
@@ -210,7 +210,7 @@ class GSTHsnCodeMaster:
 
     def GetTodaysGstHsnCode(self):
         
-        TodayDateGstHsncodedata = M_GSTHSNCode.objects.filter(Item_id=self.ItemID,EffectiveDate__lte=self.today).order_by('-EffectiveDate','-id')[:1]
+        TodayDateGstHsncodedata = M_GSTHSNCode.objects.filter(Item_id=self.ItemID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(TodayDateGstHsncodedata.query))
         if TodayDateGstHsncodedata.exists():
             GSTHsnCode_Serializer = M_GstHsnCodeSerializer(TodayDateGstHsncodedata, many=True).data
@@ -232,7 +232,7 @@ class GSTHsnCodeMaster:
         return Details
         
     def GetEffectiveDateGstHsnCode(self):
-        EffectiveDateGstHsnCodedata = M_GSTHSNCode.objects.filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        EffectiveDateGstHsnCodedata = M_GSTHSNCode.objects.filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         if EffectiveDateGstHsnCodedata.exists():
             GSTHsnCode_Serializer = M_GstHsnCodeSerializer(EffectiveDateGstHsnCodedata, many=True).data
             Gst=GSTHsnCode_Serializer[0]['GSTPercentage']
@@ -254,7 +254,7 @@ class GSTHsnCodeMaster:
 
     def GetEffectiveDateGstHsnID(self):
         
-        EffectiveDateGstHsndata = M_GSTHSNCode.objects.filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate).order_by('-EffectiveDate','-id')[:1]
+        EffectiveDateGstHsndata = M_GSTHSNCode.objects.filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         if EffectiveDateGstHsndata.exists():
             GstHsnCode_Serializer = M_GstHsnCodeSerializer(EffectiveDateGstHsndata, many=True).data
             EffectiveDateID =   GstHsnCode_Serializer[0]['id']
