@@ -105,7 +105,7 @@ class M_MarginsViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 Margindata = M_MarginMaster.objects.filter(id=id).update(IsDeleted=1)
-                Margindata.delete()
+                # Margindata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
         except M_MarginMaster.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})
