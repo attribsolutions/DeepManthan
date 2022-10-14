@@ -579,7 +579,7 @@ class M_GSTHSNCode(models.Model):
     HSNCode = models.CharField(max_length=500)
     CommonID = models.IntegerField(null=True,blank=True)
     Company = models.ForeignKey(C_Companies, related_name='GstCompany', on_delete=models.DO_NOTHING)
-    IsDeleted = models.IntegerField()
+    # IsDeleted = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -603,7 +603,7 @@ class M_MRPMaster(models.Model):
     MRP = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MRPCompany', on_delete=models.DO_NOTHING)
     CommonID = models.IntegerField(null=True,blank=True)
-    IsDeleted = models.IntegerField()
+    # IsDeleted = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -620,7 +620,7 @@ class M_MarginMaster(models.Model):
     Item = models.ForeignKey(M_Items,related_name='ItemMarginDetails', on_delete=models.CASCADE)
     Margin = models.DecimalField(max_digits=20, decimal_places=2)
     Company = models.ForeignKey(C_Companies, related_name='MarginCompany', on_delete=models.DO_NOTHING)
-    IsDeleted = models.IntegerField()
+    # IsDeleted = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -723,7 +723,7 @@ class TC_InvoiceItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    # CreatedOn = models.DateTimeField(auto_now_add=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "TC_InvoiceItems"
