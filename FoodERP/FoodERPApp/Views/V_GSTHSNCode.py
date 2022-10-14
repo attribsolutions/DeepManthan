@@ -65,8 +65,8 @@ class M_GSTHSNCodeViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                GSTHSNCodedata = M_GSTHSNCode.objects.get(id=id)
-                GSTHSNCodedata.delete()
+                GSTHSNCodedata = M_GSTHSNCode.objects.filter(id=id).update(IsDeleted=1)
+                # GSTHSNCodedata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GST and HSNCode Deleted Successfully','Data':[]})
         except M_GSTHSNCode.DoesNotExist:
             transaction.set_rollback(True)
@@ -90,8 +90,8 @@ class M_GSTHSNCodeViewThird(CreateAPIView):
             deletedID = a['id']
             try:
                 with transaction.atomic():
-                    GSTHSNCodedata = M_GSTHSNCode.objects.get(id=deletedID)
-                    GSTHSNCodedata.delete()
+                    GSTHSNCodedata = M_GSTHSNCode.objects.filter(id=deletedID).update(IsDeleted = 1)
+                    # GSTHSNCodedata.delete()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GST and HSNCode Deleted Successfully','Data':[]})
             except IntegrityError:
                 transaction.set_rollback(True)
