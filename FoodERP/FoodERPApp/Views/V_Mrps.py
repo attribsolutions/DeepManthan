@@ -26,7 +26,7 @@ class M_MRPsView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                MRPdata = M_MRPMaster.objects.raw('''SELECT m_mrpmaster.id,m_mrpmaster.EffectiveDate,m_mrpmaster.Company_id,m_mrpmaster.Division_id,m_mrpmaster.Party_id,m_mrpmaster.CommonID,c_companies.Name CompanyName,a.Name DivisionName,m_parties.Name PartyName  FROM m_mrpmaster left join c_companies on c_companies.id = m_mrpmaster.Company_id left join m_parties a on a.id = m_mrpmaster.Division_id left join m_parties on m_parties.id = m_mrpmaster.Party_id where m_mrpmaster.CommonID >0   group by EffectiveDate,Party_id,Division_id Order BY EffectiveDate Desc''')
+                MRPdata = M_MRPMaster.objects.raw('''SELECT m_mrpmaster.id,m_mrpmaster.EffectiveDate,m_mrpmaster.Company_id,m_mrpmaster.Division_id,m_mrpmaster.Party_id,m_mrpmaster.CommonID,c_companies.Name CompanyName,a.Name DivisionName,m_parties.Name PartyName  FROM m_mrpmaster left join c_companies on c_companies.id = m_mrpmaster.Company_id left join m_parties a on a.id = m_mrpmaster.Division_id left join m_parties on m_parties.id = m_mrpmaster.Party_id where m_mrpmaster.CommonID >0 AND m_mrpmaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id Order BY EffectiveDate Desc''')
                 # print(str(MRPdata.query))
                 if not MRPdata:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Not available', 'Data': []})
@@ -129,8 +129,7 @@ class M_MRPsViewThird(CreateAPIView):
             deletedID = a['id']
             try:
                 with transaction.atomic():
-                    MRPdata = M_MRPMaster.objects.get(id=deletedID)
-                    MRPdata.delete()
+                    MRPdata = M_MRPMaster.objects.filter(id=deletedID).update(IsDeleted=1)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
             except IntegrityError:
                 transaction.set_rollback(True)

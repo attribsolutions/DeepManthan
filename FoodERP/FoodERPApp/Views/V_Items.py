@@ -26,8 +26,8 @@ class M_ItemsView(CreateAPIView):
                 else:
                     Items_Serializer = ItemsSerializerList(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Items_Serializer})   
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
     @transaction.atomic()
     def post(self, request):
@@ -41,8 +41,8 @@ class M_ItemsView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
     
  
@@ -191,7 +191,8 @@ class M_ItemsViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-   
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     @transaction.atomic()
     def put(self, request, id=0):
         try:
@@ -206,8 +207,8 @@ class M_ItemsViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
