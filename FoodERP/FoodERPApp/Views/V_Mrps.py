@@ -104,8 +104,8 @@ class M_MRPsViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                MRPdata = M_MRPMaster.objects.get(id=id)
-                MRPdata.delete()
+                MRPdata = M_MRPMaster.objects.filter(id=id).update(IsDeleted=1)
+                # MRPdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
         except M_MRPMaster.DoesNotExist:
             transaction.set_rollback(True)
