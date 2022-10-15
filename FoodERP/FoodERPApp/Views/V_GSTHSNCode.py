@@ -22,7 +22,7 @@ class M_GstHsnCodeView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                GstHsndata = M_GSTHSNCode.objects.raw('''SELECT m_gsthsncode.id,m_gsthsncode.EffectiveDate,m_gsthsncode.Company_id,m_gsthsncode.CommonID,c_companies.Name CompanyName  FROM m_gsthsncode left join c_companies on c_companies.id = m_gsthsncode.Company_id where m_gsthsncode.CommonID > 0 AND m_gsthsncode.IsDeleted=0  group by EffectiveDate Order BY EffectiveDate Desc''')
+                GstHsndata = M_GSTHSNCode.objects.raw('''SELECT m_gsthsncode.id,m_gsthsncode.EffectiveDate,m_gsthsncode.Company_id,m_gsthsncode.CommonID,c_companies.Name CompanyName  FROM m_gsthsncode left join c_companies on c_companies.id = m_gsthsncode.Company_id where m_gsthsncode.CommonID > 0 AND m_gsthsncode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
                 # print(str(MRPdata.query))
                 if not GstHsndata:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
