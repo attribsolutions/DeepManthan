@@ -116,52 +116,54 @@ class M_ItemsViewSecond(CreateAPIView):
                         
                         MRPDetails=list()
                         for g in a['ItemMRPDetails']:
-                            MRPDetails.append({
-                                "id": g['id'],
-                                "EffectiveDate": g['EffectiveDate'],
-                                "Company": g['Company']['id'],
-                                "CompanyName": g['Company']['Name'],
-                                "MRP": g['MRP'],
-                                "Party": g['Party']['id'],
-                                "PartyName": g['Party']['Name'],
-                                "Division":g['Division']['id'],
-                                "DivisionName":g['Division']['Name'],
-                                "CreatedBy":g['CreatedBy'],
-                                "UpdatedBy":g['UpdatedBy'],
-                                "IsAdd":False
-                            })
+                            if g['IsDeleted']== 0 :
+                                MRPDetails.append({
+                                    "id": g['id'],
+                                    "EffectiveDate": g['EffectiveDate'],
+                                    "Company": g['Company']['id'],
+                                    "CompanyName": g['Company']['Name'],
+                                    "MRP": g['MRP'],
+                                    "Party": g['Party']['id'],
+                                    "PartyName": g['Party']['Name'],
+                                    "Division":g['Division']['id'],
+                                    "DivisionName":g['Division']['Name'],
+                                    "CreatedBy":g['CreatedBy'],
+                                    "UpdatedBy":g['UpdatedBy'],
+                                    "IsAdd":False
+                                })
                         
                         MarginDetails=list()
                         for h in a['ItemMarginDetails']:
-                            MarginDetails.append({
-                                "id": h['id'],
-                                "EffectiveDate": h['EffectiveDate'],
-                                "Company": h['Company']['id'],
-                                "CompanyName": h['Company']['Name'],
-                                "Party": h['Party']['id'],
-                                "PartyName": h['Party']['Name'],
-                                "Margin": h['Margin'],
-                                "CreatedBy":h['CreatedBy'],
-                                "UpdatedBy":h['UpdatedBy'],
-                                "PriceList":h['PriceList']['id'],
-                                "PriceListName":h['PriceList']['Name'],
-                                "IsAdd":False
-                                   
-                            })
+                            if h['IsDeleted']== 0 :
+                                MarginDetails.append({
+                                    "id": h['id'],
+                                    "EffectiveDate": h['EffectiveDate'],
+                                    "Company": h['Company']['id'],
+                                    "CompanyName": h['Company']['Name'],
+                                    "Party": h['Party']['id'],
+                                    "PartyName": h['Party']['Name'],
+                                    "Margin": h['Margin'],
+                                    "CreatedBy":h['CreatedBy'],
+                                    "UpdatedBy":h['UpdatedBy'],
+                                    "PriceList":h['PriceList']['id'],
+                                    "PriceListName":h['PriceList']['Name'],
+                                    "IsAdd":False   
+                                })
                         
                         GSTHSNDetails=list()
                         for i in a['ItemGSTHSNDetails']:
-                            GSTHSNDetails.append({
-                                "id": i['id'],
-                                "EffectiveDate": i['EffectiveDate'],
-                                "GSTPercentage": i['GSTPercentage'],
-                                "HSNCode": i['HSNCode'],
-                                "Company": i['Company']['id'],
-                                "CompanyName": i['Company']['Name'],
-                                "CreatedBy":i['CreatedBy'],
-                                "UpdatedBy":i['UpdatedBy'],
-                                "IsAdd":False
-                            })            
+                            if i['IsDeleted']== 0 :
+                                GSTHSNDetails.append({
+                                    "id": i['id'],
+                                    "EffectiveDate": i['EffectiveDate'],
+                                    "GSTPercentage": i['GSTPercentage'],
+                                    "HSNCode": i['HSNCode'],
+                                    "Company": i['Company']['id'],
+                                    "CompanyName": i['Company']['Name'],
+                                    "CreatedBy":i['CreatedBy'],
+                                    "UpdatedBy":i['UpdatedBy'],
+                                    "IsAdd":False
+                                })            
                             
                         ItemData.append({
                             "id": a['id'],
@@ -221,7 +223,8 @@ class M_ItemsViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []}) 
-
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class M_ImageTypesView(CreateAPIView):
     
