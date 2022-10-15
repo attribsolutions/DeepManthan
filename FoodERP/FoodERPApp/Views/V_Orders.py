@@ -80,7 +80,6 @@ class T_OrdersView(CreateAPIView):
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})
              
-
     @transaction.atomic()
     def post(self, request):
         try:
@@ -91,8 +90,8 @@ class T_OrdersView(CreateAPIView):
                     Order_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully' , 'Data':[] })
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors , 'Data':[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class T_OrdersViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
