@@ -19,13 +19,32 @@ class M_ItemsView(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT m_items.id,m_items.Name,m_items.ShortName,m_units.Name BaseUnitName,c_companies.Name CompanyName,m_items.BarCode  FROM m_items join m_units on m_units.id= m_items.BaseUnitID_id join c_companies on c_companies.id= m_items.Company_id Order BY m_items.Sequence''')
-                # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': str(query.query)})
+                query = M_Items.objects.all().order_by('Sequence')
+                # return JsonResponse({'query':  str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
-                    Items_Serializer = ItemsSerializerList(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Items_Serializer})   
+                    Items_Serializer = ItemSerializerSecond(query, many=True).data
+                    ItemListData = list ()
+                    for a in Items_Serializer:
+                        ItemListData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "ShortName": a['ShortName'],
+                            "Company": a['Company']['id'],
+                            "CompanyName": a['Company']['Name'],
+                            "BaseUnitID": a['BaseUnitID']['id'],
+                            "BaseUnitName": a['BaseUnitID']['Name'],
+                            "BarCode": a['BarCode'],
+                            "Sequence": a['Sequence'],
+                            "isActive":a['isActive'] ,
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })    
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
