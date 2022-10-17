@@ -16,27 +16,27 @@ class TermsAndCondtions(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
-                Order_serializer = M_TermsAndConditionsSerializer(data=Orderdata)
-                if Order_serializer.is_valid():
-                    Order_serializer.save()
+                TermsCondition = JSONParser().parse(request)
+                TermsCondition_serializer = M_TermsAndConditionsSerializer(data=TermsCondition)
+                if TermsCondition_serializer.is_valid():
+                    TermsCondition_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'TermsAndCondtions Save Successfully' , 'Data':[] })
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors , 'Data':[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})   
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': TermsCondition_serializer.errors , 'Data':[]})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
 
     @transaction.atomic()
     def get(self, request ):
         try:
             with transaction.atomic():
-                Modulesdata = M_TermsAndConditions.objects.all()
-                if Modulesdata.exists():
-                    Modules_Serializer = M_TermsAndConditionsSerializer(
-                    Modulesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data })
+                TermsCondition = M_TermsAndConditions.objects.all()
+                if TermsCondition.exists():
+                    TermsCondition_serializer = M_TermsAndConditionsSerializer(
+                    TermsCondition, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': TermsCondition_serializer.data })
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'TermsAndConditions Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class T_OrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -65,8 +65,8 @@ class T_OrdersView(CreateAPIView):
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': OrderListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
              
     @transaction.atomic()
     def post(self, request):
@@ -99,7 +99,7 @@ class T_OrdersViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Orderupdate_Serializer.errors ,'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Exception Found','Data': []})  
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -112,6 +112,8 @@ class T_OrdersViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'T_Orders used in another tbale', 'Data': []}) 
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class GetItemsForOrder(CreateAPIView):
     permission_classes = (IsAuthenticated,)
