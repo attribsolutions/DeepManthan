@@ -64,18 +64,21 @@ class MRPMaster:
         # print(str(TodayDateItemMRPdata.query))
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(TodayDateItemMRPdata, many=True).data
+            Mrpid = MRP_Serializer[0]['id']
             MRPs=MRP_Serializer[0]['MRP']
             Date=MRP_Serializer[0]['EffectiveDate']
             MRPDetails=list()
             MRPDetails.append({
                 "TodaysMRP":MRPs,
                 "Date": Date,
+                "Mrpid":Mrpid
             })
         else:
             MRPDetails=list()
             MRPDetails.append({
                 "TodaysMRP":"",
                 "Date": "",
+                "Mrpid":""
             })
             
         return MRPDetails
@@ -214,12 +217,14 @@ class GSTHsnCodeMaster:
         # print(str(TodayDateGstHsncodedata.query))
         if TodayDateGstHsncodedata.exists():
             GSTHsnCode_Serializer = M_GstHsnCodeSerializer(TodayDateGstHsncodedata, many=True).data
+            Gstid = GSTHsnCode_Serializer[0]['id']
             Gst=GSTHsnCode_Serializer[0]['GSTPercentage']
             HSNCode=GSTHsnCode_Serializer[0]['HSNCode']
             Details=list()
             Details.append({
                 "GST":Gst,
                 "HSNCode": HSNCode,
+                "Gstid": Gstid
             })
             
         else:
@@ -227,6 +232,7 @@ class GSTHsnCodeMaster:
             Details.append({
                 "GST":"",
                 "HSNCode": "",
+                "Gstid": ""
             })
             
         return Details
