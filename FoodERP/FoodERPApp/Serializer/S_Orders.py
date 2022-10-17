@@ -14,7 +14,7 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
 
 
 class TC_OrderItemsSerializerForGET(serializers.Serializer): 
