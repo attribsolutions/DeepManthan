@@ -6,6 +6,7 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
+from ..Serializer.S_PartyItems import *
 
 from ..models import  *
 class TermsAndCondtions(CreateAPIView):
@@ -115,36 +116,41 @@ class T_OrdersViewSecond(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-class GetItemsForOrder(CreateAPIView):
+class GetItemsForOrderView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
     
     def post(self, request):
             try:
                 with transaction.atomic():
-                    DivisionID = request.data['Division']
+                    # DivisionID = request.data['Division']
                     PartyID = request.data['Party']
                     EffectiveDate = request.data['EffectiveDate']
-                    query = M_Items.objects.all()
+                    query = MC_PartyItems.objects.filter(Party_id = PartyID)
+                    # return JsonResponse({ 'query': str(query.query)})
                     if not query:
                         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                     else:
-                        Items_Serializer = M_ItemsSerializer01(query, many=True).data
+                        Items_Serializer = MC_PartyItemSerializer(query, many=True).data
                         ItemList = list()
                         for a in Items_Serializer:
-                            Item= a['id']
-                            Mrp=MRPMaster(Item,DivisionID,PartyID,EffectiveDate)
-                            TodaysMRP=Mrp.GetTodaysDateMRP()
-                            Gst=GSTHsnCodeMaster(Item,EffectiveDate)
-                            TodaysGst=Gst.GetTodaysGstHsnCode()
+                            ItemID =a['Item']['id']
+                            Gst = GSTHsnCodeMaster(ItemID,EffectiveDate).GetTodaysGstHsnCode()
+                            UnitDetails=list()
+                            for d in a['Item']['ItemUnitDetails']:
+                                UnitDetails.append({
+                                    "UnitID": d['id'],
+                                    # "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name'],
+                                    "BaseUnitQuantity": d['BaseUnitQuantity']
+                                })
+                            
                             ItemList.append({
-                              
-                                "id":a['id'],
-                                "Name": a['Name'],
-                                "MRP":TodaysMRP[0]["Mrpid"],
-                                "MRPValue": TodaysMRP[0]["TodaysMRP"],
-                                "GST":TodaysGst[0]["Gstid"],
-                                "GSTValue":TodaysGst[0]["GST"]
+                                "id":a['Item']['id'],
+                                "Name": a['Item']['Name'],
+                                "Gstid":Gst[0]['Gstid'],
+                                "GST":Gst[0]['GST'],
+                                "UnitDetails":UnitDetails
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
             except Exception as e:

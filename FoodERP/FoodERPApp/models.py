@@ -633,6 +633,13 @@ class M_TermsAndConditions(models.Model):
     Name = models.CharField(max_length=500)
     class Meta:
         db_table = "M_TermsAndConditions"
+        
+class MC_PartyItems(models.Model):
+    Party =models.ForeignKey(M_Parties, related_name='Party', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items,related_name='PartyItem', on_delete=models.DO_NOTHING) 
+    class Meta:
+        db_table = "MC_PartyItems"
+            
 
        
 class T_Orders(models.Model):
@@ -653,12 +660,12 @@ class TC_OrderItems(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='Items', on_delete=models.DO_NOTHING)
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.DO_NOTHING)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.DO_NOTHING,null=True,blank=True)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=2)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='OrderItemGST', on_delete=models.DO_NOTHING)
-    Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.DO_NOTHING)
+    Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.DO_NOTHING,null=True,blank=True)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=10, decimal_places=2)
     Amount = models.DecimalField(max_digits=20, decimal_places=2)
