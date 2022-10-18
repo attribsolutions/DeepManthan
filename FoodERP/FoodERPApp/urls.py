@@ -105,7 +105,6 @@ urlpatterns = [
     url(r'States$',M_StateView.as_view()),
     url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
     url(r'Parties$', M_PartiesView.as_view()),
-    url(r'demo$', GetItemsForOrder.as_view()),
     url(r'Divisions/([0-9]+)$', DivisionsView.as_view()),
     url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
     url(r'PriceList$', PriceListView.as_view()),
@@ -137,6 +136,7 @@ urlpatterns = [
     url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
+    url(r'GetItemsForOrder$',GetItemsForOrderView.as_view()),
   
     
     url(r'Mrps$',M_MRPsView.as_view()),
