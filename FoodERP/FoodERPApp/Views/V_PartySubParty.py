@@ -56,3 +56,22 @@ class PartySubPartyViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+
+class GetSubPartyOnParty(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication 
+       
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = MC_PartySubParty.objects.filter(Party_id=id)
+                # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': str(query.query)})
+                PartySubparties_Serializer = PartySubpartySerializerSecond(query)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartySubparties_Serializer.data})
+        except  MC_PartySubParty.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+            
+        

@@ -141,9 +141,9 @@ class GetItemsForOrder(CreateAPIView):
                               
                                 "id":a['id'],
                                 "Name": a['Name'],
-                                "MRP":TodaysMRP[0]["Mrpid"],
+                                "MRPid":TodaysMRP[0]["Mrpid"],
                                 "MRPValue": TodaysMRP[0]["TodaysMRP"],
-                                "GST":TodaysGst[0]["Gstid"],
+                                "GSTid":TodaysGst[0]["Gstid"],
                                 "GSTValue":TodaysGst[0]["GST"]
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
