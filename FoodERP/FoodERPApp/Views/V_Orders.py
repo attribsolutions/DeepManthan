@@ -136,11 +136,21 @@ class GetItemsForOrderView(CreateAPIView):
                         for a in Items_Serializer:
                             ItemID =a['Item']['id']
                             Gst = GSTHsnCodeMaster(ItemID,EffectiveDate).GetTodaysGstHsnCode()
+                            UnitDetails=list()
+                            for d in a['Item']['ItemUnitDetails']:
+                                UnitDetails.append({
+                                    "UnitID": d['id'],
+                                    # "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name'],
+                                    "BaseUnitQuantity": d['BaseUnitQuantity']
+                                })
+                            
                             ItemList.append({
                                 "id":a['Item']['id'],
                                 "Name": a['Item']['Name'],
                                 "Gstid":Gst[0]['Gstid'],
-                                "GST":Gst[0]['GST']
+                                "GST":Gst[0]['GST'],
+                                "UnitDetails":UnitDetails
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
             except Exception as e:
