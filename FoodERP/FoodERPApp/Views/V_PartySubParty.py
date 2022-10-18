@@ -41,7 +41,6 @@ class PartySubPartyView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-
 class PartySubPartyViewSecond(CreateAPIView): 
        
     @transaction.atomic()
@@ -57,7 +56,7 @@ class PartySubPartyViewSecond(CreateAPIView):
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
 
-class GetSubPartyOnParty(CreateAPIView):
+class GetSupplierListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication 
        
@@ -65,13 +64,37 @@ class GetSubPartyOnParty(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.filter(Party_id=id)
+                query = MC_PartySubParty.objects.filter(SubParty_id=id)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': str(query.query)})
-                PartySubparties_Serializer = PartySubpartySerializerSecond(query)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartySubparties_Serializer.data})
+                PartySubparties_Serializer = PartySubpartySerializerSecond(query,many=True).data
+                SupplierList = ()
+                for a in PartySubparties_Serializer:
+                
+                    SupplierList.append({
+                            "id":a['id'],
+                            "SupplierName": a['Name'],
+                        }) 
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SupplierList})
         except  MC_PartySubParty.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
             
-        
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                Supplier = MC_PartySubParty.objects.filter(SubParty_id=id)
+                # return JsonResponse({'query': str(Orderdata.query)})
+                if Supplier:
+                    Supplier_serializer = PartySubpartySerializerSecond(Supplier, many=True).data
+                    SupplierListData = list()
+                    for a in Supplier_serializer:   
+                        SupplierListData.append({
+                        "id": a['Party']['id'],
+                        "Supplier": a['Party']['Name']
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
