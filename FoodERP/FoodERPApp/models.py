@@ -337,7 +337,7 @@ class MC_PageFieldMaster(models.Model):
     ControlID = models.CharField(max_length=300)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ControlType', on_delete=models.DO_NOTHING)
     FieldLabel = models.CharField(max_length=300)
-    DefaultSort = models.BooleanField(default=False)   
+    DefaultSort = models.IntegerField()   
     IsCompulsory = models.BooleanField(default=False)      
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='FieldValidation', on_delete=models.DO_NOTHING)        
     ListPageSeq = models.IntegerField()

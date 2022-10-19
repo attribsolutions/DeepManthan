@@ -131,7 +131,7 @@ class GetItemsForOrderView(CreateAPIView):
                     if not query:
                         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                     else:
-                        Items_Serializer = MC_PartyItemSerializer(query, many=True).data
+                        Items_Serializer = MC_PartyItemSerializerSecond(query, many=True).data
                         ItemList = list()
                         for a in Items_Serializer:
                             ItemID =a['Item']['id']

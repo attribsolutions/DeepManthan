@@ -26,7 +26,7 @@ class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
     CName = serializers.CharField(max_length=100)
     FieldLabel = serializers.CharField(max_length=300)
     IsCompulsory = serializers.BooleanField(default=False)
-    DefaultSort =  serializers.BooleanField(default=False)    
+    DefaultSort =  serializers.IntegerField()    
     FieldValidation_id = serializers.IntegerField()
     FName = serializers.CharField(max_length=100)         
     ListPageSeq = serializers.IntegerField()
