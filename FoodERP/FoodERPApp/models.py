@@ -647,7 +647,7 @@ class T_Orders(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
-    Description = models.CharField(max_length=500)
+    Description = models.CharField(max_length=500 ,null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
