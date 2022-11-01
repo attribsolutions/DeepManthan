@@ -85,6 +85,63 @@ class T_OrdersView(CreateAPIView):
 class T_OrdersViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+    
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                OrderQuery = T_Orders.objects.filter(id=id)
+                if OrderQuery.exists():
+                    OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
+                    OrderData=list()
+                    for a in OrderSerializedata:
+                        
+                        OrderItemDetails=list()
+                        for b in a['OrderItem']:
+                            OrderItemDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "Margin":b['Margin']['id'],
+                                "MarginValue":b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                            })
+                        OrderData.append({
+                            "id": a['id'],
+                            "OrderDate": a['OrderDate'],
+                            "OrderAmount": a['OrderAmount'],
+                            "Description": a['Description'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "Supplier": a['Supplier']['id'],
+                            "SupplierName": a['Supplier']['Name'],
+                            "OrderItem" : OrderItemDetails,
+                        })      
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+    
+    
+    
+    
 
     def put(self, request, id=0):
         try:
