@@ -70,10 +70,12 @@ from .Views.V_GSTHSNCode import *
 
 from .Views.V_PartySubParty import *
 
+from .Views.V_PartyItems import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
-    
+    url(r'test', AbcView.as_view()),
     url(r'Registration', UserRegistrationView.as_view()),
     url(r'Login', UserLoginView.as_view()),
     url(r'ChangePassword', ChangePasswordView.as_view()),
@@ -137,7 +139,9 @@ urlpatterns = [
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
     url(r'GetItemsForOrder$',GetItemsForOrderView.as_view()),
-  
+    url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
+    url(r'PartyItemList$',PartyItemsView.as_view()),
+    
     
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
