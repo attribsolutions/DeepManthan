@@ -13,6 +13,16 @@ from ..Serializer.S_RoleAccess import *
 from ..models import *
 
 
+def GetRelatedPageID(id):
+    a=M_Pages.objects.filter(id=id).values('RelatedPageID')
+   
+    if(a[0]['RelatedPageID']  == 0):
+        b=M_Pages.objects.filter(RelatedPageID=id).values('id')
+        return b[0]['id']
+    else:
+        return a[0]['RelatedPageID'] 
+
+
 class RoleAccessView(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -48,12 +58,7 @@ class RoleAccessView(RetrieveAPIView):
             y=tuple(roles)
 
             
-        # print(y)
-        # modules = M_RoleAccess.objects.raw(
-        #     '''SELECT distinct Modules_id id ,h_modules.Name FROM m_roleaccess 
-        #     join h_modules on h_modules.id=m_roleaccess.Modules_id 
-        #     WHERE  Role_id IN %s  AND (%s) AND (%s) ORDER BY h_modules.DisplayIndex''', ( y,Division, Company)) 
-        # print(PartyID)
+        
 
         if (int(PartyID) > 0)  :
        
@@ -64,10 +69,7 @@ class RoleAccessView(RetrieveAPIView):
         queryset=H_Modules.objects.filter(id__in=modules).order_by("DisplayIndex")
         serializerdata = H_ModulesSerializer(queryset, many=True).data
 
-        # return Response(str(modules.query))
-        # print(str(modules.query))
-        # serializerdata = M_RoleAccessSerializerfordistinctModule(modules, many=True).data
-        # print(serializerdata)
+        
         Moduledata = list()
                
         for a in serializerdata:
@@ -98,7 +100,7 @@ class RoleAccessView(RetrieveAPIView):
                 # print(str(RolePageAccess.query))
                 Pagesdata.append({
                     "id": a1['Pages']['id'], 
-                    "RelatedPageID": a1['Pages']['RelatedPageID'],
+                    "RelatedPageID": GetRelatedPageID(a1['Pages']['id']),
                     "Name": a1['Pages']['Name'],
                     "PageHeading": a1['Pages']['PageHeading'],
                     "PageDescription": a1['Pages']['PageDescription'],
