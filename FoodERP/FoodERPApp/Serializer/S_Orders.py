@@ -4,7 +4,10 @@ from unittest.util import _MAX_LENGTH
 from ..models import *
 from rest_framework import serializers
 from .S_Parties import * 
-
+from .S_Items import * 
+from .S_GSTHSNCode import * 
+from .S_Margins import * 
+from .S_Mrps import * 
 
 
 class M_TermsAndConditionsSerializer(serializers.ModelSerializer):
@@ -69,11 +72,57 @@ class T_OrderSerializer(serializers.ModelSerializer):
 class T_OrderSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Supplier = PartiesSerializerSecond(read_only=True)
+
     class Meta:
         model = T_Orders
         fields = '__all__'
-    
 
+class PartiesSerializerThird(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name']
+
+
+class UnitSerializerThird(serializers.ModelSerializer):
+    class Meta:
+        model = M_Units
+        fields = ['id','Name']
+        
+class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
+    UnitID = UnitSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemUnits
+        fields = ['id','UnitID']      
+        
+class TC_OrderItemSerializer(serializers.ModelSerializer):
+    
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta:
+        model = TC_OrderItems
+        fields = '__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(TC_OrderItemSerializer, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("Margin", None):
+            ret["Margin"] = {"id": None, "Margin": None}    
+        return ret      
+    
+class T_OrderSerializerThird(serializers.ModelSerializer):
+    Customer = PartiesSerializerThird(read_only=True)
+    Supplier = PartiesSerializerThird(read_only=True)
+    OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
+    class Meta:
+        model = T_Orders
+        fields = '__all__'
 
 
     
