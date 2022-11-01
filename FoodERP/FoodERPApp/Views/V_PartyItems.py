@@ -43,8 +43,13 @@ class PartyItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyItems_data = JSONParser().parse(request)
-                PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data)
+                PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data,many=True)
             if PartyItems_serializer.is_valid():
+                id = PartyItems_serializer.data[0]['Party']
+                MC_PartyItem_data = MC_PartyItems.objects.filter(Party=id)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :str(MC_PartyItem_data.query)})
+                MC_PartyItem_data.delete()
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :PartyItems_serializer.data[0]['Party']})
                 PartyItems_serializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :[]})
             else:
