@@ -88,7 +88,7 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CanBeSold', 'CanBePurchase', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
@@ -142,7 +142,12 @@ class ItemSerializer(serializers.ModelSerializer):
         instance.BarCode = validated_data.get(
             'BarCode', instance.BarCode)
         instance.isActive = validated_data.get(
-            'isActive', instance.isActive)    
+            'isActive', instance.isActive)
+        instance.CanBeSold = validated_data.get(
+            'CanBeSold', instance.CanBeSold)
+        instance.CanBePurchase = validated_data.get(
+            'CanBePurchase', instance.CanBePurchase)
+            
         instance.save()
         
         for a in instance.ItemCategoryDetails.all():
