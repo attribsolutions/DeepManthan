@@ -8,81 +8,47 @@ from ..Serializer.S_PartyItems import *
 from ..models import *
 
 
-class GroupTypeView(CreateAPIView):
+class PartyItemsViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
     
+    @transaction.atomic()
+    def get(self, request,id=0):
+            try:
+                with transaction.atomic():
+                    query = MC_PartyItems.objects.filter(Party_id = id)
+                    # return JsonResponse({ 'query': str(query.query)})
+                    if not query:
+                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                    else:
+                        Items_Serializer = MC_PartyItemSerializerThird(query, many=True).data
+                        ItemList = list()
+                        for a in Items_Serializer:
+                            ItemList.append({
+                                "id":a['id'],
+                                "ItemID":a['Item']['id'],
+                                "Name": a['Item']['Name'],
+                                "Party":a['Party']['id']
+                            })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
+            except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class PartyItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request,id=0):
         try:
             with transaction.atomic():
-                GroupType_data = M_GroupType.objects.all()
-                if GroupType_data.exists():
-                    GroupType_serializer = GroupTypeSerializer(GroupType_data, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GroupType_serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Group Type Not available', 'Data': []})
-        except Exception :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
-
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                GroupType_data = JSONParser().parse(request)
-                GroupType_serializer = GroupTypeSerializer(data=GroupType_data)
-            if GroupType_serializer.is_valid():
-                GroupType_serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Type Save Successfully', 'Data' :[]})
+                PartyItems_data = JSONParser().parse(request)
+                PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data)
+            if PartyItems_serializer.is_valid():
+                PartyItems_serializer.save()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :[]})
             else:
                 transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GroupType_serializer.errors, 'Data' : []})
-        except Exception :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
-
-
-class GroupTypeViewSecond(CreateAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                GroupTypedata = M_GroupType.objects.get(id=id)
-                GroupType_serializer = GroupTypeSerializer(GroupTypedata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': GroupType_serializer.data})
-        except  M_GroupType.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Group Type Not available', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data' : []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                GroupTypedata = JSONParser().parse(request)
-                GroupTypedataByID = M_GroupType.objects.get(id=id)
-                GroupType_serializer = GroupTypeSerializer(
-                    GroupTypedataByID, data=GroupTypedata)
-                if GroupType_serializer.is_valid():
-                    GroupType_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Type Updated Successfully','Data' :[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GroupType_serializer.errors, 'Data' :[]})
-        except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Executiono Error', 'Data':[]})
-
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                GroupType_data = M_GroupType.objects.get(id=id)
-                GroupType_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Type Deleted Successfully','Data':[]})
-        except M_GroupType.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Group Type Not available', 'Data': []})
-        except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Group Type used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
