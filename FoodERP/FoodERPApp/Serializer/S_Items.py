@@ -156,8 +156,11 @@ class ItemSerializer(serializers.ModelSerializer):
         for b in instance.ItemGroupDetails.all():
             b.delete()
                 
-        for c in instance.ItemUnitDetails.all():
-            c.delete()
+        # for c in instance.ItemUnitDetails.all():
+        #     c.delete()
+        for c in instance.ItemUnitDetails:
+            setFlag=MC_ItemUnits.objects.update(IsDeleted=1, **c)
+            
             
         for d in instance.ItemImagesDetails.all():
             d.delete()
