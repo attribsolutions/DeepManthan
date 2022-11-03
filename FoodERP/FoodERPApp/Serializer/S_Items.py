@@ -157,7 +157,9 @@ class ItemSerializer(serializers.ModelSerializer):
             b.delete()
                 
         for c in instance.ItemUnitDetails.all():
-            c.delete()
+            # print(c.id)
+            SetFlag=MC_ItemUnits.objects.filter(id=c.id).update(IsDeleted=1)
+            
             
         for d in instance.ItemImagesDetails.all():
             d.delete()
@@ -168,7 +170,8 @@ class ItemSerializer(serializers.ModelSerializer):
         # for f in instance.ItemMRPDetails.all():
         #     f.delete()  
         # for g in instance.ItemMarginDetails.all():
-        #     g.delete()                    
+        #     g.delete()  
+                          
         # for h in instance.ItemGSTHSNDetails.all():
         #     h.delete()
         
