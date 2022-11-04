@@ -134,8 +134,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "PageFieldMaster": MC_PageFieldMasterListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -151,8 +151,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Pages_Serializer.errors, 'Data': []})
-        except Exception  :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error' , 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -185,8 +185,8 @@ class showPagesListOnPageType(RetrieveAPIView):
                         'Name': a1["Name"]
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPageListData})
-        except Exception:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PagesMasterForRoleAccessView(RetrieveAPIView):
     
@@ -239,8 +239,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                 "ModuleData": PageListData,}
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':[PageListData] })
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ControlTypeMasterView(CreateAPIView):
     
