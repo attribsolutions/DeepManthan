@@ -75,13 +75,13 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 "AccessID": b['id'],
                                 "AccessName": b['Name']
                             })
-                        bb=id
-                        # aa=M_Pages.objects.filter(id=id).values('RelatedPageID')
+                        # bb=id
+                        aa=M_Pages.objects.filter(id=id).values('RelatedPageID')
                         
-                        # if(aa[0]['RelatedPageID']  == 0):
-                        #     bb=id
-                        # else:
-                        #     bb= aa[0]['RelatedPageID']
+                        if(aa[0]['RelatedPageID']  == 0):
+                            bb=id
+                        else:
+                            bb= aa[0]['RelatedPageID']
 
                         
                         PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [bb])
