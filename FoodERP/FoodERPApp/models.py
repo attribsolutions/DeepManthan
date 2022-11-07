@@ -6,8 +6,12 @@ from typing import Sequence
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator, MaxValueValidator
+from activity_log.models import UserMixin
 
 # Create your models here.
+
+def make_extra_data(request, response):
+    return str(request.META)
    
 class M_PartyType(models.Model):
     Name = models.CharField(max_length=100)
@@ -245,7 +249,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class M_Users(AbstractBaseUser):
+class M_Users(AbstractBaseUser, UserMixin):
 
     LoginName = models.CharField(max_length=100, unique=True)
     Employee = models.ForeignKey(
@@ -271,12 +275,18 @@ class M_Users(AbstractBaseUser):
     class Meta:
         db_table = "M_Users"
 
+    verbose_name = 'M_Users'    
+
     def __str__(self):
         return self.LoginName
 
     def __str__(self):
         return self.ID
 
+def make_extra_data(request,response,body):
+    a=str(body) +'!'+str(response)
+    return a
+    # return str(request.META)
 
 class H_Modules(models.Model):
 
@@ -807,3 +817,80 @@ class Abc(models.Model):
         db_table = "Abc"
         
 
+class T_GRNs(models.Model):
+    # Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
+    GRNDate = models.DateField()
+    # InvoiceDate = models.DateField()
+    Customer = models.ForeignKey(
+        M_Parties, related_name='GRNCustomer', on_delete=models.DO_NOTHING)
+    GRNNumber = models.IntegerField()
+    # FullInvoiceNumber = models.CharField(max_length=500)
+    # CustomerGSTTin = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    Party = models.ForeignKey(
+        M_Parties, related_name='GRNParty', on_delete=models.DO_NOTHING)
+    # RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "T_GRNs"
+
+class TC_GRNReferences(models.Model):
+    GRN = models.ForeignKey(
+        T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
+    Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING ,null=True) 
+    Invoice = models.ForeignKey(T_Invoices, on_delete=models.DO_NOTHING ,null=True)
+
+    class Meta:
+        db_table = "TC_GRNReferences"    
+
+class TC_GRNItems(models.Model):
+    GRN = models.ForeignKey(
+        T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    # HSNCode = models.CharField(max_length=500)
+    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Unit = models.ForeignKey(
+        MC_ItemUnits, related_name='GRNUnitID', on_delete=models.DO_NOTHING)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2)
+    ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    TaxType = models.CharField(max_length=500)
+    GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountType = models.CharField(max_length=500)
+    Discount = models.DecimalField(max_digits=10, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
+    CGST = models.DecimalField(max_digits=5, decimal_places=2)
+    SGST = models.DecimalField(max_digits=5, decimal_places=2)
+    IGST = models.DecimalField(max_digits=5, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "TC_GRNItems"
+
+
+class TC_GRNItemBatches(models.Model):
+    GRN = models.ForeignKey(T_GRNs,related_name='GRNBatches',  on_delete=models.CASCADE)
+    GRNItem = models.ForeignKey(
+        TC_GRNItems, related_name='GRNItemBatches', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Unit = models.ForeignKey(
+        MC_ItemUnits, related_name='GRNBatchUnitID', on_delete=models.DO_NOTHING)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "TC_GRNItemBatches"

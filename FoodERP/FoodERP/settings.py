@@ -122,7 +122,8 @@ ACTIVITYLOG_STATUSES = (200, )
 # ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
 
 # URL substrings, which ignores
-ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
+ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', 'PartyItemList')
+ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
