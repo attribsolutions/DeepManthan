@@ -78,20 +78,16 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)           
         
-       
         instance.save()
 
         for items in instance.EmployeeParties.all():
-          items.delete()
+            items.delete()
 
         
-
         for OrderItem_data in validated_data['EmployeeParties']:
             Items = MC_EmployeeParties.objects.create(Employee=instance, **OrderItem_data)
-        instance.EmployeeParties.add(Items)
+            instance.EmployeeParties.add(Items)
  
-     
-
         return instance      
 
 
