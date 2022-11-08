@@ -1,6 +1,6 @@
 from django.urls import re_path as url
 
-from .Views.V_GRNs import *
+# from .Views.V_GRNs import *
 
 from .Views.V_SuperAdmin import SuperAdminView
 
@@ -104,8 +104,8 @@ urlpatterns = [
     url(r'Employees$', M_EmployeesView.as_view()),
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
     url(r'Invoices$', T_InvoiceView.as_view()),
-    url(r'GRN/([0-9]+)$', T_InvoicesViewSecond.as_view()),
-    url(r'GRN$', T_GRNView.as_view()),
+    # url(r'GRN/([0-9]+)$', T_InvoicesViewSecond.as_view()),
+    # url(r'GRN$', T_GRNView.as_view()),
     url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
     url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     url(r'States$',M_StateView.as_view()),
