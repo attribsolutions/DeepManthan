@@ -1,6 +1,6 @@
 from django.urls import re_path as url
 
-from .Views.V_GRNs import *
+# from .Views.V_GRNs import *
 
 from .Views.V_SuperAdmin import SuperAdminView
 
