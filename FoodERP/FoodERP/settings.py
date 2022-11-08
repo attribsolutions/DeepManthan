@@ -78,8 +78,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
-# DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-# DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 
 # Database
@@ -94,18 +94,18 @@ DATABASES = {
         'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    # ,
-    # 'logs': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'erpdatabase_logs',
-    #     'USER': 'pk',
-    #     'PASSWORD': 'P@ssw0rd',
-    #     'HOST': '192.168.1.114',
-    #     'PORT': '3306'
-    # }
+    ,
+    'logs': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'transactionlogdb',
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',
+        'HOST': '192.168.1.114',
+        'PORT': '3306'
+    }
 }
 
-ACTIVITYLOG_AUTOCREATE_DB = False
+ACTIVITYLOG_AUTOCREATE_DB = True
 # Log anonymous actions?
 ACTIVITYLOG_ANONYMOUS = True
 # Update last activity datetime in user profile. Needs updates for user model.
@@ -122,7 +122,7 @@ ACTIVITYLOG_STATUSES = (200, )
 # ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
 
 # URL substrings, which ignores
-ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', 'PartyItemList')
+ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
 ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
