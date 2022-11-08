@@ -692,6 +692,13 @@ class TC_OrderItems(models.Model):
     class Meta:
         db_table = "TC_OrderItems"
 
+class TC_OrderTermsAndConditions(models.Model):
+    Order = models.ForeignKey(T_Orders, related_name='OrderTermsAndConditions', on_delete=models.DO_NOTHING)
+    TermsAndCondition=models.ForeignKey(M_TermsAndConditions,on_delete=models.DO_NOTHING)
+
+    class Meta:
+        db_table = "TC_OrderTermsAndConditions"
+
 
 class T_Invoices(models.Model):
     Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
