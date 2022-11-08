@@ -23,8 +23,8 @@ class M_DesignationsView(CreateAPIView):
                     M_Designations_serializer = M_DesignationsSerializer(M_Designations_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Designations_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Designation Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
             
 
     @transaction.atomic()
@@ -39,8 +39,8 @@ class M_DesignationsView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Designationsdata_Serializer.errors, 'Data':[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
                     
 
 class M_DesignationsViewSecond(RetrieveAPIView):
@@ -70,8 +70,8 @@ class M_DesignationsViewSecond(RetrieveAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Designations_Serializer.errors, 'Data':[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception FOund' , 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
     @transaction.atomic()
     def delete(self, request, id=0):
