@@ -12,7 +12,7 @@ from ..models import  *
 class TermsAndCondtions(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication  
-
+# =================================================================================================
     @transaction.atomic()
     def post(self, request):
         try:
@@ -38,7 +38,7 @@ class TermsAndCondtions(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'TermsAndConditions Not available', 'Data': []})    
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+# ==================================================================================================
 class T_OrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -92,8 +92,16 @@ class T_OrdersViewSecond(CreateAPIView):
                 OrderQuery = T_Orders.objects.filter(id=id)
                 if OrderQuery.exists():
                     OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
+                    
                     OrderData=list()
                     for a in OrderSerializedata:
+                        
+                        OrderTermsAndCondition=list()
+                        for b in a['OrderTermsAndConditions']:
+                            OrderTermsAndCondition.append({
+                                "id": b['TermsAndCondition']['id'],
+                                "TermsAndCondition":b['TermsAndCondition']['Name'],
+                            })
                         
                         OrderItemDetails=list()
                         for b in a['OrderItem']:
@@ -132,6 +140,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "Supplier": a['Supplier']['id'],
                             "SupplierName": a['Supplier']['Name'],
                             "OrderItem" : OrderItemDetails,
+                            "OrderTermsAndCondition" : OrderTermsAndCondition
                         })      
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})

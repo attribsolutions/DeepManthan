@@ -27,17 +27,30 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
         model = TC_OrderItems
         fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
 
+class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=TC_OrderTermsAndConditions
+        fields =['TermsAndCondition']
+
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
+    OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','Customer','Supplier','OrderAmount','Description','CreatedBy', 'UpdatedBy','OrderItem']
+        fields = ['id','OrderDate','Customer','Supplier','OrderAmount','Description','CreatedBy', 'UpdatedBy','OrderItem','OrderTermsAndConditions']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
+        OrderTermsAndConditions_data = validated_data.pop('OrderTermsAndConditions')
+        
         Order = T_Orders.objects.create(**validated_data)
+        
         for OrderItem_data in OrderItems_data:
-           TC_OrderItems.objects.create(Order=Order, **OrderItem_data)    
+           TC_OrderItems.objects.create(Order=Order, **OrderItem_data)
+
+        for OrderTermsAndCondition_data in OrderTermsAndConditions_data:
+            TC_OrderTermsAndConditions.objects.create(Order=Order, **OrderTermsAndCondition_data)       
+        
         return Order
 
     def update(self, instance, validated_data):
@@ -60,11 +73,18 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.save()
 
         for items in instance.OrderItem.all():
-          items.delete()
+            items.delete()
+
+        for items in instance.OrderTermsAndConditions.all():
+            items.delete()  
 
         for OrderItem_data in validated_data['OrderItem']:
             Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
         instance.OrderItem.add(Items)
+        
+        for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
+            Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
+        instance.OrderTermsAndConditions.add(Items)
  
         return instance  
 
@@ -115,11 +135,21 @@ class TC_OrderItemSerializer(serializers.ModelSerializer):
         if not ret.get("Margin", None):
             ret["Margin"] = {"id": None, "Margin": None}    
         return ret      
-    
+
+
+
+class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
+    TermsAndCondition=M_TermsAndConditionsSerializer(read_only=True)
+    class Meta:
+        model=TC_OrderTermsAndConditions
+        fields ='__all__'
+
 class T_OrderSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
     Supplier = PartiesSerializerThird(read_only=True)
     OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
+    OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
+    
     class Meta:
         model = T_Orders
         fields = '__all__'
