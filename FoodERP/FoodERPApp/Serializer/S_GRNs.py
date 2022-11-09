@@ -49,14 +49,14 @@ class T_GRNSerializer(serializers.ModelSerializer):
         return grnID     
 
     def update(self, instance, validated_data):
-        print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        
         instance.GRNDate = validated_data.get(
             'GRNDate', instance.GRNDate)
         instance.Customer = validated_data.get(
             'Customer', instance.Customer)
         instance.Party = validated_data.get(
             'Party', instance.Party)
-        print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
         instance.GRNNumber = validated_data.get(
@@ -65,7 +65,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
             'UpdatedBy', instance.UpdatedBy)  
          
         instance.save()
-        print('aaaa')
+        
         for items in instance.GRNItems.all():
             items.delete()
 
@@ -74,10 +74,10 @@ class T_GRNSerializer(serializers.ModelSerializer):
         
         for GRNReference_data in validated_data['GRNReferences']:
             Reference_data=TC_GRNReferences.objects.create(GRN=instance, **GRNReference_data)
-        print('nnnnnnnnnnnnnnnnnn') 
-        for InvoiceItem_data in validated_data['GRNItems']:
-            InvoiceItemBatches_data = InvoiceItem_data.pop('GRNItemBatches')
-            TC_InvoiceItemsID = TC_GRNItems.objects.create(GRN=instance, **InvoiceItem_data)
-            for InvoiceItemBatch_data in InvoiceItemBatches_data:
-               TC_GRNItemBatches.objects.create(GRN=instance,GRNItem=TC_InvoiceItemsID, **InvoiceItemBatch_data)
+       
+        for GRNItem_data in validated_data['GRNItems']:
+            GRNItemBatches_data = GRNItem_data.pop('GRNItemBatches')
+            TC_GRNItemsID = TC_GRNItems.objects.create(GRN=instance, **GRNItem_data)
+            for GRNItemBatch_data in GRNItemBatches_data:
+               TC_GRNItemBatches.objects.create(GRN=instance,GRNItem=TC_GRNItemsID, **GRNItemBatch_data)
         return instance     
