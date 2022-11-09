@@ -10,13 +10,13 @@ class TC_GRNReferencesSerializer(serializers.ModelSerializer):
 class TC_GRNItemBatchesSerializer(serializers.ModelSerializer):
     class Meta : 
         model=TC_GRNItemBatches
-        fields =['BatchDate','BatchCode','Quantity','MRP','Item','Unit']
+        fields =['id','BatchDate','BatchCode','Quantity','MRP','Item','Unit']
 
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
     GRNItemBatches=TC_GRNItemBatchesSerializer(many=True)
     class Meta : 
         model=TC_GRNItems
-        fields =['Item','Quantity','Unit','BaseUnitQuantity','MRP','ReferenceRate','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','GRNItemBatches']
+        fields =['id','Item','Quantity','Unit','BaseUnitQuantity','MRP','ReferenceRate','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','GRNItemBatches']
         
         
 
@@ -28,7 +28,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
     
     class Meta:
         model =   T_GRNs
-        fields = ['GRNDate','Customer','GRNNumber','GrandTotal','Party','CreatedBy','UpdatedBy','GRNReferences','GRNItems']
+        fields = ['id','GRNDate','Customer','GRNNumber','GrandTotal','Party','CreatedBy','UpdatedBy','GRNReferences','GRNItems']
         
 
     def create(self, validated_data):
@@ -49,25 +49,35 @@ class T_GRNSerializer(serializers.ModelSerializer):
         return grnID     
 
     def update(self, instance, validated_data):
-        
-        instance.Order = validated_data.get(
-            'Order', instance.Order)
+        print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        instance.GRNDate = validated_data.get(
+            'GRNDate', instance.GRNDate)
         instance.Customer = validated_data.get(
             'Customer', instance.Customer)
         instance.Party = validated_data.get(
             'Party', instance.Party)
+        print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
-        instance.RoundOffAmount = validated_data.get(
-            'RoundOffAmount', instance.RoundOffAmount)    
+        instance.GRNNumber = validated_data.get(
+            'GRNNumber', instance.GRNNumber)    
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy)  
+         
         instance.save()
-        
-        for items in instance.InvoiceItems.all():
+        print('aaaa')
+        for items in instance.GRNItems.all():
             items.delete()
+
+        for items in instance.GRNReferences.all():
+            items.delete()    
         
-        for InvoiceItem_data in validated_data['InvoiceItems']:
-            InvoiceItemBatches_data = InvoiceItem_data.pop('InvoiceItemBatches')
-            TC_InvoiceItemsID = TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
+        for GRNReference_data in validated_data['GRNReferences']:
+            Reference_data=TC_GRNReferences.objects.create(GRN=instance, **GRNReference_data)
+        print('nnnnnnnnnnnnnnnnnn') 
+        for InvoiceItem_data in validated_data['GRNItems']:
+            InvoiceItemBatches_data = InvoiceItem_data.pop('GRNItemBatches')
+            TC_InvoiceItemsID = TC_GRNItems.objects.create(GRN=instance, **InvoiceItem_data)
             for InvoiceItemBatch_data in InvoiceItemBatches_data:
-               TC_InvoiceItemBatches.objects.create(Invoice=instance,InvoiceItem=TC_InvoiceItemsID, **InvoiceItemBatch_data)
+               TC_GRNItemBatches.objects.create(GRN=instance,GRNItem=TC_InvoiceItemsID, **InvoiceItemBatch_data)
         return instance     
