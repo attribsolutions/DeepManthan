@@ -37,7 +37,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','Customer','Supplier','OrderAmount','Description','CreatedBy', 'UpdatedBy','OrderItem','OrderTermsAndConditions']
+        fields = ['id','OrderDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','OrderItem','OrderTermsAndConditions']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
@@ -56,20 +56,20 @@ class T_OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         
         # * Order Info
-        instance.Customer = validated_data.get(
-            'Customer', instance.Customer)
+        
         instance.OrderDate = validated_data.get(
             'OrderDate', instance.OrderDate)    
-        instance.Supplier = validated_data.get(
-            'Supplier', instance.Supplier)
         instance.OrderAmount = validated_data.get(
             'OrderAmount', instance.OrderAmount)
         instance.Description = validated_data.get(
             'Description', instance.Description)
+        instance.BillingAddress = validated_data.get(
+            'BillingAddress', instance.BillingAddress)
+        instance.ShippingAddress = validated_data.get(
+            'ShippingAddress', instance.ShippingAddress)
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy) 
-        instance.UpdatedOn = validated_data.get(
-            'UpdatedOn', instance.UpdatedOn)           
+                
         instance.save()
 
         for items in instance.OrderItem.all():
@@ -92,7 +92,8 @@ class T_OrderSerializer(serializers.ModelSerializer):
 class T_OrderSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Supplier = PartiesSerializerSecond(read_only=True)
-
+    BillingAddress=PartyAddressSerializerSecond(read_only=True) 
+    ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
     class Meta:
         model = T_Orders
         fields = '__all__'
@@ -149,6 +150,8 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
     Supplier = PartiesSerializerThird(read_only=True)
     OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
+    BillingAddress=PartyAddressSerializerSecond(read_only=True) 
+    ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
     
     class Meta:
         model = T_Orders
