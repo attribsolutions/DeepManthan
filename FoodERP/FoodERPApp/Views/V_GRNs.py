@@ -56,20 +56,20 @@ class T_GRNViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
    
 
-    # @transaction.atomic()
-    # def put(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             Invoiceupdatedata = JSONParser().parse(request)
-    #             InvoiceupdateByID = T_Invoices.objects.get(id=id)
-    #             Invoiceupdate_Serializer = T_InvoiceSerializer(InvoiceupdateByID, data=Invoiceupdatedata)
-    #             if Invoiceupdate_Serializer.is_valid():
-    #                 Invoiceupdate_Serializer.save()
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':{}})
-    #             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors ,'Data':[]})
-    #     except Exception  :
-    #         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Exception Found', 'Data': []})               
-        
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoiceupdatedata = JSONParser().parse(request)
+                InvoiceupdateByID = T_GRNs.objects.get(id=id)
+                Invoiceupdate_Serializer = T_GRNSerializer(InvoiceupdateByID, data=Invoiceupdatedata)
+                if Invoiceupdate_Serializer.is_valid():
+                    Invoiceupdate_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':{}})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors ,'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+   
     @transaction.atomic()
     def delete(self, request, id=0):
         try:

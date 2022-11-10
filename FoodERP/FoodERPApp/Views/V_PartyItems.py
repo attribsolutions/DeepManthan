@@ -26,7 +26,7 @@ class PartyItemsViewSecond(CreateAPIView):
                         for a in Items_Serializer:
                             ItemList.append({
                                 "id":a['id'],
-                                "ItemID":a['Item']['id'],
+                                "Item":a['Item']['id'],
                                 "Name": a['Item']['Name'],
                                 "Party":a['Party']['id']
                             })
