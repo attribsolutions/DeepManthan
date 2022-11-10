@@ -108,9 +108,9 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING, blank=True)
-    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.DO_NOTHING,blank=True)
-    Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.DO_NOTHING)
+    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.PROTECT, blank=True)
+    PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.PROTECT,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.PROTECT)
     Email = models.EmailField(max_length=200)
     MobileNo = models.BigIntegerField()
     AlternateContactNo = models.CharField(max_length=500, null=True, blank=True)
@@ -658,8 +658,13 @@ class T_Orders(models.Model):
     OrderDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
+    OrderNo = models.IntegerField()
+    FullOrderNumber = models.CharField(max_length=500)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500 ,null=True,blank=True)
+    OrderType=models.IntegerField()  #1.SalesOrder OR 2.PurchesOrder
+    POType=models.IntegerField()     #1.OpenOrder OR 2.RegulerOrder
+    Division=models.ForeignKey(M_Parties, related_name='OrderDivision', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
