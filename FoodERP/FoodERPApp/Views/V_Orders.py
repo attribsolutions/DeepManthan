@@ -51,6 +51,7 @@ class T_OrdersView(CreateAPIView):
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if Orderdata:
                     Order_serializer = T_OrderSerializerSecond(Orderdata, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:   
                         OrderListData.append({
@@ -60,6 +61,8 @@ class T_OrdersView(CreateAPIView):
                         "Supplier": a['Supplier']['Name'],
                         "OrderAmount": a['OrderAmount'],
                         "Description": a['Description'],
+                        "BillingAddress" : a['BillingAddress']['Address'],
+                        "ShippingAddress" : a['ShippingAddress']['Address'],
                         "CreatedBy" : a['CreatedBy'],
                         "CreatedOn" : a['CreatedOn']
                         
@@ -92,7 +95,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 OrderQuery = T_Orders.objects.filter(id=id)
                 if OrderQuery.exists():
                     OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
-                    
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                     OrderData=list()
                     for a in OrderSerializedata:
                         
@@ -139,6 +142,10 @@ class T_OrdersViewSecond(CreateAPIView):
                             "CustomerName": a['Customer']['Name'],
                             "Supplier": a['Supplier']['id'],
                             "SupplierName": a['Supplier']['Name'],
+                            "BillingAddressID" :a['BillingAddress']['id'],
+                            "BillingAddress" :a['BillingAddress']['Address'],
+                            "ShippingAddressID" :a['ShippingAddress']['id'],
+                            "ShippingAddress" :a['ShippingAddress']['Address'],
                             "OrderItem" : OrderItemDetails,
                             "OrderTermsAndCondition" : OrderTermsAndCondition
                         })      
