@@ -57,6 +57,7 @@ class T_OrdersView(CreateAPIView):
                         OrderListData.append({
                         "id": a['id'],
                         "OrderDate": a['OrderDate'],
+                        "DeliveryDate": a['DeliveryDate'],
                         "Customer": a['Customer']['Name'],
                         "Supplier": a['Supplier']['Name'],
                         "OrderAmount": a['OrderAmount'],
@@ -136,6 +137,7 @@ class T_OrdersViewSecond(CreateAPIView):
                         OrderData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
+                            "DeliveryDate": a['DeliveryDate'],
                             "OrderAmount": a['OrderAmount'],
                             "Description": a['Description'],
                             "Customer": a['Customer']['id'],
