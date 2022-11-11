@@ -645,6 +645,15 @@ class MC_PartyItems(models.Model):
     Item = models.ForeignKey(M_Items,related_name='PartyItem', on_delete=models.DO_NOTHING) 
     class Meta:
         db_table = "MC_PartyItems"
+
+class MC_PartyPrefixs(models.Model):
+    Party =models.ForeignKey(M_Parties, related_name='PartyPrefix', on_delete=models.DO_NOTHING)
+    Orderprefix = models.CharField(max_length=500)
+    Invoiceprefix = models.CharField(max_length=500)
+    Grnprefix = models.CharField(max_length=500)
+    Receiptprefix = models.CharField(max_length=500)
+    class Meta:
+        db_table = "MC_PartyPrefixs"        
             
 
        
