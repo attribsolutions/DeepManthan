@@ -1,11 +1,5 @@
-from datetime import datetime
-from pickle import TRUE
-from pyexpat import model
-from statistics import mode
-from typing import Sequence
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from django.core.validators import MinValueValidator, MaxValueValidator
 from activity_log.models import UserMixin
 
 # Create your models here.
@@ -656,6 +650,7 @@ class MC_PartyItems(models.Model):
        
 class T_Orders(models.Model):
     OrderDate = models.DateField()
+    DeliveryDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='OrderCustomer', on_delete=models.DO_NOTHING)
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
     OrderNo = models.IntegerField()
@@ -822,8 +817,12 @@ class  MC_PartySubParty(models.Model):
    
                                     
 class Abc(models.Model):
-    remark = models.CharField(max_length=20)
-    class Meta:
+   
+  file = models.FileField(blank=False, null=False)
+  remark = models.CharField(max_length=20)
+  picture = models.ImageField(upload_to='ItemMaster',blank=True)
+
+  class Meta:
         db_table = "Abc"
         
 
