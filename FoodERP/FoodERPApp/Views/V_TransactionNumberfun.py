@@ -15,8 +15,17 @@ class GetMaxNumber:
             a=int(MaxOrderNumber[0]['OrderNo'])
             a=a+1
         return a
-             
-        
+
+class GetPrifix:
+                 
+    def GetOrderPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Orderprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['Orderprefix']
+        return a
+            
         
         
         

@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Views.V_TransactionNumberfun import GetMaxNumber
+from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
@@ -82,8 +82,13 @@ class T_OrdersView(CreateAPIView):
                 Orderdata = JSONParser().parse(request)
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
+                '''Get Max Order Number'''
                 a=GetMaxNumber.GetOrderNumber(Division,OrderType)
-                
+                Orderdata['OrderNo']= a
+                '''Get Order Prifix '''
+                b=GetPrifix.GetOrderPrifix(Division)
+                Orderdata['FullOrderNumber']= b+""+str(a)
+                # return JsonResponse({ 'Data': Orderdata })
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
