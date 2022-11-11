@@ -6,8 +6,20 @@ from ..Serializer.S_Orders import *
 class GetMaxNumber:
 
     def GetOrderNumber(*args):
-        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).order_by('-id')[:1]
-        # return str(MaxOrderNumber.query)
+        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).values('OrderNo').order_by('-id')[:1]
+        a=int(MaxOrderNumber[0]['OrderNo'])
+      
+        if a is None:
+            a=1
+        else:
+            a=a+1
+        
+        return a
+        
+        
+        
+        
+        
         # MaxOrderNumber=T_Orders.objects.aggregate(Max('OrderNo')).filter(Division_id=args[0]).filter(OrderType=args[1]) 
         if MaxOrderNumber.exists():
             Order_serializer = T_OrderSerializerSecond(data=MaxOrderNumber,many=True)
