@@ -6,6 +6,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
 
+from ..Serializer.S_Orders import TC_OrderTermsAndConditionsSerializer
+
 from ..Serializer.S_abc import *
 from ..models import *
 
@@ -30,3 +32,20 @@ class AbcView(CreateAPIView):
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
+    @transaction.atomic()
+    def get(self, request ):
+        try:
+            with transaction.atomic():
+                print('aaaaa')
+                Modulesdata = TC_OrderTermsAndConditions.objects.filter(Order=62)
+                print('bbbbb')
+                if Modulesdata.exists():
+                    print('ccccc')
+                    Modules_Serializer = TC_OrderTermsAndConditionsSerializer(
+                    Modulesdata, many=True)
+                    print(Modules_Serializer.data)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data })
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
+        except Exception as e :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[e]})
+         
