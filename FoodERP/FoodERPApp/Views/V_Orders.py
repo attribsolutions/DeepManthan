@@ -83,7 +83,7 @@ class T_OrdersView(CreateAPIView):
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
                 a=GetMaxNumber.GetOrderNumber(Division,OrderType)
-               
+                
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
