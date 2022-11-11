@@ -14,7 +14,6 @@ class GetMaxNumber:
         else:
             a=int(MaxOrderNumber[0]['OrderNo'])
             a=a+1
-        
         return a
              
         
