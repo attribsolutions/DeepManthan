@@ -118,8 +118,8 @@ class M_PartiesViewSecond(CreateAPIView):
                                 "FSSAIExipry": b['FSSAIExipry'],
                                 "PIN": b['PIN'],
                                 "IsDefault": b['IsDefault'],
-                                "AddressType": b['AddressType']['id'],
-                                "AddressTypeName": b['AddressType']['Name'],
+                                # "AddressType": b['AddressType']['id'],
+                                # "AddressTypeName": b['AddressType']['Name'],
                             })
                         
                         PartiesData.append({
