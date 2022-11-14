@@ -840,13 +840,13 @@ class T_GRNs(models.Model):
     GRNDate = models.DateField()
     # InvoiceDate = models.DateField()
     Customer = models.ForeignKey(
-        M_Parties, related_name='GRNCustomer', on_delete=models.DO_NOTHING)
+        M_Parties, related_name='GRNCustomer', on_delete=models.PROTECT)
     GRNNumber = models.IntegerField()
     # FullInvoiceNumber = models.CharField(max_length=500)
     # CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(
-        M_Parties, related_name='GRNParty', on_delete=models.DO_NOTHING)
+        M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
     # RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -867,11 +867,11 @@ class TC_GRNReferences(models.Model):
 class TC_GRNItems(models.Model):
     GRN = models.ForeignKey(
         T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     # HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='GRNUnitID', on_delete=models.DO_NOTHING)
+        MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
@@ -898,35 +898,18 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
 
 
-class TC_GRNItemBatches(models.Model):
-    GRN = models.ForeignKey(T_GRNs,related_name='GRNBatches',  on_delete=models.CASCADE)
-    GRNItem = models.ForeignKey(
-        TC_GRNItems, related_name='GRNItemBatches', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='GRNBatchUnitID', on_delete=models.DO_NOTHING)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "TC_GRNItemBatches"
-
-
 class T_DeliveryChallans(models.Model):
     # Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
     ChallanDate = models.DateField()
     # InvoiceDate = models.DateField()
     Customer = models.ForeignKey(
-        M_Parties, related_name='DeliveryCustomer', on_delete=models.DO_NOTHING)
+        M_Parties, related_name='DeliveryCustomer', on_delete=models.PROTECT)
     ChallanNumber = models.IntegerField()
     # FullInvoiceNumber = models.CharField(max_length=500)
     # CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(
-        M_Parties, related_name='DeliveryParty', on_delete=models.DO_NOTHING)
+        M_Parties, related_name='DeliveryParty', on_delete=models.PROTECT)
     # RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -938,8 +921,8 @@ class T_DeliveryChallans(models.Model):
 
 class TC_DeliveryChallanReferences(models.Model):
     DeliveryChallan = models.ForeignKey(
-        T_DeliveryChallans, related_name='DeiveryChallanReferences', on_delete=models.CASCADE)
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.DO_NOTHING ,null=True) 
+        T_DeliveryChallans, related_name='DeliveryChallanReferences', on_delete=models.CASCADE)
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT) 
   
     class Meta:
         db_table = "TC_DeliveryChallanReferences"    
@@ -947,11 +930,11 @@ class TC_DeliveryChallanReferences(models.Model):
 class TC_DeliveryChallanItems(models.Model):
     DeliveryChallan = models.ForeignKey(
         T_DeliveryChallans, related_name='DeliveryChallanItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     # HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='DeliveryChallanUnitID', on_delete=models.DO_NOTHING)
+        MC_ItemUnits, related_name='DeliveryChallanUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
