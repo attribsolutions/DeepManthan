@@ -891,6 +891,8 @@ class TC_GRNItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
