@@ -60,13 +60,13 @@ class T_GRNViewSecond(CreateAPIView):
     def put(self, request, id=0):
         try:
             with transaction.atomic():
-                Invoiceupdatedata = JSONParser().parse(request)
-                InvoiceupdateByID = T_GRNs.objects.get(id=id)
-                Invoiceupdate_Serializer = T_GRNSerializer(InvoiceupdateByID, data=Invoiceupdatedata)
-                if Invoiceupdate_Serializer.is_valid():
-                    Invoiceupdate_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully','Data':{}})
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoiceupdate_Serializer.errors ,'Data':[]})
+                GRN_data = JSONParser().parse(request)
+                GRN_dataByID = T_GRNs.objects.get(id=id)
+                GRN_Serializer = T_GRNSerializer(GRN_dataByID, data=GRN_data)
+                if GRN_Serializer.is_valid():
+                    GRN_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN  Updated Successfully','Data':{}})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer.errors ,'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
    
