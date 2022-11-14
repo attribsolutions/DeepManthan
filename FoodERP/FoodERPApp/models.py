@@ -898,23 +898,6 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
 
 
-class TC_GRNItemBatches(models.Model):
-    GRN = models.ForeignKey(T_GRNs,related_name='GRNBatches',  on_delete=models.CASCADE)
-    GRNItem = models.ForeignKey(
-        TC_GRNItems, related_name='GRNItemBatches', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='GRNBatchUnitID', on_delete=models.DO_NOTHING)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "TC_GRNItemBatches"
-
-
 class T_DeliveryChallans(models.Model):
     # Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
     ChallanDate = models.DateField()
