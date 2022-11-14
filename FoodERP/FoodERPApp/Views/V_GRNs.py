@@ -77,7 +77,7 @@ class T_GRNViewSecond(CreateAPIView):
                 GRN_Data = T_GRNs.objects.get(id=id)
                 GRN_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': 'true', 'Message': 'GRN Deleted Successfully', 'Data':[]})
-        except T_Invoices.DoesNotExist:
+        except T_GRNs.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'T_GRN used in another tbale', 'Data': []})    
