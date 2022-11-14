@@ -7,19 +7,12 @@ class TC_GRNReferencesSerializer(serializers.ModelSerializer):
         model=TC_GRNReferences
         fields =['Invoice','Order']
 
-class TC_GRNItemBatchesSerializer(serializers.ModelSerializer):
-    class Meta : 
-        model=TC_GRNItemBatches
-        fields =['id','BatchDate','BatchCode','Quantity','MRP','Item','Unit']
-
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
-    GRNItemBatches=TC_GRNItemBatchesSerializer(many=True)
+  
     class Meta : 
         model=TC_GRNItems
-        fields =['id','Item','Quantity','Unit','BaseUnitQuantity','MRP','ReferenceRate','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','GRNItemBatches']
+        fields =['id','Item','Quantity','Unit','BaseUnitQuantity','MRP','ReferenceRate','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode']
         
-        
-
 class T_GRNSerializer(serializers.ModelSerializer):
     
     GRNReferences=TC_GRNReferencesSerializer(many=True)
@@ -40,12 +33,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
             Reference_data=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
 
         for GRNItem_data in GRNItems_data:
-            GRNItemBatches_data = GRNItem_data.pop('GRNItemBatches')
-           
             GRNItemID =TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
-            for GRNItemBatch_data in GRNItemBatches_data:
-               TC_GRNItemBatches.objects.create(GRN=grnID,GRNItem=GRNItemID, **GRNItemBatch_data)
-        
         return grnID     
 
     def update(self, instance, validated_data):
@@ -76,8 +64,5 @@ class T_GRNSerializer(serializers.ModelSerializer):
             Reference_data=TC_GRNReferences.objects.create(GRN=instance, **GRNReference_data)
        
         for GRNItem_data in validated_data['GRNItems']:
-            GRNItemBatches_data = GRNItem_data.pop('GRNItemBatches')
             TC_GRNItemsID = TC_GRNItems.objects.create(GRN=instance, **GRNItem_data)
-            for GRNItemBatch_data in GRNItemBatches_data:
-               TC_GRNItemBatches.objects.create(GRN=instance,GRNItem=TC_GRNItemsID, **GRNItemBatch_data)
         return instance     
