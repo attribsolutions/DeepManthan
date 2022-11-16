@@ -139,10 +139,11 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 for PagePageAccess_data in validated_data['PagePageAccess']:
                     PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)
                 instance.PagePageAccess.add(PageAccess)
-                
-            for PageField_data in validated_data['PageFieldMaster']:
-                PageField = MC_PageFieldMaster.objects.create(Page=instance, **PageField_data)
-            instance.PageFieldMaster.add(PageField)
+            
+            if (instance.PageType !=2):   
+                for PageField_data in validated_data['PageFieldMaster']:
+                    PageField = MC_PageFieldMaster.objects.create(Page=instance, **PageField_data)
+                instance.PageFieldMaster.add(PageField)
             
             return instance   
     
