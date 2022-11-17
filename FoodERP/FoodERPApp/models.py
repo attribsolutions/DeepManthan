@@ -567,7 +567,7 @@ class MC_ItemUnits(models.Model):
 
 class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE,null=True,blank=True)
     Item_pic = models.TextField()
     class Meta:
         db_table = "MC_ItemImages" 
