@@ -102,7 +102,7 @@ class M_AddressTypes(models.Model):
 class M_Parties(models.Model):
 
     Name = models.CharField(max_length=500)
-    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.PROTECT, blank=True,null=True)
+    PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING,null=True)
     PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.PROTECT,blank=True)
     Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.PROTECT)
     Email = models.EmailField(max_length=200)
@@ -567,7 +567,7 @@ class MC_ItemUnits(models.Model):
 
 class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE,null=True,blank=True)
     Item_pic = models.TextField()
     class Meta:
         db_table = "MC_ItemImages" 
