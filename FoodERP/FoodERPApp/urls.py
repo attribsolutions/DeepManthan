@@ -188,6 +188,7 @@ urlpatterns = [
     #RoleAccess Page AddPage Button
     url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     #PartyDropdownforloginpage/EmployeeID
+    # This below API used for Dropdown populated when user have multiple role and parties.
     url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
@@ -198,5 +199,7 @@ urlpatterns = [
     url(r'GetSubGroupByGroupID/([0-9]+)$', GetSubGroupByGroupID.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
+    url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
+    
     
 ]

@@ -6,6 +6,7 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_GRNs import *
+from ..Serializer.S_Orders import *
 
 from ..models import  *
 
@@ -83,3 +84,71 @@ class T_GRNViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'T_GRN used in another tbale', 'Data': []})    
 
 
+
+class GetOrderDetailsForGrnView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    
+    def post(self, request,id=0):
+        try:
+            with transaction.atomic():
+                POOrderIDs = request.data['OrderIDs']
+                Order_list = POOrderIDs.split(",")
+                AllData = list()
+                for OrderID in Order_list:
+                    OrderQuery = T_Orders.objects.filter(id=OrderID)
+                    if OrderQuery.exists():
+                        OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
+                        OrderData=list()
+                        for a in OrderSerializedata:
+                            OrderItemDetails=list()
+                            for b in a['OrderItem']:
+                                OrderItemDetails.append({
+                                    "id": b['id'],
+                                    "Item":b['Item']['id'],
+                                    "ItemName":b['Item']['Name'],
+                                    "Quantity": b['Quantity'],
+                                    "MRP": b['MRP']['id'],
+                                    "MRPValue": b['MRP']['MRP'],
+                                    "Rate": b['Rate'],
+                                    "Unit": b['Unit']['id'],
+                                    "UnitName": b['Unit']['UnitID']['Name'],
+                                    "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                    "GST": b['GST']['id'],
+                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "Margin":b['Margin']['id'],
+                                    "MarginValue":b['Margin']['Margin'],
+                                    "BasicAmount": b['BasicAmount'],
+                                    "GSTAmount": b['GSTAmount'],
+                                    "CGST": b['CGST'],
+                                    "SGST": b['SGST'],
+                                    "IGST": b['IGST'],
+                                    "CGSTPercentage": b['CGSTPercentage'],
+                                    "SGSTPercentage": b['SGSTPercentage'],
+                                    "IGSTPercentage": b['IGSTPercentage'],
+                                    "Amount": b['Amount'],
+                                })
+                            OrderData.append({
+                                "id": a['id'],
+                                "OrderDate": a['OrderDate'],
+                                "DeliveryDate": a['DeliveryDate'],
+                                "OrderAmount": a['OrderAmount'],
+                                "Description": a['Description'],
+                                "Customer": a['Customer']['id'],
+                                "CustomerName": a['Customer']['Name'],
+                                "Supplier": a['Supplier']['id'],
+                                "SupplierName": a['Supplier']['Name'],
+                                "BillingAddressID" :a['BillingAddress']['id'],
+                                "BillingAddress" :a['BillingAddress']['Address'],
+                                "ShippingAddressID" :a['ShippingAddress']['id'],
+                                "ShippingAddress" :a['ShippingAddress']['Address'],
+                                "OrderItem" : OrderItemDetails,
+                            })        
+                        AllData.append({"Data":OrderData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': AllData})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+    
