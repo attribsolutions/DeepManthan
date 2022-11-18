@@ -9,6 +9,7 @@ from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
 
 from ..models import  *
+from django.db.models import *
 
 
 class T_GRNView(CreateAPIView):
@@ -89,15 +90,13 @@ class GetOrderDetailsForGrnView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
     
-    
     def post(self, request,id=0):
         try:
             with transaction.atomic():
                 POOrderIDs = request.data['OrderIDs']
                 Order_list = POOrderIDs.split(",")
-                AllData = list()
-                for OrderID in Order_list:
-                    OrderQuery = T_Orders.objects.filter(id=OrderID)
+                for OrderId in Order_list:
+                    OrderQuery = T_Orders.objects.filter(id=OrderId)
                     if OrderQuery.exists():
                         OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
@@ -145,10 +144,22 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "ShippingAddressID" :a['ShippingAddress']['id'],
                                 "ShippingAddress" :a['ShippingAddress']['Address'],
                                 "OrderItem" : OrderItemDetails,
-                            })        
-                        AllData.append({"Data":OrderData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': AllData})
+                            })      
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-    
-    
+    # def post(self, request,id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             POOrderIDs = request.data['OrderIDs']
+    #             Order_list = POOrderIDs.split(",")
+    #             # return JsonResponse({'StatusCode': 400, 'Status': True,'Data':Order_list}) 
+    #             # OrderQuery = T_Orders.objects.filter(id__in=Order_list).annotate(total=Sum('OrderAmount')).order_by("Supplier_id")
+    #             OrderQuery =  T_Orders.objects.values("Supplier_id","Customer_id").annotate(Supplier=F("Supplier_id"),Customer=F("Customer_id"),OrderAmount=Sum('OrderAmount')).filter(id__in =Order_list).order_by("Supplier_id")
+    #             if OrderQuery.exists():
+    #                 OrderSerializedata = OrderSerializerForGrn(OrderQuery, many=True).data
+    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata[0]})
+    #             #return JsonResponse({'StatusCode': 400, 'Status': True,'Data':str(OrderQuery.query)})      
+    #     except Exception as e:
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})     
