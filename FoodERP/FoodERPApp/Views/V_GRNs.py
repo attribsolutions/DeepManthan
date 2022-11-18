@@ -147,7 +147,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "OrderItem" : OrderItemDetails,
                             })        
                         AllData.append({"Data":OrderData})
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': AllData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': AllData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
