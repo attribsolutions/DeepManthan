@@ -160,4 +160,29 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
         fields = '__all__'
 
 
+'''Order Serializer For Make Grn'''
+
+
+class PartiesSerializerForGrn(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name']
+        
+class OrderSerializerForGrn(serializers.ModelSerializer):
+    # Customer = PartiesSerializerForGrn(read_only=True)
+    # Supplier = PartiesSerializerForGrn(read_only=True)
+    Customer = serializers.IntegerField()
+    Supplier = serializers.IntegerField()
+  
+  
+    # OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
+    # OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
+    # BillingAddress=PartyAddressSerializerSecond(read_only=True) 
+    # ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
+    
+    class Meta:
+        model = T_Orders
+        fields = ['Customer','Supplier','OrderAmount']       
+
+
     
