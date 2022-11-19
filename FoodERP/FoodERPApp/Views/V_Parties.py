@@ -60,7 +60,7 @@ class M_PartiesView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
-                    # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':M_Parties_serializer})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Data':M_Parties_serializer})
                     PartyData=list()
                     for a in M_Parties_serializer:
                         id =  a['id']
