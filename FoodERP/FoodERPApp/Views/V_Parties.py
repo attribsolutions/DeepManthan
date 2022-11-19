@@ -107,6 +107,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer})
                     PartiesData=list()
                     for a in M_Parties_serializer:
                         PartyAddresslist=list()
