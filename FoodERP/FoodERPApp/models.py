@@ -647,11 +647,11 @@ class MC_PartyItems(models.Model):
         db_table = "MC_PartyItems"
 
 class MC_PartyPrefixs(models.Model):
-    Party =models.ForeignKey(M_Parties, related_name='PartyPrefix', on_delete=models.DO_NOTHING)
-    Orderprefix = models.CharField(max_length=500)
-    Invoiceprefix = models.CharField(max_length=500)
-    Grnprefix = models.CharField(max_length=500)
-    Receiptprefix = models.CharField(max_length=500)
+    Party =models.ForeignKey(M_Parties, related_name='PartyPrefix', on_delete=models.CASCADE)
+    Orderprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Invoiceprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
     class Meta:
         db_table = "MC_PartyPrefixs"        
             

@@ -16,6 +16,11 @@ class AddressTypesSerializer(serializers.ModelSerializer):
         model =  M_AddressTypes
         fields = '__all__'
         
+class PartyPrefixsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyPrefixs
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix']
+
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
@@ -23,6 +28,7 @@ class PartyAddressSerializer(serializers.ModelSerializer):
 
 class M_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializer(many=True)
+    PartyPrefix = PartyPrefixsSerializer(many=True)
     class Meta:
         model =  M_Parties
         fields = '__all__'
@@ -30,10 +36,14 @@ class M_PartiesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
     
         PartyAddress_data = validated_data.pop('PartyAddress')
+        PartyPrefix_data = validated_data.pop('PartyPrefix')
         PartyID= M_Parties.objects.create(**validated_data)
         
         for PartyAddress in PartyAddress_data:
             Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
+
+        for PartyPrefix in PartyPrefix_data:
+            Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix)     
                
         return PartyID
     
@@ -78,9 +88,15 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         
         for a in instance.PartyAddress.all():
             a.delete()
+
+        for a in instance.PartyPrefix.all():
+            a.delete()    
         
         for PartyAddress_data in validated_data['PartyAddress']:
-            Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_data)  
+            Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_data) 
+
+        for PartyPrefixs_data in validated_data['PartyPrefix']:
+            Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)     
                   
         return instance
             
@@ -122,10 +138,10 @@ class AddressTypesSerializerSecond(serializers.ModelSerializer):
         fields = '__all__'
     
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
-    AddressType = AddressTypesSerializerSecond(read_only=True)
+    # AddressType = AddressTypesSerializerSecond(read_only=True)
     class Meta:
         model = MC_PartyAddress
-        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType'] 
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault'] 
 
 class DistrictSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -159,6 +175,7 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     Company = CompanySerializerSecond()
     PartyType = PartyTypeSerializerSecond()
     PriceList=PriceListSerializerSecond()
+    PartyPrefix = PartyPrefixsSerializer(many=True)
     class Meta:
         model =  M_Parties
         fields = '__all__'

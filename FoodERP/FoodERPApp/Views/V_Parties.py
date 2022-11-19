@@ -107,6 +107,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer[0]})
                     PartiesData=list()
                     for a in M_Parties_serializer:
                         PartyAddresslist=list()
@@ -118,8 +119,8 @@ class M_PartiesViewSecond(CreateAPIView):
                                 "FSSAIExipry": b['FSSAIExipry'],
                                 "PIN": b['PIN'],
                                 "IsDefault": b['IsDefault'],
-                                "AddressType": b['AddressType']['id'],
-                                "AddressTypeName": b['AddressType']['Name'],
+                                # "AddressType": b['AddressType']['id'],
+                                # "AddressTypeName": b['AddressType']['Name'],
                             })
                         
                         PartiesData.append({
