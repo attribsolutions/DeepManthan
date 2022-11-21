@@ -35,6 +35,14 @@ class GetPrifix:
         else:
             a=Prifix[0]['Orderprefix']
         return a
+    
+    def GetGrnPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Grnprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['Grnprefix']
+        return a
             
         
         
