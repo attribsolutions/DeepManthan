@@ -5,6 +5,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from ..Views.V_TransactionNumberfun import *
+
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
 
@@ -35,11 +37,19 @@ class T_GRNView(CreateAPIView):
         try:
             with transaction.atomic():
                 GRNdata = JSONParser().parse(request)
+               
+                Customer = GRNdata['Customer']
+                '''Get Max GRN Number'''
+                a=GetMaxNumber.GetGrnNumber(Customer)
+                GRNdata['GRNNumber']= a
+                '''Get Order Prifix '''
+                b=GetPrifix.GetGrnPrifix(Customer)
+                GRNdata['FullGRNNumber']= b+""+str(a)
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
                     GRN_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'GRN Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': GRN_serializer.errors, 'Data':[]})
+                return JsonResponse({'StatusCode': 400, 'Status': 'true',  'Message': GRN_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
