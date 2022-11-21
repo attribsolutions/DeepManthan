@@ -842,7 +842,7 @@ class T_GRNs(models.Model):
     Customer = models.ForeignKey(
         M_Parties, related_name='GRNCustomer', on_delete=models.PROTECT)
     GRNNumber = models.IntegerField()
-    # FullInvoiceNumber = models.CharField(max_length=500)
+    FullGRNNumber = models.CharField(max_length=500)
     # CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(
@@ -861,6 +861,7 @@ class TC_GRNReferences(models.Model):
         T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
     Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING ,null=True) 
     Invoice = models.ForeignKey(T_Invoices, on_delete=models.DO_NOTHING ,null=True)
+    ChallanNo = models.CharField(max_length=500 ,null=True)
     class Meta:
         db_table = "TC_GRNReferences"    
 
@@ -873,9 +874,9 @@ class TC_GRNItems(models.Model):
     Unit = models.ForeignKey(
         MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2, null=True)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
@@ -890,7 +891,7 @@ class TC_GRNItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    BatchDate = models.DateField(blank=True, null=True)
+    BatchDate = models.DateField()
     BatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
