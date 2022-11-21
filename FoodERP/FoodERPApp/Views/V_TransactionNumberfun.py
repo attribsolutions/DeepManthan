@@ -15,6 +15,16 @@ class GetMaxNumber:
             a=int(MaxOrderNumber[0]['OrderNo'])
             a=a+1
         return a
+    
+    def GetGrnNumber(*args):
+        
+        MaxGrnNumber=T_GRNs.objects.filter(Customer_id=args[0]).values('GRNNumber').order_by('-id')[:1]
+        if not MaxGrnNumber :
+            a=1
+        else:
+            a=int(MaxGrnNumber[0]['GRNNumber'])
+            a=a+1
+        return a
 
 class GetPrifix:
                  
