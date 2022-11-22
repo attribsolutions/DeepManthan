@@ -6,6 +6,7 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyItems import *
 from ..models import *
+from django.db.models import Count
 
 
 class PartyItemsViewSecond(CreateAPIView):
@@ -37,6 +38,31 @@ class PartyItemsViewSecond(CreateAPIView):
 class PartyItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+    
+    
+    @transaction.atomic()
+    def get(self, request,id=0):
+            try:
+                with transaction.atomic():
+                  
+                    # query=MC_PartyItems.objects.all().values('Party').annotate(total=Count('Item')).order_by('total')
+                    query=MC_PartyItems.objects.raw('''select mc_partyitems.id,m_parties.Name, mc_partyitems.Party_id,count(mc_partyitems.Item_id)As Total From mc_partyitems join m_parties on m_parties.id=mc_partyitems.Party_id group by mc_partyitems.Party_id  ''')
+                    # return JsonResponse({ 'query': str(query.query)})
+                    if not query:
+                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                    else:
+                        Items_Serializer = MC_PartyItemSerializerFourth(query, many=True).data
+                        # return JsonResponse({ 'query': Items_Serializer[0]})
+                        ItemList = list()
+                        for a in Items_Serializer:
+                            ItemList.append({
+                                "id":a['Party_id'],
+                                "Name":a['Name'],
+                                "Total": a['Total']
+                            })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
+            except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request,id=0):
