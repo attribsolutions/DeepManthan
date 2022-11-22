@@ -2,67 +2,117 @@ from dataclasses import field
 from ..models import *
 from rest_framework import serializers
 
-class TC_GRNReferencesSerializer(serializers.ModelSerializer):
-    class Meta : 
-        model=TC_GRNReferences
-        fields =['Invoice','Order']
 
-class TC_GRNItemsSerializer(serializers.ModelSerializer):
-  
+class Partiesserializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id', 'Name']
+
+
+class TC_GRNReferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_GRNReferences
+        fields = ['Invoice', 'Order', 'ChallanNo']
+
+
+class ItemSerializer(serializers.ModelSerializer):
     class Meta : 
-        model=TC_GRNItems
-        fields =['id','Item','Quantity','Unit','BaseUnitQuantity','MRP','ReferenceRate','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode']
-        
-class T_GRNSerializer(serializers.ModelSerializer):
-    
-    GRNReferences=TC_GRNReferencesSerializer(many=True)
-    GRNItems=TC_GRNItemsSerializer(many=True)
-    
+        model = M_Items
+        fields = ['id','Name']
+
+class Unitserializer(serializers.ModelSerializer):
     
     class Meta:
-        model =   T_GRNs
-        fields = ['id','GRNDate','Customer','GRNNumber','GrandTotal','Party','CreatedBy','UpdatedBy','GRNReferences','GRNItems']
-        
+        model = M_Units
+        fields = ['Name']
+
+class UnitSerializerSecond(serializers.ModelSerializer):
+   
+    UnitID= serializers.SlugRelatedField(read_only=True,slug_field='Name')
+    class Meta:
+        model = MC_ItemUnits
+        fields = ['id','UnitID']
+
+class TC_GRNItemsSerializer(serializers.ModelSerializer):
+    Item=ItemSerializer(read_only=True)
+    Unit=UnitSerializerSecond(read_only=True)
+    
+    class Meta:
+        model = TC_GRNItems
+        fields = ['id', 'Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount',
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode']
+
+
+
+
+class T_GRNSerializer(serializers.ModelSerializer):
+
+    GRNReferences = TC_GRNReferencesSerializer(many=True)
+    GRNItems = TC_GRNItemsSerializer(many=True)
+
+    class Meta:
+        model = T_GRNs
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber',
+                  'GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNReferences', 'GRNItems']
+        # fields ='__all__'
 
     def create(self, validated_data):
         GRNItems_data = validated_data.pop('GRNItems')
         GRNReferences_data = validated_data.pop('GRNReferences')
         grnID = T_GRNs.objects.create(**validated_data)
-       
+
         for GRNReference_data in GRNReferences_data:
-            Reference_data=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
+            Reference_data = TC_GRNReferences.objects.create(
+                GRN=grnID, **GRNReference_data)
 
         for GRNItem_data in GRNItems_data:
-            GRNItemID =TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
-        return grnID     
+            GRNItemID = TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
+        return grnID
 
     def update(self, instance, validated_data):
-        
+
         instance.GRNDate = validated_data.get(
             'GRNDate', instance.GRNDate)
         instance.Customer = validated_data.get(
             'Customer', instance.Customer)
         instance.Party = validated_data.get(
             'Party', instance.Party)
-        
+
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
         instance.GRNNumber = validated_data.get(
-            'GRNNumber', instance.GRNNumber)    
+            'GRNNumber', instance.GRNNumber)
         instance.UpdatedBy = validated_data.get(
-            'UpdatedBy', instance.UpdatedBy)  
-         
+            'UpdatedBy', instance.UpdatedBy)
+
         instance.save()
-        
+
         for items in instance.GRNItems.all():
             items.delete()
 
         for items in instance.GRNReferences.all():
-            items.delete()    
-        
+            items.delete()
+
         for GRNReference_data in validated_data['GRNReferences']:
-            Reference_data=TC_GRNReferences.objects.create(GRN=instance, **GRNReference_data)
-       
+            Reference_data = TC_GRNReferences.objects.create(
+                GRN=instance, **GRNReference_data)
+
         for GRNItem_data in validated_data['GRNItems']:
-            TC_GRNItemsID = TC_GRNItems.objects.create(GRN=instance, **GRNItem_data)
-        return instance     
+            TC_GRNItemsID = TC_GRNItems.objects.create(
+                GRN=instance, **GRNItem_data)
+        return instance
+
+
+class T_GRNSerializerForGET(serializers.ModelSerializer):
+
+    Customer = Partiesserializer(read_only=True)
+    Party = Partiesserializer(read_only=True)
+
+    GRNReferences = TC_GRNReferencesSerializer(read_only=True)
+    GRNItems = TC_GRNItemsSerializer(many=True)
+
+    class Meta:
+        model = T_GRNs
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber',
+                  'GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNReferences', 'GRNItems']
+        # fields ='__all__'
