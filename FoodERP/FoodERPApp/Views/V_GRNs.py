@@ -27,7 +27,10 @@ class GRNListFilterView(CreateAPIView):
                 FromDate = GRNdata['FromDate']
                 ToDate = GRNdata['ToDate']
                 Supplier = GRNdata['Supplier']
-                query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Party_id=Supplier)
+                if(Supplier==''):
+                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate])
+                else:
+                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Party_id=Supplier)    
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
@@ -58,36 +61,6 @@ class T_GRNView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic():
-                query = T_GRNs.objects.all()
-                if not query:
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
-                else:
-                    GRN_serializer = T_GRNSerializerForGET(query, many=True).data
-                    GRNListData = list()
-                    for a in GRN_serializer:   
-                        GRNListData.append({
-                        "id": a['id'],
-                        "GRNDate": a['GRNDate'],
-                        "Customer": a['Customer']['id'],
-                        "CustomerName": a['Customer']['Name'],
-                        "GRNNumber": a['GRNNumber'],
-                        "FullGRNNumber": a['FullGRNNumber'],
-                        "GrandTotal": a['GrandTotal'],
-                        "Party": a['Party']['id'],
-                        "PartyName": a['Party']['Name'],
-                        "CreatedBy":a['CreatedBy'],
-                        "UpdatedBy": a['UpdatedBy'],
-
-                        })
-                    
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
