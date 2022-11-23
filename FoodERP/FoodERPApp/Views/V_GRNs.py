@@ -80,6 +80,7 @@ class T_GRNViewSecond(CreateAPIView):
             with transaction.atomic():
                 GRNdata = T_GRNs.objects.get(id=id)
                 GRN_serializer = T_GRNSerializerForGET(GRNdata).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                 GRNItemListData = list()
                 for a in GRN_serializer['GRNItems']:   
                         GRNItemListData.append({
@@ -110,8 +111,19 @@ class T_GRNViewSecond(CreateAPIView):
                         "BatchCode": a['BatchCode'],
                     })
 
+                GRNReferencesData = list()
+                for r in GRN_serializer['GRNReferences']:   
+                        GRNReferencesData.append({
+                       
+                            "Invoice": r['Invoice'],
+                            "Order": r['Order'],
+                            "ChallanNo":r['ChallanNo'],
+                   
+                        })    
+
                 GRNListData = list()
                 a=GRN_serializer
+               
                 GRNListData.append({
                     "id": a['id'],
                     "GRNDate": a['GRNDate'],
@@ -124,12 +136,8 @@ class T_GRNViewSecond(CreateAPIView):
                     "PartyName": a['Party']['Name'],
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
-                    "GRNReferences": 
-                        {
-                            "Invoice": a['GRNReferences']['Invoice'],
-                            "Order": a['GRNReferences']['Order'],
-                            "ChallanNo":a['GRNReferences']['ChallanNo'],
-                        },
+                    "GRNReferences": GRNReferencesData,
+                        
                     "GRNItems" : GRNItemListData  
 
                     })  

@@ -868,7 +868,7 @@ class TC_GRNReferences(models.Model):
 class TC_GRNItems(models.Model):
     GRN = models.ForeignKey(
         T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    Item = models.ForeignKey(M_Items,related_name='Item', on_delete=models.PROTECT)
     # HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(

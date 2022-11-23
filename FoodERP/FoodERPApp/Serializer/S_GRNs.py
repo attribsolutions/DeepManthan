@@ -108,7 +108,7 @@ class T_GRNSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
     Party = Partiesserializer(read_only=True)
 
-    GRNReferences = TC_GRNReferencesSerializer(read_only=True)
+    GRNReferences = TC_GRNReferencesSerializer(many=True,read_only=True)
     GRNItems = TC_GRNItemsSerializer(many=True)
 
     class Meta:
