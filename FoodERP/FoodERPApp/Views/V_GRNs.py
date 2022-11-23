@@ -6,10 +6,8 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
-
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
-
 from ..models import  *
 from django.db.models import *
 
@@ -129,16 +127,12 @@ class T_GRNViewSecond(CreateAPIView):
                 GRNReferencesData = list()
                 for r in GRN_serializer['GRNReferences']:   
                         GRNReferencesData.append({
-                       
                             "Invoice": r['Invoice'],
                             "Order": r['Order'],
                             "ChallanNo":r['ChallanNo'],
-                   
                         })    
-
                 GRNListData = list()
                 a=GRN_serializer
-               
                 GRNListData.append({
                     "id": a['id'],
                     "GRNDate": a['GRNDate'],
@@ -152,11 +146,8 @@ class T_GRNViewSecond(CreateAPIView):
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
                     "GRNReferences": GRNReferencesData,
-                
                     "GRNItems" : GRNItemListData  
-
                     })  
-                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -187,7 +178,6 @@ class T_GRNViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'T_GRN used in another tbale', 'Data': []})    
-
 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
