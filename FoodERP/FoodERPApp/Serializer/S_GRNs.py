@@ -6,24 +6,7 @@ class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
         fields = ['id', 'Name']
-
-class ItemSerializer(serializers.ModelSerializer):
-    class Meta : 
-        model = M_Items
-        fields = ['id','Name']
-
-class Unitserializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = M_Units
-        fields = ['Name']
-
-class UnitSerializerSecond(serializers.ModelSerializer):
-    UnitID= serializers.SlugRelatedField(read_only=True,slug_field='Name')
-    class Meta:
-        model = MC_ItemUnits
-        fields = ['id','UnitID']
-
+        
 ''' POST AND PUT Methods Serializers  Save/Edit  Create/Update '''
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
@@ -91,13 +74,52 @@ class T_GRNSerializer(serializers.ModelSerializer):
         return instance
 
 
-class T_GRNSerializerForGET(serializers.ModelSerializer):
 
+
+'''Single Record Details Fetch Get Methods Serializer '''
+
+
+class Partiesserializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id', 'Name']
+
+class TC_GRNReferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_GRNReferences
+        fields = ['Invoice', 'Order', 'ChallanNo'] 
+        
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta : 
+        model = M_Items
+        fields = ['id','Name']
+
+class Unitserializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Units
+        fields = ['Name']
+
+class UnitSerializerSecond(serializers.ModelSerializer):
+    UnitID= serializers.SlugRelatedField(read_only=True,slug_field='Name')
+    class Meta:
+        model = MC_ItemUnits
+        fields = ['id','UnitID']          
+
+class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
+    
+    Item=ItemSerializer(read_only=True)
+    Unit=UnitSerializerSecond(read_only=True)
+    class Meta:
+        model = TC_GRNItems
+        fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount',
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode']          
+
+
+class T_GRNSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
     Party = Partiesserializer(read_only=True)
-
     GRNReferences = TC_GRNReferencesSerializer(many=True,read_only=True)
-    GRNItems = TC_GRNItemsSerializer(many=True)
+    GRNItems = TC_GRNItemsSerializerSecond(many=True)
 
     class Meta:
         model = T_GRNs

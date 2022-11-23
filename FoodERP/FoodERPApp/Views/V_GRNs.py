@@ -35,13 +35,13 @@ class T_GRNView(CreateAPIView):
                         "GRNDate": a['GRNDate'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
-                        "GRNNumber": 1,
-                        "FullGRNNumber": "1",
-                        "GrandTotal": "5250.00",
+                        "GRNNumber": a['GRNNumber'],
+                        "FullGRNNumber": a['FullGRNNumber'],
+                        "GrandTotal": a['GrandTotal'],
                         "Party": a['Party']['id'],
                         "PartyName": a['Party']['Name'],
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
+                        "CreatedBy":a['CreatedBy'],
+                        "UpdatedBy": a['UpdatedBy'],
 
                         })
                     
