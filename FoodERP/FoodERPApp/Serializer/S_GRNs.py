@@ -2,7 +2,6 @@ from dataclasses import field
 from ..models import *
 from rest_framework import serializers
 
-
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
@@ -13,11 +12,6 @@ class ItemSerializer(serializers.ModelSerializer):
         model = M_Items
         fields = ['id','Name']
 
-class TC_GRNReferencesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo']
-
 class Unitserializer(serializers.ModelSerializer):
     
     class Meta:
@@ -25,43 +19,42 @@ class Unitserializer(serializers.ModelSerializer):
         fields = ['Name']
 
 class UnitSerializerSecond(serializers.ModelSerializer):
-   
     UnitID= serializers.SlugRelatedField(read_only=True,slug_field='Name')
     class Meta:
         model = MC_ItemUnits
         fields = ['id','UnitID']
 
+''' POST AND PUT Methods Serializers  Save/Edit  Create/Update '''
+
+class TC_GRNReferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_GRNReferences
+        fields = ['Invoice', 'Order', 'ChallanNo']        
+
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
-    Item=ItemSerializer(read_only=True)
-    Unit=UnitSerializerSecond(read_only=True)
-    
     class Meta:
         model = TC_GRNItems
-        fields = ['id', 'Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount',
+        fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount',
                   'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode']
 
 class T_GRNSerializer(serializers.ModelSerializer):
 
-    # GRNReferences = TC_GRNReferencesSerializer(many=True) 'GRNReferences', 
     GRNItems = TC_GRNItemsSerializer(many=True)
-
+    GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems']
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems', 'GRNReferences']
        
-
     def create(self, validated_data):
         GRNItems_data = validated_data.pop('GRNItems')
-        # GRNReferences_data = validated_data.pop('GRNReferences')
+        GRNReferences_data = validated_data.pop('GRNReferences')
         grnID = T_GRNs.objects.create(**validated_data)
 
         for GRNItem_data in GRNItems_data:
-            TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
+            GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
 
-        # for GRNReference_data in GRNReferences_data:
-        #     TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
-
-        
+        for GRNReference_data in GRNReferences_data:
+            GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
         return grnID
 
     def update(self, instance, validated_data):
@@ -110,4 +103,4 @@ class T_GRNSerializerForGET(serializers.ModelSerializer):
         model = T_GRNs
         fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber',
                   'GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNReferences', 'GRNItems']
-        # fields ='__all__'
+
