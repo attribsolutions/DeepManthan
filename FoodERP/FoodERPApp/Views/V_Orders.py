@@ -41,18 +41,26 @@ class TermsAndCondtions(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 # ==================================================================================================
-class T_OrdersView(CreateAPIView):
+class OrderListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request,id=0):
+    def post(self, request,id=0):
         try:
             with transaction.atomic():
-                Orderdata = T_Orders.objects.all().order_by('-id')
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Customer = Orderdata['Customer']
+                Supplier = Orderdata['Supplier']
+                if(Supplier==''):
+                    query = T_Orders.objects.filter(OrderDate__range=[FromDate,ToDate],Customer_id=Customer)
+                else:
+                    query = T_Orders.objects.filter(OrderDate__range=[FromDate,ToDate],Customer_id=Customer,Supplier_id=Supplier)
                 # return JsonResponse({'query': str(Orderdata.query)})
-                if Orderdata:
-                    Order_serializer = T_OrderSerializerSecond(Orderdata, many=True).data
+                if query:
+                    Order_serializer = T_OrderSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:   
@@ -75,6 +83,11 @@ class T_OrdersView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class T_OrdersView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
              
     @transaction.atomic()
     def post(self, request):

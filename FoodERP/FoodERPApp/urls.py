@@ -98,6 +98,7 @@ urlpatterns = [
     url(r'CompanyGroups$', C_CompanyGroupView.as_view()),
     url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
     url(r'Orders$', T_OrdersView.as_view()),
+    url(r'OrdersFilter$', OrderListFilterView.as_view()),
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
     url(r'Designations$',M_DesignationsView.as_view()),
     url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
@@ -108,6 +109,8 @@ urlpatterns = [
     url(r'Invoices$', T_InvoiceView.as_view()),
     url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
     url(r'GRN$', T_GRNView.as_view()),
+    url(r'GRNFilter$', GRNListFilterView.as_view()),
+    
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
     url(r'Challan$', T_DeliveryChallanView.as_view()),
     url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),

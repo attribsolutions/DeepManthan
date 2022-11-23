@@ -5,25 +5,32 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Views.V_TransactionNumberfun import *
-
+from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
-
 from ..models import  *
 from django.db.models import *
 
 
-class T_GRNView(CreateAPIView):
+class GRNListFilterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request,id=0):
+    def post(self, request):
         try:
             with transaction.atomic():
-                query = T_GRNs.objects.all()
+                GRNdata = JSONParser().parse(request)
+                FromDate = GRNdata['FromDate']
+                ToDate = GRNdata['ToDate']
+                Customer = GRNdata['Party']
+                Supplier = GRNdata['Supplier']
+                if(Supplier==''):
+                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Customer_id=Customer)
+                else:
+                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Customer_id=Customer,Party_id=Supplier)    
+                # return JsonResponse({'Data':str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
                 else:
@@ -35,35 +42,42 @@ class T_GRNView(CreateAPIView):
                         "GRNDate": a['GRNDate'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
-                        "GRNNumber": 1,
-                        "FullGRNNumber": "1",
-                        "GrandTotal": "5250.00",
+                        "GRNNumber": a['GRNNumber'],
+                        "FullGRNNumber": a['FullGRNNumber'],
+                        "GrandTotal": a['GrandTotal'],
                         "Party": a['Party']['id'],
                         "PartyName": a['Party']['Name'],
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
+                        "CreatedBy":a['CreatedBy'],
+                        "UpdatedBy": a['UpdatedBy'],
 
                         })
-                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class T_GRNView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
                 GRNdata = JSONParser().parse(request)
-               
                 Customer = GRNdata['Customer']
                 '''Get Max GRN Number'''
                 a=GetMaxNumber.GetGrnNumber(Customer)
+                # return JsonResponse({'Data':a})
                 GRNdata['GRNNumber']= a
                 '''Get Order Prifix '''
                 b=GetPrifix.GetGrnPrifix(Customer)
+                # return JsonResponse({'Data':b})
                 GRNdata['FullGRNNumber']= b+""+str(a)
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
+                    # return JsonResponse({'Data':GRN_serializer.data})
                     GRN_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data':[]})
                 return JsonResponse({'StatusCode': 400, 'Status': True,  'Message': GRN_serializer.errors, 'Data':[]})
@@ -114,16 +128,12 @@ class T_GRNViewSecond(CreateAPIView):
                 GRNReferencesData = list()
                 for r in GRN_serializer['GRNReferences']:   
                         GRNReferencesData.append({
-                       
                             "Invoice": r['Invoice'],
                             "Order": r['Order'],
                             "ChallanNo":r['ChallanNo'],
-                   
                         })    
-
                 GRNListData = list()
                 a=GRN_serializer
-               
                 GRNListData.append({
                     "id": a['id'],
                     "GRNDate": a['GRNDate'],
@@ -137,11 +147,8 @@ class T_GRNViewSecond(CreateAPIView):
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
                     "GRNReferences": GRNReferencesData,
-                        
                     "GRNItems" : GRNItemListData  
-
                     })  
-                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -153,11 +160,11 @@ class T_GRNViewSecond(CreateAPIView):
             with transaction.atomic():
                 GRN_data = JSONParser().parse(request)
                 GRN_dataByID = T_GRNs.objects.get(id=id)
-                GRN_Serializer = T_GRNSerializer(GRN_dataByID, data=GRN_data)
-                if GRN_Serializer.is_valid():
-                    GRN_Serializer.save()
+                GRN_Serializer_Update = T_GRNSerializer(GRN_dataByID, data=GRN_data)
+                if GRN_Serializer_Update.is_valid():
+                    GRN_Serializer_Update.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN  Updated Successfully','Data':{}})
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer.errors ,'Data':[]})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer_Update.errors ,'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
    
@@ -172,7 +179,6 @@ class T_GRNViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'T_GRN used in another tbale', 'Data': []})    
-
 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
