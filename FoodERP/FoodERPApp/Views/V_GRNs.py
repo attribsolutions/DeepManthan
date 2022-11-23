@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
-from ..Views.V_TransactionNumberfun import *
+from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
 
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
@@ -54,16 +54,18 @@ class T_GRNView(CreateAPIView):
         try:
             with transaction.atomic():
                 GRNdata = JSONParser().parse(request)
-               
                 Customer = GRNdata['Customer']
                 '''Get Max GRN Number'''
                 a=GetMaxNumber.GetGrnNumber(Customer)
+                # return JsonResponse({'Data':a})
                 GRNdata['GRNNumber']= a
                 '''Get Order Prifix '''
                 b=GetPrifix.GetGrnPrifix(Customer)
+                # return JsonResponse({'Data':b})
                 GRNdata['FullGRNNumber']= b+""+str(a)
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
+                    # return JsonResponse({'Data':GRN_serializer.data})
                     GRN_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data':[]})
                 return JsonResponse({'StatusCode': 400, 'Status': True,  'Message': GRN_serializer.errors, 'Data':[]})
@@ -137,7 +139,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
                     "GRNReferences": GRNReferencesData,
-                        
+                
                     "GRNItems" : GRNItemListData  
 
                     })  
@@ -153,11 +155,11 @@ class T_GRNViewSecond(CreateAPIView):
             with transaction.atomic():
                 GRN_data = JSONParser().parse(request)
                 GRN_dataByID = T_GRNs.objects.get(id=id)
-                GRN_Serializer = T_GRNSerializer(GRN_dataByID, data=GRN_data)
-                if GRN_Serializer.is_valid():
-                    GRN_Serializer.save()
+                GRN_Serializer_Update = T_GRNSerializer(GRN_dataByID, data=GRN_data)
+                if GRN_Serializer_Update.is_valid():
+                    GRN_Serializer_Update.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN  Updated Successfully','Data':{}})
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer.errors ,'Data':[]})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer_Update.errors ,'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
    
