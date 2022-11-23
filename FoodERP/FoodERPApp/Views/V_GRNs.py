@@ -24,11 +24,12 @@ class GRNListFilterView(CreateAPIView):
                 GRNdata = JSONParser().parse(request)
                 FromDate = GRNdata['FromDate']
                 ToDate = GRNdata['ToDate']
+                Customer = GRNdata['Party']
                 Supplier = GRNdata['Supplier']
                 if(Supplier==''):
-                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate])
+                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Customer_id=Customer)
                 else:
-                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Party_id=Supplier)    
+                    query = T_GRNs.objects.filter(GRNDate__range=[FromDate,ToDate],Customer_id=Customer,Party_id=Supplier)    
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':  'Records Not available', 'Data': []})
