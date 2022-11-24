@@ -869,8 +869,7 @@ class TC_GRNItems(models.Model):
     Item = models.ForeignKey(M_Items, related_name='GItem', on_delete=models.DO_NOTHING)
     # HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2, null=True)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
@@ -891,6 +890,7 @@ class TC_GRNItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     BatchDate = models.DateField()
     BatchCode = models.CharField(max_length=500)
+    SystemBatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
