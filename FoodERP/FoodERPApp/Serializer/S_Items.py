@@ -53,7 +53,7 @@ class ItemImagesSerializer(serializers.ModelSerializer):
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity' ]
+        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted' ]
         
         
 class ItemGroupDetailsSerializer(serializers.ModelSerializer):
