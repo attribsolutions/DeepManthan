@@ -51,8 +51,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
 
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
-        instance.GRNNumber = validated_data.get(
-            'GRNNumber', instance.GRNNumber)
+       
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
 
