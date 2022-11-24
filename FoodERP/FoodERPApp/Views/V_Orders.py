@@ -237,12 +237,13 @@ class GetItemsForOrderView(CreateAPIView):
                             Gst = GSTHsnCodeMaster(ItemID,EffectiveDate).GetTodaysGstHsnCode()
                             UnitDetails=list()
                             for d in a['Item']['ItemUnitDetails']:
-                                UnitDetails.append({
-                                    "UnitID": d['id'],
-                                    # "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'],
-                                    "BaseUnitQuantity": d['BaseUnitQuantity']
-                                })
+                                if d['IsDeleted']== 0 :
+                                    UnitDetails.append({
+                                        "UnitID": d['id'],
+                                        # "UnitID": d['UnitID']['id'],
+                                        "UnitName": d['UnitID']['Name'],
+                                        "BaseUnitQuantity": d['BaseUnitQuantity']
+                                    })
                             
                             ItemList.append({
                                 "id":a['Item']['id'],
