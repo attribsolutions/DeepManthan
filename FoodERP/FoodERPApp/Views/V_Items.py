@@ -81,6 +81,7 @@ class M_ItemsViewSecond(CreateAPIView):
                 if Itemsquery.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
+                    # return JsonResponse({'query':  Itemsdata})
                     ItemData=list()
                     for a in Itemsdata:
                         
@@ -108,13 +109,14 @@ class M_ItemsViewSecond(CreateAPIView):
                         
                         UnitDetails=list()
                         for d in a['ItemUnitDetails']:
-                            UnitDetails.append({
-                                "id": d['id'],
-                                "UnitID": d['UnitID']['id'],
-                                "UnitName": d['UnitID']['Name'],
-                                "BaseUnitQuantity": d['BaseUnitQuantity'],
-                            
-                            })
+                            if d['IsDeleted']== 0 :
+                                UnitDetails.append({
+                                    "id": d['id'],
+                                    "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name'],
+                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                
+                                })
                             
                         ImagesDetails=list()
                         for e in a['ItemImagesDetails']:
