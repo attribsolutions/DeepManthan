@@ -81,6 +81,7 @@ class M_ItemsViewSecond(CreateAPIView):
                 if Itemsquery.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
+                    # return JsonResponse({'query':  Itemsdata})
                     ItemData=list()
                     for a in Itemsdata:
                         
