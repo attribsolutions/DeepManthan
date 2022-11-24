@@ -541,6 +541,7 @@ class MC_ItemCategoryDetails(models.Model):
     Category = models.ForeignKey(M_Category, related_name='ItemCategory', on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedOn = models.DateTimeField(auto_now_add=True)
+    
     class Meta:
         db_table = "MC_ItemCategoryDetails"
 
@@ -562,8 +563,10 @@ class MC_ItemUnits(models.Model):
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
     IsDeleted = models.BooleanField(default=False)
+    IsBase = models.BooleanField(default=False)
     class Meta:
         db_table = "MC_ItemUnits"                
+
 
 class MC_ItemImages(models.Model):
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.DO_NOTHING)
