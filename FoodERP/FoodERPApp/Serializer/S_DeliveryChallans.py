@@ -47,10 +47,7 @@ class T_DeliveryChallanSerializer(serializers.ModelSerializer):
             'Party', instance.Party) 
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
-        instance.ChallanNumber = validated_data.get(
-            'ChallanNumber', instance.ChallanNumber) 
-        instance.FullChallanNumber = validated_data.get(
-            'FullChallanNumber', instance.FullChallanNumber)    
+          
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)  
          
