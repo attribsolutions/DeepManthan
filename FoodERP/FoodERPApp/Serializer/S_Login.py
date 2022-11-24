@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 
-from  ..models import C_CompanyGroups, M_Employees, M_Parties, M_Roles, M_Users, MC_UserRoles
+from  ..models import C_CompanyGroups, M_Employees, M_Parties, M_Roles, M_Users, MC_UserRoles,C_Companies
 
 from rest_framework import serializers
 
@@ -144,8 +144,13 @@ class UserRolesSerializer(serializers.ModelSerializer):
         model = MC_UserRoles
         fields= ['Role','Party']
         
-
-class M_employeesSerializer(serializers.ModelSerializer):   
+class C_CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = '__all__'
+        
+class M_employeesSerializer(serializers.ModelSerializer): 
+    Company = C_CompanySerializer(read_only=True)
     class Meta:
         model = M_Employees
         fields = '__all__' 
