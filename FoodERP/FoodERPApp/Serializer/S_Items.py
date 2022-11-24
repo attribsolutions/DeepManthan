@@ -53,7 +53,7 @@ class ItemImagesSerializer(serializers.ModelSerializer):
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted' ]
+        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase']
         
         
 class ItemGroupDetailsSerializer(serializers.ModelSerializer):
@@ -158,7 +158,7 @@ class ItemSerializer(serializers.ModelSerializer):
                 
         for c in instance.ItemUnitDetails.all():
             # print(c.id)
-            SetFlag=MC_ItemUnits.objects.filter(id=c.id).update(IsDeleted=1)
+            SetFlag=MC_ItemUnits.objects.filter(id=c.id).filter(~Q(IsBase=1)).update(IsDeleted=1)
             
             
         for d in instance.ItemImagesDetails.all():
