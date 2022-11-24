@@ -102,6 +102,7 @@ class UserListView(CreateAPIView):
                             'UpdatedOn': a["UpdatedOn"],
                             'Employee': a["Employee"]["id"],
                             'EmployeeName': a["Employee"]["Name"],
+                            'CompanyName': a["Employee"]["Company"]["Name"],
                             # 'UserRole': RoleData,
 
                         })

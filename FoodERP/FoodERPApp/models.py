@@ -652,6 +652,7 @@ class MC_PartyPrefixs(models.Model):
     Invoiceprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     class Meta:
         db_table = "MC_PartyPrefixs"        
             
@@ -836,18 +837,13 @@ class  MC_PartySubParty(models.Model):
         
 
 class T_GRNs(models.Model):
-    # Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
+    
     GRNDate = models.DateField()
-    # InvoiceDate = models.DateField()
-    Customer = models.ForeignKey(
-        M_Parties, related_name='GRNCustomer', on_delete=models.PROTECT)
+    Customer = models.ForeignKey(M_Parties, related_name='GRNCustomer', on_delete=models.PROTECT)
     GRNNumber = models.IntegerField()
     FullGRNNumber = models.CharField(max_length=500)
-    # CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    Party = models.ForeignKey(
-        M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
-    # RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -899,18 +895,13 @@ class TC_GRNItems(models.Model):
 
 
 class T_DeliveryChallans(models.Model):
-    # Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
+    
     ChallanDate = models.DateField()
-    # InvoiceDate = models.DateField()
-    Customer = models.ForeignKey(
-        M_Parties, related_name='DeliveryCustomer', on_delete=models.PROTECT)
+    Customer = models.ForeignKey(M_Parties, related_name='DeliveryCustomer', on_delete=models.PROTECT)
     ChallanNumber = models.IntegerField()
-    # FullInvoiceNumber = models.CharField(max_length=500)
-    # CustomerGSTTin = models.CharField(max_length=500)
+    FullChallanNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    Party = models.ForeignKey(
-        M_Parties, related_name='DeliveryParty', on_delete=models.PROTECT)
-    # RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='DeliveryParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -920,21 +911,18 @@ class T_DeliveryChallans(models.Model):
         db_table = "T_DeliveryChallans"
 
 class TC_DeliveryChallanReferences(models.Model):
-    DeliveryChallan = models.ForeignKey(
-        T_DeliveryChallans, related_name='DeliveryChallanReferences', on_delete=models.CASCADE)
+    DeliveryChallan = models.ForeignKey(T_DeliveryChallans, related_name='DeliveryChallanReferences', on_delete=models.CASCADE)
     GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT) 
   
     class Meta:
         db_table = "TC_DeliveryChallanReferences"    
 
 class TC_DeliveryChallanItems(models.Model):
-    DeliveryChallan = models.ForeignKey(
-        T_DeliveryChallans, related_name='DeliveryChallanItems', on_delete=models.CASCADE)
+    DeliveryChallan = models.ForeignKey(T_DeliveryChallans, related_name='DeliveryChallanItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     # HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='DeliveryChallanUnitID', on_delete=models.PROTECT)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='DeliveryChallanUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
