@@ -16,19 +16,36 @@ class C_CompaniesView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-
+                   
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Companiesdata = C_Companies.objects.all()
-                if Companiesdata.exists():
-                    Companies_Serializer = C_CompanySerializerSecond(Companiesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Companies_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Companies Not Available', 'Data': []})    
+                Groupquery = C_Companies.objects.all()
+                if Groupquery.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Companydata = C_CompanySerializerSecond(Groupquery, many=True).data
+                    CompanyList=list()
+                    for a in Companydata:
+                        CompanyList.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "CompanyGroup": a['CompanyGroup']['id'],
+                            "CompanyGroupName": a['CompanyGroup']['Name'],
+                            "Address": a['Address'],
+                            "GSTIN": a['GSTIN'],
+                            "PhoneNo": a['PhoneNo'],
+                            "CompanyAbbreviation": a['CompanyAbbreviation'],
+                            "EmailID": a['EmailID'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
 
     @transaction.atomic()
     def post(self, request):
