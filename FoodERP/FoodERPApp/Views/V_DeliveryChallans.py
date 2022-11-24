@@ -7,7 +7,6 @@ from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_DeliveryChallans import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
-
 from ..models import  *
 
 
