@@ -25,6 +25,16 @@ class GetMaxNumber:
             a=int(MaxGrnNumber[0]['GRNNumber'])
             a=a+1
         return a
+    
+    def GetDeliveryChallanNumber(*args):
+        
+        MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
+        if not MaxChallanNumber :
+            a=1
+        else:
+            a=int(MaxChallanNumber[0]['ChallanNumber'])
+            a=a+1
+        return a
 
 class GetPrifix:
                  
@@ -42,6 +52,14 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['Grnprefix']
+        return a
+    
+    def GetDeliveryChallanPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Challanprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['Challanprefix']
         return a
             
         
