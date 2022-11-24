@@ -108,13 +108,14 @@ class M_ItemsViewSecond(CreateAPIView):
                         
                         UnitDetails=list()
                         for d in a['ItemUnitDetails']:
-                            UnitDetails.append({
-                                "id": d['id'],
-                                "UnitID": d['UnitID']['id'],
-                                "UnitName": d['UnitID']['Name'],
-                                "BaseUnitQuantity": d['BaseUnitQuantity'],
-                            
-                            })
+                            if d['IsDeleted']== 0 :
+                                UnitDetails.append({
+                                    "id": d['id'],
+                                    "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name'],
+                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                
+                                })
                             
                         ImagesDetails=list()
                         for e in a['ItemImagesDetails']:
