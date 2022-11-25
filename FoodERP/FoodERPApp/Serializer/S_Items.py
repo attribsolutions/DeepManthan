@@ -287,7 +287,7 @@ class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted' ]
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase' ]
 
 class ItemSubGroupSerializerSecond(serializers.ModelSerializer):
     class Meta:
