@@ -249,7 +249,7 @@ class GetItemsForOrderView(CreateAPIView):
                                 "id":a['Item']['id'],
                                 "Name": a['Item']['Name'],
                                 "Gstid":Gst[0]['Gstid'],
-                                "GST":Gst[0]['GST'],
+                                "GSTPercentage":Gst[0]['GST'],
                                 "UnitDetails":UnitDetails
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
