@@ -43,7 +43,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
         
         for GRNItem_data in GRNItems_data :
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
-            O_BatchWiseLiveStockItem=O_BatchWiseLiveStock.objects.create(GRN=grnID, **GRNItem_data)  
+            # O_BatchWiseLiveStockItem=O_BatchWiseLiveStock.objects.create(GRN=grnID,PartyID **GRNItem_data)  
 
         for GRNReference_data in GRNReferences_data:
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
