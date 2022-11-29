@@ -1,6 +1,8 @@
 from dataclasses import field
 from ..models import *
 from rest_framework import serializers
+from collections import OrderedDict
+from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
@@ -33,8 +35,31 @@ class T_GRNSerializer(serializers.ModelSerializer):
         GRNReferences_data = validated_data.pop('GRNReferences')
         grnID = T_GRNs.objects.create(**validated_data)
 
-        for GRNItem_data in GRNItems_data:
-            GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
+        # item= ""
+        for GRNItem_data in GRNItems_data :
+            # X = dict(GRNItem_data)
+            
+            # print(X['Item'])
+            # if(item==""):
+            #     item=GRNItem_data['Item']
+            #     b=0
+              
+            # elif(item == GRNItem_data['Item']):
+            #     item = 1
+            #     b = b+1
+                
+            # else:
+            #     item=GRNItem_data['Item']
+            #     b=0
+            
+            # print(validated_data['Customer'])
+            # print(b)
+            
+        
+            # a=SystemBatchCodeGeneration.GetGrnBatchCode(GRNItem_data['Item'],validated_data['Customer'],b)
+      
+            # GrnItem=TC_GRNItems.objects.create(GRN=grnID,SystemBatchCode=a, **GRNItem_data)  
+            GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data) 
 
         for GRNReference_data in GRNReferences_data:
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
