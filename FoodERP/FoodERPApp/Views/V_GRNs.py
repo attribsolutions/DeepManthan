@@ -75,6 +75,24 @@ class T_GRNView(CreateAPIView):
                 b=GetPrifix.GetGrnPrifix(Customer)
                 # return JsonResponse({'Data':b})
                 GRNdata['FullGRNNumber']= b+""+str(a)
+                item= ""
+                for a in GRNdata['GRNItems']:
+
+                    if(item==""):
+                        item=a['Item']
+                        b=0
+
+                    elif(item == a['Item']):
+                        item = 1
+                        b = b+1
+                    else:
+                        item=a['Item']
+                        b=0
+                    
+                    BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],GRNdata['Customer'],b)
+                    
+                    a['SystemBatchCode']=BatchCode
+                
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
                     # return JsonResponse({'Data':GRN_serializer.data})
