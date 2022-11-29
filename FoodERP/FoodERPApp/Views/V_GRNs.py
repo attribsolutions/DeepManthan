@@ -76,11 +76,18 @@ class T_GRNView(CreateAPIView):
                 # return JsonResponse({'Data':b})
                 GRNdata['FullGRNNumber']= b+""+str(a)
                 item= ""
+                query=T_GRNs.objects.filter(Customer_id=GRNdata['Customer']).values('id')
                 for a in GRNdata['GRNItems']:
-
+                    
+                    
+                    query1 = TC_GRNItems.objects.filter(Item_id=a['Item'],SystemBatchDate=date.today(),GRN_id__in=query).values('id')
+                    
+                    # print(str(query1.query))
+                    # print(query1.count())
+                    
                     if(item==""):
                         item=a['Item']
-                        b=0
+                        b=query1.count()
 
                     elif(item == a['Item']):
                         item = 1
