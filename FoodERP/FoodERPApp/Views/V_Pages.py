@@ -84,11 +84,11 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             bb= aa[0]['RelatedPageID']
 
                         
-                        PageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [bb])
+                        MasterPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [bb])
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(PageFieldQuery.query)})
-                       
+
                         MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
-                            PageFieldQuery, many=True).data
+                            MasterPageFieldQuery, many=True).data
                         
                         MC_PageFieldMasterListData = list()
                         for c in MC_PageFieldMaster_data:
@@ -111,7 +111,36 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                                 
                             })
                         
-                       
+                        MC_PageFieldListData = list()
+                        
+                        if(a['PageType']== 2):
+                            ListPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT mc_pagefieldmaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,mc_pagefieldmaster.ControlType_id,m_controltypemaster.Name CName, FieldValidation_id,m_fieldvalidations.Name FName,m_fieldvalidations.RegularExpression FROM mc_pagefieldmaster JOIN m_controltypemaster on m_controltypemaster.id=mc_pagefieldmaster.ControlType_id JOIN m_fieldvalidations on m_fieldvalidations.id=mc_pagefieldmaster.FieldValidation_id where mc_pagefieldmaster.Page_id=%s''', [id])
+                           
+                            MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
+                                ListPageFieldQuery, many=True).data
+                            
+                            
+                            for c in MC_PageFieldMaster_data:
+                                MC_PageFieldListData.append({
+                                    
+                                    "ControlID":  c['ControlID'],
+                                    "ControlType":  c['ControlType_id'],
+                                    "ControlTypeName":c['CName'],
+                                    "FieldLabel": c['FieldLabel'],
+                                    "IsCompulsory":c['IsCompulsory'],
+                                    "DefaultSort":c['DefaultSort'],      
+                                    "FieldValidation": c['FieldValidation_id'], 
+                                    "FieldValidationName":c['FName'],      
+                                    "ListPageSeq": c['ListPageSeq'],
+                                    "ShowInListPage": c['ShowInListPage'],
+                                    "ShowInDownload": c['ShowInDownload'],
+                                    "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
+                                    "RegularExpression":c['RegularExpression'],
+                                    "InValidMsg":c['InValidMsg'],
+                                    
+                                })    
+                        
+                        
                         PageListData.append({
 
                             "id": a['id'],
@@ -131,7 +160,8 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "IsDivisionRequired":a['IsDivisionRequired'],
                             "IsEditPopuporComponent":a['IsEditPopuporComponent'],
                             "PagePageAccess": PageAccessListData,
-                            "PageFieldMaster": MC_PageFieldMasterListData
+                            "PageFieldMaster": MC_PageFieldMasterListData,
+                            "PageFieldList" : MC_PageFieldListData
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception as e:
