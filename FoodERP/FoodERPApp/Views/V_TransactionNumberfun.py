@@ -68,11 +68,12 @@ class SystemBatchCodeGeneration:
     
     def GetGrnBatchCode(*args):
         today = date.today().strftime('%Y%m%d') 
-        # print(today)
-        # print(args[0])   
-        # print(args[1])   
-        # print(args[2])        
-        a=today+"_"+args[0]+"_"+args[1]+"_"+args[2]
+         
+        Date=str(today)   
+        ItemID=str(args[0]) 
+        CustomerID=str(args[1])
+        IncrementedID=str(args[2])
+        a=Date+"_"+ItemID+"_"+CustomerID+"_"+IncrementedID
         return a    
             
         
