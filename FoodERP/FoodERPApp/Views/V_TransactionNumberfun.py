@@ -1,6 +1,7 @@
 from ..models import *
 from django.db.models import Max
 from ..Serializer.S_Orders import *
+from datetime import date
 
 
 class GetMaxNumber:
@@ -61,6 +62,18 @@ class GetPrifix:
         else:
             a=Prifix[0]['Challanprefix']
         return a
+    
+    
+class SystemBatchCodeGeneration:
+    
+    def GetGrnBatchCode(*args):
+        today = date.today().strftime('%Y%m%d') 
+        # print(today)
+        # print(args[0])   
+        # print(args[1])   
+        # print(args[2])        
+        a=today+"_"+args[0]+"_"+args[1]+"_"+args[2]
+        return a    
             
         
         

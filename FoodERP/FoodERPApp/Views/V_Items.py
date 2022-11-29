@@ -115,6 +115,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "UnitID": d['UnitID']['id'],
                                     "UnitName": d['UnitID']['Name'],
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                    "IsBase": d['IsBase'],
                                 
                                 })
                             
