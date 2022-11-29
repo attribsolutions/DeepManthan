@@ -91,8 +91,9 @@ class M_PagesSerializer1(serializers.ModelSerializer):
         for data in PageAccess_data:
             MC_PagePageAccess.objects.create(Page=Pages, **data)
             
-        for PageFielddata in  PageFieldMaster:
-            MC_PageFieldMaster.objects.create(Page=Pages,**PageFielddata) 
+        if(PageFieldMaster != ''):
+            for PageFielddata in  PageFieldMaster:
+                MC_PageFieldMaster.objects.create(Page=Pages,**PageFielddata) 
               
         return Pages
 
@@ -130,9 +131,10 @@ class M_PagesSerializer1(serializers.ModelSerializer):
 
             for Access in instance.PagePageAccess.all():
                 Access.delete()
-                
-            for PageField in instance.PageFieldMaster.all():
-                PageField.delete()
+            
+            if (validated_data['PageFieldMaster'] != ''):      
+                for a in instance.PageFieldMaster.all():
+                    a.delete()
                 
 
             if (instance.PageType !=1):
@@ -140,10 +142,10 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                     PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)
                 instance.PagePageAccess.add(PageAccess)
             
-            # if (instance.PageType !=2):   
-            for PageField_data in validated_data['PageFieldMaster']:
-                PageField = MC_PageFieldMaster.objects.create(Page=instance, **PageField_data)
-            instance.PageFieldMaster.add(PageField)
+            if (validated_data['PageFieldMaster'] != ''):   
+                for PageField_data in validated_data['PageFieldMaster']:
+                    Page = MC_PageFieldMaster.objects.create(Page=instance, **PageField_data)
+                    instance.PageFieldMaster.add(Page)
             
             return instance   
     
