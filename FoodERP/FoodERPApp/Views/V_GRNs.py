@@ -92,6 +92,7 @@ class T_GRNView(CreateAPIView):
                     BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],GRNdata['Customer'],b)
                     
                     a['SystemBatchCode']=BatchCode
+                    a['SystemBatchDate']=date.today()
                 
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
