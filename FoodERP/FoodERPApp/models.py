@@ -953,7 +953,7 @@ class TC_DeliveryChallanItems(models.Model):
         db_table = "TC_DeliveryChallanItems"
 
 class O_BatchWiseLiveStock(models.Model):
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT) 
+    GRN = models.IntegerField() 
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
@@ -963,6 +963,7 @@ class O_BatchWiseLiveStock(models.Model):
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
