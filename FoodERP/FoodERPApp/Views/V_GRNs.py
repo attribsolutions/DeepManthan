@@ -85,10 +85,8 @@ class T_GRNView(CreateAPIView):
                 O_BatchWiseLiveStockList=list()
                 for a in GRNdata['GRNItems']:
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
-
                     # print(str(query1.query))
                     # print(query1.count())
-
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -100,8 +98,7 @@ class T_GRNView(CreateAPIView):
                         item = a['Item']
                         b = 0
 
-                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(
-                        a['Item'], GRNdata['Customer'], b)
+                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
 
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
@@ -122,7 +119,7 @@ class T_GRNView(CreateAPIView):
 
                 # print(GRNdata)
                 GRNdata.update({"O_BatchWiseLiveStockItems":O_BatchWiseLiveStockList}) 
-                print(GRNdata)   
+                # print(GRNdata)   
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
                     # return JsonResponse({'Data':GRN_serializer.data})
