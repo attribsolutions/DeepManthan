@@ -3,7 +3,7 @@ from ..models import *
 from rest_framework import serializers
 from collections import OrderedDict
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
-
+from .S_GSTHSNCode import * 
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
@@ -13,7 +13,7 @@ class Partiesserializer(serializers.ModelSerializer):
 class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','CreatedBy']
+        fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','CreatedBy']
     
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class TC_GRNReferencesSerializer(serializers.ModelSerializer):
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_GRNItems
-        fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount',
+        fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
                   'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate']
 
 class T_GRNSerializer(serializers.ModelSerializer):
@@ -121,9 +121,10 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
     
     Item=ItemSerializer(read_only=True)
     Unit=UnitSerializerSecond(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
     class Meta:
         model = TC_GRNItems
-        fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount',
+        fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
                   'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode']          
 
 
