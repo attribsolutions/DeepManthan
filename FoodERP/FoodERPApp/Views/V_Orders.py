@@ -223,9 +223,9 @@ class GetItemsForOrderView(CreateAPIView):
             try:
                 with transaction.atomic():
                     # DivisionID = request.data['Division']
-                    Supplier = request.data['Supplier'] # Order Page Supplier Id
+                    Party = request.data['Party'] # Order Page Party Id
                     EffectiveDate = request.data['EffectiveDate']
-                    query = MC_PartyItems.objects.filter(Party_id = Supplier)
+                    query = MC_PartyItems.objects.filter(Party_id = Party)
                     # return JsonResponse({ 'query': str(query.query)})
                     if not query:
                         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
