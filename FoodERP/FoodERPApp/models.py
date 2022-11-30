@@ -965,8 +965,7 @@ class O_BatchWiseLiveStock(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
+   
     
     class Meta:
         db_table = "O_BatchWiseLiveStock"
