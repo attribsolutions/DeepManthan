@@ -957,6 +957,7 @@ class O_BatchWiseLiveStock(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
