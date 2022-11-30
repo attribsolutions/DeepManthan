@@ -114,9 +114,9 @@ class T_GRNView(CreateAPIView):
                     "Party": Customer,
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
-                    "CreatedBy":CreatedBy,
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
+                    "CreatedBy":CreatedBy,
                     
                     })
 
