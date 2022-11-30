@@ -877,7 +877,6 @@ class TC_GRNItems(models.Model):
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='GRNItemGst', on_delete=models.PROTECT)
-    GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500)
