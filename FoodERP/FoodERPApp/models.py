@@ -957,17 +957,16 @@ class O_BatchWiseLiveStock(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    
+   
     class Meta:
         db_table = "O_BatchWiseLiveStock"
 
