@@ -13,7 +13,7 @@ class Partiesserializer(serializers.ModelSerializer):
 class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['Item', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchCode','Quantity','Unit','BaseUnitQuantity','MRP','Party','CreatedBy','UpdatedBy']
+        fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','CreatedBy']
     
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
@@ -30,25 +30,27 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
 class T_GRNSerializer(serializers.ModelSerializer):
 
     GRNItems = TC_GRNItemsSerializer(many=True)
+    O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems', 'GRNReferences']
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems','O_BatchWiseLiveStockItems','GRNReferences']
        
     def create(self, validated_data):
         GRNItems_data = validated_data.pop('GRNItems')
+        O_BatchWiseLiveStockItems_data=validated_data.pop('O_BatchWiseLiveStockItems')
         GRNReferences_data = validated_data.pop('GRNReferences')
         grnID = T_GRNs.objects.create(**validated_data)
-
         
         for GRNItem_data in GRNItems_data :
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
-            # O_BatchWiseLiveStockItem=O_BatchWiseLiveStock.objects.create(GRN=grnID,PartyID **GRNItem_data)  
-
+ 
+        for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
+            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data)  
+            
         for GRNReference_data in GRNReferences_data:
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
         
-            
         return grnID
 
     def update(self, instance, validated_data):
