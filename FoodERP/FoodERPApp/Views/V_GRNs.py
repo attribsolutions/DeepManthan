@@ -109,6 +109,7 @@ class T_GRNView(CreateAPIView):
                     "BaseUnitQuantity": a['BaseUnitQuantity'],
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
+                    "GST": a['GST'],
                     "Party": Customer,
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
