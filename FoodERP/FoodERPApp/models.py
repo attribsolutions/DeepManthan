@@ -691,6 +691,7 @@ class TC_OrderItems(models.Model):
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='OrderItemGst', on_delete=models.PROTECT)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.DO_NOTHING,null=True,blank=True)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
