@@ -958,11 +958,13 @@ class O_BatchWiseLiveStock(models.Model):
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     SystemBatchDate = models.DateField()
+    
     SystemBatchCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst', on_delete=models.PROTECT)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
