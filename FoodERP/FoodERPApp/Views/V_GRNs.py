@@ -250,6 +250,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         for a in OrderSerializedata:
                             OrderItemDetails = list()
                             for b in a['OrderItem']:
+                                Item= b['Item']['id']
+                                query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
+                                # print(query.query)
+                                if query.exists():
+                                    Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                    UnitDetails = list()
+                                    for c in Unitdata:
+                                        UnitDetails.append({
+                                        "Unit": c['id'],
+                                        "UnitName": c['UnitID']['Name'],
+                                    })
+                                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
@@ -275,6 +287,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "UnitDetails":UnitDetails
                                 })
                             OrderData.append({
                                 "id": a['id'],
