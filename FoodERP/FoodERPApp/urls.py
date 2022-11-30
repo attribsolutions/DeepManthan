@@ -150,7 +150,7 @@ urlpatterns = [
     url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
-    url(r'GetItemsForOrder$',GetItemsForOrderView.as_view()),
+    url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),
     
