@@ -30,7 +30,7 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
 class T_GRNSerializer(serializers.ModelSerializer):
 
     GRNItems = TC_GRNItemsSerializer(many=True)
-    # O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
+    O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
