@@ -34,7 +34,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems','O_BatchWiseLiveStockItems','GRNReferences']
+        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems','O_BatchWiseLiveStockItems','GRNReferences']
        
     def create(self, validated_data):
         GRNItems_data = validated_data.pop('GRNItems')
