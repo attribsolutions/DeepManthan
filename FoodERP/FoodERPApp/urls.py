@@ -159,6 +159,9 @@ urlpatterns = [
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),
     
+    # Select Item and Get MCItemUnits
+    url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
+    
     
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
