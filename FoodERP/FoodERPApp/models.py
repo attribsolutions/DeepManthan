@@ -898,6 +898,45 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
 
 
+class O_BatchWiseLiveStock(models.Model):
+    # GRN = models.ForeignKey(T_GRNs, related_name='O_BatchWiseLiveStockGrnItems',on_delete=models.PROTECT)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
+    SystemBatchCode = models.CharField(max_length=500)
+    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst', on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        db_table = "O_BatchWiseLiveStock"
+
+class M_BillOfMaterial(models.Model):
+    Date = models.DateField()
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
+    EstimatedOutput = models.DecimalField(max_digits=15, decimal_places=2)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
+    Comment = models.CharField(max_length=500 ,null=True,blank=True)
+    IsActive = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = "M_BillOfMaterial"
+      
+class MC_BillOfMaterialItems(models.Model): 
+    BOM = models.ForeignKey(M_BillOfMaterial, on_delete=models.CASCADE) 
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
+    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
+    
+    class Meta:
+        db_table = "MC_BillOfMaterialItems"
 class T_DeliveryChallans(models.Model):
     
     ChallanDate = models.DateField()
@@ -952,43 +991,4 @@ class TC_DeliveryChallanItems(models.Model):
     class Meta:
         db_table = "TC_DeliveryChallanItems"
 
-class O_BatchWiseLiveStock(models.Model):
-    GRN = models.IntegerField(blank=True) 
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    SystemBatchDate = models.DateField()
-    SystemBatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst', on_delete=models.PROTECT)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2)
-    Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-   
-    class Meta:
-        db_table = "O_BatchWiseLiveStock"
-
-class M_BillOfMaterial(models.Model):
-    Date = models.DateField()
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    EstimatedOutput = models.DecimalField(max_digits=15, decimal_places=2)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
-    Comment = models.CharField(max_length=500 ,null=True,blank=True)
-    IsActive = models.BooleanField(default=False)
-    
-    class Meta:
-        db_table = "M_BillOfMaterial"
-      
-class MC_BillOfMaterialItems(models.Model): 
-    BOM = models.ForeignKey(M_BillOfMaterial, on_delete=models.CASCADE) 
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
-    
-    class Meta:
-        db_table = "MC_BillOfMaterialItems"
      
