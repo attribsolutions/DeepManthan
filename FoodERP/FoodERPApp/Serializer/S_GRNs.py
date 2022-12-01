@@ -34,7 +34,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems','O_BatchWiseLiveStockItems','GRNReferences']
+        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems','O_BatchWiseLiveStockItems','GRNReferences']
        
     def create(self, validated_data):
         GRNItems_data = validated_data.pop('GRNItems')
@@ -46,7 +46,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
  
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
-            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data)  
+            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(**O_BatchWiseLiveStockItem_data)  
             
         for GRNReference_data in GRNReferences_data:
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
