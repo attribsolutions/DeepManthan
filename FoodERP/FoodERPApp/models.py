@@ -917,27 +917,7 @@ class O_BatchWiseLiveStock(models.Model):
     class Meta:
         db_table = "O_BatchWiseLiveStock"
 
-class M_BillOfMaterial(models.Model):
-    Date = models.DateField()
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    EstimatedOutput = models.DecimalField(max_digits=15, decimal_places=2)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
-    Comment = models.CharField(max_length=500 ,null=True,blank=True)
-    IsActive = models.BooleanField(default=False)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        db_table = "M_BillOfMaterial"
-      
-class MC_BillOfMaterialItems(models.Model): 
-    BOM = models.ForeignKey(M_BillOfMaterial, related_name='BOMItems', on_delete=models.CASCADE) 
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
-    
-    class Meta:
-        db_table = "MC_BillOfMaterialItems"
+
 
         
 class T_DeliveryChallans(models.Model):
