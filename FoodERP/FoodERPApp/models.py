@@ -897,9 +897,7 @@ class TC_GRNItems(models.Model):
     class Meta:
         db_table = "TC_GRNItems"
 
-
 class O_BatchWiseLiveStock(models.Model):
-    GRN = models.IntegerField()
     GRN = models.ForeignKey(T_GRNs, related_name='O_BatchWiseLiveStockGrnItems', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
@@ -918,6 +916,7 @@ class O_BatchWiseLiveStock(models.Model):
    
     class Meta:
         db_table = "O_BatchWiseLiveStock"
+
 
 class M_BillOfMaterial(models.Model):
     Date = models.DateField()

@@ -10,10 +10,10 @@ class Partiesserializer(serializers.ModelSerializer):
         fields = ['id', 'Name']
         
 ''' POST AND PUT Methods Serializers  Save/Edit  Create/Update '''
-class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = O_BatchWiseLiveStock
-        fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','CreatedBy']
+# class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = O_BatchWiseLiveStock
+#         fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','CreatedBy']
     
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
@@ -30,7 +30,7 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
 class T_GRNSerializer(serializers.ModelSerializer):
 
     GRNItems = TC_GRNItemsSerializer(many=True)
-    O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
+    # O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
@@ -45,8 +45,8 @@ class T_GRNSerializer(serializers.ModelSerializer):
         for GRNItem_data in GRNItems_data :
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
  
-        for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
-            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data)  
+        # for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
+        #     O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data)  
             
         for GRNReference_data in GRNReferences_data:
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
