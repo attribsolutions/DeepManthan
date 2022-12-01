@@ -112,8 +112,8 @@ urlpatterns = [
     url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
     url(r'GRN$', T_GRNView.as_view()),
     url(r'GRNFilter$', GRNListFilterView.as_view()),
-    url(r'BOM/([0-9]+)$',M_BOMsViewSecond.as_view()),
-    url(r'BOM$', M_BOMsView.as_view()),
+    url(r'Billofmaterial/([0-9]+)$',M_BOMsViewSecond.as_view()),
+    url(r'Billofmaterial$', M_BOMsView.as_view()),
     
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
@@ -158,6 +158,9 @@ urlpatterns = [
     url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),
+    
+    # Select Item and Get MCItemUnits
+    url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
     
     
     url(r'Mrps$',M_MRPsView.as_view()),

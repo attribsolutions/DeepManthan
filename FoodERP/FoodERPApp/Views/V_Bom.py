@@ -7,33 +7,38 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from ..Serializer.S_Orders import *
+
 from ..Serializer.S_Bom import *
 
 from ..models import *
 
 '''BOM ---   Bill Of Material'''
+
+
 class M_BOMsView(CreateAPIView):
-    
+
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-    
+
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
-                Bomsdata = JSONParser().parse(request)
-                Boms_Serializer = M_BOMSerializer(data=Bomsdata)
+                BillOfMaterial = JSONParser().parse(request)
+                Boms_Serializer = M_BOMSerializer(data=BillOfMaterial)
                 if Boms_Serializer.is_valid():
                     Boms_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error' , 'Data':[]})       
+        except Exception:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data': []})
+
 
 class M_BOMsViewSecond(RetrieveAPIView):
-    
+
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
@@ -41,12 +46,62 @@ class M_BOMsViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Bomsdata = M_BillOfMaterial.objects.get(id=id)
-                Boms_Serializer = M_BOMSerializerSecond(Bomsdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Boms_Serializer.data})
+                Query = M_BillOfMaterial.objects.filter(id=id)
+                print(Query.query)
+                if Query.exists():
+                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BillofmaterialData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    for a in BOM_Serializer:
+                        MaterialDetails =list()
+                        ParentItem= a['Item']['id']
+                        Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                            # print(query.query)
+                        if Parentquery.exists():
+                            ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                            ParentUnitDetails = list()
+                            for d in ParentUnitdata:
+                                ParentUnitDetails.append({
+                                "Unit": d['id'],
+                                "UnitName": d['UnitID']['Name'],
+                            })
+                        
+                        for b in a['BOMItems']:
+                            ChildItem= b['Item']['id']
+                            query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
+                            # print(query.query)
+                            if query.exists():
+                                Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                UnitDetails = list()
+                                for c in Unitdata:
+                                    UnitDetails.append({
+                                    "Unit": c['id'],
+                                    "UnitName": c['UnitID']['Name'],
+                                })
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'], 
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "Quantity":b['Quantity'],
+                                "UnitDetails":UnitDetails
+                            })
+                            
+                        BillofmaterialData.append({
+                            "id": a['id'],
+                            "Date": a['Date'],
+                            "Item":a['Item']['id'],
+                            "ItemName":a['Item']['Name'],
+                            "EstimatedOutput": a['EstimatedOutput'],  
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "ParentUnitDetails":ParentUnitDetails,
+                            "BOMItems":MaterialDetails
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
         except H_Modules.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bill Of Material Not available', 'Data': []})
-           
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -54,15 +109,16 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Bomsdata = JSONParser().parse(request)
                 BomsdataByID = M_BillOfMaterial.objects.get(id=id)
-                Boms_Serializer = M_BOMSerializerSecond(BomsdataByID, data=Bomsdata)
+                Boms_Serializer = M_BOMSerializerSecond(
+                    BomsdataByID, data=Bomsdata)
                 if Boms_Serializer.is_valid():
                     Boms_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Updated Successfully','Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors,'Data' :[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})            
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})
+        except Exception:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -70,8 +126,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Bomsdata = M_BillOfMaterial.objects.get(id=id)
                 Bomsdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material  Deleted Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material  Deleted Successfully', 'Data': []})
         except H_Modules.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bill Of Material Not available', 'Data': []})    
-        except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bill Of Material used in another table', 'Data': []})    
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material used in another table', 'Data': []})
