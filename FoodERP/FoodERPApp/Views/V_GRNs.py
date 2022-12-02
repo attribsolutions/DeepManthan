@@ -173,6 +173,8 @@ class T_GRNViewSecond(CreateAPIView):
                         "IGSTPercentage": a['IGSTPercentage'],
                         "BatchDate": a['BatchDate'],
                         "BatchCode": a['BatchCode'],
+                        "SystemBatchDate": a['SystemBatchDate'],
+                        "SystemBatchCode": a['SystemBatchCode'],
                     })
 
                 GRNReferencesData = list()
