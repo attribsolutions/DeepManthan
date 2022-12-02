@@ -363,7 +363,7 @@ NOT IN (SELECT Employee_id From m_users) ''')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
 
-class GerUserDetialsView(APIView):
+class GetUserDetailsView(APIView):
 
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
