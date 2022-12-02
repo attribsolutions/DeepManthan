@@ -43,7 +43,9 @@ class BOMListFilterView(CreateAPIView):
                         "UnitName": a['Unit']['UnitID']['Name'],
                         "EstimatedOutput" : a['EstimatedOutput'],
                         "Comment": a['Comment'],
-                        "IsActive": a['IsActive']
+                        "IsActive": a['IsActive'],
+                        "Company": a['Company']['id'],
+                        "CompanyName": a['Company']['Name'],
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
@@ -77,11 +79,12 @@ class M_BOMsViewSecond(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request, id=0,Company=0):
         try:
             with transaction.atomic():
-                Query = M_BillOfMaterial.objects.filter(id=id)
-                print(Query.query)
+                Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
+                
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
                     BillofmaterialData = list()
