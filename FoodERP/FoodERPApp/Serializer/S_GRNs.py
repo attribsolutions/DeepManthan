@@ -1,9 +1,11 @@
 from dataclasses import field
+import re
 from ..models import *
 from rest_framework import serializers
 from collections import OrderedDict
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from .S_GSTHSNCode import * 
+
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
@@ -49,9 +51,14 @@ class T_GRNSerializer(serializers.ModelSerializer):
             O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(**O_BatchWiseLiveStockItem_data)  
             
         for GRNReference_data in GRNReferences_data:
+            a=str(GRNReference_data['Order']) 
+            OrderID=re.findall(r'\d+', a)
+            print(OrderID[0])
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
-        
+            Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=1)
+            
         return grnID
+      
 
     def update(self, instance, validated_data):
 
