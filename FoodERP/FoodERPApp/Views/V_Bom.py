@@ -38,7 +38,7 @@ class BOMListFilterView(CreateAPIView):
                         "id": a['id'],
                         "Date": a['Date'],
                         "Item":a['Item']['id'],
-                        "Item Name": a['Item']['Name'],
+                        "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
                         "UnitName": a['Unit']['UnitID']['Name'],
                         "EstimatedOutput" : a['EstimatedOutput'],
