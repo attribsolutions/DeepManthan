@@ -114,6 +114,7 @@ urlpatterns = [
     url(r'GRNFilter$', GRNListFilterView.as_view()),
     url(r'Billofmaterial/([0-9]+)$',M_BOMsViewSecond.as_view()),
     url(r'Billofmaterial$', M_BOMsView.as_view()),
+    url(r'BomFilter$', BOMListFilterView.as_view()),
     
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
