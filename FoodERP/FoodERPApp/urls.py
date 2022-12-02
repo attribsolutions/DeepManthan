@@ -205,7 +205,7 @@ urlpatterns = [
     url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
     url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
     url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
-    url(r'GerUserDetials$',GerUserDetialsView.as_view()),
+    url(r'GetUserDetails$',GetUserDetailsView.as_view()),
     url(r'SuperAdmin$',SuperAdminView.as_view()),
     url(r'GetCategoryByCategoryTypeID/([0-9]+)$', GetCategoryByCategoryTypeID.as_view()),
     url(r'GetGroupByGroupTypeID/([0-9]+)$', GetGroupByGroupTypeID.as_view()),
