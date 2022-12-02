@@ -679,6 +679,7 @@ class T_Orders(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now_add=True)
+    Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Orders"
 

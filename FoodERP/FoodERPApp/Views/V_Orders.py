@@ -76,7 +76,8 @@ class OrderListFilterView(CreateAPIView):
                         "BillingAddress" : a['BillingAddress']['Address'],
                         "ShippingAddress" : a['ShippingAddress']['Address'],
                         "CreatedBy" : a['CreatedBy'],
-                        "CreatedOn" : a['CreatedOn']
+                        "CreatedOn" : a['CreatedOn'],
+                        "Inward" : a['Inward']
                         
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': OrderListData})
@@ -174,6 +175,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "BillingAddress" :a['BillingAddress']['Address'],
                             "ShippingAddressID" :a['ShippingAddress']['id'],
                             "ShippingAddress" :a['ShippingAddress']['Address'],
+                            "Inward" : a['Inward'],
                             "OrderItem" : OrderItemDetails,
                             "OrderTermsAndCondition" : OrderTermsAndCondition
                         })      
@@ -181,11 +183,6 @@ class T_OrdersViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-    
-    
-    
-    
-    
 
     def put(self, request, id=0):
         try:
