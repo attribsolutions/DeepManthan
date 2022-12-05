@@ -16,7 +16,7 @@ class M_BOMSerializer(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializer(many=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['Date','EstimatedOutput','Comment','IsActive','Item','Unit','Company','CreatedBy','BOMItems']  
+        fields = ['BomDate','EstimatedOutput','Comment','IsActive','Item','Unit','Company','CreatedBy','BOMItems']  
         
     def create(self, validated_data):
         BomItems_data = validated_data.pop('BOMItems')
@@ -25,7 +25,28 @@ class M_BOMSerializer(serializers.ModelSerializer):
         for BomItem_data in BomItems_data:
             BomItem = MC_BillOfMaterialItems.objects.create(BOM=BomID, **BomItem_data)
             
-        return BomID    
+        return BomID  
+
+    def update(self, instance, validated_data):
+
+        instance.BomDate = validated_data.get(
+            'BomDate', instance.BomDate)
+        instance.EstimatedOutput = validated_data.get(
+            'EstimatedOutput', instance.EstimatedOutput)
+        instance.Comment = validated_data.get(
+            'Comment', instance.Comment)
+        instance.IsActive = validated_data.get(
+            'IsActive', instance.IsActive)
+        instance.Item = validated_data.get(
+            'Item', instance.Item)
+        instance.Unit = validated_data.get(
+            'Unit', instance.Unit)
+        instance.Company = validated_data.get(
+            'Company', instance.Company)
+          
+        instance.save()
+        
+       
 
 # Get ALL Category,Get Single BOM
 
@@ -36,7 +57,7 @@ class MC_BOMItemsSerializerSecond(serializers.ModelSerializer):
         model =  MC_BillOfMaterialItems
         fields = ['id','Quantity','Item','Unit'] 
 
-class M_BOMSerializerSecond(serializers.ModelSerializer):
+class  M_BOMSerializerSecond(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializerSecond(many=True,read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     Unit = ItemUnitsSerializerSecond(read_only=True)

@@ -63,8 +63,8 @@ class PriceListView(CreateAPIView):
                             "UpdatedOn": a['UpdatedOn']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -79,8 +79,8 @@ class PriceListView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PriceListdata_Serializer.errors, 'Data': []})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class PriceListViewSecond(CreateAPIView):
@@ -109,8 +109,8 @@ class PriceListViewSecond(CreateAPIView):
                             "children":child
                             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -126,8 +126,8 @@ class PriceListViewSecond(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PriceListdata_Serializer.errors, 'Data': []})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception', 'Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
