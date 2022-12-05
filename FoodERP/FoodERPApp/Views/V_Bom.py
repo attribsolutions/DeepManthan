@@ -36,7 +36,7 @@ class BOMListFilterView(CreateAPIView):
                     for a in Bom_serializer:   
                         BomListData.append({
                         "id": a['id'],
-                        "Date": a['Date'],
+                        "BomDate": a['BomDate'],
                         "Item":a['Item']['id'],
                         "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
@@ -127,7 +127,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             
                         BillofmaterialData.append({
                             "id": a['id'],
-                            "Date": a['Date'],
+                            "BomDate": a['BomDate'],
                             "Comment": a['Comment'],
                             "IsActive": a['IsActive'],
                             "Item":a['Item']['id'],
@@ -139,7 +139,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             "BOMItems":MaterialDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
-        except H_Modules.DoesNotExist:
+        except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
 
     @transaction.atomic()
@@ -148,7 +148,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Bomsdata = JSONParser().parse(request)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
-                BomsdataByID = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
+                BomsdataByID = M_BillOfMaterial.objects.get(id=id,Company_id=Company)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
                 Boms_Serializer = M_BOMSerializer(BomsdataByID, data=Bomsdata)
                 if Boms_Serializer.is_valid():
@@ -167,7 +167,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                 Bomsdata = M_BillOfMaterial.objects.get(id=id)
                 Bomsdata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material  Deleted Successfully', 'Data': []})
-        except H_Modules.DoesNotExist:
+        except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material used in another table', 'Data': []})
