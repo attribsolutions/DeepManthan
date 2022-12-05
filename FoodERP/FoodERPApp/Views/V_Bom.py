@@ -128,6 +128,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
                         BillofmaterialData.append({
                             "id": a['id'],
                             "Date": a['Date'],
+                            "Comment": a['Comment'],
+                            "IsActive": a['IsActive'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
                             "EstimatedOutput": a['EstimatedOutput'],  
