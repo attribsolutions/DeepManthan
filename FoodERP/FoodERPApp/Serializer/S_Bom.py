@@ -45,6 +45,14 @@ class M_BOMSerializer(serializers.ModelSerializer):
             'Company', instance.Company)
           
         instance.save()
+
+        for a in instance.BOMItems.all():
+            a.delete()
+
+        for BomItem_data in  validated_data['BOMItems']:
+            MaterialItems = MC_BillOfMaterialItems.objects.create(BOM=instance, **BomItem_data)
+
+        return instance        
         
        
 
@@ -64,4 +72,4 @@ class  M_BOMSerializerSecond(serializers.ModelSerializer):
     Company = C_CompanySerializer(read_only=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['id','Date','EstimatedOutput','Comment','IsActive','Item','Unit','Company','BOMItems']      
+        fields = ['id','BomDate','EstimatedOutput','Comment','IsActive','Item','Unit','Company','BOMItems']      
