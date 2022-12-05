@@ -130,6 +130,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             "BomDate": a['BomDate'],
                             "Comment": a['Comment'],
                             "IsActive": a['IsActive'],
+                            "Company": a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
                             "EstimatedOutput": a['EstimatedOutput'],  
