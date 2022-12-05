@@ -941,6 +941,31 @@ class MC_BillOfMaterialItems(models.Model):
     
     class Meta:
         db_table = "MC_BillOfMaterialItems"
+
+class T_WorkOrder(models.Model):
+    WorkOrderDate = models.DateField()
+    Bom = models.ForeignKey(M_BillOfMaterial, related_name='BomID', on_delete=models.PROTECT)
+    NumberOfLot = models.IntegerField()
+    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = "T_WorkOrder"
+
+class TC_WorkOrderItems(models.Model):
+    WorkOrder = models.ForeignKey(T_WorkOrder, related_name='WorkOrderItems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    BomQuantity = models.DecimalField(max_digits=5, decimal_places=3) 
+    Quantity = models.DecimalField(max_digits=5, decimal_places=3) 
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
+    
+    class Meta:
+        db_table = "TC_WorkOrderItems"
+    
         
 class T_DeliveryChallans(models.Model):
     
