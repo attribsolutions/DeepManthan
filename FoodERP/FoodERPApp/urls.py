@@ -115,6 +115,7 @@ urlpatterns = [
     url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
     url(r'Billofmaterial$', M_BOMsView.as_view()),
     url(r'BomFilter$', BOMListFilterView.as_view()),
+    url(r'BomList$', BOMListView.as_view()),
     
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
@@ -213,6 +214,7 @@ urlpatterns = [
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
     url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
+    
     
     
 ]
