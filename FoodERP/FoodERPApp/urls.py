@@ -28,7 +28,7 @@ from .Views.V_Modules import *
 
 from .Views.V_PageAccess import *
 
-# from .Views.V_Login import *
+from .Views.V_WorkOrder import *
 
 from .Views.V_Items import *
 
@@ -116,6 +116,7 @@ urlpatterns = [
     url(r'Billofmaterial$', M_BOMsView.as_view()),
     url(r'BomFilter$', BOMListFilterView.as_view()),
     url(r'BomList$', BOMListView.as_view()),
+    url(r'BomDetails$', BomDetailsView.as_view()),
     
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),

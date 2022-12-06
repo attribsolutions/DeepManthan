@@ -7,7 +7,59 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Orders import *
-
+from ..Serializer.S_Bom import *
 from ..Serializer.S_WorkOrder import *
 
 from ..models import *
+
+
+class BomDetailsView(CreateAPIView):
+   
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                BomDetailsdata = JSONParser().parse(request)
+                BomID = BomDetailsdata['BomID']
+                ItemID = BomDetailsdata['ItemID']
+                Company = BomDetailsdata['Company']
+                Quantity = BomDetailsdata['Quantity']
+                Query = M_BillOfMaterial.objects.filter(id=BomID,Item_id=ItemID)
+                if Query.exists():
+                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BillofmaterialData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    for a in BOM_Serializer:
+                        MaterialDetails =list()
+                        for b in a['BOMItems']:
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'], 
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "Quantity":b['Quantity']
+                            })
+                            
+                        BillofmaterialData.append({
+                            "id": a['id'],
+                            "BomDate": a['BomDate'],
+                            "Comment": a['Comment'],
+                            "IsActive": a['IsActive'],
+                            "Company": a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
+                            "Item":a['Item']['id'],
+                            "ItemName":a['Item']['Name'],
+                            "EstimatedOutput": a['EstimatedOutput'],  
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "BOMItems":MaterialDetails
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
+        except M_BillOfMaterial.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
+
+   
