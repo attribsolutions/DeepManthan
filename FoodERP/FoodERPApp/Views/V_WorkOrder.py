@@ -67,7 +67,7 @@ class WorkOrderList(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def post(self, request,id=0):
+    def post(self, request):
         try:
             with transaction.atomic():
                 WorkOrderdata = JSONParser().parse(request)
@@ -76,17 +76,22 @@ class WorkOrderList(CreateAPIView):
                 query = T_WorkOrder.objects.filter(WorkOrderDate__range=[FromDate,ToDate])
                 if query:
                     WorkOrder_serializerdata = WorkOrderSerializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
                     WorkOrderListData = list()
                     for a in WorkOrder_serializerdata:   
                         WorkOrderListData.append({
                         "id": a['id'],
                         "WorkOrderDate": a['WorkOrderDate'],
+                        "Item":a['Item']['id'],
+                        "ItemName":a['Item']['Name'],
                         "Bom": a['Bom'],
                         "NumberOfLot": a['NumberOfLot'],
-                        "Quantity": a['Quantity'],
-                        "CreatedOn" : a['CreatedOn']
+                        "Quantity":a["Quantity"],
+                        "Company": a['Company']['id'],
+                        "CompanyName":a['Company']['Name'],
+                        "EstimatedOutputQty": a['Quantity'],  
                         }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrderListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
