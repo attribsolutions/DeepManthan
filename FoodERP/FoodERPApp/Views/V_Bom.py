@@ -15,36 +15,36 @@ from ..models import *
 
 '''BOM ---   Bill Of Material'''
 
-class BOMListView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+# class BOMListView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication__Class = JSONWebTokenAuthentication
 
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic(): 
-                query = M_BillOfMaterial.objects.all()
-                if query:
-                    Bom_serializer = M_BOMSerializerSecond(query, many=True).data
-                    BomListData = list()
-                    for a in Bom_serializer:   
-                        BomListData.append({
-                        "id": a['id'],
-                        "BomDate": a['BomDate'],
-                        "Item":a['Item']['id'],
-                        "ItemName": a['Item']['Name'],
-                        "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name'],
-                        "EstimatedOutput" : a['EstimatedOutput'],
-                        "Comment": a['Comment'],
-                        "IsActive": a['IsActive'],
-                        "Company": a['Company']['id'],
-                        "CompanyName": a['Company']['Name'],
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
-        except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+#     @transaction.atomic()
+#     def get(self, request,id=0):
+#         try:
+#             with transaction.atomic(): 
+#                 query = M_BillOfMaterial.objects.all()
+#                 if query:
+#                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
+#                     BomListData = list()
+#                     for a in Bom_serializer:   
+#                         BomListData.append({
+#                         "id": a['id'],
+#                         "BomDate": a['BomDate'],
+#                         "Item":a['Item']['id'],
+#                         "ItemName": a['Item']['Name'],
+#                         "Unit": a['Unit']['id'],
+#                         "UnitName": a['Unit']['UnitID']['Name'],
+#                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
+#                         "Comment": a['Comment'],
+#                         "IsActive": a['IsActive'],
+#                         "Company": a['Company']['id'],
+#                         "CompanyName": a['Company']['Name'],
+#                         }) 
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
+#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+#         except Exception as e:
+#                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class BOMListFilterView(CreateAPIView):
@@ -73,11 +73,12 @@ class BOMListFilterView(CreateAPIView):
                         "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
                         "UnitName": a['Unit']['UnitID']['Name'],
-                        "EstimatedOutput" : a['EstimatedOutput'],
+                        "EstimatedOutputQty" : a['EstimatedOutputQty'],
                         "Comment": a['Comment'],
                         "IsActive": a['IsActive'],
                         "Company": a['Company']['id'],
                         "CompanyName": a['Company']['Name'],
+                        "CreatedOn" : a['CreatedOn'],
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
@@ -166,7 +167,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             "CompanyName":a['Company']['Name'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
-                            "EstimatedOutput": a['EstimatedOutput'],  
+                            "EstimatedOutputQty": a['EstimatedOutputQty'],  
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
                             "ParentUnitDetails":ParentUnitDetails,
