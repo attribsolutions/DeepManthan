@@ -9,7 +9,6 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Bom import *
 from ..Serializer.S_WorkOrder import *
-
 from ..models import *
 
 
@@ -25,8 +24,7 @@ class BomDetailsView(CreateAPIView):
                 BomDetailsdata = JSONParser().parse(request)
                 BomID = BomDetailsdata['BomID']
                 ItemID = BomDetailsdata['ItemID']
-                Company = BomDetailsdata['Company']
-                Quantity = BomDetailsdata['Quantity']
+                GetQuantity = BomDetailsdata['Quantity']
                 Query = M_BillOfMaterial.objects.filter(id=BomID,Item_id=ItemID)
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
@@ -34,26 +32,27 @@ class BomDetailsView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
                         MaterialDetails =list()
+                        total=0
                         for b in a['BOMItems']:
+                            Item = b['Item']['id']
+                            Qty = float(b['Quantity']) /float(a['EstimatedOutput'])
+                            ActualQty = float(GetQuantity * Qty)
+                            total += ActualQty
                             MaterialDetails.append({
                                 "id": b['id'],
                                 "Item":b['Item']['id'],
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                "Quantity":b['Quantity']
+                                "BOMQuantity":b['Quantity'],
+                                "ActualQty":ActualQty
                             })
-                            
                         BillofmaterialData.append({
                             "id": a['id'],
-                            "BomDate": a['BomDate'],
-                            "Comment": a['Comment'],
                             "IsActive": a['IsActive'],
-                            "Company": a['Company']['id'],
-                            "CompanyName":a['Company']['Name'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
-                            "EstimatedOutput": a['EstimatedOutput'],  
+                            "EstimatedOutput": round(total, 2),  
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
                             "BOMItems":MaterialDetails
