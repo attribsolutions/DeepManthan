@@ -45,7 +45,7 @@ class BomDetailsView(CreateAPIView):
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
                                 "BomQuantity":b['Quantity'],
-                                "ActualQty":ActualQty
+                                "Quantity":ActualQty
                             })
                         BillofmaterialData.append({
                             "id": a['id'],
