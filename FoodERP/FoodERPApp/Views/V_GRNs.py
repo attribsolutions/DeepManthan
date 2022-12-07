@@ -50,8 +50,8 @@ class GRNListFilterView(CreateAPIView):
                             "GrandTotal": a['GrandTotal'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
-                            "CreatedBy": a['CreatedBy'],
-                            "UpdatedBy": a['UpdatedBy'],
+                            "CreatedOn" : a['CreatedOn'],
+                           
 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
