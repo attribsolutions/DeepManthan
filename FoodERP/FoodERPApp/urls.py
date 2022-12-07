@@ -115,6 +115,7 @@ urlpatterns = [
     url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
     url(r'Billofmaterial$', M_BOMsView.as_view()),
     url(r'BomFilter$', BOMListFilterView.as_view()),
+    url(r'BomDetails$', BomDetailsView.as_view()),
 
     
     
