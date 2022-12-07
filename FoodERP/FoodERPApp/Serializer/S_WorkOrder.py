@@ -44,4 +44,3 @@ class WorkOrderSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = T_WorkOrder
         fields = ['id','WorkOrderDate','Item','Bom','NumberOfLot','Quantity','Company','Division','CreatedBy','UpdatedBy','CreatedOn','WorkOrderItems'] 
-
