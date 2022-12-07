@@ -57,7 +57,7 @@ class BomDetailsView(CreateAPIView):
                             "UnitName": a['Unit']['UnitID']['Name'],
                             "BOMItems":MaterialDetails
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData[0]})
         except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
 
