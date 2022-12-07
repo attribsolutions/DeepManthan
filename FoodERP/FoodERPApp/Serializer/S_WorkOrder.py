@@ -7,69 +7,40 @@ from ..Serializer.S_Companies import *
 
 # Post and Put Methods Serializer
 
-# class MC_BOMItemsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model =  MC_BillOfMaterialItems
-#         fields = ['Quantity','Item','Unit'] 
+class WorkOrderItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  TC_WorkOrderItems
+        fields = ['BomQuantity','Quantity','Item','Unit'] 
 
-# class M_BOMSerializer(serializers.ModelSerializer):
-#     BOMItems = MC_BOMItemsSerializer(many=True)
-#     class Meta:
-#         model = M_BillOfMaterial
-#         fields = ['BomDate','EstimatedOutput','Comment','IsActive','Item','Unit','Company','CreatedBy','BOMItems']  
+class WorkOrderSerializer(serializers.ModelSerializer):
+    WorkOrderItems = WorkOrderItemsSerializer(many=True)
+    class Meta:
+        model = T_WorkOrder
+        fields = ['WorkOrderDate','Item','Bom','NumberOfLot','Quantity','Company','Division','CreatedBy','UpdatedBy','WorkOrderItems']  
         
-#     def create(self, validated_data):
-#         BomItems_data = validated_data.pop('BOMItems')
-#         BomID= M_BillOfMaterial.objects.create(**validated_data)
+    def create(self, validated_data):
+        WorkOrderItems_data = validated_data.pop('WorkOrderItems')
+        WorkOrderID= T_WorkOrder.objects.create(**validated_data)
         
-#         for BomItem_data in BomItems_data:
-#             BomItem = MC_BillOfMaterialItems.objects.create(BOM=BomID, **BomItem_data)
+        for WorkOrderItem_data in WorkOrderItems_data:
+            WorkOrderItem = TC_WorkOrderItems.objects.create(WorkOrder=WorkOrderID, **WorkOrderItem_data)
             
-#         return BomID  
+        return WorkOrderID  
+     
+    
+# Get ALL Category,Get Single BOM
 
-#     def update(self, instance, validated_data):
+class WorkOrderItemsSerializerSecond(serializers.ModelSerializer):
+    Unit = ItemUnitsSerializerSecond(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    class Meta:
+        model =  TC_WorkOrderItems
+        fields = ['id','BomQuantity','Quantity','Item','Unit'] 
 
-#         instance.BomDate = validated_data.get(
-#             'BomDate', instance.BomDate)
-#         instance.EstimatedOutput = validated_data.get(
-#             'EstimatedOutput', instance.EstimatedOutput)
-#         instance.Comment = validated_data.get(
-#             'Comment', instance.Comment)
-#         instance.IsActive = validated_data.get(
-#             'IsActive', instance.IsActive)
-#         instance.Item = validated_data.get(
-#             'Item', instance.Item)
-#         instance.Unit = validated_data.get(
-#             'Unit', instance.Unit)
-#         instance.Company = validated_data.get(
-#             'Company', instance.Company)
-          
-#         instance.save()
-
-#         for a in instance.BOMItems.all():
-#             a.delete()
-
-#         for BomItem_data in  validated_data['BOMItems']:
-#             MaterialItems = MC_BillOfMaterialItems.objects.create(BOM=instance, **BomItem_data)
-
-#         return instance        
-        
-       
-
-# # Get ALL Category,Get Single BOM
-
-# class MC_BOMItemsSerializerSecond(serializers.ModelSerializer):
-#     Item = M_ItemsSerializer01(read_only=True)
-#     Unit = ItemUnitsSerializerSecond(read_only=True)
-#     class Meta:
-#         model =  MC_BillOfMaterialItems
-#         fields = ['id','Quantity','Item','Unit'] 
-
-# class  M_BOMSerializerSecond(serializers.ModelSerializer):
-#     BOMItems = MC_BOMItemsSerializerSecond(many=True,read_only=True)
-#     Item = M_ItemsSerializer01(read_only=True)
-#     Unit = ItemUnitsSerializerSecond(read_only=True)
-#     Company = C_CompanySerializer(read_only=True)
-#     class Meta:
-#         model = M_BillOfMaterial
-#         fields = ['id','BomDate','EstimatedOutput','Comment','IsActive','Item','Unit','Company','BOMItems']      
+class WorkOrderSerializerSecond(serializers.ModelSerializer):
+    WorkOrderItems = WorkOrderItemsSerializerSecond(many=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Company = C_CompanySerializer(read_only=True)
+    class Meta:
+        model = T_WorkOrder
+        fields = ['id','WorkOrderDate','Item','Bom','NumberOfLot','Quantity','Company','Division','CreatedBy','UpdatedBy','CreatedOn','WorkOrderItems'] 

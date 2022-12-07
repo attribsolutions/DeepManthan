@@ -18,7 +18,7 @@ class BomDetailsView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def post(self, request, id=0):
+    def post(self, request):
         try:
             with transaction.atomic():
                 BomDetailsdata = JSONParser().parse(request)
@@ -44,7 +44,7 @@ class BomDetailsView(CreateAPIView):
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                "BOMQuantity":b['Quantity'],
+                                "BomQuantity":b['Quantity'],
                                 "ActualQty":ActualQty
                             })
                         BillofmaterialData.append({
@@ -61,4 +61,116 @@ class BomDetailsView(CreateAPIView):
         except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
 
-   
+
+class WorkOrderList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                WorkOrderdata = JSONParser().parse(request)
+                FromDate = WorkOrderdata['FromDate']
+                ToDate = WorkOrderdata['ToDate']
+                query = T_WorkOrder.objects.filter(WorkOrderDate__range=[FromDate,ToDate])
+                if query:
+                    WorkOrder_serializerdata = WorkOrderSerializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
+                    WorkOrderListData = list()
+                    for a in WorkOrder_serializerdata:   
+                        WorkOrderListData.append({
+                        "id": a['id'],
+                        "WorkOrderDate": a['WorkOrderDate'],
+                        "Item":a['Item']['id'],
+                        "ItemName":a['Item']['Name'],
+                        "Bom": a['Bom'],
+                        "NumberOfLot": a['NumberOfLot'],
+                        "Quantity":a["Quantity"],
+                        "Company": a['Company']['id'],
+                        "CompanyName":a['Company']['Name'],
+                        "EstimatedOutputQty": a['Quantity'],  
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrderListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
+
+class WorkOrderView(CreateAPIView):
+       
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication  
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                WorkOrderData = JSONParser().parse(request)
+                WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
+                if WorkOrder_Serializer.is_valid():
+                    WorkOrder_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Save Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+
+class WorkOrderViewSecond(RetrieveAPIView):
+       
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request, id=0,Company=0):
+        try:
+            with transaction.atomic():
+                Query = T_WorkOrder.objects.filter(id=id)
+                if Query.exists():
+                    WorkOrder_serializer = WorkOrderSerializerSecond(Query,many=True).data
+                    WorkOrderData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    for a in WorkOrder_serializer:
+                        MaterialDetails =list()
+                        for b in a['WorkOrderItems']:  
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'], 
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BomQuantity":b['BomQuantity'],
+                                "Quantity":b['Quantity'], 
+                            })  
+                        WorkOrderData.append({
+                            "id": a['id'],
+                            "WorkOrderDate": a['WorkOrderDate'],
+                            "Item":a['Item']['id'],
+                            "ItemName":a['Item']['Name'],
+                            "Bom": a['Bom'],
+                            "NumberOfLot": a['NumberOfLot'],
+                            "Quantity":a["Quantity"],
+                            "Company": a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
+                            "EstimatedOutputQty": a['Quantity'],  
+                            "WorkOrderItems":MaterialDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderData})
+        except T_WorkOrder.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Orders Not available', 'Data': []})
+    
+    
+    @transaction.atomic()
+    def delete(self, request, id=0,Company=0):
+        try:
+            with transaction.atomic():
+                WorkOrderdata = T_WorkOrder.objects.get(id=id)
+                WorkOrderdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Deleted Successfully', 'Data': []})
+        except T_WorkOrder.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order used in another table', 'Data': []})                
