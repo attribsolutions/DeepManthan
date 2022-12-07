@@ -144,4 +144,4 @@ class T_GRNSerializerForGET(serializers.ModelSerializer):
     class Meta:
         model = T_GRNs
         fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber',
-                  'GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNReferences', 'GRNItems']
+                  'GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'GRNReferences', 'GRNItems']

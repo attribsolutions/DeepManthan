@@ -922,10 +922,11 @@ class O_BatchWiseLiveStock(models.Model):
 class M_BillOfMaterial(models.Model):
     BomDate = models.DateField()
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    EstimatedOutput = models.DecimalField(max_digits=15, decimal_places=2)
+    EstimatedOutputQty = models.DecimalField(max_digits=15, decimal_places=2)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
     Comment = models.CharField(max_length=500 ,null=True,blank=True)
     IsActive = models.BooleanField(default=False)
+    IsDelete = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
