@@ -1010,6 +1010,14 @@ class TC_MaterialIssueItemBatches(models.Model):
     BestBefore = models.CharField(max_length=500)
     class Meta:
         db_table = "TC_MaterialIssueItemBatches"
+
+
+class TC_MaterialIssueWorkOrders(models.Model):
+    WorkOrder = models.ForeignKey(T_WorkOrder, related_name='abc', on_delete=models.CASCADE)
+    MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "TC_MaterialIssueWorkOrders"        
                     
          
 class T_DeliveryChallans(models.Model):
