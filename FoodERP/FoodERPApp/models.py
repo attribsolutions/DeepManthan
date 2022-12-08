@@ -452,7 +452,7 @@ class M_ImageTypes(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_ImageTypes"
         
@@ -462,7 +462,7 @@ class M_CategoryType(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_CategoryType"
 
@@ -472,7 +472,7 @@ class M_Category(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_Category"
         
@@ -481,7 +481,7 @@ class M_GroupType(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     IsReserved = models.BooleanField(default=False)
     class Meta:
         db_table = "M_GroupType"
@@ -492,7 +492,7 @@ class M_Group(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    UpdatedOn = models.DateTimeField(auto_now=True)    
     class Meta:
         db_table = "M_Group"
 
@@ -502,7 +502,7 @@ class MC_SubGroup(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    UpdatedOn = models.DateTimeField(auto_now=True)    
     class Meta:
         db_table = "MC_SubGroup"                             
 
@@ -530,7 +530,7 @@ class M_Items(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_Items"
         
@@ -540,7 +540,7 @@ class MC_ItemCategoryDetails(models.Model):
     CategoryType = models.ForeignKey(M_CategoryType, related_name='ItemCategoryType', on_delete=models.DO_NOTHING)
     Category = models.ForeignKey(M_Category, related_name='ItemCategory', on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "MC_ItemCategoryDetails"
@@ -551,7 +551,7 @@ class MC_ItemGroupDetails(models.Model):
     Group = models.ForeignKey(M_Group, related_name='ItemGroup', on_delete=models.DO_NOTHING)
     SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup',null=True, on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "MC_ItemGroupDetails"
 
@@ -592,7 +592,7 @@ class M_GSTHSNCode(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
@@ -616,7 +616,7 @@ class M_MRPMaster(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
      
     class Meta:
         db_table = "M_MRPMaster"
@@ -633,7 +633,7 @@ class M_MarginMaster(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_MarginMaster"        
 
@@ -678,7 +678,7 @@ class T_Orders(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Orders"
@@ -954,7 +954,7 @@ class T_WorkOrder(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "T_WorkOrder"
@@ -968,8 +968,58 @@ class TC_WorkOrderItems(models.Model):
     
     class Meta:
         db_table = "TC_WorkOrderItems"
+
+class T_MaterialIssue(models.Model):
+    MaterialIssueDate = models.DateField()
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    NumberOfLot = models.IntegerField()
+    LotQuantity = models.DecimalField(max_digits=10, decimal_places=3)
+    Status=models.IntegerField()
+    ReIssueID = models.IntegerField()
+    IsReIssueID = models.BooleanField(default=False)
+    Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
+    Division = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        db_table = "T_MaterialIssue"
+
+class TC_MaterialIssueItems(models.Model):
+    MaterialIssue = models.ForeignKey(T_MaterialIssue, related_name='MaterialIssueItems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    WorkOrderQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
+    IssueQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_MaterialIssueItems"
         
+        
+class TC_MaterialIssueItemBatches(models.Model):
+    MaterialIssueItem = models.ForeignKey(TC_MaterialIssueItems, related_name='MaterialIssueItemBatches', on_delete=models.CASCADE)
+    MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    BatchDate = models.DateField()
+    BatchCode = models.CharField(max_length=500)
+    BatchCodeQuantity = models.DecimalField(max_digits=10, decimal_places=3)
+    IsssueQuantity=models.DecimalField(max_digits=10, decimal_places=3)
+    StoreLocation = models.IntegerField()
+    SupplierBatchCode = models.CharField(max_length=500)
+    BestBefore = models.CharField(max_length=500)
+    class Meta:
+        db_table = "TC_MaterialIssueItemBatches"
+
+
+class TC_MaterialIssueWorkOrders(models.Model):
+    WorkOrder = models.ForeignKey(T_WorkOrder, related_name='abc', on_delete=models.CASCADE)
+    MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "TC_MaterialIssueWorkOrders"        
+                    
+         
 class T_DeliveryChallans(models.Model):
     
     ChallanDate = models.DateField()
