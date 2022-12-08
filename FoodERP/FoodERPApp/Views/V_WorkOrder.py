@@ -138,7 +138,9 @@ class WorkOrderViewSecond(RetrieveAPIView):
                     WorkOrder_serializer = WorkOrderSerializerSecond(Query,many=True).data
                     WorkOrderData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    acqty =0
                     for a in WorkOrder_serializer:
+                        acqty = float(a['Quantity']) /float(a['NumberOfLot'])
                         MaterialDetails =list()
                         for b in a['WorkOrderItems']:  
                             MaterialDetails.append({
@@ -149,13 +151,15 @@ class WorkOrderViewSecond(RetrieveAPIView):
                                 "UnitName": b['Unit']['UnitID']['Name'],
                                 "BomQuantity":b['BomQuantity'],
                                 "Quantity":b['Quantity'], 
-                            })  
+                            })
+                        
                         WorkOrderData.append({
                             "id": a['id'],
                             "WorkOrderDate": a['WorkOrderDate'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
                             "Bom": a['Bom'],
+                            "acqty": acqty,
                             "NumberOfLot": a['NumberOfLot'],
                             "Quantity":a["Quantity"],
                             "Company": a['Company']['id'],
