@@ -75,18 +75,18 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.save()
 
         for items in instance.OrderItem.all():
-            items.delete()
-
+            SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
+            
+            
         for items in instance.OrderTermsAndConditions.all():
             items.delete()  
 
         for OrderItem_data in validated_data['OrderItem']:
             Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
-        instance.OrderItem.add(Items)
-        
+       
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
             Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
-        instance.OrderTermsAndConditions.add(Items)
+       
  
         return instance  
 
