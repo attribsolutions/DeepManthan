@@ -452,7 +452,7 @@ class M_ImageTypes(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_ImageTypes"
         
@@ -462,7 +462,7 @@ class M_CategoryType(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_CategoryType"
 
@@ -472,7 +472,7 @@ class M_Category(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_Category"
         
@@ -481,7 +481,7 @@ class M_GroupType(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     IsReserved = models.BooleanField(default=False)
     class Meta:
         db_table = "M_GroupType"
@@ -492,7 +492,7 @@ class M_Group(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    UpdatedOn = models.DateTimeField(auto_now=True)    
     class Meta:
         db_table = "M_Group"
 
@@ -502,7 +502,7 @@ class MC_SubGroup(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)    
+    UpdatedOn = models.DateTimeField(auto_now=True)    
     class Meta:
         db_table = "MC_SubGroup"                             
 
