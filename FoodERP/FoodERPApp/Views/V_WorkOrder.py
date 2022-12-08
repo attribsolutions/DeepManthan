@@ -5,12 +5,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
-
+from django.db.models import Sum
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Bom import *
 from ..Serializer.S_WorkOrder import *
 from ..models import *
-
 
 class BomDetailsView(CreateAPIView):
    
@@ -35,6 +34,11 @@ class BomDetailsView(CreateAPIView):
                         total=0
                         for b in a['BOMItems']:
                             Item = b['Item']['id']
+                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').aggregate(Sum('BaseUnitQuantity'))
+                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(total_price=Sum('BaseUnitQuantity'))
+                            # print(str(obatchwisestockquery.query))
+                           
+                            
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
                             total += ActualQty
@@ -44,6 +48,7 @@ class BomDetailsView(CreateAPIView):
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
+                                # "StockQuantity":stqty,
                                 "BomQuantity":b['Quantity'],
                                 "Quantity":ActualQty
                             })
