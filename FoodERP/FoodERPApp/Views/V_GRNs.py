@@ -71,8 +71,9 @@ class T_GRNView(CreateAPIView):
                 GRNdata = JSONParser().parse(request)
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
+                GRNDate = GRNdata['GRNDate']
                 '''Get Max GRN Number'''
-                a = GetMaxNumber.GetGrnNumber(Customer)
+                a = GetMaxNumber.GetGrnNumber(Customer,GRNDate)
                 # return JsonResponse({'Data':a})
                 GRNdata['GRNNumber'] = a
                 '''Get Order Prifix '''

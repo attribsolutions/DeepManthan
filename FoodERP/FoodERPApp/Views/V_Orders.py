@@ -97,8 +97,12 @@ class T_OrdersView(CreateAPIView):
                 Orderdata = JSONParser().parse(request)
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
+                OrderDate = Orderdata['OrderDate']
+                
                 '''Get Max Order Number'''
-                a=GetMaxNumber.GetOrderNumber(Division,OrderType)
+                a=GetMaxNumber.GetOrderNumber(Division,OrderType,OrderDate)
+                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+                print(a)
                 Orderdata['OrderNo']= a
                 '''Get Order Prifix '''
                 b=GetPrifix.GetOrderPrifix(Division)
