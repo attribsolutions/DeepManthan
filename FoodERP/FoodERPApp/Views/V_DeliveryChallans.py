@@ -65,8 +65,9 @@ class T_DeliveryChallanView(CreateAPIView):
             with transaction.atomic():
                 DeliveryChallandata = JSONParser().parse(request)
                 Customer = DeliveryChallandata['Customer']
+                ChallanDate = DeliveryChallandata['ChallanDate']
                 '''Get Max DeliveryChallan Number'''
-                a=GetMaxNumber.GetDeliveryChallanNumber(Customer)
+                a=GetMaxNumber.GetDeliveryChallanNumber(Customer,ChallanDate)
                 # return JsonResponse({'Data':a})
                 DeliveryChallandata['ChallanNumber']= a
                 '''Get DeliveryChallan Prifix '''
