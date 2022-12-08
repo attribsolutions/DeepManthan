@@ -704,6 +704,7 @@ class TC_OrderItems(models.Model):
     SGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     CreatedOn = models.DateTimeField(auto_now_add=True)
+    IsDeleted = models.BooleanField(default=False)
 
     class Meta:
         db_table = "TC_OrderItems"
