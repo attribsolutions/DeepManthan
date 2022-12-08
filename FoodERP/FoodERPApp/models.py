@@ -530,7 +530,7 @@ class M_Items(models.Model):
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_Items"
         
@@ -540,7 +540,7 @@ class MC_ItemCategoryDetails(models.Model):
     CategoryType = models.ForeignKey(M_CategoryType, related_name='ItemCategoryType', on_delete=models.DO_NOTHING)
     Category = models.ForeignKey(M_Category, related_name='ItemCategory', on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "MC_ItemCategoryDetails"
@@ -551,7 +551,7 @@ class MC_ItemGroupDetails(models.Model):
     Group = models.ForeignKey(M_Group, related_name='ItemGroup', on_delete=models.DO_NOTHING)
     SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup',null=True, on_delete=models.DO_NOTHING)
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "MC_ItemGroupDetails"
 
@@ -592,7 +592,7 @@ class M_GSTHSNCode(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
@@ -616,7 +616,7 @@ class M_MRPMaster(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
      
     class Meta:
         db_table = "M_MRPMaster"
@@ -633,7 +633,7 @@ class M_MarginMaster(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_MarginMaster"        
 
@@ -678,7 +678,7 @@ class T_Orders(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Orders"
@@ -954,7 +954,7 @@ class T_WorkOrder(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "T_WorkOrder"
@@ -982,7 +982,7 @@ class T_MaterialIssue(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "T_MaterialIssue"
