@@ -41,7 +41,7 @@ class BomDetailsView(CreateAPIView):
                             
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
-                            total += ActualQty
+                           
                             MaterialDetails.append({
                                 "id": b['id'],
                                 "Item":b['Item']['id'],
@@ -57,7 +57,7 @@ class BomDetailsView(CreateAPIView):
                             "IsActive": a['IsActive'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
-                            "EstimatedOutputQty": round(total, 2),  
+                            "EstimatedOutputQty": round(GetQuantity, 2),  
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
                             "BOMItems":MaterialDetails
