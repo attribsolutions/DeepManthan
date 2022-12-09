@@ -30,6 +30,12 @@ class BomDetailsView(CreateAPIView):
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
+                        stockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [ItemID])
+                        if not stockquery:
+                            Stock =0.0
+                        else:
+                            Serialize_data = StockQtyserializer(stockquery, many=True).data
+                            Stock = Serialize_data[0]['actualStock']
                         MaterialDetails =list()
                         total=0
                         for b in a['BOMItems']:
@@ -39,8 +45,8 @@ class BomDetailsView(CreateAPIView):
                             if not obatchwisestockquery:
                                 StockQty =0.0
                             else:
-                                Serialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
-                                StockQty = Serialize_data[0]['actualStock']
+                                StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
+                                StockQty = StockQtySerialize_data[0]['actualStock']
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
                             MaterialDetails.append({
@@ -58,6 +64,7 @@ class BomDetailsView(CreateAPIView):
                             "IsActive": a['IsActive'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
+                            "Stock":Stock,
                             "EstimatedOutputQty": round(GetQuantity, 2),  
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
