@@ -147,6 +147,15 @@ class WorkOrderViewSecond(RetrieveAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     ActualBomqty =0
                     for a in WorkOrder_serializer:
+                        Item = a['Item']['id']
+                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
+                        obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                        if not obatchwisestockquery:
+                            StockQty =0.0
+                        else:
+                            StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
+                            StockQty = StockQtySerialize_data[0]['actualStock']
+                        
                         ActualBomqty = float(a['Quantity']) /float(a['NumberOfLot'])
                         MaterialDetails =list()
                         for b in a['WorkOrderItems']:  
@@ -166,6 +175,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
                             "Bom": a['Bom'],
+                            "Stock":StockQty,
                             "ActualBomqty": ActualBomqty,
                             "NumberOfLot": a['NumberOfLot'],
                             "Quantity":a["Quantity"],
