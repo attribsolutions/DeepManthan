@@ -43,7 +43,6 @@ class BomDetailsView(CreateAPIView):
                                 StockQty = Serialize_data[0]['actualStock']
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
-                           
                             MaterialDetails.append({
                                 "id": b['id'],
                                 "Item":b['Item']['id'],
@@ -102,7 +101,6 @@ class WorkOrderList(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
 
 
 
