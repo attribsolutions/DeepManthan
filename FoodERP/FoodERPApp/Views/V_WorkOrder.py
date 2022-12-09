@@ -34,11 +34,13 @@ class BomDetailsView(CreateAPIView):
                         total=0
                         for b in a['BOMItems']:
                             Item = b['Item']['id']
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').aggregate(Sum('BaseUnitQuantity'))
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(total_price=Sum('BaseUnitQuantity'))
-                            # print(str(obatchwisestockquery.query))
-                           
-                            
+                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
+                            obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                            if not obatchwisestockquery:
+                                StockQty =0.0
+                            else:
+                                Serialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
+                                StockQty = Serialize_data[0]['actualStock']
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
                            
@@ -48,7 +50,7 @@ class BomDetailsView(CreateAPIView):
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                # "StockQuantity":stqty,
+                                "StockQuantity":StockQty,
                                 "BomQuantity":b['Quantity'],
                                 "Quantity":ActualQty
                             })
