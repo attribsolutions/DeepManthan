@@ -44,8 +44,3 @@ class WorkOrderSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = T_WorkOrder
         fields = ['id','WorkOrderDate','Item','Bom','NumberOfLot','Quantity','Company','Division','CreatedBy','UpdatedBy','CreatedOn','WorkOrderItems'] 
-
-class StockQtyserializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    actualStock = serializers.DecimalField(max_digits=10, decimal_places=3)
-    Item_id=serializers.IntegerField()
