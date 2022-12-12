@@ -183,8 +183,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
         except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
-        except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material in another table', 'Data': []})
+       
     @transaction.atomic()
     def put(self, request, id=0, Company=0):
         try:
@@ -200,9 +199,11 @@ class M_BOMsViewSecond(RetrieveAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material in another table', 'Data': []})        
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
     @transaction.atomic()
     def delete(self, request, id=0,Company=0):
         try:
