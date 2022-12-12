@@ -187,6 +187,8 @@ class WorkOrderViewSecond(RetrieveAPIView):
                                 "Quantity":a["Quantity"],
                                 "Company": a['Company']['id'],
                                 "CompanyName":a['Company']['Name'],
+                                "Division": a['Division']['id'],
+                                "DivisionName": a['Division']['Name'],
                                 "EstimatedOutputQty": a['Quantity'],  
                                 "WorkOrderItems":MaterialDetails,
                             })
