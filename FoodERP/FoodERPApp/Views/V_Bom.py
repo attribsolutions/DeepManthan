@@ -63,9 +63,16 @@ class BOMListFilterView(CreateAPIView):
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
-                    
                     BomListData = list()
-                    for a in Bom_serializer:   
+                    for a in Bom_serializer:
+                        Item = a['Item']['id']
+                        # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
+                        obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                        if not obatchwisestockquery:
+                            StockQty =0.0
+                        else:
+                            StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
+                            StockQty = StockQtySerialize_data[0]['actualStock']   
                         BomListData.append({
                         "id": a['id'],
                         "BomDate": a['BomDate'],
@@ -73,6 +80,7 @@ class BOMListFilterView(CreateAPIView):
                         "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
                         "UnitName": a['Unit']['UnitID']['Name'],
+                        "StockQty":StockQty,
                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
                         "Comment": a['Comment'],
                         "IsActive": a['IsActive'],
