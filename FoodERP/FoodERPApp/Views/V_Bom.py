@@ -125,7 +125,6 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
-                
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
                     BillofmaterialData = list()
@@ -184,7 +183,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
         except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
-
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material in another table', 'Data': []})
     @transaction.atomic()
     def put(self, request, id=0, Company=0):
         try:
