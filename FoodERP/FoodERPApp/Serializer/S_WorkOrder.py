@@ -26,15 +26,35 @@ class WorkOrderSerializer(serializers.ModelSerializer):
             WorkOrderItem = TC_WorkOrderItems.objects.create(WorkOrder=WorkOrderID, **WorkOrderItem_data)
             
         return WorkOrderID  
+    
     def update(self, instance, validated_data):
     
+        instance.WorkOrderDate = validated_data.get(
+            'WorkOrderDate', instance.WorkOrderDate)
+        instance.Item = validated_data.get(
+            'Item', instance.Item)
+        instance.Bom = validated_data.get(
+            'Bom', instance.Bom)
         instance.NumberOfLot = validated_data.get(
             'NumberOfLot', instance.NumberOfLot)
         instance.Quantity = validated_data.get(
             'Quantity', instance.Quantity)
+        instance.Company = validated_data.get(
+            'Company', instance.Company)
+        instance.Division = validated_data.get(
+            'Division', instance.Division)
+        instance.CreatedBy = validated_data.get(
+            'CreatedBy', instance.CreatedBy)
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy)
             
         instance.save()
         
+        for a in instance.WorkOrderItems.all():
+            a.delete()
+        
+        for WorkOrderItems_data in  validated_data['WorkOrderItems']:
+            Item = TC_WorkOrderItems.objects.create(WorkOrder=instance, **WorkOrderItems_data)
         return instance   
     
 # Get ALL Category,Get Single BOM
