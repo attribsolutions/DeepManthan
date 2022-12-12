@@ -871,7 +871,6 @@ class TC_GRNReferences(models.Model):
 class TC_GRNItems(models.Model):
     GRN = models.ForeignKey(T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='GItem', on_delete=models.DO_NOTHING)
-    # HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
@@ -902,7 +901,6 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
 
 class O_BatchWiseLiveStock(models.Model):
-   
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
@@ -920,7 +918,6 @@ class O_BatchWiseLiveStock(models.Model):
    
     class Meta:
         db_table = "O_BatchWiseLiveStock"
-
 
 class M_BillOfMaterial(models.Model):
     BomDate = models.DateField()
@@ -970,8 +967,8 @@ class TC_WorkOrderItems(models.Model):
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
     
     class Meta:
-        db_table = "TC_WorkOrderItems"
-
+        db_table = "TC_WorkOrderItems"   
+                    
 class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
@@ -996,35 +993,23 @@ class TC_MaterialIssueItems(models.Model):
     WorkOrderQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
     IssueQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
-    class Meta:
-        db_table = "TC_MaterialIssueItems"
-        
-        
-class TC_MaterialIssueItemBatches(models.Model):
-    MaterialIssueItem = models.ForeignKey(TC_MaterialIssueItems, related_name='MaterialIssueItemBatches', on_delete=models.CASCADE)
-    MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField()
     BatchCode = models.CharField(max_length=500)
     BatchCodeQuantity = models.DecimalField(max_digits=10, decimal_places=3)
-    IsssueQuantity=models.DecimalField(max_digits=10, decimal_places=3)
-    StoreLocation = models.IntegerField()
+    SystemBatchDate = models.DateField()
     SupplierBatchCode = models.CharField(max_length=500)
-    BestBefore = models.CharField(max_length=500)
+    
     class Meta:
-        db_table = "TC_MaterialIssueItemBatches"
-
-
+        db_table = "TC_MaterialIssueItems"
+        
 class TC_MaterialIssueWorkOrders(models.Model):
-    WorkOrder = models.ForeignKey(T_WorkOrder, related_name='abc', on_delete=models.CASCADE)
+    WorkOrder = models.ForeignKey(T_WorkOrder, related_name='MaterialIssueWorkOrder', on_delete=models.CASCADE)
     MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "TC_MaterialIssueWorkOrders"        
-                    
+        db_table = "TC_MaterialIssueWorkOrders"   
          
 class T_DeliveryChallans(models.Model):
-    
     ChallanDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='DeliveryCustomer', on_delete=models.PROTECT)
     ChallanNumber = models.IntegerField()
