@@ -988,31 +988,8 @@ class T_MaterialIssue(models.Model):
     class Meta:
         db_table = "T_MaterialIssue"
 
-class TC_MaterialIssueItems(models.Model):
-    MaterialIssue = models.ForeignKey(T_MaterialIssue, related_name='MaterialIssueItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    WorkOrderQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
-    IssueQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
-    class Meta:
-        db_table = "TC_MaterialIssueItems"
-        
-        
-class TC_MaterialIssueItemBatches(models.Model):
-    MaterialIssueItem = models.ForeignKey(TC_MaterialIssueItems, related_name='MaterialIssueItemBatches', on_delete=models.CASCADE)
-    MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    BatchDate = models.DateField()
-    BatchCode = models.CharField(max_length=500)
-    BatchCodeQuantity = models.DecimalField(max_digits=10, decimal_places=3)
-    IsssueQuantity=models.DecimalField(max_digits=10, decimal_places=3)
-    StoreLocation = models.IntegerField()
-    SupplierBatchCode = models.CharField(max_length=500)
-    BestBefore = models.CharField(max_length=500)
-    class Meta:
-        db_table = "TC_MaterialIssueItemBatches"
 
-
+ 
 class TC_MaterialIssueWorkOrders(models.Model):
     WorkOrder = models.ForeignKey(T_WorkOrder, related_name='abc', on_delete=models.CASCADE)
     MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
