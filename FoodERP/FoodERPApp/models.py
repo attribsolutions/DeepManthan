@@ -712,6 +712,7 @@ class TC_OrderItems(models.Model):
 class TC_OrderTermsAndConditions(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderTermsAndConditions', on_delete=models.CASCADE)
     TermsAndCondition=models.ForeignKey(M_TermsAndConditions, related_name='TermsAndCondition', on_delete=models.DO_NOTHING)
+    IsDeleted = models.BooleanField(default=False)
 
     class Meta:
         db_table = "TC_OrderTermsAndConditions"
