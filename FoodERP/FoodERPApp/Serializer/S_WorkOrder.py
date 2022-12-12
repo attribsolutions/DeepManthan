@@ -3,6 +3,7 @@ from rest_framework import serializers
 from ..models import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_Companies import *
+from ..Serializer.S_Parties import *
 
 
 # Post and Put Methods Serializer
@@ -70,6 +71,7 @@ class WorkOrderSerializerSecond(serializers.ModelSerializer):
     WorkOrderItems = WorkOrderItemsSerializerSecond(many=True)
     Item = M_ItemsSerializer01(read_only=True)
     Company = C_CompanySerializer(read_only=True)
+    Division = DivisionsSerializer(read_only=True)
     class Meta:
         model = T_WorkOrder
         fields = ['id','WorkOrderDate','Item','Bom','NumberOfLot','Quantity','Company','Division','CreatedBy','UpdatedBy','CreatedOn','WorkOrderItems'] 
