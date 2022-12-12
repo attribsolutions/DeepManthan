@@ -188,7 +188,23 @@ class WorkOrderViewSecond(RetrieveAPIView):
         except T_WorkOrder.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Orders Not available', 'Data': []})
     
-    
+    @transaction.atomic()
+    def put(self, request, id=0, Company=0):
+        try:
+            with transaction.atomic():
+                WorkOrderData = JSONParser().parse(request)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
+                WorkOrderDataByID = T_WorkOrder.objects.get(id=id)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
+                WorkOrder_Serializer = WorkOrderSerializer(WorkOrderDataByID, data=WorkOrderData)
+                if WorkOrder_Serializer.is_valid():
+                    WorkOrder_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Updated Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     @transaction.atomic()
     def delete(self, request, id=0,Company=0):
         try:
