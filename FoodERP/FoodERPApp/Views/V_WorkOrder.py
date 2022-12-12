@@ -103,6 +103,7 @@ class WorkOrderList(CreateAPIView):
                         "Company": a['Company']['id'],
                         "CompanyName":a['Company']['Name'],
                         "EstimatedOutputQty": a['Quantity'],  
+                        "CreatedOn": a['CreatedOn'],
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrderListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
