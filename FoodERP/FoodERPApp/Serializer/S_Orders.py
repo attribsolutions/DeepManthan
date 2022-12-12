@@ -91,8 +91,8 @@ class T_OrderSerializer(serializers.ModelSerializer):
                 Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
        
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
-            # if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
-            #     SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)    
+            if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)    
             Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
        
  
@@ -157,7 +157,7 @@ class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
 
 class T_OrderSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
-    SupplierName = PartiesSerializerThird(read_only=True)
+    Supplier = PartiesSerializerThird(read_only=True)
     OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
