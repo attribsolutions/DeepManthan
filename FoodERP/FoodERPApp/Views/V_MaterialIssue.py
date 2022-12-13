@@ -25,24 +25,17 @@ class WorkOrderDetailsView(CreateAPIView):
                 CompanyID = WorkOrderDetailsdata['Company']
                 DivisionID = WorkOrderDetailsdata['Division']
                 Query = T_WorkOrder.objects.filter(id=WorkOrderID,Item_id=ItemID,Company_id=CompanyID,Division_id=DivisionID)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
                 if Query.exists():
                     WorkOrder_Serializer = WorkOrderSerializerSecond(Query,many=True).data
                     WorkOrderData = list()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
                     for a in WorkOrder_Serializer:
-                        stockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [ItemID])
-                        if not stockquery:
-                            Stock =0.0
-                        else:
-                            Serialize_data = StockQtyserializer(stockquery, many=True).data
-                            Stock = Serialize_data[0]['actualStock']
                         MaterialDetails =list()
                         total=0
-                        for b in a['BOMItems']:
+                        for b in a['WorkOrderItems']:
                             Item = b['Item']['id']
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
-                            obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                            obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s AND O_BatchWiseLiveStock.Party_id= GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
                             if not obatchwisestockquery:
                                 StockQty =0.0
                             else:
