@@ -246,9 +246,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 OrderData = list()
                 OrderItemDetails = list()
                 
-                OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
+                OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                 OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-               
+                print(OrderSerializedata)
 
                 OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list).order_by('Item')
                 OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
@@ -302,6 +302,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 "Supplier": OrderSerializedata[0]['id'],
                 "SupplierName": OrderSerializedata[0]['SupplierName'],
                 "OrderAmount": OrderSerializedata[0]['OrderAmount'],
+                "Customer": OrderSerializedata[0]['CustomerID'],
                 "OrderItem": OrderItemDetails,
             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})

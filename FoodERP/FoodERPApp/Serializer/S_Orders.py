@@ -85,10 +85,19 @@ class T_OrderSerializer(serializers.ModelSerializer):
             
 
         for OrderItem_data in validated_data['OrderItem']:
-            if(OrderItem_data['IsDeleted'] == 1 ) :
+            if(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
                 SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
+           
+           
+           
             if(OrderItem_data['Quantity'] > 0 and OrderItem_data['IsDeleted'] == 1 ):    
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
                 Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            elif(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
+            elif(OrderItem_data['Quantity'] >0 and OrderItem_data['IsDeleted'] == 0 ) :    
+                Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            
        
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
             if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
@@ -182,7 +191,8 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
 class OrderSerializerForGrn(serializers.Serializer):
     id=serializers.IntegerField()
     SupplierName = serializers.CharField(max_length=500)     
-    OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2)   
+    OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
+    CustomerID =serializers.IntegerField() 
 
 
     
