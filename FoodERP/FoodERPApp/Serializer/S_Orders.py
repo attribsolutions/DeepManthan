@@ -92,8 +92,11 @@ class T_OrderSerializer(serializers.ModelSerializer):
        
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
             if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
-                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)    
-            Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
+                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)
+            else:
+                TestExistance=TC_OrderTermsAndConditions.objects.filter(Order=instance ,TermsAndCondition=OrderTermsAndCondition_data['TermsAndCondition'])
+                if TestExistance.count() == 0:
+                    Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
        
  
         return instance  
