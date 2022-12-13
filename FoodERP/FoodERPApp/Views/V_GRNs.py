@@ -299,9 +299,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         })
                        
                 OrderData.append({
-                "id": OrderSerializedata[0]['id'],
-                "OrderDate": OrderSerializedata[0]['SupplierName'],
-                "DeliveryDate": OrderSerializedata[0]['OrderAmount'],
+                "Supplier": OrderSerializedata[0]['id'],
+                "SupplierName": OrderSerializedata[0]['SupplierName'],
+                "OrderAmount": OrderSerializedata[0]['OrderAmount'],
                 "OrderItem": OrderItemDetails,
             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
