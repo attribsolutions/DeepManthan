@@ -78,6 +78,8 @@ from .Views.V_PartySubParty import *
 
 from .Views.V_PartyItems import *
 
+from .Views.V_MaterialIssue import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -119,6 +121,7 @@ urlpatterns = [
     url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
     url(r'WorkOrder$', WorkOrderView.as_view()),
     url(r'WorkOrderFilter$', WorkOrderList.as_view()),
+    url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
 
     
     
