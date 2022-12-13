@@ -21,8 +21,8 @@ class BomDetailsView(CreateAPIView):
         try:
             with transaction.atomic():
                 BomDetailsdata = JSONParser().parse(request)
-                BomID = BomDetailsdata['BomID']
-                ItemID = BomDetailsdata['ItemID']
+                BomID = BomDetailsdata['Bom']
+                ItemID = BomDetailsdata['Item']
                 GetQuantity = BomDetailsdata['Quantity']
                 Query = M_BillOfMaterial.objects.filter(id=BomID,Item_id=ItemID)
                 if Query.exists():
