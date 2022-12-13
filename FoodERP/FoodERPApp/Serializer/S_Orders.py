@@ -25,7 +25,7 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted']
 
 class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,17 +74,25 @@ class T_OrderSerializer(serializers.ModelSerializer):
                 
         instance.save()
 
-        for items in instance.OrderItem.all():
-            SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
+        # for items in instance.OrderItem.all():
+        #     print(items.IsDeleted)
+        #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
             
             
-        for items in instance.OrderTermsAndConditions.all():
-            items.delete()  
+        # for items in instance.OrderTermsAndConditions.all():
+            
+        #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
+            
 
         for OrderItem_data in validated_data['OrderItem']:
-            Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            if(OrderItem_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
+            if(OrderItem_data['Quantity'] > 0 and OrderItem_data['IsDeleted'] == 1 ):    
+                Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
        
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
+            if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)    
             Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
        
  
