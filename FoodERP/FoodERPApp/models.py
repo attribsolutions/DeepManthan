@@ -675,6 +675,9 @@ class T_Orders(models.Model):
     Division=models.ForeignKey(M_Parties, related_name='OrderDivision', on_delete=models.DO_NOTHING)
     BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT)
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
+    IsOpenPO = models.BooleanField(default=False)
+    POFromDate = models.DateField()
+    POToDate = models.DateField()
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -705,6 +708,7 @@ class TC_OrderItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     IsDeleted = models.BooleanField(default=False)
+    DeletedOn = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "TC_OrderItems"
