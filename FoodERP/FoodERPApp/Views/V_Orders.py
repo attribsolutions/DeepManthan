@@ -139,6 +139,7 @@ class T_OrdersViewSecond(CreateAPIView):
                         
                         OrderItemDetails=list()
                         for b in a['OrderItem']:
+                            
                             OrderItemDetails.append({
                                 "id": b['id'],
                                 "Item":b['Item']['id'],

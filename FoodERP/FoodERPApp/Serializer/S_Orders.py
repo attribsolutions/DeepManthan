@@ -86,17 +86,19 @@ class T_OrderSerializer(serializers.ModelSerializer):
 
         for OrderItem_data in validated_data['OrderItem']:
             if(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0).update(IsDeleted=1)
+            elif(OrderItem_data['IsDeleted'] == 0 ) :
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0)
+                
+                if SetFlag.count() == 0:
+                    OrderItem_data['IsDeleted']=0
+                    Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            else: 
                 SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
-           
-           
-           
-            if(OrderItem_data['Quantity'] > 0 and OrderItem_data['IsDeleted'] == 1 ):    
-                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
+                OrderItem_data['IsDeleted']=0
                 Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
-            elif(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
-                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
-            elif(OrderItem_data['Quantity'] >0 and OrderItem_data['IsDeleted'] == 0 ) :    
-                Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            
+            
             
        
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
