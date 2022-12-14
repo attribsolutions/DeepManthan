@@ -37,7 +37,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','OrderItem','OrderTermsAndConditions','Inward']
+        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','IsOpenPO','POFromDate','POToDate','OrderItem','OrderTermsAndConditions','Inward']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
