@@ -187,21 +187,23 @@ class M_BOMsViewSecond(RetrieveAPIView):
     def put(self, request, id=0, Company=0):
         try:
             with transaction.atomic():
-                Bomsdata = JSONParser().parse(request)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
-                BomsdataByID = M_BillOfMaterial.objects.get(id=id,Company_id=Company)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
-                Boms_Serializer = M_BOMSerializer(BomsdataByID, data=Bomsdata)
-                if Boms_Serializer.is_valid():
-                    Boms_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Updated Successfully', 'Data': []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})
-        except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material in another table', 'Data': []})        
+                checkitem = T_WorkOrder.objects.filter(Bom_id=id)
+                if checkitem.exists():
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material used in Work Order', 'Data': []})
+                else:    
+                    Bomsdata = JSONParser().parse(request)
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
+                    BomsdataByID = M_BillOfMaterial.objects.get(id=id,Company_id=Company)
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
+                    Boms_Serializer = M_BOMSerializer(BomsdataByID, data=Bomsdata)
+                    if Boms_Serializer.is_valid():
+                        Boms_Serializer.save()
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Updated Successfully', 'Data': []})
+                    else:
+                        transaction.set_rollback(True)
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})    
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
     @transaction.atomic()
     def delete(self, request, id=0,Company=0):
