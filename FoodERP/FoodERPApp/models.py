@@ -934,6 +934,7 @@ class M_BillOfMaterial(models.Model):
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
+    ReferenceBom = models.IntegerField()
     
     class Meta:
         db_table = "M_BillOfMaterial"
