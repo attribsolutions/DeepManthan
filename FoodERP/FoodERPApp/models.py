@@ -996,7 +996,6 @@ class TC_MaterialIssueItems(models.Model):
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
     BatchDate = models.DateField()
     BatchCode = models.CharField(max_length=500)
-    BatchCodeQuantity = models.DecimalField(max_digits=10, decimal_places=3)
     SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
     
