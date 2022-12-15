@@ -998,7 +998,7 @@ class TC_MaterialIssueItems(models.Model):
     BatchCode = models.CharField(max_length=500)
     BatchCodeQuantity = models.DecimalField(max_digits=10, decimal_places=3)
     SystemBatchDate = models.DateField()
-    SupplierBatchCode = models.CharField(max_length=500)
+    SystemBatchCode = models.CharField(max_length=500)
     
     class Meta:
         db_table = "TC_MaterialIssueItems"
