@@ -109,21 +109,34 @@ urlpatterns = [
     url(r'Items$', M_ItemsView.as_view()),
     url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
     url(r'Employees$', M_EmployeesView.as_view()),
+    
+    #Invoice All APIs
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
     url(r'Invoices$', T_InvoiceView.as_view()),
+    
+    # GRN All API's
     url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
     url(r'GRN$', T_GRNView.as_view()),
     url(r'GRNFilter$', GRNListFilterView.as_view()),
+    
+    # Bill Of Material All API's
     url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
     url(r'Billofmaterial$', M_BOMsView.as_view()),
     url(r'BomFilter$', BOMListFilterView.as_view()),
+    
+    # Work Order All API's
     url(r'BomDetails$', BomDetailsView.as_view()),
     url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
     url(r'WorkOrder$', WorkOrderView.as_view()),
     url(r'WorkOrderFilter$', WorkOrderList.as_view()),
-    url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
-
     
+    # Material Issues All API's
+    url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
+    url(r'MaterialIssue/([0-9]+)$',MaterialIssueViewSecond.as_view()),
+    url(r'MaterialIssue$', MaterialIssueView.as_view()),
+    url(r'MaterialIssueFilter$', MaterialIsssueList.as_view()),
+   
+
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
     url(r'Challan$', T_DeliveryChallanView.as_view()),

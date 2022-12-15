@@ -12,6 +12,12 @@ class StockQtyserializerForMaterialIssue(serializers.ModelSerializer):
         model = O_BatchWiseLiveStock
         fields = ['id','Item','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Quantity','BaseUnitQuantity','Party']  
 
+
+class MaterialIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_MaterialIssue
+        fields = '__all__'
+    
 # class MaterialIssueSerializer(serializers.ModelSerializer):
 #     WorkOrderItems = WorkOrderItemsSerializer(many=True)
 #     class Meta:
@@ -59,5 +65,9 @@ class StockQtyserializerForMaterialIssue(serializers.ModelSerializer):
 #             Item = TC_WorkOrderItems.objects.create(WorkOrder=instance, **WorkOrderItems_data)
 #         return instance     
         
-
+class MatetrialIssueSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = T_MaterialIssue
+        fields = ['MaterialIssueDate','Item','Unit','Bom','NumberOfLot','Quantity','Company','Party','CreatedBy','UpdatedBy','WorkOrderItems']
+    
            
