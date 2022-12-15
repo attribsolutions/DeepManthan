@@ -90,7 +90,7 @@ class WorkOrderDetailsView(CreateAPIView):
                         })    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':WorkOrderData[0]})
         except T_WorkOrder.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
 
 
 class MaterialIsssueList(CreateAPIView):
@@ -130,8 +130,6 @@ class MaterialIsssueList(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
-
 class MaterialIssueView(CreateAPIView):
        
     permission_classes = (IsAuthenticated,)
@@ -164,7 +162,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 Check = TC_MaterialIssueWorkOrders.objects.filter(WorkOrder_id=id)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Check.query)})
                 if Check.exists():
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order used in Material Issue', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue used in Material Issue', 'Data': []})
                 else:
                     Query = T_MaterialIssue.objects.filter(id=id)
                     if Query.exists():
@@ -216,7 +214,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIssueData})
         except T_MaterialIssue.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Orders Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
     
     @transaction.atomic()
     def put(self, request, id=0, Company=0):
@@ -229,7 +227,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 MaterialIssue_Serializer = MaterialIssueSerializer(MaterialIssueDataByID, data=MaterialIssueData)
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Updated Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material IssueUpdated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer.errors, 'Data': []})
