@@ -189,7 +189,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 checkitem = T_WorkOrder.objects.filter(Bom_id=id)
                 if checkitem.exists():
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material used in Work Order', 'Data': []})
+                    return JsonResponse({'StatusCode': 100, 'Status': True, 'Message': 'Bill Of Material used in Work Order', 'Data': []})
                 else:    
                     Bomsdata = JSONParser().parse(request)
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
