@@ -46,8 +46,6 @@ class WorkOrderSerializer(serializers.ModelSerializer):
             'Company', instance.Company)
         instance.Party = validated_data.get(
             'Party', instance.Party)
-        instance.CreatedBy = validated_data.get(
-            'CreatedBy', instance.CreatedBy)
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
             
