@@ -123,69 +123,63 @@ class M_BOMsViewSecond(RetrieveAPIView):
     def get(self, request, id=0,Company=0):
         try:
             with transaction.atomic():
-                
-                Check = T_WorkOrder.objects.filter(Bom_id=id)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Check.query)})
-                if Check.exists():
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material used in WorkOrder', 'Data': []})
-                else:
-                    Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
-                    if Query.exists():
-                        BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
-                        BillofmaterialData = list()
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
-                        for a in BOM_Serializer:
-                            MaterialDetails =list()
-                            ParentItem= a['Item']['id']
-                            Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                            # print(query.query)
-                            if Parentquery.exists():
-                                ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
-                                ParentUnitDetails = list()
-                                for d in ParentUnitdata:
-                                    ParentUnitDetails.append({
-                                    "Unit": d['id'],
-                                    "UnitName": d['UnitID']['Name'],
-                                })
-                            
-                            for b in a['BOMItems']:
-                                ChildItem= b['Item']['id']
-                                query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
-                                # print(query.query)
-                                if query.exists():
-                                    Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
-                                    UnitDetails = list()
-                                    for c in Unitdata:
-                                        UnitDetails.append({
-                                        "Unit": c['id'],
-                                        "UnitName": c['UnitID']['Name'],
-                                    })
-                                MaterialDetails.append({
-                                    "id": b['id'],
-                                    "Item":b['Item']['id'],
-                                    "ItemName":b['Item']['Name'], 
-                                    "Unit": b['Unit']['id'],
-                                    "UnitName": b['Unit']['UnitID']['Name'],
-                                    "Quantity":b['Quantity'],
-                                    "UnitDetails":UnitDetails
-                                })
-                                
-                            BillofmaterialData.append({
-                                "id": a['id'],
-                                "BomDate": a['BomDate'],
-                                "Comment": a['Comment'],
-                                "IsActive": a['IsActive'],
-                                "Company": a['Company']['id'],
-                                "CompanyName":a['Company']['Name'],
-                                "Item":a['Item']['id'],
-                                "ItemName":a['Item']['Name'],
-                                "EstimatedOutputQty": a['EstimatedOutputQty'],  
-                                "Unit": a['Unit']['id'],
-                                "UnitName": a['Unit']['UnitID']['Name'],
-                                "ParentUnitDetails":ParentUnitDetails,
-                                "BOMItems":MaterialDetails
+                Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
+                if Query.exists():
+                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BillofmaterialData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    for a in BOM_Serializer:
+                        MaterialDetails =list()
+                        ParentItem= a['Item']['id']
+                        Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                        # print(query.query)
+                        if Parentquery.exists():
+                            ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                            ParentUnitDetails = list()
+                            for d in ParentUnitdata:
+                                ParentUnitDetails.append({
+                                "Unit": d['id'],
+                                "UnitName": d['UnitID']['Name'],
                             })
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
+                        
+                        for b in a['BOMItems']:
+                            ChildItem= b['Item']['id']
+                            query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
+                            # print(query.query)
+                            if query.exists():
+                                Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                UnitDetails = list()
+                                for c in Unitdata:
+                                    UnitDetails.append({
+                                    "Unit": c['id'],
+                                    "UnitName": c['UnitID']['Name'],
+                                })
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'], 
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "Quantity":b['Quantity'],
+                                "UnitDetails":UnitDetails
+                            })
+                            
+                        BillofmaterialData.append({
+                            "id": a['id'],
+                            "BomDate": a['BomDate'],
+                            "Comment": a['Comment'],
+                            "IsActive": a['IsActive'],
+                            "Company": a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
+                            "Item":a['Item']['id'],
+                            "ItemName":a['Item']['Name'],
+                            "EstimatedOutputQty": a['EstimatedOutputQty'],  
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "ParentUnitDetails":ParentUnitDetails,
+                            "BOMItems":MaterialDetails
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData})
         except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
        
