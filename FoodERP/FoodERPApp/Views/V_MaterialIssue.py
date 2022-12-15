@@ -29,7 +29,6 @@ class WorkOrderDetailsView(CreateAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
                 if Query.exists():
                     WorkOrder_Serializer = WorkOrderSerializerSecond(Query,many=True).data
-                    WorkOrderData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
                     for a in WorkOrder_Serializer:
                         MaterialDetails =list()
@@ -85,10 +84,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "Quantity":b['Quantity'],
                                 "BatchesData":stockDatalist   
                             })
-                        WorkOrderData.append({
-                            "ItemsData":MaterialDetails
-                        })    
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':WorkOrderData[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':MaterialDetails})
         except T_WorkOrder.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
 
