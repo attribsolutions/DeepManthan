@@ -136,7 +136,7 @@ class MaterialIssueView(CreateAPIView):
         try:
             with transaction.atomic():
                 MaterialIssueData = JSONParser().parse(request)
-                MaterialIssue_Serializer = WorkOrderSerializer(data=MaterialIssueData)
+                MaterialIssue_Serializer = MaterialIssueSerializer(data=MaterialIssueData)
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': []})
