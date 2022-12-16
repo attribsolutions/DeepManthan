@@ -103,9 +103,12 @@ class M_BOMsView(CreateAPIView):
         try:
             with transaction.atomic():
                 BillOfMaterial = JSONParser().parse(request)
+                ReferenceBOMID = BillOfMaterial['ReferenceBom']
                 Boms_Serializer = M_BOMSerializer(data=BillOfMaterial)
                 if Boms_Serializer.is_valid():
                     Boms_Serializer.save()
+                    if(ReferenceBOMID > 0):
+                        query = M_BillOfMaterial.objects.filter(id=ReferenceBOMID).update(IsActive=1)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
