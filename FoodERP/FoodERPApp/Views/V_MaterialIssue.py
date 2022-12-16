@@ -100,7 +100,7 @@ class MaterialIsssueList(CreateAPIView):
                 MaterialIsssuedata = JSONParser().parse(request)
                 FromDate = MaterialIsssuedata['FromDate']
                 ToDate = MaterialIsssuedata['ToDate']
-                query = T_MaterialIssue.objects.filter(WorkOrderDate__range=[FromDate,ToDate])
+                query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate,ToDate])
                 if query:
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
@@ -108,17 +108,17 @@ class MaterialIsssueList(CreateAPIView):
                     for a in MaterialIsssue_serializerdata:   
                         MaterialIsssueListData.append({
                         "id": a['id'],
-                        "WorkOrderDate": a['WorkOrderDate'],
+                        "MaterialIssueDate": a['MaterialIssueDate'],
                         "Item":a['Item']['id'],
                         "ItemName":a['Item']['Name'],
                         "Unit": a['Unit']['id'],
                         "UnitName": a['Unit']['UnitID']['Name'],
-                        "Bom": a['Bom'],
                         "NumberOfLot": a['NumberOfLot'],
-                        "Quantity":a["Quantity"],
+                        "LotQuantity":a["LotQuantity"],
                         "Company": a['Company']['id'],
                         "CompanyName":a['Company']['Name'],
-                        "EstimatedOutputQty": a['Quantity'],  
+                        "Party":a['Party']['id'],
+                        "PartyName":a['Party']['Name'],
                         "CreatedOn": a['CreatedOn'],
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssueListData})

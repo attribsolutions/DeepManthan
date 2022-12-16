@@ -26,7 +26,7 @@ class MaterialIssueSerializer(serializers.ModelSerializer):
     MaterialIssueItems = MaterialIssueItemsSerializer(many=True)
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','MaterialIssueItems','MaterialIssueWorkOrder']
+        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder']
     
     def create(self, validated_data):
         MaterialIssueItems_data = validated_data.pop('MaterialIssueItems')
@@ -48,19 +48,18 @@ class MaterialIssueItemsSerializerSecond(serializers.ModelSerializer):
     Unit = ItemUnitsSerializerSecond(read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     class Meta:
-        model =  TC_MaterialIssueItems
-        fields = ['id', 'WorkOrderQuantity', 'IssueQuantity', 'BatchDate', 'BatchCode','BatchCodeQuantity', 'SystemBatchDate', 'SystemBatchCode', 'Item', 'MaterialIssue', 'Unit']
+        model = TC_MaterialIssueItems
+        fields =['WorkOrderQuantity', 'IssueQuantity', 'BatchDate', 'BatchCode', 'SystemBatchDate', 'SystemBatchCode', 'Item','Unit']
         
              
         
 class MatetrialIssueSerializerSecond(serializers.ModelSerializer):
-    MaterialIssueItems = MaterialIssueItemsSerializerSecond(many=True)
     Item = M_ItemsSerializer01(read_only=True)
     Company = C_CompanySerializer(read_only=True)
     Party = DivisionsSerializer(read_only=True)
     Unit = ItemUnitsSerializerSecond(read_only=True)
     class Meta:
         model = T_MaterialIssue
-        fields = ['MaterialIssueDate','Item','Unit','Bom','NumberOfLot','Quantity','Company','Party','CreatedBy','UpdatedBy','MaterialIssueItems']
+        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit']
     
            
