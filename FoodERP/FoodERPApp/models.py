@@ -1005,6 +1005,7 @@ class TC_MaterialIssueItems(models.Model):
         
 class TC_MaterialIssueWorkOrders(models.Model):
     WorkOrder = models.ForeignKey(T_WorkOrder, related_name='MaterialIssueWorkOrder', on_delete=models.CASCADE)
+    Bom = models.ForeignKey(M_BillOfMaterial, related_name='Bom', on_delete=models.PROTECT)
     MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
 
     class Meta:
