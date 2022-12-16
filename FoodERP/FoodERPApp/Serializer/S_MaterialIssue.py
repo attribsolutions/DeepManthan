@@ -60,6 +60,6 @@ class MatetrialIssueSerializerSecond(serializers.ModelSerializer):
     Unit = ItemUnitsSerializerSecond(read_only=True)
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit']
+        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','CreatedOn']
     
            
