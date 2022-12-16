@@ -934,7 +934,7 @@ class M_BillOfMaterial(models.Model):
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    ReferenceBom = models.IntegerField()
+    ReferenceBom = models.IntegerField(null=True,blank=True)
     
     class Meta:
         db_table = "M_BillOfMaterial"
@@ -980,9 +980,6 @@ class T_MaterialIssue(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     NumberOfLot = models.IntegerField()
     LotQuantity = models.DecimalField(max_digits=10, decimal_places=3)
-    Status=models.IntegerField()
-    ReIssueID = models.IntegerField()
-    IsReIssueID = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
