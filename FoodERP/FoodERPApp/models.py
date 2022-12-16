@@ -934,6 +934,7 @@ class M_BillOfMaterial(models.Model):
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
+    ReferenceBom = models.IntegerField()
     
     class Meta:
         db_table = "M_BillOfMaterial"
@@ -1008,6 +1009,7 @@ class TC_MaterialIssueItems(models.Model):
         
 class TC_MaterialIssueWorkOrders(models.Model):
     WorkOrder = models.ForeignKey(T_WorkOrder, related_name='MaterialIssueWorkOrder', on_delete=models.CASCADE)
+    Bom = models.ForeignKey(M_BillOfMaterial, related_name='Bom', on_delete=models.PROTECT)
     MaterialIssue = models.ForeignKey(T_MaterialIssue,  on_delete=models.CASCADE)
 
     class Meta:
