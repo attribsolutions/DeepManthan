@@ -16,7 +16,7 @@ class M_BOMSerializer(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializer(many=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','Item','Unit','Company','CreatedBy','BOMItems']  
+        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems']  
         
     def create(self, validated_data):
         BomItems_data = validated_data.pop('BOMItems')
