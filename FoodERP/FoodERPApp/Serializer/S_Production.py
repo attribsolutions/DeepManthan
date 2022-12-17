@@ -38,8 +38,13 @@ class ProductionMaterialIssueSerializer(serializers.ModelSerializer):
         model =TC_ProductionMaterialIssue
         fields='__all__'
 
+class M_MaterialissueItemsserializer(serializers.ModelSerializer):
+    class Meta:
+        model=M_Items
+        fields=['id','Name']
 
 class H_ProductionSerializer2(serializers.ModelSerializer):
+    Item=M_MaterialissueItemsserializer(read_only=True)
     class Meta:
-        model = H_Modules
-        fields = ['id','Name']
+        model = T_MaterialIssue
+        fields = '__all__'
