@@ -47,23 +47,29 @@ class WorkOrderDetailsView(CreateAPIView):
                                 amount = 0
                                 p =0
                                 for c in StockQtySerialize_data:
-                                    if amount==0:
-                                        if(float(c['BaseUnitQuantity']) > float(ActualQty)):
-                                            p=float(ActualQty)
-                                            add=float(add) + float(ActualQty)
+                                    if(add >= float(ActualQty)):
+                                        p=0
+                                    else:    
+                                        if amount==0:
+                                            if(float(c['BaseUnitQuantity']) > float(ActualQty)):
+                                                p=float(ActualQty)
+                                                add=float(add) + float(ActualQty)
+
+                                            else:
+                                                p=float(c['BaseUnitQuantity'])
+                                                amount = float(ActualQty)- float(c['BaseUnitQuantity'])
+                                                add = float(add) + float(c['BaseUnitQuantity'])
                                         else:
-                                            p=float(c['BaseUnitQuantity'])
-                                            amount = float(ActualQty)- float(c['BaseUnitQuantity'])
-                                            add = float(add) + float(c['BaseUnitQuantity'])
-                                    else:
-                                        if(float(amount) > float(c['BaseUnitQuantity'])):
-                                            p=float(c['BaseUnitQuantity'])
-                                            amount = float(amount)-float(c['BaseUnitQuantity'])
-                                            add = float(add) + float(c['BaseUnitQuantity'])
-                                        else:
-                                            p=float(amount)
-                                            add = float(add) + float(amount) 
-                                            amount= float(c['BaseUnitQuantity'])-float(amount)            
+                                            if(float(amount) > float(c['BaseUnitQuantity'])):
+                                                p=float(c['BaseUnitQuantity'])
+                                                amount = float(amount)-float(c['BaseUnitQuantity'])
+                                                add = float(add) + float(c['BaseUnitQuantity'])
+                                            else:
+                                                p=float(amount)
+                                                add = float(add) + float(amount) 
+                                                amount= float(c['BaseUnitQuantity'])-float(amount)            
+                                    
+                                    
                                     stockDatalist.append({
                                         "id": c['id'],
                                         "Item":c['Item'],
