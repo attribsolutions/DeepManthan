@@ -1065,4 +1065,34 @@ class TC_DeliveryChallanItems(models.Model):
     class Meta:
         db_table = "TC_DeliveryChallanItems"
 
+
+class T_Production(models.Model): 
+        ProductionDate = models.DateField()  
+        Item=models.ForeignKey(M_Items, on_delete=models.PROTECT)
+        EstimatedQuantity=models.DecimalField(max_digits=5, decimal_places=3)	
+        NumberOfLot=models.IntegerField()
+        ActualQuantity	=	models.DecimalField(max_digits=5, decimal_places=3)	
+        BatchDate = models.DateField()
+        BatchCode = models.CharField(max_length=500)		
+        StoreLocation		= models.CharField(max_length=500)
+        SupplierBatchCode	= models.CharField(max_length=500)		
+        BestBefore		= models.DateField()  
+        Remark		= models.CharField(max_length=500)
+        # MachineID		
+        Company=	models.ForeignKey(C_Companies,  on_delete=models.PROTECT)		
+        Division=models.ForeignKey(M_Parties, on_delete=models.PROTECT)
+        CreatedBy = models.IntegerField()
+        CreatedOn = models.DateTimeField(auto_now_add=True)
+        UpdatedBy = models.IntegerField()
+        UpdatedOn = models.DateTimeField(auto_now=True)
+
+        class Meta:
+            db_table = "T_Production"
+
+
+class TC_ProductionMaterialIssue(models.Model):
+        Production= models.ForeignKey(T_Production, related_name='ProductionMaterialIssue', on_delete=models.CASCADE)
+        MaterialIssue= models.ForeignKey(T_MaterialIssue, related_name='MaterialIssue', on_delete=models.CASCADE)
      
+        class Meta:
+            db_table = "TC_ProductionMaterialIssue"
