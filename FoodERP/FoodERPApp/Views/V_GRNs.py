@@ -248,15 +248,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 
                 OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                 OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                print(OrderSerializedata)
-
-                OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list).order_by('Item')
+                
+                OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                 OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                # print(OrderItemSerializedata.data)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
-                
-                # for a in OrderSerializedata:
-                
                 for b in OrderItemSerializedata:
                         Item= b['Item']['id']
                         query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
@@ -296,8 +291,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "IGSTPercentage": b['IGSTPercentage'],
                             "Amount": b['Amount'],
                             "UnitDetails":UnitDetails
-                        })
-                       
+                        })     
                 OrderData.append({
                 "Supplier": OrderSerializedata[0]['id'],
                 "SupplierName": OrderSerializedata[0]['SupplierName'],
@@ -306,20 +300,6 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 "OrderItem": OrderItemDetails,
             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
-                # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    # def post(self, request,id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             POOrderIDs = request.data['OrderIDs']
-    #             Order_list = POOrderIDs.split(",")
-    #             # return JsonResponse({'StatusCode': 400, 'Status': True,'Data':Order_list})
-    #             # OrderQuery = T_Orders.objects.filter(id__in=Order_list).annotate(total=Sum('OrderAmount')).order_by("Supplier_id")
-    #             OrderQuery =  T_Orders.objects.values("Supplier_id","Customer_id").annotate(Supplier=F("Supplier_id"),Customer=F("Customer_id"),OrderAmount=Sum('OrderAmount')).filter(id__in =Order_list).order_by("Supplier_id")
-    #             if OrderQuery.exists():
-    #                 OrderSerializedata = OrderSerializerForGrn(OrderQuery, many=True).data
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata[0]})
-    #             #return JsonResponse({'StatusCode': 400, 'Status': True,'Data':str(OrderQuery.query)})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
