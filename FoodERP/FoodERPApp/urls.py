@@ -1,5 +1,7 @@
 from django.urls import re_path as url
 
+from .Views.V_Production import *
+
 from .Views.V_GRNs import *
 
 from .Views.V_Bom import *
@@ -135,6 +137,12 @@ urlpatterns = [
     url(r'MaterialIssue/([0-9]+)$',MaterialIssueViewSecond.as_view()),
     url(r'MaterialIssue$', MaterialIssueView.as_view()),
     url(r'MaterialIssueFilter$', MaterialIsssueList.as_view()),
+
+
+    #Production ALL API`s
+    url(r'MaterialIssueforProduction$',ProductionformMaterialIssue.as_view()),
+    url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
+    url(r'Production$',ProductionView.as_view()),
    
 
     
@@ -178,8 +186,11 @@ urlpatterns = [
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
     url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
+    # url(r'OrderEdit$',EditOrderView.as_view()),
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),
+    
+
     
     # Select Item and Get MCItemUnits
     url(r'GetItemUnits$',M_ItemsViewThird.as_view()),

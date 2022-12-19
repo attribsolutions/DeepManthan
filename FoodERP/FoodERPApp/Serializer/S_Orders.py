@@ -30,14 +30,14 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
 class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model=TC_OrderTermsAndConditions
-        fields =['TermsAndCondition']
+        fields =['TermsAndCondition','IsDeleted']
 
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','OrderItem','OrderTermsAndConditions','Inward']
+        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','IsOpenPO','POFromDate','POToDate','OrderItem','OrderTermsAndConditions','Inward']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
@@ -85,15 +85,29 @@ class T_OrderSerializer(serializers.ModelSerializer):
             
 
         for OrderItem_data in validated_data['OrderItem']:
-            if(OrderItem_data['IsDeleted'] == 1 ) :
+            if(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0).update(IsDeleted=1)
+            elif(OrderItem_data['IsDeleted'] == 0 ) :
+                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0)
+                
+                if SetFlag.count() == 0:
+                    OrderItem_data['IsDeleted']=0
+                    Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            else: 
                 SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
-            if(OrderItem_data['Quantity'] > 0 and OrderItem_data['IsDeleted'] == 1 ):    
+                OrderItem_data['IsDeleted']=0
                 Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+            
+            
+            
        
         for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
             if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
-                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)    
-            Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
+                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)
+            else:
+                TestExistance=TC_OrderTermsAndConditions.objects.filter(Order=instance ,TermsAndCondition=OrderTermsAndCondition_data['TermsAndCondition'])
+                if TestExistance.count() == 0:
+                    Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
        
  
         return instance  
@@ -171,26 +185,16 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
 '''Order Serializer For Make Grn'''
 
 
-class PartiesSerializerForGrn(serializers.ModelSerializer):
-    class Meta:
-        model = M_Parties
-        fields = ['id','Name']
+# class PartiesSerializerForGrn(serializers.ModelSerializer):
+#     class Meta:
+#         model = M_Parties
+#         fields = ['id','Name']
         
-class OrderSerializerForGrn(serializers.ModelSerializer):
-    # Customer = PartiesSerializerForGrn(read_only=True)
-    # Supplier = PartiesSerializerForGrn(read_only=True)
-    Customer = serializers.IntegerField()
-    Supplier = serializers.IntegerField()
-  
-  
-    # OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
-    # OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
-    # BillingAddress=PartyAddressSerializerSecond(read_only=True) 
-    # ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
-    
-    class Meta:
-        model = T_Orders
-        fields = ['Customer','Supplier','OrderAmount']       
+class OrderSerializerForGrn(serializers.Serializer):
+    id=serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)     
+    OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
+    CustomerID =serializers.IntegerField() 
 
 
     
