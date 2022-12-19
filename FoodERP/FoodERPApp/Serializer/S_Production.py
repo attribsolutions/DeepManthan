@@ -10,6 +10,13 @@ class ProductionMaterialIssueSerializer(serializers.ModelSerializer):
         model =TC_ProductionMaterialIssue
         fields=['MaterialIssue']
 
+class H_ProductionSerializerforGET(serializers.ModelSerializer):
+    ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
+    
+    class Meta:
+        model = T_Production
+        fields = '__all__'
+
 class H_ProductionSerializer(serializers.ModelSerializer):
     ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
     O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
