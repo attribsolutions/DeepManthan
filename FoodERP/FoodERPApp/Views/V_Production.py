@@ -28,7 +28,7 @@ class ProductionformMaterialIssue(CreateAPIView):
                 query1 = T_MaterialIssue.objects.filter(id=MaterialIssueID)
                
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer, 'Data': 'aaaaaaaaaaa'})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer, 'Data': []})
         except Exception as e  :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e , 'Data':[]}) 
 
@@ -45,7 +45,7 @@ class ProductionView(CreateAPIView):
             with transaction.atomic():
                 Productiondata = T_Production.objects.all()
                 if Productiondata.exists():
-                    Production_Serializer = H_ProductionSerializer(
+                    Production_Serializer = H_ProductionSerializerforGET(
                     Productiondata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data })
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Production Not available', 'Data': []})    
@@ -107,7 +107,7 @@ class ProductionViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 Productiondata = T_Production.objects.get(id=id)
-                Production_Serializer = H_ProductionSerializer(Productiondata)
+                Production_Serializer = H_ProductionSerializerforGET(Productiondata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data})
         except H_Modules.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})
