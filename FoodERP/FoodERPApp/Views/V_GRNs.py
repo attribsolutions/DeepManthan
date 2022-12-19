@@ -11,6 +11,7 @@ from ..Serializer.S_Orders import *
 from ..models import *
 from django.db.models import *
 
+# GRN List API
 
 class GRNListFilterView(CreateAPIView):
 
@@ -58,6 +59,7 @@ class GRNListFilterView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+# GRN Save  API
 
 class T_GRNView(CreateAPIView):
 
@@ -132,6 +134,7 @@ class T_GRNView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+#GRN Single Get API
 
 class T_GRNViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -205,22 +208,8 @@ class T_GRNViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                GRN_data = JSONParser().parse(request)
-                GRN_dataByID = T_GRNs.objects.get(id=id)
-                GRN_Serializer_Update = T_GRNSerializer(
-                    GRN_dataByID, data=GRN_data)
-                if GRN_Serializer_Update.is_valid():
-                    GRN_Serializer_Update.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN  Updated Successfully', 'Data': {}})
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer_Update.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+ 
+# GRN DELETE API 
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
@@ -233,6 +222,7 @@ class T_GRNViewSecond(CreateAPIView):
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'T_GRN used in another tbale', 'Data': []})
 
+# Get PO Details For Make GRN POST API 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
