@@ -60,7 +60,11 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.OrderDate = validated_data.get(
             'OrderDate', instance.OrderDate)   
         instance.DeliveryDate = validated_data.get(
-            'DeliveryDate', instance.DeliveryDate)         
+            'DeliveryDate', instance.DeliveryDate)
+        instance.POFromDate = validated_data.get(
+            'POFromDate', instance.POFromDate)   
+        instance.POToDate = validated_data.get(
+            'POToDate', instance.POToDate)          
         instance.OrderAmount = validated_data.get(
             'OrderAmount', instance.OrderAmount)
         instance.Description = validated_data.get(

@@ -11,6 +11,7 @@ from ..Serializer.S_Orders import *
 from ..models import *
 from django.db.models import *
 
+# GRN List API
 
 class GRNListFilterView(CreateAPIView):
 
@@ -58,6 +59,7 @@ class GRNListFilterView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+# GRN Save  API
 
 class T_GRNView(CreateAPIView):
 
@@ -132,6 +134,7 @@ class T_GRNView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+#GRN Single Get API
 
 class T_GRNViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -205,26 +208,14 @@ class T_GRNViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                GRN_data = JSONParser().parse(request)
-                GRN_dataByID = T_GRNs.objects.get(id=id)
-                GRN_Serializer_Update = T_GRNSerializer(
-                    GRN_dataByID, data=GRN_data)
-                if GRN_Serializer_Update.is_valid():
-                    GRN_Serializer_Update.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN  Updated Successfully', 'Data': {}})
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': GRN_Serializer_Update.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+ 
+# GRN DELETE API 
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
+                O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.get(GRN_id=id)
+                O_BatchWiseLiveStockData.delete()
                 GRN_Data = T_GRNs.objects.get(id=id)
                 GRN_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Deleted Successfully', 'Data': []})
@@ -233,6 +224,7 @@ class T_GRNViewSecond(CreateAPIView):
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'T_GRN used in another tbale', 'Data': []})
 
+# Get PO Details For Make GRN POST API 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -248,15 +240,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 
                 OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                 OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                print(OrderSerializedata)
-
-                OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list).order_by('Item')
+                
+                OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                 OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                # print(OrderItemSerializedata.data)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
-                
-                # for a in OrderSerializedata:
-                
                 for b in OrderItemSerializedata:
                         Item= b['Item']['id']
                         query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
@@ -296,8 +283,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "IGSTPercentage": b['IGSTPercentage'],
                             "Amount": b['Amount'],
                             "UnitDetails":UnitDetails
-                        })
-                       
+                        })     
                 OrderData.append({
                 "Supplier": OrderSerializedata[0]['id'],
                 "SupplierName": OrderSerializedata[0]['SupplierName'],
@@ -306,20 +292,6 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 "OrderItem": OrderItemDetails,
             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
-                # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    # def post(self, request,id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             POOrderIDs = request.data['OrderIDs']
-    #             Order_list = POOrderIDs.split(",")
-    #             # return JsonResponse({'StatusCode': 400, 'Status': True,'Data':Order_list})
-    #             # OrderQuery = T_Orders.objects.filter(id__in=Order_list).annotate(total=Sum('OrderAmount')).order_by("Supplier_id")
-    #             OrderQuery =  T_Orders.objects.values("Supplier_id","Customer_id").annotate(Supplier=F("Supplier_id"),Customer=F("Customer_id"),OrderAmount=Sum('OrderAmount')).filter(id__in =Order_list).order_by("Supplier_id")
-    #             if OrderQuery.exists():
-    #                 OrderSerializedata = OrderSerializerForGrn(OrderQuery, many=True).data
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata[0]})
-    #             #return JsonResponse({'StatusCode': 400, 'Status': True,'Data':str(OrderQuery.query)})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
