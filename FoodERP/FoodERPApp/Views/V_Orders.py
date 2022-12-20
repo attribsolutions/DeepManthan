@@ -41,6 +41,26 @@ class TermsAndCondtions(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 # ==================================================================================================
+class POTypeView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication  
+   
+    @transaction.atomic()
+    def get(self, request ):
+        try:
+            with transaction.atomic():
+                PoTypedata = M_POType.objects.all()
+                if PoTypedata.exists():
+                    PoTypedata_serializer = M_POTypeserializer(
+                    PoTypedata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PoTypedata_serializer.data })
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'POType Not available', 'Data': []})    
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
+
 class OrderListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication

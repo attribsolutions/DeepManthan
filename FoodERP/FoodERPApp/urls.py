@@ -102,15 +102,22 @@ urlpatterns = [
     url(r'Company$', C_CompaniesView.as_view()),
     url(r'CompanyGroups/([0-9]+)$', C_CompanyGroupViewSecond.as_view()),
     url(r'CompanyGroups$', C_CompanyGroupView.as_view()),
-    url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
-    url(r'Orders$', T_OrdersView.as_view()),
-    url(r'OrdersFilter$', OrderListFilterView.as_view()),
+    
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
     url(r'Designations$',M_DesignationsView.as_view()),
     url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
     url(r'Items$', M_ItemsView.as_view()),
     url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
     url(r'Employees$', M_EmployeesView.as_view()),
+    
+    #Order All APIs
+    url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
+    url(r'Orders$', T_OrdersView.as_view()),
+    url(r'OrdersFilter$', OrderListFilterView.as_view()),
+    url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
+    url(r'POType$',POTypeView.as_view()),
+    
+    
     
     #Invoice All APIs
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
@@ -213,7 +220,7 @@ urlpatterns = [
     url(r'GetMargin$',GETMarginDetails.as_view()),
     url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
     
-    url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
+    
     
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
