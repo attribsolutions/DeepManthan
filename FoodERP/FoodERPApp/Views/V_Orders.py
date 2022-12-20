@@ -54,13 +54,18 @@ class OrderListFilterView(CreateAPIView):
                 ToDate = Orderdata['ToDate']
                 Customer = Orderdata['Customer']
                 Supplier = Orderdata['Supplier']
+                d=date.today()
                 if(Supplier==''):
-                    query = T_Orders.objects.filter(OrderDate__range=[FromDate,ToDate],Customer_id=Customer)
+                    query = T_Orders.objects.filter(OrderDate__range=[FromDate,ToDate],Customer_id=Customer,IsOpenPO=0)
+                    queryForOpenPO=T_Orders.objects.filter(IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d,Customer_id=Customer)
+                    q=query.union(queryForOpenPO)
                 else:
-                    query = T_Orders.objects.filter(OrderDate__range=[FromDate,ToDate],Customer_id=Customer,Supplier_id=Supplier)
+                    query = T_Orders.objects.filter(OrderDate__range=[FromDate,ToDate],Customer_id=Customer,Supplier_id=Supplier,IsOpenPO=0)
+                    queryForOpenPO=T_Orders.objects.filter(IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d ,Customer_id=Customer,Supplier_id=Supplier)
+                    q=query.union(queryForOpenPO)
                 # return JsonResponse({'query': str(Orderdata.query)})
-                if query:
-                    Order_serializer = T_OrderSerializerSecond(query, many=True).data
+                if q:
+                    Order_serializer = T_OrderSerializerSecond(q, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:   
