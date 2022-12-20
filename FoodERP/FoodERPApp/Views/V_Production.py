@@ -24,11 +24,9 @@ class ProductionformMaterialIssue(CreateAPIView):
             with transaction.atomic():
                 MaterialIssueIDdata = JSONParser().parse(request)
                 MaterialIssueID = MaterialIssueIDdata['MaterialIssueID']
-               
                 query1 = T_MaterialIssue.objects.filter(id=MaterialIssueID)
-               
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer, 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
         except Exception as e  :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e , 'Data':[]}) 
 

@@ -837,14 +837,27 @@ class  MC_PartySubParty(models.Model):
         db_table = "MC_PartySubParty"
    
                                     
-# class Abc(models.Model):
-   
-#   file = models.FileField(blank=False, null=False)
-#   remark = models.CharField(max_length=20)
-#   picture = models.ImageField(upload_to='ItemMaster',blank=True)
+class M_POType(models.Model): 
+    Name = models.CharField(max_length=500)
+    Company=	models.ForeignKey(C_Companies,  on_delete=models.PROTECT)		
+    Division=models.ForeignKey(M_Parties, on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_POType"
 
-#   class Meta:
-#         db_table = "Abc"
+class M_InvoiceType(models.Model): 
+    Name = models.CharField(max_length=500)
+    Company=	models.ForeignKey(C_Companies,  on_delete=models.PROTECT)		
+    Division=models.ForeignKey(M_Parties, on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_InvoiceType"        
         
 
 class T_GRNs(models.Model):
@@ -1025,8 +1038,7 @@ class T_Production(models.Model):
         StoreLocation		= models.CharField(max_length=500)
         SupplierBatchCode	= models.CharField(max_length=500)		
         BestBefore		= models.DateField()  
-        Remark		= models.CharField(max_length=500)
-        # MachineID		
+        Remark		= models.CharField(max_length=500)	
         Company=	models.ForeignKey(C_Companies,  on_delete=models.PROTECT)		
         Division=models.ForeignKey(M_Parties, on_delete=models.PROTECT)
         CreatedBy = models.IntegerField()
@@ -1045,6 +1057,9 @@ class TC_ProductionMaterialIssue(models.Model):
         class Meta:
             db_table = "TC_ProductionMaterialIssue"
             
+
+	 
+       
         
 class T_DeliveryChallans(models.Model):
     ChallanDate = models.DateField()
