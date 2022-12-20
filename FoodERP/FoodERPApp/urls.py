@@ -82,6 +82,9 @@ from .Views.V_PartyItems import *
 
 from .Views.V_MaterialIssue import *
 
+from .Views.V_TermsAndConditions import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -114,10 +117,13 @@ urlpatterns = [
     url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
     url(r'Orders$', T_OrdersView.as_view()),
     url(r'OrdersFilter$', OrderListFilterView.as_view()),
-    url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
     url(r'POType$',POTypeView.as_view()),
     
     
+    #TermsAndCondition All APIs
+    url(r'TermsAndCondtions/([0-9]+)$', TermsAndCondtionsViewSecond.as_view()),
+    url(r'TermsAndCondtions$', TermsAndCondtionsView.as_view()),
+
     
     #Invoice All APIs
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),

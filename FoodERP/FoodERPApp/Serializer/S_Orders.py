@@ -8,17 +8,12 @@ from .S_Items import *
 from .S_GSTHSNCode import * 
 from .S_Margins import * 
 from .S_Mrps import * 
+from .S_TermsAndConditions import *
 
 
 class M_POTypeserializer(serializers.ModelSerializer):
     class Meta : 
         model = M_POType
-        fields = '__all__'
-
-
-class M_TermsAndConditionsSerializer(serializers.ModelSerializer):
-    class Meta : 
-        model = M_TermsAndConditions
         fields = '__all__'
 
 # POST Method

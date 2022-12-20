@@ -4,43 +4,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
-
 from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
-
 from ..models import  *
-class TermsAndCondtions(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication  
-# =================================================================================================
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                TermsCondition = JSONParser().parse(request)
-                TermsCondition_serializer = M_TermsAndConditionsSerializer(data=TermsCondition)
-                if TermsCondition_serializer.is_valid():
-                    TermsCondition_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'TermsAndCondtions Save Successfully' , 'Data':[] })
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': TermsCondition_serializer.errors , 'Data':[]})
-        except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
 
-    @transaction.atomic()
-    def get(self, request ):
-        try:
-            with transaction.atomic():
-                TermsCondition = M_TermsAndConditions.objects.all()
-                if TermsCondition.exists():
-                    TermsCondition_serializer = M_TermsAndConditionsSerializer(
-                    TermsCondition, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': TermsCondition_serializer.data })
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'TermsAndConditions Not available', 'Data': []})    
-        except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-# ==================================================================================================
 class POTypeView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication  
