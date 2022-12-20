@@ -31,7 +31,7 @@ class H_ProductionSerializer(serializers.ModelSerializer):
         ProductionID= T_Production.objects.create(**validated_data)
        
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
-            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(**O_BatchWiseLiveStockItem_data)  
+            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=ProductionID,**O_BatchWiseLiveStockItem_data)  
           
         for ProductionMaterialIssue_data in ProductionMaterialIssues_data:
             Productionreff = TC_ProductionMaterialIssue.objects.create(Production=ProductionID, **ProductionMaterialIssue_data)
