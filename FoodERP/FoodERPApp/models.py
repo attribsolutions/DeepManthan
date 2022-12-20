@@ -640,6 +640,7 @@ class M_MarginMaster(models.Model):
 
 class M_TermsAndConditions(models.Model):
     Name = models.CharField(max_length=500)
+    IsDefault = models.BooleanField(default=False)
     class Meta:
         db_table = "M_TermsAndConditions"
         
@@ -659,7 +660,6 @@ class MC_PartyPrefixs(models.Model):
     class Meta:
         db_table = "MC_PartyPrefixs"        
             
-
        
 class T_Orders(models.Model):
     OrderDate = models.DateField()
