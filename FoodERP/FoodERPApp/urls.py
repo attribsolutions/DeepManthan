@@ -143,6 +143,7 @@ urlpatterns = [
     url(r'MaterialIssueforProduction$',ProductionformMaterialIssue.as_view()),
     url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
     url(r'Production$',ProductionView.as_view()),
+    url(r'ProductionFilter$',ProductionFilterView.as_view()),
    
 
     
@@ -186,7 +187,7 @@ urlpatterns = [
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
     url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
-    # url(r'OrderEdit$',EditOrderView.as_view()),
+    url(r'OrderEdit$',EditOrderView.as_view()),
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),
     
