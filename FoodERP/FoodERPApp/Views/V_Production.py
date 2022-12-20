@@ -32,13 +32,32 @@ class ProductionformMaterialIssue(CreateAPIView):
         except Exception as e  :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e , 'Data':[]}) 
 
+class ProductionFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
 
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Productiondata = JSONParser().parse(request)
+                FromDate = Productiondata['FromDate']
+                ToDate = Productiondata['ToDate']
+                
+                query1 = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
+                
+                Production_Serializer = H_ProductionSerializerforGET(query1, many=True)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data })
+                
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+         
 
 class ProductionView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-    
+
     @transaction.atomic()
     def get(self, request ):
         try:
