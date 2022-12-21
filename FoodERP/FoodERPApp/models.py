@@ -836,6 +836,10 @@ class M_Vehicles(models.Model):
     Description = models.CharField(max_length=300)
     Driver =models.ForeignKey(M_Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
     VehicleType = models.ForeignKey(M_VehicleTypes, related_name='VehicleType', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "M_Vehicles"
