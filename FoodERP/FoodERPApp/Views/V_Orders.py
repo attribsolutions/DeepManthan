@@ -168,6 +168,8 @@ class T_OrdersViewSecond(CreateAPIView):
                             "DeliveryDate": a['DeliveryDate'],
                             "POFromDate": a['POFromDate'],
                             "POToDate": a['POToDate'],
+                            "POType":a['POType']['id'],
+                            "POTypeName":a['POType']['Name'],
                             "OrderAmount": a['OrderAmount'],
                             "Description": a['Description'],
                             "Customer": a['Customer']['id'],
@@ -237,12 +239,16 @@ class GetItemsForOrderView(CreateAPIView):
                         for a in Items_Serializer:
                             ItemID =a['Item']['id']
                             stockquery= O_BatchWiseLiveStock.objects.filter(Item_id=ItemID).aggregate(Qty=Sum('BaseUnitQuantity'))
-                            # return JsonResponse({ 'query': str(stockquery.query)})
-                            # print(stockquery['Qty'])
                             if stockquery['Qty'] is None:
                                 Stock = 0.0
                             else:
-                                Stock = stockquery['Qty']
+                                Stock = stockquery['Qty'] 
+                            ratequery= TC_OrderItems.objects.filter(Item_id=ItemID).values('Rate').order_by('-id')[:1]
+                            # print(ratequery)
+                            if not ratequery:
+                                r=0.00
+                            else:    
+                                r = ratequery[0]['Rate']
                             Gst = GSTHsnCodeMaster(ItemID,EffectiveDate).GetTodaysGstHsnCode()
                             UnitDetails=list()
                             for d in a['Item']['ItemUnitDetails']:
@@ -259,9 +265,10 @@ class GetItemsForOrderView(CreateAPIView):
                                 "Name": a['Item']['Name'],
                                 "Gstid":Gst[0]['Gstid'],
                                 "StockQuantity":Stock,
+                                "Rate":r,
                                 "GSTPercentage":Gst[0]['GST'],
                                 "UnitDetails":UnitDetails
-                            })
+                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
             except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

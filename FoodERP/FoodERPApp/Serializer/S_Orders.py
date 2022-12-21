@@ -35,6 +35,7 @@ class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
 
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
+    POType = M_POTypeserializer(many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
@@ -65,7 +66,9 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.POFromDate = validated_data.get(
             'POFromDate', instance.POFromDate)   
         instance.POToDate = validated_data.get(
-            'POToDate', instance.POToDate)          
+            'POToDate', instance.POToDate)
+        instance.POType = validated_data.get(
+            'POType', instance.POType)          
         instance.OrderAmount = validated_data.get(
             'OrderAmount', instance.OrderAmount)
         instance.Description = validated_data.get(
