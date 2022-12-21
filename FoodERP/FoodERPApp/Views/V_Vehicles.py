@@ -76,7 +76,8 @@ class M_VehicleViewSecond(CreateAPIView):
                         "DriverName": a['Driver']['Name'],
                         "VehicleType": a['VehicleType']['id'],
                         "VehicleTypeName": a['VehicleType']['Name'],
-                        "VehicleDivisions": Divisions
+                        "VehicleDivisions": Divisions,
+                        "Creat": Divisions
 
                     })
 
