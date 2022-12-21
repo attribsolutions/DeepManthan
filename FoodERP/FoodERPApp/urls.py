@@ -119,6 +119,7 @@ urlpatterns = [
     url(r'OrdersFilter$', OrderListFilterView.as_view()),
     url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
     url(r'POType$',POTypeView.as_view()),
+    url(r'OrderEdit$',EditOrderView.as_view()),
     
     
     

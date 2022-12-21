@@ -144,7 +144,7 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID']      
+        fields = ['id','UnitID','BaseUnitQuantity']      
         
 class TC_OrderItemSerializer(serializers.ModelSerializer):
     
@@ -204,6 +204,32 @@ class OrderSerializerForGrn(serializers.Serializer):
     SupplierName = serializers.CharField(max_length=500)     
     OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
     CustomerID =serializers.IntegerField() 
+
+class OrderEditserializer(serializers.Serializer):
+    # id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=100)
+    Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    MRP_id=serializers.IntegerField() 
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Unit_id=serializers.IntegerField() 
+    UnitName=serializers.CharField(max_length=100)
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GST_id=serializers.IntegerField() 
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    HSNCode=serializers.CharField(max_length=100)
+    Margin_id=serializers.IntegerField() 
+    MarginValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)    
 
 
     
