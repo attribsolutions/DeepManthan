@@ -161,7 +161,11 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "IsEditPopuporComponent":a['IsEditPopuporComponent'],
                             "PagePageAccess": PageAccessListData,
                             "PageFieldMaster": MC_PageFieldMasterListData,
-                            "PageFieldList" : MC_PageFieldListData
+                            "PageFieldList" : MC_PageFieldListData,
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn'],
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception as e:
