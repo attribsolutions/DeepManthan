@@ -8,11 +8,12 @@ from .S_Items import *
 from .S_GSTHSNCode import * 
 from .S_Margins import * 
 from .S_Mrps import * 
+from .S_TermsAndConditions import *
 
 
-class M_TermsAndConditionsSerializer(serializers.ModelSerializer):
+class M_POTypeserializer(serializers.ModelSerializer):
     class Meta : 
-        model = M_TermsAndConditions
+        model = M_POType
         fields = '__all__'
 
 # POST Method
@@ -64,7 +65,9 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.POFromDate = validated_data.get(
             'POFromDate', instance.POFromDate)   
         instance.POToDate = validated_data.get(
-            'POToDate', instance.POToDate)          
+            'POToDate', instance.POToDate)
+        instance.POType = validated_data.get(
+            'POType', instance.POType)          
         instance.OrderAmount = validated_data.get(
             'OrderAmount', instance.OrderAmount)
         instance.Description = validated_data.get(
@@ -141,7 +144,7 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID']      
+        fields = ['id','UnitID','BaseUnitQuantity']      
         
 class TC_OrderItemSerializer(serializers.ModelSerializer):
     
@@ -177,6 +180,8 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
     Supplier = PartiesSerializerThird(read_only=True)
     OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
+    POType = M_POTypeserializer(read_only=True)
+    
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
@@ -199,6 +204,32 @@ class OrderSerializerForGrn(serializers.Serializer):
     SupplierName = serializers.CharField(max_length=500)     
     OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
     CustomerID =serializers.IntegerField() 
+
+class OrderEditserializer(serializers.Serializer):
+    # id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=100)
+    Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    MRP_id=serializers.IntegerField() 
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Unit_id=serializers.IntegerField() 
+    UnitName=serializers.CharField(max_length=100)
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GST_id=serializers.IntegerField() 
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    HSNCode=serializers.CharField(max_length=100)
+    Margin_id=serializers.IntegerField() 
+    MarginValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)    
 
 
     

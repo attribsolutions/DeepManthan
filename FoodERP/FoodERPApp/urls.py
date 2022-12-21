@@ -82,6 +82,9 @@ from .Views.V_PartyItems import *
 
 from .Views.V_MaterialIssue import *
 
+from .Views.V_TermsAndConditions import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -102,15 +105,28 @@ urlpatterns = [
     url(r'Company$', C_CompaniesView.as_view()),
     url(r'CompanyGroups/([0-9]+)$', C_CompanyGroupViewSecond.as_view()),
     url(r'CompanyGroups$', C_CompanyGroupView.as_view()),
-    url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
-    url(r'Orders$', T_OrdersView.as_view()),
-    url(r'OrdersFilter$', OrderListFilterView.as_view()),
+    
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
     url(r'Designations$',M_DesignationsView.as_view()),
     url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
     url(r'Items$', M_ItemsView.as_view()),
     url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
     url(r'Employees$', M_EmployeesView.as_view()),
+    
+    #Order All APIs
+    url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
+    url(r'Orders$', T_OrdersView.as_view()),
+    url(r'OrdersFilter$', OrderListFilterView.as_view()),
+    url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
+    url(r'POType$',POTypeView.as_view()),
+    url(r'OrderEdit$',EditOrderView.as_view()),
+    
+    
+    
+    #TermsAndCondition All APIs
+    url(r'TermsAndCondtions/([0-9]+)$', TermsAndCondtionsViewSecond.as_view()),
+    url(r'TermsAndCondtions$', TermsAndCondtionsView.as_view()),
+
     
     #Invoice All APIs
     url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
@@ -186,7 +202,7 @@ urlpatterns = [
     url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
-    url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
+    
     # url(r'OrderEdit$',EditOrderView.as_view()),
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),
@@ -213,7 +229,7 @@ urlpatterns = [
     url(r'GetMargin$',GETMarginDetails.as_view()),
     url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
     
-    url(r'TermsAndCondtions$',TermsAndCondtions.as_view()),
+    
     
     # Dependencies APIs IN Projects 
     url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
