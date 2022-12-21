@@ -825,6 +825,8 @@ class M_Drivers(models.Model):
     DOB = models.DateField()
     Address = models.CharField(max_length=500)
     UID = models.CharField(max_length=500)
+    
+   
     class Meta:
         db_table = "M_Drivers"
     
