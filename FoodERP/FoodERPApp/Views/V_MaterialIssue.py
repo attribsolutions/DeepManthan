@@ -36,7 +36,7 @@ class WorkOrderDetailsView(CreateAPIView):
                             Item = b['Item']['id']
                             obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=PartyID)
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(obatchwisestockquery.query)})
-                            if not obatchwisestockquery:
+                            if obatchwisestockquery == "":
                                 StockQtySerialize_data =[]
                             else:
                                 StockQtySerialize_data = StockQtyserializerForMaterialIssue(obatchwisestockquery, many=True).data
