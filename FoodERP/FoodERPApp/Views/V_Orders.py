@@ -239,7 +239,7 @@ class GetItemsForOrderView(CreateAPIView):
                             stockquery= O_BatchWiseLiveStock.objects.filter(Item_id=ItemID).aggregate(Qty=Sum('BaseUnitQuantity'))
                             # return JsonResponse({ 'query': str(stockquery.query)})
                             # print(stockquery['Qty'])
-                            if not stockquery:
+                            if stockquery['Qty'] is None:
                                 Stock = 0.0
                             else:
                                 Stock = stockquery['Qty']
