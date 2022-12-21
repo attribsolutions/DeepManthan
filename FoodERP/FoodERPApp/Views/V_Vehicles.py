@@ -77,10 +77,11 @@ class M_VehicleViewSecond(CreateAPIView):
                         "VehicleType": a['VehicleType']['id'],
                         "VehicleTypeName": a['VehicleType']['Name'],
                         "VehicleDivisions": Divisions,
-                        "Creat": Divisions
-
+                        "CreatedBy": a['CreatedBy'],
+                        "CreatedOn": a['CreatedOn'],
+                        "UpdatedBy": a['UpdatedBy'],
+                        "UpdatedOn": a['UpdatedOn']
                     })
-
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
