@@ -117,7 +117,9 @@ urlpatterns = [
     url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
     url(r'Orders$', T_OrdersView.as_view()),
     url(r'OrdersFilter$', OrderListFilterView.as_view()),
+    url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
     url(r'POType$',POTypeView.as_view()),
+    
     
     
     #TermsAndCondition All APIs
@@ -199,7 +201,7 @@ urlpatterns = [
     url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
     url(r'PartySubParty$',PartySubPartyView.as_view()),
     url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
-    url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
+    
     # url(r'OrderEdit$',EditOrderView.as_view()),
     url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
     url(r'PartyItemList$',PartyItemsView.as_view()),

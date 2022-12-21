@@ -8,6 +8,8 @@ from ..Views.V_TransactionNumberfun import GetMaxNumber,GetPrifix
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
+from ..Serializer.S_Bom import *
+from django.db.models import Sum
 from ..models import  *
 
 class POTypeView(CreateAPIView):
@@ -234,6 +236,13 @@ class GetItemsForOrderView(CreateAPIView):
                         ItemList = list()
                         for a in Items_Serializer:
                             ItemID =a['Item']['id']
+                            stockquery= O_BatchWiseLiveStock.objects.filter(Item_id=ItemID).aggregate(Qty=Sum('BaseUnitQuantity'))
+                            # return JsonResponse({ 'query': str(stockquery.query)})
+                            # print(stockquery['Qty'])
+                            if not stockquery:
+                                Stock = 0.0
+                            else:
+                                Stock = stockquery['Qty']
                             Gst = GSTHsnCodeMaster(ItemID,EffectiveDate).GetTodaysGstHsnCode()
                             UnitDetails=list()
                             for d in a['Item']['ItemUnitDetails']:
@@ -249,6 +258,7 @@ class GetItemsForOrderView(CreateAPIView):
                                 "id":a['Item']['id'],
                                 "Name": a['Item']['Name'],
                                 "Gstid":Gst[0]['Gstid'],
+                                "StockQuantity":Stock,
                                 "GSTPercentage":Gst[0]['GST'],
                                 "UnitDetails":UnitDetails
                             })
