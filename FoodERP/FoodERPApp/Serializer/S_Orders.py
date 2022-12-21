@@ -35,7 +35,6 @@ class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
 
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
-    POType = M_POTypeserializer(many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
@@ -181,6 +180,8 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
     Supplier = PartiesSerializerThird(read_only=True)
     OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
+    POType = M_POTypeserializer(read_only=True,many=True)
+    
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
