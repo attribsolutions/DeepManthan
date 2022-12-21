@@ -19,4 +19,6 @@ class M_MarginsSerializerSecond(serializers.Serializer):
     CompanyName = serializers.CharField(max_length=100)
     PriceListName = serializers.CharField(max_length=100)
     PartyName = serializers.CharField(max_length=100)
+    CreatedBy = serializers.IntegerField()
+    CreatedOn = serializers.DateTimeField()
     CommonID= serializers.IntegerField()        
