@@ -826,6 +826,9 @@ class M_Drivers(models.Model):
     Address = models.CharField(max_length=500)
     UID = models.CharField(max_length=500)
     CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
    
     class Meta:
         db_table = "M_Drivers"
