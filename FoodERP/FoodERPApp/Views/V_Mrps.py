@@ -88,7 +88,11 @@ class GETMrpDetails(CreateAPIView):
                             "Name": a['Name'],
                             "CurrentMRP": TodaysMRP[0]["TodaysMRP"],
                             "CurrentDate":TodaysMRP[0]["Date"],
-                            "MRP": EffectiveDateMRP
+                            "MRP": EffectiveDateMRP,
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
                           
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
