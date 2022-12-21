@@ -662,6 +662,10 @@ class M_InvoiceType(models.Model):
 class M_TermsAndConditions(models.Model):
     Name = models.CharField(max_length=500)
     IsDefault = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_TermsAndConditions"
         
