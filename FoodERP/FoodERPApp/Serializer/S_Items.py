@@ -88,7 +88,7 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CanBeSold', 'CanBePurchase', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
@@ -147,6 +147,10 @@ class ItemSerializer(serializers.ModelSerializer):
             'CanBeSold', instance.CanBeSold)
         instance.CanBePurchase = validated_data.get(
             'CanBePurchase', instance.CanBePurchase)
+        instance.BrandName = validated_data.get(
+            'BrandName', instance.BrandName)
+        instance.Tag = validated_data.get(
+            'Tag', instance.Tag)
             
         instance.save()
         
