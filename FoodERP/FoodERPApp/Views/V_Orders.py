@@ -416,18 +416,18 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id''', (
                                 "ShippingAddressID": a['ShippingAddress']['id'],
                                 "ShippingAddress": a['ShippingAddress']['Address'],
                                 "Inward": a['Inward'],  
-                                "Item": OrderItemSerializer,
+                                "OrderItems": OrderItemSerializer,
                                 "OrderTermsAndCondition" : OrderTermsAndCondition
                     })
                     FinalResult=OrderData
                 else:
                     NewOrder=list()
-                    NewOrder.append({"Item":OrderItemSerializer,
+                    NewOrder.append({"OrderItems":OrderItemSerializer,
                         "TermsAndConditions" : TermsAndConditions})
 
                     FinalResult=NewOrder[0]
                          
 
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  '', 'Data': FinalResult})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
