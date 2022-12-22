@@ -300,7 +300,8 @@ class EditOrderView(CreateAPIView):
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
-
+                
+                
                 Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount 
                 from
@@ -347,7 +348,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id''', (
                         r = ratequery[0]['Rate']
 
                     if b['Rate'] is None:
-                        b['Rate'] = r
+                       b['Rate'] = r
             # =====================Rate================================================
                     UnitDetails = list()
                     ItemUnitquery = MC_ItemUnits.objects.filter(
@@ -361,9 +362,72 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id''', (
                             "UnitName": d['UnitID']['Name'],
                             "BaseUnitQuantity": d['BaseUnitQuantity']
                         })
+            # =====================IsDefaultTermsAndConditions================================================
+                    TermsAndConditions = list()
+                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(IsDefault=1)
+                    TermsAndConditionsSerializer=M_TermsAndConditionsSerializer(TermsAndConditionsquery,many=True).data  
+                    
 
-                        b.update({"StockQuantity": Stock,
-                                 "UnitDetails": UnitDetails})
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
+                    for d in TermsAndConditionsSerializer:
+                        TermsAndConditions.append({
+                            "id": d['id'],
+                            "TermsAndCondition": d['Name']
+                            
+                        })            
+
+                    
+                    
+                    
+                    b.update({"StockQuantity": Stock,
+                              "UnitDetails": UnitDetails
+                              })
+                    
+                          
+                                
+                if OrderID != 0:
+                    OrderQuery=T_Orders.objects.get(id=OrderID)
+                    a=T_OrderSerializerThird(OrderQuery).data
+
+                    OrderTermsAndCondition = list()
+                    for b in a['OrderTermsAndConditions']:
+                        OrderTermsAndCondition.append({
+                            "id": b['TermsAndCondition']['id'],
+                            "TermsAndCondition": b['TermsAndCondition']['Name'],
+                        })
+
+
+                    OrderData=list()
+                    OrderData.append({
+                                "id": a['id'],
+                                "OrderDate": a['OrderDate'],
+                                "DeliveryDate": a['DeliveryDate'],
+                                "POFromDate": a['POFromDate'],
+                                "POToDate": a['POToDate'],
+                                "POType": a['POType']['id'],
+                                "POTypeName": a['POType']['Name'],
+                                "OrderAmount": a['OrderAmount'],
+                                "Description": a['Description'],
+                                "Customer": a['Customer']['id'],
+                                "CustomerName": a['Customer']['Name'],
+                                "Supplier": a['Supplier']['id'],
+                                "SupplierName": a['Supplier']['Name'],
+                                "BillingAddressID": a['BillingAddress']['id'],
+                                "BillingAddress": a['BillingAddress']['Address'],
+                                "ShippingAddressID": a['ShippingAddress']['id'],
+                                "ShippingAddress": a['ShippingAddress']['Address'],
+                                "Inward": a['Inward'],  
+                                "Item": OrderItemSerializer,
+                                "OrderTermsAndCondition" : OrderTermsAndCondition
+                    })
+                    FinalResult=OrderData
+                else:
+                    NewOrder=list()
+                    NewOrder.append({"Item":OrderItemSerializer,
+                        "TermsAndConditions" : TermsAndConditions})
+
+                    FinalResult=NewOrder[0]
+                         
+
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
