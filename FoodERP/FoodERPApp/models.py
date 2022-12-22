@@ -561,6 +561,8 @@ class M_Items(models.Model):
     isActive = models.BooleanField(default=False)
     CanBeSold = models.BooleanField(default=False)
     CanBePurchase = models.BooleanField(default=False)
+    BrandName = models.CharField(max_length=500)
+    Tag = models.CharField(max_length=1000)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
