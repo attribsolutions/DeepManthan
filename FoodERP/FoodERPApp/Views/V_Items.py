@@ -24,25 +24,18 @@ class M_ItemTag(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = ItemSerializerSecond(query, many=True).data
-                    ItemListData = list ()
+                    ListData = list ()
                     for a in Items_Serializer:
                         b=str(a['Tag'])
                         c=b.split(',')
-                        ListData = list ()
                         for d in c:
                             ListData.append({
                                 "dta": d+ "-" + a['Name']
-                            })
-                        ItemListData.append({
-                            "Tag": ListData,   
-                        })    
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
+                            })  
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})
+                         
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
-    
-    
-
  
 class M_ItemsView(CreateAPIView):
     
