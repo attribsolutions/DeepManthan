@@ -630,11 +630,15 @@ class M_GSTHSNCode(models.Model):
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
-class M_ItemShelfLife(models.Model):
-    Name = models.CharField(max_length=500)
+class MC_ItemShelfLife(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemShelf', on_delete=models.CASCADE)
     Days = models.IntegerField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
-        db_table = "M_ItemShelfLife"
+        db_table = "MC_ItemShelfLife"
 
 class M_MRPMaster(models.Model):
     '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
