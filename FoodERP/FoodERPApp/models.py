@@ -514,6 +514,40 @@ class M_Units(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_Units"
+
+
+class M_Drivers(models.Model):
+    Name =  models.CharField(max_length=300)
+    DOB = models.DateField()
+    Address = models.CharField(max_length=500)
+    UID = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+   
+    class Meta:
+        db_table = "M_Drivers"
+    
+    
+class M_VehicleTypes(models.Model):
+    Name= models.CharField(max_length=300)
+    class Meta:
+        db_table = "M_VehicleTypes" 
+
+        
+class M_Vehicles(models.Model):
+    VehicleNumber= models.CharField(max_length=300)
+    Description = models.CharField(max_length=300)
+    Driver =models.ForeignKey(M_Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
+    VehicleType = models.ForeignKey(M_VehicleTypes, related_name='VehicleType', on_delete=models.DO_NOTHING)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "M_Vehicles"
               
 class M_Items(models.Model):
     Name = models.CharField(max_length=500)
@@ -527,6 +561,8 @@ class M_Items(models.Model):
     isActive = models.BooleanField(default=False)
     CanBeSold = models.BooleanField(default=False)
     CanBePurchase = models.BooleanField(default=False)
+    BrandName = models.CharField(max_length=500,null=True,blank=True)
+    Tag = models.CharField(max_length=1000,null=True,blank=True)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(default=False)
@@ -596,11 +632,15 @@ class M_GSTHSNCode(models.Model):
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
-class M_ItemShelfLife(models.Model):
-    Name = models.CharField(max_length=500)
+class MC_ItemShelfLife(models.Model):
+    Item = models.ForeignKey(M_Items, related_name='ItemShelf', on_delete=models.CASCADE)
     Days = models.IntegerField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
-        db_table = "M_ItemShelfLife"
+        db_table = "MC_ItemShelfLife"
 
 class M_MRPMaster(models.Model):
     '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
@@ -662,6 +702,10 @@ class M_InvoiceType(models.Model):
 class M_TermsAndConditions(models.Model):
     Name = models.CharField(max_length=500)
     IsDefault = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "M_TermsAndConditions"
         
@@ -816,30 +860,6 @@ class TC_InvoiceItemBatches(models.Model):
         db_table = "TC_InvoiceItemBatches"
 
 
-class M_Drivers(models.Model):
-    Name =  models.CharField(max_length=300)
-    DOB = models.DateField()
-    Address = models.CharField(max_length=500)
-    UID = models.CharField(max_length=500)
-    class Meta:
-        db_table = "M_Drivers"
-    
-    
-class M_VehicleTypes(models.Model):
-    Name= models.CharField(max_length=300)
-    class Meta:
-        db_table = "M_VehicleTypes" 
-
-        
-class M_Vehicles(models.Model):
-    VehicleNumber= models.CharField(max_length=300)
-    Description = models.CharField(max_length=300)
-    Driver =models.ForeignKey(
-        M_Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
-    VehicleType = models.ForeignKey(
-        M_VehicleTypes, related_name='VehicleType', on_delete=models.DO_NOTHING) 
-    class Meta:
-        db_table = "M_Vehicles"
 
 class MC_VehiclesDivisions(models.Model):
     Vehicle = models.ForeignKey(M_Vehicles, related_name='VehicleDivisions', on_delete=models.DO_NOTHING) 
@@ -857,8 +877,6 @@ class  MC_PartySubParty(models.Model):
     class Meta:
         db_table = "MC_PartySubParty"
                                      
-       
-        
 
 class T_GRNs(models.Model):
     
@@ -1030,9 +1048,9 @@ class TC_MaterialIssueWorkOrders(models.Model):
 class T_Production(models.Model): 
         ProductionDate = models.DateField()  
         Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-        EstimatedQuantity = models.DecimalField(max_digits=5, decimal_places=3)	
+        EstimatedQuantity = models.DecimalField(max_digits=15, decimal_places=3)	
         NumberOfLot = models.IntegerField()
-        ActualQuantity = models.DecimalField(max_digits=5, decimal_places=3)	
+        ActualQuantity = models.DecimalField(max_digits=15, decimal_places=3)	
         BatchDate = models.DateField()
         BatchCode = models.CharField(max_length=500)		
         StoreLocation = models.CharField(max_length=500)

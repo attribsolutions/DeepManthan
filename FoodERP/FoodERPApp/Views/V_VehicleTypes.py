@@ -56,7 +56,7 @@ class M_VehicleTypesViewSecond(CreateAPIView):
                 VehicleTypedata = M_VehicleTypes.objects.get(id=id)
                 VehicleType_Serializer = M_VehicleTypesSerializer(VehicleTypedata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': VehicleType_Serializer.data})
-        except  M_Drivers.DoesNotExist:
+        except  M_VehicleTypes.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Vehicle Type Not available', 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
