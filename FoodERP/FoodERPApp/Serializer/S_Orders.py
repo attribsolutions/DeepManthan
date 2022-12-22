@@ -20,7 +20,7 @@ class M_POTypeserializer(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['Name']
+        fields = ['id','Name']
 
 class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
