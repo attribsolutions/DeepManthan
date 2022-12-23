@@ -216,7 +216,17 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "CreatedBy":i['CreatedBy'],
                                     "UpdatedBy":i['UpdatedBy'],
                                     "IsAdd":False
-                                })            
+                                })
+                                
+                        ShelfLifeDetails=list()
+                        for j in a['ItemShelfLife']:
+                            ShelfLifeDetails.append({
+                                "id": j['id'],
+                                "Days": j['Days'],
+                                "CreatedBy":j['CreatedBy'],
+                                "UpdatedBy":j['UpdatedBy'],
+                                "IsAdd":False
+                            })                    
                             
                         ItemData.append({
                             "id": a['id'],
@@ -244,7 +254,8 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemDivisionDetails": DivisionDetails,
                             "ItemMRPDetails":MRPDetails,
                             "ItemMarginDetails":MarginDetails, 
-                            "ItemGSTHSNDetails":GSTHSNDetails
+                            "ItemGSTHSNDetails":GSTHSNDetails,
+                            "ItemShelfLife":ShelfLifeDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})

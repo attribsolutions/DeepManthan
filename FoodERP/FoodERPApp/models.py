@@ -633,7 +633,7 @@ class M_GSTHSNCode(models.Model):
         db_table = "M_GSTHSNCode"          
                    
 class MC_ItemShelfLife(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemShelf', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, related_name='ItemShelfLife', on_delete=models.CASCADE)
     Days = models.IntegerField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
