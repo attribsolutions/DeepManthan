@@ -237,7 +237,7 @@ class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
 class ItemShelfLifeSerializerSecond(serializers.ModelSerializer):
      class Meta:
         model = MC_ItemShelfLife
-        fields = ['Days', 'CreatedBy', 'UpdatedBy']
+        fields = ['id','Days', 'CreatedBy', 'UpdatedBy']
                 
 class PriceListSerializerSecond(serializers.ModelSerializer):
      class Meta:
