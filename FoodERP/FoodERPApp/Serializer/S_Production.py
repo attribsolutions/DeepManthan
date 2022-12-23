@@ -10,8 +10,14 @@ class ProductionMaterialIssueSerializer(serializers.ModelSerializer):
         model =TC_ProductionMaterialIssue
         fields=['MaterialIssue']
 
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=M_Items
+        fields=['id','Name']
+
 class H_ProductionSerializerforGET(serializers.ModelSerializer):
     ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
+    Item=ItemSerializer(read_only=True)
     
     class Meta:
         model = T_Production
