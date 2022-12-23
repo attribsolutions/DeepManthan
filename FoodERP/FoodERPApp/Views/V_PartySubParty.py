@@ -64,15 +64,15 @@ class GetSupplierListView(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Supplier = MC_PartySubParty.objects.filter(SubParty_id=id)
+                Supplier = MC_PartySubParty.objects.filter(Party_id=id)
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if Supplier:
                     Supplier_serializer = PartySubpartySerializerSecond(Supplier, many=True).data
                     SupplierListData = list()
                     for a in Supplier_serializer:   
                         SupplierListData.append({
-                        "id": a['Party']['id'],
-                        "Supplier": a['Party']['Name']
+                        "id": a['SubParty']['id'],
+                        "Supplier": a['SubParty']['Name']
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
