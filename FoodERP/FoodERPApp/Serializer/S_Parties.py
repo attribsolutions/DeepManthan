@@ -24,7 +24,7 @@ class PartyPrefixsSerializer(serializers.ModelSerializer):
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
-        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType']                
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'AddressType','fssaidocument']                
 
 class M_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializer(many=True)
@@ -141,7 +141,7 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
     # AddressType = AddressTypesSerializerSecond(read_only=True)
     class Meta:
         model = MC_PartyAddress
-        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault'] 
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault','fssaidocument'] 
 
 class DistrictSerializerSecond(serializers.ModelSerializer):
     class Meta:
