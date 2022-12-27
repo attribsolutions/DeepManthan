@@ -108,10 +108,16 @@ urlpatterns = [
     
     url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
     url(r'Designations$',M_DesignationsView.as_view()),
-    url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
-    url(r'Items$', M_ItemsView.as_view()),
+    
     url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
     url(r'Employees$', M_EmployeesView.as_view()),
+    
+    #Item All APIs
+    url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
+    url(r'Items$', M_ItemsView.as_view()),
+    url(r'ItemTag$',M_ItemTag.as_view()),
+    url(r'ItemBrand$',M_ItemBrandName.as_view()),
+    
     
     #Order All APIs
     url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
@@ -161,8 +167,7 @@ urlpatterns = [
     url(r'Production$',ProductionView.as_view()),
     url(r'ProductionFilter$',ProductionFilterView.as_view()),
    
-    url(r'ItemTag$',M_ItemTag.as_view()),
-    url(r'ItemBrand$',M_ItemBrandName.as_view()),
+    
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
     url(r'Challan$', T_DeliveryChallanView.as_view()),
@@ -213,7 +218,6 @@ urlpatterns = [
     # Select Item and Get MCItemUnits
     url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
     
-    
     url(r'Mrps$',M_MRPsView.as_view()),
     url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
     url(r'DeleteMrpOnList/([0-9]+)$',M_MRPsViewThird.as_view()),
@@ -263,7 +267,5 @@ urlpatterns = [
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
     url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
-    
-    
-    
+     
 ]
