@@ -9,6 +9,62 @@ from rest_framework.parsers import JSONParser
 from  ..Serializer.S_Items import *
 from ..models import *
 
+
+class M_ItemBrandName(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                query = M_Items.objects.all()
+                # return JsonResponse({'query':  str(query.query)})
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    Items_Serializer = ItemSerializerSecond(query, many=True).data
+                    ListData = list ()
+                    for a in Items_Serializer:
+                        b=str(a['BrandName'])
+                        c=b.split(',')
+                        for d in c:
+                            ListData.append({
+                                "dta": d+ "-" + a['Name']
+                            })  
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
+
+class M_ItemTag(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                query = M_Items.objects.all()
+                # return JsonResponse({'query':  str(query.query)})
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    Items_Serializer = ItemSerializerSecond(query, many=True).data
+                    ListData = list ()
+                    for a in Items_Serializer:
+                        b=str(a['Tag'])
+                        c=b.split(',')
+                        for d in c:
+                            ListData.append({
+                                "dta": d+ "-" + a['Name']
+                            })  
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})
+                         
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
  
 class M_ItemsView(CreateAPIView):
     
@@ -189,7 +245,17 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "CreatedBy":i['CreatedBy'],
                                     "UpdatedBy":i['UpdatedBy'],
                                     "IsAdd":False
-                                })            
+                                })
+                                
+                        ShelfLifeDetails=list()
+                        for j in a['ItemShelfLife']:
+                            ShelfLifeDetails.append({
+                                "id": j['id'],
+                                "Days": j['Days'],
+                                "CreatedBy":j['CreatedBy'],
+                                "UpdatedBy":j['UpdatedBy'],
+                                "IsAdd":False
+                            })                    
                             
                         ItemData.append({
                             "id": a['id'],
@@ -217,7 +283,8 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemDivisionDetails": DivisionDetails,
                             "ItemMRPDetails":MRPDetails,
                             "ItemMarginDetails":MarginDetails, 
-                            "ItemGSTHSNDetails":GSTHSNDetails
+                            "ItemGSTHSNDetails":GSTHSNDetails,
+                            "ItemShelfLife":ShelfLifeDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})

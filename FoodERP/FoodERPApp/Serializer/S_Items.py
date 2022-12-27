@@ -25,6 +25,11 @@ class ImageTypesSerializer(serializers.ModelSerializer):
         model = M_ImageTypes
         fields = '__all__'
 
+class ItemShelfLifeSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = MC_ItemShelfLife
+        fields = ['Days', 'CreatedBy', 'UpdatedBy']
+
 class ItemGSTHSNSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_GSTHSNCode
@@ -85,10 +90,11 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemGSTHSNDetails = ItemGSTHSNSerializer(many=True)
     
+    ItemShelfLife = ItemShelfLifeSerializer(many=True)
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode', 'isActive','CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
@@ -99,6 +105,7 @@ class ItemSerializer(serializers.ModelSerializer):
         ItemMRPs_data = validated_data.pop('ItemMRPDetails')
         ItemMargins_data = validated_data.pop('ItemMarginDetails')
         ItemGSTHSNs_data = validated_data.pop('ItemGSTHSNDetails')
+        ItemShelfLifes_data = validated_data.pop('ItemShelfLife')
         ItemID= M_Items.objects.create(**validated_data)
         
         for ItemCategory_data in ItemCategorys_data:
@@ -124,7 +131,10 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemMargin = M_MarginMaster.objects.create(Item=ItemID, **ItemMargin_data)
         
         for ItemGSTHSN_data in ItemGSTHSNs_data:
-            ItemGSTHSN = M_GSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)                  
+            ItemGSTHSN = M_GSTHSNCode.objects.create(Item=ItemID, **ItemGSTHSN_data)
+        
+        for ItemShelfLife_data in ItemShelfLifes_data:
+            MItemShelfLife = MC_ItemShelfLife.objects.create(Item=ItemID, **ItemShelfLife_data)                      
             
         return ItemID
     
@@ -203,7 +213,10 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemMargin = M_MarginMaster.objects.create(Item=instance, **ItemMargin_data)
         
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
-            ItemGSTHSN = M_GSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data)    
+            ItemGSTHSN = M_GSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data) 
+        
+        for ItemShelfLife_data in validated_data['ItemShelfLife']:
+            MItemShelfLife = MC_ItemShelfLife.objects.create(Item=instance, **ItemShelfLife_data)       
         
         return instance 
          
@@ -222,7 +235,12 @@ class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_GSTHSNCode
         fields = ['id','EffectiveDate', 'GSTPercentage', 'HSNCode','Company','IsDeleted', 'CreatedBy', 'UpdatedBy']
-        
+
+class ItemShelfLifeSerializerSecond(serializers.ModelSerializer):
+     class Meta:
+        model = MC_ItemShelfLife
+        fields = ['id','Days', 'CreatedBy', 'UpdatedBy']
+                
 class PriceListSerializerSecond(serializers.ModelSerializer):
      class Meta:
         model = M_PriceList
@@ -356,6 +374,7 @@ class ItemSerializerSecond(serializers.ModelSerializer):
     ItemMRPDetails = ItemMRPSerializerSecond(many=True)
     ItemMarginDetails = ItemMarginSerializerSecond(many=True)
     ItemGSTHSNDetails = ItemGSTHSNSerializerSecond(many=True)
+    ItemShelfLife = ItemShelfLifeSerializerSecond(many=True)
     
     class Meta:
         model = M_Items

@@ -1,3 +1,4 @@
+from typing import Concatenate
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -169,6 +170,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "Comment": b['Comment'],
                                 })
                         OrderData.append({
                             "id": a['id'],
@@ -267,11 +269,17 @@ class GetItemsForOrderView(CreateAPIView):
                         UnitDetails = list()
                         for d in a['Item']['ItemUnitDetails']:
                             if d['IsDeleted'] == 0:
+                                ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsBase=1).values('UnitID')
+                                qwer=ItemUnitquery[0]['UnitID']
+                                BaseUnitNamequery = M_Units.objects.filter(id=qwer).values('Name')
+                                q=BaseUnitNamequery[0]['Name']
+                                baseunitconcat=" ("+d['BaseUnitQuantity']+" "+q+")"
                                 UnitDetails.append({
+                                    # Below UnitID is MC_ItemUnits Primary id
                                     "UnitID": d['id'],
                                     # "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'],
-                                    "BaseUnitQuantity": d['BaseUnitQuantity']
+                                    "UnitName": d['UnitID']['Name']+ baseunitconcat,
+                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
                                 })
 
                         ItemList.append({
@@ -357,12 +365,18 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id''', (
                         Item=ItemID, IsDeleted=0)
                     ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
                         ItemUnitquery, many=True).data
-
+                
                     for d in ItemUnitqueryserialize:
+                        BaseUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsBase=1,IsDeleted=0)
+                        BaseUnitserialize = Mc_ItemUnitSerializerThird(BaseUnitquery, many=True).data
+                        for q in BaseUnitserialize:
+                            base=str(q['UnitID']['Name'])
+                            baseunitconcat=" ("+d['BaseUnitQuantity']+" "+base+")"
+                        
                         UnitDetails.append({
                             "UnitID": d['id'],
-                            "UnitName": d['UnitID']['Name'],
-                            "BaseUnitQuantity": d['BaseUnitQuantity']
+                            "UnitName": d['UnitID']['Name'] + baseunitconcat,
+                            "BaseUnitQuantity": d['BaseUnitQuantity'],  
                         })
             # =====================IsDefaultTermsAndConditions================================================
                     TermsAndConditions = list()

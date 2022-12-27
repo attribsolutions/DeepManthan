@@ -27,8 +27,8 @@ class ProductionformMaterialIssue(CreateAPIView):
                 query1 = T_MaterialIssue.objects.filter(id=MaterialIssueID)
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
-        except Exception as e  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e , 'Data':[]}) 
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
 class ProductionFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -41,14 +41,11 @@ class ProductionFilterView(CreateAPIView):
                 Productiondata = JSONParser().parse(request)
                 FromDate = Productiondata['FromDate']
                 ToDate = Productiondata['ToDate']
-                
                 query1 = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
-                
                 Production_Serializer = H_ProductionSerializerforGET(query1, many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data })
-                
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
          
 
 class ProductionView(CreateAPIView):
@@ -66,8 +63,8 @@ class ProductionView(CreateAPIView):
                     Productiondata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data })
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Production Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
          
 
     @transaction.atomic()
@@ -111,8 +108,8 @@ class ProductionView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors, 'Data': []})
-        except Exception as e  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e , 'Data':[]})       
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
 
 class ProductionViewSecond(RetrieveAPIView):
     
@@ -126,8 +123,8 @@ class ProductionViewSecond(RetrieveAPIView):
                 Productiondata = T_Production.objects.get(id=id)
                 Production_Serializer = H_ProductionSerializerforGET(Productiondata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data})
-        except H_Modules.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})
+        except T_Production.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production Not available', 'Data': []})
            
 
     @transaction.atomic()
@@ -143,8 +140,8 @@ class ProductionViewSecond(RetrieveAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors,'Data' :[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})            
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -153,7 +150,7 @@ class ProductionViewSecond(RetrieveAPIView):
                 Productiondata = T_Production.objects.get(id=id)
                 Productiondata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})
-        except H_Modules.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})    
+        except T_Production.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production Not available', 'Data': []})    
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production used in another table', 'Data': []})    
