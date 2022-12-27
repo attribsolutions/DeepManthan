@@ -272,13 +272,13 @@ class GetItemsForOrderView(CreateAPIView):
                                 qwer=ItemUnitquery[0]['UnitID']
                                 BaseUnitNamequery = M_Units.objects.filter(id=qwer).values('Name')
                                 q=BaseUnitNamequery[0]['Name']
-                                baseunitconcat="( "+d['BaseUnitQuantity']+" "+q+" )"
-                               
+                                baseunitconcat=" ("+d['BaseUnitQuantity']+" "+q+")"
                                 UnitDetails.append({
                                     # Below UnitID is MC_ItemUnits Primary id
                                     "UnitID": d['id'],
-                                    "UnitName": d['UnitID']['Name'],
-                                    "BaseUnitQuantity": baseunitconcat
+                                    # "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name']+ baseunitconcat,
+                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
                                 })
 
                         ItemList.append({
