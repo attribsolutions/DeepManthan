@@ -162,6 +162,7 @@ urlpatterns = [
     url(r'ProductionFilter$',ProductionFilterView.as_view()),
    
     url(r'ItemTag$',M_ItemTag.as_view()),
+    url(r'ItemBrand$',M_ItemBrandName.as_view()),
     
     url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
     url(r'Challan$', T_DeliveryChallanView.as_view()),
