@@ -943,7 +943,7 @@ class O_BatchWiseLiveStock(models.Model):
     BatchCode = models.CharField(max_length=500)
     SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=10, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)

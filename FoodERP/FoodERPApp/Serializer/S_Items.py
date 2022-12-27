@@ -117,8 +117,9 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemUnit_data in ItemUnits_data:
             ItemUnits = MC_ItemUnits.objects.create(Item=ItemID, **ItemUnit_data)
             
-        for ItemImage_data in ItemImages_data:
-            ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
+        if ItemImages_data != '':
+            for ItemImage_data in ItemImages_data:
+                ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
         
         for ItemDivision_data in ItemDivisions_data:
             ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
@@ -174,9 +175,9 @@ class ItemSerializer(serializers.ModelSerializer):
             # print(c.id)
             SetFlag=MC_ItemUnits.objects.filter(id=c.id).filter(~Q(IsBase=1)).update(IsDeleted=1)
             
-            
-        for d in instance.ItemImagesDetails.all():
-            d.delete()
+        if validated_data['ItemImagesDetails'] != '':    
+            for d in instance.ItemImagesDetails.all():
+                d.delete()
             
         for e in instance.ItemDivisionDetails.all():
             e.delete()
@@ -198,8 +199,9 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemUnit_data in validated_data['ItemUnitDetails']:
             ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)
             
-        for ItemImage_data in validated_data['ItemImagesDetails']:
-            ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
+        if validated_data['ItemImagesDetails'] != '':
+            for ItemImage_data in validated_data['ItemImagesDetails']:
+                ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
         
         for ItemDivision_data in validated_data['ItemDivisionDetails']:
             ItemDivision = MC_ItemDivisions.objects.create(Item=instance, **ItemDivision_data)    
