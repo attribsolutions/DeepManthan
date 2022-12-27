@@ -55,7 +55,8 @@ class T_GRNSerializer(serializers.ModelSerializer):
             OrderID=re.findall(r'\d+', a)
             print(OrderID[0])
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
-            Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=1)
+            
+            Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
             
         return grnID
       
