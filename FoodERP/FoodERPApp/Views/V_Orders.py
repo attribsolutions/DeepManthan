@@ -1,3 +1,4 @@
+from typing import Concatenate
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -267,11 +268,17 @@ class GetItemsForOrderView(CreateAPIView):
                         UnitDetails = list()
                         for d in a['Item']['ItemUnitDetails']:
                             if d['IsDeleted'] == 0:
+                                ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsBase=1).values('UnitID')
+                                qwer=ItemUnitquery[0]['UnitID']
+                                BaseUnitNamequery = M_Units.objects.filter(id=qwer).values('Name')
+                                q=BaseUnitNamequery[0]['Name']
+                                baseunitconcat="( "+d['BaseUnitQuantity']+" "+q+" )"
+                               
                                 UnitDetails.append({
+                                    # Below UnitID is MC_ItemUnits Primary id
                                     "UnitID": d['id'],
-                                    # "UnitID": d['UnitID']['id'],
                                     "UnitName": d['UnitID']['Name'],
-                                    "BaseUnitQuantity": d['BaseUnitQuantity']
+                                    "BaseUnitQuantity": baseunitconcat
                                 })
 
                         ItemList.append({
