@@ -170,6 +170,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "Comment": b['Comment'],
                                 })
                         OrderData.append({
                             "id": a['id'],
