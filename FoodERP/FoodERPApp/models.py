@@ -137,6 +137,7 @@ class MC_PartyAddress(models.Model):
     FSSAIExipry = models.DateField(blank=True)
     PIN = models.CharField(max_length=500)
     IsDefault = models.BooleanField(default=False) 
+    fssaidocument=models.TextField()
     class Meta:
         db_table = 'MC_PartyAddress'
      
