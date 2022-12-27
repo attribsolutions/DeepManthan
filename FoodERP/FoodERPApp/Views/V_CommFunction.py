@@ -7,6 +7,10 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
 from django.db.models import Q
 from django.db.models import Max
+
+from ..Serializer.S_CommFunction import *
+
+
 from ..Serializer.S_Mrps import *
 from ..Serializer.S_Margins import *
 from ..Serializer.S_GSTHSNCode import *
@@ -22,6 +26,46 @@ from datetime import date
 4) class GSTHsnCodeMaster - TodaysDateGSTHSnCode ,EffectiveDateGSTHSNCode,EffectiveDateGSTHSNCodeID
 '''
 
+
+class UnitwiseQuantityConversion:
+    
+    def __init__(self,ItemID,InputQuantity,MCItemUnit,MUnits,ConversionMCItemUnit,ConversionMUnits):
+        self.ItemID = ItemID
+        self.InputQuantity = InputQuantity
+        self.MCItemUnit = MCItemUnit
+        self.MUnits = MUnits
+        self.ConversionMCItemUnit = ConversionMCItemUnit
+        self.ConversionMUnits = ConversionMUnits
+       
+        if(MCItemUnit == 0): 
+            a=Q(UnitID=MUnits)
+        else:
+            a=Q(id=MCItemUnit)   
+        
+        BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0).filter( a )
+        BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
+        self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
+        
+        if(MCItemUnit == 0): 
+            b=Q(UnitID=ConversionMUnits)
+        else:
+            b=Q(id=ConversionMCItemUnit)
+        ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( b )
+        ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
+        self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
+          
+    def GetBaseUnitQuantity(self):
+       
+        BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
+       
+        return BaseUnitQuantity   
+
+    def ConvertintoSelectedUnit(self):
+        BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
+        ConvertedQuantity=   float(BaseUnitQuantity) /  float(self.ConversionUnitBaseQuantity)
+        return ConvertedQuantity
+        
+    
 
 class MaxValueMaster:
     
