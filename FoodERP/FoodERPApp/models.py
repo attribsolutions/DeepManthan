@@ -756,6 +756,7 @@ class T_Orders(models.Model):
 class TC_OrderItems(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='Item', on_delete=models.DO_NOTHING)
+    Comment= models.CharField(max_length=300,blank=True,null=True)
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
     MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.DO_NOTHING,null=True,blank=True)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
