@@ -139,6 +139,7 @@ urlpatterns = [
     url(r'Invoices$', T_InvoiceView.as_view()),
     
     # GRN All API's
+    url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
     url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
     url(r'GRN$', T_GRNView.as_view()),
     url(r'GRNFilter$', GRNListFilterView.as_view()),
@@ -266,6 +267,6 @@ urlpatterns = [
     url(r'GetSubGroupByGroupID/([0-9]+)$', GetSubGroupByGroupID.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
-    url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
+    
      
 ]
