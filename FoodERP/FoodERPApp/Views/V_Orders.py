@@ -371,11 +371,12 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id''', (
                     for d in ItemUnitqueryserialize:
                         qty=d['BaseUnitQuantity']
                         BaseUnitQuantity = ShowBaseUnitQtyOnUnitDropDown("",qty).TrimQty()
-                        baseunitconcat=" ("+BaseUnitQuantity+" "+BaseUnitName+")"
+                        baseunitconcat=" ("+ str(BaseUnitQuantity)+" "+BaseUnitName+")"
                         UnitDetails.append({
                             "UnitID": d['id'],
                             "UnitName": d['UnitID']['Name'] + baseunitconcat,
                             "BaseUnitQuantity": d['BaseUnitQuantity'],  
+                           
                          
                         })
             # =====================IsDefaultTermsAndConditions================================================
