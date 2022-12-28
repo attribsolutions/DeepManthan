@@ -168,10 +168,12 @@ class M_ItemsViewSecond(CreateAPIView):
                         UnitDetails=list()
                         for d in a['ItemUnitDetails']:
                             if d['IsDeleted']== 0 :
+                                baseunitconcat=" ("+d['BaseUnitQuantity']+" "+a['BaseUnitID']['Name']+")"
                                 UnitDetails.append({
+                                   
                                     "id": d['id'],
                                     "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'],
+                                    "UnitName": d['UnitID']['Name'] + baseunitconcat ,
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
                                 

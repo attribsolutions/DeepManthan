@@ -311,8 +311,19 @@ class M_FieldValidations(models.Model):
     
     class Meta:
         db_table = "M_FieldValidations"
+        
          
-
+class M_PageType(models.Model):
+    Name = models.CharField(max_length=500, blank=True)
+    ''' IsAvailableForAccess if flag true this page show on role access page dropdown'''
+    IsAvailableForAccess = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_PageType"
+    
 class M_Pages(models.Model):
     PageHeading = models.CharField(max_length=500, blank=True)
     Name = models.CharField(max_length=100)
@@ -908,7 +919,7 @@ class TC_GRNReferences(models.Model):
 class TC_GRNItems(models.Model):
     GRN = models.ForeignKey(T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='GItem', on_delete=models.DO_NOTHING)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2, null=True)
@@ -922,12 +933,12 @@ class TC_GRNItems(models.Model):
     DiscountType = models.CharField(max_length=500)
     Discount = models.DecimalField(max_digits=10, decimal_places=2)
     DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
-    CGST = models.DecimalField(max_digits=5, decimal_places=2)
-    SGST = models.DecimalField(max_digits=5, decimal_places=2)
-    IGST = models.DecimalField(max_digits=5, decimal_places=2)
-    CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    CGST = models.DecimalField(max_digits=10, decimal_places=2)
+    SGST = models.DecimalField(max_digits=10, decimal_places=2)
+    IGST = models.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500,blank=True, null=True)
     SystemBatchDate  = models.DateField()
@@ -936,9 +947,14 @@ class TC_GRNItems(models.Model):
 
     class Meta:
         db_table = "TC_GRNItems"
+        
+class M_TransactionType(models.Model):
+    Name= models.CharField(max_length=100)
+    class Meta:
+        db_table = "M_TransactionType"
 
 class O_BatchWiseLiveStock(models.Model):
-    # GRN = models.ForeignKey(T_GRNs, related_name='GRN',null=True, on_delete=models.CASCADE)
+
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
@@ -951,6 +967,9 @@ class O_BatchWiseLiveStock(models.Model):
     GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
     Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
+    ItemExpiryDate=models.DateField()
+    TransactionType=models.ForeignKey(M_TransactionType, on_delete=models.DO_NOTHING)
+    TransactionID =  models.IntegerField()
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
    

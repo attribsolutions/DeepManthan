@@ -11,6 +11,24 @@ from ..Serializer.S_Pages import *
 from ..models import M_Pages
 
 
+class M_PageTypeView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                PageType_data = M_PageType.objects.all()
+                if PageType_data.exists():
+                    PageType_serializer = PageTypeMasterSerializer(PageType_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageType_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Page Type Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
 class M_PagesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -27,8 +45,8 @@ class M_PagesView(CreateAPIView):
                     HPagesserialize_data = M_PagesSerializer(
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPagesserialize_data})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def post(self, request):
@@ -40,8 +58,8 @@ class M_PagesView(CreateAPIView):
                     HPagesserialize_data.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': HPagesserialize_data.errors, 'Data': []})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class M_PagesViewSecond(RetrieveAPIView):

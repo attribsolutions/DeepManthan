@@ -322,9 +322,11 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
             with transaction.atomic():
                 
                 if int(Division) > 0:
-                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and m_pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
+                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages Join m_pagetype on m_pagetype.id= m_pages.PageType   WHERE m_pagetype.IsAvailableForAccess=1 and m_pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
+                    
                 else:
-                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType=2 and m_pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
+                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1  and m_pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
+                   
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
@@ -334,27 +336,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
         except Exception  :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
         
-        
-# class RoleAccessGetPagesAccessOnPage(RetrieveAPIView):
-    
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-    
-#     def get(self, request, moduleid=0):
-#         try:
-#             with transaction.atomic():
-#                 query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE Module_id=%s''',[moduleid])
-#                 if not query:
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
-#                 else:
-#                     PageSerializer = M_PageSerializerNewUpdated(
-#                         query, many=True).data
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
-#         except Exception :
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})        
-       
-
-
+      
 class CopyRoleAccessView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

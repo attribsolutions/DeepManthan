@@ -100,6 +100,7 @@ urlpatterns = [
     url(r'Roles$', M_RolesView.as_view()),
     url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
     url(r'PageMaster$', M_PagesView.as_view()),
+    url(r'PageType$', M_PageTypeView.as_view()),
     url(r'PageAccess$', H_PageAccessView.as_view()),
     url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
     url(r'Company$', C_CompaniesView.as_view()),
@@ -139,6 +140,7 @@ urlpatterns = [
     url(r'Invoices$', T_InvoiceView.as_view()),
     
     # GRN All API's
+    url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
     url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
     url(r'GRN$', T_GRNView.as_view()),
     url(r'GRNFilter$', GRNListFilterView.as_view()),
@@ -266,6 +268,6 @@ urlpatterns = [
     url(r'GetSubGroupByGroupID/([0-9]+)$', GetSubGroupByGroupID.as_view()),
     url(r'RegenrateToken$', RegenrateToken.as_view()),
     url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
-    url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
+    
      
 ]

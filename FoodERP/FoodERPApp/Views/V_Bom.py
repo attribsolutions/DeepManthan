@@ -139,7 +139,9 @@ class M_BOMsViewSecond(RetrieveAPIView):
                         if Parentquery.exists():
                             ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
                             ParentUnitDetails = list()
+                           
                             for d in ParentUnitdata:
+                               
                                 ParentUnitDetails.append({
                                 "Unit": d['id'],
                                 "UnitName": d['UnitID']['Name'],
@@ -152,10 +154,13 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             if query.exists():
                                 Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                 UnitDetails = list()
+                               
                                 for c in Unitdata:
+                                    
                                     UnitDetails.append({
                                     "Unit": c['id'],
                                     "UnitName": c['UnitID']['Name'],
+                                    
                                 })
                             MaterialDetails.append({
                                 "id": b['id'],
