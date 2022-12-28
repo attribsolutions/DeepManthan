@@ -4,6 +4,10 @@ from rest_framework import serializers
 
 from ..models import *
 
+class PageTypeMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_PageType
+        fields = ['id','Name']
 
 class ControlTypeMasterSerializer(serializers.ModelSerializer):
     class Meta:
