@@ -322,10 +322,10 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
             with transaction.atomic():
                 
                 if int(Division) > 0:
-                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType IN(2,3) and m_pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
+                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages Join m_pagetype on m_pagetype.id= m_pages.PageType   WHERE m_pagetype.IsAvailableForAccess=1 and m_pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
                     
                 else:
-                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages  WHERE m_pages.PageType IN(2,3) and m_pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
+                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1  and m_pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
                    
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})

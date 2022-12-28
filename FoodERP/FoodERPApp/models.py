@@ -315,6 +315,8 @@ class M_FieldValidations(models.Model):
          
 class M_PageType(models.Model):
     Name = models.CharField(max_length=500, blank=True)
+    ''' IsAvailableForAccess if flag true this page show on role access page dropdown'''
+    IsAvailableForAccess = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
