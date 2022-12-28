@@ -7,6 +7,7 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
 from django.db.models import Q
 from django.db.models import Max
+import math  
 
 
 
@@ -314,8 +315,9 @@ class UnitwiseQuantityConversion:
 
 class ShowBaseUnitQtyOnUnitDropDown:
     
-    def __init__(self,ItemID):
+    def __init__(self,ItemID,Qty):
         self.ItemID = ItemID
+        self.Qty = Qty
         
     def ShowDetails(self):
         Itemsquery = M_Items.objects.filter(id=self.ItemID)
@@ -324,5 +326,14 @@ class ShowBaseUnitQtyOnUnitDropDown:
             for a in Itemsdata:
                 base=a['BaseUnitID']['Name']
             return base 
-        
+    
+    def TrimQty(self):
+        a = (self.Qty)
+        valueAfterPoint = a.split('.')[1]
+        valueAfterPoint = int(valueAfterPoint)
        
+        if valueAfterPoint == 0:
+            num_value1 = int(float(a))  
+        else:
+            num_value1 = self.Qty
+        return num_value1
