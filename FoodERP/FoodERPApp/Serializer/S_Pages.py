@@ -7,7 +7,7 @@ from ..models import *
 class PageTypeMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_PageType
-        fields = ['id','Name']
+        fields ="__all__" 
 
 class ControlTypeMasterSerializer(serializers.ModelSerializer):
     class Meta:
