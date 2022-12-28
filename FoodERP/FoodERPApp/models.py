@@ -954,7 +954,7 @@ class M_TransactionType(models.Model):
         db_table = "M_TransactionType"
 
 class O_BatchWiseLiveStock(models.Model):
-   
+
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
