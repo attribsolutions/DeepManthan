@@ -1,3 +1,4 @@
+from decimal import Decimal
 from genericpath import exists
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
@@ -335,5 +336,6 @@ class ShowBaseUnitQtyOnUnitDropDown:
         if valueAfterPoint == 0:
             num_value1 = int(float(a))  
         else:
-            num_value1 = self.Qty
+            num_value1 = Decimal(self.Qty).normalize()
+            
         return num_value1
