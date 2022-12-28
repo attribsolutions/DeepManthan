@@ -139,12 +139,12 @@ class M_BOMsViewSecond(RetrieveAPIView):
                         if Parentquery.exists():
                             ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
                             ParentUnitDetails = list()
-                            BaseUnitName = ShowBaseUnitQtyOnUnitDropDown(ParentItem).ShowDetails()
+                           
                             for d in ParentUnitdata:
-                                baseunitconcat=" ("+d['BaseUnitQuantity']+" "+BaseUnitName+")"
+                               
                                 ParentUnitDetails.append({
                                 "Unit": d['id'],
-                                "UnitName": d['UnitID']['Name']+baseunitconcat,
+                                "UnitName": d['UnitID']['Name'],
                             })
                         
                         for b in a['BOMItems']:
@@ -154,12 +154,12 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             if query.exists():
                                 Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                 UnitDetails = list()
-                                BaseUnitName = ShowBaseUnitQtyOnUnitDropDown(ChildItem).ShowDetails()
+                               
                                 for c in Unitdata:
-                                    baseunitconcat=" ("+c['BaseUnitQuantity']+" "+BaseUnitName+")"
+                                    
                                     UnitDetails.append({
                                     "Unit": c['id'],
-                                    "UnitName": c['UnitID']['Name']+ baseunitconcat,
+                                    "UnitName": c['UnitID']['Name'],
                                     
                                 })
                             MaterialDetails.append({
