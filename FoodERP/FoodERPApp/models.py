@@ -311,8 +311,17 @@ class M_FieldValidations(models.Model):
     
     class Meta:
         db_table = "M_FieldValidations"
+        
          
-
+# class M_PageType(models.Model):
+#     Name = models.CharField(max_length=500, blank=True)
+#     CreatedBy = models.IntegerField()
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField()
+#     UpdatedOn = models.DateTimeField(auto_now=True)
+#     class Meta:
+#         db_table = "M_PageType"
+    
 class M_Pages(models.Model):
     PageHeading = models.CharField(max_length=500, blank=True)
     Name = models.CharField(max_length=100)
