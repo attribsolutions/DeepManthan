@@ -408,10 +408,11 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                 if OrderID != 0:
                     OrderQuery=T_Orders.objects.get(id=OrderID)
                     a=T_OrderSerializerThird(OrderQuery).data
-
+                   
                     OrderTermsAndCondition = list()
                     for b in a['OrderTermsAndConditions']:
-                        if b['TermsAndCondition']['IsDeleted'] ==0:
+                       # print(b['TermsAndCondition']['IsDeleted'])
+                        if b['IsDeleted'] ==0:
                             OrderTermsAndCondition.append({
                                 "id": b['TermsAndCondition']['id'],
                                 "TermsAndCondition": b['TermsAndCondition']['Name'],
