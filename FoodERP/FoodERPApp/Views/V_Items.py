@@ -36,9 +36,6 @@ class M_ItemBrandName(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
-
-
 class M_ItemTag(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
@@ -61,8 +58,7 @@ class M_ItemTag(CreateAPIView):
                             ListData.append({
                                 "dta": d+ "-" + a['Name']
                             })  
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})
-                         
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
  
@@ -123,8 +119,6 @@ class M_ItemsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
-    
- 
 
 class M_ItemsViewSecond(CreateAPIView):
 
@@ -251,13 +245,14 @@ class M_ItemsViewSecond(CreateAPIView):
                                 
                         ShelfLifeDetails=list()
                         for j in a['ItemShelfLife']:
-                            ShelfLifeDetails.append({
-                                "id": j['id'],
-                                "Days": j['Days'],
-                                "CreatedBy":j['CreatedBy'],
-                                "UpdatedBy":j['UpdatedBy'],
-                                "IsAdd":False
-                            })                    
+                            if i['IsDeleted']== 0 :
+                                ShelfLifeDetails.append({
+                                    "id": j['id'],
+                                    "Days": j['Days'],
+                                    "CreatedBy":j['CreatedBy'],
+                                    "UpdatedBy":j['UpdatedBy'],
+                                    "IsAdd":False
+                                })                    
                             
                         ItemData.append({
                             "id": a['id'],

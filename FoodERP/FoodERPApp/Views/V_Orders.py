@@ -365,20 +365,11 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
                         ItemUnitquery, many=True).data
                     
-                    BaseUnitName = ShowBaseUnitQtyOnUnitDropDown(ItemID,"").ShowDetails()
-                    
                     for d in ItemUnitqueryserialize:
-                        ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsBase=1).values('id')
-                        qwer=ItemUnitquery[0]['id']
-                        qty=d['BaseUnitQuantity']
-                        BaseUnitQuantity = ShowBaseUnitQtyOnUnitDropDown("",qty).TrimQty()
-                        if qwer == d['id']:
-                            baseunitconcat=""
-                        else:
-                            baseunitconcat=" ("+ str(BaseUnitQuantity)+" "+BaseUnitName+")"
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ItemID,d['id'],d['BaseUnitQuantity']).ShowDetails()
                         UnitDetails.append({
                             "UnitID": d['id'],
-                            "UnitName": d['UnitID']['Name'] + baseunitconcat,
+                            "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
                             "BaseUnitQuantity": d['BaseUnitQuantity'],  
                            
                          
