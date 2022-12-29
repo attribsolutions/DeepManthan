@@ -100,7 +100,7 @@ urlpatterns = [
     url(r'Roles$', M_RolesView.as_view()),
     url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
     url(r'PageMaster$', M_PagesView.as_view()),
-    url(r'PageType$', M_PageTypeView.as_view()),
+    url(r'PageTypeList$', M_PageTypeView.as_view()),
     url(r'PageAccess$', H_PageAccessView.as_view()),
     url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
     url(r'Company$', C_CompaniesView.as_view()),
