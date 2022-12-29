@@ -252,9 +252,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                             UnitDetails = list()
                             for c in Unitdata:
+                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,c['id'],c['BaseUnitQuantity']).ShowDetails()
                                 UnitDetails.append({
                                 "Unit": c['id'],
-                                "UnitName": c['UnitID']['Name'],
+                                "UnitName": c['UnitID']['Name'] + baseunitconcat,
                             })
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                         OrderItemDetails.append({
