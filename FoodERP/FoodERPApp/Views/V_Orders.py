@@ -433,7 +433,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                                 "OrderItems": OrderItemSerializer,
                                 "OrderTermsAndCondition" : OrderTermsAndCondition
                     })
-                    FinalResult=OrderData
+                    FinalResult=OrderData[0]
                 else:
                     NewOrder=list()
                     NewOrder.append({
@@ -459,7 +459,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                                 "TermsAndConditions" : TermsAndConditions
                                 })
 
-                    FinalResult=NewOrder
+                    FinalResult=NewOrder[0]
                          
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
