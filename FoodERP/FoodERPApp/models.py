@@ -647,6 +647,7 @@ class M_GSTHSNCode(models.Model):
 class MC_ItemShelfLife(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemShelfLife', on_delete=models.CASCADE)
     Days = models.IntegerField(default=False)
+    IsDeleted = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
