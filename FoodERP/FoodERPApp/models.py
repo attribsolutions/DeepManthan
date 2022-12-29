@@ -612,6 +612,8 @@ class MC_ItemUnits(models.Model):
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     IsDeleted = models.BooleanField(default=False)
     IsBase = models.BooleanField(default=False)
+    PODefaultUnit = models.BooleanField(default=False)
+    SODefaultUnit = models.BooleanField(default=False)
     class Meta:
         db_table = "MC_ItemUnits"                
 

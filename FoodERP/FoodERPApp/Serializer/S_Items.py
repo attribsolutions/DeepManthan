@@ -58,9 +58,9 @@ class ItemImagesSerializer(serializers.ModelSerializer):
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase']
+        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
         
-        
+               
 class ItemGroupDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemGroupDetails
