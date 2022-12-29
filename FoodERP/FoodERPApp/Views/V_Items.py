@@ -170,6 +170,8 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "UnitName": d['UnitID']['Name'] + baseunitconcat ,
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
+                                    "PODefaultUnit": d['PODefaultUnit'],
+                                    "SODefaultUnit": d['SODefaultUnit'],
                                 
                                 })
                             
@@ -245,7 +247,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                 
                         ShelfLifeDetails=list()
                         for j in a['ItemShelfLife']:
-                            if i['IsDeleted']== 0 :
+                            if j['IsDeleted']== 0 :
                                 ShelfLifeDetails.append({
                                     "id": j['id'],
                                     "Days": j['Days'],
@@ -361,6 +363,8 @@ class M_ItemsViewThird(CreateAPIView):
                                     "UnitName": d['UnitID']['Name'],
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
+                                    "PODefaultUnit": d['PODefaultUnit'],
+                                    "SODefaultUnit": d['SODefaultUnit'],
                                 })
                         ItemData.append({
                             "id": a['id'],
