@@ -412,10 +412,11 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id''', (
 
                     OrderTermsAndCondition = list()
                     for b in a['OrderTermsAndConditions']:
-                        OrderTermsAndCondition.append({
-                            "id": b['TermsAndCondition']['id'],
-                            "TermsAndCondition": b['TermsAndCondition']['Name'],
-                        })
+                        if b['TermsAndCondition']['IsDeleted'] ==0:
+                            OrderTermsAndCondition.append({
+                                "id": b['TermsAndCondition']['id'],
+                                "TermsAndCondition": b['TermsAndCondition']['Name'],
+                            })
 
 
                     OrderData=list()
