@@ -445,10 +445,30 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     FinalResult=OrderData
                 else:
                     NewOrder=list()
-                    NewOrder.append({"OrderItems":OrderItemSerializer,
-                        "TermsAndConditions" : TermsAndConditions})
+                    NewOrder.append({
+                                "id": "",
+                                "OrderDate":"",
+                                "DeliveryDate": "",
+                                "POFromDate": "",
+                                "POToDate": "",
+                                "POType": "",
+                                "POTypeName": "",
+                                "OrderAmount": "",
+                                "Description": "",
+                                "Customer": "",
+                                "CustomerName": "",
+                                "Supplier": "",
+                                "SupplierName": "",
+                                "BillingAddressID": "",
+                                "BillingAddress": "",
+                                "ShippingAddressID": "",
+                                "ShippingAddress": "",
+                                "Inward": "",  
+                                "OrderItems":OrderItemSerializer,
+                                "TermsAndConditions" : TermsAndConditions
+                                })
 
-                    FinalResult=NewOrder[0]
+                    FinalResult=NewOrder
                          
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
