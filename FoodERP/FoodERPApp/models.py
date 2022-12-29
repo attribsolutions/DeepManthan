@@ -609,7 +609,7 @@ class MC_ItemUnits(models.Model):
         M_Items, related_name='ItemUnitDetails', on_delete=models.CASCADE)
     UnitID = models.ForeignKey(
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
-    BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     IsDeleted = models.BooleanField(default=False)
     IsBase = models.BooleanField(default=False)
     class Meta:
@@ -995,7 +995,7 @@ class M_BillOfMaterial(models.Model):
 class MC_BillOfMaterialItems(models.Model): 
     BOM = models.ForeignKey(M_BillOfMaterial, related_name='BOMItems', on_delete=models.CASCADE) 
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    Quantity = models.DecimalField(max_digits=10, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
     
     class Meta:
@@ -1007,7 +1007,7 @@ class T_WorkOrder(models.Model):
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
     Bom = models.ForeignKey(M_BillOfMaterial, related_name='BomID', on_delete=models.PROTECT)
     NumberOfLot = models.IntegerField()
-    Quantity = models.DecimalField(max_digits=10, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
@@ -1021,8 +1021,8 @@ class T_WorkOrder(models.Model):
 class TC_WorkOrderItems(models.Model):
     WorkOrder = models.ForeignKey(T_WorkOrder, related_name='WorkOrderItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    BomQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
-    Quantity = models.DecimalField(max_digits=10, decimal_places=3) 
+    BomQuantity = models.DecimalField(max_digits=15, decimal_places=3) 
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderItemUnitID', on_delete=models.PROTECT)
     
     class Meta:
@@ -1032,7 +1032,7 @@ class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     NumberOfLot = models.IntegerField()
-    LotQuantity = models.DecimalField(max_digits=10, decimal_places=3)
+    LotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
@@ -1047,8 +1047,8 @@ class T_MaterialIssue(models.Model):
 class TC_MaterialIssueItems(models.Model):
     MaterialIssue = models.ForeignKey(T_MaterialIssue, related_name='MaterialIssueItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    WorkOrderQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
-    IssueQuantity = models.DecimalField(max_digits=10, decimal_places=3) 
+    WorkOrderQuantity = models.DecimalField(max_digits=15, decimal_places=3) 
+    IssueQuantity = models.DecimalField(max_digits=15, decimal_places=3) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueItemUnitID', on_delete=models.PROTECT)
     BatchDate = models.DateField()
     BatchCode = models.CharField(max_length=500)
@@ -1100,7 +1100,7 @@ class T_DeliveryChallans(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='DeliveryCustomer', on_delete=models.PROTECT)
     ChallanNumber = models.IntegerField()
     FullChallanNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=3)
     Party = models.ForeignKey(M_Parties, related_name='DeliveryParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1120,7 +1120,7 @@ class TC_DeliveryChallanReferences(models.Model):
 class TC_DeliveryChallanItems(models.Model):
     DeliveryChallan = models.ForeignKey(T_DeliveryChallans, related_name='DeliveryChallanItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='DeliveryChallanUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2)
