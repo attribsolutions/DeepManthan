@@ -609,7 +609,7 @@ class MC_ItemUnits(models.Model):
         M_Items, related_name='ItemUnitDetails', on_delete=models.CASCADE)
     UnitID = models.ForeignKey(
         M_Units, related_name='UnitID', on_delete=models.DO_NOTHING)
-    BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     IsDeleted = models.BooleanField(default=False)
     IsBase = models.BooleanField(default=False)
     class Meta:
