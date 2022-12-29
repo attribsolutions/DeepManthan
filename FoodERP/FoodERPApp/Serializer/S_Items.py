@@ -242,7 +242,7 @@ class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
 class ItemShelfLifeSerializerSecond(serializers.ModelSerializer):
      class Meta:
         model = MC_ItemShelfLife
-        fields = ['id','Days', 'CreatedBy', 'UpdatedBy']
+        fields = ['id','Days', 'CreatedBy', 'UpdatedBy','IsDeleted']
                 
 class PriceListSerializerSecond(serializers.ModelSerializer):
      class Meta:
@@ -314,7 +314,7 @@ class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase' ]
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
 
 class ItemSubGroupSerializerSecond(serializers.ModelSerializer):
     class Meta:
