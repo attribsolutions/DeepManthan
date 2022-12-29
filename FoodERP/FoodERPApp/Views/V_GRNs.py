@@ -123,7 +123,7 @@ class T_GRNView(CreateAPIView):
                     })
 
                 # print(GRNdata)
-                GRNdata.update({"O_BatchWiseLiveStockItems":O_BatchWiseLiveStockList}) 
+                # GRNdata.update({"O_BatchWiseLiveStockItems":O_BatchWiseLiveStockList}) 
                 # print(GRNdata)   
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
