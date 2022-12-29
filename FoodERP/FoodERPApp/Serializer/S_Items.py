@@ -181,7 +181,10 @@ class ItemSerializer(serializers.ModelSerializer):
             
         for e in instance.ItemDivisionDetails.all():
             e.delete()
-         
+        
+        for f in instance.ItemShelfLife.all():
+            SetFlag=MC_ItemShelfLife.objects.filter(id=f.id).update(IsDeleted=1) 
+            
         # for f in instance.ItemMRPDetails.all():
         #     f.delete()  
         # for g in instance.ItemMarginDetails.all():
