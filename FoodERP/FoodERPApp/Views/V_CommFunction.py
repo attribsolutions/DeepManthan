@@ -23,13 +23,14 @@ from datetime import date
 
 
 '''Common Functions List
-1) class MaxValueMaster -  GetMaxValue from table Pass Parameter
-2) class MRPMaster - TodaysDateMRP,EffectiveDateMRP,EffectiveDateMRPID
-3) class MarginMaster - TodaysDateMargin,EffectiveDateMargin,EffectiveDateMarginID
-4) class GSTHsnCodeMaster - TodaysDateGSTHSnCode ,EffectiveDateGSTHSNCode,EffectiveDateGSTHSNCodeID
-5) class UnitwiseQuantityConversion - ItemID,InputQuantity,MCItemUnit,MUnits,ConversionMCItemUnit,ConversionMUnits
-'''
+1) class MaxValueMaster -  GetMaxValue
+2) class MRPMaster - GetTodaysDateMRP, GetEffectiveDateMRP, GetEffectiveDateMRPID
+3) class MarginMaster - GetTodaysDateMargin, GetEffectiveDateMargin, GetEffectiveDateMarginID
+4) class GSTHsnCodeMaster - GetTodaysGstHsnCode, GetEffectiveDateGSTHSNCode, GetEffectiveDateGSTHSNCodeID
+5) class UnitwiseQuantityConversion - GetBaseUnitQuantity, ConvertintoSelectedUnit
+6) class ShowBaseUnitQtyOnUnitDropDown - ShowDetails(baseunitname), TrimQty(Baseunitqty)
 
+'''
 class MaxValueMaster:
     
     def __init__(self,TableName,ColumnName):
