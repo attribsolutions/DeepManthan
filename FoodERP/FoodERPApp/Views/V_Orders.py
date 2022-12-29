@@ -399,13 +399,15 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                 if OrderID != 0:
                     OrderQuery=T_Orders.objects.get(id=OrderID)
                     a=T_OrderSerializerThird(OrderQuery).data
-
+                   
                     OrderTermsAndCondition = list()
                     for b in a['OrderTermsAndConditions']:
-                        OrderTermsAndCondition.append({
-                            "id": b['TermsAndCondition']['id'],
-                            "TermsAndCondition": b['TermsAndCondition']['Name'],
-                        })
+                       # print(b['TermsAndCondition']['IsDeleted'])
+                        if b['IsDeleted'] ==0:
+                            OrderTermsAndCondition.append({
+                                "id": b['TermsAndCondition']['id'],
+                                "TermsAndCondition": b['TermsAndCondition']['Name'],
+                            })
 
 
                     OrderData=list()
@@ -431,11 +433,31 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                                 "OrderItems": OrderItemSerializer,
                                 "OrderTermsAndCondition" : OrderTermsAndCondition
                     })
-                    FinalResult=OrderData
+                    FinalResult=OrderData[0]
                 else:
                     NewOrder=list()
-                    NewOrder.append({"OrderItems":OrderItemSerializer,
-                        "TermsAndConditions" : TermsAndConditions})
+                    NewOrder.append({
+                                "id": "",
+                                "OrderDate":"",
+                                "DeliveryDate": "",
+                                "POFromDate": "",
+                                "POToDate": "",
+                                "POType": "",
+                                "POTypeName": "",
+                                "OrderAmount": "",
+                                "Description": "",
+                                "Customer": "",
+                                "CustomerName": "",
+                                "Supplier": "",
+                                "SupplierName": "",
+                                "BillingAddressID": "",
+                                "BillingAddress": "",
+                                "ShippingAddressID": "",
+                                "ShippingAddress": "",
+                                "Inward": "",  
+                                "OrderItems":OrderItemSerializer,
+                                "TermsAndConditions" : TermsAndConditions
+                                })
 
                     FinalResult=NewOrder[0]
                          
