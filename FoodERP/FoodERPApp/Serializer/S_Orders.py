@@ -144,7 +144,7 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID','BaseUnitQuantity']      
+        fields = ['id','UnitID','BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']      
         
 class TC_OrderItemSerializer(serializers.ModelSerializer):
     
