@@ -433,7 +433,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                                 "ShippingAddress": a['ShippingAddress']['Address'],
                                 "Inward": a['Inward'],  
                                 "OrderItems": OrderItemSerializer,
-                                "TermsAndCondition" : OrderTermsAndCondition
+                                "TermsAndConditions" : OrderTermsAndCondition
                     })
                     FinalResult=OrderData[0]
                 else:
