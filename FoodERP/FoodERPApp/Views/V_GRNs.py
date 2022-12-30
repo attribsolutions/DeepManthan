@@ -107,7 +107,6 @@ class T_GRNView(CreateAPIView):
                     a['SystemBatchDate'] = date.today()
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
-                    "TransactionType":1,
                     "Quantity": a['Quantity'],
                     "ItemExpiryDate":a['ItemExpiryDate'],
                     "Unit": a['Unit'],
