@@ -971,7 +971,7 @@ class O_BatchWiseLiveStock(models.Model):
     Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
     ItemExpiryDate=models.DateField()
-    TransactionType=models.ForeignKey(M_TransactionType, on_delete=models.DO_NOTHING)
+    TransactionType= models.IntegerField()
     TransactionID =  models.IntegerField()
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
