@@ -79,6 +79,19 @@ class M_ItemsView(CreateAPIView):
                     Items_Serializer = ItemSerializerSecond(query, many=True).data
                     ItemListData = list ()
                     for a in Items_Serializer:
+                        UnitDetails=list()
+                        for d in a['ItemUnitDetails']:
+                            if d['IsDeleted']== 0 :
+                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(a['id'],d['id'],d['BaseUnitQuantity']).ShowDetails()
+                                UnitDetails.append({
+                                    "id": d['id'],
+                                    "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                    "IsBase": d['IsBase'],
+                                    "PODefaultUnit": d['PODefaultUnit'],
+                                    "SODefaultUnit": d['SODefaultUnit'],
+                                })
                         ItemListData.append({
                             "id": a['id'],
                             "Name": a['Name'],
@@ -97,7 +110,8 @@ class M_ItemsView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "UnitDetails":UnitDetails
                         })    
                     
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
