@@ -236,7 +236,7 @@ urlpatterns = [
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'ItemBrand$',M_ItemBrandName.as_view()),
             # Select Item and Get MCItemUnits
-            url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
+            # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
