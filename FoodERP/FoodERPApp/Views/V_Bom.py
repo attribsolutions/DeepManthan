@@ -84,7 +84,6 @@ class M_BOMsView(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
 class M_BOMsViewSecond(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
