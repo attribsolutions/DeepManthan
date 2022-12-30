@@ -353,57 +353,57 @@ class M_ImageTypesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-class M_ItemsViewThird(CreateAPIView):
+# class M_ItemsViewThird(CreateAPIView):
     
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+#     permission_classes = (IsAuthenticated,)
+#     authentication_class = JSONWebTokenAuthentication
     
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                Item = request.data['Item'] 
-                Itemsquery = M_Items.objects.filter(id=Item)
-                if Itemsquery.exists():
-                    Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
-                    ItemData=list()
-                    for a in Itemsdata:
-                        UnitDetails=list()
-                        for d in a['ItemUnitDetails']:
-                            if d['IsDeleted']== 0 :
-                                UnitDetails.append({
-                                    "id": d['id'],
-                                    "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'],
-                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
-                                    "IsBase": d['IsBase'],
-                                    "PODefaultUnit": d['PODefaultUnit'],
-                                    "SODefaultUnit": d['SODefaultUnit'],
-                                })
-                        ItemData.append({
-                            "id": a['id'],
-                            "Name": a['Name'],
-                            "ShortName": a['ShortName'],
-                            "Company": a['Company']['id'],
-                            "CompanyName": a['Company']['Name'],
-                            "BaseUnitID": a['BaseUnitID']['id'],
-                            "BaseUnitName": a['BaseUnitID']['Name'],
-                            "BarCode": a['BarCode'],
-                            "Sequence": a['Sequence'],
-                            "isActive":a['isActive'] ,
-                            "CanBeSold":a['CanBeSold'] ,
-                            "CanBePurchase":a['CanBePurchase'],
-                            "BrandName":a['BrandName'] ,
-                            "Tag":a['Tag'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn'],
-                            "ItemUnitDetails": UnitDetails 
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
-        except M_Items.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+#     @transaction.atomic()
+#     def post(self, request):
+#         try:
+#             with transaction.atomic():
+#                 Item = request.data['Item'] 
+#                 Itemsquery = M_Items.objects.filter(id=Item)
+#                 if Itemsquery.exists():
+#                     Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
+#                     ItemData=list()
+#                     for a in Itemsdata:
+#                         UnitDetails=list()
+#                         for d in a['ItemUnitDetails']:
+#                             if d['IsDeleted']== 0 :
+#                                 UnitDetails.append({
+#                                     "id": d['id'],
+#                                     "UnitID": d['UnitID']['id'],
+#                                     "UnitName": d['UnitID']['Name'],
+#                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
+#                                     "IsBase": d['IsBase'],
+#                                     "PODefaultUnit": d['PODefaultUnit'],
+#                                     "SODefaultUnit": d['SODefaultUnit'],
+#                                 })
+#                         ItemData.append({
+#                             "id": a['id'],
+#                             "Name": a['Name'],
+#                             "ShortName": a['ShortName'],
+#                             "Company": a['Company']['id'],
+#                             "CompanyName": a['Company']['Name'],
+#                             "BaseUnitID": a['BaseUnitID']['id'],
+#                             "BaseUnitName": a['BaseUnitID']['Name'],
+#                             "BarCode": a['BarCode'],
+#                             "Sequence": a['Sequence'],
+#                             "isActive":a['isActive'] ,
+#                             "CanBeSold":a['CanBeSold'] ,
+#                             "CanBePurchase":a['CanBePurchase'],
+#                             "BrandName":a['BrandName'] ,
+#                             "Tag":a['Tag'],
+#                             "CreatedBy": a['CreatedBy'],
+#                             "CreatedOn": a['CreatedOn'],
+#                             "UpdatedBy": a['UpdatedBy'],
+#                             "UpdatedOn": a['UpdatedOn'],
+#                             "ItemUnitDetails": UnitDetails 
+#                         })
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+#                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
+#         except M_Items.DoesNotExist:
+#             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
