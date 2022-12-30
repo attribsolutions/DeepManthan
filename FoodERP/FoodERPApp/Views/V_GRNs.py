@@ -108,6 +108,7 @@ class T_GRNView(CreateAPIView):
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
+                    "ItemExpiryDate":a['ItemExpiryDate'],
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": a['BaseUnitQuantity'],
                     "MRP": a['MRP'],
