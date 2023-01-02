@@ -27,7 +27,11 @@ class BOMListFilterView(CreateAPIView):
                 FromDate = BillOfMaterialdata['FromDate']
                 ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
-                query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company,IsActive=1)
+                d = date.today()
+                if FromDate == d:
+                    query = M_BillOfMaterial.objects.filter(Company_id=Company,IsActive=1)
+                else:    
+                    query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company,IsActive=1)
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
