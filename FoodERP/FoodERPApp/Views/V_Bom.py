@@ -44,14 +44,15 @@ class BOMListFilterView(CreateAPIView):
                             StockQty =0.0
                         else:
                             StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
-                            StockQty = StockQtySerialize_data[0]['actualStock']   
+                            StockQty = StockQtySerialize_data[0]['actualStock']
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()   
                         BomListData.append({
                         "id": a['id'],
                         "BomDate": a['BomDate'],
                         "Item":a['Item']['id'],
                         "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name'],
+                        "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
                         "StockQty":StockQty,
                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
                         "Comment": a['Comment'],
