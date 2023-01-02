@@ -956,28 +956,7 @@ class M_TransactionType(models.Model):
     class Meta:
         db_table = "M_TransactionType"
 
-class O_BatchWiseLiveStock(models.Model):
-   
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    SystemBatchDate = models.DateField()
-    SystemBatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
-    ItemExpiryDate=models.DateField()
-    TransactionType= models.IntegerField()
-    TransactionID =  models.IntegerField()
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-   
-    class Meta:
-        db_table = "O_BatchWiseLiveStock"
+
 
 class M_BillOfMaterial(models.Model):
     BomDate = models.DateField()
@@ -1149,3 +1128,30 @@ class TC_DeliveryChallanItems(models.Model):
 
     class Meta:
         db_table = "TC_DeliveryChallanItems"            
+
+
+
+class O_BatchWiseLiveStock(models.Model):
+       
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
+    SystemBatchCode = models.CharField(max_length=500)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
+    ItemExpiryDate=models.DateField()
+    GRN = models.ForeignKey(T_GRNs, related_name='BatchWiseLiveStockGRNID', on_delete=models.PROTECT,null=True)
+    Production = models.ForeignKey(T_Production, related_name='BatchWiseLiveStockProductionID', on_delete=models.PROTECT,null=True)
+    # TransactionType= models.IntegerField()
+    # TransactionID =  models.IntegerField()
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        db_table = "O_BatchWiseLiveStock"        
