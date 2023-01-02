@@ -91,14 +91,15 @@ class WorkOrderList(CreateAPIView):
                     WorkOrder_serializerdata = WorkOrderSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
                     WorkOrderListData = list()
-                    for a in WorkOrder_serializerdata:   
+                    for a in WorkOrder_serializerdata:
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(a['Item']['id'],a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()      
                         WorkOrderListData.append({
                         "id": a['id'],
                         "WorkOrderDate": a['WorkOrderDate'],
                         "Item":a['Item']['id'],
                         "ItemName":a['Item']['Name'],
                         "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name'],
+                        "UnitName": a['Unit']['UnitID']['Name'] +baseunitconcat,
                         "Bom": a['Bom'],
                         "NumberOfLot": a['NumberOfLot'],
                         "Quantity":a["Quantity"],
