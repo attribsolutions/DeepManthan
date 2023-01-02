@@ -74,22 +74,21 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
-                '''Get Max GRN Number'''
+# ==========================Get Max GRN Number=====================================================
                 a = GetMaxNumber.GetGrnNumber(Customer,GRNDate)
-                # return JsonResponse({'Data':a})
                 GRNdata['GRNNumber'] = a
-                '''Get Order Prifix '''
                 b = GetPrifix.GetGrnPrifix(Customer)
-                # return JsonResponse({'Data':b})
+                
                 GRNdata['FullGRNNumber'] = b+""+str(a)
+#================================================================================================== 
                 item = ""
-                query = T_GRNs.objects.filter(
-                    Customer_id=GRNdata['Customer']).values('id')
+                query = T_GRNs.objects.filter(Customer_id=GRNdata['Customer']).values('id')
                 O_BatchWiseLiveStockList=list()
                 for a in GRNdata['GRNItems']:
+                    
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
-                    # print(str(query1.query))
-                    # print(query1.count())
+                    # query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                    
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
