@@ -58,9 +58,9 @@ class ItemImagesSerializer(serializers.ModelSerializer):
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase']
+        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
         
-        
+               
 class ItemGroupDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemGroupDetails
@@ -181,7 +181,10 @@ class ItemSerializer(serializers.ModelSerializer):
             
         for e in instance.ItemDivisionDetails.all():
             e.delete()
-         
+        
+        for f in instance.ItemShelfLife.all():
+            SetFlag=MC_ItemShelfLife.objects.filter(id=f.id).update(IsDeleted=1) 
+            
         # for f in instance.ItemMRPDetails.all():
         #     f.delete()  
         # for g in instance.ItemMarginDetails.all():
@@ -239,7 +242,7 @@ class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
 class ItemShelfLifeSerializerSecond(serializers.ModelSerializer):
      class Meta:
         model = MC_ItemShelfLife
-        fields = ['id','Days', 'CreatedBy', 'UpdatedBy']
+        fields = ['id','Days', 'CreatedBy', 'UpdatedBy','IsDeleted']
                 
 class PriceListSerializerSecond(serializers.ModelSerializer):
      class Meta:
@@ -311,7 +314,7 @@ class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase' ]
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
 
 class ItemSubGroupSerializerSecond(serializers.ModelSerializer):
     class Meta:

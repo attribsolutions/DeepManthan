@@ -15,38 +15,6 @@ from ..models import *
 
 '''BOM ---   Bill Of Material'''
 
-# class BOMListView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     authentication__Class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def get(self, request,id=0):
-#         try:
-#             with transaction.atomic(): 
-#                 query = M_BillOfMaterial.objects.all()
-#                 if query:
-#                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
-#                     BomListData = list()
-#                     for a in Bom_serializer:   
-#                         BomListData.append({
-#                         "id": a['id'],
-#                         "BomDate": a['BomDate'],
-#                         "Item":a['Item']['id'],
-#                         "ItemName": a['Item']['Name'],
-#                         "Unit": a['Unit']['id'],
-#                         "UnitName": a['Unit']['UnitID']['Name'],
-#                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
-#                         "Comment": a['Comment'],
-#                         "IsActive": a['IsActive'],
-#                         "Company": a['Company']['id'],
-#                         "CompanyName": a['Company']['Name'],
-#                         }) 
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
-#         except Exception as e:
-#                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
 class BOMListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -59,7 +27,11 @@ class BOMListFilterView(CreateAPIView):
                 FromDate = BillOfMaterialdata['FromDate']
                 ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
-                query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company,IsActive=1)
+                d = date.today()
+                if FromDate == d:
+                    query = M_BillOfMaterial.objects.filter(Company_id=Company,IsActive=1)
+                else:    
+                    query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company,IsActive=1)
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
@@ -116,7 +88,6 @@ class M_BOMsView(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
 class M_BOMsViewSecond(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -141,10 +112,11 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             ParentUnitDetails = list()
                            
                             for d in ParentUnitdata:
-                               
+                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ParentItem,d['id'],d['BaseUnitQuantity']).ShowDetails()
                                 ParentUnitDetails.append({
+                                   
                                 "Unit": d['id'],
-                                "UnitName": d['UnitID']['Name'],
+                                "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
                             })
                         
                         for b in a['BOMItems']:
@@ -156,10 +128,10 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 UnitDetails = list()
                                
                                 for c in Unitdata:
-                                    
+                                    baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ParentItem,d['id'],d['BaseUnitQuantity']).ShowDetails()
                                     UnitDetails.append({
                                     "Unit": c['id'],
-                                    "UnitName": c['UnitID']['Name'],
+                                    "UnitName": c['UnitID']['Name']+ str(baseunitconcat),
                                     
                                 })
                             MaterialDetails.append({

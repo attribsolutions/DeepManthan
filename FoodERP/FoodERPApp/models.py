@@ -612,6 +612,8 @@ class MC_ItemUnits(models.Model):
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     IsDeleted = models.BooleanField(default=False)
     IsBase = models.BooleanField(default=False)
+    PODefaultUnit = models.BooleanField(default=False)
+    SODefaultUnit = models.BooleanField(default=False)
     class Meta:
         db_table = "MC_ItemUnits"                
 
@@ -955,7 +957,7 @@ class M_TransactionType(models.Model):
         db_table = "M_TransactionType"
 
 class O_BatchWiseLiveStock(models.Model):
-
+   
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
@@ -969,7 +971,7 @@ class O_BatchWiseLiveStock(models.Model):
     Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
     Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
     ItemExpiryDate=models.DateField()
-    TransactionType=models.ForeignKey(M_TransactionType, on_delete=models.DO_NOTHING)
+    TransactionType= models.IntegerField()
     TransactionID =  models.IntegerField()
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)

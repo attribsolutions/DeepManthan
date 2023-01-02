@@ -108,6 +108,7 @@ class T_GRNView(CreateAPIView):
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
+                    "ItemExpiryDate":a['ItemExpiryDate'],
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": a['BaseUnitQuantity'],
                     "MRP": a['MRP'],
@@ -252,9 +253,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                             UnitDetails = list()
                             for c in Unitdata:
+                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,c['id'],c['BaseUnitQuantity']).ShowDetails()
                                 UnitDetails.append({
                                 "Unit": c['id'],
-                                "UnitName": c['UnitID']['Name'],
+                                "UnitName": c['UnitID']['Name'] + baseunitconcat,
                             })
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                         OrderItemDetails.append({
