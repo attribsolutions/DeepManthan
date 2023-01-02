@@ -67,24 +67,22 @@ class UserListView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                PageListData = list()
                 Usersdata = M_Users.objects.all()
-                
                 if Usersdata.exists():
-                   
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
-                    
                     UserData = list()
                     
-                    # print(Usersdata_Serializer)
+                   
                     for a in Usersdata_Serializer:
-                        # RoleData = list()
-                        # for b in a["UserRole"]:
-                        #     RoleData.append({
-                        #         'Role': b['Role']['id'],
-                        #         'Name': b['Role']['Name'],
+                        RoleData = list()
+                        for b in a["UserRole"]:
+                            RoleData.append({
+                                'Party': b['Party']['id'],
+                                'PartyName': b['Party']['Name'],
+                                'Role': b['Role']['id'],
+                                'RoleName': b['Role']['Name'],
 
-                        #     })
+                            })
                         
                         UserData.append({
                             'id': a["id"],
@@ -103,14 +101,14 @@ class UserListView(CreateAPIView):
                             'Employee': a["Employee"]["id"],
                             'EmployeeName': a["Employee"]["Name"],
                             'CompanyName': a["Employee"]["Company"]["Name"],
-                            # 'UserRole': RoleData,
+                            'UserRole': RoleData,
 
                         })
                        
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class UserListViewSecond(CreateAPIView):

@@ -138,11 +138,21 @@ class PartySerializer(serializers.ModelSerializer):
 class UserRolesSerializer(serializers.ModelSerializer):
     Role=RolesSerializer()
     Party=PartySerializer()
-    # Role= serializers.SlugRelatedField(read_only=True, slug_field='Name' )
-    
+   
     class Meta:
         model = MC_UserRoles
         fields= ['Role','Party']
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(UserRolesSerializer, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Role", None):
+            ret["Role"] = {"id": None, "Name": None}
+            
+        if not ret.get("Party", None):
+            ret["Party"] = {"id": None, "Name": None}    
+        return ret     
         
 class C_CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -156,7 +166,7 @@ class M_employeesSerializer(serializers.ModelSerializer):
         fields = '__all__' 
         
 class UserListSerializer(serializers.ModelSerializer):
-    # UserRole = UserRolesSerializer(many=True, read_only=True)
+    UserRole = UserRolesSerializer(many=True, read_only=True)
     Employee = M_employeesSerializer(read_only=True)
     class Meta:
         model = M_Users
