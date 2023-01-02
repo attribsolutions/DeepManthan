@@ -48,7 +48,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
  
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
-            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(TransactionID=grnID,**O_BatchWiseLiveStockItem_data,TransactionType =1)  
+            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data,TransactionType =1)  
             
         for GRNReference_data in GRNReferences_data:
             a=str(GRNReference_data['Order']) 
