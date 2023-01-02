@@ -111,14 +111,15 @@ class MaterialIsssueList(CreateAPIView):
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
                     MaterialIsssueListData = list()
-                    for a in MaterialIsssue_serializerdata:   
+                    for a in MaterialIsssue_serializerdata:
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(a['Item']['id'],a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()   
                         MaterialIsssueListData.append({
                         "id": a['id'],
                         "MaterialIssueDate": a['MaterialIssueDate'],
                         "Item":a['Item']['id'],
                         "ItemName":a['Item']['Name'],
                         "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name'],
+                        "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
                         "NumberOfLot": a['NumberOfLot'],
                         "LotQuantity":a["LotQuantity"],
                         "Company": a['Company']['id'],
