@@ -915,7 +915,7 @@ class TC_GRNReferences(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
     Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
     ChallanNo = models.CharField(max_length=500 ,null=True)
-    Inward = models.PositiveSmallIntegerField(default=0)
+    Inward = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_GRNReferences"    
 
