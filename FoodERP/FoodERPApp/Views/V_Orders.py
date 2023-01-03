@@ -65,6 +65,10 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
+                        inward=0 
+                        for c in a['OrderReferences']:
+                            if( c['Inward'] == 1):
+                                inward =1
                         OrderListData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -80,7 +84,7 @@ class OrderListFilterView(CreateAPIView):
                             "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
-                            "Inward": a['Inward']
+                            "Inward": inward
 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
@@ -129,8 +133,7 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 OrderQuery = T_Orders.objects.filter(id=id)
                 if OrderQuery.exists():
-                    OrderSerializedata = T_OrderSerializerThird(
-                        OrderQuery, many=True).data
+                    OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                     OrderData = list()
                     for a in OrderSerializedata:
@@ -172,6 +175,12 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "Comment": b['Comment'],
                                 })
+                        inward=0 
+                        for c in a['OrderReferences']:
+                            if( c['Inward'] == 1):
+                                inward =1
+                            
+                                   
                         OrderData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -190,7 +199,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddressID": a['ShippingAddress']['id'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
-                            "Inward": a['Inward'],
+                            "Inward": inward,
                             "OrderItem": OrderItemDetails,
                             "OrderTermsAndCondition": OrderTermsAndCondition
                         })

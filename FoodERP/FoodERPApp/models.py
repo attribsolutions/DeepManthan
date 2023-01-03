@@ -911,10 +911,9 @@ class T_GRNs(models.Model):
         db_table = "T_GRNs"
 
 class TC_GRNReferences(models.Model):
-    GRN = models.ForeignKey(
-        T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
-    Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING ,null=True) 
-    Invoice = models.ForeignKey(T_Invoices, on_delete=models.DO_NOTHING ,null=True)
+    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
+    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
+    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
     ChallanNo = models.CharField(max_length=500 ,null=True)
     Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
