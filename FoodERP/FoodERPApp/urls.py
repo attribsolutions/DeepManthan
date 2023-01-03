@@ -185,7 +185,7 @@ urlpatterns = [
 
 #Production ALL API`s
 
-            url(r'MaterialIssueDetails$',MaterialIssueDetailsView.as_view()),
+            
             url(r'MaterialIssueforProduction$',ProductionformMaterialIssue.as_view()),
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),
@@ -237,6 +237,7 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'ItemBrand$',M_ItemBrandName.as_view()),
+            url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 
