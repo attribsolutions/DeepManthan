@@ -104,6 +104,7 @@ class ProductionView(CreateAPIView):
                     "BatchDate": Productiondata['BatchDate'],
                     "BatchCode": Productiondata['SupplierBatchCode'],
                     "CreatedBy":Productiondata['CreatedBy'],
+                    "ItemExpiryDate":Productiondata['BestBefore']
                     
                     })
 
