@@ -38,7 +38,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','IsOpenPO','POFromDate','POToDate','OrderItem','OrderTermsAndConditions','Inward']
+        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','IsOpenPO','POFromDate','POToDate','OrderItem','OrderTermsAndConditions']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
@@ -119,12 +119,17 @@ class T_OrderSerializer(serializers.ModelSerializer):
  
         return instance  
 
+class GRNReferanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =TC_GRNReferences
+        fields = ['Order','Inward']
 
 class T_OrderSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Supplier = PartiesSerializerSecond(read_only=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
+    OrderReferences= GRNReferanceSerializer(read_only=True,many=True)
     class Meta:
         model = T_Orders
         fields = '__all__'
@@ -176,6 +181,8 @@ class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
         model=TC_OrderTermsAndConditions
         fields ='__all__'
 
+
+
 class T_OrderSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
     Supplier = PartiesSerializerThird(read_only=True)
@@ -185,7 +192,7 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
-    
+    OrderReferences= GRNReferanceSerializer(read_only=True,many=True)
     class Meta:
         model = T_Orders
         fields = '__all__'
