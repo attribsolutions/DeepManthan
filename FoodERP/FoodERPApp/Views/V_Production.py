@@ -17,51 +17,7 @@ from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from ..Serializer.S_Production import *
 from ..models import *
 
-class MaterialIssueDetailsView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                MaterialIssueIDdata = JSONParser().parse(request)
-                MaterialIssueID = MaterialIssueIDdata['MaterialIssueID']
-                query = T_MaterialIssue.objects.filter(id=MaterialIssueID)
-                if query:
-                    MaterialIsssue_serializerdata=MaterialIssueSerializer(query,many=True).data
-                    MaterialIsssueListData = list()
-                    for a in MaterialIsssue_serializerdata:
-                        Item=a['Item']['id']
-                        Itemsquery = M_Items.objects.filter(id=Item)
-                        if Itemsquery.exists():
-                            Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
-                            for b in Itemsdata:
-                                UnitDetails=list()
-                                for d in b['ItemUnitDetails']:
-                                    if d['IsDeleted'] == 0 :
-                                        baseunitconcat1=ShowBaseUnitQtyOnUnitDropDown(Item,d['id'],d['BaseUnitQuantity']).ShowDetails()
-                                        UnitDetails.append({
-                                            "id": d['id'],
-                                            "UnitID": d['UnitID']['id'],
-                                            "UnitName": d['UnitID']['Name'] +baseunitconcat1,
-                                            "BaseUnitQuantity": d['BaseUnitQuantity'],
-                                            "IsBase": d['IsBase'],
-                                            "PODefaultUnit": d['PODefaultUnit'],
-                                            "SODefaultUnit": d['SODefaultUnit'],         
-                                        })
-                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()
-                        MaterialIsssueListData.append({
-                        "id": a['id'],
-                        "Item":a['Item']['id'],
-                        "ItemName":a['Item']['Name'],
-                        "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
-                        "NumberOfLot": a['NumberOfLot'],
-                        "LotQuantity":a["LotQuantity"],
-                        "UnitDetails":UnitDetails
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                    
+                    
 
 class ProductionformMaterialIssue(CreateAPIView):
     permission_classes = (IsAuthenticated,)
