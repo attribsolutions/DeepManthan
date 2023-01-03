@@ -762,7 +762,7 @@ class T_Orders(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Inward = models.PositiveSmallIntegerField(default=0)
+    # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Orders"
 
@@ -916,6 +916,7 @@ class TC_GRNReferences(models.Model):
     Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING ,null=True) 
     Invoice = models.ForeignKey(T_Invoices, on_delete=models.DO_NOTHING ,null=True)
     ChallanNo = models.CharField(max_length=500 ,null=True)
+    Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "TC_GRNReferences"    
 

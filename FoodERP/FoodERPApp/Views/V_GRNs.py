@@ -74,6 +74,10 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
+                # print(GRNdata['GRNReferences'])
+
+                # if R in GRNdata['GRNReferences']:
+                #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
 # ==========================Get Max GRN Number=====================================================
                 a = GetMaxNumber.GetGrnNumber(Customer,GRNDate)
                 GRNdata['GRNNumber'] = a
