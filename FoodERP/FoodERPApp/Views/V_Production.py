@@ -57,19 +57,11 @@ class MaterialIssueDetailsView(CreateAPIView):
                         "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
                         "NumberOfLot": a['NumberOfLot'],
                         "LotQuantity":a["LotQuantity"],
-                        "ItemsData":UnitDetails
+                        "UnitDetails":UnitDetails
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
-                
-    
-    
-    
-
-
-
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                    
 
 class ProductionformMaterialIssue(CreateAPIView):
     permission_classes = (IsAuthenticated,)
