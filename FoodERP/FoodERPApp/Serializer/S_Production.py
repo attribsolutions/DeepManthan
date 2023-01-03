@@ -61,3 +61,23 @@ class H_ProductionSerializer2(serializers.ModelSerializer):
     class Meta:
         model = T_MaterialIssue
         fields = '__all__'
+
+class UnitSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Units
+        fields = ['id','Name']
+        
+class ItemUnitsSerializerSecond(serializers.ModelSerializer):
+    UnitID = UnitSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemUnits
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
+
+class MaterialIssueSerializer(serializers.ModelSerializer):
+    Item=M_MaterialissueItemsserializer(read_only=True)
+    Unit = ItemUnitsSerializerSecond(read_only=True)
+    class Meta:
+        model = T_MaterialIssue
+        fields = '__all__'
+        fields = ['id','NumberOfLot','LotQuantity','Item','Unit']
+    

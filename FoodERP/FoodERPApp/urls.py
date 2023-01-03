@@ -184,6 +184,8 @@ urlpatterns = [
 
 
 #Production ALL API`s
+
+            url(r'MaterialIssueDetails$',MaterialIssueDetailsView.as_view()),
             url(r'MaterialIssueforProduction$',ProductionformMaterialIssue.as_view()),
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),

@@ -8,11 +8,67 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from ..Serializer.S_Items import ItemSerializerSecond
+
+from ..Views.V_CommFunction import ShowBaseUnitQtyOnUnitDropDown
+
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 
 from ..Serializer.S_Production import *
-
 from ..models import *
+
+class MaterialIssueDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                MaterialIssueIDdata = JSONParser().parse(request)
+                MaterialIssueID = MaterialIssueIDdata['MaterialIssueID']
+                query = T_MaterialIssue.objects.filter(id=MaterialIssueID)
+                if query:
+                    MaterialIsssue_serializerdata=MaterialIssueSerializer(query,many=True).data
+                    MaterialIsssueListData = list()
+                    for a in MaterialIsssue_serializerdata:
+                        Item=a['Item']['id']
+                        Itemsquery = M_Items.objects.filter(id=Item)
+                        if Itemsquery.exists():
+                            Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
+                            for b in Itemsdata:
+                                UnitDetails=list()
+                                for d in b['ItemUnitDetails']:
+                                    if d['IsDeleted'] == 0 :
+                                        baseunitconcat1=ShowBaseUnitQtyOnUnitDropDown(Item,d['id'],d['BaseUnitQuantity']).ShowDetails()
+                                        UnitDetails.append({
+                                            "id": d['id'],
+                                            "UnitID": d['UnitID']['id'],
+                                            "UnitName": d['UnitID']['Name'] +baseunitconcat1,
+                                            "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                            "IsBase": d['IsBase'],
+                                            "PODefaultUnit": d['PODefaultUnit'],
+                                            "SODefaultUnit": d['SODefaultUnit'],         
+                                        })
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()
+                        MaterialIsssueListData.append({
+                        "id": a['id'],
+                        "Item":a['Item']['id'],
+                        "ItemName":a['Item']['Name'],
+                        "Unit": a['Unit']['id'],
+                        "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
+                        "NumberOfLot": a['NumberOfLot'],
+                        "LotQuantity":a["LotQuantity"],
+                        "ItemsData":UnitDetails
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+                
+    
+    
+    
+
+
+
 
 
 class ProductionformMaterialIssue(CreateAPIView):
@@ -28,7 +84,12 @@ class ProductionformMaterialIssue(CreateAPIView):
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+        
+         
 
 class ProductionFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
