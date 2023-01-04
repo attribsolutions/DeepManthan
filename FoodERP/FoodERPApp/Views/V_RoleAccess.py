@@ -105,7 +105,7 @@ class RoleAccessView(RetrieveAPIView):
                     "id": a1['Pages']['id'], 
                     "RelatedPageID": vvv[0],
                     "RelatedPageIDPath": vvv[1],
-                    "Name": a1['Pages']['PageType'],
+                    "Name": a1['Pages']['Name'],
                     "PageType" : a1['Pages']['PageType'],
                     "PageHeading": a1['Pages']['PageHeading'],
                     "PageDescription": a1['Pages']['PageDescription'],
