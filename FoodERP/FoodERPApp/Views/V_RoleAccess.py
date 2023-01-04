@@ -103,7 +103,7 @@ class RoleAccessView(RetrieveAPIView):
                 print(vvv)
                 Pagesdata.append({
                     "id": a1['Pages']['id'], 
-                    "RelatedPageID": vvv[0],
+                    "RelatedPageID": int(vvv[0]),
                     "RelatedPageIDPath": vvv[1],
                     "Name": a1['Pages']['Name'],
                     "PageType" : a1['Pages']['PageType'],
