@@ -143,6 +143,17 @@ class MaterialIssueView(CreateAPIView):
         try:
             with transaction.atomic():
                 MaterialIssueData = JSONParser().parse(request)
+                MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
+                O_BatchWiseLiveStockList=list()
+                for MaterialIssueItem in MaterialIssueItems:
+                    O_BatchWiseLiveStockList.append({
+                        "Quantity" : MaterialIssueItem['BatchID'],
+                        "Item" : MaterialIssueItem['Item'],
+                        "BaseUnitQuantity" : MaterialIssueItem['IssueQuantity']
+                    })
+                        
+                MaterialIssueData.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': MaterialIssueData})
                 MaterialIssue_Serializer = MaterialIssueSerializer(data=MaterialIssueData)
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
