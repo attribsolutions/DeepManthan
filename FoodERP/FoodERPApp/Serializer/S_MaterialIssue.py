@@ -21,24 +21,38 @@ class MaterialIssueItemsSerializer(serializers.ModelSerializer):
         model = TC_MaterialIssueItems
         fields =['WorkOrderQuantity', 'IssueQuantity', 'BatchDate', 'BatchCode', 'SystemBatchDate', 'SystemBatchCode', 'Item','Unit']
 
+class obatchwiseStockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=O_BatchWiseLiveStock
+        fields=['Quantity','BaseUnitQuantity','Item']
+
 class MaterialIssueSerializer(serializers.ModelSerializer):
     MaterialIssueWorkOrder = MaterialIssueWorkOrdersSerializer(many=True)
     MaterialIssueItems = MaterialIssueItemsSerializer(many=True)
+    obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder']
+        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock']
     
     def create(self, validated_data):
+        
         MaterialIssueItems_data = validated_data.pop('MaterialIssueItems')
         MaterialIssueWorkOrders_data = validated_data.pop('MaterialIssueWorkOrder')
-        
+        O_BatchWiseLiveStockItems_data= validated_data.pop('obatchwiseStock')
+
         MaterialIssueID= T_MaterialIssue.objects.create(**validated_data)
         
         for MaterialIssueItem_data in MaterialIssueItems_data:
             WorkOrderItem = TC_MaterialIssueItems.objects.create(MaterialIssue=MaterialIssueID, **MaterialIssueItem_data)
+            
+        
+        for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
+            OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
+            OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
         
         for MaterialIssueWorkOrder_data in MaterialIssueWorkOrders_data:
-            MaterialIssueWorkOrder = TC_MaterialIssueWorkOrders.objects.create(MaterialIssue=MaterialIssueID, **MaterialIssueWorkOrder_data)    
+            MaterialIssueWorkOrder = TC_MaterialIssueWorkOrders.objects.create(MaterialIssue=MaterialIssueID, **MaterialIssueWorkOrder_data)   
+           
             
         return MaterialIssueID    
 
