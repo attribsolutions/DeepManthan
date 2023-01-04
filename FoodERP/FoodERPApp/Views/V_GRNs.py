@@ -1,3 +1,4 @@
+import datetime
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -91,8 +92,8 @@ class T_GRNView(CreateAPIView):
                 for a in GRNdata['GRNItems']:
                     
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
-                    # query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
-                    
+                    query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                    print(query2['Days'])
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -111,7 +112,7 @@ class T_GRNView(CreateAPIView):
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
-                    "ItemExpiryDate":date.today(),
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2['Days']),
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": a['BaseUnitQuantity'],
                     "MRP": a['MRP'],
