@@ -93,7 +93,7 @@ class T_GRNView(CreateAPIView):
                     
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
-                    print(query2['Days'])
+                   
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -112,7 +112,7 @@ class T_GRNView(CreateAPIView):
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
-                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2['Days']),
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": a['BaseUnitQuantity'],
                     "MRP": a['MRP'],
