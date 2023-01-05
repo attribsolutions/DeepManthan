@@ -14,13 +14,14 @@ from ..models import *
 
 
 def GetRelatedPageID(id):
-    a=M_Pages.objects.filter(id=id).values('RelatedPageID','ActualPagePath') 
-   
+    a=M_Pages.objects.filter(id=id).values('RelatedPageID')
+    aa=M_Pages.objects.filter(id=a[0]['RelatedPageID']).values('ActualPagePath')
+  
     if(a[0]['RelatedPageID']  == 0):
         b=M_Pages.objects.filter(RelatedPageID=id).values('id','ActualPagePath')
         return str(b[0]['id']) +','+ b[0]['ActualPagePath']
     else:
-        return str(a[0]['RelatedPageID']) +','+ a[0]['ActualPagePath']
+        return str(a[0]['RelatedPageID']) +','+ aa[0]['ActualPagePath']
 
 
 class RoleAccessView(RetrieveAPIView):
