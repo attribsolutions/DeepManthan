@@ -101,7 +101,7 @@ class RoleAccessView(RetrieveAPIView):
                 # print(str(RolePageAccess.query))
                 GetRelatedPageIDData=GetRelatedPageID(a1['Pages']['id'])
                 vvv=GetRelatedPageIDData.split(',')
-                print(vvv)
+               
                 Pagesdata.append({
                     "id": a1['Pages']['id'], 
                     "RelatedPageID": int(vvv[0]),
