@@ -296,13 +296,14 @@ class UnitwiseQuantityConversion:
         BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
         self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         
-        if(MCItemUnit == 0): 
-            b=Q(UnitID=ConversionMUnits)
-        else:
-            b=Q(id=ConversionMCItemUnit)
-        ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( b )
-        ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
-        self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
+        if(ConversionMCItemUnit !=0) or (ConversionMUnits!=0):
+            if(ConversionMCItemUnit == 0): 
+                b=Q(UnitID=ConversionMUnits)
+            else:
+                b=Q(id=ConversionMCItemUnit)
+            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( b )
+            ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
+            self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
           
     def GetBaseUnitQuantity(self):
        
