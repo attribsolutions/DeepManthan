@@ -15,7 +15,7 @@ class Partiesserializer(serializers.ModelSerializer):
 class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','CreatedBy']
+        fields = ['Item','Quantity','Unit','OriginalBaseUnitQuantity','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','CreatedBy']
     
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
