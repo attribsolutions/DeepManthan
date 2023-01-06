@@ -49,6 +49,7 @@ class GRNListFilterView(CreateAPIView):
                             "CustomerName": a['Customer']['Name'],
                             "GRNNumber": a['GRNNumber'],
                             "FullGRNNumber": a['FullGRNNumber'],
+                            "InvoiceNumber": a['InvoiceNumber'],
                             "GrandTotal": a['GrandTotal'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
