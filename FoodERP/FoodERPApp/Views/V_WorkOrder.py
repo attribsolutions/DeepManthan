@@ -136,8 +136,6 @@ class WorkOrderView(CreateAPIView):
                 '''Get Order Prifix '''
                 b = GetPrifix.GetWorkOrderPrifix(Division)
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
-                
-            
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
                     WorkOrder_Serializer.save()

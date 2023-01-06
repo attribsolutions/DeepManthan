@@ -10,13 +10,8 @@ class GetMaxNumber:
         
         MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).filter(OrderDate=args[2]).values('OrderNo').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
-        # enddatefinancial = 
-        # print(firstdatefinancial)
-       
-        
         b=args[2]
-        # print(b)
-        
+       
         if(not MaxOrderNumber):
           a = 1
         else:
@@ -30,37 +25,46 @@ class GetMaxNumber:
     def GetGrnNumber(*args):
         
         MaxGrnNumber=T_GRNs.objects.filter(Customer_id=args[0]).values('GRNNumber').order_by('-id')[:1]
-        today = date.today().strftime('%Y-04-01')
+        firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxGrnNumber):
             a=1
         else:
-            a=int(MaxGrnNumber[0]['GRNNumber'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxGrnNumber[0]['GRNNumber'])
+                a=a+1
         return a
     
     def GetDeliveryChallanNumber(*args):
 
         MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
-        today = date.today().strftime('%Y-04-01')
+        firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
-        if(b >= today and not MaxChallanNumber):
+        if(not MaxChallanNumber):
             a=1
         else:
-            a=int(MaxChallanNumber[0]['ChallanNumber'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxChallanNumber[0]['ChallanNumber'])
+                a=a+1
         return a
     
     def GetWorkOrderNumber(*args):
         
         MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).values('WorkOrderNo').order_by('-id')[:1]
-        today = date.today().strftime('%Y-04-01')
+        firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxWorkOrderNumber):
             a=1
         else:
-            a=int(MaxWorkOrderNumber[0]['WorkOrderNo'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxWorkOrderNumber[0]['WorkOrderNo'])
+                a=a+1
         return a
     
 
