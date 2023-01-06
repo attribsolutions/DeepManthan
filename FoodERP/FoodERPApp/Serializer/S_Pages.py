@@ -60,6 +60,9 @@ class M_PagesSerializer(serializers.Serializer):
     RelatedPageName=serializers.CharField(max_length=100)
     IsDivisionRequired = serializers.BooleanField(default=False)
     IsEditPopuporComponent = serializers.BooleanField(default=False)
+    CountLabel = serializers.BooleanField(default=False)
+    ShowCountLabel=serializers.CharField(max_length=200)
+    
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
