@@ -14,15 +14,17 @@ class GetMaxNumber:
         # print(firstdatefinancial)
        
         
-        # b=args[2]
+        b=args[2]
         # print(b)
         
         if(not MaxOrderNumber):
           a = 1
         else:
-            
-            a=int(MaxOrderNumber[0]['OrderNo'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:
+                a=int(MaxOrderNumber[0]['OrderNo'])
+                a=a+1
         return a
     
     def GetGrnNumber(*args):
@@ -30,7 +32,7 @@ class GetMaxNumber:
         MaxGrnNumber=T_GRNs.objects.filter(Customer_id=args[0]).values('GRNNumber').order_by('-id')[:1]
         today = date.today().strftime('%Y-04-01')
         b=args[1]
-        if(b >= today and not MaxGrnNumber):
+        if(not MaxGrnNumber):
             a=1
         else:
             a=int(MaxGrnNumber[0]['GRNNumber'])
@@ -54,7 +56,7 @@ class GetMaxNumber:
         MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).values('WorkOrderNo').order_by('-id')[:1]
         today = date.today().strftime('%Y-04-01')
         b=args[1]
-        if(b >= today and not MaxWorkOrderNumber):
+        if(not MaxWorkOrderNumber):
             a=1
         else:
             a=int(MaxWorkOrderNumber[0]['WorkOrderNo'])
