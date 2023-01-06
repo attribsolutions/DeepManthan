@@ -65,10 +65,10 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
-                        inward=0 
+                        inward = 0
                         for c in a['OrderReferences']:
-                            if( c['Inward'] == 1):
-                                inward =1
+                            if(c['Inward'] == 1):
+                                inward = 1
                         OrderListData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -133,7 +133,8 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 OrderQuery = T_Orders.objects.filter(id=id)
                 if OrderQuery.exists():
-                    OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
+                    OrderSerializedata = T_OrderSerializerThird(
+                        OrderQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                     OrderData = list()
                     for a in OrderSerializedata:
@@ -175,12 +176,11 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "Comment": b['Comment'],
                                 })
-                        inward=0 
+                        inward = 0
                         for c in a['OrderReferences']:
-                            if( c['Inward'] == 1):
-                                inward =1
-                            
-                                   
+                            if(c['Inward'] == 1):
+                                inward = 1
+
                         OrderData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -278,16 +278,19 @@ class GetItemsForOrderView(CreateAPIView):
                         UnitDetails = list()
                         for d in a['Item']['ItemUnitDetails']:
                             if d['IsDeleted'] == 0:
-                                ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsBase=1).values('UnitID')
-                                qwer=ItemUnitquery[0]['UnitID']
-                                BaseUnitNamequery = M_Units.objects.filter(id=qwer).values('Name')
-                                q=BaseUnitNamequery[0]['Name']
-                                baseunitconcat=" ("+d['BaseUnitQuantity']+" "+q+")"
+                                ItemUnitquery = MC_ItemUnits.objects.filter(
+                                    Item=ItemID, IsBase=1).values('UnitID')
+                                qwer = ItemUnitquery[0]['UnitID']
+                                BaseUnitNamequery = M_Units.objects.filter(
+                                    id=qwer).values('Name')
+                                q = BaseUnitNamequery[0]['Name']
+                                baseunitconcat = " (" + \
+                                    d['BaseUnitQuantity']+" "+q+")"
                                 UnitDetails.append({
                                     # Below UnitID is MC_ItemUnits Primary id
                                     "UnitID": d['id'],
                                     # "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name']+ baseunitconcat,
+                                    "UnitName": d['UnitID']['Name'] + baseunitconcat,
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                 })
 
@@ -319,7 +322,7 @@ class EditOrderView(CreateAPIView):
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
-                
+
                 Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
                 from
@@ -366,112 +369,111 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         r = ratequery[0]['Rate']
 
                     if b['Rate'] is None:
-                       b['Rate'] = r
+                        b['Rate'] = r
             # =====================Rate================================================
                     UnitDetails = list()
                     ItemUnitquery = MC_ItemUnits.objects.filter(
                         Item=ItemID, IsDeleted=0)
                     ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
                         ItemUnitquery, many=True).data
-                    
+
                     for d in ItemUnitqueryserialize:
-                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ItemID,d['id'],d['BaseUnitQuantity']).ShowDetails()
+                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
+                            ItemID, d['id'], d['BaseUnitQuantity']).ShowDetails()
                         UnitDetails.append({
                             "UnitID": d['id'],
                             "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "PODefaultUnit": d['PODefaultUnit'],
-                            "SODefaultUnit": d['SODefaultUnit'],  
-                           
-                         
+                            "SODefaultUnit": d['SODefaultUnit'],
+
+
                         })
             # =====================IsDefaultTermsAndConditions================================================
                     TermsAndConditions = list()
-                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(IsDefault=1)
-                    TermsAndConditionsSerializer=M_TermsAndConditionsSerializer(TermsAndConditionsquery,many=True).data  
-                    
+                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
+                        IsDefault=1)
+                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
+                        TermsAndConditionsquery, many=True).data
 
                     for d in TermsAndConditionsSerializer:
                         TermsAndConditions.append({
                             "id": d['id'],
                             "TermsAndCondition": d['Name']
-                            
-                        })            
 
-                    
-                    
-                    
+                        })
+
                     b.update({"StockQuantity": Stock,
                               "UnitDetails": UnitDetails
                               })
-                    
-                          
-                                
+
                 if OrderID != 0:
-                    OrderQuery=T_Orders.objects.get(id=OrderID)
-                    a=T_OrderSerializerThird(OrderQuery).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': a})
+                    OrderQuery = T_Orders.objects.get(id=OrderID)
+                    a = T_OrderSerializerThird(OrderQuery).data
+
                     OrderTermsAndCondition = list()
                     for b in a['OrderTermsAndConditions']:
-                       # print(b['TermsAndCondition']['IsDeleted'])
-                        if b['IsDeleted'] ==0:
+                        # print(b['TermsAndCondition']['IsDeleted'])
+                        if b['IsDeleted'] == 0:
                             OrderTermsAndCondition.append({
                                 "id": b['TermsAndCondition']['id'],
                                 "TermsAndCondition": b['TermsAndCondition']['Name'],
                             })
+                    inward=0 
+                    for c in a['OrderReferences']:
+                        if( c['Inward'] == 1):
+                            inward =1        
 
-
-                    OrderData=list()
+                    OrderData = list()
                     OrderData.append({
-                                "id": a['id'],
-                                "OrderDate": a['OrderDate'],
-                                "DeliveryDate": a['DeliveryDate'],
-                                "POFromDate": a['POFromDate'],
-                                "POToDate": a['POToDate'],
-                                "POType": a['POType']['id'],
-                                "POTypeName": a['POType']['Name'],
-                                "OrderAmount": a['OrderAmount'],
-                                "Description": a['Description'],
-                                "Customer": a['Customer']['id'],
-                                "CustomerName": a['Customer']['Name'],
-                                "Supplier": a['Supplier']['id'],
-                                "SupplierName": a['Supplier']['Name'],
-                                "BillingAddressID": a['BillingAddress']['id'],
-                                "BillingAddress": a['BillingAddress']['Address'],
-                                "ShippingAddressID": a['ShippingAddress']['id'],
-                                "ShippingAddress": a['ShippingAddress']['Address'],
-                                "Inward": a['Inward'],  
-                                "OrderItems": OrderItemSerializer,
-                                "TermsAndConditions" : OrderTermsAndCondition
+                        "id": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "DeliveryDate": a['DeliveryDate'],
+                        "POFromDate": a['POFromDate'],
+                        "POToDate": a['POToDate'],
+                        "POType": a['POType']['id'],
+                        "POTypeName": a['POType']['Name'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Description": a['Description'],
+                        "Customer": a['Customer']['id'],
+                        "CustomerName": a['Customer']['Name'],
+                        "Supplier": a['Supplier']['id'],
+                        "SupplierName": a['Supplier']['Name'],
+                        "BillingAddressID": a['BillingAddress']['id'],
+                        "BillingAddress": a['BillingAddress']['Address'],
+                        "ShippingAddressID": a['ShippingAddress']['id'],
+                        "ShippingAddress": a['ShippingAddress']['Address'],
+                        "Inward": inward,
+                        "OrderItems": OrderItemSerializer,
+                        "TermsAndConditions": OrderTermsAndCondition
                     })
-                    FinalResult=OrderData[0]
+                    FinalResult = OrderData[0]
                 else:
-                    NewOrder=list()
+                    NewOrder = list()
                     NewOrder.append({
-                                "id": "",
-                                "OrderDate":"",
-                                "DeliveryDate": "",
-                                "POFromDate": "",
-                                "POToDate": "",
-                                "POType": "",
-                                "POTypeName": "",
-                                "OrderAmount": "",
-                                "Description": "",
-                                "Customer": "",
-                                "CustomerName": "",
-                                "Supplier": "",
-                                "SupplierName": "",
-                                "BillingAddressID": "",
-                                "BillingAddress": "",
-                                "ShippingAddressID": "",
-                                "ShippingAddress": "",
-                                "Inward": "",  
-                                "OrderItems":OrderItemSerializer,
-                                "TermsAndConditions" : TermsAndConditions
-                                })
+                        "id": "",
+                        "OrderDate": "",
+                        "DeliveryDate": "",
+                        "POFromDate": "",
+                        "POToDate": "",
+                        "POType": "",
+                        "POTypeName": "",
+                        "OrderAmount": "",
+                        "Description": "",
+                        "Customer": "",
+                        "CustomerName": "",
+                        "Supplier": "",
+                        "SupplierName": "",
+                        "BillingAddressID": "",
+                        "BillingAddress": "",
+                        "ShippingAddressID": "",
+                        "ShippingAddress": "",
+                        "Inward": "",
+                        "OrderItems": OrderItemSerializer,
+                        "TermsAndConditions": TermsAndConditions
+                    })
 
-                    FinalResult=NewOrder[0]
-                         
+                    FinalResult = NewOrder[0]
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
