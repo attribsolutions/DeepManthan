@@ -15,13 +15,13 @@ class Partiesserializer(serializers.ModelSerializer):
 class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['Item','Quantity','Unit','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','CreatedBy']
+        fields = ['Item','Quantity','Unit','OriginalBaseUnitQuantity','BaseUnitQuantity','MRP','GST','Rate','Party','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','CreatedBy']
     
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo']        
+        fields = ['Invoice', 'Order', 'ChallanNo','Inward']        
 
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,22 +42,23 @@ class T_GRNSerializer(serializers.ModelSerializer):
         GRNItems_data = validated_data.pop('GRNItems')
         O_BatchWiseLiveStockItems_data=validated_data.pop('O_BatchWiseLiveStockItems')
         GRNReferences_data = validated_data.pop('GRNReferences')
+        
+        
         grnID = T_GRNs.objects.create(**validated_data)
         
         for GRNItem_data in GRNItems_data :
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
  
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
-            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data,TransactionType =1)  
+            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,**O_BatchWiseLiveStockItem_data)  
             
+        
         for GRNReference_data in GRNReferences_data:
             a=str(GRNReference_data['Order']) 
             OrderID=re.findall(r'\d+', a)
-            print(OrderID[0])
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
             
-            Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
-            
+       
         return grnID
       
 
@@ -107,7 +108,7 @@ class Partiesserializer(serializers.ModelSerializer):
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo'] 
+        fields = ['Invoice', 'Order', 'ChallanNo','Inward'] 
         
 class ItemSerializer(serializers.ModelSerializer):
     class Meta : 

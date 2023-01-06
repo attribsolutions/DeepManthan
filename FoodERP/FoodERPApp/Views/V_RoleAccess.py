@@ -15,12 +15,13 @@ from ..models import *
 
 def GetRelatedPageID(id):
     a=M_Pages.objects.filter(id=id).values('RelatedPageID')
-   
+    aa=M_Pages.objects.filter(id=a[0]['RelatedPageID']).values('ActualPagePath')
+  
     if(a[0]['RelatedPageID']  == 0):
-        b=M_Pages.objects.filter(RelatedPageID=id).values('id')
-        return b[0]['id']
+        b=M_Pages.objects.filter(RelatedPageID=id).values('id','ActualPagePath')
+        return str(b[0]['id']) +','+ b[0]['ActualPagePath']
     else:
-        return a[0]['RelatedPageID'] 
+        return str(a[0]['RelatedPageID']) +','+ aa[0]['ActualPagePath']
 
 
 class RoleAccessView(RetrieveAPIView):
@@ -98,10 +99,15 @@ class RoleAccessView(RetrieveAPIView):
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(
                     RolePageAccess,  many=True).data
                 # print(str(RolePageAccess.query))
+                GetRelatedPageIDData=GetRelatedPageID(a1['Pages']['id'])
+                vvv=GetRelatedPageIDData.split(',')
+               
                 Pagesdata.append({
                     "id": a1['Pages']['id'], 
-                    "RelatedPageID": GetRelatedPageID(a1['Pages']['id']),
+                    "RelatedPageID": int(vvv[0]),
+                    "RelatedPageIDPath": vvv[1],
                     "Name": a1['Pages']['Name'],
+                    "PageType" : a1['Pages']['PageType'],
                     "PageHeading": a1['Pages']['PageHeading'],
                     "PageDescription": a1['Pages']['PageDescription'],
                     "PageDescriptionDetails": a1['Pages']['PageDescriptionDetails'],

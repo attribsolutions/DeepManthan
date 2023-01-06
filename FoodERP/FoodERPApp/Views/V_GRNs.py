@@ -1,3 +1,4 @@
+import datetime
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -74,6 +75,10 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
+                # print(GRNdata['GRNReferences'])
+
+                # if R in GRNdata['GRNReferences']:
+                #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
 # ==========================Get Max GRN Number=====================================================
                 a = GetMaxNumber.GetGrnNumber(Customer,GRNDate)
                 GRNdata['GRNNumber'] = a
@@ -87,8 +92,8 @@ class T_GRNView(CreateAPIView):
                 for a in GRNdata['GRNItems']:
                     
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
-                    # query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
-                    
+                    query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                   
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -101,15 +106,19 @@ class T_GRNView(CreateAPIView):
                         b = 0
 
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
-
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0)
+                    BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    print(BaseUnitQuantity)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
+                    a['BaseUnitQuantity'] = BaseUnitQuantity
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
-                    "ItemExpiryDate":date.today(),
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "Unit": a['Unit'],
-                    "BaseUnitQuantity": a['BaseUnitQuantity'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],

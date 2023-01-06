@@ -762,7 +762,7 @@ class T_Orders(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Inward = models.PositiveSmallIntegerField(default=0)
+    # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Orders"
 
@@ -911,11 +911,11 @@ class T_GRNs(models.Model):
         db_table = "T_GRNs"
 
 class TC_GRNReferences(models.Model):
-    GRN = models.ForeignKey(
-        T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
-    Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING ,null=True) 
-    Invoice = models.ForeignKey(T_Invoices, on_delete=models.DO_NOTHING ,null=True)
+    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
+    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
+    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
     ChallanNo = models.CharField(max_length=500 ,null=True)
+    Inward = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_GRNReferences"    
 
@@ -1140,6 +1140,7 @@ class O_BatchWiseLiveStock(models.Model):
     SystemBatchCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
+    OriginalBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
