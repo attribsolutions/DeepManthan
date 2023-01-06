@@ -410,7 +410,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                 if OrderID != 0:
                     OrderQuery=T_Orders.objects.get(id=OrderID)
                     a=T_OrderSerializerThird(OrderQuery).data
-                   
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': a})
                     OrderTermsAndCondition = list()
                     for b in a['OrderTermsAndConditions']:
                        # print(b['TermsAndCondition']['IsDeleted'])
@@ -475,4 +475,4 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
