@@ -1,9 +1,8 @@
-from dataclasses import fields
 from rest_framework import serializers
 from ..models import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_Companies import *
-from ..Serializer.S_Parties import *
+from ..Serializer.S_Parties import * 
 
 
 class StockQtyserializerForMaterialIssue(serializers.ModelSerializer):
@@ -47,15 +46,27 @@ class MaterialIssueSerializer(serializers.ModelSerializer):
             
         
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
-            OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
-            OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
-        
+            
+                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
+                
+                if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
+                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
+                else:
+                    
+                    raise serializers.ValidationError("Not In Stock ")
+                   
+
+
+
         for MaterialIssueWorkOrder_data in MaterialIssueWorkOrders_data:
             MaterialIssueWorkOrder = TC_MaterialIssueWorkOrders.objects.create(MaterialIssue=MaterialIssueID, **MaterialIssueWorkOrder_data)   
            
             
         return MaterialIssueID    
+    
 
+
+    
 # Get ALL ,Get Single BOM
 
 class MaterialIssueItemsSerializerSecond(serializers.ModelSerializer):
