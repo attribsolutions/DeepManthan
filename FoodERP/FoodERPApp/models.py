@@ -902,7 +902,7 @@ class T_GRNs(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='GRNCustomer', on_delete=models.PROTECT)
     GRNNumber = models.IntegerField()
     FullGRNNumber = models.CharField(max_length=500)
-    InvoiceNumber = models.CharField(max_length=300,null=True,blank=True) # This Invoice Number  - Vendors Invoice Number
+    InvoiceNumber = models.CharField(max_length=300) # This Invoice Number  - Vendors Invoice Number
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
