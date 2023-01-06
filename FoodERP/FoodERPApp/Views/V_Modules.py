@@ -27,8 +27,8 @@ class H_ModulesView(CreateAPIView):
                     Modulesdata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Modules_Serializer.data })
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
          
 
     @transaction.atomic()
@@ -43,8 +43,8 @@ class H_ModulesView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors, 'Data': []})
-        except Exception  :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error' , 'Data':[]})       
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
 
 class H_ModulesViewSecond(RetrieveAPIView):
     
@@ -75,8 +75,8 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors,'Data' :[]})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})            
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
 
     @transaction.atomic()
     def delete(self, request, id=0):
