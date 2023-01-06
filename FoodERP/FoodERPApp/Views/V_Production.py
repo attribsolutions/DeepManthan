@@ -8,12 +8,16 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from ..Serializer.S_Items import ItemSerializerSecond
+
+from ..Views.V_CommFunction import ShowBaseUnitQtyOnUnitDropDown
+
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 
 from ..Serializer.S_Production import *
-
 from ..models import *
 
+                    
 
 class ProductionformMaterialIssue(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -28,7 +32,12 @@ class ProductionformMaterialIssue(CreateAPIView):
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+        
+         
 
 class ProductionFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -95,6 +104,7 @@ class ProductionView(CreateAPIView):
                     "BatchDate": Productiondata['BatchDate'],
                     "BatchCode": Productiondata['SupplierBatchCode'],
                     "CreatedBy":Productiondata['CreatedBy'],
+                    "ItemExpiryDate":Productiondata['BestBefore']
                     
                     })
 

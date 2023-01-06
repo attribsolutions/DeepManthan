@@ -61,7 +61,34 @@ class M_ItemTag(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
- 
+        
+class MCUnitDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                MaterialIssueIDdata = JSONParser().parse(request)
+                ItemID = MaterialIssueIDdata['Item']   
+                Itemsquery = MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0)
+                if Itemsquery.exists():
+                    Itemsdata = ItemUnitsSerializerSecond(Itemsquery, many=True).data
+                    UnitDetails=list()
+                    for d in Itemsdata:
+                        baseunitconcat1=ShowBaseUnitQtyOnUnitDropDown(ItemID,d['id'],d['BaseUnitQuantity']).ShowDetails()
+                        UnitDetails.append({
+                            "id": d['id'],
+                            "UnitID": d['UnitID']['id'],
+                            "UnitName": d['UnitID']['Name'] +baseunitconcat1,
+                            "BaseUnitQuantity": d['BaseUnitQuantity'],
+                            "IsBase": d['IsBase'],
+                            "PODefaultUnit": d['PODefaultUnit'],
+                            "SODefaultUnit": d['SODefaultUnit'],         
+                        })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UnitDetails})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
+        
 class M_ItemsView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
