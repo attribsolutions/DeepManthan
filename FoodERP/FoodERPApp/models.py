@@ -991,6 +991,8 @@ class T_WorkOrder(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
     Bom = models.ForeignKey(M_BillOfMaterial, related_name='BomID', on_delete=models.PROTECT)
+    WorkOrderNo = models.IntegerField()
+    FullWorkOrderNumber = models.CharField(max_length=500)
     NumberOfLot = models.IntegerField()
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
