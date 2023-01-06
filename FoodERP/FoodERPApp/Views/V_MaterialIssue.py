@@ -9,6 +9,7 @@ from django.db.models import Sum
 from ..Serializer.S_WorkOrder import *
 from ..Serializer.S_MaterialIssue import *
 from ..models import *
+from rest_framework.views import exception_handler
 
 class WorkOrderDetailsView(CreateAPIView):
        
@@ -153,16 +154,21 @@ class MaterialIssueView(CreateAPIView):
                     })
                         
                 MaterialIssueData.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': MaterialIssueData})
+                
                 MaterialIssue_Serializer = MaterialIssueSerializer(data=MaterialIssueData)
+                
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': []})
                 else:
+                   
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer.errors, 'Data': []})
+                    
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+               
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': e.__dict__, 'Data': []})
+                  
 
 class MaterialIssueViewSecond(RetrieveAPIView):
        
