@@ -132,6 +132,11 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'IsDivisionRequired', instance.IsDivisionRequired)
             instance.IsEditPopuporComponent = validated_data.get(
                 'IsEditPopuporComponent', instance.IsEditPopuporComponent)
+            instance.CountLabel = validated_data.get(
+                'CountLabel', instance.CountLabel)
+            instance.ShowCountLabel = validated_data.get(
+                'ShowCountLabel', instance.ShowCountLabel)
+            
             instance.save()
 
             for Access in instance.PagePageAccess.all():
