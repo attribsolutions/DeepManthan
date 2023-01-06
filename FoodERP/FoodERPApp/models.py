@@ -739,6 +739,7 @@ class MC_PartyPrefixs(models.Model):
     Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)
     class Meta:
         db_table = "MC_PartyPrefixs"        
             
