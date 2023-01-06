@@ -55,6 +55,7 @@ class M_PagesSerializer(serializers.Serializer):
     Icon = serializers.CharField(max_length=100)
     ActualPagePath = serializers.CharField(max_length=100)
     PageType = serializers.IntegerField()
+    PageTypeName=serializers.CharField(max_length=100)
     RelatedPageID = serializers.IntegerField()
     RelatedPageName=serializers.CharField(max_length=100)
     IsDivisionRequired = serializers.BooleanField(default=False)

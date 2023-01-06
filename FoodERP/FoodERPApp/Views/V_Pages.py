@@ -71,7 +71,7 @@ class M_PagesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,p.IsEditPopuporComponent,Rp.Name RelatedPageName FROM M_Pages p join H_Modules m on p.Module_id= m.ID left join M_Pages RP on p.RelatedPageID=RP.id where p.id= %s''', [id])
+                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,p.IsEditPopuporComponent,Rp.Name RelatedPageName,m_pagetype.Name PageTypeName FROM M_Pages p join H_Modules m on p.Module_id= m.ID left join M_Pages RP on p.RelatedPageID=RP.id join m_pagetype on m_pagetype.id= p.pagetype where p.id= %s''', [id])
                 
                 if not HPagesdata:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
@@ -173,6 +173,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
                             "Icon": a['Icon'],
                             "ActualPagePath": a['ActualPagePath'],
                             "PageType": a['PageType'],
+                            "PageTypeName": a['PageTypeName'],
                             "RelatedPageId": a['RelatedPageID'],
                             "RelatedPageName": a['RelatedPageName'],
                             "IsDivisionRequired":a['IsDivisionRequired'],
