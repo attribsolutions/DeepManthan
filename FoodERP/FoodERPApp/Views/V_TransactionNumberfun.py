@@ -69,7 +69,7 @@ class GetMaxNumber:
     
     def GetMaterialIssueNumber(*args):
         
-        MaxMaterialIssueNumber=T_WorkOrder.objects.filter(Party_id=args[0]).filter(MaterialIssueDate=args[1]).values('MaterialIssueNumber').order_by('-id')[:1]
+        MaxMaterialIssueNumber=T_MaterialIssue.objects.filter(Party_id=args[0]).filter(MaterialIssueDate=args[1]).values('MaterialIssueNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxMaterialIssueNumber):
