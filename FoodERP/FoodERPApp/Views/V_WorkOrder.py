@@ -126,15 +126,15 @@ class WorkOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
-                Division = WorkOrderData['Division']
+                Party = WorkOrderData['Party']
                
                 WorkOrderDate = WorkOrderData['OrderDate']
-                a = GetMaxNumber.GetWorkOrderNumber(Division, WorkOrderDate)
+                a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 print(a)
                 WorkOrderData['WorkOrderNumber'] = a
                 '''Get Order Prifix '''
-                b = GetPrifix.GetWorkOrderPrifix(Division)
+                b = GetPrifix.GetWorkOrderPrifix(Party)
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
