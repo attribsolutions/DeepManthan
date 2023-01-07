@@ -31,7 +31,7 @@ class MaterialIssueSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock']
+        fields = ['id', 'MaterialIssueDate', 'MaterialIssueNumber', 'FullMaterialIssueNumber', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock']
     
     def create(self, validated_data):
         
@@ -85,6 +85,6 @@ class MatetrialIssueSerializerSecond(serializers.ModelSerializer):
     Unit = ItemUnitsSerializerSecond(read_only=True)
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','CreatedOn']
+        fields = ['id', 'MaterialIssueDate','MaterialIssueNumber','FullMaterialIssueNumber','NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','CreatedOn']
     
            

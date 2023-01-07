@@ -67,6 +67,21 @@ class GetMaxNumber:
                 a=a+1
         return a
     
+    def GetMaterialIssueNumber(*args):
+        
+        MaxMaterialIssueNumber=T_WorkOrder.objects.filter(Party_id=args[0]).filter(MaterialIssueDate=args[1]).values('MaterialIssueNumber').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxMaterialIssueNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxMaterialIssueNumber[0]['MaterialIssueNumber'])
+                a=a+1
+        return a
+    
 
 class GetPrifix:
                  
@@ -100,6 +115,14 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['WorkOrderprefix']
+        return a
+    
+    def GetMaterialIssuePrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('MaterialIssueprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['MaterialIssueprefix']
         return a
     
     
