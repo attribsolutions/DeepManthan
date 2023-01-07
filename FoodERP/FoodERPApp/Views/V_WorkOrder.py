@@ -128,7 +128,7 @@ class WorkOrderView(CreateAPIView):
                 WorkOrderData = JSONParser().parse(request)
                 Party = WorkOrderData['Party']
                
-                WorkOrderDate = WorkOrderData['OrderDate']
+                WorkOrderDate = WorkOrderData['WorkOrderDate']
                 a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 print(a)
