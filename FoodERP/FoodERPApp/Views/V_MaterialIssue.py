@@ -118,6 +118,8 @@ class MaterialIsssueList(CreateAPIView):
                         MaterialIsssueListData.append({
                         "id": a['id'],
                         "MaterialIssueDate": a['MaterialIssueDate'],
+                        "MaterialIssueNumber": a['MaterialIssueNumber'],
+                        "FullMaterialIssueNumber": a['FullMaterialIssueNumber'],
                         "Item":a['Item']['id'],
                         "ItemName":a['Item']['Name'],
                         "Unit": a['Unit']['id'],
