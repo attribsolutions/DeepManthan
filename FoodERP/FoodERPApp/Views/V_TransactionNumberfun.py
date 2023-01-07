@@ -8,39 +8,65 @@ class GetMaxNumber:
 
     def GetOrderNumber(*args):
         
-        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).values('OrderNo').order_by('-id')[:1]
-        today = date.today().strftime('%Y-04-01')
+        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).filter(OrderDate=args[2]).values('OrderNo').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[2]
-        if(b >= today and not MaxOrderNumber):
-            a=1
+       
+        if(not MaxOrderNumber):
+          a = 1
         else:
-            a=int(MaxOrderNumber[0]['OrderNo'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:
+                a=int(MaxOrderNumber[0]['OrderNo'])
+                a=a+1
         return a
     
     def GetGrnNumber(*args):
         
         MaxGrnNumber=T_GRNs.objects.filter(Customer_id=args[0]).values('GRNNumber').order_by('-id')[:1]
-        today = date.today().strftime('%Y-04-01')
+        firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
-        if(b >= today and not MaxGrnNumber):
+        if(not MaxGrnNumber):
             a=1
         else:
-            a=int(MaxGrnNumber[0]['GRNNumber'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxGrnNumber[0]['GRNNumber'])
+                a=a+1
         return a
     
     def GetDeliveryChallanNumber(*args):
 
         MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
-        today = date.today().strftime('%Y-04-01')
+        firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
-        if(b >= today and not MaxChallanNumber):
+        if(not MaxChallanNumber):
             a=1
         else:
-            a=int(MaxChallanNumber[0]['ChallanNumber'])
-            a=a+1
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxChallanNumber[0]['ChallanNumber'])
+                a=a+1
         return a
+    
+    def GetWorkOrderNumber(*args):
+        
+        MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).values('WorkOrderNo').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxWorkOrderNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxWorkOrderNumber[0]['WorkOrderNo'])
+                a=a+1
+        return a
+    
 
 class GetPrifix:
                  
@@ -66,6 +92,14 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['Challanprefix']
+        return a
+    
+    def GetWorkOrderPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('WorkOrderprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['WorkOrderprefix']
         return a
     
     

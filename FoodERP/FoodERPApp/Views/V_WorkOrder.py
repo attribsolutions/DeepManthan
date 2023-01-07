@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from django.db.models import Sum
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Bom import *
@@ -125,6 +126,16 @@ class WorkOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
+                Division = WorkOrderData['Division']
+               
+                WorkOrderDate = WorkOrderData['OrderDate']
+                a = GetMaxNumber.GetWorkOrderNumber(Division, WorkOrderDate)
+                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+                print(a)
+                WorkOrderData['WorkOrderNumber'] = a
+                '''Get Order Prifix '''
+                b = GetPrifix.GetWorkOrderPrifix(Division)
+                WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
                     WorkOrder_Serializer.save()
