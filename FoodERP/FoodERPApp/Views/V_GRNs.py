@@ -225,8 +225,12 @@ class T_GRNViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(GRN_id=id)
-                O_BatchWiseLiveStockData.delete()
+                O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(GRN_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+              
+                for a in O_BatchWiseLiveStockData:
+                    if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})   
+                
                 GRN_Data = T_GRNs.objects.get(id=id)
                 GRN_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Deleted Successfully', 'Data': []})
