@@ -1067,7 +1067,7 @@ class T_Production(models.Model):
         BatchDate = models.DateField()
         BatchCode = models.CharField(max_length=500)		
         StoreLocation = models.CharField(max_length=500)
-        SupplierBatchCode = models.CharField(max_length=500)		
+        PrintedBatchCode = models.CharField(max_length=500)		
         BestBefore = models.DateField()  
         Remark = models.CharField(max_length=500)	
         Company = models.ForeignKey(C_Companies,  on_delete=models.PROTECT)		
