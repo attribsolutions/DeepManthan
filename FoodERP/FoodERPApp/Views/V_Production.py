@@ -10,7 +10,7 @@ from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Items import ItemSerializerSecond
 
-from ..Views.V_CommFunction import ShowBaseUnitQtyOnUnitDropDown
+from ..Views.V_CommFunction import *
 
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 
@@ -19,7 +19,7 @@ from ..models import *
 
                     
 
-class ProductionformMaterialIssue(CreateAPIView):
+class MaterialIssueDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
@@ -85,7 +85,13 @@ class ProductionView(CreateAPIView):
                 Item = Productiondata['Item']
                 
                 query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')
+                
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
+                
+                BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0).GetBaseUnitQuantity()
+                
+                Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()
+                GSTID = Gst[0]['Gstid']
 
                 Productiondata['BatchCode'] = BatchCode
                 Productiondata['BatchDate'] = date.today()
@@ -94,15 +100,16 @@ class ProductionView(CreateAPIView):
                     "Item": Productiondata['Item'],
                     "Quantity": Productiondata['ActualQuantity'],
                     "Unit": Productiondata['Unit'],
-                    "BaseUnitQuantity": Productiondata['ActualQuantity'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "MRP": Productiondata['MRP'],
                     "Rate": Productiondata['Rate'],
-                    "GST": Productiondata['GST'],
+                    "GST": GSTID,
                     "Party": Customer,
                     "SystemBatchDate": Productiondata['BatchDate'],
                     "SystemBatchCode": Productiondata['BatchCode'],
                     "BatchDate": Productiondata['BatchDate'],
-                    "BatchCode": Productiondata['SupplierBatchCode'],
+                    "BatchCode": Productiondata['PrintedBatchCode'],
                     "CreatedBy":Productiondata['CreatedBy'],
                     "ItemExpiryDate":Productiondata['BestBefore']
                     
@@ -157,6 +164,11 @@ class ProductionViewSecond(RetrieveAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
+                O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(Production_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+                for a in O_BatchWiseLiveStockData:
+                    if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})   
+                
                 Productiondata = T_Production.objects.get(id=id)
                 Productiondata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})
