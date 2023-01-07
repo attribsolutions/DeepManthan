@@ -97,6 +97,8 @@ class WorkOrderList(CreateAPIView):
                         WorkOrderListData.append({
                         "id": a['id'],
                         "WorkOrderDate": a['WorkOrderDate'],
+                        "WorkOrderNumber": a['WorkOrderNumber'],
+                        "FullWorkOrderNumber": a['FullWorkOrderNumber'],
                         "Item":a['Item']['id'],
                         "ItemName":a['Item']['Name'],
                         "Unit": a['Unit']['id'],
@@ -126,15 +128,16 @@ class WorkOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
-                Division = WorkOrderData['Division']
+                Party = WorkOrderData['Party']
                
-                WorkOrderDate = WorkOrderData['OrderDate']
-                a = GetMaxNumber.GetWorkOrderNumber(Division, WorkOrderDate)
+                WorkOrderDate = WorkOrderData['WorkOrderDate']
+                a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 print(a)
                 WorkOrderData['WorkOrderNumber'] = a
                 '''Get Order Prifix '''
-                b = GetPrifix.GetWorkOrderPrifix(Division)
+                b = GetPrifix.GetWorkOrderPrifix(Party)
+                print(b)
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
@@ -192,6 +195,8 @@ class WorkOrderViewSecond(RetrieveAPIView):
                             WorkOrderData.append({
                                 "id": a['id'],
                                 "WorkOrderDate": a['WorkOrderDate'],
+                                "WorkOrderNumber": a['WorkOrderNumber'],
+                                "FullWorkOrderNumber": a['FullWorkOrderNumber'],
                                 "Item":a['Item']['id'],
                                 "ItemName":a['Item']['Name'],
                                 "Unit": a['Unit']['id'],

@@ -740,6 +740,8 @@ class MC_PartyPrefixs(models.Model):
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    MaterialIssueprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    
     class Meta:
         db_table = "MC_PartyPrefixs"        
             
@@ -1018,6 +1020,8 @@ class TC_WorkOrderItems(models.Model):
                     
 class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
+    MaterialIssueNumber = models.IntegerField()
+    FullMaterialIssueNumber = models.CharField(max_length=500)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     NumberOfLot = models.IntegerField()
     LotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
