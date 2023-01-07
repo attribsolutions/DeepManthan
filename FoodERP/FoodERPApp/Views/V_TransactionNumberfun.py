@@ -63,7 +63,7 @@ class GetMaxNumber:
             if(b==firstdatefinancial):
                 a = 1
             else:    
-                a=int(MaxWorkOrderNumber[0]['WorkOrderNo'])
+                a=int(MaxWorkOrderNumber[0]['WorkOrderNumber'])
                 a=a+1
         return a
     
