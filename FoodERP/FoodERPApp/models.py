@@ -967,7 +967,7 @@ class M_TransactionType(models.Model):
 class M_BillOfMaterial(models.Model):
     BomDate = models.DateField()
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
-    EstimatedOutputQty = models.DecimalField(max_digits=15, decimal_places=2)
+    EstimatedOutputQty = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
     Comment = models.CharField(max_length=500 ,null=True,blank=True)
     IsActive = models.BooleanField(default=False)
