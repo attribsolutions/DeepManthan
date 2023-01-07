@@ -97,6 +97,8 @@ class WorkOrderList(CreateAPIView):
                         WorkOrderListData.append({
                         "id": a['id'],
                         "WorkOrderDate": a['WorkOrderDate'],
+                        "WorkOrderNumber": a['WorkOrderNumber'],
+                        "FullWorkOrderNumber": a['FullWorkOrderNumber'],
                         "Item":a['Item']['id'],
                         "ItemName":a['Item']['Name'],
                         "Unit": a['Unit']['id'],
