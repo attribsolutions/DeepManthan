@@ -54,7 +54,7 @@ class GetMaxNumber:
     
     def GetWorkOrderNumber(*args):
         
-        MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).values('WorkOrderNo').order_by('-id')[:1]
+        MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).filter(OrderDate=args[1]).values('WorkOrderNo').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxWorkOrderNumber):
