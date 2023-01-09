@@ -439,16 +439,16 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                 else:
 
                     TermsAndConditions = list()
-                TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
+                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
                     IsDefault=1)
-                TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
+                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
                     TermsAndConditionsquery, many=True).data
 
-                for d in TermsAndConditionsSerializer:
-                    TermsAndConditions.append({
-                        "id": d['id'],
-                        "TermsAndCondition": d['Name']
-                    })
+                    for d in TermsAndConditionsSerializer:
+                        TermsAndConditions.append({
+                            "id": d['id'],
+                            "TermsAndCondition": d['Name']
+                        })
 
                     NewOrder = list()
                     NewOrder.append({
