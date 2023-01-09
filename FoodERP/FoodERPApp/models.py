@@ -1061,6 +1061,7 @@ class TC_MaterialIssueWorkOrders(models.Model):
 class T_Production(models.Model): 
         ProductionDate = models.DateField()  
         Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+        Unit = models.ForeignKey(MC_ItemUnits, related_name='ProductionUnitID', on_delete=models.PROTECT)
         EstimatedQuantity = models.DecimalField(max_digits=15, decimal_places=3)	
         NumberOfLot = models.IntegerField()
         ActualQuantity = models.DecimalField(max_digits=15, decimal_places=3)	
