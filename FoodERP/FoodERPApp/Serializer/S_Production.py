@@ -15,9 +15,22 @@ class ItemSerializer(serializers.ModelSerializer):
         model=M_Items
         fields=['id','Name']
 
+
+class UnitSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Units
+        fields = ['id','Name']
+        
+class ItemUnitsSerializerSecond(serializers.ModelSerializer):
+    UnitID = UnitSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemUnits
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
+
 class H_ProductionSerializerforGET(serializers.ModelSerializer):
     ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
     Item=ItemSerializer(read_only=True)
+    Unit = ItemUnitsSerializerSecond(read_only=True)
     
     class Meta:
         model = T_Production
