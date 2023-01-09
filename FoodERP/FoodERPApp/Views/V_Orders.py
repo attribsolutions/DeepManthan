@@ -109,7 +109,10 @@ class T_OrdersView(CreateAPIView):
                 '''Get Max Order Number'''
                 a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                print(a)
+                for aa in Orderdata['OrderItem']:
+                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0).GetBaseUnitQuantity()
+                    Orderdata['BaseUnitQuantity'] =  BaseUnitQuantity 
+                
                 Orderdata['OrderNo'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetOrderPrifix(Division)
@@ -439,16 +442,16 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                 else:
 
                     TermsAndConditions = list()
-                TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
+                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
                     IsDefault=1)
-                TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
+                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
                     TermsAndConditionsquery, many=True).data
 
-                for d in TermsAndConditionsSerializer:
-                    TermsAndConditions.append({
-                        "id": d['id'],
-                        "TermsAndCondition": d['Name']
-                    })
+                    for d in TermsAndConditionsSerializer:
+                        TermsAndConditions.append({
+                            "id": d['id'],
+                            "TermsAndCondition": d['Name']
+                        })
 
                     NewOrder = list()
                     NewOrder.append({
