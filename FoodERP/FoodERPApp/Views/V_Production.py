@@ -49,7 +49,7 @@ class ProductionList(CreateAPIView):
                 query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
                 if query:
                     Production_Serializer = H_ProductionSerializerforGET(query, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})
                     Production_SerializerListData = list()
                     for a in Production_Serializer:   
                         Production_SerializerListData.append({
@@ -88,21 +88,7 @@ class ProductionView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request ):
-        try:
-            with transaction.atomic():
-                Productiondata = T_Production.objects.all()
-                if Productiondata.exists():
-                    Production_Serializer = H_ProductionSerializerforGET(
-                    Productiondata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data })
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Production Not available', 'Data': []})    
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-         
-
+   
     @transaction.atomic()
     def post(self, request):
         try:
@@ -170,22 +156,6 @@ class ProductionViewSecond(RetrieveAPIView):
         except T_Production.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production Not available', 'Data': []})
            
-
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Productiondata = JSONParser().parse(request)
-                ProductiondataByID = T_Production.objects.get(id=id)
-                Production_Serializer = H_ProductionSerializer(ProductiondataByID, data=Productiondata)
-                if Production_Serializer.is_valid():
-                    Production_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production Updated Successfully','Data':[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors,'Data' :[]})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
 
     @transaction.atomic()
     def delete(self, request, id=0):
