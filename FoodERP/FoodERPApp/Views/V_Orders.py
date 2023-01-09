@@ -80,6 +80,8 @@ class OrderListFilterView(CreateAPIView):
                             "Supplier": a['Supplier']['Name'],
                             "OrderAmount": a['OrderAmount'],
                             "Description": a['Description'],
+                            "OrderType" : a['OrderType'],
+                            "POType_id" : a['POType_id'],
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
