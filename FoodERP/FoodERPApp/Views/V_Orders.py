@@ -390,18 +390,6 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
 
                         })
             # =====================IsDefaultTermsAndConditions================================================
-                    TermsAndConditions = list()
-                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
-                        IsDefault=1)
-                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
-                        TermsAndConditionsquery, many=True).data
-
-                    for d in TermsAndConditionsSerializer:
-                        TermsAndConditions.append({
-                            "id": d['id'],
-                            "TermsAndCondition": d['Name']
-
-                        })
 
                     b.update({"StockQuantity": Stock,
                               "UnitDetails": UnitDetails
@@ -419,10 +407,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                                 "id": b['TermsAndCondition']['id'],
                                 "TermsAndCondition": b['TermsAndCondition']['Name'],
                             })
-                    inward=0 
+                    inward = 0
                     for c in a['OrderReferences']:
-                        if( c['Inward'] == 1):
-                            inward =1        
+                        if(c['Inward'] == 1):
+                            inward = 1
 
                     OrderData = list()
                     OrderData.append({
@@ -449,6 +437,19 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     })
                     FinalResult = OrderData[0]
                 else:
+
+                    TermsAndConditions = list()
+                TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
+                    IsDefault=1)
+                TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
+                    TermsAndConditionsquery, many=True).data
+
+                for d in TermsAndConditionsSerializer:
+                    TermsAndConditions.append({
+                        "id": d['id'],
+                        "TermsAndCondition": d['Name']
+                    })
+
                     NewOrder = list()
                     NewOrder.append({
                         "id": "",
