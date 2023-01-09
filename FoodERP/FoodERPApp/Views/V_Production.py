@@ -34,14 +34,10 @@ class MaterialIssueDetailsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
-        
-        
-        
-         
 
-class ProductionFilterView(CreateAPIView):
+class ProductionList(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -50,12 +46,43 @@ class ProductionFilterView(CreateAPIView):
                 Productiondata = JSONParser().parse(request)
                 FromDate = Productiondata['FromDate']
                 ToDate = Productiondata['ToDate']
-                query1 = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
-                Production_Serializer = H_ProductionSerializerforGET(query1, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Production_Serializer.data })
+                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
+                if query:
+                    Production_Serializer = H_ProductionSerializerforGET(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
+                    Production_SerializerListData = list()
+                    for a in Production_Serializer:   
+                        Production_SerializerListData.append({
+                        "id": a['id'],
+                        "ProductionDate": a['ProductionDate'],
+                        "EstimatedQuantity": a['EstimatedQuantity'],
+                        "NumberOfLot": a['NumberOfLot'],
+                        "ActualQuantity":a['ActualQuantity'],
+                        "BatchDate":a["BatchDate"],
+                        "BatchCode": a['BatchCode'],
+                        "StoreLocation": a['StoreLocation'],
+                        "PrintedBatchCode": a['PrintedBatchCode'],
+                        "BestBefore": a['BestBefore'],
+                        "Remark": a['Remark'],
+                        "CreatedBy": a['CreatedBy'],
+                        "CreatedOn": a['CreatedOn'],
+                        "UpdatedBy": a['UpdatedBy'],
+                        "UpdatedOn": a['UpdatedOn'],
+                        "Company": a['Company']['id'],
+                        "CompanyName":a['Company']['Name'],
+                        "Division":a['Division']['id'],
+                        "DivisionName":a['Division']['Name'],
+                        "Item":a['Item']['id'],
+                        "ItemName":a['Item']['Name'],
+                        "Unit": a['Unit']['id'],
+                        "UnitName": a['Unit']['UnitID']['Name']
+                   
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_SerializerListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-         
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            
 
 class ProductionView(CreateAPIView):
     

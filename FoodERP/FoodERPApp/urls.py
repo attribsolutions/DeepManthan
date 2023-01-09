@@ -189,7 +189,7 @@ urlpatterns = [
             url(r'MaterialIssueDetails$',MaterialIssueDetailsView.as_view()),
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),
-            url(r'ProductionFilter$',ProductionFilterView.as_view()),
+            url(r'ProductionFilter$',ProductionList.as_view()),
    
     
 # Challan
