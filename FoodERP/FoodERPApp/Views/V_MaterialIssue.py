@@ -92,7 +92,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                "Quantity":ActualQty,
+                                "Quantity":round(ActualQty, 3),
                                 "BatchesData":stockDatalist   
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':MaterialDetails})
