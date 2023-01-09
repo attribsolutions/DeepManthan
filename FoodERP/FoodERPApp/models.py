@@ -756,13 +756,13 @@ class T_Orders(models.Model):
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500 ,null=True,blank=True)
     OrderType=models.IntegerField()  #1.SalesOrder OR 2.PurchesOrder
-    POType=models.ForeignKey(M_POType, related_name='OrderPOType', on_delete=models.DO_NOTHING)     #1.OpenOrder OR 2.RegulerOrder
+    POType=models.ForeignKey(M_POType, related_name='OrderPOType', on_delete=models.DO_NOTHING,null=True,blank=True)     #1.OpenOrder OR 2.RegulerOrder
     Division=models.ForeignKey(M_Parties, related_name='OrderDivision', on_delete=models.DO_NOTHING)
-    BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT)
-    ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
+    BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT,null=True,blank=True)
+    ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT,null=True,blank=True)
     IsOpenPO = models.BooleanField(default=False)
-    POFromDate = models.DateField()
-    POToDate = models.DateField()
+    POFromDate = models.DateField(null=True,blank=True)
+    POToDate = models.DateField(null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -774,15 +774,15 @@ class T_Orders(models.Model):
 
 class TC_OrderItems(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, related_name='Item', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='Item', on_delete=models.PROTECT)
     Comment= models.CharField(max_length=300,blank=True,null=True)
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.DO_NOTHING,null=True,blank=True)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=5, decimal_places=3)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='OrderItemGst', on_delete=models.PROTECT)
-    Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.PROTECT,null=True,blank=True)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=10, decimal_places=2)
     Amount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -801,7 +801,7 @@ class TC_OrderItems(models.Model):
 
 class TC_OrderTermsAndConditions(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderTermsAndConditions', on_delete=models.CASCADE)
-    TermsAndCondition=models.ForeignKey(M_TermsAndConditions, related_name='TermsAndCondition', on_delete=models.DO_NOTHING)
+    TermsAndCondition=models.ForeignKey(M_TermsAndConditions, related_name='TermsAndCondition', on_delete=models.PROTECT,blank=True,null=True)
     IsDeleted = models.BooleanField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 

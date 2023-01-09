@@ -3,6 +3,9 @@ from dataclasses import fields
 from ..Serializer.S_GRNs import O_BatchWiseLiveStockSerializer
 from ..models import *
 from rest_framework import serializers
+from ..Serializer.S_Companies import *
+from ..Serializer.S_Parties import *
+from ..Serializer.S_Items import *
 
 
 class ProductionMaterialIssueSerializer(serializers.ModelSerializer):
@@ -18,6 +21,9 @@ class ItemSerializer(serializers.ModelSerializer):
 class H_ProductionSerializerforGET(serializers.ModelSerializer):
     ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
     Item=ItemSerializer(read_only=True)
+    Unit = ItemUnitsSerializerSecond(read_only=True)
+    Company = C_CompanySerializer(read_only=True)
+    Division = DivisionsSerializer(read_only=True)
     
     class Meta:
         model = T_Production
