@@ -151,16 +151,12 @@ class MaterialIssueView(CreateAPIView):
             with transaction.atomic():
                 MaterialIssueData = JSONParser().parse(request)
                 Party = MaterialIssueData['Party']
-               
                 MaterialIssueDate = MaterialIssueData['MaterialIssueDate']
-                
                 a = GetMaxNumber.GetMaterialIssueNumber(Party, MaterialIssueDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                print(a)
                 MaterialIssueData['MaterialIssueNumber'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetMaterialIssuePrifix(Party)
-                print(b)
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 O_BatchWiseLiveStockList=list()
