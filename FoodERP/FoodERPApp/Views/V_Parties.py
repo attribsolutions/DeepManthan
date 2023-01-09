@@ -29,22 +29,6 @@ class DivisionsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
-class AddressTypesView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
-    
-    @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                Address_data = M_AddressTypes.objects.all()
-                if Address_data.exists():
-                    Address_serializer = AddressTypesSerializer(Address_data, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Address_serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Role Not available', 'Data': []})
-        except Exception :
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
-
   
 class M_PartiesView(CreateAPIView):
     
