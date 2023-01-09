@@ -756,13 +756,13 @@ class T_Orders(models.Model):
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500 ,null=True,blank=True)
     OrderType=models.IntegerField()  #1.SalesOrder OR 2.PurchesOrder
-    POType=models.ForeignKey(M_POType, related_name='OrderPOType', on_delete=models.DO_NOTHING)     #1.OpenOrder OR 2.RegulerOrder
+    POType=models.ForeignKey(M_POType, related_name='OrderPOType', on_delete=models.DO_NOTHING,null=True,blank=True)     #1.OpenOrder OR 2.RegulerOrder
     Division=models.ForeignKey(M_Parties, related_name='OrderDivision', on_delete=models.DO_NOTHING)
-    BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT)
-    ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
+    BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT,null=True,blank=True)
+    ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT,null=True,blank=True)
     IsOpenPO = models.BooleanField(default=False)
-    POFromDate = models.DateField()
-    POToDate = models.DateField()
+    POFromDate = models.DateField(null=True,blank=True)
+    POToDate = models.DateField(null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
