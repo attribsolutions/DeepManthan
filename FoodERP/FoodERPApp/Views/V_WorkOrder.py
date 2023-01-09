@@ -133,11 +133,11 @@ class WorkOrderView(CreateAPIView):
                 WorkOrderDate = WorkOrderData['WorkOrderDate']
                 a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                print(a)
+                
                 WorkOrderData['WorkOrderNumber'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetWorkOrderPrifix(Party)
-                print(b)
+                
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
