@@ -34,15 +34,18 @@ class WorkOrderDetailsView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
                     for a in WorkOrder_Serializer:
                         MaterialDetails =list()
+                        workorderqty=a['Quantity']
+                        
                         for b in a['WorkOrderItems']:
                             Item = b['Item']['id']
-                            obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=PartyID)
+                            z=0
+                            obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=PartyID,BaseUnitQuantity__gt=0)
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(obatchwisestockquery.query)})
                             if obatchwisestockquery == "":
                                 StockQtySerialize_data =[]
                             else:
                                 StockQtySerialize_data = StockQtyserializerForMaterialIssue(obatchwisestockquery, many=True).data
-                                Qty = float(b['Quantity']) /float(GetQuantity)
+                                Qty = float(b['Quantity']) /float(workorderqty)
                                 ActualQty = float(GetQuantity * Qty)
                                 stockDatalist = list()
                                 add=0
@@ -89,7 +92,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                "Quantity":b['Quantity'],
+                                "Quantity":ActualQty,
                                 "BatchesData":stockDatalist   
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':MaterialDetails})
