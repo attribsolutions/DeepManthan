@@ -94,10 +94,6 @@ class M_Districts(models.Model):
     class Meta:
         db_table = "M_Districts"
 
-class M_AddressTypes(models.Model):
-    Name = models.CharField(max_length=500)
-    class Meta:
-        db_table = "M_AddressTypes"
     
 class M_Parties(models.Model):
 
@@ -131,13 +127,12 @@ class M_Parties(models.Model):
 class MC_PartyAddress(models.Model):
     
     Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE)
-    AddressType = models.ForeignKey(M_AddressTypes, related_name='AddressType', on_delete=models.DO_NOTHING ,blank=True,null=True)
     Address = models.CharField(max_length=500)
-    FSSAINo = models.CharField(max_length=500)
-    FSSAIExipry = models.DateField(blank=True)
+    FSSAINo = models.CharField(max_length=500,null=True,blank=True)
+    FSSAIExipry = models.DateField(null=True,blank=True)
     PIN = models.CharField(max_length=500)
     IsDefault = models.BooleanField(default=False) 
-    fssaidocument=models.TextField()
+    fssaidocument=models.TextField(null=True,blank=True)
     class Meta:
         db_table = 'MC_PartyAddress'
      
