@@ -27,6 +27,7 @@ class BOMListFilterView(CreateAPIView):
                 FromDate = BillOfMaterialdata['FromDate']
                 ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
+                Party = BillOfMaterialdata['Party']
                 d = date.today()
                 if str(FromDate == d):
                     query = M_BillOfMaterial.objects.filter(Company_id=Company,IsActive=1)
@@ -38,13 +39,10 @@ class BOMListFilterView(CreateAPIView):
                     BomListData = list()
                     for a in Bom_serializer:
                         Item = a['Item']['id']
-                        # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
-                        obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
-                        if not obatchwisestockquery:
-                            StockQty =0.0
-                        else:
-                            StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
-                            StockQty = StockQtySerialize_data[0]['actualStock']
+                        
+                        Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
+                        StockintoSelectedUnit=UnitwiseQuantityConversion(Item,Stock,0,0,a['Unit']['id'],0).ConvertintoSelectedUnit()
+                        
                         baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()   
                         BomListData.append({
                         "id": a['id'],
@@ -53,7 +51,7 @@ class BOMListFilterView(CreateAPIView):
                         "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
                         "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
-                        "StockQty":StockQty,
+                        "StockQty":StockintoSelectedUnit,
                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
                         "Comment": a['Comment'],
                         "IsActive": a['IsActive'],
