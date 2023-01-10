@@ -209,10 +209,10 @@ urlpatterns = [
             url(r'PriceList$', PriceListView.as_view()),
             url(r'PartyTypes/([0-9]+)$', PartyTypeViewSecond.as_view()),
             url(r'PartyTypes$', PartyTypeView.as_view()),
-            url(r'AddressTypes$',AddressTypesView.as_view()),
+           
             url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
             url(r'ImageTypes$', M_ImageTypesView.as_view()),
-            url(r'AddressTypes$',AddressTypesView.as_view()),
+           
             url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
            
 # State and District
