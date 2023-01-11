@@ -55,6 +55,21 @@ class C_Companies(models.Model):
         db_table = "C_Companies"
         
 
+class M_GeneralMaster(models.Model):
+    Type = models.CharField(max_length=200,blank=True,null=True)
+    Name = models.CharField(max_length=200,blank=True,null=True)
+    Company = models.ForeignKey(C_Companies, related_name='Company', on_delete=models.DO_NOTHING)
+    IsActive =models.BooleanField(default=False)
+    Flag =models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "M_GeneralMaster"
+        
+
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
     '''PLPartyType means PriceListPartyType'''
@@ -805,16 +820,13 @@ class TC_OrderTermsAndConditions(models.Model):
 
 
 class T_Invoices(models.Model):
-    Order = models.ForeignKey(T_Orders, on_delete=models.DO_NOTHING)
     InvoiceDate = models.DateField()
-    Customer = models.ForeignKey(
-        M_Parties, related_name='InvoicesCustomer', on_delete=models.DO_NOTHING)
+    Customer = models.ForeignKey(M_Parties, related_name='InvoicesCustomer', on_delete=models.PROTECT)
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
     CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    Party = models.ForeignKey(
-        M_Parties, related_name='InvoicesParty', on_delete=models.DO_NOTHING)
+    Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -826,25 +838,19 @@ class T_Invoices(models.Model):
 
 
 class TC_InvoiceItems(models.Model):
-    Invoice = models.ForeignKey(
-        T_Invoices, related_name='InvoiceItems', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_Invoices, related_name='InvoiceItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
-    HSNCode = models.CharField(max_length=500)
     Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.DO_NOTHING)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    QtyInKg = models.DecimalField(max_digits=10, decimal_places=3)
-    QtyInNo = models.DecimalField(max_digits=10, decimal_places=3)
-    QtyInBox = models.DecimalField(max_digits=10, decimal_places=3)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
-    DiscountType = models.CharField(max_length=500)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
     Discount = models.DecimalField(max_digits=10, decimal_places=2)
     DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
     CGST = models.DecimalField(max_digits=5, decimal_places=2)
@@ -853,28 +859,18 @@ class TC_InvoiceItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "TC_InvoiceItems"
 
-
-class TC_InvoiceItemBatches(models.Model):
+class TC_InvoicesReferences(models.Model):
     Invoice = models.ForeignKey(T_Invoices, on_delete=models.CASCADE)
-    InvoiceItem = models.ForeignKey(
-        TC_InvoiceItems, related_name='InvoiceItemBatches', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
-    Unit = models.ForeignKey(
-        MC_ItemUnits, related_name='InvoiceBatchUnitID', on_delete=models.DO_NOTHING)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-
+    Order = models.ForeignKey(T_Orders, on_delete=models.PROTECT)
     class Meta:
-        db_table = "TC_InvoiceItemBatches"
-
+        db_table = "TC_InvoicesReferences"        
 
 
 class MC_VehiclesDivisions(models.Model):
