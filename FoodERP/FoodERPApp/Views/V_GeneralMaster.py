@@ -11,95 +11,85 @@ from ..Serializer.S_GeneralMaster import *
 from ..models import C_Companies
 
 class GeneralMasterFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                GeneralMasterdata = JSONParser().parse(request)
+                Type = GeneralMasterdata['Type']
+                CompanyID = GeneralMasterdata['Company']
+                if Type !='':
+                    query = M_GeneralMaster.objects.filter(Company=CompanyID,Type=Type)
+                else:    
+                    query = M_GeneralMaster.objects.filter(Company=CompanyID)
+                if query:
+                    GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                    GeneralMaster_SerializerList = list()
+                    for a in GeneralMaster_Serializer:   
+                        GeneralMaster_SerializerList.append({
+                        "id": a['id'],
+                        "Type": a['Type'],
+                        "Name": a['Name'],
+                        "IsActive": a['IsActive'],
+                        "Flag":a['Flag'],
+                        "Company": a['Company']['id'],
+                        "CompanyName":a['Company']['Name'],
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            
+            
+class GeneralMasterTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-                   
+    
     @transaction.atomic()
-    def get(self, request,id=0):
+    def post(self, request):
         try:
             with transaction.atomic():
-                Groupquery = C_Companies.objects.all()
-                if Groupquery.exists():
-                    # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Companydata = GeneralMasterserializer(Groupquery, many=True).data
-                    CompanyList=list()
-                    for a in Companydata:
-                        CompanyList.append({
-                            "id": a['id'],
-                            "Name": a['Name'],
-                            "CompanyGroup": a['CompanyGroup']['id'],
-                            "CompanyGroupName": a['CompanyGroup']['Name'],
-                            "Address": a['Address'],
-                            "GSTIN": a['GSTIN'],
-                            "PhoneNo": a['PhoneNo'],
-                            "CompanyAbbreviation": a['CompanyAbbreviation'],
-                            "EmailID": a['EmailID'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                GeneralMasterdata = JSONParser().parse(request)
+                CompanyID = GeneralMasterdata['Company'] 
+                query = M_GeneralMaster.objects.filter(Company=CompanyID)
+                GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                GeneralMaster_SerializerList = list()
+                for a in GeneralMaster_Serializer:   
+                    GeneralMaster_SerializerList.append({
+                    "id": a['id'],
+                    "Type": a['Type'],
+                    })
+                GeneralMaster_SerializerList.append({"Type":"NewGeneralMasterType"})     
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
-
-
-
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
+    
+    
 
 class GeneralMasterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-                   
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic():
-                Groupquery = C_Companies.objects.all()
-                if Groupquery.exists():
-                    # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Companydata = GeneralMasterserializer(Groupquery, many=True).data
-                    CompanyList=list()
-                    for a in Companydata:
-                        CompanyList.append({
-                            "id": a['id'],
-                            "Name": a['Name'],
-                            "CompanyGroup": a['CompanyGroup']['id'],
-                            "CompanyGroupName": a['CompanyGroup']['Name'],
-                            "Address": a['Address'],
-                            "GSTIN": a['GSTIN'],
-                            "PhoneNo": a['PhoneNo'],
-                            "CompanyAbbreviation": a['CompanyAbbreviation'],
-                            "EmailID": a['EmailID'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
+    authentication_class = JSONWebTokenAuthentication                      
 
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
-                Companiesdata = JSONParser().parse(request)
-                Companies_Serializer = C_CompanySerializer(data=Companiesdata)
-                if Companies_Serializer.is_valid():
-                    Companies_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully', 'Data':[]})
+                GeneralMasterdata = JSONParser().parse(request)
+                GeneralMaster_Serializer = GeneralMasterserializer(data=GeneralMasterdata)
+                if GeneralMaster_Serializer.is_valid():
+                    GeneralMaster_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GenearlMaster Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Companies_Serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':GeneralMaster_Serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
             
-
-
 class GeneralMasterViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -109,28 +99,20 @@ class GeneralMasterViewSecond(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Groupquery = C_Companies.objects.filter(id=id)
-                if Groupquery.exists():
+                query = M_GeneralMaster.objects.filter(id=id)
+                if query.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Companydata = GeneralMasterserializer(Groupquery, many=True).data
-                    CompanyList=list()
-                    for a in Companydata:
-                        CompanyList.append({
+                    GeneralMasterdata = GeneralMasterserializer(query, many=True).data
+                    GeneralMasterList=list()
+                    for a in GeneralMasterdata:
+                        GeneralMasterList.append({
                             "id": a['id'],
+                            "Type": a['Type'],
                             "Name": a['Name'],
-                            "CompanyGroup": a['CompanyGroup']['id'],
-                            "CompanyGroupName": a['CompanyGroup']['Name'],
-                            "Address": a['Address'],
-                            "GSTIN": a['GSTIN'],
-                            "PhoneNo": a['PhoneNo'],
-                            "CompanyAbbreviation": a['CompanyAbbreviation'],
-                            "EmailID": a['EmailID'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "IsActive": a['IsActive'],
+                            "Flag": a['Flag']
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GeneralMasterList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -143,7 +125,7 @@ class GeneralMasterViewSecond(CreateAPIView):
             with transaction.atomic():
                 Companiesdata = JSONParser().parse(request)
                 CompaniesdataByID = C_Companies.objects.get(id=id)
-                Companies_Serializer = C_CompanySerializer(
+                Companies_Serializer = GeneralMasterserializer(
                     CompaniesdataByID, data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()

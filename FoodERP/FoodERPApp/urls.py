@@ -160,6 +160,7 @@ urlpatterns = [
             url(r'GeneralMaster/([0-9]+)$', GeneralMasterViewSecond.as_view()),
             url(r'GeneralMaster$', GeneralMasterView.as_view()),
             url(r'GeneralMasterList$', GeneralMasterFilterView.as_view()),
+            url(r'GeneralMasterType$', GeneralMasterTypeView.as_view()),
 
     
 #Invoice All APIs
