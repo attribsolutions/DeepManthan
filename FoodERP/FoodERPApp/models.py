@@ -60,7 +60,6 @@ class M_GeneralMaster(models.Model):
     Name = models.CharField(max_length=200,blank=True,null=True)
     Company = models.ForeignKey(C_Companies, related_name='Company', on_delete=models.DO_NOTHING)
     IsActive =models.BooleanField(default=False)
-    Flag =models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
