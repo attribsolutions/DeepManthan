@@ -10,6 +10,10 @@ from ..Serializer.S_GeneralMaster import *
 
 from ..models import C_Companies
 
+
+
+#List API View
+
 class GeneralMasterFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
@@ -20,13 +24,13 @@ class GeneralMasterFilterView(CreateAPIView):
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
                 Type = GeneralMasterdata['Type']
-                CompanyID = GeneralMasterdata['Company']
+                Company = GeneralMasterdata['Company']
                 if Type !='':
-                    query = M_GeneralMaster.objects.filter(Company=CompanyID,Type=Type)
+                    query = M_GeneralMaster.objects.filter(Company=Company,Type=Type)
                 else:    
-                    query = M_GeneralMaster.objects.filter(Company=CompanyID)
+                    query = M_GeneralMaster.objects.filter(Company=Company)
                 if query:
-                    GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                    GeneralMaster_Serializer = GeneralMasterserializerSecond(query, many=True).data
                     GeneralMaster_SerializerList = list()
                     for a in GeneralMaster_Serializer:   
                         GeneralMaster_SerializerList.append({
@@ -36,19 +40,20 @@ class GeneralMasterFilterView(CreateAPIView):
                         "IsActive": a['IsActive'],
                         "Flag":a['Flag'],
                         "Company": a['Company']['id'],
-                        "CompanyName":a['Company']['Name'],
+                        "CompanyName":a['Company']['Name']
                         }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
-            
+
+
+#Get General Master Type -Post API             
 class GeneralMasterTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-    
     @transaction.atomic()
     def post(self, request):
         try:
@@ -60,8 +65,7 @@ class GeneralMasterTypeView(CreateAPIView):
                 GeneralMaster_SerializerList = list()
                 for a in GeneralMaster_Serializer:   
                     GeneralMaster_SerializerList.append({
-                    "id": a['id'],
-                    "Type": a['Type'],
+                    "Type": a['Type']
                     })
                 GeneralMaster_SerializerList.append({"Type":"NewGeneralMasterType"})     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
@@ -69,7 +73,7 @@ class GeneralMasterTypeView(CreateAPIView):
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
     
     
-
+#Post API - Save API 
 class GeneralMasterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -83,7 +87,7 @@ class GeneralMasterView(CreateAPIView):
                 GeneralMaster_Serializer = GeneralMasterserializer(data=GeneralMasterdata)
                 if GeneralMaster_Serializer.is_valid():
                     GeneralMaster_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GenearlMaster Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Genearl Master Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':GeneralMaster_Serializer.errors, 'Data':[]})
@@ -113,7 +117,7 @@ class GeneralMasterViewSecond(CreateAPIView):
                             "Flag": a['Flag']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GeneralMasterList[0]})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'General Master data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
@@ -123,16 +127,16 @@ class GeneralMasterViewSecond(CreateAPIView):
     def put(self, request, id=0):
         try:
             with transaction.atomic():
-                Companiesdata = JSONParser().parse(request)
-                CompaniesdataByID = C_Companies.objects.get(id=id)
-                Companies_Serializer = GeneralMasterserializer(
-                    CompaniesdataByID, data=Companiesdata)
-                if Companies_Serializer.is_valid():
-                    Companies_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Updated Successfully', 'Data':[]})
+                GeneralMasterdata = JSONParser().parse(request)
+                GeneralMasterdataByID = M_GeneralMaster.objects.get(id=id)
+                GeneralMaster_Serializer = GeneralMasterserializer(
+                    GeneralMasterdataByID, data=GeneralMasterdata)
+                if GeneralMaster_Serializer.is_valid():
+                    GeneralMaster_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GeneralMaster_Serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
         
@@ -141,10 +145,8 @@ class GeneralMasterViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Companiesdata = C_Companies.objects.get(id=id)
-                Companiesdata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Deleted Successfully', 'Data':[]})
-        except C_Companies.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
+                GeneralMasterdata = M_GeneralMaster.objects.get(id=id)
+                GeneralMasterdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Deleted Successfully', 'Data':[]})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company used in another table', 'Data': []})   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'General Master used in another table', 'Data': []})   
