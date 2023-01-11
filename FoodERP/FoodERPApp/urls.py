@@ -84,6 +84,7 @@ from .Views.V_MaterialIssue import *
 
 from .Views.V_TermsAndConditions import *
 
+from .Views.V_GeneralMaster import *
 
 urlpatterns = [
     
@@ -153,10 +154,17 @@ urlpatterns = [
             url(r'TermsAndCondtions/([0-9]+)$', TermsAndCondtionsViewSecond.as_view()),
             url(r'TermsAndCondtions$', TermsAndCondtionsView.as_view()),
 
+
+
+# General Master All APIs
+            url(r'GeneralMaster/([0-9]+)$', GeneralMasterViewSecond.as_view()),
+            url(r'GeneralMaster$', GeneralMasterView.as_view()),
+            url(r'GeneralMasterList$', GeneralMasterFilterView.as_view()),
+
     
 #Invoice All APIs
-            url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
-            url(r'Invoices$', T_InvoiceView.as_view()),
+            # url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
+            # url(r'Invoices$', T_InvoiceView.as_view()),
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
