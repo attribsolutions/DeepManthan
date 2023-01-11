@@ -38,7 +38,6 @@ class GeneralMasterFilterView(CreateAPIView):
                         "Type": a['Type'],
                         "Name": a['Name'],
                         "IsActive": a['IsActive'],
-                        "Flag":a['Flag'],
                         "Company": a['Company']['id'],
                         "CompanyName":a['Company']['Name']
                         }) 
@@ -113,8 +112,7 @@ class GeneralMasterViewSecond(CreateAPIView):
                             "id": a['id'],
                             "Type": a['Type'],
                             "Name": a['Name'],
-                            "IsActive": a['IsActive'],
-                            "Flag": a['Flag']
+                            "IsActive": a['IsActive']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GeneralMasterList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'General Master data Not available ', 'Data': []})
