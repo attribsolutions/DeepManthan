@@ -55,6 +55,21 @@ class C_Companies(models.Model):
         db_table = "C_Companies"
         
 
+class M_GeneralMaster(models.Model):
+    Type = models.CharField(max_length=200)
+    Name = models.CharField(max_length=200)
+    Company = models.ForeignKey(C_Companies, related_name='Company', on_delete=models.DO_NOTHING)
+    IsActive =models.BooleanField(default=False)
+    Flag =models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "M_GeneralMaster"
+        
+
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
     '''PLPartyType means PriceListPartyType'''
