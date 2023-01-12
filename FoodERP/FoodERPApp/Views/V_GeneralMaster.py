@@ -23,10 +23,10 @@ class GeneralMasterFilterView(CreateAPIView):
         try:
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
-                Type = GeneralMasterdata['Type']
+                Type = GeneralMasterdata['TypeID']
                 Company = GeneralMasterdata['Company']
                 if Type !='':
-                    query = M_GeneralMaster.objects.filter(Company=Company,Type=Type)
+                    query = M_GeneralMaster.objects.filter(Company=Company,TypeID=Type)
                 else:    
                     query = M_GeneralMaster.objects.filter(Company=Company)
                 if query:
@@ -35,10 +35,9 @@ class GeneralMasterFilterView(CreateAPIView):
                     for a in GeneralMaster_Serializer:   
                         GeneralMaster_SerializerList.append({
                         "id": a['id'],
-                        "Type": a['Type'],
+                        "TypeID": a['TypeID'],
                         "Name": a['Name'],
                         "IsActive": a['IsActive'],
-                        "Flag":a['Flag'],
                         "Company": a['Company']['id'],
                         "CompanyName":a['Company']['Name']
                         }) 
@@ -65,9 +64,11 @@ class GeneralMasterTypeView(CreateAPIView):
                 GeneralMaster_SerializerList = list()
                 for a in GeneralMaster_Serializer:   
                     GeneralMaster_SerializerList.append({
-                    "Type": a['Type']
+                    "id":a['id'],    
+                    "TypeID": a['TypeID'],
+                    "Name": a['Name']   
                     })
-                GeneralMaster_SerializerList.append({"Type":"NewGeneralMasterType"})     
+                GeneralMaster_SerializerList.append({"TypeID":"0","Name":"NewGeneralMasterType"})     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
@@ -111,10 +112,9 @@ class GeneralMasterViewSecond(CreateAPIView):
                     for a in GeneralMasterdata:
                         GeneralMasterList.append({
                             "id": a['id'],
-                            "Type": a['Type'],
+                            "TypeID": a['TypeID'],
                             "Name": a['Name'],
-                            "IsActive": a['IsActive'],
-                            "Flag": a['Flag']
+                            "IsActive": a['IsActive']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GeneralMasterList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'General Master data Not available ', 'Data': []})
