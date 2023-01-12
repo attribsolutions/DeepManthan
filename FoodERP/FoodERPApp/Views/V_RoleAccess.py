@@ -96,7 +96,7 @@ class RoleAccessView(RetrieveAPIView):
             # print(str(query.query) )  
           
             PageSerializer = RoleAccessserializerforsidemenu(query,  many=True).data
-            return Response(PageSerializer ) 
+            # return Response(PageSerializer ) 
             Pagesdata = list()
             for a1 in PageSerializer:
                 id = a1['id']
