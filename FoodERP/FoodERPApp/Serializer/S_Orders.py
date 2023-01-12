@@ -237,7 +237,13 @@ class OrderEditserializer(serializers.Serializer):
     SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)  
-    Comment=serializers.CharField(max_length=100)  
+    Comment=serializers.CharField(max_length=100) 
+    
+    
+    
+class OrderserializerforInvoice(serializers.Serializer):
+    id=serializers.IntegerField()
+     
 
 
     
