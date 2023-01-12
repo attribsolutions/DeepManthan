@@ -8,11 +8,11 @@ class StockQtyserializerForInvoice(serializers.ModelSerializer):
         model = O_BatchWiseLiveStock
         fields = ['id','Item','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Quantity','BaseUnitQuantity','Party']  
 
-class OrderSerializerForInvoice(serializers.Serializer):
-    id=serializers.IntegerField()
-    SupplierName = serializers.CharField(max_length=500)     
-    OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
-    CustomerID =serializers.IntegerField() 
+class OrderserializerforInvoice(serializers.ModelSerializer):
+    class Meta:
+        model = T_Orders
+        fields = '__all__'
+
 
 
 # class T_InvoiceSerializerGETList(serializers.Serializer):
