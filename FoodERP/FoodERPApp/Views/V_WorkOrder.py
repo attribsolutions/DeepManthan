@@ -25,29 +25,37 @@ class BomDetailsView(CreateAPIView):
                 BomID = BomDetailsdata['Bom']
                 ItemID = BomDetailsdata['Item']
                 GetQuantity = BomDetailsdata['Quantity']
-                Query = M_BillOfMaterial.objects.filter(id=BomID,Item_id=ItemID)
+                Party = BomDetailsdata['Party']
+                Query = M_BillOfMaterial.objects.filter(id=BomID)
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
-                        stockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [ItemID])
-                        if not stockquery:
-                            Stock =0.0
-                        else:
-                            Serialize_data = StockQtyserializer(stockquery, many=True).data
-                            Stock = Serialize_data[0]['actualStock']
+                        # stockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [ItemID])
+                        # if not stockquery:
+                        #     Stock =0.0
+                        # else:
+                        #     Serialize_data = StockQtyserializer(stockquery, many=True).data
+                        #     Stock = Serialize_data[0]['actualStock']
+                        Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
+                        StockintoSelectedUnit=UnitwiseQuantityConversion(a['Item']['id'],Stock,0,0,a['Unit']['id'],0).ConvertintoSelectedUnit()
                         MaterialDetails =list()
                         total=0
                         for b in a['BOMItems']:
                             Item = b['Item']['id']
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
-                            obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
-                            if not obatchwisestockquery:
-                                StockQty =0.0
-                            else:
-                                StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
-                                StockQty = StockQtySerialize_data[0]['actualStock']
+                            # # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
+                            # obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                            # if not obatchwisestockquery:
+                            #     StockQty =0.0
+                            # else:
+                            #     StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
+                            #     StockQty = StockQtySerialize_data[0]['actualStock']
+                            Stock=float(GetO_BatchWiseLiveStock(b['Item']['id'],Party))
+                            print(Stock)
+                            print(a['Unit']['id'])
+                            StockQty=UnitwiseQuantityConversion(b['Item']['id'],Stock,0,0,b['Unit']['id'],0).ConvertintoSelectedUnit()
+                            print(StockQty)
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
                             MaterialDetails.append({
@@ -65,7 +73,7 @@ class BomDetailsView(CreateAPIView):
                             "IsActive": a['IsActive'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
-                            "Stock":Stock,
+                            "Stock":StockintoSelectedUnit,
                             "EstimatedOutputQty": round(GetQuantity, 2),  
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
