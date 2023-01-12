@@ -16,17 +16,17 @@ from ..models import *
 def GetRelatedPageID(id):
     a=M_Pages.objects.filter(id=id).values('RelatedPageID')
     aa=M_Pages.objects.filter(id=a[0]['RelatedPageID']).values('ActualPagePath')
-    print(a)
-    print(aa)
+    
     if(a[0]['RelatedPageID']  == 0):
         b=M_Pages.objects.filter(RelatedPageID=id).values('id','ActualPagePath')
-        print('gggggggg',b)
-        if b.exists:
+       
+        if not b:
             print('vvvvvvvvvv')
-            return str(b[0]['id']) +','+ b[0]['ActualPagePath']
+            return str(0) +','+ str(0)
+            
         else:
-            print('bbbbbb')
-            return str(0 +','+ 0)    
+            
+            return str(b[0]['id']) +','+ b[0]['ActualPagePath']
     else:
         return str(a[0]['RelatedPageID']) +','+ aa[0]['ActualPagePath']
 
@@ -106,7 +106,7 @@ class RoleAccessView(RetrieveAPIView):
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(
                     RolePageAccess,  many=True).data
                 # print(str(RolePageAccess.query))
-                print(a1['Pages']['id'])
+               
                 GetRelatedPageIDData=GetRelatedPageID(a1['Pages']['id'])
                 vvv=GetRelatedPageIDData.split(',')
                 
@@ -126,14 +126,14 @@ class RoleAccessView(RetrieveAPIView):
                     "ActualPagePath": a1['Pages']['ActualPagePath'],
                     "RolePageAccess": RolePageAccessSerializer
                 })
-            print('dddddddddddddd')
+           
             response1 = {
                 "ModuleID": a['id'],
                 "ModuleName":a["Name"],
                 "ModuleData": Pagesdata,
 
             }
-            print('tttttttttt')
+         
             Moduledata.append(response1)
              
         response = {
