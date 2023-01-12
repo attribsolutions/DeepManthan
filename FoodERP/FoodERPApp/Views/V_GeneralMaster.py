@@ -23,10 +23,10 @@ class GeneralMasterFilterView(CreateAPIView):
         try:
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
-                Type = GeneralMasterdata['Type']
+                Type = GeneralMasterdata['TypeID']
                 Company = GeneralMasterdata['Company']
                 if Type !='':
-                    query = M_GeneralMaster.objects.filter(Company=Company,Type=Type)
+                    query = M_GeneralMaster.objects.filter(Company=Company,TypeID=Type)
                 else:    
                     query = M_GeneralMaster.objects.filter(Company=Company)
                 if query:
