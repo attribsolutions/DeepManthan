@@ -36,7 +36,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
                 else:
                     
-                    query = T_Orders.objects.raw("SELECT t_orders.id FROM t_orders where t_orders.OrderDate= %s and t_orders.Customer_id = %s ",[FromDate,Customer])
+                    query = T_Orders.objects.raw("SELECT t_orders.id FROM t_orders where t_orders.OrderDate= %s and t_orders.Supplier_id= %s and t_orders.Customer_id = %s ",[FromDate,Party,Customer])
                     Serializedata = OrderserializerforInvoice(query,many=True).data
                     Order_list = list()
                     for x in Serializedata:
