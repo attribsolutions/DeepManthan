@@ -56,7 +56,7 @@ class C_Companies(models.Model):
         
 
 class M_GeneralMaster(models.Model):
-    Type = models.CharField(max_length=200,blank=True,null=True)
+    TypeID = models.IntegerField()
     Name = models.CharField(max_length=200,blank=True,null=True)
     Company = models.ForeignKey(C_Companies, related_name='Company', on_delete=models.DO_NOTHING)
     IsActive =models.BooleanField(default=False)
