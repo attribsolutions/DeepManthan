@@ -165,7 +165,7 @@ urlpatterns = [
     
 #Invoice All APIs
             # url(r'Invoices/([0-9]+)$', T_InvoicesViewSecond.as_view()),
-            # url(r'Invoices$', T_InvoiceView.as_view()),
+            url(r'Invoices$', GetOrderDetailsForInvoice.as_view()),
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
