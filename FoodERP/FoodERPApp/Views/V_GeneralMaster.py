@@ -35,7 +35,7 @@ class GeneralMasterFilterView(CreateAPIView):
                     for a in GeneralMaster_Serializer:   
                         GeneralMaster_SerializerList.append({
                         "id": a['id'],
-                        "Type": a['Type'],
+                        "TypeID": a['TypeID'],
                         "Name": a['Name'],
                         "IsActive": a['IsActive'],
                         "Company": a['Company']['id'],
@@ -64,11 +64,11 @@ class GeneralMasterTypeView(CreateAPIView):
                 GeneralMaster_SerializerList = list()
                 for a in GeneralMaster_Serializer:   
                     GeneralMaster_SerializerList.append({
-                    "id": a['id'],
-                    "Type": a['Type'],
+                    "id":a['id'],    
+                    "TypeID": a['TypeID'],
                     "Name": a['Name']   
                     })
-                GeneralMaster_SerializerList.append({"Type":"NewGeneralMasterType"})     
+                GeneralMaster_SerializerList.append({"TypeID":"0","Name":"NewGeneralMasterType"})     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
@@ -112,7 +112,7 @@ class GeneralMasterViewSecond(CreateAPIView):
                     for a in GeneralMasterdata:
                         GeneralMasterList.append({
                             "id": a['id'],
-                            "Type": a['Type'],
+                            "TypeID": a['TypeID'],
                             "Name": a['Name'],
                             "IsActive": a['IsActive']
                         })
