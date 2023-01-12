@@ -21,7 +21,7 @@ def GetRelatedPageID(id):
         b=M_Pages.objects.filter(RelatedPageID=id).values('id','ActualPagePath')
        
         if not b:
-            print('vvvvvvvvvv')
+           
             return str(0) +','+ str(0)
             
         else:
@@ -215,15 +215,15 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             else:
                 RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id,'a' as Name FROM m_roleaccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id is null    ''',([RelatedPageID],[Role]))
             RelatedPageRoleAccessdata = MC_RolePageAccessSerializerNewUpdated(RelatedPageroleaccessquery, many=True).data
-            # return JsonResponse({'data':  RelatedPageRoleAccessdata})
+            # return JsonResponse(RelatedPageRoleAccessdata[0])
             
             rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [id])
             # # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializerforListPAge = MC_RolePageAccessSerializerNewUpdated(rolepageaccessqueryforlistPage,  many=True).data
             # # return JsonResponse({'query':  RolePageAccessSerializerforListPAge})
             
-            
-            roleaccessID=RelatedPageRoleAccessdata[0]['id']
+            for d in RelatedPageRoleAccessdata:
+                roleaccessID=d['id']
             rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [roleaccessID])
             # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
