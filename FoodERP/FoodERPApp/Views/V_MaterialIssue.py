@@ -50,31 +50,31 @@ class WorkOrderDetailsView(CreateAPIView):
                                 stockDatalist = list()
                                 add=0
                                 amount = 0
-                                p =0
+                                # p =0
                                 for c in StockQtySerialize_data:
-                                    if(add >= float(ActualQty)):
-                                        p=0
-                                    else:    
-                                        if amount==0:
-                                            if(float(c['BaseUnitQuantity']) > float(ActualQty)):
-                                                p=float(ActualQty)
-                                                add=float(add) + float(ActualQty)
+                                    # if(add >= float(ActualQty)):
+                                    #     p=0
+                                    # else:    
+                                    #     if amount==0:
+                                    #         if(float(c['BaseUnitQuantity']) > float(ActualQty)):
+                                    #             p=float(ActualQty)
+                                    #             add=float(add) + float(ActualQty)
 
-                                            else:
-                                                p=float(c['BaseUnitQuantity'])
-                                                amount = float(ActualQty)- float(c['BaseUnitQuantity'])
-                                                add = float(add) + float(c['BaseUnitQuantity'])
-                                        else:
-                                            if(float(amount) > float(c['BaseUnitQuantity'])):
-                                                p=float(c['BaseUnitQuantity'])
-                                                amount = float(amount)-float(c['BaseUnitQuantity'])
-                                                add = float(add) + float(c['BaseUnitQuantity'])
-                                            else:
-                                                p=float(amount)
-                                                add = float(add) + float(amount) 
-                                                amount= float(c['BaseUnitQuantity'])-float(amount)            
+                                    #         else:
+                                    #             p=float(c['BaseUnitQuantity'])
+                                    #             amount = float(ActualQty)- float(c['BaseUnitQuantity'])
+                                    #             add = float(add) + float(c['BaseUnitQuantity'])
+                                    #     else:
+                                    #         if(float(amount) > float(c['BaseUnitQuantity'])):
+                                    #             p=float(c['BaseUnitQuantity'])
+                                    #             amount = float(amount)-float(c['BaseUnitQuantity'])
+                                    #             add = float(add) + float(c['BaseUnitQuantity'])
+                                    #         else:
+                                    #             p=float(amount)
+                                    #             add = float(add) + float(amount) 
+                                    #             amount= float(c['BaseUnitQuantity'])-float(amount)            
                                     
-                                    
+                                    StockQty=UnitwiseQuantityConversion(b['Item']['id'],c['BaseUnitQuantity'],0,0,b['Unit']['id'],0).ConvertintoSelectedUnit()
                                     stockDatalist.append({
                                         "id": c['id'],
                                         "Item":c['Item'],
@@ -83,8 +83,9 @@ class WorkOrderDetailsView(CreateAPIView):
                                         "SystemBatchDate":c['SystemBatchDate'],
                                         "SystemBatchCode":c['SystemBatchCode'],
                                         "ObatchwiseQuantity":c['Quantity'],
-                                        "BaseUnitQuantity":c['BaseUnitQuantity'],
-                                        "Qty":p
+                                        "BaseUnitQuantity":StockQty,
+                                        # "Qty":p
+                                        "Qty":""
                                     })
                             MaterialDetails.append({
                                 "id": b['id'],
@@ -272,10 +273,42 @@ class MaterialIssueViewSecond(RetrieveAPIView):
     def delete(self, request, id=0,Company=0):
         try:
             with transaction.atomic():
+                MaterialIssueItemdata=TC_MaterialIssueItems.objects.all().filter(MaterialIssue=id)
+                MaterialIssueItemdataserializer=MaterialIssueItemsSerializer(MaterialIssueItemdata,many=True).data
+                for a in MaterialIssueItemdataserializer:
+                    
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['IssueQuantity'],0,0,0,0).GetBaseUnitQuantity(),
+                   
+                   
+                    jsonbody=list()
+                    jsonbody.append({
+                    "Item": a['Item'],
+                    "Quantity": a['IssueQuantity'],
+                    "ItemExpiryDate":'2023-01-10',
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "MRP": "",
+                    "Rate": 0,
+                    "GST": 5,
+                    "Party": 4,
+                    "SystemBatchDate": a['SystemBatchDate'],
+                    "SystemBatchCode": a['SystemBatchCode'],
+                    "BatchDate": a['BatchDate'],
+                    "BatchCode": a['BatchCode'],
+                    "CreatedBy":1,
+                    })
+                    bb=O_BatchWiseLiveStock.objects.create(jsonbody)
+                    bb.save()
+                
                 MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
-                MaterialIssuedata.delete()
+                print('aaaaa')
+                # MaterialIssuedata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Deleted Successfully', 'Data': []})
         except T_MaterialIssue.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue used in another table', 'Data': []})                
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue used in another table', 'Data': []})  
+        except Exception as  e:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': e, 'Data': []})   
+                            
