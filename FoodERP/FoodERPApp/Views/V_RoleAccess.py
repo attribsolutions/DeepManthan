@@ -16,10 +16,17 @@ from ..models import *
 def GetRelatedPageID(id):
     a=M_Pages.objects.filter(id=id).values('RelatedPageID')
     aa=M_Pages.objects.filter(id=a[0]['RelatedPageID']).values('ActualPagePath')
-  
+    print(a)
+    print(aa)
     if(a[0]['RelatedPageID']  == 0):
         b=M_Pages.objects.filter(RelatedPageID=id).values('id','ActualPagePath')
-        return str(b[0]['id']) +','+ b[0]['ActualPagePath']
+        print('gggggggg',b)
+        if b.exists:
+            print('vvvvvvvvvv')
+            return str(b[0]['id']) +','+ b[0]['ActualPagePath']
+        else:
+            print('bbbbbb')
+            return str(0 +','+ 0)    
     else:
         return str(a[0]['RelatedPageID']) +','+ aa[0]['ActualPagePath']
 
@@ -89,7 +96,7 @@ class RoleAccessView(RetrieveAPIView):
             # print(str(query.query) )  
           
             PageSerializer = RoleAccessserializerforsidemenu(query,  many=True).data
-            # return Response(PageSerializer ) 
+            return Response(PageSerializer ) 
             Pagesdata = list()
             for a1 in PageSerializer:
                 id = a1['id']
@@ -99,9 +106,10 @@ class RoleAccessView(RetrieveAPIView):
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(
                     RolePageAccess,  many=True).data
                 # print(str(RolePageAccess.query))
+                print(a1['Pages']['id'])
                 GetRelatedPageIDData=GetRelatedPageID(a1['Pages']['id'])
                 vvv=GetRelatedPageIDData.split(',')
-               
+                
                 Pagesdata.append({
                     "id": a1['Pages']['id'], 
                     "RelatedPageID": int(vvv[0]),
@@ -118,15 +126,16 @@ class RoleAccessView(RetrieveAPIView):
                     "ActualPagePath": a1['Pages']['ActualPagePath'],
                     "RolePageAccess": RolePageAccessSerializer
                 })
-
+            print('dddddddddddddd')
             response1 = {
                 "ModuleID": a['id'],
                 "ModuleName":a["Name"],
                 "ModuleData": Pagesdata,
 
             }
+            print('tttttttttt')
             Moduledata.append(response1)
-
+             
         response = {
             "StatusCode": 200,
             "Status": True,
