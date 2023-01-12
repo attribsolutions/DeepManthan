@@ -1,7 +1,18 @@
-# from dataclasses import fields
-# import json
-# from ..models import *
-# from rest_framework import serializers
+from dataclasses import fields
+import json
+from ..models import *
+from rest_framework import serializers
+
+class StockQtyserializerForInvoice(serializers.ModelSerializer):
+    class Meta:
+        model = O_BatchWiseLiveStock
+        fields = ['id','Item','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Quantity','BaseUnitQuantity','Party']  
+
+class OrderSerializerForInvoice(serializers.Serializer):
+    id=serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)     
+    OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
+    CustomerID =serializers.IntegerField() 
 
 
 # class T_InvoiceSerializerGETList(serializers.Serializer):
