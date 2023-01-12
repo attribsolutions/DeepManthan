@@ -26,7 +26,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                 Customer = Orderdata['Customer']
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
-                OrderData = list()
                 OrderItemDetails = list()
                
                 if POOrderIDs != '':
@@ -49,66 +48,66 @@ class OrderDetailsForInvoice(CreateAPIView):
                     
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
                 for b in OrderItemSerializedata:
-                        Item= b['Item']['id']
-                        obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
-                        if obatchwisestockquery == "":
-                            StockQtySerialize_data =[]
-                        else:
-                            StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
-                            stockDatalist = list()
-                            for d in StockQtySerialize_data:
-                                stockDatalist.append({
-                                    "id": d['id'],
-                                    "Item":d['Item'],
-                                    "BatchDate":d['BatchDate'],
-                                    "BatchCode":d['BatchCode'],
-                                    "SystemBatchDate":d['SystemBatchDate'],
-                                    "SystemBatchCode":d['SystemBatchCode'],
-                                    "BaseUnitQuantity":d['BaseUnitQuantity']   
-                                    })
-                        query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                        # print(query.query)
-                        if query.exists():
-                            Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
-                            UnitDetails = list()
-                            for c in Unitdata:
-                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,c['id'],c['BaseUnitQuantity']).ShowDetails()
-                                UnitDetails.append({
-                                "Unit": c['id'],
-                                "UnitName": c['UnitID']['Name'] + baseunitconcat,
-                            })
-                            # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                            
-                        OrderItemDetails.append({
-                            "id": b['id'],
-                            "Item": b['Item']['id'],
-                            "ItemName": b['Item']['Name'],
-                            "Quantity": b['Quantity'],
-                            "MRP": b['MRP']['id'],
-                            "MRPValue": b['MRP']['MRP'],
-                            "Rate": b['Rate'],
-                            "Unit": b['Unit']['id'],
-                            "UnitName": b['Unit']['UnitID']['Name'],
-                            "BaseUnitQuantity": b['BaseUnitQuantity'],
-                            "GST": b['GST']['id'],
-                            "HSNCode": b['GST']['HSNCode'],
-                            "GSTPercentage": b['GST']['GSTPercentage'],
-                            "Margin": b['Margin']['id'],
-                            "MarginValue": b['Margin']['Margin'],
-                            "BasicAmount": b['BasicAmount'],
-                            "GSTAmount": b['GSTAmount'],
-                            "CGST": b['CGST'],
-                            "SGST": b['SGST'],
-                            "IGST": b['IGST'],
-                            "CGSTPercentage": b['CGSTPercentage'],
-                            "SGSTPercentage": b['SGSTPercentage'],
-                            "IGSTPercentage": b['IGSTPercentage'],
-                            "Amount": b['Amount'],
-                            "UnitDetails":UnitDetails,
-                            "StockDetails":stockDatalist
-                        })     
-                OrderData.append({ "OrderItem": OrderItemDetails})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    
+                    Item= b['Item']['id']
+                    obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+                    if obatchwisestockquery == "":
+                        StockQtySerialize_data =[]
+                    else:
+                        StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
+                        stockDatalist = list()
+                        for d in StockQtySerialize_data:
+                            stockDatalist.append({
+                                "id": d['id'],
+                                "Item":d['Item'],
+                                "BatchDate":d['BatchDate'],
+                                "BatchCode":d['BatchCode'],
+                                "SystemBatchDate":d['SystemBatchDate'],
+                                "SystemBatchCode":d['SystemBatchCode'],
+                                "BaseUnitQuantity":d['BaseUnitQuantity']   
+                                })
+                    query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
+                    # print(query.query)
+                    if query.exists():
+                        Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                        UnitDetails = list()
+                        for c in Unitdata:
+                            baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,c['id'],c['BaseUnitQuantity']).ShowDetails()
+                            UnitDetails.append({
+                            "Unit": c['id'],
+                            "UnitName": c['UnitID']['Name'] + baseunitconcat,
+                        })
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
+                        
+                    OrderItemDetails.append({
+                        "id": b['id'],
+                        "Item": b['Item']['id'],
+                        "ItemName": b['Item']['Name'],
+                        "Quantity": b['Quantity'],
+                        "MRP": b['MRP']['id'],
+                        "MRPValue": b['MRP']['MRP'],
+                        "Rate": b['Rate'],
+                        "Unit": b['Unit']['id'],
+                        "UnitName": b['Unit']['UnitID']['Name'],
+                        "BaseUnitQuantity": b['BaseUnitQuantity'],
+                        "GST": b['GST']['id'],
+                        "HSNCode": b['GST']['HSNCode'],
+                        "GSTPercentage": b['GST']['GSTPercentage'],
+                        "Margin": b['Margin']['id'],
+                        "MarginValue": b['Margin']['Margin'],
+                        "BasicAmount": b['BasicAmount'],
+                        "GSTAmount": b['GSTAmount'],
+                        "CGST": b['CGST'],
+                        "SGST": b['SGST'],
+                        "IGST": b['IGST'],
+                        "CGSTPercentage": b['CGSTPercentage'],
+                        "SGSTPercentage": b['SGSTPercentage'],
+                        "IGSTPercentage": b['IGSTPercentage'],
+                        "Amount": b['Amount'],
+                        "UnitDetails":UnitDetails,
+                        "StockDetails":stockDatalist
+                    })     
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
