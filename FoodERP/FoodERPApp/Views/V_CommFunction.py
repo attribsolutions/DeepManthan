@@ -29,8 +29,18 @@ from datetime import date
 4) class GSTHsnCodeMaster - GetTodaysGstHsnCode, GetEffectiveDateGSTHSNCode, GetEffectiveDateGSTHSNCodeID
 5) class UnitwiseQuantityConversion - GetBaseUnitQuantity, ConvertintoSelectedUnit
 6) class ShowBaseUnitQtyOnUnitDropDown - ShowDetails(baseunitname), TrimQty(Baseunitqty)
+7) class UnitwiseQuantityConversion - GetBaseUnitQuantity,ConvertintoSelectedUnit
+8) class ShowBaseUnitQtyOnUnitDropDown -ShowDetails
 
 '''
+
+def GetO_BatchWiseLiveStock(ItemID,PartyID):
+   
+    items = O_BatchWiseLiveStock.objects.filter(Item=ItemID,Party=PartyID)
+    total_Stock = sum(items.values_list('BaseUnitQuantity', flat=True))
+    
+    return total_Stock
+
 class MaxValueMaster:
     
     def __init__(self,TableName,ColumnName):
@@ -287,14 +297,21 @@ class UnitwiseQuantityConversion:
         self.ConversionMCItemUnit = ConversionMCItemUnit
         self.ConversionMUnits = ConversionMUnits
        
-        if(MCItemUnit == 0): 
-            a=Q(UnitID=MUnits)
-        else:
-            a=Q(id=MCItemUnit)   
         
-        BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0).filter( a )
-        BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
-        self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
+        if(MCItemUnit == 0 & MUnits==0 ):
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0,IsBase=1)
+            BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
+            self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
+        else:
+        
+            if(MCItemUnit == 0): 
+                a=Q(UnitID=MUnits)
+            else:
+                a=Q(id=MCItemUnit)   
+            
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0).filter( a )
+            BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
+            self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         
         if(ConversionMCItemUnit !=0) or (ConversionMUnits!=0):
             if(ConversionMCItemUnit == 0): 
