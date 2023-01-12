@@ -64,7 +64,9 @@ class GeneralMasterTypeView(CreateAPIView):
                 GeneralMaster_SerializerList = list()
                 for a in GeneralMaster_Serializer:   
                     GeneralMaster_SerializerList.append({
-                    "Type": a['Type']
+                    "id": a['id'],
+                    "Type": a['Type'],
+                    "Name": a['Name']   
                     })
                 GeneralMaster_SerializerList.append({"Type":"NewGeneralMasterType"})     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
