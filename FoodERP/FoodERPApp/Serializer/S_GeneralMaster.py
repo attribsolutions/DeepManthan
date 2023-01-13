@@ -21,9 +21,7 @@ class GeneralMasterserializer(serializers.ModelSerializer):
         fields = '__all__'    
  
     
-class GeneralMasterserializerThird(serializers.Serializer):
-    id = serializers.IntegerField()
-    TypeName = serializers.CharField(max_length=500)    
+ 
     
           
 

@@ -24,16 +24,18 @@ class GeneralMasterFilterView(CreateAPIView):
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
                 Company = GeneralMasterdata['Company']
-                query = M_GeneralMaster.objects.filter(Company=Company,TypeID__gt=0)
+                query = M_GeneralMaster.objects.filter(Company=Company)
                 if query:
                     GeneralMaster_Serializer = GeneralMasterserializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_Serializer})
                     GeneralMaster_SerializerList = list()
                     for a in GeneralMaster_Serializer:
                         type=a['TypeID']
-                        query2 =M_GeneralMaster.objects.raw('''SELECT id, Name TypeName from M_GeneralMaster where M_GeneralMaster.id=%s and M_GeneralMaster.company_id=%s ''',([type,Company])) 
-                        GeneralMaster_Serializer2 = GeneralMasterserializerThird(query2, many=True).data
-                        TypeName = GeneralMaster_Serializer2[0]['TypeName']
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_Serializer2[0]['TypeName'] })  
+                        query2 =M_GeneralMaster.objects.filter(id=type,Company=Company).values('Name')
+                        if type == 0:
+                            TypeName='NewGeneralMasterType'
+                        else:
+                            TypeName=query2[0]['Name']     
                         GeneralMaster_SerializerList.append({
                         "id": a['id'],
                         "TypeID": a['TypeID'],
