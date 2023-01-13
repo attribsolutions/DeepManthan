@@ -52,10 +52,9 @@ class BomDetailsView(CreateAPIView):
                             #     StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
                             #     StockQty = StockQtySerialize_data[0]['actualStock']
                             Stock=float(GetO_BatchWiseLiveStock(b['Item']['id'],Party))
-                            print(Stock)
-                            print(a['Unit']['id'])
+                           
                             StockQty=UnitwiseQuantityConversion(b['Item']['id'],Stock,0,0,b['Unit']['id'],0).ConvertintoSelectedUnit()
-                            print(StockQty)
+                            
                             Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
                             MaterialDetails.append({
