@@ -241,8 +241,7 @@ class OrderEditserializer(serializers.Serializer):
     
     
     
-class OrderserializerforInvoice(serializers.Serializer):
-    id=serializers.IntegerField()
+
      
 
 
