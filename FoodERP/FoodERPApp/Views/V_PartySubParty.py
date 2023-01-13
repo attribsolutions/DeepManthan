@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -64,17 +65,73 @@ class GetSupplierListView(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Supplier = MC_PartySubParty.objects.filter(Party_id=id)
+                
+                
+                Query = MC_PartySubParty.objects.filter(SubParty=id)
+                # Supplier = MC_PartySubParty.objects.filter(Party_id=id)
                 # return JsonResponse({'query': str(Orderdata.query)})
-                if Supplier:
-                    Supplier_serializer = PartySubpartySerializerSecond(Supplier, many=True).data
+                if Query:
+                    Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
                     SupplierListData = list()
                     for a in Supplier_serializer:   
                         SupplierListData.append({
-                        "id": a['SubParty']['id'],
-                        "Supplier": a['SubParty']['Name']
+                        "id": a['Party']['id'],
+                        "Name": a['Party']['Name']
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class GetVenderView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication 
+            
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                
+                
+                aa=M_Parties.objects.filter(PartyType = 3).values('id') 
+                
+                Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
+                if Query:
+                    Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
+                    SupplierListData = list()
+                    for a in Supplier_serializer:   
+                        SupplierListData.append({
+                        "id": a['SubParty']['id'],
+                        "Name": a['SubParty']['Name']
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+
+
+class GetCustomerView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication 
+            
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                
+                
+                aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
+                
+                Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
+                if Query:
+                    Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
+                    SupplierListData = list()
+                    for a in Supplier_serializer:   
+                        SupplierListData.append({
+                        "id": a['SubParty']['id'],
+                        "Name": a['SubParty']['Name']
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                                      

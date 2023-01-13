@@ -218,11 +218,11 @@ urlpatterns = [
             url(r'PriceList$', PriceListView.as_view()),
             url(r'PartyTypes/([0-9]+)$', PartyTypeViewSecond.as_view()),
             url(r'PartyTypes$', PartyTypeView.as_view()),
-           
-            url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
             url(r'ImageTypes$', M_ImageTypesView.as_view()),
            
+            url(r'GetVender/([0-9]+)$',GetVenderView.as_view()),
             url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
+            url(r'GetCustomer/([0-9]+)$',GetCustomerView.as_view()),
            
 # State and District
             url(r'States$',M_StateView.as_view()),    

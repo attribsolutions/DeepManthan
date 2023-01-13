@@ -11,6 +11,7 @@ class PartySerializer(serializers.ModelSerializer):
   
 class PartySubpartySerializerSecond(serializers.ModelSerializer):
     SubParty = PartySerializer(read_only=True)
+    Party = PartySerializer(read_only=True)
     class Meta :
         model= MC_PartySubParty
         fields = '__all__'  
