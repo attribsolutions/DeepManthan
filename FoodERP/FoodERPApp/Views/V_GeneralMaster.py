@@ -30,7 +30,7 @@ class GeneralMasterFilterView(CreateAPIView):
                     GeneralMaster_SerializerList = list()
                     for a in GeneralMaster_Serializer:
                         type=a['TypeID']
-                        query2 =M_GeneralMaster.objects.raw('''SELECT id, Name TypeName from M_GeneralMaster where M_GeneralMaster.TypeID=%s and M_GeneralMaster.company_id=%s ''',([type,Company])) 
+                        query2 =M_GeneralMaster.objects.raw('''SELECT id, Name TypeName from M_GeneralMaster where M_GeneralMaster.id=%s and M_GeneralMaster.company_id=%s ''',([type,Company])) 
                         GeneralMaster_Serializer2 = GeneralMasterserializerThird(query2, many=True).data
                         TypeName = GeneralMaster_Serializer2[0]['TypeName']
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_Serializer2[0]['TypeName'] })  
