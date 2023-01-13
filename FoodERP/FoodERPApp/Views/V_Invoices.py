@@ -76,6 +76,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                             UnitDetails.append({
                             "Unit": c['id'],
                             "UnitName": c['UnitID']['Name'] + baseunitconcat,
+                            "ConversionUnit": c['BaseUnitQuantity'],
                         })
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                         
