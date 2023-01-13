@@ -75,6 +75,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                     #             amount= float(c['BaseUnitQuantity'])-float(amount)            
                                     
                                     StockQty=UnitwiseQuantityConversion(b['Item']['id'],c['BaseUnitQuantity'],0,0,b['Unit']['id'],0).ConvertintoSelectedUnit()
+                                    
                                     stockDatalist.append({
                                         "id": c['id'],
                                         "Item":c['Item'],
