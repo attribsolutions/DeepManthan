@@ -37,6 +37,25 @@ class GetMaxNumber:
                 a=a+1
         return a
     
+    
+    
+    def GetDemandNumber(*args):
+        
+        MaxDemandNumber=T_Demands.objects.filter(Division_id=args[0]).filter(Customer_id=args[1]).filter(DemandDate=args[2]).values('DemandNo').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[2]
+       
+        if(not MaxDemandNumber):
+          a = 1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:
+                a=int(MaxDemandNumber[0]['DemandNo'])
+                a=a+1
+        return a
+    
+    
     def GetDeliveryChallanNumber(*args):
 
         MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
@@ -115,6 +134,15 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['Grnprefix']
+        return a
+    
+    
+    def GetDemandPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Demandprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['Demandprefix']
         return a
     
     def GetDeliveryChallanPrifix(*args):
