@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
-
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_Invoices import *
 from ..Serializer.S_Orders import *
 
@@ -113,7 +113,47 @@ class OrderDetailsForInvoice(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
-
+class InvoiceView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Invoicedata = JSONParser().parse(request)
+                Party = Invoicedata['Party']
+                print(Party)
+                InvoiceDate = Invoicedata['InvoiceDate']
+                print(InvoiceDate)
+                # ==========================Get Max Invoice Number=====================================================
+                a = GetMaxNumber.GetInvoiceNumber(Party,InvoiceDate)
+                print(a)
+                Invoicedata['InvoiceNumber'] = a
+                b = GetPrifix.GetInvoicePrifix(Party)
+                Invoicedata['FullInvoiceNumber'] = b+""+str(a)
+                print(b)
+                #================================================================================================== 
+                InvoiceItems = Invoicedata['InvoiceItems']
+                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully', 'Data':InvoiceItems})
+                O_BatchWiseLiveStockList=list()
+                for InvoiceItem in InvoiceItems:
+                    O_BatchWiseLiveStockList.append({
+                        "Quantity" : InvoiceItem['BatchID'],
+                        "Item" : InvoiceItem['Item'],
+                        "BaseUnitQuantity" : InvoiceItem['IssueQuantity']
+                    })
+                        
+                Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
+                
+                Invoice_serializer = InvoiceSerializer(data=Invoicedata)
+                if Invoice_serializer.is_valid():
+                    Invoice_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': Invoice_serializer.errors, 'Data':[]})
+        except Exception:
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Exceptio Found', 'Data': []})
+    
 
 
 # class T_InvoiceView(CreateAPIView):
