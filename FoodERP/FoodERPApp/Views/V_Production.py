@@ -109,27 +109,35 @@ class ProductionView(CreateAPIView):
                 Productiondata['BatchCode'] = BatchCode
                 Productiondata['BatchDate'] = date.today()
                 O_BatchWiseLiveStockList=list()
+                O_LiveBatchesList=list()
                 O_BatchWiseLiveStockList.append({
                     "Item": Productiondata['Item'],
                     "Quantity": Productiondata['ActualQuantity'],
                     "Unit": Productiondata['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Customer,
+                    "CreatedBy":Productiondata['CreatedBy'],
+                    
+                    
+                    })
+
+                O_LiveBatchesList.append({
+                    
                     "MRP": Productiondata['MRP'],
                     "Rate": Productiondata['Rate'],
                     "GST": GSTID,
-                    "Party": Customer,
                     "SystemBatchDate": Productiondata['BatchDate'],
                     "SystemBatchCode": Productiondata['BatchCode'],
                     "BatchDate": Productiondata['BatchDate'],
                     "BatchCode": Productiondata['PrintedBatchCode'],
-                    "CreatedBy":Productiondata['CreatedBy'],
-                    "ItemExpiryDate":Productiondata['BestBefore']
+                    "ItemExpiryDate":Productiondata['BestBefore'],
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
-                    })
+                    })    
 
                 # print(GRNdata)
-                Productiondata.update({"O_BatchWiseLiveStockItems":O_BatchWiseLiveStockList}) 
+                Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 
                 Production_Serializer = H_ProductionSerializer(data=Productiondata)
                 if Production_Serializer.is_valid():
