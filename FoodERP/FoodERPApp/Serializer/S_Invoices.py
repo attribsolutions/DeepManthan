@@ -3,10 +3,17 @@ import json
 from ..models import *
 from rest_framework import serializers
 
+
+class LiveBatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =O_LiveBatches
+        fields='__all__'
+
 class StockQtyserializerForInvoice(serializers.ModelSerializer):
+    LiveBatche=LiveBatchSerializer()
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['id','Item','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Quantity','BaseUnitQuantity','Party']  
+        fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche']  
 
 class OrderserializerforInvoice(serializers.ModelSerializer):
     class Meta:
