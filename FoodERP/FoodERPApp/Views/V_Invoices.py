@@ -60,10 +60,10 @@ class OrderDetailsForInvoice(CreateAPIView):
                             stockDatalist.append({
                                 "id": d['id'],
                                 "Item":d['Item'],
-                                "BatchDate":d['BatchDate'],
-                                "BatchCode":d['BatchCode'],
-                                "SystemBatchDate":d['SystemBatchDate'],
-                                "SystemBatchCode":d['SystemBatchCode'],
+                                "BatchDate":d['LiveBatche']['BatchDate'],
+                                "BatchCode":d['LiveBatche']['BatchCode'],
+                                "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
+                                "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
