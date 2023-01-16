@@ -45,6 +45,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 StockQtySerialize_data =[]
                             else:
                                 StockQtySerialize_data = StockQtyserializerForMaterialIssue(obatchwisestockquery, many=True).data
+                                # print(StockQtySerialize_data)
                                 Qty = float(b['Quantity']) /float(workorderqty)
                                 ActualQty = float(GetQuantity * Qty)
                                 stockDatalist = list()
@@ -79,10 +80,10 @@ class WorkOrderDetailsView(CreateAPIView):
                                     stockDatalist.append({
                                         "id": c['id'],
                                         "Item":c['Item'],
-                                        "BatchDate":c['BatchDate'],
-                                        "BatchCode":c['BatchCode'],
-                                        "SystemBatchDate":c['SystemBatchDate'],
-                                        "SystemBatchCode":c['SystemBatchCode'],
+                                        "BatchDate":c['LiveBatche']['BatchDate'],
+                                        "BatchCode":c['LiveBatche']['BatchCode'],
+                                        "SystemBatchDate":c['LiveBatche']['SystemBatchDate'],
+                                        "SystemBatchCode":c['LiveBatche']['SystemBatchCode'],
                                         "ObatchwiseQuantity":c['Quantity'],
                                         "BaseUnitQuantity":StockQty,
                                         # "Qty":p

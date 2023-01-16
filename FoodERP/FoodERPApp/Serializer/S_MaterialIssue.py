@@ -5,10 +5,16 @@ from ..Serializer.S_Companies import *
 from ..Serializer.S_Parties import * 
 
 
+class LiveBatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =O_LiveBatches
+        fields='__all__'
+
 class StockQtyserializerForMaterialIssue(serializers.ModelSerializer):
+    LiveBatche=LiveBatchSerializer()
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['id','Item','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Quantity','BaseUnitQuantity','Party']  
+        fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche']  
 
 class MaterialIssueWorkOrdersSerializer(serializers.ModelSerializer):
     class Meta:
