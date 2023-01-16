@@ -29,13 +29,11 @@ class OrderDetailsForInvoice(CreateAPIView):
                 OrderItemDetails = list()
                
                 if POOrderIDs != '':
-                    
                     OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
                 else:
-                    
                     query = T_Orders.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
                     Serializedata = OrderserializerforInvoice(query,many=True).data
                     Order_list = list()
@@ -46,12 +44,14 @@ class OrderDetailsForInvoice(CreateAPIView):
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                    
+                       
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
                 for b in OrderItemSerializedata:
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+           
+                   
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
                     else:
