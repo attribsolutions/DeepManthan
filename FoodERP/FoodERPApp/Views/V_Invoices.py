@@ -114,6 +114,54 @@ class OrderDetailsForInvoice(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
+class InvoiceListFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoicedata = JSONParser().parse(request)
+                FromDate = Invoicedata['FromDate']
+                ToDate = Invoicedata['ToDate']
+                Customer = Invoicedata['Customer']
+                Party = Invoicedata['Party']
+               
+                if(Customer == ''):
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party)
+                else:
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)
+                   
+                # return JsonResponse({'query': str(Orderdata.query)})
+                if query:
+                    Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    InvoiceListData = list()
+                    for a in Invoice_serializer:
+                        InvoiceListData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount']  
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
+
+
+
+
+
 class InvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication

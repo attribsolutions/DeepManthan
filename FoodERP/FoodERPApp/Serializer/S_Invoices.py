@@ -3,6 +3,11 @@ import json
 from ..models import *
 from rest_framework import serializers
 
+class PartiesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name']
+
 
 class LiveBatchSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,27 +25,6 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
         model = T_Orders
         fields = '__all__'
 
-
-
-# class T_InvoiceSerializerGETList(serializers.Serializer):
-#     id=serializers.IntegerField()
-#     Customer_id = serializers.IntegerField()
-#     CustomerName=serializers.CharField(max_length=500)
-#     Party_id =serializers.IntegerField()
-#     PartyName=serializers.CharField(max_length=500)
-#     InvoiceDate = serializers.DateField()
-#     InvoiceNumber  =  serializers.IntegerField()
-#     FullInvoiceNumber =  serializers.CharField(max_length=500)
-#     CustomerGSTTin = serializers.CharField(max_length=500)
-#     GrandTotal =  serializers.DecimalField(max_digits = 15,decimal_places=2)
-#     RoundOffAmount = serializers.DecimalField(max_digits = 5,decimal_places=2)
-#     CreatedBy  =  serializers.IntegerField()
-#     CreatedOn =  serializers.DateTimeField()
-#     UpdatedBy = serializers.IntegerField()
-#     UpdatedOn = serializers.DateTimeField()
-#     Order_id = serializers.IntegerField()
-    
-    
 
 
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
@@ -89,4 +73,14 @@ class InvoiceSerializer(serializers.ModelSerializer):
         for InvoicesReference_data in InvoicesReferences_data:
             InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)       
         
-        return InvoiceID       
+        return InvoiceID   
+    
+    
+    
+class InvoiceSerializerSecond(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+ 
+    class Meta:
+        model = T_Invoices
+        fields = '__all__'        

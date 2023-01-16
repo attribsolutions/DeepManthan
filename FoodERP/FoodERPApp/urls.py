@@ -173,9 +173,10 @@ urlpatterns = [
 
     
 #Invoice All APIs
-            url(r'Invoices/([0-9]+)$', InvoiceView.as_view()),
-            url(r'Invoices$', InvoiceView.as_view()),
+            url(r'Invoice/([0-9]+)$', InvoiceView.as_view()),
+            url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
+            url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
