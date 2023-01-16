@@ -48,16 +48,16 @@ class InvoiceItemsSerializer(serializers.ModelSerializer):
         fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate']   
         
 class InvoiceSerializer(serializers.ModelSerializer):
-    InvoiceItems = InvoicesReferencesSerializer(many=True)
-    InvoicesReferences = InvoiceItemsSerializer(many=True)
+    InvoiceItems = InvoiceItemsSerializer(many=True)
+    InvoicesReferences = InvoicesReferencesSerializer(many=True) 
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'CustomerGSTTin', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'CustomerGSTTin', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems', 'InvoicesReferences']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         InvoicesReferences_data = validated_data.pop('InvoicesReferences')
-        O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
+        # # O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
         InvoiceID = T_Invoices.objects.create(**validated_data)
         
         for InvoiceItem_data in InvoiceItems_data:
