@@ -14,6 +14,54 @@ from django.db.models import Sum
 from ..models import *
 
 
+class DemandListFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Demanddata = JSONParser().parse(request)
+                FromDate = Demanddata['FromDate']
+                ToDate = Demanddata['ToDate']
+                Customer = Demanddata['Customer']
+                Supplier = Demanddata['Supplier']
+                d = date.today()
+                if(Supplier == ''):
+                    query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer)
+                else:
+                    query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
+                # return JsonResponse({'query': str(Orderdata.query)})
+                if query:
+                    Demand_serializer = DemandSerializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    DemandListData = list()
+                    for a in Demand_serializer:
+                        DemandListData.append({
+                            "id": a['id'],
+                            "DemandDate": a['DemandDate'],
+                            "FullDemandNumber": a['FullDemandNumber'],
+                            "DeliveryDate": a['DeliveryDate'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "SupplierID": a['Supplier']['id'],
+                            "Supplier": a['Supplier']['Name'],
+                            "DemandAmount": a['DemandAmount'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
+
+
+
+
 class DemandView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -56,8 +104,8 @@ class DemandViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Order_Data = T_Demands.objects.get(id=id)
-                Order_Data.delete()
+                Demand_Data = T_Demands.objects.get(id=id)
+                Demand_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
