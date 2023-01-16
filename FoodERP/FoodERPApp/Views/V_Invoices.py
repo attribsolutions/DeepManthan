@@ -29,6 +29,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 OrderItemDetails = list()
                
                 if POOrderIDs != '':
+                    
                     OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
@@ -130,17 +131,17 @@ class InvoiceView(CreateAPIView):
                 b = GetPrifix.GetInvoicePrifix(Party)
                 Invoicedata['FullInvoiceNumber'] = b+""+str(a)
                 #================================================================================================== 
-                # InvoiceItems = Invoicedata['InvoiceItems']
-                # return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully', 'Data':InvoiceItems})
-                # O_BatchWiseLiveStockList=list()
-                # for InvoiceItem in InvoiceItems:
-                #     O_BatchWiseLiveStockList.append({
-                #         "Quantity" : InvoiceItem['BatchID'],
-                #         "Item" : InvoiceItem['Item'],
-                #         "BaseUnitQuantity" : InvoiceItem['IssueQuantity']
-                #     })
+                InvoiceItems = Invoicedata['InvoiceItems']
+                
+                O_BatchWiseLiveStockList=list()
+                for InvoiceItem in InvoiceItems:
+                    O_BatchWiseLiveStockList.append({
+                        "Quantity" : InvoiceItem['BatchID'],
+                        "Item" : InvoiceItem['Item'],
+                        "BaseUnitQuantity" : InvoiceItem['Quantity']
+                    })
                         
-                # Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
+                Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
                 
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():
