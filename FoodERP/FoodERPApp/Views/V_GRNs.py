@@ -90,6 +90,7 @@ class T_GRNView(CreateAPIView):
                 item = ""
                 query = T_GRNs.objects.filter(Customer_id=GRNdata['Customer']).values('id')
                 O_BatchWiseLiveStockList=list()
+                O_LiveBatchesList=list()
                 for a in GRNdata['GRNItems']:
                     
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
@@ -113,28 +114,34 @@ class T_GRNView(CreateAPIView):
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
-                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Customer,
+                    "CreatedBy":CreatedBy,
+                    
+                    })
+                    O_LiveBatchesList.append({
+                    
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],
-                    "Party": Customer,
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
-                    "CreatedBy":CreatedBy,
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })
 
                 # print(GRNdata)
-                GRNdata.update({"O_BatchWiseLiveStockItems":O_BatchWiseLiveStockList}) 
-                # print(GRNdata)   
+                GRNdata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
+                # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': GRNdata})   
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
                     # return JsonResponse({'Data':GRN_serializer.data})

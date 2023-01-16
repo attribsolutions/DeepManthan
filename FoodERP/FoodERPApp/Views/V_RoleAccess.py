@@ -89,9 +89,9 @@ class RoleAccessView(RetrieveAPIView):
     
             if (int(PartyID) > 0)  :
 
-                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company_id__isnull=True,)
+                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company_id__isnull=True,).select_related('Pages').order_by('Pages__DisplayIndex')
             else :
-                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company_id__isnull=True)
+                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company_id__isnull=True).select_related('Pages').order_by('Pages__DisplayIndex')
 
             # print(str(query.query) )  
           
