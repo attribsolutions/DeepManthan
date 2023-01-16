@@ -39,7 +39,7 @@ class DemandView(CreateAPIView):
                 b = GetPrifix.GetOrderPrifix(Division)
                 Orderdata['FullOrderNumber'] = b+""+str(a)
                 # return JsonResponse({ 'Data': Orderdata })
-                Order_serializer = T_OrderSerializer(data=Orderdata)
+                Order_serializer = DemandSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'Data': []})
@@ -56,10 +56,10 @@ class DemandViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Order_Data = T_Orders.objects.get(id=id)
+                Order_Data = T_Demands.objects.get(id=id)
                 Order_Data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
-        except T_Orders.DoesNotExist:
+        except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})

@@ -22,14 +22,14 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
         model = M_Parties
         fields = ['id','Name']
 
-class TC_OrderItemsSerializer(serializers.ModelSerializer):
+class DemandItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_DemandItems
         fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment']
 
-class T_OrderSerializer(serializers.ModelSerializer):
-    DemandItem = TC_OrderItemsSerializer(many=True)
+class DemandSerializer(serializers.ModelSerializer):
+    DemandItem = DemandItemsSerializer(many=True)
    
     class Meta:
         model = T_Demands
