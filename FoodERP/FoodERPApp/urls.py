@@ -86,6 +86,9 @@ from .Views.V_TermsAndConditions import *
 
 from .Views.V_GeneralMaster import *
 
+
+from .Views.V_Demands import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -149,6 +152,12 @@ urlpatterns = [
             url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
+
+# Demands All APIs
+            url(r'Demands/([0-9]+)$', DemandViewSecond.as_view()),
+            url(r'Demands$', DemandView.as_view()),
+         
+
     
 # TermsAndCondition All APIs
             url(r'TermsAndCondtions/([0-9]+)$', TermsAndCondtionsViewSecond.as_view()),
@@ -164,9 +173,10 @@ urlpatterns = [
 
     
 #Invoice All APIs
-            url(r'Invoices/([0-9]+)$', InvoiceView.as_view()),
-            url(r'Invoices$', InvoiceView.as_view()),
+            url(r'Invoice/([0-9]+)$', InvoiceView.as_view()),
+            url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
+            url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),

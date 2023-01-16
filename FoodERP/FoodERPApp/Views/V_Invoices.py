@@ -34,7 +34,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
                 else:
-                    
                     query = T_Orders.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
                     Serializedata = OrderserializerforInvoice(query,many=True).data
                     Order_list = list()
@@ -45,12 +44,14 @@ class OrderDetailsForInvoice(CreateAPIView):
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                    
+                       
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
                 for b in OrderItemSerializedata:
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+           
+                   
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
                     else:
@@ -113,6 +114,48 @@ class OrderDetailsForInvoice(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
+class InvoiceListFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoicedata = JSONParser().parse(request)
+                FromDate = Invoicedata['FromDate']
+                ToDate = Invoicedata['ToDate']
+                Customer = Invoicedata['Customer']
+                Party = Invoicedata['Party']
+               
+                if(Customer == ''):
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party)
+                else:
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)
+                   
+                # return JsonResponse({'query': str(Orderdata.query)})
+                if query:
+                    Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    InvoiceListData = list()
+                    for a in Invoice_serializer:
+                        InvoiceListData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount']  
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
 class InvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -130,17 +173,17 @@ class InvoiceView(CreateAPIView):
                 b = GetPrifix.GetInvoicePrifix(Party)
                 Invoicedata['FullInvoiceNumber'] = b+""+str(a)
                 #================================================================================================== 
-                # InvoiceItems = Invoicedata['InvoiceItems']
-                # return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully', 'Data':InvoiceItems})
-                # O_BatchWiseLiveStockList=list()
-                # for InvoiceItem in InvoiceItems:
-                #     O_BatchWiseLiveStockList.append({
-                #         "Quantity" : InvoiceItem['BatchID'],
-                #         "Item" : InvoiceItem['Item'],
-                #         "BaseUnitQuantity" : InvoiceItem['IssueQuantity']
-                #     })
+                InvoiceItems = Invoicedata['InvoiceItems']
+                
+                O_BatchWiseLiveStockList=list()
+                for InvoiceItem in InvoiceItems:
+                    O_BatchWiseLiveStockList.append({
+                        "Quantity" : InvoiceItem['BatchID'],
+                        "Item" : InvoiceItem['Item'],
+                        "BaseUnitQuantity" : InvoiceItem['Quantity']
+                    })
                         
-                # Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
+                Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
                 
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():

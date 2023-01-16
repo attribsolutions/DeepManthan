@@ -823,9 +823,9 @@ class T_Demands(models.Model):
     DeliveryDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='DemandCustomer', on_delete=models.DO_NOTHING)
     Supplier = models.ForeignKey(M_Parties, related_name='DemandSupplier', on_delete=models.DO_NOTHING)
-    OrderNo = models.IntegerField()
-    FullOrderNumber = models.CharField(max_length=500)
-    OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    DemandNo = models.IntegerField()
+    FullDemandNumber = models.CharField(max_length=500)
+    DemandAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500 ,null=True,blank=True)
     OrderType=models.IntegerField()  #1.SalesOrder OR 2.PurchesOrder
     POType=models.ForeignKey(M_POType, related_name='DemandPOType', on_delete=models.DO_NOTHING,null=True,blank=True)     #1.OpenOrder OR 2.RegulerOrder
@@ -839,12 +839,12 @@ class T_Demands(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    # Inward = models.PositiveSmallIntegerField(default=0)
+    IsInward = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Demands"        
         
 class TC_DemandItems(models.Model):
-    Demand = models.ForeignKey(T_Demands, related_name='DemandItems', on_delete=models.CASCADE)
+    Demand = models.ForeignKey(T_Demands, related_name='DemandItem', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='DItem', on_delete=models.PROTECT)
     Comment= models.CharField(max_length=300,blank=True,null=True)
     Quantity = models.DecimalField(max_digits=10, decimal_places=2)
