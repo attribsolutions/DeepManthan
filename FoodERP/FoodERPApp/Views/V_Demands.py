@@ -22,28 +22,28 @@ class DemandView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
-                Division = Orderdata['Division']
-                OrderType = Orderdata['OrderType']
-                OrderDate = Orderdata['OrderDate']
+                Demanddata = JSONParser().parse(request)
+                Division = Demanddata['Division']
+                Customer = Demanddata['Customer']
+                DemandDate = Demanddata['DemandDate']
 
-                '''Get Max Order Number'''
-                a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
+                '''Get Max Demand Number'''
+                a = GetMaxNumber.GetDemandNumber(Division, Customer, DemandDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                for aa in Orderdata['OrderItem']:
+                for aa in Demanddata['DemandItem']:
                     BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0).GetBaseUnitQuantity()
-                    Orderdata['BaseUnitQuantity'] =  BaseUnitQuantity 
+                    Demanddata['BaseUnitQuantity'] =  BaseUnitQuantity 
                 
-                Orderdata['OrderNo'] = a
-                '''Get Order Prifix '''
-                b = GetPrifix.GetOrderPrifix(Division)
-                Orderdata['FullOrderNumber'] = b+""+str(a)
-                # return JsonResponse({ 'Data': Orderdata })
-                Order_serializer = DemandSerializer(data=Orderdata)
-                if Order_serializer.is_valid():
-                    Order_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'Data': []})
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
+                Demanddata['DemandNo'] = a
+                '''Get Demand Prifix '''
+                b = GetPrifix.GetDemandPrifix(Division)
+                Demanddata['FullDemandNumber'] = b+""+str(a)
+               
+                Demand_serializer = DemandSerializer(data=Demanddata)
+                if Demand_serializer.is_valid():
+                    Demand_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Demand Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Demand_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
