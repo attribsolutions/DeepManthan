@@ -29,22 +29,38 @@ class H_ProductionSerializerforGET(serializers.ModelSerializer):
         model = T_Production
         fields = '__all__'
 
+class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = O_BatchWiseLiveStock
+        fields = ['Item','Quantity','Unit','OriginalBaseUnitQuantity','BaseUnitQuantity','Party','CreatedBy']
+    
+class O_LiveBatchesSerializer(serializers.ModelSerializer):
+    
+    O_BatchWiseLiveStockList = O_BatchWiseLiveStockSerializer(many=True)
+    class Meta:
+        model = O_LiveBatches
+        fields = ['MRP','GST','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','O_BatchWiseLiveStockList']
+    
+
 class H_ProductionSerializer(serializers.ModelSerializer):
     ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
-    O_BatchWiseLiveStockItems = O_BatchWiseLiveStockSerializer(many=True)
+    O_LiveBatchesList=O_LiveBatchesSerializer(many=True)
     class Meta:
         model = T_Production
         fields = '__all__'
 
     def create(self, validated_data):
         ProductionMaterialIssues_data = validated_data.pop('ProductionMaterialIssue')
-        O_BatchWiseLiveStockItems_data=validated_data.pop('O_BatchWiseLiveStockItems')
+        O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
         
         ProductionID= T_Production.objects.create(**validated_data)
        
-        for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data :
-            O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(Production=ProductionID,**O_BatchWiseLiveStockItem_data)  
-          
+        for O_LiveBatchesList_data in O_LiveBatchesLists_data :
+            O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
+            BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
+            for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
+                O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(Production=ProductionID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
+            
         for ProductionMaterialIssue_data in ProductionMaterialIssues_data:
             Productionreff = TC_ProductionMaterialIssue.objects.create(Production=ProductionID, **ProductionMaterialIssue_data)
             
