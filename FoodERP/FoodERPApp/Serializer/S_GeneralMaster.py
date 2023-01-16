@@ -21,7 +21,7 @@ class GeneralMasterserializer(serializers.ModelSerializer):
         fields = '__all__'    
  
     
-    
+ 
     
           
 

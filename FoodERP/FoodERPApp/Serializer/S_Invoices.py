@@ -36,33 +36,44 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
     
 
 
-# class TC_InvoiceItemBatchesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = TC_InvoicesReferences
-#         fields = ['Order','Invoice']
+class InvoicesReferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_InvoicesReferences
+        fields = ['Order']
         
-# class TC_InvoiceItemsSerializer(serializers.ModelSerializer):
-#     InvoiceItemBatches = TC_InvoiceItemBatchesSerializer(many=True) 
-#     class Meta:
-#         model = TC_InvoiceItems
-#         fields = ['Item','HSNCode','Quantity','Unit','BaseUnitQuantity','QtyInKg','QtyInNo','QtyInBox','MRP','Rate','BasicAmount','TaxType','GSTPercentage','GSTAmount','Amount','DiscountType','Discount','DiscountAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','InvoiceItemBatches']   
+class InvoiceItemsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = TC_InvoiceItems
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate']   
         
-# class T_InvoiceSerializer(serializers.ModelSerializer):
-#     InvoiceItems = TC_InvoiceItemsSerializer(many=True)
-#     class Meta:
-#         model = T_Invoices
-#         fields = ['InvoiceDate','Customer','InvoiceNumber','FullInvoiceNumber','CustomerGSTTin','GrandTotal','Party','RoundOffAmount','CreatedBy','UpdatedBy','InvoiceItems']
+class InvoiceSerializer(serializers.ModelSerializer):
+    InvoiceItems = InvoiceItemsSerializer(many=True)
+    InvoicesReferences = InvoicesReferencesSerializer(many=True) 
+    class Meta:
+        model = T_Invoices
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'CustomerGSTTin', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems', 'InvoicesReferences']
 
-#     def create(self, validated_data):
-#         InvoiceItems_data = validated_data.pop('InvoiceItems')
-#         InvoiceID = T_Invoices.objects.create(**validated_data)
-#         for InvoiceItem_data in InvoiceItems_data:
-#             InvoiceItemBatches_data = InvoiceItem_data.pop('InvoiceItemBatches')
-#             InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
-#             for InvoiceItemBatch_data in InvoiceItemBatches_data:
-#                TC_InvoiceItemBatches.objects.create(Invoice=InvoiceID,InvoiceItem=InvoiceItemID, **InvoiceItemBatch_data)
+    def create(self, validated_data):
+        InvoiceItems_data = validated_data.pop('InvoiceItems')
+        InvoicesReferences_data = validated_data.pop('InvoicesReferences')
+        # # O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
+        InvoiceID = T_Invoices.objects.create(**validated_data)
         
-#         return InvoiceID       
+        for InvoiceItem_data in InvoiceItems_data:
+            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            
+        # for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
+        #     OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
+        #     if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
+        #         OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
+        #     else:
+        #         raise serializers.ValidationError("Not In Stock ")    
+          
+        for InvoicesReference_data in InvoicesReferences_data:
+            InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)       
+        
+        return InvoiceID       
     
 #     def update(self, instance, validated_data):
         
