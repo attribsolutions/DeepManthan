@@ -744,6 +744,7 @@ class MC_PartyItems(models.Model):
 class MC_PartyPrefixs(models.Model):
     Party =models.ForeignKey(M_Parties, related_name='PartyPrefix', on_delete=models.CASCADE)
     Orderprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Demandprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
