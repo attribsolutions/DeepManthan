@@ -57,81 +57,49 @@ class PartySubPartyViewSecond(CreateAPIView):
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
 
-class GetSupplierListView(CreateAPIView):
+class GetVendorSupplierCustomerListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication 
             
     @transaction.atomic()
-    def get(self, request,id=0):
+    def post(self, request):
         try:
             with transaction.atomic():
+                Partydata = JSONParser().parse(request)
+                Type=Partydata['Type']
+                id=Partydata['PartyID']
+                if(Type==1): #Vendor
+                    aa=M_Parties.objects.filter(PartyType = 3).values('id') 
+                    Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
                 
+                elif(Type==2): #Supplier
+                    Query = MC_PartySubParty.objects.filter(SubParty=id)
+                   
+                else:  #Customer
+                    aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
+                    Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
                 
-                Query = MC_PartySubParty.objects.filter(SubParty=id)
-                # Supplier = MC_PartySubParty.objects.filter(Party_id=id)
-                # return JsonResponse({'query': str(Orderdata.query)})
                 if Query:
                     Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
-                    SupplierListData = list()
-                    for a in Supplier_serializer:   
-                        SupplierListData.append({
-                        "id": a['Party']['id'],
-                        "Name": a['Party']['Name']
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
+                    ListData = list()
+                    for a in Supplier_serializer: 
+                        if(Type==1): #Vendor
+                            ListData.append({
+                            "id": a['SubParty']['id'],
+                            "Name": a['SubParty']['Name']
+                            })   
+                        elif(Type==2): #Supplier
+                            ListData.append({
+                            "id": a['Party']['id'],
+                            "Name": a['Party']['Name']
+                            }) 
+                        else:  #Customer
+                            ListData.append({
+                            "id": a['SubParty']['id'],
+                            "Name": a['SubParty']['Name']
+                            })    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-class GetVenderView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
-            
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic():
-                
-                
-                aa=M_Parties.objects.filter(PartyType = 3).values('id') 
-                
-                Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
-                if Query:
-                    Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
-                    SupplierListData = list()
-                    for a in Supplier_serializer:   
-                        SupplierListData.append({
-                        "id": a['SubParty']['id'],
-                        "Name": a['SubParty']['Name']
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
-        except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
-
-
-class GetCustomerView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
-            
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic():
-                
-                
-                aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
-                
-                Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
-                if Query:
-                    Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
-                    SupplierListData = list()
-                    for a in Supplier_serializer:   
-                        SupplierListData.append({
-                        "id": a['SubParty']['id'],
-                        "Name": a['SubParty']['Name']
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': SupplierListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
-        except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                                      
