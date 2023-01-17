@@ -21,27 +21,35 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
         fields = ['id','Name']
-
+        
+class DemandReferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_DemandReferences
+        fields = ['MaterialIssue']        
+        
 class DemandItemsSerializer(serializers.ModelSerializer):
-    
    class Meta:
         model = TC_DemandItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount', 'Comment']
 
 class DemandSerializer(serializers.ModelSerializer):
     DemandItem = DemandItemsSerializer(many=True)
-   
+    DemandReferences = DemandReferencesSerializer(many=True)
     class Meta:
         model = T_Demands
-        fields = ['id','DemandDate','DeliveryDate','Customer','Supplier','DemandNo','FullDemandNumber','OrderType','POType','Division','DemandAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','IsOpenPO','POFromDate','POToDate','DemandItem']
+        fields = ['id','DemandDate','Customer','Supplier','DemandNo','FullDemandNumber', 'Division','DemandAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy', 'DemandItem', 'DemandReferences']
 
     def create(self, validated_data):
         DemandItems_data = validated_data.pop('DemandItem')
+        DemandReferences_data = validated_data.pop('DemandReferences')
         Demand = T_Demands.objects.create(**validated_data)
         
         for DemandItem_data in DemandItems_data:
-            TC_DemandItems.objects.create(Demand=Demand, **DemandItem_data)
-
+            Items=TC_DemandItems.objects.create(Demand=Demand, **DemandItem_data)
+            
+        for DemandReference_data in DemandReferences_data:
+            References = TC_DemandReferences.objects.create(Demand=Demand, **DemandReference_data)
+        
         return Demand
 
 class DemandSerializerSecond(serializers.ModelSerializer):

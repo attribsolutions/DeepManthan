@@ -42,7 +42,6 @@ class DemandListFilterView(CreateAPIView):
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
                             "FullDemandNumber": a['FullDemandNumber'],
-                            "DeliveryDate": a['DeliveryDate'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "SupplierID": a['Supplier']['id'],
