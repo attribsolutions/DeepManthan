@@ -821,26 +821,20 @@ class TC_OrderTermsAndConditions(models.Model):
         
 class T_Demands(models.Model):
     DemandDate = models.DateField()
-    DeliveryDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='DemandCustomer', on_delete=models.DO_NOTHING)
     Supplier = models.ForeignKey(M_Parties, related_name='DemandSupplier', on_delete=models.DO_NOTHING)
     DemandNo = models.IntegerField()
     FullDemandNumber = models.CharField(max_length=500)
     DemandAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500 ,null=True,blank=True)
-    OrderType=models.IntegerField()  #1.SalesOrder OR 2.PurchesOrder
-    POType=models.ForeignKey(M_POType, related_name='DemandPOType', on_delete=models.DO_NOTHING,null=True,blank=True)     #1.OpenOrder OR 2.RegulerOrder
     Division=models.ForeignKey(M_Parties, related_name='DemandDivision', on_delete=models.DO_NOTHING)
     BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='DemandBillingAddress', on_delete=models.PROTECT,null=True,blank=True)
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='DemandShippingAddress', on_delete=models.PROTECT,null=True,blank=True)
-    IsOpenPO = models.BooleanField(default=False)
-    POFromDate = models.DateField(null=True,blank=True)
-    POToDate = models.DateField(null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    IsInward = models.PositiveSmallIntegerField(default=0)
+    DemandClose = models.PositiveSmallIntegerField(default=0)
     class Meta:
         db_table = "T_Demands"        
         
@@ -864,10 +858,7 @@ class TC_DemandItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    IsDeleted = models.BooleanField(default=False)
-    DeletedOn = models.DateTimeField(auto_now=True)
-
+   
     class Meta:
         db_table = "TC_DemandItems"        
 
