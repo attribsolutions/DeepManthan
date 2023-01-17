@@ -82,6 +82,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                         
                     OrderItemDetails.append({
+                        
                         "id": b['id'],
                         "Item": b['Item']['id'],
                         "ItemName": b['Item']['Name'],
@@ -106,9 +107,11 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
+                        "OrderID":b['Order'],
                         "UnitDetails":UnitDetails,
                         "StockDetails":stockDatalist
-                    })     
+                    })
+                         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

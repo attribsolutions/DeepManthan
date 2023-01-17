@@ -11,10 +11,6 @@ from .S_Mrps import *
 from .S_TermsAndConditions import *
 
 
-class M_POTypeserializer(serializers.ModelSerializer):
-    class Meta : 
-        model = M_POType
-        fields = '__all__'
 
 # POST Method
 class PartiesSerializerSecond(serializers.ModelSerializer):
@@ -58,3 +54,15 @@ class DemandSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = T_Demands
         fields = '__all__'
+        
+class DemandSerializerThird(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Supplier = PartiesSerializerSecond(read_only=True)
+    DemandReferences = DemandReferencesSerializer(many=True)
+    DemandItem = DemandItemsSerializer(read_only=True,many=True)
+    BillingAddress=PartyAddressSerializerSecond(read_only=True) 
+    ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
+  
+    class Meta:
+        model = T_Orders
+        fields = '__all__'        
