@@ -43,3 +43,10 @@ class DemandSerializer(serializers.ModelSerializer):
             TC_DemandItems.objects.create(Demand=Demand, **DemandItem_data)
 
         return Demand
+
+class DemandSerializerSecond(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Supplier = PartiesSerializerSecond(read_only=True)
+    class Meta:
+        model = T_Demands
+        fields = '__all__'
