@@ -56,11 +56,6 @@ class DemandListFilterView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-
-
-
-
-
 class DemandView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -105,7 +100,7 @@ class DemandViewSecond(CreateAPIView):
             with transaction.atomic():
                 Demand_Data = T_Demands.objects.get(id=id)
                 Demand_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Demand Deleted Successfully', 'Data': []})
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
