@@ -157,6 +157,7 @@ urlpatterns = [
             url(r'Demands/([0-9]+)$', DemandViewSecond.as_view()),
             url(r'Demands$', DemandView.as_view()),
             url(r'DemandsFilter$', DemandListFilterView.as_view()),
+            url(r'InterBranches$', InterBranchDivisionView.as_view()),
          
 
     

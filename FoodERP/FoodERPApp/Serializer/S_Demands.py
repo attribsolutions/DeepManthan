@@ -3,6 +3,7 @@ import json
 from unittest.util import _MAX_LENGTH
 from ..models import *
 from rest_framework import serializers
+from .S_Orders import * 
 from .S_Parties import * 
 from .S_Items import * 
 from .S_GSTHSNCode import * 
@@ -21,7 +22,9 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
 class DemandReferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_DemandReferences
-        fields = ['MaterialIssue']        
+        fields = ['MaterialIssue'] 
+        
+          
         
 class DemandItemsSerializer(serializers.ModelSerializer):
    class Meta:
@@ -54,15 +57,40 @@ class DemandSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = T_Demands
         fields = '__all__'
+
+
+class DemandItemsSerializerSecond(serializers.ModelSerializer):
+    
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta:
+        model = TC_DemandItems
+        fields = '__all__'
         
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(DemandItemsSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("Margin", None):
+            ret["Margin"] = {"id": None, "Margin": None}    
+        return ret 
+
+
 class DemandSerializerThird(serializers.ModelSerializer):
-    Customer = PartiesSerializerSecond(read_only=True)
-    Supplier = PartiesSerializerSecond(read_only=True)
-    DemandReferences = DemandReferencesSerializer(many=True)
-    DemandItem = DemandItemsSerializer(read_only=True,many=True)
+    Customer = PartiesSerializerThird(read_only=True)
+    Supplier = PartiesSerializerThird(read_only=True)
+    DemandItem = DemandItemsSerializerSecond(read_only=True,many=True)
+    DemandReferences=DemandReferencesSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
-  
+   
     class Meta:
-        model = T_Orders
-        fields = '__all__'        
+        model = T_Demands
+        fields = '__all__'         
+                
