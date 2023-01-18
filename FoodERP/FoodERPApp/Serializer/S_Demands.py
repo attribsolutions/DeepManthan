@@ -64,5 +64,5 @@ class DemandSerializerThird(serializers.ModelSerializer):
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
   
     class Meta:
-        model = T_Orders
+        model = T_Demands
         fields = '__all__'        
