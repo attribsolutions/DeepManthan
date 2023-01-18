@@ -25,11 +25,11 @@ class DemandListFilterView(CreateAPIView):
                 Demanddata = JSONParser().parse(request)
                 FromDate = Demanddata['FromDate']
                 ToDate = Demanddata['ToDate']
-                Customer = Demanddata['Customer']
+                Customer = Demanddata['Customer'] # Customer Compansary
                 Supplier = Demanddata['Supplier']
-                d = date.today()
+                
                 if(Supplier == ''):
-                    query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer)
+                    query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
                 else:
                     query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
                 # return JsonResponse({'query': str(Orderdata.query)})
@@ -42,7 +42,6 @@ class DemandListFilterView(CreateAPIView):
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
                             "FullDemandNumber": a['FullDemandNumber'],
-                            "DeliveryDate": a['DeliveryDate'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "SupplierID": a['Supplier']['id'],
@@ -55,11 +54,6 @@ class DemandListFilterView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
-
-
-
 
 
 class DemandView(CreateAPIView):
@@ -99,6 +93,70 @@ class DemandView(CreateAPIView):
 class DemandViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+    
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                DemandQuery = T_Demands.objects.filter(id=id)
+                if DemandQuery.exists():
+                    DemandSerializedata = DemandSerializerThird(DemandQuery, many=True).data
+                    DemandData = list()
+                    for a in DemandSerializedata:
+                        DemandReferenceslist = list()
+                        for c in a['DemandReferences']:
+                            DemandReferenceslist.append({
+                                "MaterialIssue": c['MaterialIssue'],
+                            })
+                        DemandItemDetails = list()
+                        for b in a['DemandItem']:
+                            DemandItemDetails.append({
+                                "id": b['id'],
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "HSNCode": b['GST']['HSNCode'],
+                                "Margin": b['Margin']['id'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "Comment": b['Comment'],
+                            })
+                        DemandData.append({
+                            "id": a['id'],
+                            "DemandDate": a['DemandDate'],
+                            "DemandAmount": a['DemandAmount'],
+                            "Description": a['Description'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "Supplier": a['Supplier']['id'],
+                            "SupplierName": a['Supplier']['Name'],
+                            "BillingAddressID": a['BillingAddress']['id'],
+                            "BillingAddress": a['BillingAddress']['Address'],
+                            "ShippingAddressID": a['ShippingAddress']['id'],
+                            "ShippingAddress": a['ShippingAddress']['Address'],
+                            "DemandItem": DemandItemDetails,
+                            "DemandReferenceslist": DemandReferenceslist
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Demand Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -106,7 +164,7 @@ class DemandViewSecond(CreateAPIView):
             with transaction.atomic():
                 Demand_Data = T_Demands.objects.get(id=id)
                 Demand_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Demand Deleted Successfully', 'Data': []})
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:

@@ -114,9 +114,17 @@ class GeneralMasterViewSecond(CreateAPIView):
                     GeneralMasterdata = GeneralMasterserializer(query, many=True).data
                     GeneralMasterList=list()
                     for a in GeneralMasterdata:
+                        type=a['TypeID']
+                        query2 =M_GeneralMaster.objects.filter(id=type).values('Name')
+                        if type == 0:
+                            TypeName='NewGeneralMasterType'
+                        else:
+                            TypeName=query2[0]['Name']
+                        
                         GeneralMasterList.append({
                             "id": a['id'],
                             "TypeID": a['TypeID'],
+                            "TypeName":TypeName,
                             "Name": a['Name'],
                             "IsActive": a['IsActive']
                         })
@@ -149,8 +157,12 @@ class GeneralMasterViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                GeneralMasterdata = M_GeneralMaster.objects.get(id=id)
-                GeneralMasterdata.delete()
+                GeneralMasterdata = M_GeneralMaster.objects.filter(TypeID=id).count()
+                if GeneralMasterdata == 0:
+                    GeneralMasterdata = M_GeneralMaster.objects.get(id=id)
+                    GeneralMasterdata.delete()
+                else:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'This is used in another transaction', 'Data':[]}) 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Deleted Successfully', 'Data':[]})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'General Master used in another table', 'Data': []})   

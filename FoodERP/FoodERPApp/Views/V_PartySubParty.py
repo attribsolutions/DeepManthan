@@ -1,3 +1,4 @@
+from collections import Counter
 from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
@@ -13,19 +14,6 @@ from ..models import *
 class PartySubPartyView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                PartySubpartiesdata = MC_PartySubParty.objects.all()
-                if PartySubpartiesdata.exists():
-                    PartySubParty_Serializer = PartySubpartySerializerSecond(PartySubpartiesdata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PartySubParty_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})        
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-    
     
     @transaction.atomic()
     def post(self, request):
@@ -43,15 +31,25 @@ class PartySubPartyView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class PartySubPartyViewSecond(CreateAPIView): 
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
        
     @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.filter(Party_id=id)
+                query = MC_PartySubParty.objects.filter(Party=id)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': str(query.query)})
-                PartySubparties_Serializer = PartySubpartySerializerSecond(query)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartySubparties_Serializer.data})
+                PartySubparties_Serializer = PartySubpartySerializerSecond(query,many=True).data
+                SubPartyList= list()
+                for a in PartySubparties_Serializer:
+                    SubPartyList.append({
+                        "Party":a['Party']['id'],
+                        "PartyName":a['Party']['Name'],
+                        "SubParty": a['SubParty']['id'],
+                        "SubPartyName": a['SubParty']['Name']
+                    })
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubPartyList})
         except  MC_PartySubParty.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
