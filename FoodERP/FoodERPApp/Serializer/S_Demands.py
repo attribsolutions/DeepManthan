@@ -58,11 +58,20 @@ class DemandSerializerSecond(serializers.ModelSerializer):
 class DemandSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Supplier = PartiesSerializerSecond(read_only=True)
-    DemandReferences = DemandReferencesSerializer(many=True)
+    DemandReferences = DemandReferencesSerializer(read_only=True,many=True)
     DemandItem = DemandItemsSerializer(read_only=True,many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
   
     class Meta:
         model = T_Demands
-        fields = '__all__'        
+        fields = '__all__'
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(DemandSerializerThird, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("DemandReferences", None):
+            ret["DemandReferences"] = { "MaterialIssue": None }      
+        return ret     
+                
