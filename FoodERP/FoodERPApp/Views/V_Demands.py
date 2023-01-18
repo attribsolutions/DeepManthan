@@ -93,23 +93,20 @@ class DemandView(CreateAPIView):
 class DemandViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-    
+
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                DemandQuery = T_Demands.objects.filter(id=id)
-                if DemandQuery.exists():
-                    DemandSerializedata = DemandSerializerThird(DemandQuery, many=True).data
+                OrderQuery = T_Demands.objects.filter(id=id)
+                if OrderQuery.exists():
+                    OrderSerializedata = DemandSerializerThird(
+                        OrderQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                     DemandData = list()
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandSerializedata })
-                    for a in DemandSerializedata:
-                        DemandReferenceslist = list()
-                        for c in a['DemandReferences']:
-                            DemandReferenceslist.append({
-                                "MaterialIssue": c['MaterialIssue'],
-                            })
+                    for a in OrderSerializedata:
                         DemandItemDetails = list()
                         for b in a['DemandItem']:
+                            
                             DemandItemDetails.append({
                                 "id": b['id'],
                                 "Item": b['Item']['id'],
@@ -137,6 +134,13 @@ class DemandViewSecond(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "Comment": b['Comment'],
                             })
+                            
+                        DemandReferencesList = list()
+                        for c in a['DemandReferences']:
+                            DemandReferencesList.append({
+                                "MaterialIssue": c['MaterialIssue'] 
+                            })    
+                            
                         DemandData.append({
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
@@ -151,13 +155,12 @@ class DemandViewSecond(CreateAPIView):
                             "ShippingAddressID": a['ShippingAddress']['id'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
                             "DemandItem": DemandItemDetails,
-                            "DemandReferenceslist": DemandReferenceslist
+                            "DemandReferences": DemandReferencesList
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Demand Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
 
     @transaction.atomic()
     def delete(self, request, id=0):
