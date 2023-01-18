@@ -45,7 +45,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 StockQtySerialize_data =[]
                             else:
                                 StockQtySerialize_data = StockQtyserializerForMaterialIssue(obatchwisestockquery, many=True).data
-                                # print(StockQtySerialize_data)
+                                print(StockQtySerialize_data)
                                 Qty = float(b['Quantity']) /float(workorderqty)
                                 ActualQty = float(GetQuantity * Qty)
                                 stockDatalist = list()
@@ -84,6 +84,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                         "BatchCode":c['LiveBatche']['BatchCode'],
                                         "SystemBatchDate":c['LiveBatche']['SystemBatchDate'],
                                         "SystemBatchCode":c['LiveBatche']['SystemBatchCode'],
+                                        "LiveBatchID" : c['LiveBatche']['id'],
                                         "ObatchwiseQuantity":c['Quantity'],
                                         "BaseUnitQuantity":StockQty,
                                         # "Qty":p
@@ -171,7 +172,7 @@ class MaterialIssueView(CreateAPIView):
                     })
                         
                 MaterialIssueData.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
-                
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': MaterialIssueData})
                 MaterialIssue_Serializer = MaterialIssueSerializer(data=MaterialIssueData)
                 
                 if MaterialIssue_Serializer.is_valid():
@@ -275,14 +276,16 @@ class MaterialIssueViewSecond(RetrieveAPIView):
     def delete(self, request, id=0,Company=0):
         try:
             with transaction.atomic():
-                MaterialIssueItemdata=TC_MaterialIssueItems.objects.all().filter(MaterialIssue=id)
-                MaterialIssueItemdataserializer=MaterialIssueItemsSerializer(MaterialIssueItemdata,many=True).data
+                MaterialIssueItemdata=T_MaterialIssue.objects.all().filter(id=id)
+                MaterialIssueItemdataserializer=MatetrialIssueSerializerForDelete(MaterialIssueItemdata,many=True).data
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Deleted Successfully', 'Data': MaterialIssueItemdataserializer})
+                O_BatchWiseLiveStockList=list()
+                O_LiveBatchesList=list()
                 for a in MaterialIssueItemdataserializer:
                     
                     BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['IssueQuantity'],0,0,0,0).GetBaseUnitQuantity(),
                    
-                   
-                    jsonbody=list()
                     jsonbody.append({
                     "Item": a['Item'],
                     "Quantity": a['IssueQuantity'],
@@ -299,6 +302,30 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
                     "CreatedBy":1,
+                    })
+
+                    O_BatchWiseLiveStockList.append({
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Customer,
+                    "CreatedBy":CreatedBy,
+                    
+                    })
+                    O_LiveBatchesList.append({
+                    
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "MRP": a['MRP'],
+                    "Rate": a['Rate'],
+                    "GST": a['GST'],
+                    "SystemBatchDate": a['SystemBatchDate'],
+                    "SystemBatchCode": a['SystemBatchCode'],
+                    "BatchDate": a['BatchDate'],
+                    "BatchCode": a['BatchCode'],
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    
                     })
                     bb=O_BatchWiseLiveStock.objects.create(jsonbody)
                     bb.save()
