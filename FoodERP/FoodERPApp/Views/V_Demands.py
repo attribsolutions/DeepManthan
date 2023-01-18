@@ -145,6 +145,7 @@ class DemandViewSecond(CreateAPIView):
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
                             "DemandAmount": a['DemandAmount'],
+                            "FullDemandNumber": a['FullDemandNumber'],
                             "Description": a['Description'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
