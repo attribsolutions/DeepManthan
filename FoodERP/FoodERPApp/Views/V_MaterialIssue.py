@@ -45,7 +45,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 StockQtySerialize_data =[]
                             else:
                                 StockQtySerialize_data = StockQtyserializerForMaterialIssue(obatchwisestockquery, many=True).data
-                                print(StockQtySerialize_data)
+                              
                                 Qty = float(b['Quantity']) /float(workorderqty)
                                 ActualQty = float(GetQuantity * Qty)
                                 stockDatalist = list()
@@ -165,10 +165,12 @@ class MaterialIssueView(CreateAPIView):
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 O_BatchWiseLiveStockList=list()
                 for MaterialIssueItem in MaterialIssueItems:
+                    BaseUnitQuantity=UnitwiseQuantityConversion(MaterialIssueItem['Item'],MaterialIssueItem['IssueQuantity'],MaterialIssueItem['Unit'],0,0,0).GetBaseUnitQuantity()
+                    print(BaseUnitQuantity)
                     O_BatchWiseLiveStockList.append({
                         "Quantity" : MaterialIssueItem['BatchID'],
                         "Item" : MaterialIssueItem['Item'],
-                        "BaseUnitQuantity" : MaterialIssueItem['IssueQuantity']
+                        "BaseUnitQuantity" : BaseUnitQuantity
                     })
                         
                 MaterialIssueData.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
@@ -265,79 +267,59 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 MaterialIssue_Serializer = MaterialIssueSerializer(MaterialIssueDataByID, data=MaterialIssueData)
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material IssueUpdated Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer.errors, 'Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-            
+    
     @transaction.atomic()
-    def delete(self, request, id=0,Company=0):
+    def delete(self, request, id=0):
         try:
             with transaction.atomic():
                 MaterialIssueItemdata=T_MaterialIssue.objects.all().filter(id=id)
                 MaterialIssueItemdataserializer=MatetrialIssueSerializerForDelete(MaterialIssueItemdata,many=True).data
+                O_BatchWiseLiveStockList=dict()
                 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Deleted Successfully', 'Data': MaterialIssueItemdataserializer})
-                O_BatchWiseLiveStockList=list()
-                O_LiveBatchesList=list()
-                for a in MaterialIssueItemdataserializer:
+                for a in MaterialIssueItemdataserializer[0]['MaterialIssueItems']:
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['IssueQuantity'],a['Unit'],0,0,0).GetBaseUnitQuantity()
                     
-                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['IssueQuantity'],0,0,0,0).GetBaseUnitQuantity(),
-                   
-                    jsonbody.append({
+                    O_BatchWiseLiveStockList.update({
                     "Item": a['Item'],
                     "Quantity": a['IssueQuantity'],
-                    "ItemExpiryDate":'2023-01-10',
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
-                    "MRP": "",
-                    "Rate": 0,
-                    "GST": 5,
-                    "Party": 4,
-                    "SystemBatchDate": a['SystemBatchDate'],
-                    "SystemBatchCode": a['SystemBatchCode'],
-                    "BatchDate": a['BatchDate'],
-                    "BatchCode": a['BatchCode'],
+                    "Party": MaterialIssueItemdataserializer[0]['Party'],
+                    "LiveBatche" : a['LiveBatchID'],
                     "CreatedBy":1,
                     })
 
-                    O_BatchWiseLiveStockList.append({
-                    "Item": a['Item'],
-                    "Quantity": a['Quantity'],
-                    "Unit": a['Unit'],
-                    "BaseUnitQuantity": BaseUnitQuantity,
-                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
-                    "Party": Customer,
-                    "CreatedBy":CreatedBy,
-                    
-                    })
-                    O_LiveBatchesList.append({
-                    
-                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
-                    "MRP": a['MRP'],
-                    "Rate": a['Rate'],
-                    "GST": a['GST'],
-                    "SystemBatchDate": a['SystemBatchDate'],
-                    "SystemBatchCode": a['SystemBatchCode'],
-                    "BatchDate": a['BatchDate'],
-                    "BatchCode": a['BatchCode'],
-                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
-                    
-                    })
-                    bb=O_BatchWiseLiveStock.objects.create(jsonbody)
-                    bb.save()
+               
+                MaterialIssueItemdataserializer=obatchwiseStockSerializerfordelete(data=O_BatchWiseLiveStockList)
                 
-                MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
-                print('aaaaa')
-                # MaterialIssuedata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Deleted Successfully', 'Data': []})
-        except T_MaterialIssue.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
-        except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue used in another table', 'Data': []})  
-        except Exception as  e:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': e, 'Data': []})   
-                            
+                if MaterialIssueItemdataserializer.is_valid():
+                   MaterialIssueItemdataserializer.save()
+                  
+                   MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
+                   MaterialIssuedata.delete()
+                   return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Delete Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssueItemdataserializer.errors, 'Data': []})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
+                           
+
+
+
+
+
+
+
+
+
+
+
