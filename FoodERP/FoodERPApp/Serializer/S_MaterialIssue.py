@@ -94,10 +94,25 @@ class MatetrialIssueSerializerSecond(serializers.ModelSerializer):
         fields = ['id', 'MaterialIssueDate','MaterialIssueNumber','FullMaterialIssueNumber','NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','CreatedOn']
     
 
+
+class obatchwiseStockSerializerfordelete(serializers.ModelSerializer):
+    
+    # def create(self, validated_data):
+    #     for aa in validated_data:
+    #         bb=O_BatchWiseLiveStock.objects.create(**aa)
+    #     return bb
+    
+    class Meta:
+        model=O_BatchWiseLiveStock
+        # fields=['Item','Quantity','Unit','BaseUnitQuantity','OriginalBaseUnitQuantity','Party','LiveBatche','CreatedBy']
+        fields = '__all__'
 class MatetrialIssueSerializerForDelete(serializers.ModelSerializer):
     MaterialIssueItems = MaterialIssueItemsSerializer(many=True)
+    
     class Meta:
         model = T_MaterialIssue
         fields = '__all__'
+
+      
         
            
