@@ -1009,6 +1009,19 @@ class TC_WorkOrderItems(models.Model):
     class Meta:
         db_table = "TC_WorkOrderItems"   
                     
+class O_LiveBatches(models.Model):
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
+    SystemBatchCode = models.CharField(max_length=500)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    ItemExpiryDate=models.DateField()
+    OriginalBatchBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    class Meta:
+        db_table = "O_LiveBatches"
+
 class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
     MaterialIssueNumber = models.IntegerField()
@@ -1037,7 +1050,7 @@ class TC_MaterialIssueItems(models.Model):
     BatchCode = models.CharField(max_length=500)
     SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
-    
+    LiveBatchID=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
     class Meta:
         db_table = "TC_MaterialIssueItems"
         
@@ -1132,17 +1145,7 @@ class TC_DeliveryChallanItems(models.Model):
         db_table = "TC_DeliveryChallanItems"            
 
 
-class O_LiveBatches(models.Model):
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    SystemBatchDate = models.DateField()
-    SystemBatchCode = models.CharField(max_length=500)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    ItemExpiryDate=models.DateField()
-    class Meta:
-        db_table = "O_LiveBatches"
+
 
 
 class O_BatchWiseLiveStock(models.Model):

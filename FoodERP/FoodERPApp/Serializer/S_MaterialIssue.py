@@ -24,7 +24,7 @@ class MaterialIssueWorkOrdersSerializer(serializers.ModelSerializer):
 class MaterialIssueItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_MaterialIssueItems
-        fields =['WorkOrderQuantity', 'IssueQuantity', 'BatchDate', 'BatchCode', 'SystemBatchDate', 'SystemBatchCode', 'Item','Unit']
+        fields =['WorkOrderQuantity', 'IssueQuantity', 'BatchDate', 'BatchCode', 'SystemBatchDate', 'SystemBatchCode', 'LiveBatchID','Item','Unit']
 
 class obatchwiseStockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -93,4 +93,11 @@ class MatetrialIssueSerializerSecond(serializers.ModelSerializer):
         model = T_MaterialIssue
         fields = ['id', 'MaterialIssueDate','MaterialIssueNumber','FullMaterialIssueNumber','NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','CreatedOn']
     
+
+class MatetrialIssueSerializerForDelete(serializers.ModelSerializer):
+    MaterialIssueItems = MaterialIssueItemsSerializer(many=True)
+    class Meta:
+        model = T_MaterialIssue
+        fields = '__all__'
+        
            
