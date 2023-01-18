@@ -165,10 +165,11 @@ class MaterialIssueView(CreateAPIView):
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 O_BatchWiseLiveStockList=list()
                 for MaterialIssueItem in MaterialIssueItems:
+                    BaseUnitQuantity=UnitwiseQuantityConversion(MaterialIssueItem['Item'],MaterialIssueItem['IssueQuantity'],0,0,0,0).GetBaseUnitQuantity()
                     O_BatchWiseLiveStockList.append({
                         "Quantity" : MaterialIssueItem['BatchID'],
                         "Item" : MaterialIssueItem['Item'],
-                        "BaseUnitQuantity" : MaterialIssueItem['IssueQuantity']
+                        "BaseUnitQuantity" : BaseUnitQuantity
                     })
                         
                 MaterialIssueData.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
