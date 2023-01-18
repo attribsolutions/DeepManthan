@@ -161,7 +161,25 @@ class DemandViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Demand Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+        
+    
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Demandupdatedata = JSONParser().parse(request)
+                DemandupdateByID = T_Demands.objects.get(id=id)
+                Demandupdate_Serializer = DemandSerializer(
+                    DemandupdateByID, data=Demandupdatedata)
+                if Demandupdate_Serializer.is_valid():
+                    Demandupdate_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Demand Updated Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+        
+        
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
