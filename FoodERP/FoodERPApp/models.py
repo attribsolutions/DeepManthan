@@ -1050,7 +1050,7 @@ class TC_MaterialIssueItems(models.Model):
     BatchCode = models.CharField(max_length=500)
     SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
-    BatchID=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    LiveBatchID=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
     class Meta:
         db_table = "TC_MaterialIssueItems"
         
