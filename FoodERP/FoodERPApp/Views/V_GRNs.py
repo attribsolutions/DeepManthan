@@ -135,6 +135,7 @@ class T_GRNView(CreateAPIView):
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
+                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })
