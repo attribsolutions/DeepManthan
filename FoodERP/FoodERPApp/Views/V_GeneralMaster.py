@@ -114,9 +114,17 @@ class GeneralMasterViewSecond(CreateAPIView):
                     GeneralMasterdata = GeneralMasterserializer(query, many=True).data
                     GeneralMasterList=list()
                     for a in GeneralMasterdata:
+                        type=a['TypeID']
+                        query2 =M_GeneralMaster.objects.filter(id=type).values('Name')
+                        if type == 0:
+                            TypeName='NewGeneralMasterType'
+                        else:
+                            TypeName=query2[0]['Name']
+                        
                         GeneralMasterList.append({
                             "id": a['id'],
                             "TypeID": a['TypeID'],
+                            "TypeName":TypeName,
                             "Name": a['Name'],
                             "IsActive": a['IsActive']
                         })
