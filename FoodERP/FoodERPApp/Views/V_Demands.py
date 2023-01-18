@@ -14,6 +14,34 @@ from django.db.models import Sum
 from ..models import *
 
 
+
+class InterBranchDivisionView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Divisiondata = JSONParser().parse(request)
+                Company = Divisiondata['Company']
+                Party = Divisiondata['Party']
+                query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=Party))
+                if query:
+                    party_serializer = DivisionsSerializer(query, many=True).data
+                    DivisionListData = list()
+                    for a in party_serializer:
+                        DivisionListData.append({
+                            "id": a['id'],
+                            "Name": a['Name']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DivisionListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
 class DemandListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
