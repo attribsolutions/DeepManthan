@@ -191,8 +191,8 @@ class InvoiceView(CreateAPIView):
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': 'Invoice Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 200, 'Status': 'true',  'Message': Invoice_serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
