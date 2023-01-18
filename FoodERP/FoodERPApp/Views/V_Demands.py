@@ -101,6 +101,7 @@ class DemandViewSecond(CreateAPIView):
                 if DemandQuery.exists():
                     DemandSerializedata = DemandSerializerThird(DemandQuery, many=True).data
                     DemandData = list()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandSerializedata })
                     for a in DemandSerializedata:
                         DemandReferenceslist = list()
                         for c in a['DemandReferences']:

@@ -1219,7 +1219,7 @@ class TC_DemandItems(models.Model):
         db_table = "TC_DemandItems"
         
 class TC_DemandReferences(models.Model):
-    Demand = models.ForeignKey(T_Demands, on_delete=models.CASCADE)
+    Demand = models.ForeignKey(T_Demands, related_name='DemandReferences', on_delete=models.CASCADE)
     MaterialIssue = models.ForeignKey(T_MaterialIssue, on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "TC_DemandReferences"                 
