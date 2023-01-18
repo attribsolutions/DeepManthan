@@ -27,6 +27,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
                 OrderItemDetails = list()
+                Orderdata = list()
                
                 if POOrderIDs != '':
                     OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
@@ -39,7 +40,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     Order_list = list()
                     for x in Serializedata:
                         Order_list.append(x['id'])
-                   
+                        
                     OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
@@ -107,12 +108,14 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
-                        "OrderID":b['Order'],
                         "UnitDetails":UnitDetails,
                         "StockDetails":stockDatalist
                     })
-                         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
+                Orderdata.append({
+                    "OrderIDs":Order_list,
+                    "OrderItemDetails":OrderItemDetails
+                   })         
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
