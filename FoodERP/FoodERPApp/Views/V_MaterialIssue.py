@@ -283,7 +283,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 O_BatchWiseLiveStockList=dict()
                 
                 for a in MaterialIssueItemdataserializer[0]['MaterialIssueItems']:
-                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['IssueQuantity'],0,0,0,0).GetBaseUnitQuantity()
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['IssueQuantity'],a['Unit'],0,0,0).GetBaseUnitQuantity()
                     
                     O_BatchWiseLiveStockList.update({
                     "Item": a['Item'],
