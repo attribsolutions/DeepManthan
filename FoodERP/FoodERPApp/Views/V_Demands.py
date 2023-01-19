@@ -13,7 +13,39 @@ from ..Serializer.S_Bom import *
 from django.db.models import Sum
 from ..models import *
 
-
+class InterBranchDivisionItemsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Divisiondata = JSONParser().parse(request)
+                Company = Divisiondata['Company']
+                Party = Divisiondata['Party']
+                InterBranch = Divisiondata['InterBranch']
+                Partyquery = MC_PartyItems.objects.filter(Party=Party)
+                InterBranchquery = MC_PartyItems.objects.filter(Party=InterBranch)
+                q= Partyquery.union(InterBranchquery)
+                print(str(q.query))
+                # if q:
+                #     party_serializer = DivisionsSerializer(q, many=True).data
+                #     DivisionListData = list()
+                #     for a in party_serializer:
+                #         DivisionListData.append({
+                #             "id": a['id'],
+                #             "Name": a['Name']
+                #         })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':""})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+    
+    
+    
+    
 
 class InterBranchDivisionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -102,7 +134,7 @@ class DemandView(CreateAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 for aa in Demanddata['DemandItem']:
                     BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0).GetBaseUnitQuantity()
-                    Demanddata['BaseUnitQuantity'] =  BaseUnitQuantity 
+                    aa['BaseUnitQuantity'] =  BaseUnitQuantity 
                 
                 Demanddata['DemandNo'] = a
                 '''Get Demand Prifix '''
