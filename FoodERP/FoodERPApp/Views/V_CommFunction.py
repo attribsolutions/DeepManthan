@@ -298,21 +298,21 @@ class UnitwiseQuantityConversion:
         self.ConversionMUnits = ConversionMUnits
        
         
-        # if(MCItemUnit == 0 & MUnits==0 ):
-        #     BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0,IsBase=1)
-        #     BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
-        #     self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
-        # else:
-        
-        if(MCItemUnit == 0): 
-            a=Q(UnitID=MUnits)
+        if(MCItemUnit == 0 & MUnits==0 ):
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0,IsBase=1)
+            BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
+            self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         else:
-            a=Q(id=MCItemUnit)   
         
-        BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0).filter( a )
-        BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
-        self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
-        
+            if(MCItemUnit == 0): 
+                a=Q(UnitID=MUnits)
+            else:
+                a=Q(id=MCItemUnit)   
+            
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0).filter( a )
+            BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
+            self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
+            
         if(ConversionMCItemUnit !=0) or (ConversionMUnits!=0):
             if(ConversionMCItemUnit == 0): 
                 b=Q(UnitID=ConversionMUnits)
