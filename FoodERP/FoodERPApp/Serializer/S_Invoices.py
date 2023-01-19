@@ -2,6 +2,7 @@ from dataclasses import fields
 import json
 from ..models import *
 from rest_framework import serializers
+from ..Serializer.S_Items import *
 
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -26,6 +27,7 @@ class LiveBatchSerializer(serializers.ModelSerializer):
 class StockQtyserializerForInvoice(serializers.ModelSerializer):
     LiveBatche=LiveBatchSerializer()
     Unit = Mc_ItemUnitSerializerThird()
+    Item =  ItemSerializerSecond()
     class Meta:
         model = O_BatchWiseLiveStock
         fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche','Unit']  
