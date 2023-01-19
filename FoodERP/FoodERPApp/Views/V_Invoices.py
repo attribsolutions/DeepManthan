@@ -59,6 +59,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
+                            baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(d['Item'],d['Unit']['id'],d['BaseUnitQuantity']).ShowDetails()
                             stockDatalist.append({
                                 "id": d['id'],
                                 "Item":d['Item'],
@@ -67,7 +68,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
                                 "Unit":d['Unit']['id'],
-                                "UnitName":d['Unit']['UnitID']['Name'],
+                                "UnitName":d['Unit']['UnitID']['Name']+baseunitconcat,
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
@@ -84,9 +85,9 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "Unitlabel": c['UnitID']['Name']
                         })
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                        
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(b['Item']['id'],b['Unit']['id'],b['Unit']['BaseUnitQuantity']).ShowDetails()
                     OrderItemDetails.append({
-                        
+                         
                         "id": b['id'],
                         "Item": b['Item']['id'],
                         "ItemName": b['Item']['Name'],
@@ -95,7 +96,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "MRPValue": b['MRP']['MRP'],
                         "Rate": b['Rate'],
                         "Unit": b['Unit']['id'],
-                        "UnitName": b['Unit']['UnitID']['Name'],
+                        "UnitName": b['Unit']['UnitID']['Name']+ baseunitconcat,
                         "ConversionUnit": b['Unit']['BaseUnitQuantity'],
                         "BaseUnitQuantity": b['BaseUnitQuantity'],
                         "GST": b['GST']['id'],
