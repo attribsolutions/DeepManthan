@@ -13,36 +13,213 @@ from ..Serializer.S_Bom import *
 from django.db.models import Sum
 from ..models import *
 
+# class InterBranchDivisionItemsView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication__Class = JSONWebTokenAuthentication
+    
+#     @transaction.atomic()
+#     def post(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 Divisiondata = JSONParser().parse(request)
+#                 Company = Divisiondata['Company']
+#                 Party = Divisiondata['Party']
+#                 InterBranch = Divisiondata['InterBranch']
+#                 Partyquery = MC_PartyItems.objects.filter(Party=Party).select_related('Item').values('Item__id')
+#                 print(str(Partyquery.query))
+#                 InterBranchquery = MC_PartyItems.objects.filter(Party=InterBranch).select_related('Item').values('Item__id')
+#                 print(str(InterBranchquery.query))
+#                 # InterBranchquery = MC_PartyItems.objects.filter(Party=InterBranch)
+                
+#                 # q= Partyquery.union(InterBranchquery)
+                
+                
+#                 # print(str(q.query))
+#                 # if q:
+#                 #     party_serializer = DivisionsSerializer(q, many=True).data
+#                 #     DivisionListData = list()
+#                 #     for a in party_serializer:
+#                 #         DivisionListData.append({
+#                 #             "id": a['id'],
+#                 #             "Name": a['Name']
+#                 #         })
+#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':""})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
 class InterBranchDivisionItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-    
-    @transaction.atomic()
-    def post(self, request, id=0):
+
+    def post(self, request):
+
         try:
             with transaction.atomic():
-                Divisiondata = JSONParser().parse(request)
-                Company = Divisiondata['Company']
-                Party = Divisiondata['Party']
-                InterBranch = Divisiondata['InterBranch']
-                Partyquery = MC_PartyItems.objects.filter(Party=Party)
-                InterBranchquery = MC_PartyItems.objects.filter(Party=InterBranch)
-                q= Partyquery.union(InterBranchquery)
-                print(str(q.query))
-                # if q:
-                #     party_serializer = DivisionsSerializer(q, many=True).data
-                #     DivisionListData = list()
-                #     for a in party_serializer:
-                #         DivisionListData.append({
-                #             "id": a['id'],
-                #             "Name": a['Name']
-                #         })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':""})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                # DivisionID = request.data['Division']
+                Party = request.data['Party']  # Order Page Supplier DropDown
+               
+                Customer = request.data['Customer']
+                EffectiveDate = request.data['EffectiveDate']
+                OrderID = request.data['OrderID']
+
+                Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
+m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
+                from
+((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
+FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s)) 
+UNION 
+(SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`,NULL AS `Comment` 
+FROM `m_items` Join mc_partyitems a On m_items.id = a.Item_id
+join mc_partyitems b On m_items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
+
+join m_items on m_items.id=a.Item_id 
+left join m_mrpmaster on m_mrpmaster.id =a.MRP_id
+left join mc_itemunits on mc_itemunits.id=a.Unit_id
+left join m_units on m_units.id=mc_itemunits.UnitID_id
+left join m_gsthsncode on m_gsthsncode.id=a.GST_id
+left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([OrderID], [Party], [Customer]))
+                print(str(Itemquery.query))
+                OrderItemSerializer = OrderEditserializer(
+                    Itemquery, many=True).data
+                # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': OrderItemSerializer})
+
+                for b in OrderItemSerializer:
+                    ItemID = b['Item_id']
+                    GSTID = b['GST_id']
+            # =====================GST================================================
+                    if GSTID is None:
+                        Gst = GSTHsnCodeMaster(
+                            ItemID, EffectiveDate).GetTodaysGstHsnCode()
+                        b['GST_id'] = Gst[0]['Gstid']
+                        b['GSTPercentage'] = Gst[0]['GST']
+            # =====================Stock================================================
+
+                    stockquery = O_BatchWiseLiveStock.objects.filter(
+                        Item=ItemID, Party=Customer).aggregate(Qty=Sum('BaseUnitQuantity'))
+                    if stockquery['Qty'] is None:
+                        Stock = 0.0
+                    else:
+                        Stock = stockquery['Qty']
+            # =====================Rate================================================
+
+                    ratequery = TC_OrderItems.objects.filter(
+                        Item_id=ItemID).values('Rate').order_by('-id')[:1]
+                    if not ratequery:
+                        r = 0.00
+                    else:
+                        r = ratequery[0]['Rate']
+
+                    if b['Rate'] is None:
+                        b['Rate'] = r
+            # =====================Rate================================================
+                    UnitDetails = list()
+                    ItemUnitquery = MC_ItemUnits.objects.filter(
+                        Item=ItemID, IsDeleted=0)
+                    ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
+                        ItemUnitquery, many=True).data
+
+                    for d in ItemUnitqueryserialize:
+                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
+                            ItemID, d['id'], d['BaseUnitQuantity']).ShowDetails()
+                        UnitDetails.append({
+                            "UnitID": d['id'],
+                            "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                            "BaseUnitQuantity": d['BaseUnitQuantity'],
+                            "PODefaultUnit": d['PODefaultUnit'],
+                            "SODefaultUnit": d['SODefaultUnit'],
+
+
+                        })
+            # =====================IsDefaultTermsAndConditions================================================
+
+                    b.update({"StockQuantity": Stock,
+                              "UnitDetails": UnitDetails
+                              })
+
+                if OrderID != 0:
+                    OrderQuery = T_Orders.objects.get(id=OrderID)
+                    a = T_OrderSerializerThird(OrderQuery).data
+
+                    OrderTermsAndCondition = list()
+                    for b in a['OrderTermsAndConditions']:
+                        # print(b['TermsAndCondition']['IsDeleted'])
+                        if b['IsDeleted'] == 0:
+                            OrderTermsAndCondition.append({
+                                "id": b['TermsAndCondition']['id'],
+                                "TermsAndCondition": b['TermsAndCondition']['Name'],
+                            })
+                    inward = 0
+                    for c in a['OrderReferences']:
+                        if(c['Inward'] == 1):
+                            inward = 1
+
+                    OrderData = list()
+                    OrderData.append({
+                        "id": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "DeliveryDate": a['DeliveryDate'],
+                        "POFromDate": a['POFromDate'],
+                        "POToDate": a['POToDate'],
+                        "POType": a['POType']['id'],
+                        "POTypeName": a['POType']['Name'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Description": a['Description'],
+                        "Customer": a['Customer']['id'],
+                        "CustomerName": a['Customer']['Name'],
+                        "Supplier": a['Supplier']['id'],
+                        "SupplierName": a['Supplier']['Name'],
+                        "BillingAddressID": a['BillingAddress']['id'],
+                        "BillingAddress": a['BillingAddress']['Address'],
+                        "ShippingAddressID": a['ShippingAddress']['id'],
+                        "ShippingAddress": a['ShippingAddress']['Address'],
+                        "Inward": inward,
+                        "OrderItems": OrderItemSerializer,
+                        "TermsAndConditions": OrderTermsAndCondition
+                    })
+                    FinalResult = OrderData[0]
+                else:
+
+                    TermsAndConditions = list()
+                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
+                    IsDefault=1)
+                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
+                    TermsAndConditionsquery, many=True).data
+
+                    for d in TermsAndConditionsSerializer:
+                        TermsAndConditions.append({
+                            "id": d['id'],
+                            "TermsAndCondition": d['Name']
+                        })
+
+                    NewOrder = list()
+                    NewOrder.append({
+                        "id": "",
+                        "OrderDate": "",
+                        "DeliveryDate": "",
+                        "POFromDate": "",
+                        "POToDate": "",
+                        "POType": "",
+                        "POTypeName": "",
+                        "OrderAmount": "",
+                        "Description": "",
+                        "Customer": "",
+                        "CustomerName": "",
+                        "Supplier": "",
+                        "SupplierName": "",
+                        "BillingAddressID": "",
+                        "BillingAddress": "",
+                        "ShippingAddressID": "",
+                        "ShippingAddress": "",
+                        "Inward": "",
+                        "OrderItems": OrderItemSerializer,
+                        "TermsAndConditions": TermsAndConditions
+                    })
+
+                    FinalResult = NewOrder[0]
+
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
-    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})    
     
     
     
