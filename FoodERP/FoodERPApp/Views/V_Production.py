@@ -132,6 +132,7 @@ class ProductionView(CreateAPIView):
                     "BatchDate": Productiondata['BatchDate'],
                     "BatchCode": Productiondata['PrintedBatchCode'],
                     "ItemExpiryDate":Productiondata['BestBefore'],
+                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })    
