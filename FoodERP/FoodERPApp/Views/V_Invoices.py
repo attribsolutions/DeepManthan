@@ -51,7 +51,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
-           
                    
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
@@ -59,16 +58,14 @@ class OrderDetailsForInvoice(CreateAPIView):
                         StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
-                            baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(d['Item'],d['Unit']['id'],d['BaseUnitQuantity']).ShowDetails()
                             stockDatalist.append({
                                 "id": d['id'],
-                                "Item":d['Item'],
+                                "Item":d['Item']['id'],
                                 "BatchDate":d['LiveBatche']['BatchDate'],
                                 "BatchCode":d['LiveBatche']['BatchCode'],
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
-                                "Unit":d['Unit']['id'],
-                                "UnitName":d['Unit']['UnitID']['Name']+baseunitconcat,
+                                "UnitName":d['Item']['BaseUnitID']['Name'],
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
