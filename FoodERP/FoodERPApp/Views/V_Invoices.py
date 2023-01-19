@@ -51,7 +51,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
-           
                    
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
@@ -61,11 +60,12 @@ class OrderDetailsForInvoice(CreateAPIView):
                         for d in StockQtySerialize_data:
                             stockDatalist.append({
                                 "id": d['id'],
-                                "Item":d['Item'],
+                                "Item":d['Item']['id'],
                                 "BatchDate":d['LiveBatche']['BatchDate'],
                                 "BatchCode":d['LiveBatche']['BatchCode'],
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
+                                "UnitName":d['Item']['BaseUnitID']['Name'],
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
@@ -82,9 +82,9 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "Unitlabel": c['UnitID']['Name']
                         })
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                        
+                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(b['Item']['id'],b['Unit']['id'],b['Unit']['BaseUnitQuantity']).ShowDetails()
                     OrderItemDetails.append({
-                        
+                         
                         "id": b['id'],
                         "Item": b['Item']['id'],
                         "ItemName": b['Item']['Name'],
@@ -93,7 +93,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "MRPValue": b['MRP']['MRP'],
                         "Rate": b['Rate'],
                         "Unit": b['Unit']['id'],
-                        "UnitName": b['Unit']['UnitID']['Name'],
+                        "UnitName": b['Unit']['UnitID']['Name']+ baseunitconcat,
+                        "ConversionUnit": b['Unit']['BaseUnitQuantity'],
                         "BaseUnitQuantity": b['BaseUnitQuantity'],
                         "GST": b['GST']['id'],
                         "HSNCode": b['GST']['HSNCode'],
@@ -109,6 +110,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
+                        
                         "UnitDetails":UnitDetails,
                         "StockDetails":stockDatalist
                     })
