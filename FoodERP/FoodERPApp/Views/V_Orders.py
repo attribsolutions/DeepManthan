@@ -126,7 +126,7 @@ class T_OrdersView(CreateAPIView):
                 a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 for aa in Orderdata['OrderItem']:
-                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0).GetBaseUnitQuantity()
+                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],0,0,0,0).GetBaseUnitQuantity()
                     Orderdata['BaseUnitQuantity'] =  BaseUnitQuantity 
                 
                 Orderdata['OrderNo'] = a
