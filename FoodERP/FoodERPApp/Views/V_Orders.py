@@ -126,14 +126,16 @@ class T_OrdersView(CreateAPIView):
                 a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 for aa in Orderdata['OrderItem']:
-                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],0,0,0,0).GetBaseUnitQuantity()
-                    Orderdata['BaseUnitQuantity'] =  BaseUnitQuantity 
+                    
+                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0).GetBaseUnitQuantity()
+                    
+                    aa['BaseUnitQuantity'] =  BaseUnitQuantity 
                 
                 Orderdata['OrderNo'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetOrderPrifix(Division)
                 Orderdata['FullOrderNumber'] = b+""+str(a)
-                # return JsonResponse({ 'Data': Orderdata })
+                return JsonResponse({ 'Data': Orderdata })
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
