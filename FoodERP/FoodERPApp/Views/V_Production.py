@@ -132,6 +132,7 @@ class ProductionView(CreateAPIView):
                     "BatchDate": Productiondata['BatchDate'],
                     "BatchCode": Productiondata['PrintedBatchCode'],
                     "ItemExpiryDate":Productiondata['BestBefore'],
+                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })    
@@ -172,7 +173,7 @@ class ProductionViewSecond(RetrieveAPIView):
                 O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(Production_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})   
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})   
                 
                 Productiondata = T_Production.objects.get(id=id)
                 Productiondata.delete()
