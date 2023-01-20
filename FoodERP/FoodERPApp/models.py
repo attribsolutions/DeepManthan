@@ -1281,10 +1281,6 @@ class TC_InterbranchChallanReferences(models.Model):
         db_table = "TC_InterbranchChallanReferences"         
 
 
-
-
-
-
 class T_InterBranchInward(models.Model):
     IBInwardDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='InterBranchCustomer', on_delete=models.PROTECT)
