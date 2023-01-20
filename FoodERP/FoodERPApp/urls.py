@@ -176,7 +176,7 @@ urlpatterns = [
 
     
 #Invoice All APIs
-            url(r'Invoice/([0-9]+)$', InvoiceView.as_view()),
+            url(r'Invoice/([0-9]+)$', InvoiceViewSecond.as_view()),
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
