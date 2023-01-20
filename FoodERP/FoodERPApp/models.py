@@ -1179,13 +1179,13 @@ class O_BatchWiseLiveStock(models.Model):
         
 class T_Demands(models.Model):
     DemandDate = models.DateField()
-    Customer = models.ForeignKey(M_Parties, related_name='DemandCustomer', on_delete=models.DO_NOTHING)
-    Supplier = models.ForeignKey(M_Parties, related_name='DemandSupplier', on_delete=models.DO_NOTHING)
+    Customer = models.ForeignKey(M_Parties, related_name='DemandCustomer', on_delete=models.PROTECT)
+    Supplier = models.ForeignKey(M_Parties, related_name='DemandSupplier', on_delete=models.PROTECT)
     DemandNo = models.IntegerField()
     FullDemandNumber = models.CharField(max_length=500)
     DemandAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Description = models.CharField(max_length=500 ,null=True,blank=True)
-    Division=models.ForeignKey(M_Parties, related_name='DemandDivision', on_delete=models.DO_NOTHING)
+    Division=models.ForeignKey(M_Parties, related_name='DemandDivision', on_delete=models.PROTECT)
     BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='DemandBillingAddress', on_delete=models.PROTECT,null=True,blank=True)
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='DemandShippingAddress', on_delete=models.PROTECT,null=True,blank=True)
     CreatedBy = models.IntegerField()
@@ -1193,6 +1193,7 @@ class T_Demands(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     DemandClose = models.PositiveSmallIntegerField(default=0)
+    MaterialIssue=models.ForeignKey(T_MaterialIssue, related_name='DemandMaterialIssue', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "T_Demands"        
         
@@ -1223,13 +1224,70 @@ class TC_DemandItems(models.Model):
         db_table = "TC_DemandItems"
         
 
-        
+class T_InterbranchChallan(models.Model):
+    IBChallanDate = models.DateField()
+    Customer = models.ForeignKey(M_Parties, related_name='IBChallanCustomer', on_delete=models.PROTECT)
+    IBChallanNumber = models.IntegerField()
+    FullIBChallanNumber = models.CharField(max_length=500)
+    CustomerGSTTin = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='IBChallanParty', on_delete=models.PROTECT)
+    RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "T_InterbranchChallan"
+
+
+class TC_InterbranchChallanItems(models.Model):
+    IBChallan = models.ForeignKey(T_InterbranchChallan, related_name='InterbranchChallan', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='InterbranchChallanUnitID', on_delete=models.DO_NOTHING)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    TaxType = models.CharField(max_length=500)
+    GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=10, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
+    CGST = models.DecimalField(max_digits=5, decimal_places=2)
+    SGST = models.DecimalField(max_digits=5, decimal_places=2)
+    IGST = models.DecimalField(max_digits=5, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "TC_InterbranchChallanItems"
+
+class TC_InterbranchChallanReferences(models.Model):
+    IBChallan = models.ForeignKey(T_InterbranchChallan, on_delete=models.CASCADE)
+    Demand = models.ForeignKey(T_Demands, on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_InterbranchChallanReferences"         
+
+
+
+
+
 
 class T_InterBranchInward(models.Model):
-    InwardDate = models.DateField()
+    IBInwardDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='InterBranchCustomer', on_delete=models.PROTECT)
-    InwardNumber = models.IntegerField()
-    FullInwardNumber = models.CharField(max_length=500)
+    IBInwardNumber = models.IntegerField()
+    FullIBInwardNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Supplier = models.ForeignKey(M_Parties, related_name='InterBranchSupplier', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
@@ -1241,15 +1299,15 @@ class T_InterBranchInward(models.Model):
         db_table = "T_InterBranchInward"
 
 class TC_InterBranchInwardReferences(models.Model):
-    InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardReferences', on_delete=models.CASCADE)
+    IBInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardReferences', on_delete=models.CASCADE)
     Demand = models.ForeignKey(T_Demands, related_name='DemandReferences', on_delete=models.PROTECT ,null=True) 
-    # InterBranchChallan = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
-    Inward = models.BooleanField(default=False)
+    IBChallan = models.ForeignKey(T_InterbranchChallan, on_delete=models.PROTECT ,null=True)
+    IsInward = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_InterBranchInwardReferences"    
 
 class TC_InterBranchInwardItems(models.Model):
-    InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardItems', on_delete=models.CASCADE)
+    IBInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='IBInwardItem', on_delete=models.DO_NOTHING)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='IBInwardUnitID', on_delete=models.PROTECT)
