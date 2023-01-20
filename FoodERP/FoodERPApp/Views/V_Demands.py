@@ -13,41 +13,32 @@ from ..Serializer.S_Bom import *
 from django.db.models import Sum
 from ..models import *
 
-# class InterBranchDivisionItemsView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     authentication__Class = JSONWebTokenAuthentication
+class InterBranchDivisionView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Divisiondata = JSONParser().parse(request)
+                Company = Divisiondata['Company']
+                Party = Divisiondata['Party']
+                query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=Party))
+                if query:
+                    party_serializer = DivisionsSerializer(query, many=True).data
+                    DivisionListData = list()
+                    for a in party_serializer:
+                        DivisionListData.append({
+                            "id": a['id'],
+                            "Name": a['Name']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DivisionListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
-#     @transaction.atomic()
-#     def post(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 Divisiondata = JSONParser().parse(request)
-#                 Company = Divisiondata['Company']
-#                 Party = Divisiondata['Party']
-#                 InterBranch = Divisiondata['InterBranch']
-#                 Partyquery = MC_PartyItems.objects.filter(Party=Party).select_related('Item').values('Item__id')
-#                 print(str(Partyquery.query))
-#                 InterBranchquery = MC_PartyItems.objects.filter(Party=InterBranch).select_related('Item').values('Item__id')
-#                 print(str(InterBranchquery.query))
-#                 # InterBranchquery = MC_PartyItems.objects.filter(Party=InterBranch)
-                
-#                 # q= Partyquery.union(InterBranchquery)
-                
-                
-#                 # print(str(q.query))
-#                 # if q:
-#                 #     party_serializer = DivisionsSerializer(q, many=True).data
-#                 #     DivisionListData = list()
-#                 #     for a in party_serializer:
-#                 #         DivisionListData.append({
-#                 #             "id": a['id'],
-#                 #             "Name": a['Name']
-#                 #         })
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':""})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
-class InterBranchDivisionItemsView(CreateAPIView):
+class InterBranchItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
@@ -60,13 +51,13 @@ class InterBranchDivisionItemsView(CreateAPIView):
                
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
-                OrderID = request.data['OrderID']
+                DemandID = request.data['DemandID']
 
-                Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
+                Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
                 from
 ((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
-FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s)) 
+FROM `tc_demanditems` WHERE (`tc_demanditems`.`IsDeleted` = False AND `tc_demanditems`.`Demand_id` = %s)) 
 UNION 
 (SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`,NULL AS `Comment` 
 FROM `m_items` Join mc_partyitems a On m_items.id = a.Item_id
@@ -77,13 +68,13 @@ left join m_mrpmaster on m_mrpmaster.id =a.MRP_id
 left join mc_itemunits on mc_itemunits.id=a.Unit_id
 left join m_units on m_units.id=mc_itemunits.UnitID_id
 left join m_gsthsncode on m_gsthsncode.id=a.GST_id
-left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([OrderID], [Party], [Customer]))
+left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([DemandID], [Party], [Customer]))
                 print(str(Itemquery.query))
-                OrderItemSerializer = OrderEditserializer(
+                DemandItemSerializer = DemandEditserializer(
                     Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': OrderItemSerializer})
 
-                for b in OrderItemSerializer:
+                for b in DemandItemSerializer:
                     ItemID = b['Item_id']
                     GSTID = b['GST_id']
             # =====================GST================================================
@@ -102,7 +93,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         Stock = stockquery['Qty']
             # =====================Rate================================================
 
-                    ratequery = TC_OrderItems.objects.filter(
+                    ratequery = TC_DemandItems.objects.filter(
                         Item_id=ItemID).values('Rate').order_by('-id')[:1]
                     if not ratequery:
                         r = 0.00
@@ -136,33 +127,23 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                               "UnitDetails": UnitDetails
                               })
 
-                if OrderID != 0:
-                    OrderQuery = T_Orders.objects.get(id=OrderID)
-                    a = T_OrderSerializerThird(OrderQuery).data
+                if DemandID != 0:
+                    OrderQuery = T_Demands.objects.get(id=DemandID)
+                    a = TC_DemandSerializerThird(OrderQuery).data
 
-                    OrderTermsAndCondition = list()
-                    for b in a['OrderTermsAndConditions']:
-                        # print(b['TermsAndCondition']['IsDeleted'])
-                        if b['IsDeleted'] == 0:
-                            OrderTermsAndCondition.append({
-                                "id": b['TermsAndCondition']['id'],
-                                "TermsAndCondition": b['TermsAndCondition']['Name'],
-                            })
+               
                     inward = 0
-                    for c in a['OrderReferences']:
+                    for c in a['DemandReferences']:
                         if(c['Inward'] == 1):
                             inward = 1
 
                     OrderData = list()
                     OrderData.append({
                         "id": a['id'],
-                        "OrderDate": a['OrderDate'],
-                        "DeliveryDate": a['DeliveryDate'],
-                        "POFromDate": a['POFromDate'],
-                        "POToDate": a['POToDate'],
-                        "POType": a['POType']['id'],
-                        "POTypeName": a['POType']['Name'],
-                        "OrderAmount": a['OrderAmount'],
+                        "DemandDate": a['DemandDate'],
+                        "DemandNo": a['DemandNo'],
+                        "FullDemandNumber": a['FullDemandNumber'],
+                        "DemandAmount": a['DemandAmount'],
                         "Description": a['Description'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
@@ -173,34 +154,19 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": a['ShippingAddress']['id'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "Inward": inward,
-                        "OrderItems": OrderItemSerializer,
-                        "TermsAndConditions": OrderTermsAndCondition
+                        "DemandItems": DemandItemSerializer,
+                        
                     })
                     FinalResult = OrderData[0]
                 else:
 
-                    TermsAndConditions = list()
-                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
-                    IsDefault=1)
-                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
-                    TermsAndConditionsquery, many=True).data
-
-                    for d in TermsAndConditionsSerializer:
-                        TermsAndConditions.append({
-                            "id": d['id'],
-                            "TermsAndCondition": d['Name']
-                        })
-
                     NewOrder = list()
                     NewOrder.append({
                         "id": "",
-                        "OrderDate": "",
-                        "DeliveryDate": "",
-                        "POFromDate": "",
-                        "POToDate": "",
-                        "POType": "",
-                        "POTypeName": "",
-                        "OrderAmount": "",
+                        "DemandDate": "",
+                        "DemandNo":"",
+                        "FullDemandNumber":"",
+                        "DemandAmount": "",
                         "Description": "",
                         "Customer": "",
                         "CustomerName": "",
@@ -211,8 +177,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "Inward": "",
-                        "OrderItems": OrderItemSerializer,
-                        "TermsAndConditions": TermsAndConditions
+                        "DemandItems": DemandItemSerializer,
                     })
 
                     FinalResult = NewOrder[0]
@@ -222,34 +187,6 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})    
     
     
-    
-
-class InterBranchDivisionView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def post(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Divisiondata = JSONParser().parse(request)
-                Company = Divisiondata['Company']
-                Party = Divisiondata['Party']
-                query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=Party))
-                if query:
-                    party_serializer = DivisionsSerializer(query, many=True).data
-                    DivisionListData = list()
-                    for a in party_serializer:
-                        DivisionListData.append({
-                            "id": a['id'],
-                            "Name": a['Name']
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DivisionListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
 
 class DemandListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -271,10 +208,14 @@ class DemandListFilterView(CreateAPIView):
                     query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
-                    Demand_serializer = DemandSerializerSecond(query, many=True).data
+                    Demand_serializer = T_DemandSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     DemandListData = list()
                     for a in Demand_serializer:
+                        inward = 0
+                        for c in a['InterBranchInwardReferences']:
+                            if(c['Inward'] == 1):
+                                inward = 1
                         DemandListData.append({
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
@@ -284,8 +225,11 @@ class DemandListFilterView(CreateAPIView):
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
                             "DemandAmount": a['DemandAmount'],
+                            "BillingAddress": a['BillingAddress']['Address'],
+                            "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn']
+                            "CreatedOn": a['CreatedOn'],
+                            "Inward": inward
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -318,7 +262,7 @@ class DemandView(CreateAPIView):
                 b = GetPrifix.GetDemandPrifix(Division)
                 Demanddata['FullDemandNumber'] = b+""+str(a)
                
-                Demand_serializer = DemandSerializer(data=Demanddata)
+                Demand_serializer = T_DemandSerializer(data=Demanddata)
                 if Demand_serializer.is_valid():
                     Demand_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Demand Save Successfully', 'Data': []})
@@ -331,74 +275,74 @@ class DemandViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                OrderQuery = T_Demands.objects.filter(id=id)
-                if OrderQuery.exists():
-                    OrderSerializedata = DemandSerializerThird(
-                        OrderQuery, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-                    DemandData = list()
-                    for a in OrderSerializedata:
-                        DemandItemDetails = list()
-                        for b in a['DemandItem']:
+    # def get(self, request, id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             OrderQuery = T_Demands.objects.filter(id=id)
+    #             if OrderQuery.exists():
+    #                 OrderSerializedata = TC_DemandSerializerThird(
+    #                     OrderQuery, many=True).data
+    #                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
+    #                 DemandData = list()
+    #                 for a in OrderSerializedata:
+    #                     DemandItemDetails = list()
+    #                     for b in a['DemandItem']:
                             
-                            DemandItemDetails.append({
-                                "id": b['id'],
-                                "Item": b['Item']['id'],
-                                "ItemName": b['Item']['Name'],
-                                "Quantity": b['Quantity'],
-                                "MRP": b['MRP']['id'],
-                                "MRPValue": b['MRP']['MRP'],
-                                "Rate": b['Rate'],
-                                "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
-                                "BaseUnitQuantity": b['BaseUnitQuantity'],
-                                "GST": b['GST']['id'],
-                                "GSTPercentage": b['GST']['GSTPercentage'],
-                                "HSNCode": b['GST']['HSNCode'],
-                                "Margin": b['Margin']['id'],
-                                "MarginValue": b['Margin']['Margin'],
-                                "BasicAmount": b['BasicAmount'],
-                                "GSTAmount": b['GSTAmount'],
-                                "CGST": b['CGST'],
-                                "SGST": b['SGST'],
-                                "IGST": b['IGST'],
-                                "CGSTPercentage": b['CGSTPercentage'],
-                                "SGSTPercentage": b['SGSTPercentage'],
-                                "IGSTPercentage": b['IGSTPercentage'],
-                                "Amount": b['Amount'],
-                                "Comment": b['Comment'],
-                            })
+    #                         DemandItemDetails.append({
+    #                             "id": b['id'],
+    #                             "Item": b['Item']['id'],
+    #                             "ItemName": b['Item']['Name'],
+    #                             "Quantity": b['Quantity'],
+    #                             "MRP": b['MRP']['id'],
+    #                             "MRPValue": b['MRP']['MRP'],
+    #                             "Rate": b['Rate'],
+    #                             "Unit": b['Unit']['id'],
+    #                             "UnitName": b['Unit']['UnitID']['Name'],
+    #                             "BaseUnitQuantity": b['BaseUnitQuantity'],
+    #                             "GST": b['GST']['id'],
+    #                             "GSTPercentage": b['GST']['GSTPercentage'],
+    #                             "HSNCode": b['GST']['HSNCode'],
+    #                             "Margin": b['Margin']['id'],
+    #                             "MarginValue": b['Margin']['Margin'],
+    #                             "BasicAmount": b['BasicAmount'],
+    #                             "GSTAmount": b['GSTAmount'],
+    #                             "CGST": b['CGST'],
+    #                             "SGST": b['SGST'],
+    #                             "IGST": b['IGST'],
+    #                             "CGSTPercentage": b['CGSTPercentage'],
+    #                             "SGSTPercentage": b['SGSTPercentage'],
+    #                             "IGSTPercentage": b['IGSTPercentage'],
+    #                             "Amount": b['Amount'],
+    #                             "Comment": b['Comment'],
+    #                         })
                             
-                        DemandReferencesList = list()
-                        for c in a['DemandReferences']:
-                            DemandReferencesList.append({
-                                "MaterialIssue": c['MaterialIssue'] 
-                            })    
+    #                     DemandReferencesList = list()
+    #                     for c in a['DemandReferences']:
+    #                         DemandReferencesList.append({
+    #                             "MaterialIssue": c['MaterialIssue'] 
+    #                         })    
                             
-                        DemandData.append({
-                            "id": a['id'],
-                            "DemandDate": a['DemandDate'],
-                            "DemandAmount": a['DemandAmount'],
-                            "FullDemandNumber": a['FullDemandNumber'],
-                            "Description": a['Description'],
-                            "Customer": a['Customer']['id'],
-                            "CustomerName": a['Customer']['Name'],
-                            "Supplier": a['Supplier']['id'],
-                            "SupplierName": a['Supplier']['Name'],
-                            "BillingAddressID": a['BillingAddress']['id'],
-                            "BillingAddress": a['BillingAddress']['Address'],
-                            "ShippingAddressID": a['ShippingAddress']['id'],
-                            "ShippingAddress": a['ShippingAddress']['Address'],
-                            "DemandItem": DemandItemDetails,
-                            "DemandReferences": DemandReferencesList
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandData[0]})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Demand Data Not available ', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    #                     DemandData.append({
+    #                         "id": a['id'],
+    #                         "DemandDate": a['DemandDate'],
+    #                         "DemandAmount": a['DemandAmount'],
+    #                         "FullDemandNumber": a['FullDemandNumber'],
+    #                         "Description": a['Description'],
+    #                         "Customer": a['Customer']['id'],
+    #                         "CustomerName": a['Customer']['Name'],
+    #                         "Supplier": a['Supplier']['id'],
+    #                         "SupplierName": a['Supplier']['Name'],
+    #                         "BillingAddressID": a['BillingAddress']['id'],
+    #                         "BillingAddress": a['BillingAddress']['Address'],
+    #                         "ShippingAddressID": a['ShippingAddress']['id'],
+    #                         "ShippingAddress": a['ShippingAddress']['Address'],
+    #                         "DemandItem": DemandItemDetails,
+    #                         "DemandReferences": DemandReferencesList
+    #                     })
+    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandData[0]})
+    #             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Demand Data Not available ', 'Data': []})
+    #     except Exception as e:
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
     
     def put(self, request, id=0):
@@ -406,7 +350,7 @@ class DemandViewSecond(CreateAPIView):
             with transaction.atomic():
                 Demandupdatedata = JSONParser().parse(request)
                 DemandupdateByID = T_Demands.objects.get(id=id)
-                Demandupdate_Serializer = DemandSerializer(
+                Demandupdate_Serializer = T_DemandSerializer(
                     DemandupdateByID, data=Demandupdatedata)
                 if Demandupdate_Serializer.is_valid():
                     Demandupdate_Serializer.save()
