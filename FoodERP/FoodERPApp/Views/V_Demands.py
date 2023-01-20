@@ -134,7 +134,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                
                     inward = 0
                     for c in a['DemandReferences']:
-                        if(c['Inward'] == 1):
+                        if(c['IsInward'] == 1):
                             inward = 1
 
                     OrderData = list()
@@ -154,6 +154,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": a['ShippingAddress']['id'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "Inward": inward,
+                        "MaterialIssue":a['MaterialIssue'],
                         "DemandItems": DemandItemSerializer,
                         
                     })
@@ -177,6 +178,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "Inward": "",
+                        "MaterialIssue":"",
                         "DemandItems": DemandItemSerializer,
                     })
 
@@ -209,12 +211,12 @@ class DemandListFilterView(CreateAPIView):
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
                     Demand_serializer = T_DemandSerializerSecond(query, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Demand_serializer})
                     DemandListData = list()
                     for a in Demand_serializer:
                         inward = 0
-                        for c in a['InterBranchInwardReferences']:
-                            if(c['Inward'] == 1):
+                        for c in a['DemandReferences']:
+                            if(c['IsInward'] == 1):
                                 inward = 1
                         DemandListData.append({
                             "id": a['id'],
@@ -273,77 +275,7 @@ class DemandView(CreateAPIView):
 
 class DemandViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
-
-    # def get(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             OrderQuery = T_Demands.objects.filter(id=id)
-    #             if OrderQuery.exists():
-    #                 OrderSerializedata = TC_DemandSerializerThird(
-    #                     OrderQuery, many=True).data
-    #                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-    #                 DemandData = list()
-    #                 for a in OrderSerializedata:
-    #                     DemandItemDetails = list()
-    #                     for b in a['DemandItem']:
-                            
-    #                         DemandItemDetails.append({
-    #                             "id": b['id'],
-    #                             "Item": b['Item']['id'],
-    #                             "ItemName": b['Item']['Name'],
-    #                             "Quantity": b['Quantity'],
-    #                             "MRP": b['MRP']['id'],
-    #                             "MRPValue": b['MRP']['MRP'],
-    #                             "Rate": b['Rate'],
-    #                             "Unit": b['Unit']['id'],
-    #                             "UnitName": b['Unit']['UnitID']['Name'],
-    #                             "BaseUnitQuantity": b['BaseUnitQuantity'],
-    #                             "GST": b['GST']['id'],
-    #                             "GSTPercentage": b['GST']['GSTPercentage'],
-    #                             "HSNCode": b['GST']['HSNCode'],
-    #                             "Margin": b['Margin']['id'],
-    #                             "MarginValue": b['Margin']['Margin'],
-    #                             "BasicAmount": b['BasicAmount'],
-    #                             "GSTAmount": b['GSTAmount'],
-    #                             "CGST": b['CGST'],
-    #                             "SGST": b['SGST'],
-    #                             "IGST": b['IGST'],
-    #                             "CGSTPercentage": b['CGSTPercentage'],
-    #                             "SGSTPercentage": b['SGSTPercentage'],
-    #                             "IGSTPercentage": b['IGSTPercentage'],
-    #                             "Amount": b['Amount'],
-    #                             "Comment": b['Comment'],
-    #                         })
-                            
-    #                     DemandReferencesList = list()
-    #                     for c in a['DemandReferences']:
-    #                         DemandReferencesList.append({
-    #                             "MaterialIssue": c['MaterialIssue'] 
-    #                         })    
-                            
-    #                     DemandData.append({
-    #                         "id": a['id'],
-    #                         "DemandDate": a['DemandDate'],
-    #                         "DemandAmount": a['DemandAmount'],
-    #                         "FullDemandNumber": a['FullDemandNumber'],
-    #                         "Description": a['Description'],
-    #                         "Customer": a['Customer']['id'],
-    #                         "CustomerName": a['Customer']['Name'],
-    #                         "Supplier": a['Supplier']['id'],
-    #                         "SupplierName": a['Supplier']['Name'],
-    #                         "BillingAddressID": a['BillingAddress']['id'],
-    #                         "BillingAddress": a['BillingAddress']['Address'],
-    #                         "ShippingAddressID": a['ShippingAddress']['id'],
-    #                         "ShippingAddress": a['ShippingAddress']['Address'],
-    #                         "DemandItem": DemandItemDetails,
-    #                         "DemandReferences": DemandReferencesList
-    #                     })
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': DemandData[0]})
-    #             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Demand Data Not available ', 'Data': []})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
+    authentication__Class = JSONWebTokenAuthentication  
     
     def put(self, request, id=0):
         try:
