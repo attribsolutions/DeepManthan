@@ -1216,6 +1216,8 @@ class TC_DemandItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    IsDeleted = models.BooleanField(default=False)
+    DeletedOn = models.DateTimeField(auto_now=True)
    
     class Meta:
         db_table = "TC_DemandItems"
