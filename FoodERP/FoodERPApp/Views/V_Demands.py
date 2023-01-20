@@ -154,6 +154,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": a['ShippingAddress']['id'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "Inward": inward,
+                        "MaterialIssue":a['MaterialIssue'],
                         "DemandItems": DemandItemSerializer,
                         
                     })
@@ -177,6 +178,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "Inward": "",
+                        "MaterialIssue":"",
                         "DemandItems": DemandItemSerializer,
                     })
 
