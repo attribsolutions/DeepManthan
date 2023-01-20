@@ -115,6 +115,21 @@ class GetMaxNumber:
                 a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
                 a=a+1
         return a
+
+    def GetIBChallanNumber(*args):
+        
+        MaxIBChallanNumber=T_InterbranchChallan.objects.filter(Party_id=args[0]).filter(IBChallanDate=args[1]).values('IBChallanNumber').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxIBChallanNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxIBChallanNumber[0]['IBChallanNumber'])
+                a=a+1
+        return a    
     
     
 
@@ -176,6 +191,14 @@ class GetPrifix:
         else:
             a=Prifix[0]['Invoiceprefix']
         return a
+
+    def GetIBChallanPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('IBChallanprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['IBChallanprefix']
+        return a    
     
     
 class SystemBatchCodeGeneration:
