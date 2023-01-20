@@ -47,7 +47,7 @@ class InterBranchItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 # DivisionID = request.data['Division']
-                Party = request.data['Party']  # Order Page Supplier DropDown
+                Party = request.data['Party']  # Demand Page Supplier DropDown
                
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
