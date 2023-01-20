@@ -48,7 +48,7 @@ class InvoiceItemsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TC_InvoiceItems
-        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate']   
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch']   
 
 class obatchwiseStockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -95,4 +95,11 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
  
     class Meta:
         model = T_Invoices
-        fields = '__all__'        
+        fields = '__all__'    
+
+class InvoiceSerializerForDelete(serializers.ModelSerializer):
+    InvoiceItems = InvoiceItemsSerializer(many=True)
+ 
+    class Meta:
+        model = T_Invoices
+        fields = '__all__'               

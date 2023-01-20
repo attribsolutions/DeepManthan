@@ -4,6 +4,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
+
+from ..Serializer.S_MaterialIssue import obatchwiseStockSerializerfordelete
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_Invoices import *
 from ..Serializer.S_Orders import *
@@ -65,6 +67,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "BatchCode":d['LiveBatche']['BatchCode'],
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
+                                "LiveBatche" : d['LiveBatche']['id'],
                                 "UnitName":d['Item']['BaseUnitID']['Name'],
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
@@ -202,3 +205,47 @@ class InvoiceView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
+class InvoiceViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoicedata=T_Invoices.objects.all().filter(id=id)
+                Invoicedataserializer=InvoiceSerializerForDelete(Invoicedata,many=True).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':Invoicedataserializer})
+
+                O_BatchWiseLiveStockList=dict()
+                
+                for a in Invoicedataserializer[0]['InvoiceItems']:
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0).GetBaseUnitQuantity()
+                    
+                    O_BatchWiseLiveStockList.update({
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Invoicedataserializer[0]['Party'],
+                    "LiveBatche" : a['LiveBatch'],
+                    "CreatedBy":1,
+                    })
+
+                
+                BatchItemdataserializer=obatchwiseStockSerializerfordelete(data=O_BatchWiseLiveStockList)
+                
+                if BatchItemdataserializer.is_valid():
+                   BatchItemdataserializer.save()
+                  
+                   Invoicedata = T_Invoices.objects.get(id=id)
+                   Invoicedata.delete()
+                   return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': BatchItemdataserializer.errors, 'Data': []})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
+                               
