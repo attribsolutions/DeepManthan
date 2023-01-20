@@ -1216,13 +1216,68 @@ class TC_DemandItems(models.Model):
     CGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     SGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    IsDeleted = models.BooleanField(default=False)
+    DeletedOn = models.DateTimeField(auto_now=True)
    
     class Meta:
         db_table = "TC_DemandItems"
         
-class TC_DemandReferences(models.Model):
-    Demand = models.ForeignKey(T_Demands, related_name='DemandReferences', on_delete=models.CASCADE)
-    MaterialIssue = models.ForeignKey(T_MaterialIssue, on_delete=models.PROTECT,null=True,blank=True)
+
+        
+
+class T_InterBranchInward(models.Model):
+    InwardDate = models.DateField()
+    Customer = models.ForeignKey(M_Parties, related_name='InterBranchCustomer', on_delete=models.PROTECT)
+    InwardNumber = models.IntegerField()
+    FullInwardNumber = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    Supplier = models.ForeignKey(M_Parties, related_name='InterBranchSupplier', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
     class Meta:
-        db_table = "TC_DemandReferences"                 
+        db_table = "T_InterBranchInward"
+
+class TC_InterBranchInwardReferences(models.Model):
+    InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardReferences', on_delete=models.CASCADE)
+    Demand = models.ForeignKey(T_Demands, related_name='DemandReferences', on_delete=models.PROTECT ,null=True) 
+    # InterBranchChallan = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
+    Inward = models.BooleanField(default=False)
+    class Meta:
+        db_table = "TC_InterBranchInwardReferences"    
+
+class TC_InterBranchInwardItems(models.Model):
+    InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardItems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, related_name='IBInwardItem', on_delete=models.DO_NOTHING)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='IBInwardUnitID', on_delete=models.PROTECT)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    TaxType = models.CharField(max_length=500)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='IBInwardItemGst', on_delete=models.PROTECT)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountType = models.CharField(max_length=500)
+    Discount = models.DecimalField(max_digits=10, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
+    CGST = models.DecimalField(max_digits=10, decimal_places=2)
+    SGST = models.DecimalField(max_digits=10, decimal_places=2)
+    IGST = models.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500,blank=True, null=True)
+    SystemBatchDate  = models.DateField()
+    SystemBatchCode = models.CharField(max_length=500)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "TC_InterBranchInwardItems"
+                         
         
