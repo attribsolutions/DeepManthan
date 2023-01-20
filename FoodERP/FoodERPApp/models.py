@@ -817,7 +817,19 @@ class TC_OrderTermsAndConditions(models.Model):
 
     class Meta:
         db_table = "TC_OrderTermsAndConditions"
-        
+
+class O_LiveBatches(models.Model):
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
+    SystemBatchCode = models.CharField(max_length=500)
+    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    ItemExpiryDate=models.DateField()
+    OriginalBatchBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    class Meta:
+        db_table = "O_LiveBatches"        
 
 class T_Invoices(models.Model):
     InvoiceDate = models.DateField()
@@ -861,6 +873,7 @@ class TC_InvoiceItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1009,18 +1022,7 @@ class TC_WorkOrderItems(models.Model):
     class Meta:
         db_table = "TC_WorkOrderItems"   
                     
-class O_LiveBatches(models.Model):
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    SystemBatchDate = models.DateField()
-    SystemBatchCode = models.CharField(max_length=500)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    ItemExpiryDate=models.DateField()
-    OriginalBatchBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    class Meta:
-        db_table = "O_LiveBatches"
+
 
 class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
