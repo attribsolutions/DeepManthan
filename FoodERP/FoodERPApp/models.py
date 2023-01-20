@@ -751,6 +751,8 @@ class MC_PartyPrefixs(models.Model):
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)
     MaterialIssueprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    IBChallanprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    IBInwardprefix = models.CharField(max_length=500 ,null=True,blank=True)
     
     class Meta:
         db_table = "MC_PartyPrefixs"        
