@@ -129,8 +129,22 @@ class GetMaxNumber:
             else:    
                 a=int(MaxIBChallanNumber[0]['IBChallanNumber'])
                 a=a+1
-        return a    
-    
+        return a
+        
+    def GetIBInwardNumber(*args):
+        
+        MaxIBInwardNumber=T_InterBranchInward.objects.filter(Customer_id=args[0]).filter(IBInwardDate=args[1]).values('IBInwardNumber').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxIBInwardNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxIBInwardNumber[0]['IBInwardNumber'])
+                a=a+1
+        return a
     
 
 class GetPrifix:
@@ -198,8 +212,15 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['IBChallanprefix']
-        return a    
-    
+        return a 
+       
+    def GetIBInwardPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('IBInwardprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['IBInwardprefix']
+        return a
     
 class SystemBatchCodeGeneration:
     

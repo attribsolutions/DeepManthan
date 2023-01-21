@@ -1,0 +1,145 @@
+import datetime
+from django.http import JsonResponse
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django.db import IntegrityError, connection, transaction
+from rest_framework.parsers import JSONParser
+
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Serializer.S_GRNs import *
+from ..Serializer.S_InterBranchInward import *
+from ..Serializer.S_Orders import *
+from ..models import *
+from django.db.models import *
+
+
+class InterBranchInwardListFilterView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Inwarddata = JSONParser().parse(request)
+                FromDate = Inwarddata['FromDate']
+                ToDate = Inwarddata['ToDate']
+                Customer = Inwarddata['Party']
+                Supplier = Inwarddata['Supplier']
+                if(Supplier == ''):
+                    query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer)
+                else:
+                    query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
+                
+                if not query:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:
+                    Inward_serializer = T_InterBranchInwardSerializerForGET(
+                        query, many=True).data
+                    InwardListData = list()
+                    for a in Inward_serializer:
+                        InwardListData.append({
+                            "id": a['id'],
+                            "IBInwardDate": a['IBInwardDate'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "IBInwardNumber": a['IBInwardNumber'],
+                            "FullIBInwardNumber": a['FullIBInwardNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "Supplier": a['Supplier']['id'],
+                            "SupplierName": a['Supplier']['Name'],
+                            "CreatedOn" : a['CreatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InwardListData})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+class InterBranchInwardView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Inwarddata = JSONParser().parse(request)
+                Customer = Inwarddata['Customer']
+                CreatedBy = Inwarddata['CreatedBy']
+                IBInwardDate = Inwarddata['IBInwardDate']
+
+# ==========================Get Max GRN Number=====================================================
+                a = GetMaxNumber.GetIBInwardNumber(Customer,IBInwardDate)
+                Inwarddata['IBInwardNumber'] = a
+                b = GetPrifix.GetIBInwardPrifix(Customer)
+                
+                Inwarddata['FullIBInwardNumber'] = b+""+str(a)
+#================================================================================================== 
+                item = ""
+                query = T_InterBranchInward.objects.filter(Customer_id=Inwarddata['Customer']).values('id')
+                O_BatchWiseLiveStockList=list()
+                O_LiveBatchesList=list()
+                for a in Inwarddata['InterBranchInwardItems']:
+                    
+                    query1 = TC_InterBranchInwardItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), IBInward_id__in=query).values('id')
+                    query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                   
+                    if(item == ""):
+                        item = a['Item']
+                        b = query1.count()
+
+                    elif(item == a['Item']):
+                        item = 1
+                        b = b+1
+                    else:
+                        item = a['Item']
+                        b = 0
+
+                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Inwarddata['Customer'], b)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0)
+                    BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    
+                    a['SystemBatchCode'] = BatchCode
+                    a['SystemBatchDate'] = date.today()
+                    a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
+                    O_BatchWiseLiveStockList.append({
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Customer,
+                    "CreatedBy":CreatedBy,
+                    
+                    })
+                    O_LiveBatchesList.append({
+                    
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "MRP": a['MRP'],
+                    "Rate": a['Rate'],
+                    "GST": a['GST'],
+                    "SystemBatchDate": a['SystemBatchDate'],
+                    "SystemBatchCode": a['SystemBatchCode'],
+                    "BatchDate": a['BatchDate'],
+                    "BatchCode": a['BatchCode'],
+                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    
+                    })
+
+                # print(Inwarddata)
+                Inwarddata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
+                # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'InterBranch Inward Save Successfully', 'Data': Inwarddata})   
+                Inward_serializer = T_InterBranchInwardSerializer(data=Inwarddata)
+                if Inward_serializer.is_valid():
+                    # return JsonResponse({'Data':Inward_serializer.data})
+                    Inward_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'InterBranch Inward Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Inward_serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        

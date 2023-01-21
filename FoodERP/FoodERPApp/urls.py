@@ -1,7 +1,5 @@
 from django.urls import re_path as url
 
-from .Views.V_InterbranchChallan import *
-
 from .Views.V_Production import *
 
 from .Views.V_GRNs import *
@@ -88,8 +86,11 @@ from .Views.V_TermsAndConditions import *
 
 from .Views.V_GeneralMaster import *
 
-
 from .Views.V_Demands import *
+
+from .Views.V_InterbranchChallan import *
+
+from .Views.V_InterBranchInward import *
 
 urlpatterns = [
     
@@ -163,11 +164,16 @@ urlpatterns = [
             url(r'InterBranchesItems$', InterBranchItemsView.as_view()),
 
 
-#Invoice All APIs
+#InterBranch Challan  All APIs
             url(r'InterBranchChallan/([0-9]+)$', InterBranchChallanViewSecond.as_view()),
             url(r'InterBranchChallan$', InterBranchChallanView.as_view()),
             url(r'GetDemandDetails$', DemandDetailsForIBChallan.as_view()),
-            url(r'InterBranchChallanFilter$', InterBranchChallanListFilterView.as_view()),            
+            url(r'InterBranchChallanFilter$', InterBranchChallanListFilterView.as_view()), 
+            
+#InterBranch Inward All APIs
+
+            url(r'InterBranchInward$', InterBranchInwardView.as_view()),
+            url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()),              
          
 
     
