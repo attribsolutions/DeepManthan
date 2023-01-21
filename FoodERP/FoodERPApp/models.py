@@ -751,6 +751,8 @@ class MC_PartyPrefixs(models.Model):
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)
     MaterialIssueprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    IBChallanprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    IBInwardprefix = models.CharField(max_length=500 ,null=True,blank=True)
     
     class Meta:
         db_table = "MC_PartyPrefixs"        
@@ -839,7 +841,7 @@ class T_Invoices(models.Model):
     CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
-    RoundOffAmount = models.DecimalField(max_digits=5, decimal_places=2)
+    RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -852,25 +854,25 @@ class T_Invoices(models.Model):
 class TC_InvoiceItems(models.Model):
     Invoice = models.ForeignKey(T_Invoices, related_name='InvoiceItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
-    Quantity = models.DecimalField(max_digits=5, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.DO_NOTHING)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
-    GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    GSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
-    Discount = models.DecimalField(max_digits=10, decimal_places=2)
-    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
-    CGST = models.DecimalField(max_digits=5, decimal_places=2)
-    SGST = models.DecimalField(max_digits=5, decimal_places=2)
-    IGST = models.DecimalField(max_digits=5, decimal_places=2)
-    CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
@@ -1279,10 +1281,6 @@ class TC_InterbranchChallanReferences(models.Model):
         db_table = "TC_InterbranchChallanReferences"         
 
 
-
-
-
-
 class T_InterBranchInward(models.Model):
     IBInwardDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='InterBranchCustomer', on_delete=models.PROTECT)
@@ -1321,14 +1319,14 @@ class TC_InterBranchInwardItems(models.Model):
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500)
-    Discount = models.DecimalField(max_digits=10, decimal_places=2)
-    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
-    CGST = models.DecimalField(max_digits=10, decimal_places=2)
-    SGST = models.DecimalField(max_digits=10, decimal_places=2)
-    IGST = models.DecimalField(max_digits=10, decimal_places=2)
-    CGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    SGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    IGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500,blank=True, null=True)
     SystemBatchDate  = models.DateField()

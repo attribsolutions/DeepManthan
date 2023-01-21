@@ -47,7 +47,7 @@ class InterBranchItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 # DivisionID = request.data['Division']
-                Party = request.data['Party']  # Order Page Supplier DropDown
+                Party = request.data['Supplier']  # Demand Page Supplier DropDown
                
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
@@ -69,7 +69,7 @@ left join mc_itemunits on mc_itemunits.id=a.Unit_id
 left join m_units on m_units.id=mc_itemunits.UnitID_id
 left join m_gsthsncode on m_gsthsncode.id=a.GST_id
 left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([DemandID], [Party], [Customer]))
-                print(str(Itemquery.query))
+               
                 DemandItemSerializer = DemandEditserializer(
                     Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': OrderItemSerializer})
