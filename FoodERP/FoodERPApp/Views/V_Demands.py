@@ -227,8 +227,8 @@ class DemandListFilterView(CreateAPIView):
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
                             "DemandAmount": a['DemandAmount'],
-                            "BillingAddress": a['BillingAddress']['Address'],
-                            "ShippingAddress": a['ShippingAddress']['Address'],
+                            # "BillingAddress": a['BillingAddress']['Address'],
+                            # "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "Inward": inward
