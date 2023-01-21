@@ -14,6 +14,27 @@ from ..models import *
 from django.db.models import *
 
 
+class BranchInvoiceDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Demandsdata = T_InterbranchChallan.objects.get(id=id)
+                Demands_Serializer = IBChallanSerializer(Demandsdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Demands_Serializer.data})
+        except T_Demands.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Demands Not available', 'Data': []})
+           
+
+
+
+
+
+
+
 class InterBranchInwardListFilterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

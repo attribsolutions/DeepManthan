@@ -124,3 +124,25 @@ class T_InterBranchInwardSerializerForGET(serializers.ModelSerializer):
     class Meta:
         model = T_InterBranchInward
         fields = ['id', 'IBInwardDate', 'IBInwardNumber', 'FullIBInwardNumber', 'GrandTotal', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'Customer', 'Supplier','InterBranchInwardItems','InterBranchInwardReferences']
+
+class LiveBatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=O_LiveBatches
+        fields='__all__'
+
+class IBChallanItemsSerializer(serializers.ModelSerializer):
+    LiveBatch=LiveBatchSerializer(read_only=True)
+    Item=ItemSerializer(read_only=True)
+    Unit=UnitSerializerSecond(read_only=True)
+    class Meta:
+        model = TC_InterbranchChallanItems
+        fields = '__all__'   
+
+class IBChallanSerializer(serializers.ModelSerializer):
+    Customer=Partiesserializer(read_only=True)
+    Party=Partiesserializer(read_only=True)
+    IBChallanItems = IBChallanItemsSerializer(many=True)
+    class Meta:
+        model = T_InterbranchChallan
+        fields = ['IBChallanDate', 'IBChallanNumber', 'FullIBChallanNumber', 'CustomerGSTTin', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'IBChallanItems']
+   

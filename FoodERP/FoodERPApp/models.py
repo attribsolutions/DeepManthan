@@ -1245,7 +1245,7 @@ class T_InterbranchChallan(models.Model):
 
 
 class TC_InterbranchChallanItems(models.Model):
-    IBChallan = models.ForeignKey(T_InterbranchChallan, related_name='InterbranchChallan', on_delete=models.CASCADE)
+    IBChallan = models.ForeignKey(T_InterbranchChallan, related_name='IBChallanItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='InterbranchChallanUnitID', on_delete=models.DO_NOTHING)
@@ -1268,7 +1268,7 @@ class TC_InterbranchChallanItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    LiveBatch=models.ForeignKey(O_LiveBatches,related_name='LiveBatches', on_delete=models.PROTECT)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
