@@ -28,8 +28,8 @@ class O_LiveBatchesSerializer(serializers.ModelSerializer):
 
 class TC_InterBranchInwardReferencesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TC_GRNReferences
-        fields = ['IBChallan', 'IsInward']        
+        model = TC_InterBranchInwardReferences
+        fields = ['IBChallan']        
 
 class TC_InterBranchInwardItemsSerializer(serializers.ModelSerializer):
     class Meta:
