@@ -1147,37 +1147,7 @@ class TC_DeliveryChallanItems(models.Model):
 
     class Meta:
         db_table = "TC_DeliveryChallanItems"            
-
-
-
-
-
-class O_BatchWiseLiveStock(models.Model):
-       
-    LiveBatche=models.ForeignKey(O_LiveBatches, related_name='LiveBatcheID', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    # BatchDate = models.DateField(blank=True, null=True)
-    # BatchCode = models.CharField(max_length=500)
-    # SystemBatchDate = models.DateField()
-    # SystemBatchCode = models.CharField(max_length=500)
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
-    OriginalBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    # MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    # GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
-    # Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
-    Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
-    # ItemExpiryDate=models.DateField()
-    GRN = models.ForeignKey(T_GRNs, related_name='BatchWiseLiveStockGRNID', on_delete=models.CASCADE,null=True)
-    Production = models.ForeignKey(T_Production, related_name='BatchWiseLiveStockProductionID', on_delete=models.CASCADE,null=True)
-    # TransactionType= models.IntegerField()
-    # TransactionID =  models.IntegerField()
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-   
-    class Meta:
-        db_table = "O_BatchWiseLiveStock"        
+      
         
 class T_Demands(models.Model):
     DemandDate = models.DateField()
@@ -1298,9 +1268,7 @@ class T_InterBranchInward(models.Model):
 
 class TC_InterBranchInwardReferences(models.Model):
     IBInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardReferences', on_delete=models.CASCADE)
-    Demand = models.ForeignKey(T_Demands, related_name='DemandReferences', on_delete=models.PROTECT ,null=True) 
     IBChallan = models.ForeignKey(T_InterbranchChallan, on_delete=models.PROTECT ,null=True)
-    IsInward = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_InterBranchInwardReferences"    
 
@@ -1336,4 +1304,30 @@ class TC_InterBranchInwardItems(models.Model):
     class Meta:
         db_table = "TC_InterBranchInwardItems"
                          
-        
+class O_BatchWiseLiveStock(models.Model):
+       
+    LiveBatche=models.ForeignKey(O_LiveBatches, related_name='LiveBatcheID', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    # BatchDate = models.DateField(blank=True, null=True)
+    # BatchCode = models.CharField(max_length=500)
+    # SystemBatchDate = models.DateField()
+    # SystemBatchCode = models.CharField(max_length=500)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
+    OriginalBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    # MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    # GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
+    # Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    Party = models.ForeignKey(M_Parties, related_name='BatchWiseLiveStockParty', on_delete=models.PROTECT)
+    # ItemExpiryDate=models.DateField()
+    GRN = models.ForeignKey(T_GRNs, related_name='BatchWiseLiveStockGRNID', on_delete=models.CASCADE,null=True)
+    Production = models.ForeignKey(T_Production, related_name='BatchWiseLiveStockProductionID', on_delete=models.CASCADE,null=True)
+    InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='BatchWiseLiveStockInterBranchInwardID', on_delete=models.CASCADE,null=True)
+    # TransactionType= models.IntegerField()
+    # TransactionID =  models.IntegerField()
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        db_table = "O_BatchWiseLiveStock"          
