@@ -15,7 +15,7 @@ class Partiesserializer(serializers.ModelSerializer):
 class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['Item','Quantity','Unit','OriginalBaseUnitQuantity','BaseUnitQuantity','Party','CreatedBy']
+        fields = ['Item','Quantity','Unit','OriginalBaseUnitQuantity','BaseUnitQuantity','Party','CreatedBy','InterBranchInward']
     
 class O_LiveBatchesSerializer(serializers.ModelSerializer):
     
@@ -28,8 +28,8 @@ class O_LiveBatchesSerializer(serializers.ModelSerializer):
 
 class TC_InterBranchInwardReferencesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TC_GRNReferences
-        fields = ['Demand', 'IBChallan', 'IsInward']        
+        model = TC_InterBranchInwardReferences
+        fields = ['IBChallan']        
 
 class TC_InterBranchInwardItemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,7 +64,7 @@ class T_InterBranchInwardSerializer(serializers.ModelSerializer):
             O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
             BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
             for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
-                O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(IBInward=IBInwardID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
+                O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(InterBranchInward=IBInwardID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
         
         for IBInwardReference_data in IBInwardReferences_data:
@@ -86,7 +86,7 @@ class Partiesserializer(serializers.ModelSerializer):
 class TC_IBInwardReferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_InterBranchInwardReferences
-        fields = ['Demand', 'IBChallan', 'IsInward'] 
+        fields = ['IBChallan'] 
         
 class ItemSerializer(serializers.ModelSerializer):
     class Meta : 

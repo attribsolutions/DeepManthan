@@ -47,7 +47,7 @@ class InterBranchInwardListFilterView(CreateAPIView):
                 Inwarddata = JSONParser().parse(request)
                 FromDate = Inwarddata['FromDate']
                 ToDate = Inwarddata['ToDate']
-                Customer = Inwarddata['Party']
+                Customer = Inwarddata['Customer']
                 Supplier = Inwarddata['Supplier']
                 if(Supplier == ''):
                     query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer)
@@ -98,7 +98,7 @@ class InterBranchInwardView(CreateAPIView):
                 Inwarddata['IBInwardNumber'] = a
                 b = GetPrifix.GetIBInwardPrifix(Customer)
                 
-                Inwarddata['FullIBInwardNumber'] = b+""+str(a)
+                Inwarddata['FullIBInwardNumber'] = str(b)+""+str(a)
 #================================================================================================== 
                 item = ""
                 query = T_InterBranchInward.objects.filter(Customer_id=Inwarddata['Customer']).values('id')
