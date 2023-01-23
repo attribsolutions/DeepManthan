@@ -8,7 +8,7 @@ from ..Serializer.S_Orders import  *
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name']
+        fields = ['id','Name','GSTIN','PAN','Email']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
