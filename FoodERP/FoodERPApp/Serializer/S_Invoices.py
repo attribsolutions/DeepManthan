@@ -38,8 +38,6 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
         model = T_Orders
         fields = '__all__'
 
-
-
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_InvoicesReferences
@@ -92,13 +90,25 @@ class InvoiceSerializer(serializers.ModelSerializer):
 class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
     
     MRP = M_MRPsSerializer(read_only=True)
-    GST = M_GstHsnCodeSerializer(read_only=True)
-    Margin = M_MarginsSerializer(read_only=True)
+    # GST = M_GstHsnCodeSerializer(read_only=True)
+    # Margin = M_MarginsSerializer(read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     Unit = Mc_ItemUnitSerializerThird(read_only=True)
     class Meta:
-        model = TC_OrderItems
-        fields = '__all__'
+        model = TC_InvoiceItems
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch']
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(InvoiceItemsSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("Margin", None):
+            ret["Margin"] = {"id": None, "Margin": None}     
+             
+        return ret    
             
 class InvoiceSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)

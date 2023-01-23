@@ -223,20 +223,16 @@ class InvoiceViewSecond(CreateAPIView):
                         InvoiceItemDetails = list()
                         for b in a['InvoiceItems']:
                             InvoiceItemDetails.append({
-                                "id": b['id'],
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
                                 "Quantity": b['Quantity'],
                                 "MRP": b['MRP']['id'],
-                                "MRPValue": b['MRP']['MRP'],
+                                "MRP": b['MRP']['MRP'],
                                 "Rate": b['Rate'],
-                                "Unit": b['Unit']['id'],
+                                "TaxType": b['TaxType'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
-                                "GST": b['GST']['id'],
-                                "GSTPercentage": b['GST']['GSTPercentage'],
-                                "HSNCode": b['GST']['HSNCode'],
-                                "Margin": b['Margin']['id'],
+                                "GSTPercentage": b['GSTPercentage'],
                                 "MarginValue": b['Margin']['Margin'],
                                 "BasicAmount": b['BasicAmount'],
                                 "GSTAmount": b['GSTAmount'],
@@ -247,7 +243,8 @@ class InvoiceViewSecond(CreateAPIView):
                                 "SGSTPercentage": b['SGSTPercentage'],
                                 "IGSTPercentage": b['IGSTPercentage'],
                                 "Amount": b['Amount'],
-                                "Comment": b['Comment'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
                             })
                             
                         InvoiceData.append({
@@ -260,8 +257,8 @@ class InvoiceViewSecond(CreateAPIView):
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
-                            "Supplier": a['Supplier']['id'],
-                            "SupplierName": a['Supplier']['Name'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
                             "InvoiceItems": InvoiceItemDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
