@@ -77,7 +77,7 @@ class InterBranchInwardView(CreateAPIView):
                 Inwarddata['IBInwardNumber'] = a
                 b = GetPrifix.GetIBInwardPrifix(Customer)
                 
-                Inwarddata['FullIBInwardNumber'] = b+""+str(a)
+                Inwarddata['FullIBInwardNumber'] = str(b)+""+str(a)
 #================================================================================================== 
                 item = ""
                 query = T_InterBranchInward.objects.filter(Customer_id=Inwarddata['Customer']).values('id')
