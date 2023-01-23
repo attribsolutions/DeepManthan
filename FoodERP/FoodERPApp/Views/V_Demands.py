@@ -214,10 +214,7 @@ class DemandListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Demand_serializer})
                     DemandListData = list()
                     for a in Demand_serializer:
-                        inward = 0
-                        for c in a['DemandReferences']:
-                            if(c['IsInward'] == 1):
-                                inward = 1
+                       
                         DemandListData.append({
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
@@ -231,7 +228,7 @@ class DemandListFilterView(CreateAPIView):
                             # "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
-                            "Inward": inward
+                         
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
