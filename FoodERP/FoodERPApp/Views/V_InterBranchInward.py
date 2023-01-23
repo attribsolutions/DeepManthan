@@ -26,7 +26,7 @@ class InterBranchInwardListFilterView(CreateAPIView):
                 Inwarddata = JSONParser().parse(request)
                 FromDate = Inwarddata['FromDate']
                 ToDate = Inwarddata['ToDate']
-                Customer = Inwarddata['Party']
+                Customer = Inwarddata['Customer']
                 Supplier = Inwarddata['Supplier']
                 if(Supplier == ''):
                     query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer)
