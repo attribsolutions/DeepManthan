@@ -1286,7 +1286,7 @@ class TC_InterBranchInwardItems(models.Model):
     GST = models.ForeignKey(M_GSTHSNCode, related_name='IBInwardItemGst', on_delete=models.PROTECT)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
-    DiscountType = models.CharField(max_length=500)
+    DiscountType = models.CharField(max_length=500, blank=True, null=True)
     Discount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CGST = models.DecimalField(max_digits=15, decimal_places=2)
