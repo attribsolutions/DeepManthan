@@ -171,9 +171,10 @@ urlpatterns = [
             url(r'InterBranchChallanFilter$', InterBranchChallanListFilterView.as_view()), 
             
 #InterBranch Inward All APIs
-
+            url(r'InterBranchInward/([0-9]+)$', InterBranchInwardViewSecond.as_view()),
             url(r'InterBranchInward$', InterBranchInwardView.as_view()),
-            url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()),              
+            url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()),
+            url(r'BranchInvoiceDetails/([0-9]+)$', BranchInvoiceDetailsView.as_view()),              
          
 
     
