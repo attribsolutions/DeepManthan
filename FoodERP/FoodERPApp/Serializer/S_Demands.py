@@ -75,17 +75,13 @@ class T_DemandSerializer(serializers.ModelSerializer):
         return instance
 
 
-class InterBranchInwardReferanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model =TC_InterBranchInwardReferences
-        fields = ['Demand','IsInward']   
+
     
 class T_DemandSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Supplier = PartiesSerializerSecond(read_only=True)
     BillingAddress = PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress = PartyAddressSerializerSecond(read_only=True) 
-    DemandReferences=InterBranchInwardReferanceSerializer(many=True)
     class Meta:
         model = T_Demands
         fields = '__all__'
@@ -130,7 +126,6 @@ class TC_DemandSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
     Supplier = PartiesSerializerThird(read_only=True)
     DemandItem = TC_DemandItemsSerializerSecond(read_only=True,many=True)
-    DemandReferences=InterBranchInwardReferanceSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
 
