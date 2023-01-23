@@ -208,6 +208,69 @@ class InvoiceView(CreateAPIView):
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
+    
+
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                InvoiceQuery = T_Invoices.objects.filter(id=id)
+                if InvoiceQuery.exists():
+                    InvoiceSerializedata = InvoiceSerializerSecond(
+                        InvoiceQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
+                    InvoiceData = list()
+                    for a in InvoiceSerializedata:
+                        InvoiceItemDetails = list()
+                        for b in a['InvoiceItems']:
+                            InvoiceItemDetails.append({
+                                "id": b['id'],
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "HSNCode": b['GST']['HSNCode'],
+                                "Margin": b['Margin']['id'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "Comment": b['Comment'],
+                            })
+                            
+                        InvoiceData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "InvoiceNumber": a['InvoiceNumber'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "CustomerGSTTin": a['CustomerGSTTin'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "Supplier": a['Supplier']['id'],
+                            "SupplierName": a['Supplier']['Name'],
+                            "InvoiceItems": InvoiceItemDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+    
+    
 
     @transaction.atomic()
     def delete(self, request, id=0):

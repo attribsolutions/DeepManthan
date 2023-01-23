@@ -3,6 +3,7 @@ import json
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_Items import *
+from ..Serializer.S_Orders import  *
 
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -88,10 +89,21 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return InvoiceID   
     
     
+class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
     
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta:
+        model = TC_OrderItems
+        fields = '__all__'
+            
 class InvoiceSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
+    InvoiceItems = InvoiceItemsSerializerSecond(many=True)
  
     class Meta:
         model = T_Invoices
