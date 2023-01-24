@@ -128,8 +128,8 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                               })
 
                 if DemandID != 0:
-                    OrderQuery = T_Demands.objects.get(id=DemandID)
-                    a = TC_DemandSerializerThird(OrderQuery).data
+                    DemandQuery = T_Demands.objects.get(id=DemandID)
+                    a = TC_DemandSerializerThird(DemandQuery).data
 
                
                     inward = 0
@@ -137,8 +137,8 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         if(c['IsInward'] == 1):
                             inward = 1
 
-                    OrderData = list()
-                    OrderData.append({
+                    DemandData = list()
+                    DemandData.append({
                         "id": a['id'],
                         "DemandDate": a['DemandDate'],
                         "DemandNo": a['DemandNo'],
@@ -158,11 +158,11 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "DemandItems": DemandItemSerializer,
                         
                     })
-                    FinalResult = OrderData[0]
+                    FinalResult = DemandData[0]
                 else:
 
-                    NewOrder = list()
-                    NewOrder.append({
+                    NewDemand = list()
+                    NewDemand.append({
                         "id": "",
                         "DemandDate": "",
                         "DemandNo":"",
@@ -182,7 +182,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "DemandItems": DemandItemSerializer,
                     })
 
-                    FinalResult = NewOrder[0]
+                    FinalResult = NewDemand[0]
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
