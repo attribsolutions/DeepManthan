@@ -131,12 +131,6 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     DemandQuery = T_Demands.objects.get(id=DemandID)
                     a = TC_DemandSerializerThird(DemandQuery).data
 
-               
-                    inward = 0
-                    for c in a['DemandReferences']:
-                        if(c['IsInward'] == 1):
-                            inward = 1
-
                     DemandData = list()
                     DemandData.append({
                         "id": a['id'],
@@ -149,11 +143,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "CustomerName": a['Customer']['Name'],
                         "Supplier": a['Supplier']['id'],
                         "SupplierName": a['Supplier']['Name'],
-                        "BillingAddressID": a['BillingAddress']['id'],
-                        "BillingAddress": a['BillingAddress']['Address'],
-                        "ShippingAddressID": a['ShippingAddress']['id'],
-                        "ShippingAddress": a['ShippingAddress']['Address'],
-                        "Inward": inward,
+                        # "BillingAddressID": a['BillingAddress']['id'],
+                        # "BillingAddress": a['BillingAddress']['Address'],
+                        # "ShippingAddressID": a['ShippingAddress']['id'],
+                        # "ShippingAddress": a['ShippingAddress']['Address'],
                         "MaterialIssue":a['MaterialIssue'],
                         "DemandItems": DemandItemSerializer,
                         
@@ -177,7 +170,6 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "BillingAddress": "",
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
-                        "Inward": "",
                         "MaterialIssue":"",
                         "DemandItems": DemandItemSerializer,
                     })
