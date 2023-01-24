@@ -299,7 +299,7 @@ class UnitwiseQuantityConversion:
        
         
         if(MCItemUnit == 0 & MUnits==0 ):
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0,IsBase=1)
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1)
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         else:
@@ -309,7 +309,7 @@ class UnitwiseQuantityConversion:
             else:
                 a=Q(id=MCItemUnit)   
             
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsDeleted=0).filter( a )
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a )
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
             
@@ -318,7 +318,8 @@ class UnitwiseQuantityConversion:
                 b=Q(UnitID=ConversionMUnits)
             else:
                 b=Q(id=ConversionMCItemUnit)
-            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( b )
+            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b )
+            print(str(ConversionUnitBaseQuantityQuery.query))
             ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
             self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
           
