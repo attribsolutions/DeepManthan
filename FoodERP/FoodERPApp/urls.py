@@ -6,8 +6,6 @@ from .Views.V_GRNs import *
 
 from .Views.V_Bom import *
 
-from .Views.V_DeliveryChallans import *
-
 from .Views.V_SuperAdmin import SuperAdminView
 
 from .Views.V_Login import *
@@ -229,15 +227,6 @@ urlpatterns = [
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),
             url(r'ProductionFilter$',ProductionList.as_view()),
-   
-    
-# Challan
-            url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
-            url(r'Challan$', T_DeliveryChallanView.as_view()),
-            url(r'ChallanFilter$', DeliveryChallanListFilterView.as_view()),
-    
-    
-    
 
 # Parties=================================================================================
             url(r'States$',M_StateView.as_view()),
