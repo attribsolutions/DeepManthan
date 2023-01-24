@@ -1095,59 +1095,7 @@ class TC_ProductionMaterialIssue(models.Model):
      
         class Meta:
             db_table = "TC_ProductionMaterialIssue"
-               
-class T_DeliveryChallans(models.Model):
-    ChallanDate = models.DateField()
-    Customer = models.ForeignKey(M_Parties, related_name='DeliveryCustomer', on_delete=models.PROTECT)
-    ChallanNumber = models.IntegerField()
-    FullChallanNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=3)
-    Party = models.ForeignKey(M_Parties, related_name='DeliveryParty', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = "T_DeliveryChallans"
-
-class TC_DeliveryChallanReferences(models.Model):
-    DeliveryChallan = models.ForeignKey(T_DeliveryChallans, related_name='DeliveryChallanReferences', on_delete=models.CASCADE)
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT) 
-  
-    class Meta:
-        db_table = "TC_DeliveryChallanReferences"    
-
-class TC_DeliveryChallanItems(models.Model):
-    DeliveryChallan = models.ForeignKey(T_DeliveryChallans, related_name='DeliveryChallanItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='DeliveryChallanUnitID', on_delete=models.PROTECT)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2)
-    ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
-    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
-    TaxType = models.CharField(max_length=500)
-    GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
-    Amount = models.DecimalField(max_digits=15, decimal_places=2)
-    DiscountType = models.CharField(max_length=500)
-    Discount = models.DecimalField(max_digits=10, decimal_places=2)
-    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
-    CGST = models.DecimalField(max_digits=5, decimal_places=2)
-    SGST = models.DecimalField(max_digits=5, decimal_places=2)
-    IGST = models.DecimalField(max_digits=5, decimal_places=2)
-    CGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    SGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    IGSTPercentage = models.DecimalField(max_digits=5, decimal_places=2)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "TC_DeliveryChallanItems"            
-      
+                 
         
 class T_Demands(models.Model):
     DemandDate = models.DateField()
