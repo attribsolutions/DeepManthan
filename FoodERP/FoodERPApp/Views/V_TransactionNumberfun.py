@@ -38,20 +38,7 @@ class GetMaxNumber:
         return a
     
     
-    def GetDeliveryChallanNumber(*args):
-
-        MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
-        firstdatefinancial = date.today().strftime('%Y-04-01')
-        b=args[1]
-        if(not MaxChallanNumber):
-            a=1
-        else:
-            if(b==firstdatefinancial):
-                a = 1
-            else:    
-                a=int(MaxChallanNumber[0]['ChallanNumber'])
-                a=a+1
-        return a
+   
     
     def GetWorkOrderNumber(*args):
         
