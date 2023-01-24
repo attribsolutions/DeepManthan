@@ -329,15 +329,11 @@ urlpatterns = [
             #RoleAccess Page AddPage Button
             url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     
-    
-    
-    
-    
-    # Dependencies APIs IN Projects 
-    url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
-    url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
-    url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
-    url(r'RegenrateToken$', RegenrateToken.as_view()),
+            # Dependencies APIs IN Projects 
+            url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
+            url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
+            url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
+            url(r'RegenrateToken$', RegenrateToken.as_view()),
     
      
 ]
