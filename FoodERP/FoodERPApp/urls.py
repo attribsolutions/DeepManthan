@@ -6,8 +6,6 @@ from .Views.V_GRNs import *
 
 from .Views.V_Bom import *
 
-from .Views.V_DeliveryChallans import *
-
 from .Views.V_SuperAdmin import SuperAdminView
 
 from .Views.V_Login import *
@@ -171,10 +169,12 @@ urlpatterns = [
             url(r'BranchInvoiceFilter$', InterBranchChallanListFilterView.as_view()), 
             
 #InterBranch Inward All APIs
-
+            url(r'InterBranchInward/([0-9]+)$', InterBranchInwardViewSecond.as_view()),
             url(r'InterBranchInward$', InterBranchInwardView.as_view()),
-            url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()), 
-            url(r'BranchInvoiceDetails/([0-9]+)$', BranchInvoiceDetailsView.as_view()),               
+
+            url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()),
+            url(r'BranchInvoiceDetails/([0-9]+)$', BranchInvoiceDetailsView.as_view()),              
+
          
 
     
@@ -229,15 +229,6 @@ urlpatterns = [
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),
             url(r'ProductionFilter$',ProductionList.as_view()),
-   
-    
-# Challan
-            url(r'Challan/([0-9]+)$',T_DeliveryChallanViewSecond.as_view()),
-            url(r'Challan$', T_DeliveryChallanView.as_view()),
-            url(r'ChallanFilter$', DeliveryChallanListFilterView.as_view()),
-    
-    
-    
 
 # Parties=================================================================================
             url(r'States$',M_StateView.as_view()),
@@ -340,15 +331,11 @@ urlpatterns = [
             #RoleAccess Page AddPage Button
             url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
     
-    
-    
-    
-    
-    # Dependencies APIs IN Projects 
-    url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
-    url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
-    url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
-    url(r'RegenrateToken$', RegenrateToken.as_view()),
+            # Dependencies APIs IN Projects 
+            url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
+            url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
+            url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
+            url(r'RegenrateToken$', RegenrateToken.as_view()),
     
      
 ]

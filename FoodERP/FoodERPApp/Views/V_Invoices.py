@@ -252,13 +252,14 @@ class InvoiceViewSecond(CreateAPIView):
                             "InvoiceDate": a['InvoiceDate'],
                             "InvoiceNumber": a['InvoiceNumber'],
                             "FullInvoiceNumber": a['FullInvoiceNumber'],
-                            "CustomerGSTTin": a['CustomerGSTTin'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
                             "InvoiceItems": InvoiceItemDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})

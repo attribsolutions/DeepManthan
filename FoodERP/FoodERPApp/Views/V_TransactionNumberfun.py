@@ -38,24 +38,6 @@ class GetMaxNumber:
         return a
     
     
-    
-    def GetDemandNumber(*args):
-        
-        MaxDemandNumber=T_Demands.objects.filter(Division_id=args[0]).filter(Customer_id=args[1]).filter(DemandDate=args[2]).values('DemandNo').order_by('-id')[:1]
-        firstdatefinancial = date.today().strftime('%Y-04-01')
-        b=args[2]
-       
-        if(not MaxDemandNumber):
-          a = 1
-        else:
-            if(b==firstdatefinancial):
-                a = 1
-            else:
-                a=int(MaxDemandNumber[0]['DemandNo'])
-                a=a+1
-        return a
-    
-    
     def GetDeliveryChallanNumber(*args):
 
         MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
@@ -101,9 +83,25 @@ class GetMaxNumber:
                 a=a+1
         return a
     
+    def GetDemandNumber(*args):
+        
+        MaxDemandNumber=T_Demands.objects.filter(Division_id=args[0]).filter(Customer_id=args[1]).values('DemandNo').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[2]
+       
+        if(not MaxDemandNumber):
+          a = 1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:
+                a=int(MaxDemandNumber[0]['DemandNo'])
+                a=a+1
+        return a
+    
     def GetInvoiceNumber(*args):
         
-        MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0]).filter(InvoiceDate=args[1]).values('InvoiceNumber').order_by('-id')[:1]
+        MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxInvoiceNumber):
@@ -133,15 +131,19 @@ class GetMaxNumber:
         
     def GetIBInwardNumber(*args):
         
-        MaxIBInwardNumber=T_InterBranchInward.objects.filter(Customer_id=args[0]).filter(IBInwardDate=args[1]).values('IBInwardNumber').order_by('-id')[:1]
+        MaxIBInwardNumber=T_InterBranchInward.objects.filter(Customer_id=args[0]).values('IBInwardNumber').order_by('-id')[:1]
+        print(str(MaxIBInwardNumber.query))
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxIBInwardNumber):
+           
             a=1
         else:
             if(b==firstdatefinancial):
+                
                 a = 1
-            else:    
+            else: 
+                
                 a=int(MaxIBInwardNumber[0]['IBInwardNumber'])
                 a=a+1
         return a

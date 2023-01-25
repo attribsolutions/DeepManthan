@@ -8,6 +8,7 @@ from rest_framework.parsers import JSONParser
 
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_GRNs import *
+from ..Serializer.S_InterbranchChallan import *
 from ..Serializer.S_InterBranchInward import *
 from ..Serializer.S_Orders import *
 from ..models import *
@@ -22,15 +23,14 @@ class BranchInvoiceDetailsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Demandsdata = T_InterbranchChallan.objects.get(id=id)
-                Demands_Serializer = IBChallanSerializer(Demandsdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Demands_Serializer.data})
+
+                Challansdata = T_InterbranchChallan.objects.get(id=id)
+                Challans_Serializer = IBChallanSerializer(Challansdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Challans_Serializer.data})
         except T_Demands.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Demands Not available', 'Data': []})
-           
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challans Not available', 'Data': []})
 
-
-
+                
 
 
 
@@ -164,3 +164,25 @@ class InterBranchInwardView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Inward_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+
+class InterBranchInwardViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(InterBranchInward_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+              
+                for a in O_BatchWiseLiveStockData:
+                    if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'InterBranch Inward Used in another Transaction', 'Data': []})   
+                
+                Inward_Data = T_InterBranchInward.objects.get(id=id)
+                Inward_Data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'InterBranch Inward  Deleted Successfully', 'Data': []})
+        except T_InterBranchInward.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'InterBranch Inward used in another tbale', 'Data': []})

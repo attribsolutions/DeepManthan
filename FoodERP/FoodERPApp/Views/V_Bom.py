@@ -29,9 +29,11 @@ class BOMListFilterView(CreateAPIView):
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
                 d = date.today()
-                if str(FromDate == d):
+              
+                if (FromDate == d):
                     query = M_BillOfMaterial.objects.filter(Company_id=Company,IsActive=1)
-                else:    
+                else:  
+                      
                     query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company,IsActive=1)
                 # return JsonResponse({'query': str(query.query)})
                 if query:
