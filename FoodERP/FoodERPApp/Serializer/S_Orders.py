@@ -241,7 +241,157 @@ class OrderEditserializer(serializers.Serializer):
     
     
     
+class TestGRNReferanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_GRNReferences
+        fields = '__all__'
+        
+class TestTermsAndConditionsSerializer(serializers.ModelSerializer):
+    class Meta : 
+        model = M_TermsAndConditions
+        fields = '__all__'
 
+class TestOrderTermsAndConditionsSerializer(serializers.ModelSerializer):
+    # TermsAndCondition = TestTermsAndConditionsSerializer(read_only=True)
+    class Meta:
+        model = TC_OrderTermsAndConditions
+        fields = ['id','TermsAndCondition']
+
+    def to_representation(self, instance):
+        data = super(TestOrderTermsAndConditionsSerializer,self).to_representation(instance)
+        data['id'] = instance.TermsAndCondition.id
+        data['TermsAndCondition'] = instance.TermsAndCondition.Name
+        
+        return data 
+
+
+class TestPartyAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+
+
+class TestPOTypeserializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_POType
+        fields = '__all__'
+
+
+class TestPartiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = '__all__'
+
+
+class TestMRPsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_MRPMaster
+        fields = '__all__'
+
+
+class TestGstHsnCodeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = M_GSTHSNCode
+        fields = '__all__'
+
+
+class TestMarginsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_MarginMaster
+        fields = '__all__'
+
+
+class TestItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Items
+        fields = '__all__'
+
+
+class TestUnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Units
+        fields = '__all__'
+
+
+class TestMCItemUnitSerializer(serializers.ModelSerializer):
+    UnitID = TestUnitSerializer(read_only=True)
+
+    class Meta:
+        model = MC_ItemUnits
+        fields = '__all__'
+
+
+class TestOrderItemSerializer(serializers.ModelSerializer):
+
+    MRP = TestMRPsSerializer(read_only=True)
+    GST = TestGstHsnCodeSerializer(read_only=True)
+    Margin = TestMarginsSerializer(read_only=True)
+    Item = TestItemsSerializer(read_only=True)
+    Unit = TestMCItemUnitSerializer(read_only=True)
+
+    class Meta:
+        model = TC_OrderItems
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        data = super(TestOrderItemSerializer, self).to_representation(instance)
+
+        if not data.get("MRP", None):
+            data['MRP'] = None
+            data['MRPValue'] = None
+        else:
+            data['MRP'] = instance.MRP.id
+            data['MRPValue'] = instance.MRP.MRP
+
+        data['GST'] = instance.GST.id
+        data['GSTPercentage'] = instance.GST.GSTPercentage
+
+        if not data.get("Margin", None):
+            data['Margin'] = None
+            data['MarginValue'] = None
+        else:
+            data['Margin'] = instance.Margin.id
+            data['MarginValue'] = instance.Margin.Margin
+
+        data['Item'] = instance.Item.id
+        data['ItemName'] = instance.Item.Name
+        data['Unit'] = instance.Unit.id
+        data['UnitName'] = instance.Unit.UnitID.Name
+
+        return data
+
+
+class TestOrderSerializer(serializers.ModelSerializer):
+    Customer = TestPartiesSerializer(read_only=True)
+    Supplier = TestPartiesSerializer(read_only=True)
+    OrderItem = TestOrderItemSerializer(read_only=True, many=True)
+    POType = TestPOTypeserializer(read_only=True)
+    OrderTermsAndConditions = TestOrderTermsAndConditionsSerializer(many=True)
+    BillingAddress = TestPartyAddressSerializer(read_only=True)
+    ShippingAddress = TestPartyAddressSerializer(read_only=True)
+
+    class Meta:
+        model = T_Orders
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(TestOrderSerializer, self).to_representation(instance)
+        data['Customer'] = instance.Customer.id
+        data['CustomerName'] = instance.Customer.Name
+        data['Supplier'] = instance.Supplier.id
+        data['SupplierName'] = instance.Supplier.Name
+        data['Supplier'] = instance.Supplier.id
+        data['SupplierName'] = instance.Supplier.Name
+        data['POType'] = instance.POType.id
+        data['POTypeName'] = instance.POType.Name
+        data['BillingAddressID'] = instance.BillingAddress.id
+        data['BillingAddress'] = instance.BillingAddress.Address
+        data['ShippingAddressID'] = instance.ShippingAddress.id
+        data['ShippingAddress'] = instance.ShippingAddress.Address
+
+        return data
      
 
 
