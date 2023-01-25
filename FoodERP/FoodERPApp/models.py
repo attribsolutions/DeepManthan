@@ -1104,7 +1104,7 @@ class T_Demands(models.Model):
     DemandNo = models.IntegerField()
     FullDemandNumber = models.CharField(max_length=500)
     DemandAmount = models.DecimalField(max_digits=20, decimal_places=2)
-    Description = models.CharField(max_length=500 ,null=True,blank=True)
+    Comment = models.CharField(max_length=500 ,null=True,blank=True)
     Division=models.ForeignKey(M_Parties, related_name='DemandDivision', on_delete=models.PROTECT)
     BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='DemandBillingAddress', on_delete=models.PROTECT,null=True,blank=True)
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='DemandShippingAddress', on_delete=models.PROTECT,null=True,blank=True)
@@ -1120,7 +1120,6 @@ class T_Demands(models.Model):
 class TC_DemandItems(models.Model):
     Demand = models.ForeignKey(T_Demands, related_name='DemandItem', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='DItem', on_delete=models.PROTECT)
-    Comment= models.CharField(max_length=300,blank=True,null=True)
     Quantity = models.DecimalField(max_digits=15, decimal_places=2)
     MRP = models.ForeignKey(M_MRPMaster, related_name='DemandItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
