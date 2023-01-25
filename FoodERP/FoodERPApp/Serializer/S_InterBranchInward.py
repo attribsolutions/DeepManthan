@@ -144,5 +144,5 @@ class IBChallanSerializer(serializers.ModelSerializer):
     IBChallanItems = IBChallanItemsSerializer(many=True)
     class Meta:
         model = T_InterbranchChallan
-        fields = ['IBChallanDate', 'IBChallanNumber', 'FullIBChallanNumber', 'CustomerGSTTin', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'IBChallanItems']
+        fields = ['IBChallanDate', 'IBChallanNumber', 'FullIBChallanNumber', 'CustomerGSTTin', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'IBChallanItems'] 
    
