@@ -23,11 +23,14 @@ class BranchInvoiceDetailsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
+
                 Challansdata = T_InterbranchChallan.objects.get(id=id)
                 Challans_Serializer = IBChallanSerializer(Challansdata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Challans_Serializer.data})
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challans Not available', 'Data': []})
+
+                
 
 
 
