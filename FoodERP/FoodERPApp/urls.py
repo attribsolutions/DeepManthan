@@ -147,10 +147,11 @@ urlpatterns = [
             url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     
 # Order All APIs
+            url(r'TestOrderget/([0-9]+)$',TestOrdersView.as_view()),
             url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
             url(r'Orders$', T_OrdersView.as_view()),
             url(r'OrdersFilter$', OrderListFilterView.as_view()),
-            url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
+            # url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
 
