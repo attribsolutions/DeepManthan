@@ -166,4 +166,4 @@ class DemandEditserializer(serializers.Serializer):
     SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)  
-                   
+              
