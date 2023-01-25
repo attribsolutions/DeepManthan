@@ -56,10 +56,10 @@ class InterBranchItemsView(CreateAPIView):
                 Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
                 from
-((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
+((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,
 FROM `tc_demanditems` WHERE (`tc_demanditems`.`IsDeleted` = False AND `tc_demanditems`.`Demand_id` = %s)) 
 UNION 
-(SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`,NULL AS `Comment` 
+(SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`
 FROM `m_items` Join mc_partyitems a On m_items.id = a.Item_id
 join mc_partyitems b On m_items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
 
