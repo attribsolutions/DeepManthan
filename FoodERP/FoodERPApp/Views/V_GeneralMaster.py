@@ -76,6 +76,33 @@ class GeneralMasterTypeView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
+
+
+#Get General Master Type -Post API             
+class GeneralMasterSubTypeView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                GeneralMasterdata = JSONParser().parse(request)
+                CompanyID = GeneralMasterdata['Company'] 
+                Type = GeneralMasterdata['TypeID'] 
+                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=Type)
+                print(str(query.query))
+                GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                GeneralMaster_SerializerList = list()
+                for a in GeneralMaster_Serializer:   
+                    GeneralMaster_SerializerList.append({
+                    "id":a['id'],    
+                    "Name": a['Name']   
+                    })
+                # GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})     
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
     
 #Post API - Save API 
