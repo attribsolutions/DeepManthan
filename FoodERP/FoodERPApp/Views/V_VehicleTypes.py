@@ -88,4 +88,4 @@ class M_VehicleTypesViewSecond(CreateAPIView):
         except M_VehicleTypes.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Type Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Type used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message':'Vehicle Type used in another table', 'Data': []})
