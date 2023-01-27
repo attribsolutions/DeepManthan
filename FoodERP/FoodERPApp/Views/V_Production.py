@@ -30,7 +30,7 @@ class MaterialIssueDetailsView(CreateAPIView):
                 MaterialIssueID = MaterialIssueIDdata['MaterialIssueID']
                 query1 = T_MaterialIssue.objects.filter(id=MaterialIssueID)
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
+                return JsonResponse({'StatusCode':200, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -79,7 +79,7 @@ class ProductionList(CreateAPIView):
                    
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_SerializerListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
             
@@ -173,12 +173,11 @@ class ProductionViewSecond(RetrieveAPIView):
                 O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(Production_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})   
-                
+                        return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})  
                 Productiondata = T_Production.objects.get(id=id)
                 Productiondata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})
         except T_Production.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production Not available', 'Data': []})    
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production used in another table', 'Data': []})    
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message':'Production used in another table', 'Data': []})    

@@ -293,7 +293,6 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                     "CreatedBy":1,
                     })
 
-               
                 MaterialIssueItemdataserializer=obatchwiseStockSerializerfordelete(data=O_BatchWiseLiveStockList)
                 
                 if MaterialIssueItemdataserializer.is_valid():
@@ -305,7 +304,6 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssueItemdataserializer.errors, 'Data': []})
-
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
                            
