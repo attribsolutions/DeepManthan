@@ -91,7 +91,7 @@ class GeneralMasterSubTypeView(CreateAPIView):
                 CompanyID = GeneralMasterdata['Company'] 
                 Type = GeneralMasterdata['TypeID'] 
                 query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=Type)
-                print(str(query.query))
+                
                 GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                 GeneralMaster_SerializerList = list()
                 for a in GeneralMaster_Serializer:   
