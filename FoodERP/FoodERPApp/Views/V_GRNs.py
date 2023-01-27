@@ -197,7 +197,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "BatchCode": a['BatchCode'],
                         "SystemBatchDate": a['SystemBatchDate'],
                         "SystemBatchCode": a['SystemBatchCode'],
-                        "UnitDetails":""
+                        "UnitDetails":[]
                     })
 
                 GRNReferencesData = list()
