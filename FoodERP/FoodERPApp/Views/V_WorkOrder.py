@@ -119,7 +119,7 @@ class WorkOrderList(CreateAPIView):
                         "CreatedOn": a['CreatedOn'],
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrderListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -168,7 +168,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
                 Check = TC_MaterialIssueWorkOrders.objects.filter(WorkOrder_id=id)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Check.query)})
                 if Check.exists():
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order used in Material Issue', 'Data': []})
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Work Order used in Material Issue', 'Data': []})
                 else:
                     Query = T_WorkOrder.objects.filter(id=id)
                     if Query.exists():
@@ -251,4 +251,4 @@ class WorkOrderViewSecond(RetrieveAPIView):
         except T_WorkOrder.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order used in another table', 'Data': []})                
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Work Order used in another table', 'Data': []})                

@@ -237,7 +237,7 @@ class T_GRNViewSecond(CreateAPIView):
               
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})   
+                        return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})   
                 
                 GRN_Data = T_GRNs.objects.get(id=id)
                 GRN_Data.delete()
