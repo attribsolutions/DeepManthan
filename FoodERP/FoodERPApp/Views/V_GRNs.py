@@ -36,7 +36,7 @@ class GRNListFilterView(CreateAPIView):
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
                         query, many=True).data
@@ -245,8 +245,9 @@ class T_GRNViewSecond(CreateAPIView):
         except T_GRNs.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN used in another tbale', 'Data': []})
-
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 # Get PO Details For Make GRN POST API 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
