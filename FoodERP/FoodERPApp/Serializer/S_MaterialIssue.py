@@ -58,11 +58,8 @@ class MaterialIssueSerializer(serializers.ModelSerializer):
                 if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 else:
-                    
+                
                     raise serializers.ValidationError("Not In Stock ")
-                   
-
-
 
         for MaterialIssueWorkOrder_data in MaterialIssueWorkOrders_data:
             MaterialIssueWorkOrder = TC_MaterialIssueWorkOrders.objects.create(MaterialIssue=MaterialIssueID, **MaterialIssueWorkOrder_data)   
@@ -114,5 +111,44 @@ class MatetrialIssueSerializerForDelete(serializers.ModelSerializer):
         fields = '__all__'
 
       
+class TestMaterialIssueItemSerializer(serializers.ModelSerializer):
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = ItemUnitsSerializerSecond(read_only=True)
+
+    class Meta:
+        model = TC_MaterialIssueItems
+        fields = '__all__'
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        data = super(TestMaterialIssueItemSerializer, self).to_representation(instance)
+
+        data['Item'] = instance.Item.id
+        data['ItemName'] = instance.Item.Name
+        data['Unit'] = instance.Unit.id
+        data['UnitName'] = instance.Unit.UnitID.Name
         
-           
+        return data        
+
+class TestMaterialIssueShowSerializer(serializers.ModelSerializer):
+    Party = DivisionsSerializer(read_only=True)
+    Company = C_CompanySerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = ItemUnitsSerializerSecond(read_only=True)
+    MaterialIssueItems = TestMaterialIssueItemSerializer(many=True)
+
+    class Meta:
+        model = T_MaterialIssue
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(TestMaterialIssueShowSerializer, self).to_representation(instance)
+        data['Party'] = instance.Party.id
+        data['PartyName'] = instance.Party.Name
+        data['Company'] = instance.Company.id
+        data['CompanyName'] = instance.Company.Name
+        data['Item'] = instance.Item.id
+        data['ItemName'] = instance.Item.Name
+        data['Unit'] = instance.Unit.id
+        data['UnitName'] = instance.Unit.UnitID.Name
+        return data
+                

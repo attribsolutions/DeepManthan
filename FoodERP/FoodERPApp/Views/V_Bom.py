@@ -62,7 +62,7 @@ class BOMListFilterView(CreateAPIView):
                         "CreatedOn" : a['CreatedOn'],
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -196,4 +196,4 @@ class M_BOMsViewSecond(RetrieveAPIView):
         except M_BillOfMaterial.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Bill Of Material used in another table', 'Data': []})

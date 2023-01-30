@@ -8,7 +8,7 @@ class GetMaxNumber:
 
     def GetOrderNumber(*args):
         
-        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).filter(OrderDate=args[2]).values('OrderNo').order_by('-id')[:1]
+        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).values('OrderNo').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[2]
        
@@ -38,24 +38,11 @@ class GetMaxNumber:
         return a
     
     
-    def GetDeliveryChallanNumber(*args):
-
-        MaxChallanNumber=T_DeliveryChallans.objects.filter(Customer_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
-        firstdatefinancial = date.today().strftime('%Y-04-01')
-        b=args[1]
-        if(not MaxChallanNumber):
-            a=1
-        else:
-            if(b==firstdatefinancial):
-                a = 1
-            else:    
-                a=int(MaxChallanNumber[0]['ChallanNumber'])
-                a=a+1
-        return a
+   
     
     def GetWorkOrderNumber(*args):
         
-        MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).filter(WorkOrderDate=args[1]).values('WorkOrderNumber').order_by('-id')[:1]
+        MaxWorkOrderNumber=T_WorkOrder.objects.filter(Party_id=args[0]).values('WorkOrderNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxWorkOrderNumber):
@@ -70,7 +57,7 @@ class GetMaxNumber:
     
     def GetMaterialIssueNumber(*args):
         
-        MaxMaterialIssueNumber=T_MaterialIssue.objects.filter(Party_id=args[0]).filter(MaterialIssueDate=args[1]).values('MaterialIssueNumber').order_by('-id')[:1]
+        MaxMaterialIssueNumber=T_MaterialIssue.objects.filter(Party_id=args[0]).values('MaterialIssueNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxMaterialIssueNumber):
@@ -116,7 +103,7 @@ class GetMaxNumber:
 
     def GetIBChallanNumber(*args):
         
-        MaxIBChallanNumber=T_InterbranchChallan.objects.filter(Party_id=args[0]).filter(IBChallanDate=args[1]).values('IBChallanNumber').order_by('-id')[:1]
+        MaxIBChallanNumber=T_InterbranchChallan.objects.filter(Party_id=args[0]).values('IBChallanNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxIBChallanNumber):

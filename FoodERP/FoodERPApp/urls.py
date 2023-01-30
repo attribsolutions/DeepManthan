@@ -147,10 +147,11 @@ urlpatterns = [
             url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     
 # Order All APIs
+            url(r'TestOrderget/([0-9]+)$',TestOrdersView.as_view()),
             url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
             url(r'Orders$', T_OrdersView.as_view()),
             url(r'OrdersFilter$', OrderListFilterView.as_view()),
-            url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
+            # url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
 
@@ -189,6 +190,7 @@ urlpatterns = [
             url(r'GeneralMaster$', GeneralMasterView.as_view()),
             url(r'GeneralMasterList$', GeneralMasterFilterView.as_view()),
             url(r'GeneralMasterType$', GeneralMasterTypeView.as_view()),
+            url(r'GeneralMasterSubType$', GeneralMasterSubTypeView.as_view()),
 
     
 #Invoice All APIs
@@ -214,12 +216,14 @@ urlpatterns = [
             url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
             url(r'WorkOrder$', WorkOrderView.as_view()),
             url(r'WorkOrderFilter$', WorkOrderList.as_view()),
+            url(r'WorkOrderShow/([0-9]+)$', WorkOrderShowView.as_view()),
     
 # Material Issues All API's
             url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
             url(r'MaterialIssue/([0-9]+)$',MaterialIssueViewSecond.as_view()),
             url(r'MaterialIssue$', MaterialIssueView.as_view()),
             url(r'MaterialIssueFilter$', MaterialIsssueList.as_view()),
+            url(r'MaterialIssueShow/([0-9]+)$', MaterialIssueShowView.as_view()),
 
 
 #Production ALL API`s

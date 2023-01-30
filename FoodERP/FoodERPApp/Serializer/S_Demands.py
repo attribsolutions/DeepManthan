@@ -22,13 +22,13 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
 class TC_DemandItemsSerializer(serializers.ModelSerializer):
    class Meta:
         model = TC_DemandItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount', 'IsDeleted', 'Comment']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount', 'IsDeleted']
 
 class T_DemandSerializer(serializers.ModelSerializer):
     DemandItem = TC_DemandItemsSerializer(many=True)
     class Meta:
         model = T_Demands
-        fields = ['id','DemandDate','Customer','Supplier','DemandNo','FullDemandNumber', 'Division','DemandAmount','Description','BillingAddress','ShippingAddress', 'MaterialIssue','CreatedBy', 'UpdatedBy', 'DemandItem']
+        fields = ['id','DemandDate','Customer','Supplier','DemandNo','FullDemandNumber', 'Division','DemandAmount','Comment','BillingAddress','ShippingAddress', 'MaterialIssue','CreatedBy', 'UpdatedBy', 'DemandItem']
 
     def create(self, validated_data):
         DemandItems_data = validated_data.pop('DemandItem')
@@ -166,4 +166,4 @@ class DemandEditserializer(serializers.Serializer):
     SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)  
-    Comment=serializers.CharField(max_length=100)                
+              

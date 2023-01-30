@@ -34,7 +34,7 @@ class InterBranchDivisionView(CreateAPIView):
                             "Name": a['Name']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DivisionListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
@@ -54,12 +54,12 @@ class InterBranchItemsView(CreateAPIView):
                 DemandID = request.data['DemandID']
 
                 Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
-m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
+m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
                 from
-((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
+((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`
 FROM `tc_demanditems` WHERE (`tc_demanditems`.`IsDeleted` = False AND `tc_demanditems`.`Demand_id` = %s)) 
 UNION 
-(SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`,NULL AS `Comment` 
+(SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`
 FROM `m_items` Join mc_partyitems a On m_items.id = a.Item_id
 join mc_partyitems b On m_items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
 
@@ -69,7 +69,8 @@ left join mc_itemunits on mc_itemunits.id=a.Unit_id
 left join m_units on m_units.id=mc_itemunits.UnitID_id
 left join m_gsthsncode on m_gsthsncode.id=a.GST_id
 left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([DemandID], [Party], [Customer]))
-               
+                
+                # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': str(Itemquery.query)})
                 DemandItemSerializer = DemandEditserializer(
                     Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': OrderItemSerializer})
@@ -138,7 +139,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "DemandNo": a['DemandNo'],
                         "FullDemandNumber": a['FullDemandNumber'],
                         "DemandAmount": a['DemandAmount'],
-                        "Description": a['Description'],
+                        "Comment": a['Comment'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
                         "Supplier": a['Supplier']['id'],
@@ -161,7 +162,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "DemandNo":"",
                         "FullDemandNumber":"",
                         "DemandAmount": "",
-                        "Description": "",
+                        "Comment": "",
                         "Customer": "",
                         "CustomerName": "",
                         "Supplier": "",
@@ -210,6 +211,7 @@ class DemandListFilterView(CreateAPIView):
                         DemandListData.append({
                             "id": a['id'],
                             "DemandDate": a['DemandDate'],
+                            "Comment": a['Comment'],
                             "FullDemandNumber": a['FullDemandNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
@@ -223,7 +225,7 @@ class DemandListFilterView(CreateAPIView):
                          
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -278,7 +280,7 @@ class DemandViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Demand Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
         
@@ -293,6 +295,6 @@ class DemandViewSecond(CreateAPIView):
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
