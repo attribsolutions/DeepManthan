@@ -45,8 +45,8 @@ class T_DemandSerializer(serializers.ModelSerializer):
             'DemandDate', instance.DemandDate)      
         instance.DemandAmount = validated_data.get(
             'DemandAmount', instance.DemandAmount)
-        instance.Description = validated_data.get(
-            'Description', instance.Description)
+        instance.Comment = validated_data.get(
+            'Comment', instance.Comment)
         instance.BillingAddress = validated_data.get(
             'BillingAddress', instance.BillingAddress)
         instance.ShippingAddress = validated_data.get(
@@ -70,13 +70,8 @@ class T_DemandSerializer(serializers.ModelSerializer):
                 SetFlag=TC_DemandItems.objects.filter(Item=DemandItem_data['Item'],Demand=instance).update(IsDeleted=1)
                 DemandItem_data['IsDeleted']=0
                 Items = TC_DemandItems.objects.create(Demand=instance, **DemandItem_data)
-        
-
         return instance
 
-
-
-    
 class T_DemandSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Supplier = PartiesSerializerSecond(read_only=True)
