@@ -216,12 +216,14 @@ urlpatterns = [
             url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
             url(r'WorkOrder$', WorkOrderView.as_view()),
             url(r'WorkOrderFilter$', WorkOrderList.as_view()),
+            url(r'WorkOrderShow$', WorkOrderShowView.as_view()),
     
 # Material Issues All API's
             url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
             url(r'MaterialIssue/([0-9]+)$',MaterialIssueViewSecond.as_view()),
             url(r'MaterialIssue$', MaterialIssueView.as_view()),
             url(r'MaterialIssueFilter$', MaterialIsssueList.as_view()),
+            url(r'MaterialIssueShow$', MaterialIssueShowView.as_view()),
 
 
 #Production ALL API`s
