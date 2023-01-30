@@ -223,9 +223,7 @@ urlpatterns = [
             url(r'MaterialIssue/([0-9]+)$',MaterialIssueViewSecond.as_view()),
             url(r'MaterialIssue$', MaterialIssueView.as_view()),
             url(r'MaterialIssueFilter$', MaterialIsssueList.as_view()),
-            url(r'MaterialIssueShow/([0-9]+)$', MaterialIssueShowView.as_view()),
-
-
+            
 #Production ALL API`s
 
             
