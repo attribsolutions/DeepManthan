@@ -247,7 +247,7 @@ class DemandView(CreateAPIView):
                 a = GetMaxNumber.GetDemandNumber(Division, Customer, DemandDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 for aa in Demanddata['DemandItem']:
-                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0).GetBaseUnitQuantity()
+                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0,1).GetBaseUnitQuantity()
                     aa['BaseUnitQuantity'] =  BaseUnitQuantity 
                 
                 Demanddata['DemandNo'] = a
