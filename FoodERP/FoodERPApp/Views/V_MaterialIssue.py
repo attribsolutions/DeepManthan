@@ -82,7 +82,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                     #             amount= float(c['BaseUnitQuantity'])-float(amount)
 
                                     StockQty = UnitwiseQuantityConversion(
-                                        b['Item']['id'], c['BaseUnitQuantity'], 0, 0, b['Unit']['id'], 0).ConvertintoSelectedUnit()
+                                        b['Item']['id'], c['BaseUnitQuantity'], 0, 0, b['Unit']['id'], 0,0).ConvertintoSelectedUnit()
 
                                     stockDatalist.append({
                                         "id": c['id'],
@@ -178,7 +178,7 @@ class MaterialIssueView(CreateAPIView):
                 O_BatchWiseLiveStockList = list()
                 for MaterialIssueItem in MaterialIssueItems:
                     BaseUnitQuantity = UnitwiseQuantityConversion(
-                        MaterialIssueItem['Item'], MaterialIssueItem['IssueQuantity'], MaterialIssueItem['Unit'], 0, 0, 0).GetBaseUnitQuantity()
+                        MaterialIssueItem['Item'], MaterialIssueItem['IssueQuantity'], MaterialIssueItem['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
 
                     O_BatchWiseLiveStockList.append({
                         "Quantity": MaterialIssueItem['BatchID'],
@@ -303,7 +303,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
 
                 for a in MaterialIssueItemdataserializer[0]['MaterialIssueItems']:
                     BaseUnitQuantity = UnitwiseQuantityConversion(
-                        a['Item'], a['IssueQuantity'], a['Unit'], 0, 0, 0).GetBaseUnitQuantity()
+                        a['Item'], a['IssueQuantity'], a['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
 
                     O_BatchWiseLiveStockList.update({
                         "Item": a['Item'],
