@@ -323,7 +323,7 @@ class UnitwiseQuantityConversion:
             else:
                 b=Q(id=ConversionMCItemUnit)
             ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b ).filter( aaa )
-            print(str(ConversionUnitBaseQuantityQuery.query))
+            
             ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
             self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
           
