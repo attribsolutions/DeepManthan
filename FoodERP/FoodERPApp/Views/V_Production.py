@@ -101,7 +101,7 @@ class ProductionView(CreateAPIView):
                 
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
-                BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0).GetBaseUnitQuantity()
+                BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0,0).GetBaseUnitQuantity()
                 
                 Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()
                 GSTID = Gst[0]['Gstid']
