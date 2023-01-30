@@ -382,8 +382,6 @@ class TestOrderSerializer(serializers.ModelSerializer):
         data['CustomerName'] = instance.Customer.Name
         data['Supplier'] = instance.Supplier.id
         data['SupplierName'] = instance.Supplier.Name
-        data['Supplier'] = instance.Supplier.id
-        data['SupplierName'] = instance.Supplier.Name
         data['POType'] = instance.POType.id
         data['POTypeName'] = instance.POType.Name
         data['BillingAddressID'] = instance.BillingAddress.id
