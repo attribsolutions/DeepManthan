@@ -60,7 +60,7 @@ class BomDetailsView(CreateAPIView):
                                 b['Item']['id'], Party))
 
                             StockQty = UnitwiseQuantityConversion(
-                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0,0).ConvertintoSelectedUnit()
+                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0,1).ConvertintoSelectedUnit()
 
                             Qty = float(b['Quantity']) / \
                                 float(a['EstimatedOutputQty'])
