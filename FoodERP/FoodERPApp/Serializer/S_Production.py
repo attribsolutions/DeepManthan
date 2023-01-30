@@ -28,6 +28,20 @@ class H_ProductionSerializerforGET(serializers.ModelSerializer):
     class Meta:
         model = T_Production
         fields = '__all__'
+    
+    def to_representation(self, instance):
+        data = super(H_ProductionSerializerforGET, self).to_representation(instance)
+        data['Company'] = instance.Company.id
+        data['CompanyName'] = instance.Company.Name
+        data['Division'] = instance.Division.id
+        data['DivisionName'] = instance.Division.Name
+        data['Unit'] = instance.Unit.id
+        data['UnitName'] = instance.Unit.UnitID.Name
+        data['Item'] = instance.Item.id
+        data['ItemName'] = instance.Item.Name
+       
+        return data    
+        
 
 class O_BatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
