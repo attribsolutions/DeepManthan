@@ -108,7 +108,7 @@ class T_GRNView(CreateAPIView):
                         b = 0
 
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     
                     a['SystemBatchCode'] = BatchCode
