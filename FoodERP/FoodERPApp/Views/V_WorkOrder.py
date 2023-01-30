@@ -12,8 +12,9 @@ from ..Serializer.S_Bom import *
 from ..Serializer.S_WorkOrder import *
 from ..models import *
 
+
 class BomDetailsView(CreateAPIView):
-   
+
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
@@ -28,7 +29,8 @@ class BomDetailsView(CreateAPIView):
                 Party = BomDetailsdata['Party']
                 Query = M_BillOfMaterial.objects.filter(id=BomID)
                 if Query.exists():
-                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BOM_Serializer = M_BOMSerializerSecond(
+                        Query, many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
@@ -38,10 +40,12 @@ class BomDetailsView(CreateAPIView):
                         # else:
                         #     Serialize_data = StockQtyserializer(stockquery, many=True).data
                         #     Stock = Serialize_data[0]['actualStock']
-                        Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
-                        StockintoSelectedUnit=UnitwiseQuantityConversion(a['Item']['id'],Stock,0,0,a['Unit']['id'],0).ConvertintoSelectedUnit()
-                        MaterialDetails =list()
-                        total=0
+                        Stock = float(GetO_BatchWiseLiveStock(
+                            a['Item']['id'], Party))
+                        StockintoSelectedUnit = UnitwiseQuantityConversion(
+                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0).ConvertintoSelectedUnit()
+                        MaterialDetails = list()
+                        total = 0
                         for b in a['BOMItems']:
                             Item = b['Item']['id']
                             # # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
@@ -51,32 +55,35 @@ class BomDetailsView(CreateAPIView):
                             # else:
                             #     StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
                             #     StockQty = StockQtySerialize_data[0]['actualStock']
-                            Stock=float(GetO_BatchWiseLiveStock(b['Item']['id'],Party))
-                           
-                            StockQty=UnitwiseQuantityConversion(b['Item']['id'],Stock,0,0,b['Unit']['id'],0).ConvertintoSelectedUnit()
-                            
-                            Qty = float(b['Quantity']) /float(a['EstimatedOutputQty'])
+                            Stock = float(GetO_BatchWiseLiveStock(
+                                b['Item']['id'], Party))
+
+                            StockQty = UnitwiseQuantityConversion(
+                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0).ConvertintoSelectedUnit()
+
+                            Qty = float(b['Quantity']) / \
+                                float(a['EstimatedOutputQty'])
                             ActualQty = float(GetQuantity * Qty)
                             MaterialDetails.append({
                                 "id": b['id'],
-                                "Item":b['Item']['id'],
-                                "ItemName":b['Item']['Name'], 
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                "StockQuantity":StockQty,
-                                "BomQuantity":b['Quantity'],
-                                "Quantity":ActualQty
+                                "StockQuantity": StockQty,
+                                "BomQuantity": b['Quantity'],
+                                "Quantity": ActualQty
                             })
                         BillofmaterialData.append({
                             "id": a['id'],
                             "IsActive": a['IsActive'],
-                            "Item":a['Item']['id'],
-                            "ItemName":a['Item']['Name'],
-                            "Stock":StockintoSelectedUnit,
-                            "EstimatedOutputQty": round(GetQuantity, 2),  
+                            "Item": a['Item']['id'],
+                            "ItemName": a['Item']['Name'],
+                            "Stock": StockintoSelectedUnit,
+                            "EstimatedOutputQty": round(GetQuantity, 2),
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
-                            "BOMItems":MaterialDetails
+                            "BOMItems": MaterialDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData[0]})
         except M_BillOfMaterial.DoesNotExist:
@@ -94,57 +101,59 @@ class WorkOrderList(CreateAPIView):
                 WorkOrderdata = JSONParser().parse(request)
                 FromDate = WorkOrderdata['FromDate']
                 ToDate = WorkOrderdata['ToDate']
-                query = T_WorkOrder.objects.filter(WorkOrderDate__range=[FromDate,ToDate])
+                query = T_WorkOrder.objects.filter(
+                    WorkOrderDate__range=[FromDate, ToDate])
                 if query:
-                    WorkOrder_serializerdata = WorkOrderSerializerSecond(query, many=True).data
+                    WorkOrder_serializerdata = WorkOrderSerializerSecond(
+                        query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
                     WorkOrderListData = list()
                     for a in WorkOrder_serializerdata:
-                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(a['Item']['id'],a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()      
+                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
+                            a['Item']['id'], a['Unit']['id'], a['Unit']['BaseUnitQuantity']).ShowDetails()
                         WorkOrderListData.append({
-                        "id": a['id'],
-                        "WorkOrderDate": a['WorkOrderDate'],
-                        "WorkOrderNumber": a['WorkOrderNumber'],
-                        "FullWorkOrderNumber": a['FullWorkOrderNumber'],
-                        "Item":a['Item']['id'],
-                        "ItemName":a['Item']['Name'],
-                        "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name'] +baseunitconcat,
-                        "Bom": a['Bom'],
-                        "NumberOfLot": a['NumberOfLot'],
-                        "Quantity":a["Quantity"],
-                        "Company": a['Company']['id'],
-                        "CompanyName":a['Company']['Name'],
-                        "EstimatedOutputQty": a['Quantity'],  
-                        "CreatedOn": a['CreatedOn'],
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrderListData})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
+                            "id": a['id'],
+                            "WorkOrderDate": a['WorkOrderDate'],
+                            "WorkOrderNumber": a['WorkOrderNumber'],
+                            "FullWorkOrderNumber": a['FullWorkOrderNumber'],
+                            "Item": a['Item']['id'],
+                            "ItemName": a['Item']['Name'],
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['UnitID']['Name'] + baseunitconcat,
+                            "Bom": a['Bom'],
+                            "NumberOfLot": a['NumberOfLot'],
+                            "Quantity": a["Quantity"],
+                            "Company": a['Company']['id'],
+                            "CompanyName": a['Company']['Name'],
+                            "EstimatedOutputQty": a['Quantity'],
+                            "CreatedOn": a['CreatedOn'],
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class WorkOrderView(CreateAPIView):
-       
+
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication  
-    
+    authentication_class = JSONWebTokenAuthentication
+
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
                 Party = WorkOrderData['Party']
-               
+
                 WorkOrderDate = WorkOrderData['WorkOrderDate']
                 a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                
+
                 WorkOrderData['WorkOrderNumber'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetWorkOrderPrifix(Party)
-                
+
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
@@ -154,76 +163,82 @@ class WorkOrderView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
 
 class WorkOrderViewSecond(RetrieveAPIView):
-       
+
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-    
+
     @transaction.atomic()
-    def get(self, request, id=0,Company=0):
+    def get(self, request, id=0, Company=0):
         try:
             with transaction.atomic():
-                Check = TC_MaterialIssueWorkOrders.objects.filter(WorkOrder_id=id)
+                Check = TC_MaterialIssueWorkOrders.objects.filter(
+                    WorkOrder_id=id)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Check.query)})
                 if Check.exists():
                     return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Work Order used in Material Issue', 'Data': []})
                 else:
                     Query = T_WorkOrder.objects.filter(id=id)
                     if Query.exists():
-                        WorkOrder_serializer = WorkOrderSerializerSecond(Query,many=True).data
+                        WorkOrder_serializer = WorkOrderSerializerSecond(
+                            Query, many=True).data
                         WorkOrderData = list()
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
-                        ActualBomqty =0
+                        ActualBomqty = 0
                         for a in WorkOrder_serializer:
                             Item = a['Item']['id']
-                                # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
-                            obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
+                            obatchwisestockquery = O_BatchWiseLiveStock.objects.raw(
+                                ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
                             if not obatchwisestockquery:
-                                StockQty =0.0
+                                StockQty = 0.0
                             else:
-                                StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
+                                StockQtySerialize_data = StockQtyserializer(
+                                    obatchwisestockquery, many=True).data
                                 StockQty = StockQtySerialize_data[0]['actualStock']
-                            
-                            ActualBomqty = float(a['Quantity']) /float(a['NumberOfLot'])
-                            MaterialDetails =list()
-                            for b in a['WorkOrderItems']:  
+
+                            ActualBomqty = float(
+                                a['Quantity']) / float(a['NumberOfLot'])
+                            MaterialDetails = list()
+                            for b in a['WorkOrderItems']:
                                 MaterialDetails.append({
                                     "id": b['id'],
-                                    "Item":b['Item']['id'],
-                                    "ItemName":b['Item']['Name'], 
+                                    "Item": b['Item']['id'],
+                                    "ItemName": b['Item']['Name'],
                                     "Unit": b['Unit']['id'],
                                     "UnitName": b['Unit']['UnitID']['Name'],
-                                    "BomQuantity":b['BomQuantity'],
-                                    "Quantity":b['Quantity'], 
+                                    "BomQuantity": b['BomQuantity'],
+                                    "Quantity": b['Quantity'],
                                 })
-                            
+
                             WorkOrderData.append({
                                 "id": a['id'],
                                 "WorkOrderDate": a['WorkOrderDate'],
                                 "WorkOrderNumber": a['WorkOrderNumber'],
                                 "FullWorkOrderNumber": a['FullWorkOrderNumber'],
-                                "Item":a['Item']['id'],
-                                "ItemName":a['Item']['Name'],
+                                "Item": a['Item']['id'],
+                                "ItemName": a['Item']['Name'],
                                 "Unit": a['Unit']['id'],
                                 "UnitName": a['Unit']['UnitID']['Name'],
                                 "Bom": a['Bom'],
-                                "Stock":StockQty,
+                                "Stock": StockQty,
                                 "ActualBomqty": ActualBomqty,
                                 "NumberOfLot": a['NumberOfLot'],
-                                "Quantity":a["Quantity"],
+                                "Quantity": a["Quantity"],
                                 "Company": a['Company']['id'],
-                                "CompanyName":a['Company']['Name'],
+                                "CompanyName": a['Company']['Name'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
-                                "EstimatedOutputQty": a['Quantity'],  
-                                "WorkOrderItems":MaterialDetails,
+                                "EstimatedOutputQty": a['Quantity'],
+                                "WorkOrderItems": MaterialDetails,
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderData})
         except T_WorkOrder.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Orders Not available', 'Data': []})
-    
+
     @transaction.atomic()
     def put(self, request, id=0, Company=0):
         try:
@@ -232,7 +247,8 @@ class WorkOrderViewSecond(RetrieveAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
                 WorkOrderDataByID = T_WorkOrder.objects.get(id=id)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
-                WorkOrder_Serializer = WorkOrderSerializer(WorkOrderDataByID, data=WorkOrderData)
+                WorkOrder_Serializer = WorkOrderSerializer(
+                    WorkOrderDataByID, data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
                     WorkOrder_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Updated Successfully', 'Data': []})
@@ -240,9 +256,10 @@ class WorkOrderViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
     @transaction.atomic()
-    def delete(self, request, id=0,Company=0):
+    def delete(self, request, id=0, Company=0):
         try:
             with transaction.atomic():
                 WorkOrderdata = T_WorkOrder.objects.get(id=id)
@@ -251,4 +268,72 @@ class WorkOrderViewSecond(RetrieveAPIView):
         except T_WorkOrder.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Order Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Work Order used in another table', 'Data': []})                
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Work Order used in another table', 'Data': []})
+
+
+class WorkOrderShowView(RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0, Company=0):
+        try:
+            with transaction.atomic():
+                Query = T_WorkOrder.objects.filter(id=id)
+                if Query.exists():
+                    WorkOrder_serializer = WorkOrderSerializerSecond(
+                        Query, many=True).data
+                    WorkOrderData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    ActualBomqty = 0
+                    for a in WorkOrder_serializer:
+                        Item = a['Item']['id']
+                        # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
+                        obatchwisestockquery = O_BatchWiseLiveStock.objects.raw(
+                            ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                        if not obatchwisestockquery:
+                            StockQty = 0.0
+                        else:
+                            StockQtySerialize_data = StockQtyserializer(
+                                obatchwisestockquery, many=True).data
+                            StockQty = StockQtySerialize_data[0]['actualStock']
+
+                        ActualBomqty = float(
+                            a['Quantity']) / float(a['NumberOfLot'])
+                        MaterialDetails = list()
+                        for b in a['WorkOrderItems']:
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BomQuantity": b['BomQuantity'],
+                                "Quantity": b['Quantity'],
+                            })
+
+                        WorkOrderData.append({
+                            "id": a['id'],
+                            "WorkOrderDate": a['WorkOrderDate'],
+                            "WorkOrderNumber": a['WorkOrderNumber'],
+                            "FullWorkOrderNumber": a['FullWorkOrderNumber'],
+                            "Item": a['Item']['id'],
+                            "ItemName": a['Item']['Name'],
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "Bom": a['Bom'],
+                            "Stock": StockQty,
+                            "ActualBomqty": ActualBomqty,
+                            "NumberOfLot": a['NumberOfLot'],
+                            "Quantity": a["Quantity"],
+                            "Company": a['Company']['id'],
+                            "CompanyName": a['Company']['Name'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "EstimatedOutputQty": a['Quantity'],
+                            "WorkOrderItems": MaterialDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderData})
+        except T_WorkOrder.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Orders Not available', 'Data': []})
