@@ -213,10 +213,10 @@ urlpatterns = [
     
 # Work Order All API's
             url(r'BomDetails$', BomDetailsView.as_view()),
-            url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
+            url(r'WorkOrder/([0-9]+)/([0-9]+)$',WorkOrderViewSecond.as_view()),
             url(r'WorkOrder$', WorkOrderView.as_view()),
             url(r'WorkOrderFilter$', WorkOrderList.as_view()),
-            url(r'WorkOrderShow/([0-9]+)$', WorkOrderShowView.as_view()),
+         
     
 # Material Issues All API's
             url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
