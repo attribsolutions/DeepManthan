@@ -28,6 +28,7 @@ class BomDetailsView(CreateAPIView):
                 GetQuantity = BomDetailsdata['Quantity']
                 Party = BomDetailsdata['Party']
                 Query = M_BillOfMaterial.objects.filter(id=BomID)
+                
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond(
                         Query, many=True).data
@@ -43,7 +44,7 @@ class BomDetailsView(CreateAPIView):
                         Stock = float(GetO_BatchWiseLiveStock(
                             a['Item']['id'], Party))
                         StockintoSelectedUnit = UnitwiseQuantityConversion(
-                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0).ConvertintoSelectedUnit()
+                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0,0).ConvertintoSelectedUnit()
                         MaterialDetails = list()
                         total = 0
                         for b in a['BOMItems']:
@@ -59,7 +60,7 @@ class BomDetailsView(CreateAPIView):
                                 b['Item']['id'], Party))
 
                             StockQty = UnitwiseQuantityConversion(
-                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0).ConvertintoSelectedUnit()
+                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0,0).ConvertintoSelectedUnit()
 
                             Qty = float(b['Quantity']) / \
                                 float(a['EstimatedOutputQty'])
