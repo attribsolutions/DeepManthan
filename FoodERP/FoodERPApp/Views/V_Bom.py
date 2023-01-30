@@ -43,7 +43,7 @@ class BOMListFilterView(CreateAPIView):
                         Item = a['Item']['id']
                         
                         Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
-                        StockintoSelectedUnit=UnitwiseQuantityConversion(Item,Stock,0,0,a['Unit']['id'],0).ConvertintoSelectedUnit()
+                        StockintoSelectedUnit=UnitwiseQuantityConversion(Item,Stock,0,0,a['Unit']['id'],0,1).ConvertintoSelectedUnit()
                         
                         baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()   
                         BomListData.append({
