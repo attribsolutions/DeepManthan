@@ -44,7 +44,7 @@ class BomDetailsView(CreateAPIView):
                         Stock = float(GetO_BatchWiseLiveStock(
                             a['Item']['id'], Party))
                         StockintoSelectedUnit = UnitwiseQuantityConversion(
-                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0,0).ConvertintoSelectedUnit()
+                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0,1).ConvertintoSelectedUnit()
                         MaterialDetails = list()
                         total = 0
                         for b in a['BOMItems']:
