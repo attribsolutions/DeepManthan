@@ -165,33 +165,36 @@ class MaterialIssueView(CreateAPIView):
         try:
             with transaction.atomic():
                 MaterialIssueData = JSONParser().parse(request)
+                
                 Party = MaterialIssueData['Party']
+               
                 MaterialIssueDate = MaterialIssueData['MaterialIssueDate']
+                
                 a = GetMaxNumber.GetMaterialIssueNumber(
                     Party, MaterialIssueDate)
-                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+               
                 MaterialIssueData['MaterialIssueNumber'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetMaterialIssuePrifix(Party)
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
+                
                 O_BatchWiseLiveStockList = list()
                 for MaterialIssueItem in MaterialIssueItems:
                     BaseUnitQuantity = UnitwiseQuantityConversion(
-                        MaterialIssueItem['Item'], MaterialIssueItem['IssueQuantity'], MaterialIssueItem['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
+                        MaterialIssueItem['Item'], MaterialIssueItem['IssueQuantity'], MaterialIssueItem['Unit'], 0, 0, 0, 1).GetBaseUnitQuantity()
 
                     O_BatchWiseLiveStockList.append({
                         "Quantity": MaterialIssueItem['BatchID'],
                         "Item": MaterialIssueItem['Item'],
                         "BaseUnitQuantity": BaseUnitQuantity
                     })
-
                 MaterialIssueData.update(
                     {"obatchwiseStock": O_BatchWiseLiveStockList})
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': MaterialIssueData})
+               
                 MaterialIssue_Serializer = MaterialIssueSerializer(
                     data=MaterialIssueData)
-
+                
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': []})
