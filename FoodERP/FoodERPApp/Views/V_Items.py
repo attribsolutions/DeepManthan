@@ -299,17 +299,20 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "UpdatedBy":j['UpdatedBy'],
                                     "IsAdd":False
                                 })
-                                
-                        BrandName= list()
+                        
                         bb=str(a['BrandName'])
-                        cc=bb.split(',')
-                        query = M_GeneralMaster.objects.filter(id__in=cc)
-                        GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
-                        for k in GeneralMaster_Serializer:   
-                            BrandName.append({
-                            "id":k['id'],    
-                            "Name": k['Name']   
-                            })  
+                        if bb == '':
+                            BrandName= list()   
+                        else:     
+                            BrandName= list()
+                            cc=bb.split(',')
+                            query = M_GeneralMaster.objects.filter(id__in=cc)
+                            GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                            for k in GeneralMaster_Serializer:   
+                                BrandName.append({
+                                "id":k['id'],    
+                                "Name": k['Name']   
+                                })  
                              
                         ItemData.append({
                             "id": a['id'],
