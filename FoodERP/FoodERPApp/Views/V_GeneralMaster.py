@@ -192,3 +192,30 @@ class GeneralMasterViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This is used in another transaction', 'Data':[]}) 
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'General Master used in another table', 'Data': []})   
+
+class GeneralMasterBrandName(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                BrandDetailsdata = JSONParser().parse(request)
+                Company = BrandDetailsdata['Company']
+                Type = BrandDetailsdata['TypeID']
+                query = M_GeneralMaster.objects.filter(Company_id = Company,TypeID=Type)
+                # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': str(query.query)}) 
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    Items_Serializer = GeneralMasterserializer(query, many=True).data
+                    ListData = list ()
+                    for a in Items_Serializer:
+                        ListData.append({
+                            "id": a['id'],
+                            "Name": a['Name']       
+                        }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
