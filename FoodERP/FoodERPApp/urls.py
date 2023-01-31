@@ -191,6 +191,7 @@ urlpatterns = [
             url(r'GeneralMasterList$', GeneralMasterFilterView.as_view()),
             url(r'GeneralMasterType$', GeneralMasterTypeView.as_view()),
             url(r'GeneralMasterSubType$', GeneralMasterSubTypeView.as_view()),
+            url(r'GeneralMasterBrandName$', GeneralMasterBrandName.as_view()),
 
     
 #Invoice All APIs
@@ -268,7 +269,7 @@ urlpatterns = [
             url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
-            url(r'ItemBrand$',M_ItemBrandName.as_view()),
+            # url(r'ItemBrand$',M_ItemBrandName.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
