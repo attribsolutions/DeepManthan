@@ -36,9 +36,10 @@ class RoleAccessView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    def get(self, request, PartyID=0, EmployeeID=0):    
+    def get(self, request, PartyID=0, EmployeeID=0,CompanyID=0):    
         
-        Company="M_RoleAccess.Company_id is null"
+        CompanyIDQuery=M_Employees.objects.filter(id=EmployeeID).values('Company')
+        CompanyID=CompanyIDQuery[0]['Company']
         Division=PartyID
         # print(request.session.get('UserName'))
       
@@ -70,9 +71,9 @@ class RoleAccessView(RetrieveAPIView):
 
         if (int(PartyID) > 0)  :
        
-            modules= M_RoleAccess.objects.filter(Division=PartyID ,Company_id__isnull=True, Role_id__in=y).values('Modules_id').distinct()   
+            modules= M_RoleAccess.objects.filter(Division=PartyID ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
         else:
-            modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company_id__isnull=True, Role_id__in=y).values('Modules_id').distinct()   
+            modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
 
         queryset=H_Modules.objects.filter(id__in=modules).order_by("DisplayIndex")
         serializerdata = H_ModulesSerializer(queryset, many=True).data
@@ -89,9 +90,9 @@ class RoleAccessView(RetrieveAPIView):
     
             if (int(PartyID) > 0)  :
 
-                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company_id__isnull=True,).select_related('Pages').order_by('Pages__DisplayIndex')
+                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company=CompanyID,).select_related('Pages').order_by('Pages__DisplayIndex')
             else :
-                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company_id__isnull=True).select_related('Pages').order_by('Pages__DisplayIndex')
+                query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company=CompanyID).select_related('Pages').order_by('Pages__DisplayIndex')
 
             # print(str(query.query) )  
           
