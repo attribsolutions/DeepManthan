@@ -298,8 +298,19 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "CreatedBy":j['CreatedBy'],
                                     "UpdatedBy":j['UpdatedBy'],
                                     "IsAdd":False
-                                })                    
-                            
+                                })
+                                
+                        BrandName= list()
+                        bb=str(a['BrandName'])
+                        cc=bb.split(',')
+                        query = M_GeneralMaster.objects.filter(id__in=cc)
+                        GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                        for k in GeneralMaster_Serializer:   
+                            BrandName.append({
+                            "id":k['id'],    
+                            "Name": k['Name']   
+                            })  
+                             
                         ItemData.append({
                             "id": a['id'],
                             "Name": a['Name'],
@@ -313,7 +324,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "isActive":a['isActive'] ,
                             "CanBeSold":a['CanBeSold'] ,
                             "CanBePurchase":a['CanBePurchase'],
-                            "BrandName":a['BrandName'] ,
+                            "BrandName":BrandName,
                             "Tag":a['Tag'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
