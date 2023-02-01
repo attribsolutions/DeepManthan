@@ -92,7 +92,7 @@ class T_GRNView(CreateAPIView):
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 for a in GRNdata['GRNItems']:
-                    
+                  
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                    
@@ -125,6 +125,7 @@ class T_GRNView(CreateAPIView):
                     "CreatedBy":CreatedBy,
                     
                     })
+                    
                     O_LiveBatchesList.append({
                     
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
@@ -139,7 +140,9 @@ class T_GRNView(CreateAPIView):
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })
-
+                    O_BatchWiseLiveStockList=list()
+                    
+                   
                 # print(GRNdata)
                 GRNdata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': GRNdata})   
