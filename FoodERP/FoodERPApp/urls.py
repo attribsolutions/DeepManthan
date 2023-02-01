@@ -214,7 +214,7 @@ urlpatterns = [
     
 # Work Order All API's
             url(r'BomDetails$', BomDetailsView.as_view()),
-            url(r'WorkOrder/([0-9]+)/([0-9]+)$',WorkOrderViewSecond.as_view()),
+            url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
             url(r'WorkOrder$', WorkOrderView.as_view()),
             url(r'WorkOrderFilter$', WorkOrderList.as_view()),
          
