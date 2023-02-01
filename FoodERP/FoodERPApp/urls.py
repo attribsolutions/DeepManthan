@@ -191,6 +191,7 @@ urlpatterns = [
             url(r'GeneralMasterList$', GeneralMasterFilterView.as_view()),
             url(r'GeneralMasterType$', GeneralMasterTypeView.as_view()),
             url(r'GeneralMasterSubType$', GeneralMasterSubTypeView.as_view()),
+            url(r'GeneralMasterBrandName$', GeneralMasterBrandName.as_view()),
 
     
 #Invoice All APIs
@@ -213,19 +214,17 @@ urlpatterns = [
     
 # Work Order All API's
             url(r'BomDetails$', BomDetailsView.as_view()),
-            url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
+            url(r'WorkOrder/([0-9]+)/([0-9]+)$',WorkOrderViewSecond.as_view()),
             url(r'WorkOrder$', WorkOrderView.as_view()),
             url(r'WorkOrderFilter$', WorkOrderList.as_view()),
-            url(r'WorkOrderShow/([0-9]+)$', WorkOrderShowView.as_view()),
+         
     
 # Material Issues All API's
             url(r'WorkOrderDetails$', WorkOrderDetailsView.as_view()),
             url(r'MaterialIssue/([0-9]+)$',MaterialIssueViewSecond.as_view()),
             url(r'MaterialIssue$', MaterialIssueView.as_view()),
             url(r'MaterialIssueFilter$', MaterialIsssueList.as_view()),
-            url(r'MaterialIssueShow/([0-9]+)$', MaterialIssueShowView.as_view()),
-
-
+            
 #Production ALL API`s
 
             
@@ -270,7 +269,7 @@ urlpatterns = [
             url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
-            url(r'ItemBrand$',M_ItemBrandName.as_view()),
+           
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
@@ -323,13 +322,13 @@ urlpatterns = [
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid
-            url(r'RoleAccess/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
+            url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
             #ListPage API 
             url(r'RoleAccessList$', RoleAccessViewList.as_view()),
             #Post Method API
             url(r'RoleAccess$', RoleAccessView.as_view()),
             #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
-            url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
+            url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
             #RoleAccessGetPagesOnModule moduleid/Divisionid
             url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
             #RoleAccess Page AddPage Button

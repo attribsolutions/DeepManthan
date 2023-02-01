@@ -220,7 +220,7 @@ class InterBranchChallanViewSecond(CreateAPIView):
                 O_BatchWiseLiveStockList=dict()
                 
                 for a in IBChallandataserializer[0]['IBChallanItems']:
-                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0).GetBaseUnitQuantity()
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
                     
                     O_BatchWiseLiveStockList.update({
                     "Item": a['Item'],

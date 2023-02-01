@@ -7,35 +7,10 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
 from  ..Serializer.S_Items import *
+from  ..Serializer.S_GeneralMaster import *
 from ..models import *
 
-
-class M_ItemBrandName(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-    
-    @transaction.atomic()
-    def get(self, request, id=0 ):
-        try:
-            with transaction.atomic():
-                query = M_Items.objects.all()
-                # return JsonResponse({'query':  str(query.query)})
-                if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-                else:
-                    Items_Serializer = ItemSerializerSecond(query, many=True).data
-                    ListData = list ()
-                    for a in Items_Serializer:
-                        b=str(a['BrandName'])
-                        c=b.split(',')
-                        for d in c:
-                            ListData.append({
-                                "dta": d+ "-" + a['Name']
-                            })  
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+        
 class M_ItemTag(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
@@ -295,8 +270,22 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "CreatedBy":j['CreatedBy'],
                                     "UpdatedBy":j['UpdatedBy'],
                                     "IsAdd":False
-                                })                    
-                            
+                                })
+                        
+                        bb=str(a['BrandName'])
+                        if bb == '':
+                            BrandName= list()   
+                        else:     
+                            BrandName= list()
+                            cc=bb.split(',')
+                            query = M_GeneralMaster.objects.filter(id__in=cc)
+                            GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                            for k in GeneralMaster_Serializer:   
+                                BrandName.append({
+                                "id":k['id'],    
+                                "Name": k['Name']   
+                                })  
+                             
                         ItemData.append({
                             "id": a['id'],
                             "Name": a['Name'],
@@ -310,7 +299,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "isActive":a['isActive'] ,
                             "CanBeSold":a['CanBeSold'] ,
                             "CanBePurchase":a['CanBePurchase'],
-                            "BrandName":a['BrandName'] ,
+                            "BrandName":BrandName,
                             "Tag":a['Tag'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],

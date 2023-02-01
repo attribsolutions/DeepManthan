@@ -7,17 +7,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
-
 from ..Serializer.S_Items import ItemSerializerSecond
-
 from ..Views.V_CommFunction import *
-
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
-
 from ..Serializer.S_Production import *
 from ..models import *
-
-                    
+           
 
 class MaterialIssueDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -49,36 +44,7 @@ class ProductionList(CreateAPIView):
                 query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
                 if query:
                     Production_Serializer = H_ProductionSerializerforGET(query, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})
-                    Production_SerializerListData = list()
-                    for a in Production_Serializer:   
-                        Production_SerializerListData.append({
-                        "id": a['id'],
-                        "ProductionDate": a['ProductionDate'],
-                        "EstimatedQuantity": a['EstimatedQuantity'],
-                        "NumberOfLot": a['NumberOfLot'],
-                        "ActualQuantity":a['ActualQuantity'],
-                        "BatchDate":a["BatchDate"],
-                        "BatchCode": a['BatchCode'],
-                        "StoreLocation": a['StoreLocation'],
-                        "PrintedBatchCode": a['PrintedBatchCode'],
-                        "BestBefore": a['BestBefore'],
-                        "Remark": a['Remark'],
-                        "CreatedBy": a['CreatedBy'],
-                        "CreatedOn": a['CreatedOn'],
-                        "UpdatedBy": a['UpdatedBy'],
-                        "UpdatedOn": a['UpdatedOn'],
-                        "Company": a['Company']['id'],
-                        "CompanyName":a['Company']['Name'],
-                        "Division":a['Division']['id'],
-                        "DivisionName":a['Division']['Name'],
-                        "Item":a['Item']['id'],
-                        "ItemName":a['Item']['Name'],
-                        "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name']
-                   
-                        }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_SerializerListData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
@@ -101,7 +67,7 @@ class ProductionView(CreateAPIView):
                 
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
-                BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0).GetBaseUnitQuantity()
+                BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0,1).GetBaseUnitQuantity()
                 
                 Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()
                 GSTID = Gst[0]['Gstid']

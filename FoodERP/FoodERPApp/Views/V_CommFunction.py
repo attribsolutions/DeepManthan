@@ -289,17 +289,21 @@ class GSTHsnCodeMaster:
     
 class UnitwiseQuantityConversion:
     
-    def __init__(self,ItemID,InputQuantity,MCItemUnit,MUnits,ConversionMCItemUnit,ConversionMUnits):
+    def __init__(self,ItemID,InputQuantity,MCItemUnit,MUnits,ConversionMCItemUnit,ConversionMUnits,ShowDeletedUnitAlso):
         self.ItemID = ItemID
         self.InputQuantity = InputQuantity
         self.MCItemUnit = MCItemUnit
         self.MUnits = MUnits
         self.ConversionMCItemUnit = ConversionMCItemUnit
         self.ConversionMUnits = ConversionMUnits
+        self.ShowDeletedUnitAlso = ShowDeletedUnitAlso
        
-        
+        if(ShowDeletedUnitAlso == 1):
+            aaa=Q()
+        else:
+            aaa=Q(IsDeleted=0) 
         if(MCItemUnit == 0 & MUnits==0 ):
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1)
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1).filter( aaa )
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         else:
@@ -309,7 +313,7 @@ class UnitwiseQuantityConversion:
             else:
                 a=Q(id=MCItemUnit)   
             
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a )
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a ).filter( aaa )
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
             
@@ -318,8 +322,8 @@ class UnitwiseQuantityConversion:
                 b=Q(UnitID=ConversionMUnits)
             else:
                 b=Q(id=ConversionMCItemUnit)
-            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b )
-            print(str(ConversionUnitBaseQuantityQuery.query))
+            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b ).filter( aaa )
+            
             ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
             self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
           
