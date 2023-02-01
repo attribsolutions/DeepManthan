@@ -173,67 +173,10 @@ class WorkOrderViewSecond(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0, show=0):
+    def get(self, request, id=0):
         try:
             with transaction.atomic():
-                if (int(str(show)) > 0):
-                    Query = T_WorkOrder.objects.filter(id=id)
-                    if Query.exists():
-                        WorkOrder_serializer = WorkOrderSerializerSecond(
-                            Query, many=True).data
-                        WorkOrderData = list()
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
-                        ActualBomqty = 0
-                        for a in WorkOrder_serializer:
-                            Item = a['Item']['id']
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
-                            obatchwisestockquery = O_BatchWiseLiveStock.objects.raw(
-                                ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
-                            if not obatchwisestockquery:
-                                StockQty = 0.0
-                            else:
-                                StockQtySerialize_data = StockQtyserializer(
-                                    obatchwisestockquery, many=True).data
-                                StockQty = StockQtySerialize_data[0]['actualStock']
-
-                            ActualBomqty = float(
-                                a['Quantity']) / float(a['NumberOfLot'])
-                            MaterialDetails = list()
-                            for b in a['WorkOrderItems']:
-                                MaterialDetails.append({
-                                    "id": b['id'],
-                                    "Item": b['Item']['id'],
-                                    "ItemName": b['Item']['Name'],
-                                    "Unit": b['Unit']['id'],
-                                    "UnitName": b['Unit']['UnitID']['Name'],
-                                    "BomQuantity": b['BomQuantity'],
-                                    "Quantity": b['Quantity'],
-                                })
-
-                            WorkOrderData.append({
-                                "id": a['id'],
-                                "WorkOrderDate": a['WorkOrderDate'],
-                                "WorkOrderNumber": a['WorkOrderNumber'],
-                                "FullWorkOrderNumber": a['FullWorkOrderNumber'],
-                                "Item": a['Item']['id'],
-                                "ItemName": a['Item']['Name'],
-                                "Unit": a['Unit']['id'],
-                                "UnitName": a['Unit']['UnitID']['Name'],
-                                "Bom": a['Bom'],
-                                "Stock": StockQty,
-                                "ActualBomqty": ActualBomqty,
-                                "NumberOfLot": a['NumberOfLot'],
-                                "Quantity": a["Quantity"],
-                                "Company": a['Company']['id'],
-                                "CompanyName": a['Company']['Name'],
-                                "Party": a['Party']['id'],
-                                "PartyName": a['Party']['Name'],
-                                "EstimatedOutputQty": a['Quantity'],
-                                "WorkOrderItems": MaterialDetails,
-                            })
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderData})
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Work Orders Not available', 'Data': []})
-                else:
+                
                     Check = TC_MaterialIssueWorkOrders.objects.filter(WorkOrder_id=id)
                     if Check.exists():
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Work Order used in Material Issue', 'Data': []})
