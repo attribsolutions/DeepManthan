@@ -73,7 +73,7 @@ class BomDetailsView(CreateAPIView):
                                 "UnitName": b['Unit']['UnitID']['Name'],
                                 "StockQuantity": StockQty,
                                 "BomQuantity": b['Quantity'],
-                                "Quantity": ActualQty
+                                "Quantity": round(ActualQty,3)
                             })
                         BillofmaterialData.append({
                             "id": a['id'],
@@ -81,7 +81,7 @@ class BomDetailsView(CreateAPIView):
                             "Item": a['Item']['id'],
                             "ItemName": a['Item']['Name'],
                             "Stock": StockintoSelectedUnit,
-                            "EstimatedOutputQty": round(GetQuantity, 2),
+                            "EstimatedOutputQty": round(GetQuantity, 3),
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['UnitID']['Name'],
                             "BOMItems": MaterialDetails
