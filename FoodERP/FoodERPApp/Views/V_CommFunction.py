@@ -353,7 +353,7 @@ class  ShowBaseUnitQtyOnUnitDropDown:
             for a in Itemsdata:
                 BaseUnitName=a['BaseUnitID']['Name']
             
-        ItemUnitquery = MC_ItemUnits.objects.filter(Item=self.ItemID, IsBase=1).values('id')
+        ItemUnitquery = MC_ItemUnits.objects.filter(Item=self.ItemID, IsBase=1, IsDeleted=0).values('id')
         qwer=ItemUnitquery[0]['id']
         
         a = (self.MC_ItemUnitBaseUnitQty)
