@@ -1045,7 +1045,7 @@ class T_MaterialIssue(models.Model):
         db_table = "T_MaterialIssue"
 
 class TC_MaterialIssueItems(models.Model):
-    
+    MaterialIssue = models.ForeignKey(T_MaterialIssue, related_name='MaterialIssueItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     WorkOrderQuantity = models.DecimalField(max_digits=15, decimal_places=3) 
     IssueQuantity = models.DecimalField(max_digits=15, decimal_places=3) 
