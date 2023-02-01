@@ -32,10 +32,6 @@ class WorkOrderSerializer(serializers.ModelSerializer):
     
         instance.WorkOrderDate = validated_data.get(
             'WorkOrderDate', instance.WorkOrderDate)
-        instance.WorkOrderNumber = validated_data.get(
-            'WorkOrderNumber', instance.WorkOrderNumber)
-        instance.FullWorkOrderNumber = validated_data.get(
-            'FullWorkOrderNumber', instance.FullWorkOrderNumber)
         instance.Item = validated_data.get(
             'Item', instance.Item)
         instance.Unit = validated_data.get(
