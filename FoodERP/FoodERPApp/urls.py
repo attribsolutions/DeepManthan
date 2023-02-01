@@ -328,7 +328,7 @@ urlpatterns = [
             #Post Method API
             url(r'RoleAccess$', RoleAccessView.as_view()),
             #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
-            url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
+            url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
             #RoleAccessGetPagesOnModule moduleid/Divisionid
             url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
             #RoleAccess Page AddPage Button
