@@ -205,8 +205,8 @@ class M_ItemsViewSecond(CreateAPIView):
                         for f in a['ItemDivisionDetails']:
                             DivisionDetails.append({
                                 "id": f['id'],
-                                "Division": f['Division']['id'],
-                                "DivisionName": f['Division']['Name'],
+                                "Party": f['Party']['id'],
+                                "PartyName": f['Party']['Name'],
                                 
                             })    
                         
