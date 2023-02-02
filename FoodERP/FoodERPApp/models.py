@@ -1163,9 +1163,9 @@ class T_InterbranchChallan(models.Model):
 
 class TC_InterbranchChallanItems(models.Model):
     IBChallan = models.ForeignKey(T_InterbranchChallan, related_name='IBChallanItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='InterbranchChallanUnitID', on_delete=models.DO_NOTHING)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='InterbranchChallanUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
@@ -1221,7 +1221,7 @@ class TC_InterBranchInwardReferences(models.Model):
 
 class TC_InterBranchInwardItems(models.Model):
     IBInward = models.ForeignKey(T_InterBranchInward, related_name='InterBranchInwardItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, related_name='IBInwardItem', on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, related_name='IBInwardItem', on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='IBInwardUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
