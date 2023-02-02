@@ -130,6 +130,7 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
     OrderReferences= GRNReferanceSerializer(read_only=True,many=True)
+    POType = M_POTypeserializer(read_only=True)
     class Meta:
         model = T_Orders
         fields = '__all__'
