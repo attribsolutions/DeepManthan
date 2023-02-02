@@ -47,8 +47,8 @@ class ItemMRPSerializer(serializers.ModelSerializer):
          
 class ItemDivisionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MC_ItemDivisions
-        fields = ['Division']          
+        model = MC_PartyItems
+        fields = ['Party']          
         
 class ItemImagesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -207,7 +207,7 @@ class ItemSerializer(serializers.ModelSerializer):
                 ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
         
         for ItemDivision_data in validated_data['ItemDivisionDetails']:
-            ItemDivision = MC_ItemDivisions.objects.create(Item=instance, **ItemDivision_data)    
+            ItemDivision = MC_PartyItems.objects.create(Item=instance, **ItemDivision_data)    
         
         for ItemMRP_data in validated_data['ItemMRPDetails']:
             ItemGstMrp = M_MRPMaster.objects.create(Item=instance, **ItemMRP_data)
@@ -275,10 +275,10 @@ class ItemMarginSerializerSecond(serializers.ModelSerializer):
         return ret     
         
 class ItemDivisionsSerializerSecond(serializers.ModelSerializer):
-    Division = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
     class Meta:
-        model = MC_ItemDivisions
-        fields = ['id','Division']
+        model = MC_PartyItems
+        fields = ['id','Party']
         
 class ItemMRPSerializerSecond(serializers.ModelSerializer):
     Company = CompanySerializerSecond(read_only=True)
