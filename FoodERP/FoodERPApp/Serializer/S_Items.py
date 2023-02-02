@@ -122,7 +122,7 @@ class ItemSerializer(serializers.ModelSerializer):
                 ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
         
         for ItemDivision_data in ItemDivisions_data:
-            ItemDivision = MC_ItemDivisions.objects.create(Item=ItemID, **ItemDivision_data)    
+            ItemDivision = MC_PartyItems.objects.create(Item=ItemID, **ItemDivision_data)    
         
         for ItemMRP_data in ItemMRPs_data:
             ItemMrp = M_MRPMaster.objects.create(Item=ItemID, **ItemMRP_data)
