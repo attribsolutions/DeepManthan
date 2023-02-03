@@ -25,11 +25,8 @@ class PartySubPartyListFilterView(CreateAPIView):
                 else:
                     M_Items_Serializer = PartySubPartySerializerGETList(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
-    
-    
-    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 class PartySubPartyView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -42,8 +39,10 @@ class PartySubPartyView(CreateAPIView):
                 PartySubpartiesdata = JSONParser().parse(request)
                 PartySubparties_Serializer = PartySubPartySerializer(data=PartySubpartiesdata, many=True)
                 if PartySubparties_Serializer.is_valid():
+                    PartySubpartiesdata = MC_PartySubParty.objects.filter(Party=PartySubparties_Serializer.data[0]['Party'])
+                    PartySubpartiesdata.delete()
                     PartySubparties_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Subparty Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartySubparties_Serializer.errors, 'Data':[]})
@@ -73,7 +72,7 @@ class PartySubPartyViewSecond(CreateAPIView):
         except  MC_PartySubParty.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GetVendorSupplierCustomerListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)

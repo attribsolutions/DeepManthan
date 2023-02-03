@@ -20,7 +20,6 @@ class PartySubPartySerializer(serializers.ModelSerializer):
     class Meta :
         model= MC_PartySubParty
         fields = '__all__'
-          
 
 class PartySubPartySerializerGETList(serializers.Serializer):
     
