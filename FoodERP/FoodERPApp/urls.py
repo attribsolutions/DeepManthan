@@ -156,9 +156,9 @@ urlpatterns = [
             url(r'OrderEdit$',EditOrderView.as_view()),
 
 # Demands All APIs
-            url(r'Demands/([0-9]+)$', DemandViewSecond.as_view()),
-            url(r'Demands$', DemandView.as_view()),
-            url(r'DemandsFilter$', DemandListFilterView.as_view()),
+            url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),
+            url(r'InterBranchesOrder$', DemandView.as_view()),
+            url(r'InterBranchesOrderFilter$', DemandListFilterView.as_view()),
             url(r'InterBranches$', InterBranchDivisionView.as_view()),
             url(r'InterBranchesItems$', InterBranchItemsView.as_view()),
 
@@ -166,13 +166,12 @@ urlpatterns = [
 #InterBranch Challan  All APIs
             url(r'BranchInvoice/([0-9]+)$', InterBranchChallanViewSecond.as_view()),
             url(r'BranchInvoice$', InterBranchChallanView.as_view()),
-            url(r'GetDemandDetails$', DemandDetailsForIBChallan.as_view()),
+            url(r'InterBrancheOrderDetails$', DemandDetailsForIBChallan.as_view()),
             url(r'BranchInvoiceFilter$', InterBranchChallanListFilterView.as_view()), 
             
 #InterBranch Inward All APIs
             url(r'InterBranchInward/([0-9]+)$', InterBranchInwardViewSecond.as_view()),
             url(r'InterBranchInward$', InterBranchInwardView.as_view()),
-
             url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()),
             url(r'BranchInvoiceDetails/([0-9]+)$', BranchInvoiceDetailsView.as_view()),              
 
