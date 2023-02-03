@@ -636,12 +636,6 @@ class MC_ItemImages(models.Model):
     class Meta:
         db_table = "MC_ItemImages" 
 
-class MC_ItemDivisions(models.Model):
-    Item = models.ForeignKey(M_Items, related_name='ItemDivisionDetails', on_delete=models.CASCADE)
-    Division = models.ForeignKey(M_Parties, related_name='Division', on_delete=models.DO_NOTHING)
-    class Meta:
-        db_table = "MC_ItemDivisions"
-
 class M_GSTHSNCode(models.Model):
     EffectiveDate = models.DateField()
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
