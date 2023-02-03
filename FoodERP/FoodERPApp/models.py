@@ -730,8 +730,8 @@ class M_TermsAndConditions(models.Model):
         db_table = "M_TermsAndConditions"
         
 class MC_PartyItems(models.Model):
-    Party =models.ForeignKey(M_Parties, related_name='Party', on_delete=models.DO_NOTHING)
-    Item = models.ForeignKey(M_Items,related_name='PartyItem', on_delete=models.DO_NOTHING) 
+    Party =models.ForeignKey(M_Parties, related_name='Party', on_delete=models.PROTECT)
+    Item = models.ForeignKey(M_Items,related_name='PartyItem', on_delete=models.PROTECT) 
     class Meta:
         db_table = "MC_PartyItems"
 
