@@ -17,8 +17,8 @@ class MC_PartyItemSerializer(serializers.ModelSerializer):
         fields = '__all__'   
 
 class MC_PartyItemSerializerThird(serializers.ModelSerializer):
-    Item = ItemSerializerSecond()
-    Party = M_PartiesSerializerSecond()
+    Item = M_ItemsSerializer01(read_only=True)
+    Party = DivisionsSerializer(read_only=True)
     class Meta:
         model =  MC_PartyItems
         fields = '__all__' 
