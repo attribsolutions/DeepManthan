@@ -19,4 +19,11 @@ class PartySubpartySerializerSecond(serializers.ModelSerializer):
 class PartySubPartySerializer(serializers.ModelSerializer):
     class Meta :
         model= MC_PartySubParty
-        fields = '__all__'  
+        fields = '__all__'
+          
+
+class PartySubPartySerializerGETList(serializers.Serializer):
+    
+    Party_id = serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500)
+    Subparty = serializers.IntegerField() 

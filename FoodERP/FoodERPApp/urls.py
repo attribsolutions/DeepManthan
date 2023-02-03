@@ -255,6 +255,7 @@ urlpatterns = [
 # PartySubParty
             url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
             url(r'PartySubParty$',PartySubPartyView.as_view()),
+            url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
 
 # Driver 
             url(r'Driver/([0-9]+)$', M_DriverViewSecond.as_view()),
