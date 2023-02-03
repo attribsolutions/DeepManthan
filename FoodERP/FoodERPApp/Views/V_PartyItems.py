@@ -17,7 +17,7 @@ class PartyItemsViewSecond(CreateAPIView):
     def get(self, request,id=0):
             try:
                 with transaction.atomic():
-                    query = MC_PartyItems.objects.filter(Party_id = id)
+                    query = MC_PartyItems.objects.filter(Party=id)
                     # return JsonResponse({ 'query': str(query.query)})
                     if not query:
                         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
