@@ -46,8 +46,8 @@ class PartyItemsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Itemquery= MC_PartyItems.objects.raw('''SELECT m_items.id,m_items.Name,ifnull(mc_partyitems.Party_id,0) Party_id from m_items left JOIN mc_partyitems ON mc_partyitems.item_id=m_items.id AND mc_partyitems.Party_id=%s''',([id]))
-                # return JsonResponse({'query': str(Itemquery.query)})
+                Itemquery= MC_PartyItems.objects.raw('''SELECT m_items.id,m_items.Name,ifnull(mc_partyitems.Party_id,0) Party_id,ifnull(m_parties.Name,'') PartyName from m_items left JOIN mc_partyitems ON mc_partyitems.item_id=m_items.id AND mc_partyitems.Party_id=%s left JOIN m_parties ON m_parties.id=mc_partyitems.Party_id''',([id]))
+                
                 if not Itemquery:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
@@ -59,7 +59,8 @@ class PartyItemsView(CreateAPIView):
                         ItemList.append({
                             "Item": a['id'],
                             "ItemName": a['Name'],
-                            "Party": a['Party_id']
+                            "Party": a['Party_id'],
+                            "PartyName": a['PartyName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
