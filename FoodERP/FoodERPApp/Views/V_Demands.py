@@ -238,11 +238,11 @@ class DemandView(CreateAPIView):
                 Demanddata = JSONParser().parse(request)
                 Division = Demanddata['Division']
                 Customer = Demanddata['Customer']
-                DemandDate = Demanddata['IBOrderDate']
+                DemandDate = Demanddata['DemandDate']
 
                 '''Get Max Demand Number'''
                 a = GetMaxNumber.GetDemandNumber(Division, Customer, DemandDate)
-                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+                # return JsonResponse({'StatusCode': 200, 'Status': a })
                 for aa in Demanddata['DemandItem']:
                     BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0,1).GetBaseUnitQuantity()
                     aa['BaseUnitQuantity'] =  BaseUnitQuantity 
@@ -250,7 +250,7 @@ class DemandView(CreateAPIView):
                 Demanddata['DemandNo'] = a
                 '''Get Demand Prifix '''
                 b = GetPrifix.GetDemandPrifix(Division)
-                Demanddata['FullDemandNumber'] = b+""+str(a)
+                Demanddata['FullDemandNumber'] = str(b)+""+str(a)
                
                 Demand_serializer = T_DemandSerializer(data=Demanddata)
                 if Demand_serializer.is_valid():
