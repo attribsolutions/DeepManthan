@@ -158,7 +158,7 @@ class GetPrifix:
     def GetDemandPrifix(*args):
         Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Demandprefix')
         if not Prifix :
-            a=""
+            a=''
         else:
             a=Prifix[0]['Demandprefix']
         return a
