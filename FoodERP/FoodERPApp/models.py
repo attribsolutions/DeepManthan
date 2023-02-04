@@ -1114,9 +1114,9 @@ class T_Demands(models.Model):
 class TC_DemandItems(models.Model):
     Demand = models.ForeignKey(T_Demands, related_name='DemandItem', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, related_name='DItem', on_delete=models.PROTECT)
-    Quantity = models.DecimalField(max_digits=15, decimal_places=2)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.ForeignKey(M_MRPMaster, related_name='DemandItemMRP', on_delete=models.PROTECT,null=True,blank=True)
-    Rate = models.DecimalField(max_digits=10, decimal_places=2)
+    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='DemandUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='DemandItemGst', on_delete=models.PROTECT)
