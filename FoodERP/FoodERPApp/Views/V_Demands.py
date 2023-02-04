@@ -43,15 +43,12 @@ class InterBranchItemsView(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
 
     def post(self, request):
-
         try:
             with transaction.atomic():
-                # DivisionID = request.data['Division']
                 Party = request.data['Supplier']  # Demand Page Supplier DropDown
-               
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
-                DemandID = request.data['DemandID']
+                DemandID = request.data['IBOrderID']
 
                 Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
@@ -135,10 +132,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     DemandData = list()
                     DemandData.append({
                         "id": a['id'],
-                        "DemandDate": a['DemandDate'],
-                        "DemandNo": a['DemandNo'],
-                        "FullDemandNumber": a['FullDemandNumber'],
-                        "DemandAmount": a['DemandAmount'],
+                        "IBOrderDate": a['DemandDate'],
+                        "IBOrderNo": a['DemandNo'],
+                        "FullIBOrderNumber": a['FullDemandNumber'],
+                        "IBOrderAmount": a['DemandAmount'],
                         "Comment": a['Comment'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
@@ -149,7 +146,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         # "ShippingAddressID": a['ShippingAddress']['id'],
                         # "ShippingAddress": a['ShippingAddress']['Address'],
                         "MaterialIssue":a['MaterialIssue'],
-                        "DemandItems": DemandItemSerializer,
+                        "IBOrderItems": DemandItemSerializer,
                         
                     })
                     FinalResult = DemandData[0]
@@ -158,10 +155,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     NewDemand = list()
                     NewDemand.append({
                         "id": "",
-                        "DemandDate": "",
-                        "DemandNo":"",
-                        "FullDemandNumber":"",
-                        "DemandAmount": "",
+                        "IBOrderDate": "",
+                        "IBOrderNo":"",
+                        "FullIBOrderNumber":"",
+                        "IBOrderAmount": "",
                         "Comment": "",
                         "Customer": "",
                         "CustomerName": "",
@@ -172,7 +169,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "MaterialIssue":"",
-                        "DemandItems": DemandItemSerializer,
+                        "IBOrderItems": DemandItemSerializer,
                     })
 
                     FinalResult = NewDemand[0]
@@ -210,9 +207,9 @@ class DemandListFilterView(CreateAPIView):
                        
                         DemandListData.append({
                             "id": a['id'],
-                            "DemandDate": a['DemandDate'],
+                            "IBOrderDate": a['DemandDate'],
                             "Comment": a['Comment'],
-                            "FullDemandNumber": a['FullDemandNumber'],
+                            "FullIBOrderNumber": a['FullDemandNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "SupplierID": a['Supplier']['id'],
@@ -245,7 +242,7 @@ class DemandView(CreateAPIView):
 
                 '''Get Max Demand Number'''
                 a = GetMaxNumber.GetDemandNumber(Division, Customer, DemandDate)
-                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+                # return JsonResponse({'StatusCode': 200, 'Status': a })
                 for aa in Demanddata['DemandItem']:
                     BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0,1).GetBaseUnitQuantity()
                     aa['BaseUnitQuantity'] =  BaseUnitQuantity 
@@ -253,7 +250,7 @@ class DemandView(CreateAPIView):
                 Demanddata['DemandNo'] = a
                 '''Get Demand Prifix '''
                 b = GetPrifix.GetDemandPrifix(Division)
-                Demanddata['FullDemandNumber'] = b+""+str(a)
+                Demanddata['FullDemandNumber'] = str(b)+""+str(a)
                
                 Demand_serializer = T_DemandSerializer(data=Demanddata)
                 if Demand_serializer.is_valid():

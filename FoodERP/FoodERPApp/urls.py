@@ -297,8 +297,9 @@ urlpatterns = [
             url(r'UnitList$', M_UnitsView.as_view()),
 
 # PartyItemList
-            url(r'PartyItemList/([0-9]+)$',PartyItemsViewSecond.as_view()),
-            url(r'PartyItemList$',PartyItemsView.as_view()),
+            url(r'PartyItem/([0-9]+)$',PartyItemsView.as_view()),
+            url(r'PartyItem$',PartyItemsView.as_view()),
+            url(r'PartyItemList$',PartyItemsListView.as_view()),
     
 # Mrps
             url(r'Mrps$',M_MRPsView.as_view()),
