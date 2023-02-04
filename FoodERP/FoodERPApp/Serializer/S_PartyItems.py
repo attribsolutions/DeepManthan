@@ -33,9 +33,15 @@ class MC_PartyItemSerializerThird(serializers.ModelSerializer):
         if not ret.get("Party", None):
             ret["Party"] = {"id": None, "Name": None}  
         return ret
+
+class MC_PartyItemSerializerSingleGet(serializers.Serializer):
+    id = serializers.IntegerField()
+    Name=serializers.CharField(max_length=500)
+    Party_id = serializers.IntegerField()
+  
     
      
-class MC_PartyItemSerializerFourth(serializers.Serializer):
+class MC_PartyItemListSerializer(serializers.Serializer):
     Party_id = serializers.IntegerField()
     Name=serializers.CharField(max_length=500)
     Item_id = serializers.IntegerField()
