@@ -132,10 +132,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     DemandData = list()
                     DemandData.append({
                         "id": a['id'],
-                        "DemandDate": a['DemandDate'],
-                        "DemandNo": a['DemandNo'],
-                        "FullDemandNumber": a['FullDemandNumber'],
-                        "DemandAmount": a['DemandAmount'],
+                        "IBOrderDate": a['DemandDate'],
+                        "IBOrderNo": a['DemandNo'],
+                        "FullIBOrderNumber": a['FullDemandNumber'],
+                        "IBOrderAmount": a['DemandAmount'],
                         "Comment": a['Comment'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
@@ -146,7 +146,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         # "ShippingAddressID": a['ShippingAddress']['id'],
                         # "ShippingAddress": a['ShippingAddress']['Address'],
                         "MaterialIssue":a['MaterialIssue'],
-                        "DemandItems": DemandItemSerializer,
+                        "IBOrderItems": DemandItemSerializer,
                         
                     })
                     FinalResult = DemandData[0]
@@ -155,10 +155,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     NewDemand = list()
                     NewDemand.append({
                         "id": "",
-                        "DemandDate": "",
-                        "DemandNo":"",
-                        "FullDemandNumber":"",
-                        "DemandAmount": "",
+                        "IBOrderDate": "",
+                        "IBOrderNo":"",
+                        "FullIBOrderNumber":"",
+                        "IBOrderAmount": "",
                         "Comment": "",
                         "Customer": "",
                         "CustomerName": "",
@@ -169,7 +169,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "MaterialIssue":"",
-                        "DemandItems": DemandItemSerializer,
+                        "IBOrderItems": DemandItemSerializer,
                     })
 
                     FinalResult = NewDemand[0]
@@ -207,9 +207,9 @@ class DemandListFilterView(CreateAPIView):
                        
                         DemandListData.append({
                             "id": a['id'],
-                            "DemandDate": a['DemandDate'],
+                            "IBOrderDate": a['DemandDate'],
                             "Comment": a['Comment'],
-                            "FullDemandNumber": a['FullDemandNumber'],
+                            "FullIBOrderNumber": a['FullDemandNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "SupplierID": a['Supplier']['id'],
@@ -238,7 +238,7 @@ class DemandView(CreateAPIView):
                 Demanddata = JSONParser().parse(request)
                 Division = Demanddata['Division']
                 Customer = Demanddata['Customer']
-                DemandDate = Demanddata['DemandDate']
+                DemandDate = Demanddata['IBOrderDate']
 
                 '''Get Max Demand Number'''
                 a = GetMaxNumber.GetDemandNumber(Division, Customer, DemandDate)
