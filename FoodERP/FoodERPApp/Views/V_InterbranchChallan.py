@@ -183,7 +183,7 @@ class InterBranchChallanView(CreateAPIView):
                 a = GetMaxNumber.GetIBChallanNumber(Party,IBChallanDate)
                 IBChallandata['IBChallanNumber'] = a
                 b = GetPrifix.GetIBChallanPrifix(Party)
-                IBChallandata['FullIBChallanNumber'] = b+""+str(a)
+                IBChallandata['FullIBChallanNumber'] = str(b)+""+str(a)
                 #================================================================================================== 
                 IBChallanItems = IBChallandata['IBChallanItems']
                 
