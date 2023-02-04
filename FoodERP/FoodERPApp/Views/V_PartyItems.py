@@ -53,15 +53,17 @@ class PartyItemsView(CreateAPIView):
                 else:
                     Items_Serializer = MC_PartyItemSerializerSingleGet(
                         Itemquery, many=True).data
-                    # return JsonResponse({'query': Items_Serializer})
+                    M_Parties_data=M_Parties.objects.filter(id=id)
+                    M_Parties_serializer = DivisionsSerializer(M_Parties_data, many=True).data
+                    Party= M_Parties_serializer[0]['id']
+                    PartyName= M_Parties_serializer[0]['Name']
                     ItemList = list()
                     for a in Items_Serializer:
                         ItemList.append({
                             "Item": a['id'],
-                            "ItemName": a['Name'],
-                            "Party": a['Party_id'],
-                            "PartyName": a['PartyName']
+                            "ItemName": a['Name'], 
                         })
+                    ItemList.append({"Party":Party,"PartyName":PartyName})    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
