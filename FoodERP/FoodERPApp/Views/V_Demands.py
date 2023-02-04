@@ -43,15 +43,12 @@ class InterBranchItemsView(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
 
     def post(self, request):
-
         try:
             with transaction.atomic():
-                # DivisionID = request.data['Division']
                 Party = request.data['Supplier']  # Demand Page Supplier DropDown
-               
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
-                DemandID = request.data['DemandID']
+                DemandID = request.data['IBOrderID']
 
                 Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
