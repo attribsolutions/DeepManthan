@@ -120,8 +120,8 @@ class DemandDetailsForIBChallan(CreateAPIView):
                         "StockDetails":stockDatalist
                     })
                 Orderdata.append({
-                    "DemandIDs":Order_list,
-                    "DemandItemDetails":OrderItemDetails
+                    "IBOrderIDs":Order_list,
+                    "IBOrderItemDetails":OrderItemDetails
                    })         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
