@@ -39,7 +39,7 @@ class DemandDetailsForIBChallan(CreateAPIView):
                     OrderItemQuery=TC_DemandItems.objects.filter(Demand__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_DemandItemsSerializerSecond(OrderItemQuery,many=True).data
                 else:
-                    query = T_Demands.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
+                    query = T_Demands.objects.filter(DemandDate=FromDate,Supplier=Party,Customer=Customer)
                     Serializedata = OrderserializerforIBChallan(query,many=True).data
                     Order_list = list()
                     for x in Serializedata:
