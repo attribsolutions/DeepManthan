@@ -162,7 +162,6 @@ urlpatterns = [
             url(r'InterBranches$', InterBranchDivisionView.as_view()),
             url(r'InterBranchesItems$', InterBranchItemsView.as_view()),
 
-
 #InterBranch Challan  All APIs
             url(r'BranchInvoice/([0-9]+)$', InterBranchChallanViewSecond.as_view()),
             url(r'BranchInvoice$', InterBranchChallanView.as_view()),
@@ -175,14 +174,10 @@ urlpatterns = [
             url(r'InterBranchInwardFilter$', InterBranchInwardListFilterView.as_view()),
             url(r'BranchInvoiceDetails/([0-9]+)$', BranchInvoiceDetailsView.as_view()),              
 
-         
-
     
 # TermsAndCondition All APIs
             url(r'TermsAndCondtions/([0-9]+)$', TermsAndCondtionsViewSecond.as_view()),
             url(r'TermsAndCondtions$', TermsAndCondtionsView.as_view()),
-
-
 
 # General Master All APIs
             url(r'GeneralMaster/([0-9]+)$', GeneralMasterViewSecond.as_view()),
@@ -192,7 +187,6 @@ urlpatterns = [
             url(r'GeneralMasterSubType$', GeneralMasterSubTypeView.as_view()),
             url(r'GeneralMasterBrandName$', GeneralMasterBrandName.as_view()),
 
-    
 #Invoice All APIs
             url(r'Invoice/([0-9]+)$', InvoiceViewSecond.as_view()),
             url(r'Invoice$', InvoiceView.as_view()),
@@ -204,8 +198,7 @@ urlpatterns = [
             url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
             url(r'GRN$', T_GRNView.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
-            
-            
+                     
 # Bill Of Material All API's
             url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
             url(r'Billofmaterial$', M_BOMsView.as_view()),
@@ -226,7 +219,6 @@ urlpatterns = [
             
 #Production ALL API`s
 
-            
             url(r'MaterialIssueDetails$',MaterialIssueDetailsView.as_view()),
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),
@@ -266,6 +258,7 @@ urlpatterns = [
             url(r'Vehicle$', M_VehicleView.as_view()),    
     
 #Item All APIs======================================================================================
+
             url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
@@ -340,6 +333,5 @@ urlpatterns = [
             url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
-    
      
 ]
