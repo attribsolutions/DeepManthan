@@ -201,7 +201,6 @@ class InterBranchInwardView(CreateAPIView):
                     
                     })
 
-                # print(Inwarddata)
                 Inwarddata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'InterBranch Inward Save Successfully', 'Data': Inwarddata})   
                 Inward_serializer = T_InterBranchInwardSerializer(data=Inwarddata)
