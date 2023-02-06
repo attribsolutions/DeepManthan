@@ -34,7 +34,7 @@ class StockQtyserializerForIBChallan(serializers.ModelSerializer):
 
 class OrderserializerforIBChallan(serializers.ModelSerializer):
     class Meta:
-        model = T_Orders
+        model = T_Demands
         fields = '__all__'
 
 
