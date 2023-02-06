@@ -5,6 +5,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
+from ..Serializer.S_Demands import *
+
 from ..Serializer.S_MaterialIssue import obatchwiseStockSerializerfordelete
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_InterbranchChallan import *
@@ -32,21 +34,21 @@ class DemandDetailsForIBChallan(CreateAPIView):
                 Orderdata = list()
                
                 if POOrderIDs != '':
-                    OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
+                    OrderQuery=T_Demands.objects.raw("SELECT T_Demands.Supplier_id id,m_parties.Name SupplierName,sum(T_Demands.DemandAmount) OrderAmount ,T_Demands.Customer_id CustomerID FROM T_Demands join m_parties on m_parties.id=T_Demands.Supplier_id where T_Demands.id IN %s group by T_Demands.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                    OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                    OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
+                    OrderItemQuery=TC_DemandItems.objects.filter(Demand__in=Order_list,IsDeleted=0).order_by('Item')
+                    OrderItemSerializedata=TC_DemandItemsSerializerSecond(OrderItemQuery,many=True).data
                 else:
-                    query = T_Orders.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
+                    query = T_Demands.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
                     Serializedata = OrderserializerforIBChallan(query,many=True).data
                     Order_list = list()
                     for x in Serializedata:
                         Order_list.append(x['id'])
                         
-                    OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
+                    OrderQuery=T_Demands.objects.raw("SELECT T_Demands.Supplier_id id,m_parties.Name SupplierName,sum(T_Demands.DemandAmount) OrderAmount ,T_Demands.Customer_id CustomerID FROM T_Demands join m_parties on m_parties.id=T_Demands.Supplier_id where T_Demands.id IN %s group by T_Demands.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
-                    OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                    OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
+                    OrderItemQuery=TC_DemandItems.objects.filter(Demand__in=Order_list,IsDeleted=0).order_by('Item')
+                    OrderItemSerializedata=TC_DemandItemsSerializerSecond(OrderItemQuery,many=True).data
                        
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
                 for b in OrderItemSerializedata:
@@ -118,8 +120,8 @@ class DemandDetailsForIBChallan(CreateAPIView):
                         "StockDetails":stockDatalist
                     })
                 Orderdata.append({
-                    "OrderIDs":Order_list,
-                    "OrderItemDetails":OrderItemDetails
+                    "DemandIDs":Order_list,
+                    "DemandItemDetails":OrderItemDetails
                    })         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
