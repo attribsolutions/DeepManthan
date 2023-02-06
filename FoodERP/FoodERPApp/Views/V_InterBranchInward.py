@@ -23,12 +23,59 @@ class BranchInvoiceDetailsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-
-                Challansdata = T_InterbranchChallan.objects.get(id=id)
-                Challans_Serializer = IBChallanSerializer(Challansdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Challans_Serializer.data})
-        except T_Demands.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challans Not available', 'Data': []})
+                BranchInvoiceQuery = T_InterbranchChallan.objects.filter(id=id)
+                if BranchInvoiceQuery.exists():
+                    BranchInvoiceSerializedata = IBChallanSerializerThird(
+                        BranchInvoiceQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
+                    BranchInvoiceData = list()
+                    for a in BranchInvoiceSerializedata:
+                        BranchInvoiceItemDetails = list()
+                        for b in a['IBChallanItems']:
+                            BranchInvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRP": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                            })
+                            
+                        BranchInvoiceData.append({
+                            "id": a['id'],
+                            "IBChallanDate": a['IBChallanDate'],
+                            "IBChallanNumber": a['IBChallanNumber'],
+                            "FullIBChallanNumber": a['FullIBChallanNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "IBChallanItems": BranchInvoiceItemDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+        
 
                 
 
