@@ -221,6 +221,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddressID": a['ShippingAddress']['id'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
+                            "ShippingFssai": a['ShippingAddress']['FSSAINo'],
                             "Inward": inward,
                             "OrderItem": OrderItemDetails,
                             "OrderTermsAndCondition": OrderTermsAndCondition
