@@ -206,6 +206,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
                             "DeliveryDate": a['DeliveryDate'],
+                            "OrderNo": a['OrderNo'],
                             "FullOrderNumber": a['FullOrderNumber'],
                             "POFromDate": a['POFromDate'],
                             "POToDate": a['POToDate'],
