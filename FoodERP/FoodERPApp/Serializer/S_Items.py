@@ -115,7 +115,8 @@ class ItemSerializer(serializers.ModelSerializer):
             ItemGroups = MC_ItemGroupDetails.objects.create(Item=ItemID, **ItemGroup_data)    
 
         for ItemUnit_data in ItemUnits_data:
-            ItemUnits = MC_ItemUnits.objects.create(Item=ItemID, **ItemUnit_data)
+        
+            ItemUnits = MC_ItemUnits.objects.create(Item=ItemID,**ItemUnit_data)
             
         if ItemImages_data != '':
             for ItemImage_data in ItemImages_data:

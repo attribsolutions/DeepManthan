@@ -206,6 +206,8 @@ class T_OrdersViewSecond(CreateAPIView):
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
                             "DeliveryDate": a['DeliveryDate'],
+                            "OrderNo": a['OrderNo'],
+                            "FullOrderNumber": a['FullOrderNumber'],
                             "POFromDate": a['POFromDate'],
                             "POToDate": a['POToDate'],
                             "POType": a['POType']['id'],
@@ -220,6 +222,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddressID": a['ShippingAddress']['id'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
+                            "ShippingFssai": a['ShippingAddress']['FSSAINo'],
                             "Inward": inward,
                             "OrderItem": OrderItemDetails,
                             "OrderTermsAndCondition": OrderTermsAndCondition
