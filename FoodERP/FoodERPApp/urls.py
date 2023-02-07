@@ -155,18 +155,18 @@ urlpatterns = [
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
 
-# Demands All APIs
-            url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),
-            url(r'InterBranchesOrder$', DemandView.as_view()),
-            url(r'InterBranchesOrderFilter$', DemandListFilterView.as_view()),
-            url(r'InterBranches$', InterBranchDivisionView.as_view()),
-            url(r'InterBranchesItems$', InterBranchItemsView.as_view()),
+# InterBranch Order All APIs
+            url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
+            url(r'InterBranchesOrder$', DemandView.as_view()),                          #POST Only
+            url(r'InterBranchesOrderFilter$', DemandListFilterView.as_view()),          #POST Filter
+            url(r'InterBranches$', InterBranchDivisionView.as_view()),                  #Division Dropdown
+            url(r'InterBranchesItems$', InterBranchItemsView.as_view()),                #Go Button
 
-#InterBranch Challan  All APIs
-            url(r'BranchInvoice/([0-9]+)$', InterBranchChallanViewSecond.as_view()),
-            url(r'BranchInvoice$', InterBranchChallanView.as_view()),
-            url(r'InterBrancheOrderDetails$', DemandDetailsForIBChallan.as_view()),
-            url(r'BranchInvoiceFilter$', InterBranchChallanListFilterView.as_view()), 
+#InterBranch Invoice  All APIs
+            url(r'BranchInvoice/([0-9]+)$', InterBranchChallanViewSecond.as_view()),    #DELETE
+            url(r'BranchInvoice$', InterBranchChallanView.as_view()),                   #POST Save
+            url(r'InterBrancheOrderDetails$', DemandDetailsForIBChallan.as_view()),     #POST GO Button
+            url(r'BranchInvoiceFilter$', InterBranchChallanListFilterView.as_view()),   #POST Filter
             
 #InterBranch Inward All APIs
             url(r'InterBranchInward/([0-9]+)$', InterBranchInwardViewSecond.as_view()),
