@@ -625,7 +625,7 @@ class MC_ItemUnits(models.Model):
     IsBase = models.BooleanField(default=False)
     PODefaultUnit = models.BooleanField(default=False)
     SODefaultUnit = models.BooleanField(default=False)
-    
+    BaseUnitConversion = models.CharField(max_length=500)
     class Meta:
         db_table = "MC_ItemUnits"                
 
