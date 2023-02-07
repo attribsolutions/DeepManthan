@@ -204,7 +204,6 @@ class DemandListFilterView(CreateAPIView):
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)
                     else:
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)        
-                # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
                     Demand_serializer = T_DemandSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Demand_serializer})
