@@ -100,10 +100,13 @@ class InterBranchInwardListFilterView(CreateAPIView):
                     query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer)
                 else:
                     query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
-                
-                if not query:
+                Inward_serializer = T_InterBranchInwardSerializerForGET(
+                        query, many=True).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': Inward_serializer})
+                if query.count() == 0:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
+                  
                     Inward_serializer = T_InterBranchInwardSerializerForGET(
                         query, many=True).data
                     InwardListData = list()
