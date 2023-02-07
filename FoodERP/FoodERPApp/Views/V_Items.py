@@ -338,6 +338,17 @@ class M_ItemsViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Itemsdata = JSONParser().parse(request)
                 M_ItemsdataByID = M_Items.objects.get(id=id)
+                query = M_Units.objects.filter(id=M_Itemsdata['BaseUnitID']).values('Name')
+                BaseUnitName = query[0]['Name']
+                for a in M_Itemsdata['ItemUnitDetails']:
+                    query2 = M_Units.objects.filter(id=a['UnitID']).values('Name')
+                    ChildUnitName = query2[0]['Name']
+                    if a['IsBase'] == 0:
+                        BaseUnitConversion=ChildUnitName+" ("+str(a['BaseUnitQuantity'])+" "+BaseUnitName+")"
+                    else:
+                        BaseUnitConversion=ChildUnitName    
+                    a.update({"BaseUnitConversion":BaseUnitConversion})
+                
                 M_Items_Serializer = ItemSerializer(
                     M_ItemsdataByID, data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
