@@ -332,6 +332,7 @@ class M_ItemsViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
     @transaction.atomic()
     def put(self, request, id=0):
         try:
@@ -348,7 +349,6 @@ class M_ItemsViewSecond(CreateAPIView):
                     else:
                         BaseUnitConversion=ChildUnitName    
                     a.update({"BaseUnitConversion":BaseUnitConversion})
-                
                 M_Items_Serializer = ItemSerializer(
                     M_ItemsdataByID, data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
