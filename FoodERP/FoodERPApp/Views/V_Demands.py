@@ -194,13 +194,13 @@ class DemandListFilterView(CreateAPIView):
                 Customer = Demanddata['Customer'] # Customer Compansary
                 Supplier = Demanddata['Supplier']
                 InOut = Demanddata['InOut']
-                if (InOut == 1 ):
+                if (InOut == 1 ): # Supply Order against Branch Demand
                     if(Supplier == ''):
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)
                     else:
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
                 else:
-                    if(Supplier == ''):
+                    if(Supplier == ''): # Self Demand Order
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
                     else:
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
