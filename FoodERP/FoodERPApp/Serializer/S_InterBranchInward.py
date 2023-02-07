@@ -118,9 +118,6 @@ class TC_InterBranchInwardItemsSerializerSecond(serializers.ModelSerializer):
 class T_InterBranchInwardSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
     Supplier = Partiesserializer(read_only=True)
-    # InterBranchInwardReferences = TC_IBInwardReferencesSerializer(many=True,read_only=True)
-    # InterBranchInwardItems = TC_InterBranchInwardItemsSerializerSecond(many=True) ,'InterBranchInwardItems','InterBranchInwardReferences'
-
     class Meta:
         model = T_InterBranchInward
         fields = ['id', 'IBInwardDate', 'IBInwardNumber', 'FullIBInwardNumber', 'GrandTotal', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'Customer', 'Supplier']
