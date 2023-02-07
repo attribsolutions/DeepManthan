@@ -125,7 +125,18 @@ class M_ItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 Itemsdata = JSONParser().parse(request)
+                query = M_Units.objects.filter(id=Itemsdata['BaseUnitID']).values('Name')
+                BaseUnitName = query[0]['Name']
+                for a in Itemsdata['ItemUnitDetails']:
+                    query2 = M_Units.objects.filter(id=a['UnitID']).values('Name')
+                    ChildUnitName = query2[0]['Name']
+                    if a['IsBase'] == 0:
+                        BaseUnitConversion=ChildUnitName+" ("+str(a['BaseUnitQuantity'])+" "+BaseUnitName+")"
+                    else:
+                        BaseUnitConversion=ChildUnitName    
+                    a.update({"BaseUnitConversion":BaseUnitConversion})
                 Items_Serializer = ItemSerializer(data=Itemsdata)
+                
                 if Items_Serializer.is_valid():
                     Items_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
