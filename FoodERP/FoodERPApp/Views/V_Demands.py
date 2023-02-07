@@ -193,11 +193,17 @@ class DemandListFilterView(CreateAPIView):
                 ToDate = Demanddata['ToDate']
                 Customer = Demanddata['Customer'] # Customer Compansary
                 Supplier = Demanddata['Supplier']
-                
-                if(Supplier == ''):
-                    query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
+                InOut = Demanddata['InOut']
+                if (InOut == 1 ):
+                    if(Supplier == ''):
+                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
+                    else:
+                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
                 else:
-                    query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
+                    if(Supplier == ''):
+                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)
+                    else:
+                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)        
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
                     Demand_serializer = T_DemandSerializerSecond(query, many=True).data
