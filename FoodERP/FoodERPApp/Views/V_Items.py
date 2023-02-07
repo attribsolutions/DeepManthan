@@ -194,7 +194,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                    
                                     "id": d['id'],
                                     "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'] + baseunitconcat ,
+                                    "UnitName": d['BaseUnitConversion'],
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
                                     "PODefaultUnit": d['PODefaultUnit'],
