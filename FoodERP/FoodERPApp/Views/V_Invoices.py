@@ -80,7 +80,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                            
                             UnitDetails.append({
                             "Unit": c['id'],
-                            "UnitName": c['UnitID']['BaseUnitConversion'],
+                            "UnitName": c['BaseUnitConversion'],
                             "ConversionUnit": c['BaseUnitQuantity'],
                             "Unitlabel": c['UnitID']['Name']
                         })
