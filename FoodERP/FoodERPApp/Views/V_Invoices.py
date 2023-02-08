@@ -77,15 +77,15 @@ class OrderDetailsForInvoice(CreateAPIView):
                         Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                         UnitDetails = list()
                         for c in Unitdata:
-                            baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,c['id'],c['BaseUnitQuantity']).ShowDetails()
+                           
                             UnitDetails.append({
                             "Unit": c['id'],
-                            "UnitName": c['UnitID']['Name'] + baseunitconcat,
+                            "UnitName": c['UnitID']['BaseUnitConversion'],
                             "ConversionUnit": c['BaseUnitQuantity'],
                             "Unitlabel": c['UnitID']['Name']
                         })
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(b['Item']['id'],b['Unit']['id'],b['Unit']['BaseUnitQuantity']).ShowDetails()
+                        
                     OrderItemDetails.append({
                          
                         "id": b['id'],
@@ -96,7 +96,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "MRPValue": b['MRP']['MRP'],
                         "Rate": b['Rate'],
                         "Unit": b['Unit']['id'],
-                        "UnitName": b['Unit']['UnitID']['Name']+ baseunitconcat,
+                        "UnitName": b['Unit']['BaseUnitConversion'],
                         "ConversionUnit": b['Unit']['BaseUnitQuantity'],
                         "BaseUnitQuantity": b['BaseUnitQuantity'],
                         "GST": b['GST']['id'],
@@ -230,7 +230,7 @@ class InvoiceViewSecond(CreateAPIView):
                                 "MRP": b['MRP']['MRP'],
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "GSTPercentage": b['GSTPercentage'],
                                 "MarginValue": b['Margin']['Margin'],

@@ -19,7 +19,7 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
     UnitID = UnitSerializerThird(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID','BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit'] 
+        fields = ['id','UnitID','BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion'] 
 class LiveBatchSerializer(serializers.ModelSerializer):
     class Meta:
         model =O_LiveBatches
