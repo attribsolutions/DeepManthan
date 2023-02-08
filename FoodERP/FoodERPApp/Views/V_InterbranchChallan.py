@@ -218,36 +218,39 @@ class InterBranchChallanViewSecond(CreateAPIView):
             with transaction.atomic():
                 IBChallandata=T_InterbranchChallan.objects.all().filter(id=id)
                 IBChallandataserializer=IBChallanSerializerForDelete(IBChallandata,many=True).data
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':IBChallandataserializer})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':IBChallandataserializer})
 
                 O_BatchWiseLiveStockList=dict()
                 
                 for a in IBChallandataserializer[0]['IBChallanItems']:
-                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    BaseUnitQuantity11=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
                     
-                    O_BatchWiseLiveStockList.update({
-                    "Item": a['Item'],
-                    "Quantity": a['Quantity'],
-                    "Unit": a['Unit'],
-                    "BaseUnitQuantity": BaseUnitQuantity,
-                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
-                    "Party": IBChallandataserializer[0]['Party'],
-                    "LiveBatche" : a['LiveBatch'],
-                    "CreatedBy":1,
-                    })
+                    # O_BatchWiseLiveStockList.update({
+                    # "Item": a['Item'],
+                    # "Quantity": a['Quantity'],
+                    # "Unit": a['Unit'],
+                    # "BaseUnitQuantity": BaseUnitQuantity,
+                    # "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    # "Party": IBChallandataserializer[0]['Party'],
+                    # "LiveBatche" : a['LiveBatch'],
+                    # "CreatedBy":1,
+                    # })
 
+                selectQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).values('BaseUnitQuantity')
+
+                UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = int(selectQuery[0]['BaseUnitQuantity'] )+int(BaseUnitQuantity11))
+                    
+                # BatchItemdataserializer=obatchwiseStockSerializerfordelete(data=O_BatchWiseLiveStockList)
                 
-                BatchItemdataserializer=obatchwiseStockSerializerfordelete(data=O_BatchWiseLiveStockList)
-                
-                if BatchItemdataserializer.is_valid():
-                   BatchItemdataserializer.save()
+                # if BatchItemdataserializer.is_valid():
+                #    BatchItemdataserializer.save()
                   
-                   IBChallandata = T_InterbranchChallan.objects.get(id=id)
-                   IBChallandata.delete()
-                   return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': BatchItemdataserializer.errors, 'Data': []})
+                IBChallandata = T_InterbranchChallan.objects.get(id=id)
+                IBChallandata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':[]})
+                # else:
+                #     transaction.set_rollback(True)
+                #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': BatchItemdataserializer.errors, 'Data': []})
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
