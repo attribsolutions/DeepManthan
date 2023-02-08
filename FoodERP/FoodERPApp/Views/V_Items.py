@@ -342,8 +342,10 @@ class M_ItemsViewSecond(CreateAPIView):
                 for a in M_Itemsdata['ItemUnitDetails']:
                     query2 = M_Units.objects.filter(id=a['UnitID']).values('Name')
                     ChildUnitName = query2[0]['Name']
+                    B=Decimal((a['BaseUnitQuantity'])).normalize()
+                
                     if a['IsBase'] == 0:
-                        BaseUnitConversion=ChildUnitName+" ("+str(a['BaseUnitQuantity'])+" "+BaseUnitName+")"
+                        BaseUnitConversion=ChildUnitName+" ("+str(B)+" "+BaseUnitName+")"
                     else:
                         BaseUnitConversion=ChildUnitName    
                     a.update({"BaseUnitConversion":BaseUnitConversion})
