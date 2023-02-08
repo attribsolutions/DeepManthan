@@ -133,15 +133,12 @@ class WorkOrderView(CreateAPIView):
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
                 Party = WorkOrderData['Party']
-
                 WorkOrderDate = WorkOrderData['WorkOrderDate']
                 a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-
                 WorkOrderData['WorkOrderNumber'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetWorkOrderPrifix(Party)
-
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
@@ -176,7 +173,6 @@ class WorkOrderViewSecond(RetrieveAPIView):
                         ActualBomqty = 0
                         for a in WorkOrder_serializer:
                             Item = a['Item']['id']
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
                             obatchwisestockquery = O_BatchWiseLiveStock.objects.raw(
                                 ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
                             if not obatchwisestockquery:
@@ -230,9 +226,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
                 WorkOrderDataByID = T_WorkOrder.objects.get(id=id)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
                 WorkOrder_Serializer = WorkOrderSerializer(
                     WorkOrderDataByID, data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
