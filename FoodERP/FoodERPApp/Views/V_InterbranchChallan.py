@@ -98,7 +98,7 @@ class DemandDetailsForIBChallan(CreateAPIView):
                         "MRPValue": b['MRP']['MRP'],
                         "Rate": b['Rate'],
                         "Unit": b['Unit']['id'],
-                        "UnitName": b['BaseUnitConversion'],
+                        "UnitName": b['Unit']['BaseUnitConversion'],
                         "ConversionUnit": b['Unit']['BaseUnitQuantity'],
                         "BaseUnitQuantity": b['BaseUnitQuantity'],
                         "GST": b['GST']['id'],
