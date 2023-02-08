@@ -160,7 +160,8 @@ class InvoiceListFilterView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount']  
+                            "RoundOffAmount": a['RoundOffAmount'], 
+                            "CreatedOn": a['CreatedOn'] 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})

@@ -175,7 +175,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "ItemName": a['Item']['Name'],
                         "Quantity": a['Quantity'],
                         "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID'],
+                        "UnitName": a['Unit']['BaseUnitConversion'],
                         "BaseUnitQuantity": a['BaseUnitQuantity'],
                         "MRP": a['MRP'],
                         "ReferenceRate": a['ReferenceRate'],
@@ -280,10 +280,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                             UnitDetails = list()
                             for c in Unitdata:
-                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,c['id'],c['BaseUnitQuantity']).ShowDetails()
                                 UnitDetails.append({
                                 "Unit": c['id'],
-                                "UnitName": c['UnitID']['Name'] + baseunitconcat,
+                                "UnitName": c['BaseUnitConversion'],
                             })
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                         OrderItemDetails.append({
@@ -295,7 +294,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "MRPValue": b['MRP']['MRP'],
                             "Rate": b['Rate'],
                             "Unit": b['Unit']['id'],
-                            "UnitName": b['Unit']['UnitID']['Name'],
+                            "UnitName": b['Unit']['BaseUnitConversion'],
                             "BaseUnitQuantity": b['BaseUnitQuantity'],
                             "GST": b['GST']['id'],
                             "HSNCode": b['GST']['HSNCode'],
