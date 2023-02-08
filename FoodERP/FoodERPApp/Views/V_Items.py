@@ -136,6 +136,7 @@ class M_ItemsView(CreateAPIView):
                     else:
                         BaseUnitConversion=ChildUnitName    
                     a.update({"BaseUnitConversion":BaseUnitConversion})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Itemsdata })    
                 Items_Serializer = ItemSerializer(data=Itemsdata)
                 
                 if Items_Serializer.is_valid():
