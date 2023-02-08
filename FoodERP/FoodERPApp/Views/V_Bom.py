@@ -136,7 +136,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 "Item":b['Item']['id'],
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity":b['Quantity'],
                                 "UnitDetails":UnitDetails
                             })
@@ -152,7 +152,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             "ItemName":a['Item']['Name'],
                             "EstimatedOutputQty": a['EstimatedOutputQty'],  
                             "Unit": a['Unit']['id'],
-                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "UnitName": a['Unit']['BaseUnitConversion'],
                             "ParentUnitDetails":ParentUnitDetails,
                             "BOMItems":MaterialDetails
                         })
