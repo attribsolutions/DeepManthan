@@ -68,7 +68,10 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
                                 "LiveBatche" : d['LiveBatche']['id'],
-                            
+                                "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
+                                "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
+                                "MRP" : d['LiveBatche']['MRP']['MRP'],
+                                "GST" : d['LiveBatche']['GST']['GSTPercentage'],
                                 "BaseUnitQuantity":d['BaseUnitQuantity'] 
                                   
                                 })
