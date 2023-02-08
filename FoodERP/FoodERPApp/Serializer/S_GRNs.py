@@ -139,7 +139,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
     UnitID= serializers.SlugRelatedField(read_only=True,slug_field='Name')
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID']          
+        fields = ['id','UnitID','BaseUnitConversion']          
 
 class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
     
