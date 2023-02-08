@@ -53,13 +53,18 @@ class OrderDetailsForInvoice(CreateAPIView):
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
-                    print(str(obatchwisestockquery.query))
+                  
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
                     else:
+                        
                         StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
+                        
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':StockQtySerialize_data[0]['LiveBatche']})
+    
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
+                            
                             stockDatalist.append({
                                 "id": d['id'],
                                 "Item":d['Item']['id'],
