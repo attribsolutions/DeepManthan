@@ -337,7 +337,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                      
                         UnitDetails.append({
                             "UnitID": d['id'],
-                            "UnitName": d['UnitID']['BaseUnitConversion'] ,
+                            "UnitName": d['BaseUnitConversion'] ,
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],
