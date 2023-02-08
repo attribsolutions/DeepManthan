@@ -21,6 +21,8 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
         model = MC_ItemUnits
         fields = ['id','UnitID','BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion'] 
 class LiveBatchSerializer(serializers.ModelSerializer):
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
     class Meta:
         model =O_LiveBatches
         fields='__all__'
