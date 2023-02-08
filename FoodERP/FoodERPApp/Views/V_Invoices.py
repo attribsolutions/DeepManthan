@@ -73,7 +73,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "MRP" : d['LiveBatche']['MRP']['MRP'],
                                 "GST" : d['LiveBatche']['GST']['GSTPercentage'],
                                 "UnitName":d['Item']['BaseUnitID']['Name'],
-                                "BaseUnitQuantity":d['BaseUnitQuantity']   
+                                "BaseUnitQuantity":d['BaseUnitQuantity'] 
+                                  
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
                     # print(query.query)
