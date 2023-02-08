@@ -59,28 +59,22 @@ class BranchInvoiceDetailsView(CreateAPIView):
                             
                         BranchInvoiceData.append({
                             "id": a['id'],
-                            "IBChallanDate": a['IBChallanDate'],
-                            "IBChallanNumber": a['IBChallanNumber'],
-                            "FullIBChallanNumber": a['FullIBChallanNumber'],
+                            "InvoiceDate": a['IBChallanDate'],
+                            "InvoiceNumber": a['IBChallanNumber'],
+                            "FullInvoiceNumber": a['FullIBChallanNumber'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
-                            "IBChallanItems": BranchInvoiceItemDetails,
+                            "InvoiceItems": BranchInvoiceItemDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
-        
-
-                
-
-
-
 
 class InterBranchInwardListFilterView(CreateAPIView):
     
