@@ -7,7 +7,7 @@ from ..Serializer.S_Items import *
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name']
+        fields = ['id', 'Name', 'Email', 'MobileNo', 'AlternateContactNo', 'Taluka', 'City', 'GSTIN', 'PAN', 'IsDivision', 'MkUpMkDn', 'isActive']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
