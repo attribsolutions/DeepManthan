@@ -820,7 +820,7 @@ class O_LiveBatches(models.Model):
     BatchCode = models.CharField(max_length=500)
     SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
-    MRP = models.DecimalField(max_digits=15, decimal_places=2,null=True)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ObatchwiseItemMrp', on_delete=models.PROTECT,null=True,blank=True)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
     Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True)
     ItemExpiryDate=models.DateField()
