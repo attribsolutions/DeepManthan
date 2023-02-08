@@ -35,12 +35,7 @@ class BomDetailsView(CreateAPIView):
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
-                        # stockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [ItemID])
-                        # if not stockquery:
-                        #     Stock =0.0
-                        # else:
-                        #     Serialize_data = StockQtyserializer(stockquery, many=True).data
-                        #     Stock = Serialize_data[0]['actualStock']
+                        
                         Stock = float(GetO_BatchWiseLiveStock(
                             a['Item']['id'], Party))
                         StockintoSelectedUnit = UnitwiseQuantityConversion(
@@ -49,13 +44,6 @@ class BomDetailsView(CreateAPIView):
                         total = 0
                         for b in a['BOMItems']:
                             Item = b['Item']['id']
-                            # # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
-                            # obatchwisestockquery=O_BatchWiseLiveStock.objects.raw(''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
-                            # if not obatchwisestockquery:
-                            #     StockQty =0.0
-                            # else:
-                            #     StockQtySerialize_data = StockQtyserializer(obatchwisestockquery, many=True).data
-                            #     StockQty = StockQtySerialize_data[0]['actualStock']
                             Stock = float(GetO_BatchWiseLiveStock(
                                 b['Item']['id'], Party))
 
@@ -70,7 +58,7 @@ class BomDetailsView(CreateAPIView):
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
                                 "StockQuantity": StockQty,
                                 "BomQuantity": b['Quantity'],
                                 "Quantity": round(ActualQty,3)
@@ -83,7 +71,7 @@ class BomDetailsView(CreateAPIView):
                             "Stock": StockintoSelectedUnit,
                             "EstimatedOutputQty": round(GetQuantity, 3),
                             "Unit": a['Unit']['id'],
-                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "UnitName": a['Unit']['BaseUnitConversion'],
                             "BOMItems": MaterialDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BillofmaterialData[0]})
@@ -110,8 +98,7 @@ class WorkOrderList(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
                     WorkOrderListData = list()
                     for a in WorkOrder_serializerdata:
-                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
-                            a['Item']['id'], a['Unit']['id'], a['Unit']['BaseUnitQuantity']).ShowDetails()
+                        
                         WorkOrderListData.append({
                             "id": a['id'],
                             "WorkOrderDate": a['WorkOrderDate'],
@@ -120,7 +107,7 @@ class WorkOrderList(CreateAPIView):
                             "Item": a['Item']['id'],
                             "ItemName": a['Item']['Name'],
                             "Unit": a['Unit']['id'],
-                            "UnitName": a['Unit']['UnitID']['Name'] + baseunitconcat,
+                            "UnitName": a['Unit']['BaseUnitConversion'],
                             "Bom": a['Bom'],
                             "NumberOfLot": a['NumberOfLot'],
                             "Quantity": a["Quantity"],
@@ -146,15 +133,12 @@ class WorkOrderView(CreateAPIView):
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
                 Party = WorkOrderData['Party']
-
                 WorkOrderDate = WorkOrderData['WorkOrderDate']
                 a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-
                 WorkOrderData['WorkOrderNumber'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetWorkOrderPrifix(Party)
-
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
@@ -189,7 +173,6 @@ class WorkOrderViewSecond(RetrieveAPIView):
                         ActualBomqty = 0
                         for a in WorkOrder_serializer:
                             Item = a['Item']['id']
-                            # obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(Item_id=Item).values('Item').annotate(actualStock=Sum('BaseUnitQuantity')).values('actualStock')
                             obatchwisestockquery = O_BatchWiseLiveStock.objects.raw(
                                 ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
                             if not obatchwisestockquery:
@@ -208,7 +191,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "Unit": b['Unit']['id'],
-                                    "UnitName": b['Unit']['UnitID']['Name'],
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BomQuantity": b['BomQuantity'],
                                     "Quantity": b['Quantity'],
                                 })
@@ -221,7 +204,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
                                 "Item": a['Item']['id'],
                                 "ItemName": a['Item']['Name'],
                                 "Unit": a['Unit']['id'],
-                                "UnitName": a['Unit']['UnitID']['Name'],
+                                "UnitName": a['Unit']['BaseUnitConversion'],
                                 "Bom": a['Bom'],
                                 "Stock": StockQty,
                                 "ActualBomqty": ActualBomqty,
@@ -243,9 +226,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
                 WorkOrderDataByID = T_WorkOrder.objects.get(id=id)
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
                 WorkOrder_Serializer = WorkOrderSerializer(
                     WorkOrderDataByID, data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():

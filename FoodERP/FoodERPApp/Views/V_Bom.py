@@ -44,15 +44,13 @@ class BOMListFilterView(CreateAPIView):
                         
                         Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
                         StockintoSelectedUnit=UnitwiseQuantityConversion(Item,Stock,0,0,a['Unit']['id'],0,1).ConvertintoSelectedUnit()
-                        
-                        baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(Item,a['Unit']['id'],a['Unit']['BaseUnitQuantity']).ShowDetails()   
                         BomListData.append({
                         "id": a['id'],
                         "BomDate": a['BomDate'],
                         "Item":a['Item']['id'],
                         "ItemName": a['Item']['Name'],
                         "Unit": a['Unit']['id'],
-                        "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
+                        "UnitName": a['Unit']['BaseUnitConversion'],
                         "StockQty":StockintoSelectedUnit,
                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
                         "Comment": a['Comment'],
@@ -113,11 +111,10 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             ParentUnitDetails = list()
                            
                             for d in ParentUnitdata:
-                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ParentItem,d['id'],d['BaseUnitQuantity']).ShowDetails()
                                 ParentUnitDetails.append({
                                    
                                 "Unit": d['id'],
-                                "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                                "UnitName": d['BaseUnitConversion'],
                             })
                         
                         for b in a['BOMItems']:
@@ -129,10 +126,9 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 UnitDetails = list()
                                
                                 for c in Unitdata:
-                                    baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ParentItem,d['id'],d['BaseUnitQuantity']).ShowDetails()
                                     UnitDetails.append({
                                     "Unit": c['id'],
-                                    "UnitName": c['UnitID']['Name']+ str(baseunitconcat),
+                                    "UnitName": c['BaseUnitConversion'],
                                     
                                 })
                             MaterialDetails.append({
@@ -140,7 +136,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 "Item":b['Item']['id'],
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity":b['Quantity'],
                                 "UnitDetails":UnitDetails
                             })
@@ -156,7 +152,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             "ItemName":a['Item']['Name'],
                             "EstimatedOutputQty": a['EstimatedOutputQty'],  
                             "Unit": a['Unit']['id'],
-                            "UnitName": a['Unit']['UnitID']['Name'],
+                            "UnitName": a['Unit']['BaseUnitConversion'],
                             "ParentUnitDetails":ParentUnitDetails,
                             "BOMItems":MaterialDetails
                         })

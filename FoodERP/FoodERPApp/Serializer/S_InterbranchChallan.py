@@ -7,7 +7,7 @@ from ..Serializer.S_Items import *
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name']
+        fields = ['id', 'Name', 'Email', 'MobileNo', 'AlternateContactNo', 'Taluka', 'City', 'GSTIN', 'PAN', 'IsDivision', 'MkUpMkDn', 'isActive']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -87,7 +87,38 @@ class IBChallanSerializer(serializers.ModelSerializer):
         
         return IBChallanID   
     
+
+class InterbranchChallanItemsSerializerThird(serializers.ModelSerializer):
     
+    MRP = M_MRPsSerializer(read_only=True)
+    # GST = M_GstHsnCodeSerializer(read_only=True)
+    # Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta:
+        model = TC_InterbranchChallanItems
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch']
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(InterbranchChallanItemsSerializerThird, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("Margin", None):
+            ret["Margin"] = {"id": None, "Margin": None}     
+             
+        return ret    
+
+class IBChallanSerializerThird(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+    IBChallanItems = InterbranchChallanItemsSerializerThird(many=True)
+ 
+    class Meta:
+        model = T_InterbranchChallan
+        fields = '__all__'     
     
 class IBChallanSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
@@ -103,3 +134,6 @@ class IBChallanSerializerForDelete(serializers.ModelSerializer):
     class Meta:
         model = T_InterbranchChallan
         fields = '__all__'               
+        
+  
+    

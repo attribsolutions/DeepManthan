@@ -58,7 +58,7 @@ class ItemImagesSerializer(serializers.ModelSerializer):
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
+        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion']
         
                
 class ItemGroupDetailsSerializer(serializers.ModelSerializer):
@@ -315,7 +315,7 @@ class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit']
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion']
 
 class ItemSubGroupSerializerSecond(serializers.ModelSerializer):
     class Meta:

@@ -23,17 +23,60 @@ class BranchInvoiceDetailsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-
-                Challansdata = T_InterbranchChallan.objects.get(id=id)
-                Challans_Serializer = IBChallanSerializer(Challansdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': Challans_Serializer.data})
-        except T_Demands.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challans Not available', 'Data': []})
-
-                
-
-
-
+                BranchInvoiceQuery = T_InterbranchChallan.objects.filter(id=id)
+                if BranchInvoiceQuery.exists():
+                    BranchInvoiceSerializedata = IBChallanSerializerThird(
+                        BranchInvoiceQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
+                    BranchInvoiceData = list()
+                    for a in BranchInvoiceSerializedata:
+                        BranchInvoiceItemDetails = list()
+                        for b in a['IBChallanItems']:
+                            BranchInvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRP": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                            })
+                            
+                        BranchInvoiceData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['IBChallanDate'],
+                            "InvoiceNumber": a['IBChallanNumber'],
+                            "FullInvoiceNumber": a['FullIBChallanNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "InvoiceItems": BranchInvoiceItemDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
 
 class InterBranchInwardListFilterView(CreateAPIView):
     
@@ -53,10 +96,13 @@ class InterBranchInwardListFilterView(CreateAPIView):
                     query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer)
                 else:
                     query = T_InterBranchInward.objects.filter(IBInwardDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
-                
-                if not query:
+                Inward_serializer = T_InterBranchInwardSerializerForGET(
+                        query, many=True).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': Inward_serializer})
+                if query.count() == 0:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
+                  
                     Inward_serializer = T_InterBranchInwardSerializerForGET(
                         query, many=True).data
                     InwardListData = list()
@@ -123,7 +169,8 @@ class InterBranchInwardView(CreateAPIView):
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Inwarddata['Customer'], b)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,1)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
-                    
+                    Gst = GSTHsnCodeMaster(a['Item'], IBInwardDate).GetTodaysGstHsnCode()
+                    GSTID = Gst[0]['Gstid']
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
@@ -143,7 +190,7 @@ class InterBranchInwardView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
-                    "GST": a['GST'],
+                    "GST": GSTID,
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
@@ -153,7 +200,6 @@ class InterBranchInwardView(CreateAPIView):
                     
                     })
 
-                # print(Inwarddata)
                 Inwarddata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'InterBranch Inward Save Successfully', 'Data': Inwarddata})   
                 Inward_serializer = T_InterBranchInwardSerializer(data=Inwarddata)

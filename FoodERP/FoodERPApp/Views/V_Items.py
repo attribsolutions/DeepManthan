@@ -50,11 +50,11 @@ class MCUnitDetailsView(CreateAPIView):
                     Itemsdata = ItemUnitsSerializerSecond(Itemsquery, many=True).data
                     UnitDetails=list()
                     for d in Itemsdata:
-                        baseunitconcat1=ShowBaseUnitQtyOnUnitDropDown(ItemID,d['id'],d['BaseUnitQuantity']).ShowDetails()
+                       
                         UnitDetails.append({
                             "id": d['id'],
                             "UnitID": d['UnitID']['id'],
-                            "UnitName": d['UnitID']['Name'] +baseunitconcat1,
+                            "UnitName": d['BaseUnitConversion'],
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "IsBase": d['IsBase'],
                             "PODefaultUnit": d['PODefaultUnit'],
@@ -84,11 +84,11 @@ class M_ItemsView(CreateAPIView):
                         UnitDetails=list()
                         for d in a['ItemUnitDetails']:
                             if d['IsDeleted']== 0 :
-                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(a['id'],d['id'],d['BaseUnitQuantity']).ShowDetails()
+                                
                                 UnitDetails.append({
                                     "id": d['id'],
                                     "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                                    "UnitName": d['BaseUnitConversion'],
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
                                     "PODefaultUnit": d['PODefaultUnit'],
@@ -125,7 +125,18 @@ class M_ItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 Itemsdata = JSONParser().parse(request)
+                query = M_Units.objects.filter(id=Itemsdata['BaseUnitID']).values('Name')
+                BaseUnitName = query[0]['Name']
+                for a in Itemsdata['ItemUnitDetails']:
+                    query2 = M_Units.objects.filter(id=a['UnitID']).values('Name')
+                    ChildUnitName = query2[0]['Name']
+                    if a['IsBase'] == 0:
+                        BaseUnitConversion=ChildUnitName+" ("+str(a['BaseUnitQuantity'])+" "+BaseUnitName+")"
+                    else:
+                        BaseUnitConversion=ChildUnitName    
+                    a.update({"BaseUnitConversion":BaseUnitConversion})
                 Items_Serializer = ItemSerializer(data=Itemsdata)
+                
                 if Items_Serializer.is_valid():
                     Items_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
@@ -178,12 +189,10 @@ class M_ItemsViewSecond(CreateAPIView):
                         UnitDetails=list()
                         for d in a['ItemUnitDetails']:
                             if d['IsDeleted']== 0 :
-                                baseunitconcat=" ("+d['BaseUnitQuantity']+" "+a['BaseUnitID']['Name']+")"
                                 UnitDetails.append({
-                                   
                                     "id": d['id'],
                                     "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'] + baseunitconcat ,
+                                    "UnitName": d['BaseUnitConversion'],
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
                                     "PODefaultUnit": d['PODefaultUnit'],
@@ -321,12 +330,23 @@ class M_ItemsViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
     @transaction.atomic()
     def put(self, request, id=0):
         try:
             with transaction.atomic():
                 M_Itemsdata = JSONParser().parse(request)
                 M_ItemsdataByID = M_Items.objects.get(id=id)
+                query = M_Units.objects.filter(id=M_Itemsdata['BaseUnitID']).values('Name')
+                BaseUnitName = query[0]['Name']
+                for a in M_Itemsdata['ItemUnitDetails']:
+                    query2 = M_Units.objects.filter(id=a['UnitID']).values('Name')
+                    ChildUnitName = query2[0]['Name']
+                    if a['IsBase'] == 0:
+                        BaseUnitConversion=ChildUnitName+" ("+str(a['BaseUnitQuantity'])+" "+BaseUnitName+")"
+                    else:
+                        BaseUnitConversion=ChildUnitName    
+                    a.update({"BaseUnitConversion":BaseUnitConversion})
                 M_Items_Serializer = ItemSerializer(
                     M_ItemsdataByID, data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
@@ -368,58 +388,3 @@ class M_ImageTypesView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'ImageTypes Not Available', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-
-# class M_ItemsViewThird(CreateAPIView):
-    
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-    
-#     @transaction.atomic()
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 Item = request.data['Item'] 
-#                 Itemsquery = M_Items.objects.filter(id=Item)
-#                 if Itemsquery.exists():
-#                     Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
-#                     ItemData=list()
-#                     for a in Itemsdata:
-#                         UnitDetails=list()
-#                         for d in a['ItemUnitDetails']:
-#                             if d['IsDeleted']== 0 :
-#                                 UnitDetails.append({
-#                                     "id": d['id'],
-#                                     "UnitID": d['UnitID']['id'],
-#                                     "UnitName": d['UnitID']['Name'],
-#                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
-#                                     "IsBase": d['IsBase'],
-#                                     "PODefaultUnit": d['PODefaultUnit'],
-#                                     "SODefaultUnit": d['SODefaultUnit'],
-#                                 })
-#                         ItemData.append({
-#                             "id": a['id'],
-#                             "Name": a['Name'],
-#                             "ShortName": a['ShortName'],
-#                             "Company": a['Company']['id'],
-#                             "CompanyName": a['Company']['Name'],
-#                             "BaseUnitID": a['BaseUnitID']['id'],
-#                             "BaseUnitName": a['BaseUnitID']['Name'],
-#                             "BarCode": a['BarCode'],
-#                             "Sequence": a['Sequence'],
-#                             "isActive":a['isActive'] ,
-#                             "CanBeSold":a['CanBeSold'] ,
-#                             "CanBePurchase":a['CanBePurchase'],
-#                             "BrandName":a['BrandName'] ,
-#                             "Tag":a['Tag'],
-#                             "CreatedBy": a['CreatedBy'],
-#                             "CreatedOn": a['CreatedOn'],
-#                             "UpdatedBy": a['UpdatedBy'],
-#                             "UpdatedOn": a['UpdatedOn'],
-#                             "ItemUnitDetails": UnitDetails 
-#                         })
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
-#                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
-#         except M_Items.DoesNotExist:
-#             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      

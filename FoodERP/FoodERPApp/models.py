@@ -625,7 +625,7 @@ class MC_ItemUnits(models.Model):
     IsBase = models.BooleanField(default=False)
     PODefaultUnit = models.BooleanField(default=False)
     SODefaultUnit = models.BooleanField(default=False)
-    
+    BaseUnitConversion = models.CharField(max_length=500)
     class Meta:
         db_table = "MC_ItemUnits"                
 
@@ -732,7 +732,7 @@ class M_TermsAndConditions(models.Model):
         
 class MC_PartyItems(models.Model):
     Party =models.ForeignKey(M_Parties, related_name='Party', on_delete=models.PROTECT)
-    Item = models.ForeignKey(M_Items,related_name='PartyItem', on_delete=models.PROTECT) 
+    Item = models.ForeignKey(M_Items,related_name='ItemDivisionDetails', on_delete=models.PROTECT) 
     class Meta:
         db_table = "MC_PartyItems"
 
@@ -1170,8 +1170,8 @@ class TC_InterbranchChallanItems(models.Model):
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
-    Discount = models.DecimalField(max_digits=10, decimal_places=2)
-    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2)
+    Discount = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
     CGST = models.DecimalField(max_digits=5, decimal_places=2)
     SGST = models.DecimalField(max_digits=5, decimal_places=2)
     IGST = models.DecimalField(max_digits=5, decimal_places=2)
@@ -1225,12 +1225,12 @@ class TC_InterBranchInwardItems(models.Model):
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='IBInwardItemGst', on_delete=models.PROTECT)
+    GST = models.DecimalField(max_digits=5, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500, blank=True, null=True)
-    Discount = models.DecimalField(max_digits=15, decimal_places=2)
-    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
     CGST = models.DecimalField(max_digits=15, decimal_places=2)
     SGST = models.DecimalField(max_digits=15, decimal_places=2)
     IGST = models.DecimalField(max_digits=15, decimal_places=2)

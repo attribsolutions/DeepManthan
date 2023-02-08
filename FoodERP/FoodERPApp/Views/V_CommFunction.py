@@ -339,39 +339,39 @@ class UnitwiseQuantityConversion:
         return ConvertedQuantity
 
 
-class  ShowBaseUnitQtyOnUnitDropDown:
-    def __init__(self,ItemID,MC_ItemUnitID,MC_ItemUnitBaseUnitQty):
-        self.ItemID = ItemID
-        self.MC_ItemUnitID = MC_ItemUnitID
-        self.MC_ItemUnitBaseUnitQty = MC_ItemUnitBaseUnitQty
+# class  ShowBaseUnitQtyOnUnitDropDown:
+#     def __init__(self,ItemID,MC_ItemUnitID,MC_ItemUnitBaseUnitQty):
+#         self.ItemID = ItemID
+#         self.MC_ItemUnitID = MC_ItemUnitID
+#         self.MC_ItemUnitBaseUnitQty = MC_ItemUnitBaseUnitQty
         
         
-    def ShowDetails(self):    
-        Itemsquery = M_Items.objects.filter(id=self.ItemID)
-        if Itemsquery.exists():
-            Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
-            for a in Itemsdata:
-                BaseUnitName=a['BaseUnitID']['Name']
+#     def ShowDetails(self):    
+#         Itemsquery = M_Items.objects.filter(id=self.ItemID)
+#         if Itemsquery.exists():
+#             Itemsdata = ItemSerializerSecond(Itemsquery, many=True).data
+#             for a in Itemsdata:
+#                 BaseUnitName=a['BaseUnitID']['Name']
             
-        ItemUnitquery = MC_ItemUnits.objects.filter(Item=self.ItemID, IsBase=1, IsDeleted=0).values('id')
-        qwer=ItemUnitquery[0]['id']
+#         ItemUnitquery = MC_ItemUnits.objects.filter(Item=self.ItemID, IsBase=1, IsDeleted=0).values('id')
+#         qwer=ItemUnitquery[0]['id']
         
-        a = (self.MC_ItemUnitBaseUnitQty)
-        valueAfterPoint = a.split('.')[1]
-        valueAfterPoint = int(valueAfterPoint)
+#         a = (self.MC_ItemUnitBaseUnitQty)
+#         valueAfterPoint = a.split('.')[1]
+#         valueAfterPoint = int(valueAfterPoint)
        
-        if valueAfterPoint == 0:
-            num_value1 = int(float(a))  
-        else:
-            num_value1 = Decimal(self.MC_ItemUnitBaseUnitQty).normalize()
-        BaseUnitQuantity = num_value1
+#         if valueAfterPoint == 0:
+#             num_value1 = int(float(a))  
+#         else:
+#             num_value1 = Decimal(self.MC_ItemUnitBaseUnitQty).normalize()
+#         BaseUnitQuantity = num_value1
         
-        if qwer == self.MC_ItemUnitID :
-            baseunitconcat=""
-        else:
-            baseunitconcat=" ("+ str(BaseUnitQuantity)+" "+BaseUnitName+")"
+#         if qwer == self.MC_ItemUnitID :
+#             baseunitconcat=""
+#         else:
+#             baseunitconcat=" ("+ str(BaseUnitQuantity)+" "+BaseUnitName+")"
         
-        return  baseunitconcat
+#         return  baseunitconcat
      
     
     
