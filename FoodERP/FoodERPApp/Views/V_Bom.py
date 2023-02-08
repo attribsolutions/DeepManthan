@@ -111,11 +111,10 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             ParentUnitDetails = list()
                            
                             for d in ParentUnitdata:
-                                baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ParentItem,d['id'],d['BaseUnitQuantity']).ShowDetails()
                                 ParentUnitDetails.append({
                                    
                                 "Unit": d['id'],
-                                "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                                "UnitName": d['BaseUnitConversion'],
                             })
                         
                         for b in a['BOMItems']:
@@ -127,10 +126,9 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 UnitDetails = list()
                                
                                 for c in Unitdata:
-                                    baseunitconcat=ShowBaseUnitQtyOnUnitDropDown(ParentItem,d['id'],d['BaseUnitQuantity']).ShowDetails()
                                     UnitDetails.append({
                                     "Unit": c['id'],
-                                    "UnitName": c['UnitID']['Name']+ str(baseunitconcat),
+                                    "UnitName": c['BaseUnitConversion'],
                                     
                                 })
                             MaterialDetails.append({
