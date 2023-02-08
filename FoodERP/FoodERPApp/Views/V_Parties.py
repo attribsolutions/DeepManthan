@@ -21,9 +21,11 @@ class DivisionsView(CreateAPIView):
         try:
             with transaction.atomic():
                 Divisiondata =  M_PartyType.objects.filter(IsDivision=id)
-                aa=M_Parties.objects.filter(PartyType__in=Divisiondata).values('id','Name')
+                aa=M_Parties.objects.filter(PartyType__in=Divisiondata)
+                
                 if aa.exists():
                     Division_serializer = DivisionsSerializer(aa, many=True)
+                    print(Division_serializer.data)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Division_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Division Not available ', 'Data': []})
         except Exception as e:
