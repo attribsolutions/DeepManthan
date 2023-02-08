@@ -59,27 +59,6 @@ class WorkOrderDetailsView(CreateAPIView):
                                 amount = 0
                                 # p =0
                                 for c in StockQtySerialize_data:
-                                    # if(add >= float(ActualQty)):
-                                    #     p=0
-                                    # else:
-                                    #     if amount==0:
-                                    #         if(float(c['BaseUnitQuantity']) > float(ActualQty)):
-                                    #             p=float(ActualQty)
-                                    #             add=float(add) + float(ActualQty)
-
-                                    #         else:
-                                    #             p=float(c['BaseUnitQuantity'])
-                                    #             amount = float(ActualQty)- float(c['BaseUnitQuantity'])
-                                    #             add = float(add) + float(c['BaseUnitQuantity'])
-                                    #     else:
-                                    #         if(float(amount) > float(c['BaseUnitQuantity'])):
-                                    #             p=float(c['BaseUnitQuantity'])
-                                    #             amount = float(amount)-float(c['BaseUnitQuantity'])
-                                    #             add = float(add) + float(c['BaseUnitQuantity'])
-                                    #         else:
-                                    #             p=float(amount)
-                                    #             add = float(add) + float(amount)
-                                    #             amount= float(c['BaseUnitQuantity'])-float(amount)
 
                                     StockQty = UnitwiseQuantityConversion(
                                         b['Item']['id'], c['BaseUnitQuantity'], 0, 0, b['Unit']['id'], 0,1).ConvertintoSelectedUnit()
@@ -102,7 +81,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity": round(ActualQty, 3),
                                 "BatchesData": stockDatalist
                             })
@@ -130,8 +109,7 @@ class MaterialIsssueList(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
                     MaterialIsssueListData = list()
                     for a in MaterialIsssue_serializerdata:
-                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
-                            a['Item']['id'], a['Unit']['id'], a['Unit']['BaseUnitQuantity']).ShowDetails()
+                       
                         MaterialIsssueListData.append({
                             "id": a['id'],
                             "MaterialIssueDate": a['MaterialIssueDate'],
@@ -140,7 +118,7 @@ class MaterialIsssueList(CreateAPIView):
                             "Item": a['Item']['id'],
                             "ItemName": a['Item']['Name'],
                             "Unit": a['Unit']['id'],
-                            "UnitName": a['Unit']['UnitID']['Name']+baseunitconcat,
+                            "UnitName": a['Unit']['BaseUnitConversion'],
                             "NumberOfLot": a['NumberOfLot'],
                             "LotQuantity": a["LotQuantity"],
                             "Company": a['Company']['id'],
