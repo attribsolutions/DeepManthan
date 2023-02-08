@@ -25,7 +25,7 @@ class DivisionsView(CreateAPIView):
                 
                 if aa.exists():
                     Division_serializer = DivisionsSerializer(aa, many=True)
-                    print(Division_serializer.data)
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Division_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Division Not available ', 'Data': []})
         except Exception as e:
