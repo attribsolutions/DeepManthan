@@ -70,7 +70,12 @@ class DemandDetailsForIBChallan(CreateAPIView):
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
                                 "LiveBatche" : d['LiveBatche']['id'],
-                                "UnitName":d['Item']['BaseUnitID']['Name'],
+                                "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
+                                "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
+                                "Rate":d['LiveBatche']['Rate'],
+                                "MRP" : d['LiveBatche']['MRP']['MRP'],
+                                "GST" : d['LiveBatche']['GST']['GSTPercentage'],
+                                "UnitName":d['Unit']['BaseUnitConversion'], 
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
