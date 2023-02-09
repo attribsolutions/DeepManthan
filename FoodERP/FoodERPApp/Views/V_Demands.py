@@ -108,11 +108,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         ItemUnitquery, many=True).data
 
                     for d in ItemUnitqueryserialize:
-                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
-                            ItemID, d['id'], d['BaseUnitQuantity']).ShowDetails()
+                      
                         UnitDetails.append({
                             "UnitID": d['id'],
-                            "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                            "UnitName": d['BaseUnitConversion'],
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],

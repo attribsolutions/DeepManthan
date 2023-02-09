@@ -53,13 +53,18 @@ class OrderDetailsForInvoice(CreateAPIView):
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
-                    print(str(obatchwisestockquery.query))
+                  
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
                     else:
+                        
                         StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
+                        
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':StockQtySerialize_data[0]['LiveBatche']})
+    
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
+                            
                             stockDatalist.append({
                                 "id": d['id'],
                                 "Item":d['Item']['id'],
@@ -68,8 +73,14 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
                                 "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
                                 "LiveBatche" : d['LiveBatche']['id'],
-                                # "UnitName":d['Item']['BaseUnitID']['Name'],
-                                "BaseUnitQuantity":d['BaseUnitQuantity']   
+                                "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
+                                "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
+                                "Rate":d['LiveBatche']['Rate'],
+                                "MRP" : d['LiveBatche']['MRP']['MRP'],
+                                "GST" : d['LiveBatche']['GST']['GSTPercentage'],
+                                "BaseUnitQuantity":d['BaseUnitQuantity'],
+                                "UnitName":d['Unit']['BaseUnitConversion'], 
+                                  
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
                     # print(query.query)
@@ -80,7 +91,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                            
                             UnitDetails.append({
                             "Unit": c['id'],
-                            "UnitName": c['UnitID']['BaseUnitConversion'],
+                            "UnitName": c['BaseUnitConversion'],
                             "ConversionUnit": c['BaseUnitQuantity'],
                             "Unitlabel": c['UnitID']['Name']
                         })
@@ -160,7 +171,8 @@ class InvoiceListFilterView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount']  
+                            "RoundOffAmount": a['RoundOffAmount'], 
+                            "CreatedOn": a['CreatedOn'] 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})

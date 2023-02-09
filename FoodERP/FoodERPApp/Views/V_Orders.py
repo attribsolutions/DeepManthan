@@ -179,7 +179,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "Unit": b['Unit']['id'],
-                                    "UnitName": b['Unit']['UnitID']['Name'],
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
                                     "GSTPercentage": b['GST']['GSTPercentage'],
@@ -264,74 +264,6 @@ class T_OrdersViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-# class GetItemsForOrderView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     authentication__Class = JSONWebTokenAuthentication
-
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 # DivisionID = request.data['Division']
-#                 Party = request.data['Party']  # Order Page Party Id
-#                 EffectiveDate = request.data['EffectiveDate']
-#                 query = MC_PartyItems.objects.filter(Party_id=Party)
-#                 # return JsonResponse({ 'query': str(query.query)})
-#                 if not query:
-#                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
-#                 else:
-#                     Items_Serializer = MC_PartyItemSerializerSecond(
-#                         query, many=True).data
-#                     ItemList = list()
-#                     for a in Items_Serializer:
-#                         ItemID = a['Item']['id']
-#                         stockquery = O_BatchWiseLiveStock.objects.filter(
-#                             Item_id=ItemID).aggregate(Qty=Sum('BaseUnitQuantity'))
-#                         if stockquery['Qty'] is None:
-#                             Stock = 0.0
-#                         else:
-#                             Stock = stockquery['Qty']
-#                         ratequery = TC_OrderItems.objects.filter(
-#                             Item_id=ItemID).values('Rate').order_by('-id')[:1]
-#                         # print(ratequery)
-#                         if not ratequery:
-#                             r = 0.00
-#                         else:
-#                             r = ratequery[0]['Rate']
-#                         Gst = GSTHsnCodeMaster(
-#                             ItemID, EffectiveDate).GetTodaysGstHsnCode()
-#                         UnitDetails = list()
-#                         for d in a['Item']['ItemUnitDetails']:
-#                             if d['IsDeleted'] == 0:
-#                                 ItemUnitquery = MC_ItemUnits.objects.filter(
-#                                     Item=ItemID, IsBase=1).values('UnitID')
-#                                 qwer = ItemUnitquery[0]['UnitID']
-#                                 BaseUnitNamequery = M_Units.objects.filter(
-#                                     id=qwer).values('Name')
-#                                 q = BaseUnitNamequery[0]['Name']
-#                                 baseunitconcat = " (" + \
-#                                     d['BaseUnitQuantity']+" "+q+")"
-#                                 UnitDetails.append({
-#                                     # Below UnitID is MC_ItemUnits Primary id
-#                                     "UnitID": d['id'],
-#                                     # "UnitID": d['UnitID']['id'],
-#                                     "UnitName": d['UnitID']['Name'] + baseunitconcat,
-#                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
-#                                 })
-
-#                         ItemList.append({
-#                             "id": a['Item']['id'],
-#                             "Name": a['Item']['Name'],
-#                             "Gstid": Gst[0]['Gstid'],
-#                             "StockQuantity": Stock,
-#                             "Rate": r,
-#                             "GSTPercentage": Gst[0]['GST'],
-#                             "UnitDetails": UnitDetails
-#                         })
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
 class EditOrderView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -402,11 +334,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         ItemUnitquery, many=True).data
 
                     for d in ItemUnitqueryserialize:
-                        baseunitconcat = ShowBaseUnitQtyOnUnitDropDown(
-                            ItemID, d['id'], d['BaseUnitQuantity']).ShowDetails()
+                     
                         UnitDetails.append({
                             "UnitID": d['id'],
-                            "UnitName": d['UnitID']['Name'] + str(baseunitconcat),
+                            "UnitName": d['BaseUnitConversion'] ,
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],
