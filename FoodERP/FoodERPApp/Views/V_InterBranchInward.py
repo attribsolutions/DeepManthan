@@ -41,7 +41,7 @@ class BranchInvoiceDetailsView(CreateAPIView):
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "GSTPercentage": b['GSTPercentage'],
                                 "BasicAmount": b['BasicAmount'],
