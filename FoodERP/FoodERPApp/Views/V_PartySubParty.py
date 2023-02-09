@@ -88,10 +88,11 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 id=Partydata['PartyID']
                 if(Type==1): #Vendor
                     aa=M_Parties.objects.filter(PartyType = 3).values('id') 
-                    Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
+                    Query = MC_PartySubParty.objects.filter(SubParty=id,Party__in=aa)
                 
                 elif(Type==2): #Supplier
-                    Query = MC_PartySubParty.objects.filter(SubParty=id)
+                    aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
+                    Query = MC_PartySubParty.objects.filter(SubParty=id,Party__in=aa)
                    
                 else:  #Customer
                     aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
@@ -103,8 +104,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                     for a in Supplier_serializer: 
                         if(Type==1): #Vendor
                             ListData.append({
-                            "id": a['SubParty']['id'],
-                            "Name": a['SubParty']['Name']
+                            "id": a['Party']['id'],
+                            "Name": a['Party']['Name']
                             })   
                         elif(Type==2): #Supplier
                             ListData.append({
