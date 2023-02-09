@@ -848,12 +848,11 @@ class T_Invoices(models.Model):
 
 class TC_InvoiceItems(models.Model):
     Invoice = models.ForeignKey(T_Invoices, related_name='InvoiceItems', on_delete=models.CASCADE)
-    Item = models.ForeignKey(M_Items, on_delete=models.DO_NOTHING)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.DO_NOTHING)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    # MRP = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
-    # MRP = models.ForeignKey(M_MRPMaster, related_name='InvoiceItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='InvoiceItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
