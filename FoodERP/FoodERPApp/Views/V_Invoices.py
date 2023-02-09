@@ -245,7 +245,7 @@ class InvoiceViewSecond(CreateAPIView):
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "GST": b['GST']['id'],
-                                "GSTPercentage": b['GSTPercentage'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
                                 "MarginValue": b['Margin']['Margin'],
                                 "BasicAmount": b['BasicAmount'],
                                 "GSTAmount": b['GSTAmount'],
