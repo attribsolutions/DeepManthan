@@ -833,7 +833,6 @@ class T_Invoices(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='InvoicesCustomer', on_delete=models.PROTECT)
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
-    CustomerGSTTin = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
