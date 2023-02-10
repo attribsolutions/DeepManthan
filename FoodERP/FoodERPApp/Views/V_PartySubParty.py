@@ -57,19 +57,31 @@ class PartySubPartyViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.filter(Party=id)
-                # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': str(query.query)})
-                PartySubparties_Serializer = PartySubpartySerializerSecond(query,many=True).data
-                SubPartyList= list()
-                for a in PartySubparties_Serializer:
+                query= MC_PartySubParty.objects.filter(Party=id)
+                SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
+                query= MC_PartySubParty.objects.filter(SubParty=id)
+                PartySerializer = PartySubpartySerializerSecond(query, many=True).data
+                SubPartyList = list()
+                for a in SubPartySerializer:
                     SubPartyList.append({
-                        "Party":a['Party']['id'],
-                        "PartyName":a['Party']['Name'],
+                        "Party": a['Party']['id'],
+                        "PartyName": a['Party']['Name'],
                         "SubParty": a['SubParty']['id'],
                         "SubPartyName": a['SubParty']['Name'],
                         "PartyType": a['SubParty']['PartyType']
                     })
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubPartyList})
+                for a in PartySerializer:
+                    SubPartyList.append({
+                        "Party": a['SubParty']['id'],
+                        "PartyName": a['SubParty']['Name'],
+                        "SubParty": a['Party']['id'],
+                        "SubPartyName": a['Party']['Name'],
+                        "PartyType": a['Party']['PartyType']
+                    })    
+                
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
+                
         except  MC_PartySubParty.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
