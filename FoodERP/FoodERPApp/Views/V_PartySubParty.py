@@ -66,7 +66,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "Party":a['Party']['id'],
                         "PartyName":a['Party']['Name'],
                         "SubParty": a['SubParty']['id'],
-                        "SubPartyName": a['SubParty']['Name']
+                        "SubPartyName": a['SubParty']['Name'],
+                        "PartyType": a['SubParty']['PartyType']
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubPartyList})
         except  MC_PartySubParty.DoesNotExist:

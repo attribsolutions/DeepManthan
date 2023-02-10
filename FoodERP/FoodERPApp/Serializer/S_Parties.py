@@ -9,7 +9,7 @@ class DivisionsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model =  M_Parties
-        fields = ['id','Name'] 
+        fields = ['id','Name','PartyType'] 
               
 
         
