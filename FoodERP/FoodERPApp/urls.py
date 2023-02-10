@@ -321,15 +321,12 @@ urlpatterns = [
             url(r'RoleAccessList$', RoleAccessViewList.as_view()),
             #Post Method API
             url(r'RoleAccess$', RoleAccessView.as_view()),
-            #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
+            #RoleAccess PAge Go button and Edit and Delete Button Role/Division/Company
             url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
             #RoleAccessGetPagesOnModule moduleid/Divisionid
             url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
             #RoleAccess Page AddPage Button
             url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
-            #RoleAccess Delete  Button Role/Division/Company
-            url(r'RoleAccessDelete/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessDeleteView.as_view()),
-            
     
             # Dependencies APIs IN Projects 
             url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
