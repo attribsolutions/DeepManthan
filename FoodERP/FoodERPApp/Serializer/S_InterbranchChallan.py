@@ -20,9 +20,23 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
         model = MC_ItemUnits
         fields = ['id','UnitID','BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion'] 
 class LiveBatchSerializer(serializers.ModelSerializer):
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
     class Meta:
         model =O_LiveBatches
         fields='__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(LiveBatchSerializer, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("GST", None):
+            ret["GST"] = {"id": None, "GSTPercentage": None} 
+            
+        return ret    
 
 class StockQtyserializerForIBChallan(serializers.ModelSerializer):
     LiveBatche=LiveBatchSerializer()

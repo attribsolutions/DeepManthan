@@ -195,7 +195,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                 UnitDetails.append({
                                     "id": d['id'],
                                     "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['BaseUnitConversion'],
+                                    "UnitName": d['UnitID']['Name'],
                                     "BaseUnitQuantity": d['BaseUnitQuantity'],
                                     "IsBase": d['IsBase'],
                                     "PODefaultUnit": d['PODefaultUnit'],
