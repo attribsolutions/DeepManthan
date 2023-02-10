@@ -327,6 +327,9 @@ urlpatterns = [
             url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
             #RoleAccess Page AddPage Button
             url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
+            #RoleAccess Delete  Button Role/Division/Company
+            url(r'RoleAccessDelete/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessDeleteView.as_view()),
+            
     
             # Dependencies APIs IN Projects 
             url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),

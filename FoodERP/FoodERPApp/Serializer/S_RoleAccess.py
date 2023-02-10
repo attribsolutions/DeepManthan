@@ -181,3 +181,8 @@ class RoleAccessserializerforsidemenu(serializers.ModelSerializer):
     class Meta:
         model= M_RoleAccess
         fields ="__all__" 
+
+class RoleAccessserializerDeleteView(serializers.ModelSerializer):
+    class Meta:
+        model= M_RoleAccess
+        fields ="__all__"         
