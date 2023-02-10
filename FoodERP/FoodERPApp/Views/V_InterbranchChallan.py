@@ -120,7 +120,6 @@ class DemandDetailsForIBChallan(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
-                        
                         "UnitDetails":UnitDetails,
                         "StockDetails":stockDatalist
                     })

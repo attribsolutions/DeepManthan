@@ -78,8 +78,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "Rate":d['LiveBatche']['Rate'],
                                 "MRP" : d['LiveBatche']['MRP']['MRP'],
                                 "GST" : d['LiveBatche']['GST']['GSTPercentage'],
-                                "BaseUnitQuantity":d['BaseUnitQuantity'],
                                 "UnitName":d['Unit']['BaseUnitConversion'], 
+                                "BaseUnitQuantity":d['BaseUnitQuantity'],
                                   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
@@ -124,7 +124,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
-                        
                         "UnitDetails":UnitDetails,
                         "StockDetails":stockDatalist
                     })
