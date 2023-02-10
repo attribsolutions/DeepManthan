@@ -199,9 +199,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
 
     def get(self, request,Role=0,Division=0 ,Company=0):
         if int(Division) > 0:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id Join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s   ''',([Role],[Division],[Company]))
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id Join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By m_pages.name ''',([Role],[Division],[Company]))
         else:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id Join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s  ''',([Role],[Company]))            
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id Join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By  m_pages.name  ''',([Role],[Company]))            
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_RoleAccessSerializerNewUpdated(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -398,3 +398,23 @@ class CopyRoleAccessView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Execution Error', 'Data': []})
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data': []})
+        
+class RoleAccessDeleteView(RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def delete(self, request, Role=0,Division=0,Company=0):
+        try:
+            with transaction.atomic():
+                if int(Division) > 0:
+                    RoleAccessdata = M_RoleAccess.objects.filter(Role=Role,Division=Division,Company=Company).values('id')
+                else:
+                    RoleAccessdata = M_RoleAccess.objects.filter(Role=Role,Division_id__isnull=True,Company=Company).values('id')      
+                for a in RoleAccessdata:
+                    RoleAccessID = a['id']
+                    RoleAccessDeletedata = M_RoleAccess.objects.get(id=RoleAccessID)
+                    RoleAccessDeletedata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','Data':[]}) 
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
