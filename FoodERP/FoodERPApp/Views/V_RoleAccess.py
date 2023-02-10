@@ -275,6 +275,22 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             "Data": Moduledata,
         }
         return Response(response)
+    
+    @transaction.atomic()
+    def delete(self, request, Role=0,Division=0,Company=0):
+        try:
+            with transaction.atomic():
+                if int(Division) > 0:
+                    RoleAccessdata = M_RoleAccess.objects.filter(Role=Role,Division=Division,Company=Company).values('id')
+                else:
+                    RoleAccessdata = M_RoleAccess.objects.filter(Role=Role,Division_id__isnull=True,Company=Company).values('id')      
+                for a in RoleAccessdata:
+                    RoleAccessID = a['id']
+                    RoleAccessDeletedata = M_RoleAccess.objects.get(id=RoleAccessID)
+                    RoleAccessDeletedata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
 
 class RoleAccessViewAddPage(RetrieveAPIView):
     
@@ -399,22 +415,5 @@ class CopyRoleAccessView(CreateAPIView):
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data': []})
         
-class RoleAccessDeleteView(RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
 
-    @transaction.atomic()
-    def delete(self, request, Role=0,Division=0,Company=0):
-        try:
-            with transaction.atomic():
-                if int(Division) > 0:
-                    RoleAccessdata = M_RoleAccess.objects.filter(Role=Role,Division=Division,Company=Company).values('id')
-                else:
-                    RoleAccessdata = M_RoleAccess.objects.filter(Role=Role,Division_id__isnull=True,Company=Company).values('id')      
-                for a in RoleAccessdata:
-                    RoleAccessID = a['id']
-                    RoleAccessDeletedata = M_RoleAccess.objects.get(id=RoleAccessID)
-                    RoleAccessDeletedata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','Data':[]}) 
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
+           
