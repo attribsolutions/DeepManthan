@@ -45,10 +45,10 @@ class InterBranchItemsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Party = request.data['Supplier']  # Demand Page Supplier DropDown
+                Party = request.data['Party']  # Demand Page Supplier DropDown
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
-                DemandID = request.data['IBOrderID']
+                DemandID = request.data['OrderID']
 
                 Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
 m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
@@ -131,21 +131,29 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     DemandData = list()
                     DemandData.append({
                         "id": a['id'],
-                        "IBOrderDate": a['DemandDate'],
-                        "IBOrderNo": a['DemandNo'],
-                        "FullIBOrderNumber": a['FullDemandNumber'],
-                        "IBOrderAmount": a['DemandAmount'],
+                        "OrderDate": a['DemandDate'],
+                        "OrderNo": a['DemandNo'],
+                        "FullOrderNumber": a['FullDemandNumber'],
+                        "OrderAmount": a['DemandAmount'],
                         "Comment": a['Comment'],
                         "Customer": a['Customer']['id'],
                         "CustomerName": a['Customer']['Name'],
                         "Supplier": a['Supplier']['id'],
                         "SupplierName": a['Supplier']['Name'],
-                        # "BillingAddressID": a['BillingAddress']['id'],
-                        # "BillingAddress": a['BillingAddress']['Address'],
-                        # "ShippingAddressID": a['ShippingAddress']['id'],
-                        # "ShippingAddress": a['ShippingAddress']['Address'],
+                        "BillingAddressID": "",
+                        "BillingAddress": "",
+                        "ShippingAddressID": "",
+                        "ShippingAddress": "",
                         "MaterialIssue":a['MaterialIssue'],
-                        "IBOrderItems": DemandItemSerializer,
+                        "DeliveryDate": "",
+                        "POFromDate": "",
+                        "POToDate": "",
+                        "POType": "",
+                        "POTypeName": "",
+                        "Description": "",
+                        "Inward": "",
+                        "TermsAndConditions": "",
+                        "OrderItems": DemandItemSerializer,
                         
                     })
                     FinalResult = DemandData[0]
@@ -154,10 +162,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     NewDemand = list()
                     NewDemand.append({
                         "id": "",
-                        "IBOrderDate": "",
-                        "IBOrderNo":"",
-                        "FullIBOrderNumber":"",
-                        "IBOrderAmount": "",
+                        "OrderDate": "",
+                        "OrderNo":"",
+                        "FullOrderNumber":"",
+                        "OrderAmount": "",
                         "Comment": "",
                         "Customer": "",
                         "CustomerName": "",
@@ -168,7 +176,15 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "MaterialIssue":"",
-                        "IBOrderItems": DemandItemSerializer,
+                        "DeliveryDate": "",
+                        "POFromDate": "",
+                        "POToDate": "",
+                        "POType": "",
+                        "POTypeName": "",
+                        "Description": "",
+                        "Inward": "",
+                        "TermsAndConditions": "",
+                        "OrderItems": DemandItemSerializer,
                     })
 
                     FinalResult = NewDemand[0]

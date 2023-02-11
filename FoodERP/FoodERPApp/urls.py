@@ -90,6 +90,8 @@ from .Views.V_InterbranchChallan import *
 
 from .Views.V_InterBranchInward import *
 
+from .Views.V_Challan import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -198,6 +200,13 @@ urlpatterns = [
             url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
             url(r'GRN$', T_GRNView.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
+            
+# GRN All API's
+
+            url(r'Challan/([0-9]+)$',ChallanView.as_view()),# Challan Save and delete Api
+            url(r'Challan$',ChallanListFilterView.as_view()), # Challan List Api
+                    
+            
                      
 # Bill Of Material All API's
             url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
@@ -321,15 +330,12 @@ urlpatterns = [
             url(r'RoleAccessList$', RoleAccessViewList.as_view()),
             #Post Method API
             url(r'RoleAccess$', RoleAccessView.as_view()),
-            #RoleAccess PAge Go button and Edit Button Roleid/Divisionid
+            #RoleAccess PAge Go button and Edit and Delete Button Role/Division/Company
             url(r'RoleAccessNewUpdated/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessViewNewUpdated.as_view()),
             #RoleAccessGetPagesOnModule moduleid/Divisionid
             url(r'RoleAccessGetPages/([0-9]+)/([0-9]+)$', RoleAccessGetPagesOnModule.as_view()),
             #RoleAccess Page AddPage Button
             url(r'RoleAccessAddPage/([0-9]+)$', RoleAccessViewAddPage.as_view()),
-            #RoleAccess Delete  Button Role/Division/Company
-            url(r'RoleAccessDelete/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessDeleteView.as_view()),
-            
     
             # Dependencies APIs IN Projects 
             url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),

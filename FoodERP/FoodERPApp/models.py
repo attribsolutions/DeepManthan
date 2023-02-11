@@ -956,6 +956,53 @@ class TC_GRNItems(models.Model):
 
     class Meta:
         db_table = "TC_GRNItems"
+             
+        
+class T_Challan(models.Model):
+    ChallanDate = models.DateField()
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
+    Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
+    ChallanNumber = models.IntegerField()
+    FullChallanNumber = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "T_Challan"
+
+
+class TC_ChallanItems(models.Model):
+    Challan = models.ForeignKey(T_Challan, related_name='ChallanItems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='ChallanUnitID', on_delete=models.PROTECT)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    TaxType = models.CharField(max_length=500)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ChallanItemGST',null=True,on_delete=models.PROTECT)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    LiveBatch=models.ForeignKey(O_LiveBatches,blank=True, null=True, on_delete=models.PROTECT)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "TC_ChallanItems"       
         
 class M_TransactionType(models.Model):
     Name= models.CharField(max_length=100)

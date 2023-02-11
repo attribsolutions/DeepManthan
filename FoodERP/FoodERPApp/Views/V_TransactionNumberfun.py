@@ -37,7 +37,20 @@ class GetMaxNumber:
                 a=a+1
         return a
     
-    
+    def GetChallanNumber(*args):
+        
+        MaxInvoiceNumber=T_Challan.objects.filter(Party_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxInvoiceNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxInvoiceNumber[0]['ChallanNumber'])
+                a=a+1
+        return a
    
     
     def GetWorkOrderNumber(*args):
@@ -154,7 +167,6 @@ class GetPrifix:
             a=Prifix[0]['Grnprefix']
         return a
     
-    
     def GetDemandPrifix(*args):
         Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Demandprefix')
         if not Prifix :
@@ -163,7 +175,7 @@ class GetPrifix:
             a=Prifix[0]['Demandprefix']
         return a
     
-    def GetDeliveryChallanPrifix(*args):
+    def GetChallanPrifix(*args):
         Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Challanprefix')
         if not Prifix :
             a=""
