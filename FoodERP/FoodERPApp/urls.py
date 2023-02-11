@@ -90,6 +90,8 @@ from .Views.V_InterbranchChallan import *
 
 from .Views.V_InterBranchInward import *
 
+from .Views.V_VDCChallan import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -198,6 +200,11 @@ urlpatterns = [
             url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
             url(r'GRN$', T_GRNView.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
+            
+# GRN All API's
+            url(r'VDCChallan/([0-9]+)$',VDCChallanViewSecond.as_view()),
+                    
+            
                      
 # Bill Of Material All API's
             url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),

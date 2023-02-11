@@ -742,6 +742,7 @@ class MC_PartyPrefixs(models.Model):
     Demandprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    VDCChallanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)
@@ -956,15 +957,13 @@ class TC_GRNItems(models.Model):
 
     class Meta:
         db_table = "TC_GRNItems"
-        
-        
-        
+             
         
 class T_VDCChallan(models.Model):
-    ChallanDate = models.DateField()
+    InvoiceDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='VDCChallanCustomer', on_delete=models.PROTECT)
-    ChallanNumber = models.IntegerField()
-    FullChallanNumber = models.CharField(max_length=500)
+    InvoiceNumber = models.IntegerField()
+    FullInvoiceNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='VDCChallanParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
@@ -1002,16 +1001,10 @@ class TC_VDCChallanItems(models.Model):
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "TC_VDCChallanItems"
-
-class TC_VDCChallanReferences(models.Model):
-    VDCChallan = models.ForeignKey(T_VDCChallan, on_delete=models.CASCADE)
     GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "TC_VDCChallanReferences"         
+        db_table = "TC_VDCChallanItems"       
         
 class M_TransactionType(models.Model):
     Name= models.CharField(max_length=100)
