@@ -37,9 +37,9 @@ class GetMaxNumber:
                 a=a+1
         return a
     
-    def GetVDCChallanNumber(*args):
+    def GetChallanNumber(*args):
         
-        MaxInvoiceNumber=T_VDCChallan.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
+        MaxInvoiceNumber=T_Challan.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxInvoiceNumber):
@@ -167,16 +167,6 @@ class GetPrifix:
             a=Prifix[0]['Grnprefix']
         return a
     
-    
-    def GetVDCChallanprefix(*args):
-        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('VDCChallanprefix')
-        if not Prifix :
-            a=""
-        else:
-            a=Prifix[0]['VDCChallanprefix']
-        return a
-    
-    
     def GetDemandPrifix(*args):
         Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Demandprefix')
         if not Prifix :
@@ -185,7 +175,7 @@ class GetPrifix:
             a=Prifix[0]['Demandprefix']
         return a
     
-    def GetDeliveryChallanPrifix(*args):
+    def GetChallanPrifix(*args):
         Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Challanprefix')
         if not Prifix :
             a=""

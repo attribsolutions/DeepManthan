@@ -742,7 +742,6 @@ class MC_PartyPrefixs(models.Model):
     Demandprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
-    VDCChallanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)

@@ -74,11 +74,11 @@ class VDCChallanViewSecond(CreateAPIView):
                 })
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
                 Party = GRNListData[0]['Party']
-                VDCChallanDate = GRNListData[0]['InvoiceDate']
+                ChallanDate = GRNListData[0]['InvoiceDate']
                 # ==========================Get Max Invoice Number=====================================================
-                a = GetMaxNumber.GetVDCChallanNumber(Party,VDCChallanDate)
+                a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
                 GRNListData[0]['InvoiceNumber'] = a
-                b = GetPrifix.GetVDCChallanprefix(Party)
+                b = GetPrifix.GetChallanPrifix(Party)
                 GRNListData[0]['FullInvoiceNumber'] = str(b)+""+str(a)
                 #==================================================================================================
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
