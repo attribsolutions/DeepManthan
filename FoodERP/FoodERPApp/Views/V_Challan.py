@@ -115,9 +115,9 @@ class ChallanListFilterView(CreateAPIView):
                 Customer = Challandata['Customer']
                 Party = Challandata['Party']
                 if(Customer == ''):
-                    query = T_Invoices.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Party)
+                    query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Party)
                 else:
-                    query = T_Invoices.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party) 
+                    query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party) 
                     
                 if query:
                     Challan_serializer = ChallanSerializerList(query, many=True).data
@@ -132,7 +132,6 @@ class ChallanListFilterView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount'], 
                             "CreatedOn": a['CreatedOn'] 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
