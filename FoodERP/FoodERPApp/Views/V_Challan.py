@@ -98,6 +98,6 @@ class VDCChallanViewSecond(CreateAPIView):
                 Challan_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Deleted Successfully','Data':[]})
         except T_Challan.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Type Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Type used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan used in another table', 'Data': []})
