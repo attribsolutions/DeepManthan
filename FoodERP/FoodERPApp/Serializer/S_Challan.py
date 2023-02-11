@@ -31,8 +31,6 @@ class T_GRNSerializerForGETSecond(serializers.ModelSerializer):
         model = T_GRNs
         fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'GRNReferences', 'GRNItems','BatchWiseLiveStockGRNID']
 
-
-
 class ChallanItemsSerializer(serializers.ModelSerializer):  
     class Meta:
         model = TC_ChallanItems
