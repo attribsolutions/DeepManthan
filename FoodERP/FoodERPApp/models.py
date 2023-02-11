@@ -961,6 +961,7 @@ class TC_GRNItems(models.Model):
         
 class T_VDCChallan(models.Model):
     InvoiceDate = models.DateField()
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
     Customer = models.ForeignKey(M_Parties, related_name='VDCChallanCustomer', on_delete=models.PROTECT)
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
@@ -1001,7 +1002,6 @@ class TC_VDCChallanItems(models.Model):
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "TC_VDCChallanItems"       
