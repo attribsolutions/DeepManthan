@@ -15,4 +15,4 @@ class ChallanSerializer(serializers.ModelSerializer):
     ChallanItems = ChallanItemsSerializer(many=True)
     class Meta:
         model = T_Challan
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ChallanItems', 'GRN']         
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ChallanItems', 'GRN']         

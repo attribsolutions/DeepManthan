@@ -966,7 +966,6 @@ class T_Challan(models.Model):
     FullInvoiceNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
-    RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
