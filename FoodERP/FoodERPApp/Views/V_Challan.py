@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GRNs import *
-from ..Serializer.S_VDCChallan import *
+from ..Serializer.S_Challan import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
 
@@ -55,11 +55,6 @@ class VDCChallanViewSecond(CreateAPIView):
                         
                     })
 
-                GRNReferencesData = list()
-                for r in GRN_serializer['GRNReferences']:
-                    GRNReferencesData.append({
-                        "GRN": r['GRN']
-                    })
                 GRNListData = list()
                 a = GRN_serializer
                 GRNListData.append({
@@ -75,8 +70,7 @@ class VDCChallanViewSecond(CreateAPIView):
                     "PartyName": a['Party']['Name'],
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
-                    "VDCChallanReferences": GRNReferencesData,
-                    "VDCChallanItems": GRNItemListData
+                    "ChallanItems": GRNItemListData
                 })
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
                 Party = GRNListData[0]['Party']
@@ -88,7 +82,7 @@ class VDCChallanViewSecond(CreateAPIView):
                 GRNListData[0]['FullInvoiceNumber'] = str(b)+""+str(a)
                 #==================================================================================================
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
-                Invoice_serializer = VDCChallanSerializer(data=GRNListData[0])
+                Invoice_serializer = ChallanSerializer(data=GRNListData[0])
                 if Invoice_serializer.is_valid():
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer, 'Data':[]})
                     
