@@ -18,7 +18,7 @@ class VDCChallanViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 GRNdata = T_GRNs.objects.get(id=id)
-                GRN_serializer = T_GRNSerializerForGET(GRNdata).data
+                GRN_serializer = T_GRNSerializerForGETSecond(GRNdata).data
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                 GRNItemListData = list()
                 for a in GRN_serializer['GRNItems']:
@@ -52,43 +52,52 @@ class VDCChallanViewSecond(CreateAPIView):
                         "BatchCode": a['BatchCode'],
                         "SystemBatchDate": a['SystemBatchDate'],
                         "SystemBatchCode": a['SystemBatchCode'],
-                        
+                                                
                     })
 
                 GRNListData = list()
                 a = GRN_serializer
                 GRNListData.append({
                     "GRN": a['id'],
-                    "InvoiceDate": a['GRNDate'],
+                    "ChallanDate": a['GRNDate'],
                     "Customer": a['Customer']['id'],
                     "CustomerName": a['Customer']['Name'],
-                    "GRNNumber": a['GRNNumber'],
-                    "FullGRNNumber": a['FullGRNNumber'],
-                    "InvoiceNumber": a['InvoiceNumber'],
                     "GrandTotal": a['GrandTotal'],
                     "Party": a['Party']['id'],
                     "PartyName": a['Party']['Name'],
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
                     "RoundOffAmount":"",
-                    "ChallanItems": GRNItemListData
+                    "ChallanItems": GRNItemListData,
+                    "BatchWiseLiveStockGRNID":a['BatchWiseLiveStockGRNID']
                 })
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
                 Party = GRNListData[0]['Party']
-                ChallanDate = GRNListData[0]['InvoiceDate']
+                ChallanDate = GRNListData[0]['ChallanDate']
                 # ==========================Get Max Invoice Number=====================================================
                 a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
-                GRNListData[0]['InvoiceNumber'] = a
+                GRNListData[0]['ChallanNumber'] = a
                 b = GetPrifix.GetChallanPrifix(Party)
-                GRNListData[0]['FullInvoiceNumber'] = str(b)+""+str(a)
+                GRNListData[0]['FullChallanNumber'] = str(b)+""+str(a)
                 #==================================================================================================
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
-                Invoice_serializer = ChallanSerializer(data=GRNListData[0])
-                if Invoice_serializer.is_valid():
-                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer, 'Data':[]})
-                    
-                    Invoice_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'VDC Challan Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
+                Challan_serializer = ChallanSerializer(data=GRNListData[0])
+                if Challan_serializer.is_valid():
+                    # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
+                    Challan_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Challan_data = T_Challan.objects.get(id=id)
+                Challan_data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Deleted Successfully','Data':[]})
+        except T_Challan.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Type Not available', 'Data': []})
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Type used in another table', 'Data': []})

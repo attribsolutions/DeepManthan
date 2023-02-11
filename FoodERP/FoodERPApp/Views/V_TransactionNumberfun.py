@@ -39,7 +39,7 @@ class GetMaxNumber:
     
     def GetChallanNumber(*args):
         
-        MaxInvoiceNumber=T_Challan.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
+        MaxInvoiceNumber=T_Challan.objects.filter(Party_id=args[0]).values('ChallanNumber').order_by('-id')[:1]
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxInvoiceNumber):
@@ -48,7 +48,7 @@ class GetMaxNumber:
             if(b==firstdatefinancial):
                 a = 1
             else:    
-                a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
+                a=int(MaxInvoiceNumber[0]['ChallanNumber'])
                 a=a+1
         return a
    
