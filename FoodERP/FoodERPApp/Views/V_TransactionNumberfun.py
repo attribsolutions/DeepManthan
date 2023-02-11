@@ -37,7 +37,20 @@ class GetMaxNumber:
                 a=a+1
         return a
     
-    
+    def GetVDCChallanNumber(*args):
+        
+        MaxInvoiceNumber=T_VDCChallan.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxInvoiceNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else:    
+                a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
+                a=a+1
+        return a
    
     
     def GetWorkOrderNumber(*args):
@@ -152,6 +165,15 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['Grnprefix']
+        return a
+    
+    
+    def GetVDCChallanprefix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('VDCChallanprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['VDCChallanprefix']
         return a
     
     
