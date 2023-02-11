@@ -9,7 +9,7 @@ from ..Serializer.S_Challan import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
 
-class VDCChallanViewSecond(CreateAPIView):
+class ChallanView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
@@ -99,3 +99,43 @@ class VDCChallanViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan used in another table', 'Data': []})
+
+
+class ChallanListFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Challandata = JSONParser().parse(request)
+                FromDate = Challandata['FromDate']
+                ToDate = Challandata['ToDate']
+                Customer = Challandata['Customer']
+                Party = Challandata['Party']
+                if(Customer == ''):
+                    query = T_Invoices.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Party)
+                else:
+                    query = T_Invoices.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party) 
+                    
+                if query:
+                    Challan_serializer = ChallanSerializerList(query, many=True).data
+                    ChallanListData = list()
+                    for a in Challan_serializer:
+                        ChallanListData.append({
+                            "id": a['id'],
+                            "ChallanDate": a['ChallanDate'],
+                            "FullChallanNumber": a['FullChallanNumber'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount'], 
+                            "CreatedOn": a['CreatedOn'] 
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        

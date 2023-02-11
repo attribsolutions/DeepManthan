@@ -202,7 +202,9 @@ urlpatterns = [
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             
 # GRN All API's
-            url(r'VDCChallan/([0-9]+)$',VDCChallanViewSecond.as_view()),
+
+            url(r'Challan/([0-9]+)$',ChallanView.as_view()),# Challan Save and delete Api
+            url(r'Challan$',ChallanListFilterView.as_view()), # Challan List Api
                     
             
                      
