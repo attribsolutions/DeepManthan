@@ -8,7 +8,7 @@ from .S_GRNs import *
 class O_BatchWiseLiveStockSerializerForChallan(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['id','Item','Quantity','BaseUnitQuantity','LiveBatche','GRN']
+        fields = ['id','Item','Quantity','BaseUnitQuantity','LiveBatche','GRN','Party']
     
 class TC_GRNItemsSerializerSecondAAAAAAAAAAAAAA(serializers.ModelSerializer):
     
@@ -53,10 +53,10 @@ class ChallanSerializer(serializers.ModelSerializer):
             
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
             
-            OBatchQuantity=O_BatchWiseLiveStock.objects.filter(LiveBatche=O_BatchWiseLiveStockItem_data['LiveBatche']).values('BaseUnitQuantity')
+            OBatchQuantity=O_BatchWiseLiveStock.objects.filter(LiveBatche=O_BatchWiseLiveStockItem_data['LiveBatche'],Party=O_BatchWiseLiveStockItem_data['Party']).values('BaseUnitQuantity')
                 
             if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
-                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(LiveBatche=O_BatchWiseLiveStockItem_data['LiveBatche']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
+                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(LiveBatche=O_BatchWiseLiveStockItem_data['LiveBatche'],Party=O_BatchWiseLiveStockItem_data['Party']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 UpdateChildetable=TC_ChallanItems.objects.filter(Challan=ChallanID,Item=O_BatchWiseLiveStockItem_data['Item']).update(LiveBatch=O_BatchWiseLiveStockItem_data['LiveBatche'])
             else:
                 raise serializers.ValidationError("Not In Stock ")
