@@ -90,7 +90,7 @@ from .Views.V_InterbranchChallan import *
 
 from .Views.V_InterBranchInward import *
 
-from .Views.V_VDCChallan import *
+from .Views.V_Challan import *
 
 urlpatterns = [
     
