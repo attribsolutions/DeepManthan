@@ -58,7 +58,7 @@ class VDCChallanViewSecond(CreateAPIView):
                 GRNListData = list()
                 a = GRN_serializer
                 GRNListData.append({
-                    "id": a['id'],
+                    "GRN": a['id'],
                     "InvoiceDate": a['GRNDate'],
                     "Customer": a['Customer']['id'],
                     "CustomerName": a['Customer']['Name'],
@@ -70,6 +70,7 @@ class VDCChallanViewSecond(CreateAPIView):
                     "PartyName": a['Party']['Name'],
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
+                    "RoundOffAmount":"",
                     "ChallanItems": GRNItemListData
                 })
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
