@@ -62,4 +62,11 @@ class ChallanSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Not In Stock ")
                     
         return ChallanID   
-             
+
+class ChallanSerializerList(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+ 
+    class Meta:
+        model = T_Challan
+        fields = '__all__'             
