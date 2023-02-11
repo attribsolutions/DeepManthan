@@ -28,7 +28,7 @@ class VDCChallanViewSecond(CreateAPIView):
                         "Quantity": b['Quantity'],
                         "Unit": b['Unit']['id'],
                         "UnitName": b['Unit']['BaseUnitConversion'],
-                        "BaseUnitQuantity": a['BaseUnitQuantity'],
+                        "BaseUnitQuantity": b['BaseUnitQuantity'],
                         "MRP": b['MRP'],
                         "ReferenceRate": b['ReferenceRate'],
                         "Rate": b['Rate'],
