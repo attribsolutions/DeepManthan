@@ -959,14 +959,14 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
              
         
-class T_VDCChallan(models.Model):
+class T_Challan(models.Model):
     InvoiceDate = models.DateField()
     GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
-    Customer = models.ForeignKey(M_Parties, related_name='VDCChallanCustomer', on_delete=models.PROTECT)
+    Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    Party = models.ForeignKey(M_Parties, related_name='VDCChallanParty', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -974,20 +974,20 @@ class T_VDCChallan(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "T_VDCChallan"
+        db_table = "T_Challan"
 
 
-class TC_VDCChallanItems(models.Model):
-    VDCChallan = models.ForeignKey(T_VDCChallan, related_name='VDCChallanItems', on_delete=models.CASCADE)
+class TC_ChallanItems(models.Model):
+    Challan = models.ForeignKey(T_Challan, related_name='ChallanItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='VDCChallanUnitID', on_delete=models.PROTECT)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='ChallanUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='VDCChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='VDCChallanItemGST',null=True,on_delete=models.PROTECT)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ChallanItemGST',null=True,on_delete=models.PROTECT)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
@@ -1004,7 +1004,7 @@ class TC_VDCChallanItems(models.Model):
     LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "TC_VDCChallanItems"       
+        db_table = "TC_ChallanItems"       
         
 class M_TransactionType(models.Model):
     Name= models.CharField(max_length=100)
