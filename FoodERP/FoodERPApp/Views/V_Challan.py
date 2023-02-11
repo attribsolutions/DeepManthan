@@ -51,8 +51,7 @@ class VDCChallanViewSecond(CreateAPIView):
                         "BatchDate": a['BatchDate'],
                         "BatchCode": a['BatchCode'],
                         "SystemBatchDate": a['SystemBatchDate'],
-                        "SystemBatchCode": a['SystemBatchCode'],
-                                                
+                        "SystemBatchCode": a['SystemBatchCode'],                            
                     })
 
                 GRNListData = list()
