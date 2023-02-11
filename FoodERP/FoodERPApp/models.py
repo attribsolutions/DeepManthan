@@ -959,11 +959,11 @@ class TC_GRNItems(models.Model):
              
         
 class T_Challan(models.Model):
-    InvoiceDate = models.DateField()
+    ChallanDate = models.DateField()
     GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
     Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
-    InvoiceNumber = models.IntegerField()
-    FullInvoiceNumber = models.CharField(max_length=500)
+    ChallanNumber = models.IntegerField()
+    FullChallanNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
@@ -999,7 +999,7 @@ class TC_ChallanItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    LiveBatch=models.ForeignKey(O_LiveBatches,blank=True, null=True, on_delete=models.PROTECT)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "TC_ChallanItems"       
