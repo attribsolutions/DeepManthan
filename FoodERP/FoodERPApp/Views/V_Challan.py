@@ -92,9 +92,19 @@ class ChallanView(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Challan_data = T_Challan.objects.get(id=id)
-                Challan_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Deleted Successfully','Data':[]})
+                Invoicedata=T_Challan.objects.all().filter(id=id)
+                Invoicedataserializer=ChallanSerializerForDelete(Invoicedata,many=True).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':Invoicedataserializer})
+                
+                for a in Invoicedataserializer[0]['ChallanItems']:
+                    BaseUnitQuantity11=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    # return JsonResponse({'StatusCode': 200, 'Data':BaseUnitQuantity11})
+                    selectQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).values('BaseUnitQuantity')
+                    # return JsonResponse({'StatusCode': 200,'Data1':a['LiveBatch'],'Data2':BaseUnitQuantity11, 'Data3':selectQuery[0]['BaseUnitQuantity']})
+                    UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = float(selectQuery[0]['BaseUnitQuantity'])+float(BaseUnitQuantity11))
+                Invoicedata = T_Challan.objects.get(id=id)
+                Invoicedata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Delete Successfully', 'Data':[]})
         except T_Challan.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
         except IntegrityError:   
