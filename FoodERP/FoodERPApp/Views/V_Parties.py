@@ -45,7 +45,7 @@ class M_PartiesView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Data':M_Parties_serializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Data':M_Parties_serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
