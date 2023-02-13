@@ -39,8 +39,13 @@ class PartySubPartyView(CreateAPIView):
                 PartySubpartiesdata = JSONParser().parse(request)
                 PartySubparties_Serializer = PartySubPartySerializer(data=PartySubpartiesdata, many=True)
                 if PartySubparties_Serializer.is_valid():
-                    PartySubpartiesdata = MC_PartySubParty.objects.filter(Party=PartySubparties_Serializer.data[0]['Party'])
-                    PartySubpartiesdata.delete()
+                    PartySubpartiesdata1 = MC_PartySubParty.objects.filter(Party=PartySubparties_Serializer.data[0]['Party'])
+                    PartySubpartiesdata1.delete()
+                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubparties_Serializer.data[0]['Party'],Party__PartyType=3).select_related('Party')
+                    PartySubpartiesdata2.delete()
+                    
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':str(PartySubpartiesdata.query)})
+                   
                     PartySubparties_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':[]})
                 else:
@@ -62,6 +67,14 @@ class PartySubPartyViewSecond(CreateAPIView):
                 query= MC_PartySubParty.objects.filter(SubParty=id)
                 PartySerializer = PartySubpartySerializerSecond(query, many=True).data
                 SubPartyList = list()
+                for a in PartySerializer:
+                    SubPartyList.append({
+                        "Party": a['SubParty']['id'],
+                        "PartyName": a['SubParty']['Name'],
+                        "SubParty": a['Party']['id'],
+                        "SubPartyName": a['Party']['Name'],
+                        "PartyType": a['Party']['PartyType']
+                    }) 
                 for a in SubPartySerializer:
                     SubPartyList.append({
                         "Party": a['Party']['id'],
@@ -70,14 +83,7 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "SubPartyName": a['SubParty']['Name'],
                         "PartyType": a['SubParty']['PartyType']
                     })
-                for a in PartySerializer:
-                    SubPartyList.append({
-                        "Party": a['SubParty']['id'],
-                        "PartyName": a['SubParty']['Name'],
-                        "SubParty": a['Party']['id'],
-                        "SubPartyName": a['Party']['Name'],
-                        "PartyType": a['Party']['PartyType']
-                    })    
+                   
                 
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
