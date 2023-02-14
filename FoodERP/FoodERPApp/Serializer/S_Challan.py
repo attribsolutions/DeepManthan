@@ -70,3 +70,15 @@ class ChallanSerializerList(serializers.ModelSerializer):
     class Meta:
         model = T_Challan
         fields = '__all__'             
+
+class ChallanItemsSerializerForDelete(serializers.ModelSerializer):  
+    class Meta:
+        model = TC_ChallanItems
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate', 'LiveBatch']          
+
+
+class ChallanSerializerForDelete(serializers.ModelSerializer):
+    ChallanItems = ChallanItemsSerializerForDelete(many=True)
+    class Meta:
+        model = T_Challan
+        fields = '__all__'        
