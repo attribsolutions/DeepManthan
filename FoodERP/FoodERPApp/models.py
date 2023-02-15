@@ -76,6 +76,7 @@ class M_PriceList(models.Model):
     BasePriceListID = models.IntegerField()
     Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING)
     MkUpMkDn = models.BooleanField(default=False)
+    CalculationPath=models.CharField(max_length=200)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
