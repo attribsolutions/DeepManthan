@@ -37,11 +37,15 @@ class PartySubPartyView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartySubpartiesdata = JSONParser().parse(request)
+         
                 PartySubparties_Serializer = PartySubPartySerializer(data=PartySubpartiesdata, many=True)
+               
                 if PartySubparties_Serializer.is_valid():
-                    PartySubpartiesdata1 = MC_PartySubParty.objects.filter(Party=PartySubparties_Serializer.data[0]['Party'])
+                    PartySubpartiesdata1 = MC_PartySubParty.objects.filter(Party=PartySubpartiesdata[0]['PartyID'])
+                 
                     PartySubpartiesdata1.delete()
-                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubparties_Serializer.data[0]['Party'],Party__PartyType=3).select_related('Party')
+                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubpartiesdata[0]['PartyID'],Party__PartyType=3).select_related('Party')
+                  
                     PartySubpartiesdata2.delete()
                     
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':str(PartySubpartiesdata.query)})
@@ -63,9 +67,12 @@ class PartySubPartyViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 query= MC_PartySubParty.objects.filter(Party=id)
+                
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
-                query= MC_PartySubParty.objects.filter(SubParty=id)
-                PartySerializer = PartySubpartySerializerSecond(query, many=True).data
+
+                query1= MC_PartySubParty.objects.filter(SubParty=id)
+               
+                PartySerializer = PartySubpartySerializerSecond(query1, many=True).data
                 SubPartyList = list()
                 for a in PartySerializer:
                     SubPartyList.append({
