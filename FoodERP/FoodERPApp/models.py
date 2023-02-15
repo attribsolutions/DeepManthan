@@ -1024,6 +1024,7 @@ class M_BillOfMaterial(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     ReferenceBom = models.IntegerField(null=True,blank=True)
+    IsVDCItem = models.BooleanField(default=False)
     
     class Meta:
         db_table = "M_BillOfMaterial"

@@ -103,6 +103,7 @@ class OrderListFilterView(CreateAPIView):
                             "Inward": inward
 
                         })
+                        
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
@@ -349,7 +350,8 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     b.update({"StockQuantity": Stock,
                               "UnitDetails": UnitDetails
                               })
-                    bomquery = M_BillOfMaterial.objects.filter(Item_id=ItemID).order_by('-id')[:1]
+                    
+                    bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=ItemID,BOM__IsVDCItem=1).select_related('BOM')
                     if bomquery.exists():
                         b.update({"Bom": True })
                     else:
