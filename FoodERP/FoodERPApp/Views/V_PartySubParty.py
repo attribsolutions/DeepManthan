@@ -7,6 +7,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
+
+from ..Serializer.S_Parties import DivisionsSerializer
 from ..Serializer.S_PartySubParty import *
 from ..Serializer.S_CompanyGroup import *
 from ..models import *
@@ -111,6 +113,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 Partydata = JSONParser().parse(request)
                 Type=Partydata['Type']
                 id=Partydata['PartyID']
+                Company=Partydata['Company']
                 if(Type==1): #Vendor
                     aa=M_Parties.objects.filter(PartyType = 3).values('id') 
                     Query = MC_PartySubParty.objects.filter(SubParty=id,Party__in=aa)
@@ -119,12 +122,19 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                     aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
                     Query = MC_PartySubParty.objects.filter(SubParty=id,Party__in=aa)
                    
-                else:  #Customer
+                elif(Type==3):  #Customer
                     aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
                     Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
-                
+                else:
+                    Query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=id))
+                    
                 if Query:
-                    Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
+                    
+                    if(Type==4):
+                        Supplier_serializer = DivisionsSerializer(Query, many=True).data
+                    else:    
+                        Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
+                    
                     ListData = list()
                     for a in Supplier_serializer: 
                         if(Type==1): #Vendor
@@ -137,11 +147,17 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name']
                             }) 
-                        else:  #Customer
+                        elif(Type==3):  #Customer
                             ListData.append({
                             "id": a['SubParty']['id'],
                             "Name": a['SubParty']['Name']
-                            })    
+                            })
+                        else:
+                            ListData.append({
+                            "id": a['id'],
+                            "Name": a['Name']
+                            })
+
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
