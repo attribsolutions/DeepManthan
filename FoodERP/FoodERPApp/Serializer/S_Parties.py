@@ -16,7 +16,7 @@ class DivisionsSerializer(serializers.ModelSerializer):
 class PartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
-        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix']
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix']
 
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:
