@@ -10,6 +10,7 @@ from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
 from ..Serializer.S_Bom import *
+from ..Serializer.S_Challan import *
 from django.db.models import Sum
 from ..models import *
 
@@ -70,42 +71,61 @@ class OrderListFilterView(CreateAPIView):
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
                         queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
-                        q = query.union(queryForOpenPO)
-                        
+                        q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(Orderdata.query)})
-                if q:
-                    Order_serializer = T_OrderSerializerSecond(
-                        q, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
-                    OrderListData = list()
-                    for a in Order_serializer:
-                        inward = 0
-                        for c in a['OrderReferences']:
-                            if(c['Inward'] == 1):
-                                inward = 1
-                        OrderListData.append({
-                            "id": a['id'],
-                            "OrderDate": a['OrderDate'],
-                            "FullOrderNumber": a['FullOrderNumber'],
-                            "DeliveryDate": a['DeliveryDate'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
-                            "SupplierID": a['Supplier']['id'],
-                            "Supplier": a['Supplier']['Name'],
-                            "OrderAmount": a['OrderAmount'],
-                            "Description": a['Description'],
-                            "OrderType" : a['OrderType'],
-                            "POType" : a['POType']['Name'],
-                            "BillingAddress": a['BillingAddress']['Address'],
-                            "ShippingAddress": a['ShippingAddress']['Address'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "Inward": inward
-
+               
+                Order_serializer = T_OrderSerializerSecond(q, many=True).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                OrderListData = list()
+                for a in Order_serializer:
+                    inward = 0
+                    for c in a['OrderReferences']:
+                        if(c['Inward'] == 1):
+                            inward = 1
+                    OrderListData.append({
+                        "id": a['id'],
+                        "OrderDate": a['OrderDate'],
+                        "FullOrderNumber": a['FullOrderNumber'],
+                        "DeliveryDate": a['DeliveryDate'],
+                        "CustomerID": a['Customer']['id'],
+                        "Customer": a['Customer']['Name'],
+                        "SupplierID": a['Supplier']['id'],
+                        "Supplier": a['Supplier']['Name'],
+                        "OrderAmount": a['OrderAmount'],
+                        "Description": a['Description'],
+                        "OrderType" : a['OrderType'],
+                        "POType" : a['POType']['Name'],
+                        "BillingAddress": a['BillingAddress']['Address'],
+                        "ShippingAddress": a['ShippingAddress']['Address'],
+                        "CreatedBy": a['CreatedBy'],
+                        "CreatedOn": a['CreatedOn'],
+                        "Inward": inward
                         })
                         
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                Challanquery = T_Challan.objects.filter(Party=Customer)
+                Challan_serializer = ChallanSerializerList(Challanquery, many=True).data
+                for a in Challan_serializer:
+                    OrderListData.append({
+                        "id": a['id'],
+                        "OrderDate": a['ChallanDate'],
+                        "FullOrderNumber": a['FullChallanNumber'],
+                        "CustomerID": a['Customer']['id'],
+                        "Customer": a['Customer']['Name'],
+                        "SupplierID": a['Party']['id'],
+                        "Supplier": a['Party']['Name'],
+                        "OrderAmount": a['GrandTotal'],
+                        "Description": "",
+                        "OrderType" : "",
+                        "POType" : "",
+                        "BillingAddress": "",
+                        "ShippingAddress": "",
+                        "CreatedBy": a['CreatedBy'],
+                        "CreatedOn": a['CreatedOn'],
+                        "Inward": ""     
+                    })
+                if not OrderListData:    
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
