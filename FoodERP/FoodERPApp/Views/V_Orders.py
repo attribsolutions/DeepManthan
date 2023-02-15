@@ -349,7 +349,12 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     b.update({"StockQuantity": Stock,
                               "UnitDetails": UnitDetails
                               })
-
+                    bomquery = M_BillOfMaterial.objects.filter(Item_id=ItemID).order_by('-id')[:1]
+                    if bomquery.exists():
+                        b.update({"Bom": True })
+                    else:
+                        b.update({"Bom": False })
+                            
                 if OrderID != 0:
                     OrderQuery = T_Orders.objects.get(id=OrderID)
                     a = T_OrderSerializerThird(OrderQuery).data
