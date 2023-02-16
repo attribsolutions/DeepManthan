@@ -116,7 +116,7 @@ class OrderListFilterView(CreateAPIView):
                         "OrderAmount": a['GrandTotal'],
                         "Description": "",
                         "OrderType" : "",
-                        "POType" : "",
+                        "POType" : "VDCPO",
                         "BillingAddress": "",
                         "ShippingAddress": "",
                         "CreatedBy": a['CreatedBy'],
