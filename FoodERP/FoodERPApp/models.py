@@ -961,7 +961,7 @@ class TC_GRNItems(models.Model):
         
 class T_Challan(models.Model):
     ChallanDate = models.DateField()
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
     Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
     ChallanNumber = models.IntegerField()
     FullChallanNumber = models.CharField(max_length=500)

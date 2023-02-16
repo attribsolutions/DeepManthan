@@ -47,6 +47,7 @@ class OrderListFilterView(CreateAPIView):
                 Customer = Orderdata['Customer']
                 Supplier = Orderdata['Supplier']
                 OrderType = Orderdata['OrderType']
+                Mode = Orderdata['Mode']
                 d = date.today()
                 if(OrderType == 1): #OrderType -1 PO Order
                     if(Supplier == ''):
@@ -95,37 +96,39 @@ class OrderListFilterView(CreateAPIView):
                         "Description": a['Description'],
                         "OrderType" : a['OrderType'],
                         "POType" : a['POType']['Name'],
+                        "IsOpen" : a['IsOpenPO'],
                         "BillingAddress": a['BillingAddress']['Address'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
                         "Inward": inward
                         })
-                        
-                Challanquery = T_Challan.objects.filter(Party=Customer)
-                Challan_serializer = ChallanSerializerList(Challanquery, many=True).data
-                for a in Challan_serializer:
-                    OrderListData.append({
-                        "id": a['id'],
-                        "OrderDate": a['ChallanDate'],
-                        "FullOrderNumber": a['FullChallanNumber'],
-                        "CustomerID": a['Party']['id'],
-                        "Customer": a['Party']['Name'],
-                        "SupplierID": a['Customer']['id'],
-                        "Supplier": a['Customer']['Name'],
-                        "OrderAmount": a['GrandTotal'],
-                        "Description": "",
-                        "OrderType" : "",
-                        "POType" : "",
-                        "BillingAddress": "",
-                        "ShippingAddress": "",
-                        "CreatedBy": a['CreatedBy'],
-                        "CreatedOn": a['CreatedOn'],
-                        "Inward": ""     
-                    })
-                if not OrderListData:    
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
+                if Mode ==2:        
+                    Challanquery = T_Challan.objects.filter(Party=Customer)
+                    Challan_serializer = ChallanSerializerList(Challanquery, many=True).data
+                    for a in Challan_serializer:
+                        OrderListData.append({
+                            "id": a['id'],
+                            "OrderDate": a['ChallanDate'],
+                            "FullOrderNumber": a['FullChallanNumber'],
+                            "CustomerID": a['Party']['id'],
+                            "Customer": a['Party']['Name'],
+                            "SupplierID": a['Customer']['id'],
+                            "Supplier": a['Customer']['Name'],
+                            "OrderAmount": a['GrandTotal'],
+                            "Description": "",
+                            "OrderType" : "",
+                            "POType" : "",
+                            "BillingAddress": "",
+                            "IsOpen" : "",
+                            "ShippingAddress": "",
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "Inward": ""     
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})    
+                else:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
