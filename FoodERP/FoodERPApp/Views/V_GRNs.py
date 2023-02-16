@@ -54,6 +54,7 @@ class GRNListFilterView(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "CreatedOn" : a['CreatedOn'],
+                            "GRNReferences":a['GRNReferences']
                            
 
                         })

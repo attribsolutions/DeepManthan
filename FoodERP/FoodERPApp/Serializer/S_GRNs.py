@@ -4,7 +4,8 @@ from ..models import *
 from rest_framework import serializers
 from collections import OrderedDict
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
-from .S_GSTHSNCode import * 
+from .S_GSTHSNCode import *
+from .S_Orders import * 
 
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
@@ -27,6 +28,7 @@ class O_LiveBatchesSerializer(serializers.ModelSerializer):
 
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
+    Order = T_OrderSerializerSecond(many=True)  
     class Meta:
         model = TC_GRNReferences
         fields = ['Invoice', 'Order', 'ChallanNo','Inward']        
