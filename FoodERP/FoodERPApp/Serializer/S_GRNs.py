@@ -28,7 +28,7 @@ class O_LiveBatchesSerializer(serializers.ModelSerializer):
 
 
 class TC_GRNReferencesSerializer(serializers.ModelSerializer):
-    Order = T_OrderSerializerSecond(many=True)  
+  
     class Meta:
         model = TC_GRNReferences
         fields = ['Invoice', 'Order', 'ChallanNo','Inward']        
@@ -122,7 +122,8 @@ class Partiesserializer(serializers.ModelSerializer):
         model = M_Parties
         fields = ['id', 'Name']
 
-class TC_GRNReferencesSerializer(serializers.ModelSerializer):
+class TC_GRNReferencesSerializerSecond(serializers.ModelSerializer):
+    Order = T_OrderSerializerThird(read_only=True)
     class Meta:
         model = TC_GRNReferences
         fields = ['Invoice', 'Order', 'ChallanNo','Inward'] 
@@ -157,7 +158,7 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
 class T_GRNSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
     Party = Partiesserializer(read_only=True)
-    GRNReferences = TC_GRNReferencesSerializer(many=True,read_only=True)
+    GRNReferences = TC_GRNReferencesSerializerSecond(many=True,read_only=True)
     GRNItems = TC_GRNItemsSerializerSecond(many=True)
 
     class Meta:

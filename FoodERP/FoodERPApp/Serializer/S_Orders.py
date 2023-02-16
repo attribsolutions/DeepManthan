@@ -16,6 +16,11 @@ class M_POTypeserializer(serializers.ModelSerializer):
         model = M_POType
         fields = '__all__'
 
+class M_POTypeserializerSecond(serializers.ModelSerializer):
+    class Meta : 
+        model = M_POType
+        fields =  ['id', 'Name','Company', 'Division']
+
 # POST Method
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -188,7 +193,7 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
     Customer = PartiesSerializerThird(read_only=True)
     Supplier = PartiesSerializerThird(read_only=True)
     OrderItem = TC_OrderItemSerializer(read_only=True,many=True)
-    POType = M_POTypeserializer(read_only=True)
+    POType = M_POTypeserializerSecond(read_only=True)
     
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     BillingAddress=PartyAddressSerializerSecond(read_only=True) 
