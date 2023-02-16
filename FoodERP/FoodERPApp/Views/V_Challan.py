@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Challan import *
 from ..Serializer.S_Bom import * 
+from ..Serializer.S_Invoices import * 
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
 
@@ -30,7 +31,46 @@ class ChallanItemsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':Itemsdata})      
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
+        
+class ChallanItemStockView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def post(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                ChallanItemData = JSONParser().parse(request)
+                Item = ChallanItemData['Item']
+                Party = ChallanItemData['Party']
+                        
+                obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+                if obatchwisestockquery == "":
+                    StockQtySerialize_data =[]
+                else: 
+                    StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
+                    stockDatalist = list()
+                    for d in StockQtySerialize_data:
+                        
+                        stockDatalist.append({
+                            "id": d['id'],
+                            "Item":d['Item']['id'],
+                            "BatchDate":d['LiveBatche']['BatchDate'],
+                            "BatchCode":d['LiveBatche']['BatchCode'],
+                            "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
+                            "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
+                            "LiveBatche" : d['LiveBatche']['id'],
+                            "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
+                            "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
+                            "Rate":d['LiveBatche']['Rate'],
+                            "MRP" : d['LiveBatche']['MRP']['MRP'],
+                            "GST" : d['LiveBatche']['GST']['GSTPercentage'],
+                            "UnitName":d['Unit']['BaseUnitConversion'], 
+                            "BaseUnitQuantity":d['BaseUnitQuantity'], 
+                            }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': stockDatalist})           
+        except Exception as e:
+            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 class ChallanView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
