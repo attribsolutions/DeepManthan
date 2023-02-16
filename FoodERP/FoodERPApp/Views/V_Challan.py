@@ -6,85 +6,164 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Challan import *
+from ..Serializer.S_Bom import * 
+from ..Serializer.S_Invoices import * 
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
 
+
+class ChallanItemsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def post(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                ChallanitemsData = JSONParser().parse(request)
+                Company=ChallanitemsData['Company']
+                Query = MC_BillOfMaterialItems.objects.filter(BOM__IsVDCItem=1,BOM__Company=Company).select_related('BOM','Item').values('Item').distinct()
+                ItemList = list()
+                for a in Query:
+                    ItemList.append(a['Item'])
+                y=tuple(ItemList)
+                Itemsquery = M_Items.objects.filter(id__in=y,isActive=1)
+                Itemsdata = M_ItemsSerializer01(Itemsquery,many=True).data    
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':Itemsdata})      
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class ChallanItemStockView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def post(self, request, id=0 ):
+        try:
+            with transaction.atomic():
+                ChallanItemData = JSONParser().parse(request)
+                Item = ChallanItemData['Item']
+                Party = ChallanItemData['Party']
+                        
+                obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+                if obatchwisestockquery == "":
+                    StockQtySerialize_data =[]
+                else: 
+                    StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
+                    stockDatalist = list()
+                    for d in StockQtySerialize_data:
+                        
+                        stockDatalist.append({
+                            "id": d['id'],
+                            "Item":d['Item']['id'],
+                            "BatchDate":d['LiveBatche']['BatchDate'],
+                            "BatchCode":d['LiveBatche']['BatchCode'],
+                            "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
+                            "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
+                            "LiveBatche" : d['LiveBatche']['id'],
+                            "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
+                            "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
+                            "Rate":d['LiveBatche']['Rate'],
+                            "MRP" : d['LiveBatche']['MRP']['MRP'],
+                            "GST" : d['LiveBatche']['GST']['GSTPercentage'],
+                            "UnitName":d['Unit']['BaseUnitConversion'], 
+                            "BaseUnitQuantity":d['BaseUnitQuantity'], 
+                            }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': stockDatalist})           
+        except Exception as e:
+            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 class ChallanView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def post(self, request, id=0):
         try:
             with transaction.atomic():
-                GRNdata = T_GRNs.objects.get(id=id)
-                GRN_serializer = T_GRNSerializerForGETSecond(GRNdata).data
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
-                GRNItemListData = list()
-                for b in GRN_serializer['GRNItems']:
-                    GRNItemListData.append({
-                        "Item": b['Item']['id'],
-                        "ItemName": b['Item']['Name'],
-                        "Quantity": b['Quantity'],
-                        "Unit": b['Unit']['id'],
-                        "UnitName": b['Unit']['BaseUnitConversion'],
-                        "BaseUnitQuantity": b['BaseUnitQuantity'],
-                        "MRP": b['MRP'],
-                        "ReferenceRate": b['ReferenceRate'],
-                        "Rate": b['Rate'],
-                        "BasicAmount": b['BasicAmount'],
-                        "TaxType": b['TaxType'],
-                        "GST": b['GST']['id'],
-                        "GSTPercentage": b['GST']['GSTPercentage'],
-                        "HSNCode": b['GST']['HSNCode'],
-                        "GSTAmount": b['GSTAmount'],
-                        "Amount": b['Amount'],
-                        "DiscountType": b['DiscountType'],
-                        "Discount": b['Discount'],
-                        "DiscountAmount": b['DiscountAmount'],
-                        "CGST": b['CGST'],
-                        "SGST": b['SGST'],
-                        "IGST": b['IGST'],
-                        "CGSTPercentage": b['CGSTPercentage'],
-                        "SGSTPercentage": b['SGSTPercentage'],
-                        "IGSTPercentage": b['IGSTPercentage'],
-                        "BatchDate": b['BatchDate'],
-                        "BatchCode": b['BatchCode'],
-                        "SystemBatchDate": b['SystemBatchDate'],
-                        "SystemBatchCode": b['SystemBatchCode'],                            
+                Challandata = JSONParser().parse(request)
+                GRN = Challandata['GRN']
+                if GRN == 0:
+                    ChallanDate = Challandata['ChallanDate']
+                    Party = Challandata['Party']
+                    a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
+                    Challandata['ChallanNumber'] = a
+                    b = GetPrifix.GetChallanPrifix(Party)
+                    Challandata['FullChallanNumber'] = str(b)+""+str(a)
+                    Challan_serializer = ChallanSerializer(data=Challandata)
+                    if Challan_serializer.is_valid():
+                        # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
+                        Challan_serializer.save()
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
+                else:
+   
+                    GRNdata = T_GRNs.objects.get(id=GRN)
+                    GRN_serializer = T_GRNSerializerForGETSecond(GRNdata).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
+                    GRNItemListData = list()
+                    for b in GRN_serializer['GRNItems']:
+                        GRNItemListData.append({
+                            "Item": b['Item']['id'],
+                            "ItemName": b['Item']['Name'],
+                            "Quantity": b['Quantity'],
+                            "Unit": b['Unit']['id'],
+                            "UnitName": b['Unit']['BaseUnitConversion'],
+                            "BaseUnitQuantity": b['BaseUnitQuantity'],
+                            "MRP": b['MRP'],
+                            "ReferenceRate": b['ReferenceRate'],
+                            "Rate": b['Rate'],
+                            "BasicAmount": b['BasicAmount'],
+                            "TaxType": b['TaxType'],
+                            "GST": b['GST']['id'],
+                            "GSTPercentage": b['GST']['GSTPercentage'],
+                            "HSNCode": b['GST']['HSNCode'],
+                            "GSTAmount": b['GSTAmount'],
+                            "Amount": b['Amount'],
+                            "DiscountType": b['DiscountType'],
+                            "Discount": b['Discount'],
+                            "DiscountAmount": b['DiscountAmount'],
+                            "CGST": b['CGST'],
+                            "SGST": b['SGST'],
+                            "IGST": b['IGST'],
+                            "CGSTPercentage": b['CGSTPercentage'],
+                            "SGSTPercentage": b['SGSTPercentage'],
+                            "IGSTPercentage": b['IGSTPercentage'],
+                            "BatchDate": b['BatchDate'],
+                            "BatchCode": b['BatchCode'],
+                            "SystemBatchDate": b['SystemBatchDate'],
+                            "SystemBatchCode": b['SystemBatchCode'],                            
+                        })
+                    GRNListData = list()
+                    a = GRN_serializer
+                    GRNListData.append({
+                        "GRN": a['id'],
+                        "ChallanDate": a['GRNDate'],
+                        "Party": a['Customer']['id'],
+                        "PartyName": a['Customer']['Name'],
+                        "GrandTotal": a['GrandTotal'],
+                        "Customer": a['Party']['id'],
+                        "CustomerName": a['Party']['Name'],
+                        "CreatedBy": a['CreatedBy'],
+                        "UpdatedBy": a['UpdatedBy'],
+                        "RoundOffAmount":"",
+                        "ChallanItems": GRNItemListData,
+                        "BatchWiseLiveStockGRNID":a['BatchWiseLiveStockGRNID']
                     })
-                GRNListData = list()
-                a = GRN_serializer
-                GRNListData.append({
-                    "GRN": a['id'],
-                    "ChallanDate": a['GRNDate'],
-                    "Party": a['Customer']['id'],
-                    "PartyName": a['Customer']['Name'],
-                    "GrandTotal": a['GrandTotal'],
-                    "Customer": a['Party']['id'],
-                    "CustomerName": a['Party']['Name'],
-                    "CreatedBy": a['CreatedBy'],
-                    "UpdatedBy": a['UpdatedBy'],
-                    "RoundOffAmount":"",
-                    "ChallanItems": GRNItemListData,
-                    "BatchWiseLiveStockGRNID":a['BatchWiseLiveStockGRNID']
-                })
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
-                Party = GRNListData[0]['Party']
-                ChallanDate = GRNListData[0]['ChallanDate']
-                # ==========================Get Max Invoice Number=====================================================
-                a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
-                GRNListData[0]['ChallanNumber'] = a
-                b = GetPrifix.GetChallanPrifix(Party)
-                GRNListData[0]['FullChallanNumber'] = str(b)+""+str(a)
-                #==================================================================================================
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
-                Challan_serializer = ChallanSerializer(data=GRNListData[0])
-                if Challan_serializer.is_valid():
-                    # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
-                    Challan_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
+                    Party = GRNListData[0]['Party']
+                    ChallanDate = GRNListData[0]['ChallanDate']
+                    # ==========================Get Max Invoice Number=====================================================
+                    a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
+                    GRNListData[0]['ChallanNumber'] = a
+                    b = GetPrifix.GetChallanPrifix(Party)
+                    GRNListData[0]['FullChallanNumber'] = str(b)+""+str(a)
+                    #==================================================================================================
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
+                    Challan_serializer = ChallanSerializer(data=GRNListData[0])
+                    if Challan_serializer.is_valid():
+                        # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
+                        Challan_serializer.save()
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
