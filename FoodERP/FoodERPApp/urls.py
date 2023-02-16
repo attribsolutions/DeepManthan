@@ -206,6 +206,7 @@ urlpatterns = [
             url(r'Challan/([0-9]+)$',ChallanView.as_view()),     # Challan Save and delete Api
             url(r'Challan$',ChallanListFilterView.as_view()),    # Challan List Api
             url(r'ChallanItems$', ChallanItemsView.as_view()),   # ChallanItems Api
+            url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItems Api
                     
             
                      
