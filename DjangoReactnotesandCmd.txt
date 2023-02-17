@@ -30,7 +30,8 @@ EnvName\Scripts\activate
 pip install Django==3.0.8
 pip install djangorestframework
 pip install mysqlclient pymysql
-pip install django-cors-headers  
+pip install django-cors-headers
+pip install activity  
 
 pip install PyJWT==1.7.1       //Error :--attributeerror 'str' object has no attribute 'decode' django jwt      
 #Enable CORS -cross origin resource sharing,install cors headers in djangoProject.
@@ -111,7 +112,7 @@ Ans:Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 https://medium.com/analytics-vidhya/django-rest-api-with-json-web-token-jwt-authentication-69536c01ee18
 ____________________________________________________________________________________________________________
 
-pip install djangorestframework-jwt
+#pip install djangorestframework-jwt
 
 pip install drf-jwt **
 

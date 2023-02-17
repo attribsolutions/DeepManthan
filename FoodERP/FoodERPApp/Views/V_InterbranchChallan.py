@@ -170,7 +170,7 @@ class InterBranchChallanListFilterView(CreateAPIView):
                             "CreatedOn": a['CreatedOn']  
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': IBChallanListData})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -208,7 +208,7 @@ class InterBranchChallanView(CreateAPIView):
                 if IBChallan_serializer.is_valid():
                     IBChallan_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'InterBranch Challan Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': IBChallan_serializer.errors, 'Data':[]})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': IBChallan_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
