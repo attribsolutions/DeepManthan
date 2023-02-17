@@ -153,7 +153,7 @@ urlpatterns = [
             url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
             url(r'Orders$', T_OrdersView.as_view()),
             url(r'OrdersFilter$', OrderListFilterView.as_view()),
-            url(r'OrdersFilterSecond$', OrderListFilterViewSecond.as_view()),
+            url(r'OrdersFilterSecond$', OrderListFilterViewSecond.as_view()), #PO order SO order and Challan For GRN
             # url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
