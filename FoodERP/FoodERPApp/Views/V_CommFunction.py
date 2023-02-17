@@ -80,6 +80,11 @@ class MRPMaster:
         
         TodayDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(TodayDateItemMRPdata.query))
+        
+        
+        
+        
+        
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(TodayDateItemMRPdata, many=True).data
             Mrpid = MRP_Serializer[0]['id']
@@ -164,7 +169,14 @@ class MarginMaster:
             P=Q(Party_id__isnull=True)
         
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
-        # print(str(ItemMargindata.query))
+        if ItemMargindata.exists:
+           
+            P=Q(Party_id__isnull=True)
+            ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
+
+        
+        
+       
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
@@ -195,7 +207,7 @@ class MarginMaster:
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(ItemMargindata.query))
 
-        if ItemMargindata.exists():
+        if ItemMargindata.count() == 0:
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
             EffectiveDateMargin=   Margin_Serializer[0]['Margin']
         else:
@@ -340,4 +352,60 @@ class UnitwiseQuantityConversion:
 
 
     
-    
+class RateCalculationFunction:
+
+    def __init__(self,BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit):
+        self.ItemID     =   ItemID 
+        self.PartyID    =   PartyID 
+        self.BatchID    =   BatchID
+        self.DivisionID =   DivisionID
+        self.today      =   date.today()
+       
+        if(BatchID > 0):
+            QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST')
+            q1=M_MRPMaster.objects.filter(id=QueryForGSTAndMRP[0]['MRP']).values('MRP')
+            if q1.exists:
+                self.MRP = 0
+            else:
+                self.MRP = q1[0]['MRP']
+            self.Gst = q2[0]['GSTPercentage']
+
+            q2=M_GSTHSNCode.objects.filter(id=QueryForGSTAndMRP[0]['GST']).values('GSTPercentage')
+            # if(MCItemUnit == 0): 
+            #     a=Q(UnitID=MUnit)
+            # else:
+            #     a=Q(id=MCItemUnit)   
+            # q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQantity')
+            # q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).filter( a ).values('BaseUnitQantity')
+            
+            
+        else:
+            Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
+            MRPfun = MRPMaster(ItemID,DivisionID,0,self.today).GetTodaysDateMRP()
+            self.MRP=float(MRPfun[0]['TodaysMRP'])
+            self.GST=float(Gstfun[0]['GST'])
+        
+        query =M_Parties.objects.filter(id=PartyID).values('PriceList')
+        query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
+        self.calculationPath=str(query1[0]['CalculationPath']).split(',')
+       
+    def RateWithGST(self):
+        
+     
+        for i in self.calculationPath:
+            Margin=MarginMaster(self.ItemID,i,self.PartyID,self.today).GetTodaysDateMargin()
+            Margin=float(Margin[0]['TodaysMargin'])
+            GSTRate=self.MRP/(100+Margin)*100;
+            RatewithoutGST=GSTRate*100/(100+self.GST)
+            self.MRP=round(GSTRate,2)
+        
+        RateDetails=list()
+        RateDetails.append({
+            "RatewithGST":round(GSTRate,0),
+            "RateWithoutGST": round(RatewithoutGST,0),
+        })
+        
+        
+        
+        
+        return RateDetails
