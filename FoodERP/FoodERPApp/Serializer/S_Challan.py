@@ -81,4 +81,42 @@ class ChallanSerializerForDelete(serializers.ModelSerializer):
     ChallanItems = ChallanItemsSerializerForDelete(many=True)
     class Meta:
         model = T_Challan
-        fields = '__all__'        
+        fields = '__all__'
+
+
+
+class ChallanItemsSerializerSecond(serializers.ModelSerializer):
+    
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    # Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta:
+        model = TC_ChallanItems
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch']
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(ChallanItemsSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("Margin", None):
+            ret["Margin"] = {"id": None, "Margin": None} 
+        
+        if not ret.get("GST", None):
+            ret["GST"] = {"id": None, "GSTPercentage ": None}        
+             
+        return ret
+
+
+class ChallanSerializerSecond(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+    ChallanItems = ChallanItemsSerializerSecond(many=True)
+ 
+    class Meta:
+        model = T_Challan
+        fields = '__all__'                 
