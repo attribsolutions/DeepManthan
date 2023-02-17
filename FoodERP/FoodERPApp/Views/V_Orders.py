@@ -73,6 +73,81 @@ class OrderListFilterView(CreateAPIView):
                         queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
                         q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(Orderdata.query)})
+                if q :
+                    Order_serializer = T_OrderSerializerSecond(q, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    OrderListData = list()
+                    for a in Order_serializer:
+                        inward = 0
+                        for c in a['OrderReferences']:
+                            if(c['Inward'] == 1):
+                                inward = 1
+                        OrderListData.append({
+                            "id": a['id'],
+                            "OrderDate": a['OrderDate'],
+                            "FullOrderNumber": a['FullOrderNumber'],
+                            "DeliveryDate": a['DeliveryDate'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "SupplierID": a['Supplier']['id'],
+                            "Supplier": a['Supplier']['Name'],
+                            "OrderAmount": a['OrderAmount'],
+                            "Description": a['Description'],
+                            "OrderType" : a['OrderType'],
+                            "POType" : a['POType']['Name'],
+                            "IsOpen" : a['IsOpenPO'],
+                            "BillingAddress": a['BillingAddress']['Address'],
+                            "ShippingAddress": a['ShippingAddress']['Address'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "Inward": inward
+                            })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData}) 
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class OrderListFilterViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Customer = Orderdata['Customer']
+                Supplier = Orderdata['Supplier']
+                OrderType = Orderdata['OrderType']
+                
+                d = date.today()
+                if(OrderType == 1): #OrderType -1 PO Order
+                    if(Supplier == ''):
+                        query = T_Orders.objects.filter(
+                            OrderDate__range=[FromDate, ToDate], Customer_id=Customer, IsOpenPO=0, OrderType=1)
+                        queryForOpenPO = T_Orders.objects.filter(
+                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
+                        q = query.union(queryForOpenPO)
+                    else:
+                        query = T_Orders.objects.filter(OrderDate__range=[
+                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, IsOpenPO=0, OrderType=1)
+                        queryForOpenPO = T_Orders.objects.filter(
+                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
+                        q = query.union(queryForOpenPO)
+                else: #OrderType -2 Sales Order
+                    if(Customer == ''):
+                        query = T_Orders.objects.filter(
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, OrderType=2)
+                        queryForOpenPO = T_Orders.objects.filter(
+                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
+                        q = query.union(queryForOpenPO)
+                    else:
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
+                        q = query.union(queryForOpenPO)      
+                # return JsonResponse({'query': str(Orderdata.query)})
                
                 Order_serializer = T_OrderSerializerSecond(q, many=True).data
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
@@ -95,41 +170,41 @@ class OrderListFilterView(CreateAPIView):
                         "Description": a['Description'],
                         "OrderType" : a['OrderType'],
                         "POType" : a['POType']['Name'],
+                        "IsOpen" : a['IsOpenPO'],
                         "BillingAddress": a['BillingAddress']['Address'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
                         "Inward": inward
                         })
-                        
+                      
                 Challanquery = T_Challan.objects.filter(Party=Customer)
                 Challan_serializer = ChallanSerializerList(Challanquery, many=True).data
                 for a in Challan_serializer:
                     OrderListData.append({
                         "id": a['id'],
                         "OrderDate": a['ChallanDate'],
+                        "DeliveryDate": "",
                         "FullOrderNumber": a['FullChallanNumber'],
-                        "CustomerID": a['Party']['id'],
-                        "Customer": a['Party']['Name'],
-                        "SupplierID": a['Customer']['id'],
-                        "Supplier": a['Customer']['Name'],
+                        "CustomerID": a['Customer']['id'],
+                        "Customer": a['Customer']['Name'],
+                        "SupplierID": a['Party']['id'],
+                        "Supplier": a['Party']['Name'],
                         "OrderAmount": a['GrandTotal'],
                         "Description": "",
                         "OrderType" : "",
                         "POType" : "",
                         "BillingAddress": "",
+                        "IsOpen" : "",
                         "ShippingAddress": "",
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
                         "Inward": ""     
                     })
-                if not OrderListData:    
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})    
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})          
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
 class T_OrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication

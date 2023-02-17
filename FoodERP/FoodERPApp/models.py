@@ -917,14 +917,7 @@ class T_GRNs(models.Model):
     class Meta:
         db_table = "T_GRNs"
 
-class TC_GRNReferences(models.Model):
-    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
-    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
-    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
-    ChallanNo = models.CharField(max_length=500 ,null=True)
-    Inward = models.BooleanField(default=False)
-    class Meta:
-        db_table = "TC_GRNReferences"    
+    
 
 class TC_GRNItems(models.Model):
     GRN = models.ForeignKey(T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
@@ -961,7 +954,7 @@ class TC_GRNItems(models.Model):
         
 class T_Challan(models.Model):
     ChallanDate = models.DateField()
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT)
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
     Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
     ChallanNumber = models.IntegerField()
     FullChallanNumber = models.CharField(max_length=500)
@@ -1003,7 +996,18 @@ class TC_ChallanItems(models.Model):
     LiveBatch=models.ForeignKey(O_LiveBatches,blank=True, null=True, on_delete=models.PROTECT)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = "TC_ChallanItems"       
+        db_table = "TC_ChallanItems" 
+        
+        
+class TC_GRNReferences(models.Model):
+    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
+    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
+    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
+    ChallanNo = models.CharField(max_length=500 ,null=True)
+    Inward = models.BooleanField(default=False)
+    Challan = models.ForeignKey(T_Challan, on_delete=models.PROTECT ,null=True)
+    class Meta:
+        db_table = "TC_GRNReferences"              
         
 class M_TransactionType(models.Model):
     Name= models.CharField(max_length=100)
