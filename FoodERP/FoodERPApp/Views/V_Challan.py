@@ -81,7 +81,7 @@ class ChallanView(CreateAPIView):
             with transaction.atomic():
                 Challandata = JSONParser().parse(request)
                 GRN = Challandata['GRN']
-                if GRN == 0:
+                if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
