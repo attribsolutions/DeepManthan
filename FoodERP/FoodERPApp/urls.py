@@ -1,5 +1,7 @@
 from django.urls import re_path as url
 
+from .Views.V_ProductionReIssue import *
+
 from .Views.V_Production import *
 
 from .Views.V_GRNs import *
@@ -236,6 +238,12 @@ urlpatterns = [
             url(r'Production/([0-9]+)$',ProductionViewSecond.as_view()),
             url(r'Production$',ProductionView.as_view()),
             url(r'ProductionFilter$',ProductionList.as_view()),
+
+#Production ReIssue
+           
+            url(r'ProductionReIssue$',ProductionReIssueView.as_view()),
+            url(r'ProductionReIssue/([0-9]+)$',ProductionReIssueViewSecond.as_view()),
+            url(r'ProductionMaterialIssueItem$',MaterialIssueItemsView.as_view()),
 
 # Parties=================================================================================
             url(r'States$',M_StateView.as_view()),
