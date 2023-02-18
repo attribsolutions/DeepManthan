@@ -269,7 +269,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 Order_list = POOrderIDs.split(",")
                 OrderData = list()
                 OrderItemDetails = list()
-                if Mode == '1':
+                if Mode == 1:
                     OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
                     if not OrderQuery:
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
