@@ -152,7 +152,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "POTypeName": "",
                         "Description": "",
                         "Inward": "",
-                        "TermsAndConditions": "",
+                        "TermsAndConditions": [],
                         "OrderItems": DemandItemSerializer,
                         
                     })
@@ -183,7 +183,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         "POTypeName": "",
                         "Description": "",
                         "Inward": "",
-                        "TermsAndConditions": "",
+                        "TermsAndConditions": [],
                         "OrderItems": DemandItemSerializer,
                     })
 
