@@ -98,7 +98,17 @@ class WorkOrderList(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
                     WorkOrderListData = list()
                     for a in WorkOrder_serializerdata:
-                        
+                        Percentage = 0
+                        Query=TC_MaterialIssueWorkOrders.objects.filter(WorkOrder_id=a['id']).select_related('MaterialIssue').values('MaterialIssue__id')
+                        MaterialIssueList = list()
+                        for b in Query:
+                            MaterialIssueList.append(b['MaterialIssue__id'])
+                            if not MaterialIssueList:
+                                Percentage = 0 
+                            else:
+                                y=tuple(MaterialIssueList)
+                                Itemsquery = T_MaterialIssue.objects.filter(id__in=y).aggregate(Sum('LotQuantity'))
+                                Percentage = (float(Itemsquery['LotQuantity__sum'])/float(a["Quantity"]) )*100
                         WorkOrderListData.append({
                             "id": a['id'],
                             "WorkOrderDate": a['WorkOrderDate'],
@@ -111,6 +121,7 @@ class WorkOrderList(CreateAPIView):
                             "Bom": a['Bom'],
                             "NumberOfLot": a['NumberOfLot'],
                             "Quantity": a["Quantity"],
+                            "Percentage":Percentage,
                             "Company": a['Company']['id'],
                             "CompanyName": a['Company']['Name'],
                             "EstimatedOutputQty": a['Quantity'],
