@@ -180,3 +180,45 @@ class ProductionReIssueViewSecond(RetrieveAPIView):
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class ProductionReIsssueFilter(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                ProductionReIsssuedata = JSONParser().parse(request)
+                FromDate = ProductionReIsssuedata['FromDate']
+                ToDate = ProductionReIsssuedata['ToDate']
+                query = T_ProductionReIssue.objects.filter(Date__range=[FromDate, ToDate])
+                print(str(query.query))
+                if query:
+                    ProductionReIsssue_serializerdata = ProductionReIssueSerializer(
+                        query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
+                    # ProductionReIsssueListData = list()
+                    # for a in ProductionReIsssue_serializerdata:
+                       
+                    #     ProductionReIsssueListData.append({
+                    #         "id": a['id'],
+                    #         "MaterialIssueDate": a['MaterialIssueDate'],
+                    #         "MaterialIssueNumber": a['MaterialIssueNumber'],
+                    #         "FullMaterialIssueNumber": a['FullMaterialIssueNumber'],
+                    #         "Item": a['Item']['id'],
+                    #         "ItemName": a['Item']['Name'],
+                    #         "Unit": a['Unit']['id'],
+                    #         "UnitName": a['Unit']['BaseUnitConversion'],
+                    #         "NumberOfLot": a['NumberOfLot'],
+                    #         "LotQuantity": a["LotQuantity"],
+                    #         "Company": a['Company']['id'],
+                    #         "CompanyName": a['Company']['Name'],
+                    #         "Party": a['Party']['id'],
+                    #         "PartyName": a['Party']['Name'],
+                    #         "CreatedOn": a['CreatedOn'],
+                    #     })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ProductionReIsssue_serializerdata})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})

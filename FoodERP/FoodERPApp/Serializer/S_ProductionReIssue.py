@@ -35,7 +35,7 @@ class ProductionReIssueItemsSerializer(serializers.ModelSerializer):
 class ProductionReIssueSerializer(serializers.ModelSerializer):
     ProductionItem=ItemSerializer()
     ProductionReIssueItems=ProductionReIssueItemsSerializer(many=True)
-    obatchwiseStock=obatchwiseStockSerializer(many=True)
+    
     class Meta:
         model=T_ProductionReIssue
         # fields = [ 'Date', 'CreatedBy', 'UpdatedBy', 'ProductionID', 'ProductionItem','ProductionReIssueItems','obatchwiseStock']
