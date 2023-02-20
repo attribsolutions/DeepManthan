@@ -1328,7 +1328,7 @@ class O_BatchWiseLiveStock(models.Model):
 
 class T_ProductionReIssue(models.Model):
     Date = models.DateField()
-    ProductionItem = models.ForeignKey(M_Items, related_name='PItem', on_delete=models.PROTECT)
+    ProductionItem = models.ForeignKey(M_Items, related_name='ProductionItem', on_delete=models.PROTECT)
     ProductionID = models.ForeignKey(T_Production, related_name='Production', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
