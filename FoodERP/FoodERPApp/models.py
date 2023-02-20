@@ -1325,3 +1325,27 @@ class O_BatchWiseLiveStock(models.Model):
    
     class Meta:
         db_table = "O_BatchWiseLiveStock"          
+
+class T_ProductionReIssue(models.Model):
+    Date = models.DateField()
+    ProductionItem = models.ForeignKey(M_Items, related_name='ProductionItem', on_delete=models.PROTECT)
+    ProductionID = models.ForeignKey(T_Production, related_name='Production', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True) 
+    class Meta:
+        db_table = "T_ProductionReIssue"           
+
+class TC_ProductionReIssueItems(models.Model):
+    ProductionReIssue = models.ForeignKey(T_ProductionReIssue, related_name='ProductionReIssueItems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    IssueQuantity = models.DecimalField(max_digits=15, decimal_places=3) 
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='ProductionReIssueItemUnitID', on_delete=models.PROTECT)
+    BatchDate = models.DateField()
+    BatchCode = models.CharField(max_length=500)
+    SystemBatchDate = models.DateField()
+    SystemBatchCode = models.CharField(max_length=500)
+    LiveBatchID=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_ProductionReIssueItems"    
