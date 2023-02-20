@@ -99,7 +99,7 @@ class MaterialIssueItemsView(CreateAPIView):
          
 class ProductionReIssueView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    authentication_class = JSONWebTokenAuthentication 
     
     @transaction.atomic()
     def post(self, request, id=0):
@@ -109,18 +109,21 @@ class ProductionReIssueView(CreateAPIView):
                 ProductionReIssueItems = MaterialIssueData['ProductionReIssueItems']
                 O_BatchWiseLiveStockList = list()
                 for a in ProductionReIssueItems:
+                   
                     BaseUnitQuantity = UnitwiseQuantityConversion(a['Item'], a['IssueQuantity'], a['Unit'], 0, 0, 0, 1).GetBaseUnitQuantity()
+                    print(BaseUnitQuantity)
                 
                     O_BatchWiseLiveStockList.append({
-                        "Quantity": a['BatchID'],
+                        "Quantity": a['LiveBatchID'],
                         "Item": a['Item'],
                         "BaseUnitQuantity": BaseUnitQuantity
                     })
-                MaterialIssueData.update({"obatchwiseStock": O_BatchWiseLiveStockList})
+                    MaterialIssueData.update({"obatchwiseStock": O_BatchWiseLiveStockList})
                 
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':MaterialIssueData})
-                MaterialIssue_Serializer = ProductionReIssueSerializer(data=MaterialIssueData)
-                
+                MaterialIssue_Serializer = ProductionReIssueSerializerForSave(data=MaterialIssueData)
+                # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':MaterialIssue_Serializer.data})
+
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': []})
@@ -128,7 +131,7 @@ class ProductionReIssueView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
  
 
 class ProductionReIssueViewSecond(RetrieveAPIView):
