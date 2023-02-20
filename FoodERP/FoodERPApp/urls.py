@@ -243,6 +243,7 @@ urlpatterns = [
             url(r'ProductionReIssue$',ProductionReIssueView.as_view()),
             url(r'ProductionReIssue/([0-9]+)$',ProductionReIssueViewSecond.as_view()),
             url(r'ProductionMaterialIssueItem$',MaterialIssueItemsView.as_view()),
+            url(r'ProductionReIsssueFilter$',ProductionReIsssueFilter.as_view()),
 
 # Parties=================================================================================
             url(r'States$',M_StateView.as_view()),
