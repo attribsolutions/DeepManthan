@@ -114,7 +114,7 @@ class ProductionReIssueView(CreateAPIView):
                     print(BaseUnitQuantity)
                 
                     O_BatchWiseLiveStockList.append({
-                        "Quantity": a['LiveBatchID'],
+                        "Quantity": a['BatchID'],
                         "Item": a['Item'],
                         "BaseUnitQuantity": BaseUnitQuantity
                     })
