@@ -206,10 +206,11 @@ urlpatterns = [
             
 # GRN All API's
 
-            url(r'Challan/([0-9]+)$',ChallanView.as_view()),     # Challan Save and delete Api
-            url(r'Challan$',ChallanListFilterView.as_view()),    # Challan List Api
-            url(r'ChallanItems$', ChallanItemsView.as_view()),   # ChallanItems Api
-            url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItems Api
+            url(r'Challan$',ChallanView.as_view()),  # Challan Save
+            url(r'Challan/([0-9]+)$',ChallanView.as_view()),  #  delete Api
+            url(r'ChallanFilter$',ChallanListFilterView.as_view()), # Challan List Api
+            url(r'ChallanItems$', ChallanItemsView.as_view()),# ChallanItems Api
+            url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItemsStock Api
                     
             
                      

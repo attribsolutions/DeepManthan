@@ -81,7 +81,7 @@ class ChallanView(CreateAPIView):
             with transaction.atomic():
                 Challandata = JSONParser().parse(request)
                 GRN = Challandata['GRN']
-                if GRN == 0:
+                if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
@@ -165,7 +165,7 @@ class ChallanView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
         
     @transaction.atomic()
     def delete(self, request, id=0):

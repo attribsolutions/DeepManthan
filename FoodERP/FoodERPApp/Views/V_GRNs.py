@@ -9,6 +9,8 @@ from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
+from ..Serializer.S_Challan import *
+from ..Serializer.S_Bom import *
 from ..models import *
 from django.db.models import *
 
@@ -263,64 +265,154 @@ class GetOrderDetailsForGrnView(CreateAPIView):
         try:
             with transaction.atomic():
                 POOrderIDs = request.data['OrderIDs']
+                Mode = request.data['Mode']
                 Order_list = POOrderIDs.split(",")
                 OrderData = list()
                 OrderItemDetails = list()
-                
-                OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
-                OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                
-                OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
-                for b in OrderItemSerializedata:
-                        Item= b['Item']['id']
-                        query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                        # print(query.query)
-                        if query.exists():
-                            Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
-                            UnitDetails = list()
-                            for c in Unitdata:
-                                UnitDetails.append({
-                                "Unit": c['id'],
-                                "UnitName": c['BaseUnitConversion'],
-                            })
-                            # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                        OrderItemDetails.append({
-                            "id": b['id'],
-                            "Item": b['Item']['id'],
-                            "ItemName": b['Item']['Name'],
-                            "Quantity": b['Quantity'],
-                            "MRP": b['MRP']['id'],
-                            "MRPValue": b['MRP']['MRP'],
-                            "Rate": b['Rate'],
-                            "Unit": b['Unit']['id'],
-                            "UnitName": b['Unit']['BaseUnitConversion'],
-                            "BaseUnitQuantity": b['BaseUnitQuantity'],
-                            "GST": b['GST']['id'],
-                            "HSNCode": b['GST']['HSNCode'],
-                            "GSTPercentage": b['GST']['GSTPercentage'],
-                            "Margin": b['Margin']['id'],
-                            "MarginValue": b['Margin']['Margin'],
-                            "BasicAmount": b['BasicAmount'],
-                            "GSTAmount": b['GSTAmount'],
-                            "CGST": b['CGST'],
-                            "SGST": b['SGST'],
-                            "IGST": b['IGST'],
-                            "CGSTPercentage": b['CGSTPercentage'],
-                            "SGSTPercentage": b['SGSTPercentage'],
-                            "IGSTPercentage": b['IGSTPercentage'],
-                            "Amount": b['Amount'],
-                            "UnitDetails":UnitDetails
-                        })     
-                OrderData.append({
-                "Supplier": OrderSerializedata[0]['id'],
-                "SupplierName": OrderSerializedata[0]['SupplierName'],
-                "OrderAmount": OrderSerializedata[0]['OrderAmount'],
-                "Customer": OrderSerializedata[0]['CustomerID'],
-                "OrderItem": OrderItemDetails,
-            })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
+                if Mode == 1:
+                    OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
+                    if not OrderQuery:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
+                    else:
+                        OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
+                        OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
+                        OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
+                        for b in OrderItemSerializedata:
+                                Item= b['Item']['id']
+                                query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
+                                # print(query.query)
+                                if query.exists():
+                                    Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                    UnitDetails = list()
+                                    for c in Unitdata:
+                                        UnitDetails.append({
+                                        "Unit": c['id'],
+                                        "UnitName": c['BaseUnitConversion'],
+                                    })
+                                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
+                                OrderItemDetails.append({
+                                    "id": b['id'],
+                                    "Item": b['Item']['id'],
+                                    "ItemName": b['Item']['Name'],
+                                    "Quantity": b['Quantity'],
+                                    "MRP": b['MRP']['id'],
+                                    "MRPValue": b['MRP']['MRP'],
+                                    "Rate": b['Rate'],
+                                    "Unit": b['Unit']['id'],
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                    "GST": b['GST']['id'],
+                                    "HSNCode": b['GST']['HSNCode'],
+                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "Margin": b['Margin']['id'],
+                                    "MarginValue": b['Margin']['Margin'],
+                                    "BasicAmount": b['BasicAmount'],
+                                    "GSTAmount": b['GSTAmount'],
+                                    "CGST": b['CGST'],
+                                    "SGST": b['SGST'],
+                                    "IGST": b['IGST'],
+                                    "CGSTPercentage": b['CGSTPercentage'],
+                                    "SGSTPercentage": b['SGSTPercentage'],
+                                    "IGSTPercentage": b['IGSTPercentage'],
+                                    "Amount": b['Amount'],
+                                    "UnitDetails":UnitDetails
+                                })     
+                        OrderData.append({
+                            "Supplier": OrderSerializedata[0]['id'],
+                            "SupplierName": OrderSerializedata[0]['SupplierName'],
+                            "OrderAmount": OrderSerializedata[0]['OrderAmount'],
+                            "Customer": OrderSerializedata[0]['CustomerID'],
+                            "OrderItem": OrderItemDetails,
+                        })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
+                else:
+                    
+                    ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
+                    if ChallanQuery.exists():
+                        ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
+                        ChallanData = list()
+                        for x in ChallanSerializedata:
+                            ChallanItemDetails = list()
+                            for y in x['ChallanItems']:
+                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id'],BOM__IsVDCItem=1).values('BOM')
+                                Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
+                                BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                                BillofmaterialData = list()
+                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                                for a in BOM_Serializer:
+                                    ParentItem= a['Item']['id']
+                                    Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                    # print(query.query)
+                                    if Parentquery.exists():
+                                        ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                                        ParentUnitDetails = list()
+                                        for b in ParentUnitdata:
+                                            ParentUnitDetails.append({
+                                            "Unit": b['id'],
+                                            "UnitName": b['BaseUnitConversion'],
+                                        })
+                                            
+                                    GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                    if GSTquery.exists():
+                                        GSTdata =ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                                        GSTDetails = list()
+                                        for c in GSTdata:
+                                            GSTDetails.append({
+                                            "id": c['id'],
+                                            "EffectiveDate": c['EffectiveDate'],
+                                            "GSTPercentage": c['GSTPercentage'],
+                                            "HSNCode": c['HSNCode'],
+                                        })
+                                    MRPquery = M_MRPMaster.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                    if MRPquery.exists():
+                                        MRPdata =ItemMRPSerializerSecond(MRPquery, many=True).data
+                                        MRPDetails = list()
+                                        for d in MRPdata:
+                                            MRPDetails.append({
+                                            "id": d['id'],
+                                            "EffectiveDate": d['EffectiveDate'],
+                                            "Company": d['Company']['id'],
+                                            "CompanyName": d['Company']['Name'],
+                                            "MRP": d['MRP'],
+                                            })                
+                                    BillofmaterialData.append({
+                                        "Item":a['Item']['id'],
+                                        "ItemName":a['Item']['Name'],
+                                        "Quantity": a['EstimatedOutputQty'],
+                                        "MRP":MRPDetails[0]['id'],
+                                        "MRPValue": MRPDetails[0]['MRP'],
+                                        "Rate":"",  
+                                        "Unit": a['Unit']['id'],
+                                        "UnitName": a['Unit']['BaseUnitConversion'],
+                                        "BaseUnitQuantity": a['Unit']['BaseUnitQuantity'],
+                                        "GST":GSTDetails[0]['id'],
+                                        "HSNCode": GSTDetails[0]['HSNCode'],
+                                        "GSTPercentage": GSTDetails[0]['GSTPercentage'],
+                                        "Margin": "",
+                                        "MarginValue":"",
+                                        "BasicAmount": "",
+                                        "GSTAmount": "",
+                                        "CGST": "",
+                                        "SGST": "",
+                                        "IGST": "",
+                                        "CGSTPercentage": "",
+                                        "SGSTPercentage": "",
+                                        "IGSTPercentage": "",
+                                        "Amount":"",
+                                        "ParentUnitDetails":ParentUnitDetails,
+        
+                                        })       
+                            ChallanItemDetails.append(BillofmaterialData[0])        
+                        ChallanData.append({
+                            "Supplier": x['Customer']['id'],
+                            "SupplierName": x['Customer']['Name'],
+                            "OrderAmount": x['GrandTotal'],
+                            "Customer": x['Party']['id'],
+                            "OrderItem": ChallanItemDetails,
+                        })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
