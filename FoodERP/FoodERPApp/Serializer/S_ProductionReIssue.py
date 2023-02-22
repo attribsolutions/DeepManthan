@@ -35,7 +35,7 @@ class ProductionReIssueItemsSerializer(serializers.ModelSerializer):
 class ProductionReIssueSerializer(serializers.ModelSerializer):
     ProductionItem=ItemSerializer()
     ProductionReIssueItems=ProductionReIssueItemsSerializer(many=True)
-    obatchwiseStock=obatchwiseStockSerializer(many=True)
+    
     class Meta:
         model=T_ProductionReIssue
         # fields = [ 'Date', 'CreatedBy', 'UpdatedBy', 'ProductionID', 'ProductionItem','ProductionReIssueItems','obatchwiseStock']
@@ -86,3 +86,17 @@ class ProductionReIssueSerializerForSave(serializers.ModelSerializer):
         
             
         return ProductionIssueID
+
+
+class ProductionReIssueItemsSerializerForDelete(serializers.ModelSerializer):
+    
+    class Meta:
+        model=TC_ProductionReIssueItems
+        fields='__all__'
+
+class ProductionReIssueSerializerForDelete(serializers.ModelSerializer):
+    ProductionReIssueItems=ProductionReIssueItemsSerializerForDelete(many=True)
+    
+    class Meta:
+        model = T_ProductionReIssue
+        fields = '__all__'        
