@@ -326,7 +326,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "OrderItem": OrderItemDetails,
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
-                else:
+                    
+                elif Mode == 2:
                     
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
                     if ChallanQuery.exists():
@@ -412,7 +413,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "OrderItem": ChallanItemDetails,
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})    
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []}) 
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
