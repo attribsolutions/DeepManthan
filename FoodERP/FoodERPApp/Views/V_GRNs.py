@@ -325,7 +325,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "Customer": OrderSerializedata[0]['CustomerID'],
                             "OrderItem": OrderItemDetails,
                         })
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
                 elif Mode == 2:
                     
