@@ -193,7 +193,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "OrderAmount": a['GrandTotal'],
                         "Description": "",
                         "OrderType" : "",
-                        "POType" : "",
+                        "POType" : "Challan",
                         "BillingAddress": "",
                         "IsOpen" : "",
                         "ShippingAddress": "",
