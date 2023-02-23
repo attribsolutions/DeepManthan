@@ -401,7 +401,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "SGSTPercentage": "",
                                         "IGSTPercentage": "",
                                         "Amount":"",
-                                        "ParentUnitDetails":ParentUnitDetails,
+                                        "UnitDetails":ParentUnitDetails,
         
                                         })       
                             ChallanItemDetails.append(BillofmaterialData[0])        
