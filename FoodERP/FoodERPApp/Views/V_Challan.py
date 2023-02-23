@@ -221,7 +221,8 @@ class ChallanListFilterView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "CreatedOn": a['CreatedOn'] 
+                            "CreatedOn": a['CreatedOn'],
+                            "POType":3
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
