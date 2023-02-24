@@ -31,7 +31,7 @@ class TC_GRNReferencesSerializer(serializers.ModelSerializer):
   
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo','Inward']        
+        fields = ['Invoice', 'Order', 'ChallanNo','Inward','Challan']        
 
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -126,7 +126,7 @@ class TC_GRNReferencesSerializerSecond(serializers.ModelSerializer):
     Order = T_OrderSerializerThird(read_only=True)
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo','Inward'] 
+        fields = ['Invoice', 'Order', 'ChallanNo','Inward', 'Challan'] 
         
 class ItemSerializer(serializers.ModelSerializer):
     class Meta : 
