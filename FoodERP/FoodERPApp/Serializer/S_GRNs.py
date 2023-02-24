@@ -70,9 +70,14 @@ class T_GRNSerializer(serializers.ModelSerializer):
                 O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
         
+        # for GRNReference_data in GRNReferences_data:
+            
+            
+        #     a=str(GRNReference_data['Order']) 
+        #     OrderID=re.findall(r'\d+', a)
+        #     GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
+        
         for GRNReference_data in GRNReferences_data:
-            a=str(GRNReference_data['Order']) 
-            OrderID=re.findall(r'\d+', a)
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
             
        
