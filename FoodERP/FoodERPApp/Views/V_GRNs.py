@@ -338,10 +338,12 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
                     if ChallanQuery.exists():
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
                         ChallanData = list()
                         for x in ChallanSerializedata:
                             ChallanItemDetails = list()
                             for y in x['ChallanItems']:
+                                Qty = y['Quantity']
                                 bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id'],BOM__IsVDCItem=1).values('BOM')
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
                                 BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
@@ -349,6 +351,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                                 for a in BOM_Serializer:
                                     ParentItem= a['Item']['id']
+                                   
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     # print(query.query)
                                     if Parentquery.exists():
@@ -387,7 +390,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     BillofmaterialData.append({
                                         "Item":a['Item']['id'],
                                         "ItemName":a['Item']['Name'],
-                                        "Quantity": a['EstimatedOutputQty'],
+                                        "Quantity": Qty,
                                         "MRP":MRPDetails[0]['id'],
                                         "MRPValue": MRPDetails[0]['MRP'],
                                         "Rate":"",  
