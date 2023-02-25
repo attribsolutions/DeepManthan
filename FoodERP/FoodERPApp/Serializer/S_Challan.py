@@ -66,6 +66,7 @@ class ChallanSerializer(serializers.ModelSerializer):
 class ChallanSerializerList(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
+    ChallanItems = ChallanItemsSerializer(many=True)
  
     class Meta:
         model = T_Challan
