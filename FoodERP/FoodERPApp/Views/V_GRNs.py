@@ -291,10 +291,11 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                     UnitDetails = list()
                                     for c in Unitdata:
-                                        UnitDetails.append({
-                                        "Unit": c['id'],
-                                        "UnitName": c['BaseUnitConversion'],
-                                    })
+                                        if c['IsDeleted']== 0 :
+                                            UnitDetails.append({
+                                            "Unit": c['id'],
+                                            "UnitName": c['BaseUnitConversion'],
+                                        })
                                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                                 OrderItemDetails.append({
                                     "id": b['id'],
@@ -354,10 +355,11 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
                                         ParentUnitDetails = list()
                                         for b in ParentUnitdata:
-                                            ParentUnitDetails.append({
-                                            "Unit": b['id'],
-                                            "UnitName": b['BaseUnitConversion'],
-                                        })
+                                            if b['IsDeleted']== 0 :
+                                                ParentUnitDetails.append({
+                                                "Unit": b['id'],
+                                                "UnitName": b['BaseUnitConversion'],
+                                                })
                                             
                                     GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     if GSTquery.exists():
