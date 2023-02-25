@@ -55,6 +55,7 @@ class BOMListFilterView(CreateAPIView):
                         "EstimatedOutputQty" : a['EstimatedOutputQty'],
                         "Comment": a['Comment'],
                         "IsActive": a['IsActive'],
+                        "IsVDCItem": a['IsVDCItem'],
                         "Company": a['Company']['id'],
                         "CompanyName": a['Company']['Name'],
                         "CreatedOn" : a['CreatedOn'],
