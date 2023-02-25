@@ -175,12 +175,25 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
-                        "Inward": inward
+                        "Inward": inward,
+                        "Percentage" : "",
+                        
                         })
                       
                 Challanquery = T_Challan.objects.filter(Party=Customer)
                 Challan_serializer = ChallanSerializerList(Challanquery, many=True).data
                 for a in Challan_serializer:
+                    Query=TC_GRNReferences.objects.filter(Challan_id=a['id']).select_related('GRN').values('GRN_id')
+                    GRNList = list()
+                    for b in Query:
+                        GRNList.append(b['GRN_id'])
+                        if not GRNList:
+                            Percentage = 0 
+                        else:
+                            y=tuple(GRNList)
+                            Itemsquery = TC_GRNItems.objects.filter(GRN__in=y).aggregate(Sum('Quantity'))
+                            Percentage = (float(Itemsquery['Quantity__sum'])/float(a['ChallanItems'][0]['Quantity']) )*100
+                    
                     OrderListData.append({
                         "id": a['id'],
                         "OrderDate": a['ChallanDate'],
@@ -199,7 +212,9 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "ShippingAddress": "",
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
-                        "Inward": ""     
+                        "Inward": "",
+                        "Percentage" : Percentage,
+                             
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})    
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})          
