@@ -16,7 +16,7 @@ class M_BOMSerializer(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializer(many=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems']  
+        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems']  
         
     def create(self, validated_data):
         BomItems_data = validated_data.pop('BOMItems')
@@ -37,6 +37,10 @@ class M_BOMSerializer(serializers.ModelSerializer):
             'Comment', instance.Comment)
         instance.IsActive = validated_data.get(
             'IsActive', instance.IsActive)
+        
+        instance.IsVDCItem = validated_data.get(
+            'IsVDCItem', instance.IsVDCItem)
+        
         instance.Item = validated_data.get(
             'Item', instance.Item)
         instance.Unit = validated_data.get(
@@ -72,7 +76,7 @@ class  M_BOMSerializerSecond(serializers.ModelSerializer):
     Company = C_CompanySerializer(read_only=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','Item','Unit','Company','CreatedOn','BOMItems'] 
+        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems'] 
         
 class StockQtyserializer(serializers.Serializer):
     id = serializers.IntegerField()
