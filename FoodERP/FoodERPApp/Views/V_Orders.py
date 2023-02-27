@@ -141,7 +141,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, OrderType=2)
                         queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
+                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
                         q = query.union(queryForOpenPO)
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
