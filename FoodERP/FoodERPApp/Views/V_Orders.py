@@ -51,22 +51,20 @@ class OrderListFilterView(CreateAPIView):
                 if(OrderType == 1): #OrderType -1 PO Order
                     if(Supplier == ''):
                         query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Customer_id=Customer, IsOpenPO=0, OrderType=1)
+                            OrderDate__range=[FromDate, ToDate], Customer_id=Customer, OrderType=1)
                         queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
+                             POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
                         q = query.union(queryForOpenPO)
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[
-                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, IsOpenPO=0, OrderType=1)
-                        queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
+                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
                         q = query.union(queryForOpenPO)
                 else: #OrderType -2 Sales Order
                     if(Customer == ''):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, OrderType=2)
-                        queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
                         q = query.union(queryForOpenPO)
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
@@ -128,20 +126,20 @@ class OrderListFilterViewSecond(CreateAPIView):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Customer_id=Customer, IsOpenPO=0, OrderType=1)
                         queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
+                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
                         q = query.union(queryForOpenPO)
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, IsOpenPO=0, OrderType=1)
                         queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
+                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
                         q = query.union(queryForOpenPO)
                 else: #OrderType -2 Sales Order
                     if(Customer == ''):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, OrderType=2)
                         queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=1, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
+                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
                         q = query.union(queryForOpenPO)
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
@@ -175,12 +173,25 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
-                        "Inward": inward
+                        "Inward": inward,
+                        "Percentage" : "",
+                        
                         })
                       
                 Challanquery = T_Challan.objects.filter(Party=Customer)
                 Challan_serializer = ChallanSerializerList(Challanquery, many=True).data
                 for a in Challan_serializer:
+                    Query=TC_GRNReferences.objects.filter(Challan_id=a['id']).select_related('GRN').values('GRN_id')
+                    GRNList = list()
+                    for b in Query:
+                        GRNList.append(b['GRN_id'])
+                        if not GRNList:
+                            Percentage = 0 
+                        else:
+                            y=tuple(GRNList)
+                            Itemsquery = TC_GRNItems.objects.filter(GRN__in=y).aggregate(Sum('Quantity'))
+                            Percentage = (float(Itemsquery['Quantity__sum'])/float(a['ChallanItems'][0]['Quantity']) )*100
+                    
                     OrderListData.append({
                         "id": a['id'],
                         "OrderDate": a['ChallanDate'],
@@ -193,13 +204,15 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "OrderAmount": a['GrandTotal'],
                         "Description": "",
                         "OrderType" : "",
-                        "POType" : "",
+                        "POType" : "Challan",
                         "BillingAddress": "",
                         "IsOpen" : "",
                         "ShippingAddress": "",
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
-                        "Inward": ""     
+                        "Inward": "",
+                        "Percentage" : Percentage,
+                             
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})    
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})          

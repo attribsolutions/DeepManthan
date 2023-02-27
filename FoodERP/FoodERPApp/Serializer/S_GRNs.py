@@ -31,7 +31,7 @@ class TC_GRNReferencesSerializer(serializers.ModelSerializer):
   
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo','Inward']        
+        fields = ['Invoice', 'Order', 'ChallanNo','Inward','Challan']        
 
 class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,9 +70,14 @@ class T_GRNSerializer(serializers.ModelSerializer):
                 O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
         
+        # for GRNReference_data in GRNReferences_data:
+            
+            
+        #     a=str(GRNReference_data['Order']) 
+        #     OrderID=re.findall(r'\d+', a)
+        #     GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
+        
         for GRNReference_data in GRNReferences_data:
-            a=str(GRNReference_data['Order']) 
-            OrderID=re.findall(r'\d+', a)
             GRNReferences=TC_GRNReferences.objects.create(GRN=grnID, **GRNReference_data)
             
        
@@ -126,7 +131,7 @@ class TC_GRNReferencesSerializerSecond(serializers.ModelSerializer):
     Order = T_OrderSerializerThird(read_only=True)
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo','Inward'] 
+        fields = ['Invoice', 'Order', 'ChallanNo','Inward', 'Challan'] 
         
 class ItemSerializer(serializers.ModelSerializer):
     class Meta : 

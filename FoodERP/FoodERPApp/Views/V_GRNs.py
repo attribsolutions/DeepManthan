@@ -44,6 +44,12 @@ class GRNListFilterView(CreateAPIView):
                         query, many=True).data
                     GRNListData = list()
                     for a in GRN_serializer:
+                        
+                        challan = a['GRNReferences'][0]['Challan']
+                        if challan != None: 
+                            POType= ""
+                        else:
+                            POType= a['GRNReferences'][0]['Order']['POType']['id']
                         GRNListData.append({
                             "id": a['id'],
                             "GRNDate": a['GRNDate'],
@@ -56,8 +62,7 @@ class GRNListFilterView(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "CreatedOn" : a['CreatedOn'],
-                            "POType":a['GRNReferences'][0]['Order']['POType']['id']
-                           
+                            "POType":POType
 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
@@ -286,10 +291,11 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                     UnitDetails = list()
                                     for c in Unitdata:
-                                        UnitDetails.append({
-                                        "Unit": c['id'],
-                                        "UnitName": c['BaseUnitConversion'],
-                                    })
+                                        if c['IsDeleted']== 0 :
+                                            UnitDetails.append({
+                                            "Unit": c['id'],
+                                            "UnitName": c['BaseUnitConversion'],
+                                        })
                                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                                 OrderItemDetails.append({
                                     "id": b['id'],
@@ -325,16 +331,19 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "Customer": OrderSerializedata[0]['CustomerID'],
                             "OrderItem": OrderItemDetails,
                         })
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
-                else:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    
+                elif Mode == 2:
                     
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
                     if ChallanQuery.exists():
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
                         ChallanData = list()
                         for x in ChallanSerializedata:
                             ChallanItemDetails = list()
                             for y in x['ChallanItems']:
+                                Qty = y['Quantity']
                                 bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id'],BOM__IsVDCItem=1).values('BOM')
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
                                 BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
@@ -342,16 +351,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                                 for a in BOM_Serializer:
                                     ParentItem= a['Item']['id']
+                                   
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     # print(query.query)
                                     if Parentquery.exists():
                                         ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
                                         ParentUnitDetails = list()
                                         for b in ParentUnitdata:
-                                            ParentUnitDetails.append({
-                                            "Unit": b['id'],
-                                            "UnitName": b['BaseUnitConversion'],
-                                        })
+                                            if b['IsDeleted']== 0 :
+                                                ParentUnitDetails.append({
+                                                "Unit": b['id'],
+                                                "UnitName": b['BaseUnitConversion'],
+                                                })
                                             
                                     GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     if GSTquery.exists():
@@ -379,7 +390,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     BillofmaterialData.append({
                                         "Item":a['Item']['id'],
                                         "ItemName":a['Item']['Name'],
-                                        "Quantity": a['EstimatedOutputQty'],
+                                        "Quantity": Qty,
                                         "MRP":MRPDetails[0]['id'],
                                         "MRPValue": MRPDetails[0]['MRP'],
                                         "Rate":"",  
@@ -400,7 +411,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "SGSTPercentage": "",
                                         "IGSTPercentage": "",
                                         "Amount":"",
-                                        "ParentUnitDetails":ParentUnitDetails,
+                                        "UnitDetails":ParentUnitDetails,
         
                                         })       
                             ChallanItemDetails.append(BillofmaterialData[0])        
@@ -412,7 +423,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "OrderItem": ChallanItemDetails,
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})    
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []}) 
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
