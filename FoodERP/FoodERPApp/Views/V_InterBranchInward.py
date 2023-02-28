@@ -231,4 +231,4 @@ class InterBranchInwardViewSecond(CreateAPIView):
         except T_InterBranchInward.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'InterBranch Inward used in another tbale', 'Data': []})
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'InterBranch Inward used in another tbale', 'Data': []})
