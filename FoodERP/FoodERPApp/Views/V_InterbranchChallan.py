@@ -159,8 +159,8 @@ class InterBranchChallanListFilterView(CreateAPIView):
                     for a in IBChallan_serializer:
                         IBChallanListData.append({
                             "id": a['id'],
-                            "IBChallanDate": a['IBChallanDate'],
-                            "FullIBChallanNumber": a['FullIBChallanNumber'],
+                            "InvoiceDate": a['IBChallanDate'],
+                            "FullInvoiceNumber": a['FullIBChallanNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
