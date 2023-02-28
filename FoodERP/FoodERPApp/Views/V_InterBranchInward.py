@@ -223,7 +223,7 @@ class InterBranchInwardViewSecond(CreateAPIView):
               
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'InterBranch Inward Used in another Transaction', 'Data': []})   
+                        return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'InterBranch Inward Used in another Transaction', 'Data': []})   
                 
                 Inward_Data = T_InterBranchInward.objects.get(id=id)
                 Inward_Data.delete()
