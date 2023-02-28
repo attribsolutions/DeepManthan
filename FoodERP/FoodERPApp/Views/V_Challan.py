@@ -63,7 +63,7 @@ class ChallanItemStockView(CreateAPIView):
                             "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
                             "Rate":d['LiveBatche']['Rate'],
                             "MRP" : d['LiveBatche']['MRP']['MRP'],
-                            "GSTPercentage" : d['LiveBatche']['GST']['GSTPercentage'],
+                            "GST" : d['LiveBatche']['GST']['GSTPercentage'],
                             "UnitName":d['Unit']['BaseUnitConversion'], 
                             "BaseUnitQuantity":d['BaseUnitQuantity'], 
                             }) 
