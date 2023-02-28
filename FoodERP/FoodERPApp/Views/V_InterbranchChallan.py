@@ -222,7 +222,7 @@ class InterBranchChallanViewSecond(CreateAPIView):
             with transaction.atomic():
                 IBChallandata=T_InterbranchChallan.objects.all().filter(id=id)
                 IBChallandataserializer=IBChallanSerializerForDelete(IBChallandata,many=True).data
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':IBChallandataserializer})
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':IBChallandataserializer})
 
                 O_BatchWiseLiveStockList=dict()
                 
