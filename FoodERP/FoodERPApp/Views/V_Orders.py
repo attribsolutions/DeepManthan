@@ -93,7 +93,6 @@ class OrderListFilterView(CreateAPIView):
                             "Description": a['Description'],
                             "OrderType" : a['OrderType'],
                             "POType" : a['POType']['Name'],
-                            "IsOpen" : a['IsOpenPO'],
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
@@ -123,23 +122,18 @@ class OrderListFilterViewSecond(CreateAPIView):
                 d = date.today()
                 if(OrderType == 1): #OrderType -1 PO Order
                     if(Supplier == ''):
-                        query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Customer_id=Customer, IsOpenPO=0, OrderType=1)
-                        queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer,  OrderType=1)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
                         q = query.union(queryForOpenPO)
                     else:
-                        query = T_Orders.objects.filter(OrderDate__range=[
-                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, IsOpenPO=0, OrderType=1)
-                        queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
                         q = query.union(queryForOpenPO)
                 else: #OrderType -2 Sales Order
                     if(Customer == ''):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, OrderType=2)
-                        queryForOpenPO = T_Orders.objects.filter(
-                            IsOpenPO=0, POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
                         q = query.union(queryForOpenPO)
                     else:
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
@@ -168,7 +162,6 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "Description": a['Description'],
                         "OrderType" : a['OrderType'],
                         "POType" : a['POType']['Name'],
-                        "IsOpen" : a['IsOpenPO'],
                         "BillingAddress": a['BillingAddress']['Address'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "CreatedBy": a['CreatedBy'],
@@ -206,7 +199,6 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "OrderType" : "",
                         "POType" : "Challan",
                         "BillingAddress": "",
-                        "IsOpen" : "",
                         "ShippingAddress": "",
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],

@@ -44,6 +44,7 @@ class ChallanItemStockView(CreateAPIView):
                 Party = ChallanItemData['Party']
                         
                 obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+              
                 if obatchwisestockquery == "":
                     StockQtySerialize_data =[]
                 else: 
@@ -64,7 +65,8 @@ class ChallanItemStockView(CreateAPIView):
                             "Rate":d['LiveBatche']['Rate'],
                             "MRP" : d['LiveBatche']['MRP']['MRP'],
                             "GST" : d['LiveBatche']['GST']['GSTPercentage'],
-                            "UnitName":d['Unit']['BaseUnitConversion'], 
+                            "UnitName":d['Unit']['UnitID'], 
+                            "Unit":d['Unit']['BaseUnitConversion'], 
                             "BaseUnitQuantity":d['BaseUnitQuantity'], 
                             }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': stockDatalist})           
