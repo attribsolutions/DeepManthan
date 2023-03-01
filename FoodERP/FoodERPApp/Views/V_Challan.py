@@ -168,6 +168,8 @@ class ChallanView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
+ 
+ 
         
     @transaction.atomic()
     def delete(self, request, id=0):
