@@ -41,7 +41,7 @@ class ChallanSerializer(serializers.ModelSerializer):
     BatchWiseLiveStockGRNID=O_BatchWiseLiveStockSerializerForChallan(many=True)
     class Meta:
         model = T_Challan
-        fields = ['ChallanDate', 'ChallanNumber', 'FullChallanNumber', 'GrandTotal', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ChallanItems', 'GRN','BatchWiseLiveStockGRNID']    
+        fields = ['ChallanDate', 'ChallanNumber', 'FullChallanNumber', 'GrandTotal', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ChallanItems', 'GRN']    
     
     def create(self, validated_data):
         ChallanItems_data = validated_data.pop('ChallanItems')
