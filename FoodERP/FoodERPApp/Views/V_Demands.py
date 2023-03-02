@@ -208,18 +208,20 @@ class DemandListFilterView(CreateAPIView):
                 ToDate = Demanddata['ToDate']
                 Customer = Demanddata['Customer'] # Customer Compansary
                 Supplier = Demanddata['Supplier']
-                InOut = Demanddata['InOut']
-                if (InOut == 1 ): # Supply Order against Branch Demand
+                IBType = Demanddata['IBType']
+                if (IBType == "IBSO" ): # InterBranch Sales Order 
                     if(Supplier == ''):
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)
                     else:
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
-                else:
-                    if(Supplier == ''): # Self Demand Order
+                elif(IBType == "IBPO"):
+                    if(Supplier == ''): # InterBranch Purchase Order
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
                     else:
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)
-                         
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                              
                 if query:
                     Demand_serializer = T_DemandSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Demand_serializer})
