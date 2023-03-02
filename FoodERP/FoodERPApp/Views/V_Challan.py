@@ -96,10 +96,9 @@ class ChallanView(CreateAPIView):
                     Challandata['FullChallanNumber'] = str(b)+""+str(a)
                     ChallanItems = Challandata['ChallanItems']
         
-                    BatchWiseLiveStockGRNID=list()
+                    BatchWiseLiveStockList=list()
                     for ChallanItem in ChallanItems:
-                        BatchWiseLiveStockGRNID.append({
-                            
+                        BatchWiseLiveStockList.append({
                             "Item" : ChallanItem['Item'],
                             "Quantity" : ChallanItem['Quantity'],
                             "BaseUnitQuantity" : ChallanItem['BaseUnitQuantity'],
@@ -108,7 +107,7 @@ class ChallanView(CreateAPIView):
                             "Party" : ChallanItem['Party'],
                         })
                         
-                    Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockGRNID}) 
+                    Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
                     Challan_serializer = ChallanSerializer(data=Challandata)
                     if Challan_serializer.is_valid():
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
@@ -169,7 +168,7 @@ class ChallanView(CreateAPIView):
                         "ChallanItems": GRNItemListData,
                         "BatchWiseLiveStockGRNID":a['BatchWiseLiveStockGRNID']
                     })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
                     Party = GRNListData[0]['Party']
                     ChallanDate = GRNListData[0]['ChallanDate']
                     # ==========================Get Max Invoice Number=====================================================
