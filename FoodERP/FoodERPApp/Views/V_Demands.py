@@ -230,14 +230,14 @@ class DemandListFilterView(CreateAPIView):
                        
                         DemandListData.append({
                             "id": a['id'],
-                            "IBOrderDate": a['DemandDate'],
-                            "Comment": a['Comment'],
-                            "FullIBOrderNumber": a['FullDemandNumber'],
+                            "OrderDate": a['DemandDate'],
+                            "Description": a['Comment'],
+                            "FullOrderNumber": a['FullDemandNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
-                            "DemandAmount": a['DemandAmount'],
+                            "Amount": a['DemandAmount'],
                             # "BillingAddress": a['BillingAddress']['Address'],
                             # "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
