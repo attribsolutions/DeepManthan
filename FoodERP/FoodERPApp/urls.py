@@ -151,6 +151,7 @@ urlpatterns = [
 # Employees 
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
             url(r'Employees$', M_EmployeesView.as_view()),
+            url(r'EmployeesFilter$', M_EmployeesFilterView.as_view()),
             url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
             url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     
