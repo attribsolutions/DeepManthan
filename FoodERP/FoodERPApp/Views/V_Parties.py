@@ -32,6 +32,34 @@ class DivisionsView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
   
+
+class M_PartiesFilterView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Logindata = JSONParser().parse(request)
+                UserID = Logindata['UserID']   
+                RoleID=  Logindata['RoleID']  
+                CompanyID=Logindata['CompanyID'] 
+
+                if(RoleID == 1 ):
+                    query=M_Parties.objects.all()
+                else:
+                    query=M_Parties.objects.filter(CreatedBy=UserID)
+                   
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
+                else:
+                    M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Data':M_Parties_serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
 class M_PartiesView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
