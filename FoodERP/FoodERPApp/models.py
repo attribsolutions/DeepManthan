@@ -207,7 +207,38 @@ class M_Employees(models.Model):
     class Meta:
         db_table = "M_Employees"
 
-
+class M_Routes(models.Model):
+    Name = models.CharField(max_length=500)
+    Party = models.ForeignKey(M_Parties, related_name='RParty', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='RCompany', on_delete=models.PROTECT)
+    Sunday = models.BooleanField(default=False,blank=True, null=True)
+    Monday = models.BooleanField(default=False,blank=True, null=True)
+    Tuesday = models.BooleanField(default=False,blank=True, null=True)
+    Wednesday = models.BooleanField(default=False,blank=True, null=True)
+    Thursday = models.BooleanField(default=False,blank=True, null=True)
+    Friday = models.BooleanField(default=False,blank=True, null=True)
+    Saturday = models.BooleanField(default=False,blank=True, null=True)
+    IsActive =models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_Routes"
+        
+class M_Salesman(models.Model):
+    Name = models.CharField(max_length=500)
+    MobileNo = models.BigIntegerField()
+    Party = models.ForeignKey(M_Parties, related_name='SParty', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='SCompany', on_delete=models.PROTECT)
+    IsActive =models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_Salesman"
+        
 class MC_EmployeeParties(models.Model):
     Employee = models.ForeignKey(
         M_Employees, related_name='EmployeeParties', on_delete=models.CASCADE)
@@ -1348,3 +1379,55 @@ class TC_ProductionReIssueItems(models.Model):
     LiveBatchID=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
     class Meta:
         db_table = "TC_ProductionReIssueItems"    
+        
+                
+class T_PurchaseReturn(models.Model):
+    ReturnDate = models.DateField()
+    Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
+    ReturnNumber = models.IntegerField()
+    FullReturnNumber = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
+    RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "T_PurchaseReturn"
+        
+
+class TC_PurchaseReturnItems(models.Model):
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Returnitems', on_delete=models.CASCADE)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ReturnItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    TaxType = models.CharField(max_length=500)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ReturnItemGST',null=True,on_delete=models.PROTECT)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "TC_PurchaseReturnItems"
+    
+        
+        
+        
+                        
