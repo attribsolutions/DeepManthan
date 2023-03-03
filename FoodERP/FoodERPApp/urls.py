@@ -96,6 +96,8 @@ from .Views.V_Challan import *
 
 from .Views.V_Routes import *
 
+from .Views.V_Salesman import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -286,7 +288,11 @@ urlpatterns = [
             url(r'Routes/([0-9]+)$', RoutesView.as_view()), 
             url(r'Routes$', RoutesView.as_view()),              
             
-            
+
+# Salesman 
+            url(r'SalesmanList$', SalesmanListView.as_view()), 
+            url(r'Salesman/([0-9]+)$', SalesmanView.as_view()), 
+            url(r'Salesman$', SalesmanView.as_view()),             
                 
     
 #Item All APIs======================================================================================
