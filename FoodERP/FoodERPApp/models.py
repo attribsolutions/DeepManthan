@@ -922,6 +922,7 @@ class MC_VehiclesDivisions(models.Model):
 class  MC_PartySubParty(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.CASCADE)
     SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
+    Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.CASCADE, blank=True,null=True)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(blank=True, null=True)
