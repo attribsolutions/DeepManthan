@@ -64,9 +64,6 @@ class UserListView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    # def get(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
     def post(self, request):
         try:
             with transaction.atomic():
@@ -77,7 +74,7 @@ class UserListView(CreateAPIView):
                 
                 if (RoleID == 1):
                     Usersdata = M_Users.objects.all()
-                elif(RoleID == 2): 
+                else:                
                     Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
                 
                 if Usersdata.exists():
