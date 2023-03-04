@@ -82,7 +82,9 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyName": a['SubParty']['Name'],
                         "SubParty": a['Party']['id'],
                         "SubPartyName": a['Party']['Name'],
-                        "PartyType": a['Party']['PartyType']
+                        "PartyType": a['Party']['PartyType'],
+                        "Route": a['Route']['id'],
+                        "Creditlimit": a['Creditlimit']
                     }) 
                 for a in SubPartySerializer:
                     SubPartyList.append({
@@ -90,7 +92,9 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyName": a['Party']['Name'],
                         "SubParty": a['SubParty']['id'],
                         "SubPartyName": a['SubParty']['Name'],
-                        "PartyType": a['SubParty']['PartyType']
+                        "PartyType": a['SubParty']['PartyType'],
+                        "Route": a['Route']['id'],
+                        "Creditlimit": a['Creditlimit']
                     })
                    
                 

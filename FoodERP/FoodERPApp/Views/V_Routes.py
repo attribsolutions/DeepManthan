@@ -30,7 +30,6 @@ class RouteListView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
      
-
 class RoutesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -98,29 +97,35 @@ class RoutesView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
   
-class RoutesUpdateView(CreateAPIView):
+class RoutesUpdateListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def post(self, request):
+    def post(self, request,id=0):
         try:
             with transaction.atomic():
-                PartySubpartiesdata = JSONParser().parse(request)
-                PartySubparties_Serializer = PartySubPartySerializer(data=PartySubpartiesdata, many=True)
-               
-                if PartySubparties_Serializer.is_valid():
-                    
-                    PartySubpartiesdata1 = MC_PartySubParty.objects.filter(Party=PartySubpartiesdata[0]['PartyID'])
-                    PartySubpartiesdata1.delete()
-                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubpartiesdata[0]['PartyID'],Party__PartyType=3).select_related('Party')
-                    PartySubpartiesdata2.delete()
-                    PartySubparties_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartySubparties_Serializer.errors, 'Data':[]})
+                PartySubpartydata = JSONParser().parse(request)
+                Party = PartySubpartydata['Party']
+                query = MC_PartySubParty.objects.filter(Party=Party)       
+                if query.exists():
+                    SubPartydata = RoutesUpdateListSerializer(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartydata})
+                    SubPartyListData = list()
+                    for a in SubPartydata:
+                        SubPartyListData.append({
+                            "id": a['id'],
+                            "Party": a['Party']['id'],
+                            "SubParty": a['SubParty']['id'],
+                            "SubPartyName": a['SubParty']['Name'],
+                            "Route":a['Route']['id'],
+                            "RouteName":a['Route']['Name']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Creditlimit  Not available ', 'Data': []})
+        except MC_PartySubParty.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Creditlimit Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
           
