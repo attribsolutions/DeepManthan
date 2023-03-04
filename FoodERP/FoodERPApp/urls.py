@@ -295,7 +295,10 @@ urlpatterns = [
             url(r'SalesmanList$', SalesmanListView.as_view()), 
             url(r'Salesman/([0-9]+)$', SalesmanView.as_view()), 
             url(r'Salesman$', SalesmanView.as_view()),             
-                
+
+# Creditlimit 
+            url(r'CreditlimitList$', CreditlimitListView.as_view()), 
+            url(r'Creditlimit$', CreditlimitView.as_view()),                 
     
 #Item All APIs======================================================================================
 

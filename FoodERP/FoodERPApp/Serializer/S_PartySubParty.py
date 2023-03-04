@@ -26,3 +26,14 @@ class PartySubPartySerializerGETList(serializers.Serializer):
     Party_id = serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     Subparty = serializers.IntegerField() 
+    
+
+class PartySubPartyCreditlimit(serializers.ModelSerializer):
+    SubParty = PartySerializer(read_only=True)
+    Party = PartySerializer(read_only=True)
+    class Meta :
+        model= MC_PartySubParty
+        fields = ['id','Party','SubParty','Creditlimit']
+        
+    
+
