@@ -52,7 +52,7 @@ class RoleAccessView(RetrieveAPIView):
            
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
-        
+        print(qq)
        
         if(len(qq) == 1):
             roles=list()
@@ -71,13 +71,15 @@ class RoleAccessView(RetrieveAPIView):
 
         if (int(PartyID) > 0)  :
        
-            modules= M_RoleAccess.objects.filter(Division=PartyID ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
+            modules= M_RoleAccess.objects.filter(Division=PartyID ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct() 
+            if modules.count() ==0:
+                modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
         else:
             modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
 
         queryset=H_Modules.objects.filter(id__in=modules).order_by("DisplayIndex")
         serializerdata = H_ModulesSerializer(queryset, many=True).data
-
+        # print(modules.query)
         
         Moduledata = list()
                
@@ -91,6 +93,8 @@ class RoleAccessView(RetrieveAPIView):
             if (int(PartyID) > 0)  :
 
                 query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company=CompanyID,).select_related('Pages').order_by('Pages__DisplayIndex')
+                if query.count() == 0:
+                    query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company=CompanyID,).select_related('Pages').order_by('Pages__DisplayIndex')
             else :
                 query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company=CompanyID).select_related('Pages').order_by('Pages__DisplayIndex')
 

@@ -355,7 +355,7 @@ urlpatterns = [
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
     
 # RoleAccess========================================= 
-            #SideMenu Partyid/Employeeid
+            #SideMenu Partyid/Employeeid/CompanyID
             url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
             #ListPage API 
             url(r'RoleAccessList$', RoleAccessViewList.as_view()),
