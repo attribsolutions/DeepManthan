@@ -259,7 +259,7 @@ urlpatterns = [
             url(r'Divisions/([0-9]+)$', DivisionsView.as_view()),
             url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
             url(r'PriceList$', PriceListView.as_view()),
-            url(r'PartyTypes/([0-9]+)$', PartyTypeViewSecond.as_view()),
+            url(r'PartyTypes/([0-9]+)/([0-9]+)$', PartyTypeViewSecond.as_view()),
             url(r'PartyTypes$', PartyTypeView.as_view()),
             url(r'ImageTypes$', M_ImageTypesView.as_view()),
            
