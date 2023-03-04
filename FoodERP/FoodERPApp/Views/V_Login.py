@@ -400,6 +400,7 @@ class GetUserDetailsView(APIView):
             "UserName":EmployeeID[0]["LoginName"],
             "EmployeeID": EmployeeID[0]["Employee"],
             "CompanyID": CompanyID[0]["Company"],
+            "IsSCMCompany": CompanyGroupID[0]["IsSCM"],
             "CompanyGroup": CompanyGroupID[0]["CompanyGroup"]
 
         })
