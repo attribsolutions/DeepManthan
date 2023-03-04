@@ -151,6 +151,7 @@ urlpatterns = [
 # Employees 
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
             url(r'Employees$', M_EmployeesView.as_view()),
+            url(r'EmployeesFilter$', M_EmployeesFilterView.as_view()),
             url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
             url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
     
@@ -254,10 +255,11 @@ urlpatterns = [
             url(r'States$',M_StateView.as_view()),
             url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
             url(r'Parties$', M_PartiesView.as_view()),
+            url(r'PartiesFilter$', M_PartiesFilterView.as_view()),
             url(r'Divisions/([0-9]+)$', DivisionsView.as_view()),
             url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
             url(r'PriceList$', PriceListView.as_view()),
-            url(r'PartyTypes/([0-9]+)$', PartyTypeViewSecond.as_view()),
+            url(r'PartyTypes/([0-9]+)/([0-9]+)$', PartyTypeViewSecond.as_view()),
             url(r'PartyTypes$', PartyTypeView.as_view()),
             url(r'ImageTypes$', M_ImageTypesView.as_view()),
            
@@ -356,7 +358,7 @@ urlpatterns = [
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
     
 # RoleAccess========================================= 
-            #SideMenu Partyid/Employeeid
+            #SideMenu Partyid/Employeeid/CompanyID
             url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
             #ListPage API 
             url(r'RoleAccessList$', RoleAccessViewList.as_view()),

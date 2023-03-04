@@ -52,7 +52,7 @@ class RoleAccessView(RetrieveAPIView):
            
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
-        
+        print(qq)
        
         if(len(qq) == 1):
             roles=list()
@@ -71,13 +71,15 @@ class RoleAccessView(RetrieveAPIView):
 
         if (int(PartyID) > 0)  :
        
-            modules= M_RoleAccess.objects.filter(Division=PartyID ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
+            modules= M_RoleAccess.objects.filter(Division=PartyID ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct() 
+            if modules.count() ==0:
+                modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
         else:
             modules= M_RoleAccess.objects.filter(Division__isnull=True ,Company=CompanyID, Role_id__in=y).values('Modules_id').distinct()   
 
         queryset=H_Modules.objects.filter(id__in=modules).order_by("DisplayIndex")
         serializerdata = H_ModulesSerializer(queryset, many=True).data
-
+        # print(modules.query)
         
         Moduledata = list()
                
@@ -91,6 +93,8 @@ class RoleAccessView(RetrieveAPIView):
             if (int(PartyID) > 0)  :
 
                 query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id=PartyID,Company=CompanyID,).select_related('Pages').order_by('Pages__DisplayIndex')
+                if query.count() == 0:
+                    query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company=CompanyID,).select_related('Pages').order_by('Pages__DisplayIndex')
             else :
                 query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company=CompanyID).select_related('Pages').order_by('Pages__DisplayIndex')
 
@@ -173,14 +177,29 @@ class RoleAccessViewList(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    def get(self, request,id=0):
+    @transaction.atomic()
+    def post(self, request):
         try:
             with transaction.atomic():
-                query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_RoleAccess.Role_id,M_Roles.Name RoleName,M_RoleAccess.Division_id,M_Parties.Name DivisionName,M_RoleAccess.Company_id,C_Companies.Name CompanyName
+                Logindata = JSONParser().parse(request)
+                UserID = Logindata['UserID']   
+                RoleID=  Logindata['RoleID']  
+                CompanyID=Logindata['CompanyID'] 
+                
+                if(RoleID == 1):
+                    query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_RoleAccess.Role_id,M_Roles.Name RoleName,M_RoleAccess.Division_id,M_Parties.Name DivisionName,M_RoleAccess.Company_id,C_Companies.Name CompanyName
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
     left join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
     left join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id  group by Role_id,Division_id,Company_id''')
+                else:
+                    query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_RoleAccess.Role_id,M_Roles.Name RoleName,M_RoleAccess.Division_id,M_Parties.Name DivisionName,M_RoleAccess.Company_id,C_Companies.Name CompanyName
+    FROM M_RoleAccess
+    join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
+    left join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
+    left join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id where M_RoleAccess.CreatedBy=%s  group by Role_id,Division_id,Company_id''',[UserID]) 
+
+                
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
@@ -188,8 +207,8 @@ class RoleAccessViewList(RetrieveAPIView):
                         query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+        except Exception as e :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
 class RoleAccessViewNewUpdated(RetrieveAPIView):

@@ -49,15 +49,35 @@ class PartyTypeViewSecond(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request, id=0,IsSCM=0):
         try:
             with transaction.atomic():
-                query = M_PartyType.objects.filter(id=id)
+                print(id)
+                if (id == '0'):
+                   
+                    if(IsSCM == '0'):
+                       
+                        query = M_PartyType.objects.all()
+                        p=0
+                    else:
+                       
+                        query = M_PartyType.objects.filter(IsSCM=IsSCM) 
+                        p=0
+                else:    
+                   
+                    query = M_PartyType.objects.filter(id=id)
+                    p=1
+                
+               
                 if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data':[]})
                 else:    
                     PartyTypes_Serializer = PartyTypeSerializer(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': PartyTypes_Serializer[0]})   
+                    if p==0:
+                        data=PartyTypes_Serializer
+                    else:
+                        data=PartyTypes_Serializer[0]    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': data})   
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             

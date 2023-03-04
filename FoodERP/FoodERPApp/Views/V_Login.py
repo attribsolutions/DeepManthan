@@ -64,10 +64,19 @@ class UserListView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def post(self, request):
         try:
             with transaction.atomic():
-                Usersdata = M_Users.objects.all()
+                Logindata = JSONParser().parse(request)
+                UserID = Logindata['UserID']   
+                RoleID=  Logindata['RoleID']  
+                CompanyID=Logindata['CompanyID']        
+                
+                if (RoleID == 1):
+                    Usersdata = M_Users.objects.all()
+                else:                
+                    Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
+                
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
                     UserData = list()
@@ -391,6 +400,7 @@ class GetUserDetailsView(APIView):
             "UserName":EmployeeID[0]["LoginName"],
             "EmployeeID": EmployeeID[0]["Employee"],
             "CompanyID": CompanyID[0]["Company"],
+            "IsSCMCompany": CompanyGroupID[0]["IsSCM"],
             "CompanyGroup": CompanyGroupID[0]["CompanyGroup"]
 
         })
