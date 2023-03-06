@@ -94,6 +94,10 @@ from .Views.V_InterBranchInward import *
 
 from .Views.V_Challan import *
 
+from .Views.V_Routes import *
+
+from .Views.V_Salesman import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -279,7 +283,23 @@ urlpatterns = [
             url(r'VehicleTypes/([0-9]+)$', M_VehicleTypesViewSecond.as_view()),
             url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
             url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
-            url(r'Vehicle$', M_VehicleView.as_view()),    
+            url(r'Vehicle$', M_VehicleView.as_view()),
+            
+# Routes 
+            url(r'RoutesList$', RouteListView.as_view()), 
+            url(r'Routes/([0-9]+)$', RoutesView.as_view()), 
+            url(r'Routes$', RoutesView.as_view()),
+            url(r'RouteUpdateList$', RoutesUpdateListView.as_view()),              
+            
+
+# Salesman 
+            url(r'SalesmanList$', SalesmanListView.as_view()), 
+            url(r'Salesman/([0-9]+)$', SalesmanView.as_view()), 
+            url(r'Salesman$', SalesmanView.as_view()),             
+
+# Creditlimit 
+            url(r'CreditlimitList$', CreditlimitListView.as_view()), 
+            url(r'Creditlimit$', CreditlimitView.as_view()),                 
     
 #Item All APIs======================================================================================
 

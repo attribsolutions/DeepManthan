@@ -145,11 +145,20 @@ class InterBranchChallanListFilterView(CreateAPIView):
                 ToDate = IBChallandata['ToDate']
                 Customer = IBChallandata['Customer']
                 Party = IBChallandata['Party']
-               
-                if(Customer == ''):
-                    query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Party=Party)
+                IBType = IBChallandata['IBType']
+                if (IBType == "IBInvoice" ): # InterBranch Sales Order 
+                    if(Customer == ''):
+                       query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Party=Party)
+                    else:
+                        query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)  
+                elif(IBType == "IBGRN"):
+                    if(Customer == ''): # InterBranch Purchase Order
+                        query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Party)
+                    else:
+                        query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer)
                 else:
-                    query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                  
                    
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
