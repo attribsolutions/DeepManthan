@@ -106,6 +106,7 @@ class PriceListViewSecond(CreateAPIView):
                             "value": a['id'],
                             "label": a['Name'],
                             "MkUpMkDn":a["MkUpMkDn"],
+                            "CalculationPath":a["CalculationPath"],
                             "children":child
                             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
