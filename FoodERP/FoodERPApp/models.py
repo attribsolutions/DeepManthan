@@ -72,11 +72,11 @@ class M_GeneralMaster(models.Model):
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
     '''PLPartyType means PriceListPartyType'''
-    PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.DO_NOTHING)
+    PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.PROTECT)
     BasePriceListID = models.IntegerField()
-    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING)
+    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.PROTECT)
     MkUpMkDn = models.BooleanField(default=False)
-    CalculationPath=models.CharField(max_length=200)
+    CalculationPath=models.CharField(max_length=200,null=True, blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
