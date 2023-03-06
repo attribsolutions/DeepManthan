@@ -1428,6 +1428,26 @@ class TC_PurchaseReturnItems(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
+
+
+class M_Bank(models.Model):
+    Name = models.CharField(max_length=500)
+    Party = models.ForeignKey(M_Parties, related_name='PartyBank', on_delete=models.PROTECT)
+    IFSC = models.CharField(max_length=500,blank=True, null=True)
+    BranchName = models.CharField(max_length=500)
+    AccountNo = models.CharField(max_length=500,blank=True, null=True)
+    IsSelfDepositoryBank = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "M_Bank"        
+        
+        
+        
+        
     
         
         
