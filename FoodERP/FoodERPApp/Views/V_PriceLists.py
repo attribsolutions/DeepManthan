@@ -10,6 +10,20 @@ from ..Serializer.S_PriceLists import *
 from ..models import *
 
 
+def CalculationPathLable(CalculationPathSting):
+    w=CalculationPathSting.split(",")
+    query=M_PriceList.objects.filter(id__in=w).values('id','Name')
+   
+    CalculationPathdata=list()
+    for p in query:
+        
+        CalculationPathdata.append({
+            "id" :p['id'],
+            "Name" : p['Name']   
+        })
+    
+    return CalculationPathdata
+
 def getchildnode(ParentID):
     
     Modulesdata = M_PriceList.objects.filter(BasePriceListID=ParentID)
@@ -25,7 +39,7 @@ def getchildnode(ParentID):
                 "label":z["Name"],
                 "MkUpMkDn":z["MkUpMkDn"],
                 "BasePriceListID" :z['BasePriceListID'],
-                "CalculationPath":z["CalculationPath"],
+                "CalculationPath":CalculationPathLable(z['CalculationPath']),
 
                 "children":cchild
             })
@@ -103,7 +117,7 @@ class PriceListViewSecond(CreateAPIView):
                    
                     PriceListData = list()
                     for a in PriceList_Serializer:
-                        print(a)
+                      
                         aa=a['id']
                         
                         child=getchildnode(aa)
@@ -112,7 +126,8 @@ class PriceListViewSecond(CreateAPIView):
                             "label": a['Name'],
                             "MkUpMkDn":a["MkUpMkDn"],
                             "BasePriceListID" :a['BasePriceListID'],
-                            "CalculationPath":a["CalculationPath"],
+                            "CalculationPath":CalculationPathLable(a['CalculationPath']),
+
                             "children":child
                             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})

@@ -52,7 +52,7 @@ class RoleAccessView(RetrieveAPIView):
            
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
-        print(qq)
+        # print(qq)
        
         if(len(qq) == 1):
             roles=list()
