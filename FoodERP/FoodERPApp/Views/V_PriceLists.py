@@ -11,16 +11,20 @@ from ..models import *
 
 
 def CalculationPathLable(CalculationPathSting):
-    w=CalculationPathSting.split(",")
-    query=M_PriceList.objects.filter(id__in=w).values('id','Name')
-   
-    CalculationPathdata=list()
-    for p in query:
-        
-        CalculationPathdata.append({
-            "id" :p['id'],
-            "Name" : p['Name']   
-        })
+    
+    if CalculationPathSting == '':
+        CalculationPathdata=[]
+    else:    
+        w=CalculationPathSting.split(",")
+        query=M_PriceList.objects.filter(id__in=w).values('id','Name')
+    
+        CalculationPathdata=list()
+        for p in query:
+            
+            CalculationPathdata.append({
+                "id" :p['id'],
+                "Name" : p['Name']   
+            })
     
     return CalculationPathdata
 
