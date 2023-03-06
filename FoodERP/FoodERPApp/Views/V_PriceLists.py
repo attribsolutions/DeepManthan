@@ -20,10 +20,13 @@ def getchildnode(ParentID):
         
             cchild=getchildnode(z["id"])
             cdata.append({
+                
                 "value":z["id"],
                 "label":z["Name"],
                 "MkUpMkDn":z["MkUpMkDn"],
+                "BasePriceListID" :z['BasePriceListID'],
                 "CalculationPath":z["CalculationPath"],
+
                 "children":cchild
             })
         return cdata
@@ -97,9 +100,10 @@ class PriceListViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
                 else:
                     PriceList_Serializer = PriceListSerializer(query, many=True).data
-                    
+                   
                     PriceListData = list()
                     for a in PriceList_Serializer:
+                        print(a)
                         aa=a['id']
                         
                         child=getchildnode(aa)
@@ -107,6 +111,7 @@ class PriceListViewSecond(CreateAPIView):
                             "value": a['id'],
                             "label": a['Name'],
                             "MkUpMkDn":a["MkUpMkDn"],
+                            "BasePriceListID" :a['BasePriceListID'],
                             "CalculationPath":a["CalculationPath"],
                             "children":child
                             })
