@@ -289,7 +289,8 @@ urlpatterns = [
             url(r'RoutesList$', RouteListView.as_view()), 
             url(r'Routes/([0-9]+)$', RoutesView.as_view()), 
             url(r'Routes$', RoutesView.as_view()),
-            url(r'RouteUpdateList$', RoutesUpdateListView.as_view()),              
+            url(r'RouteUpdateList$', RoutesUpdateListView.as_view()),
+            url(r'RouteUpdate$',RoutesUpdateView.as_view()),               
             
 
 # Salesman 
