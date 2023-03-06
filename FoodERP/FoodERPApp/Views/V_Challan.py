@@ -94,6 +94,20 @@ class ChallanView(CreateAPIView):
                     Challandata['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party)
                     Challandata['FullChallanNumber'] = str(b)+""+str(a)
+                    ChallanItems = Challandata['ChallanItems']
+        
+                    BatchWiseLiveStockList=list()
+                    for ChallanItem in ChallanItems:
+                        BatchWiseLiveStockList.append({
+                            "Item" : ChallanItem['Item'],
+                            "Quantity" : ChallanItem['Quantity'],
+                            "BaseUnitQuantity" : ChallanItem['BaseUnitQuantity'],
+                            "LiveBatche" : ChallanItem['BatchID'],
+                            "Item" : ChallanItem['Item'],
+                            "Party" : ChallanItem['Party'],
+                        })
+                        
+                    Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
                     Challan_serializer = ChallanSerializer(data=Challandata)
                     if Challan_serializer.is_valid():
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})

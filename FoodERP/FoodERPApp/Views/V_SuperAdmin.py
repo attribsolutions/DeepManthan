@@ -123,7 +123,7 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Designationsdata_Serializer.errors, 'Data': []})
 
-#============================-----Designation-----=========================================================================
+#============================-----CompanyGroup-----=========================================================================
                 CompanyGroupJSON = {
                     "Name": "Attrib Solutions",
                     "IsSCM": 0,
@@ -829,6 +829,15 @@ class SuperAdminView(CreateAPIView):
                         "UpdatedBy": 1,
                         "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 11
+                    },
+                    {
+                        "id": 12,
+                        "Name": "IsCopy",
+                        "CreatedBy": 1,
+                        "CreatedOn": "2022-07-29T00:00:00",
+                        "UpdatedBy": 1,
+                        "UpdatedOn": "2022-07-29T00:00:00",
+                        "Sequence": 12
                     }
                 ]
 
@@ -1355,15 +1364,15 @@ class SuperAdminView(CreateAPIView):
                 ]
 
 
-                HPagesserialize_data = M_PagesSerializer1(
-                    data=HPagesdata, many=True)
-                if HPagesserialize_data.is_valid():
-                    HPagesserialize_data.save()
-                    print('pages')
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserialize_data.errors, 'Data': []})
+                # HPagesserialize_data = M_PagesSerializer1(
+                #     data=HPagesdata, many=True)
+                # if HPagesserialize_data.is_valid():
+                #     HPagesserialize_data.save()
+                #     print('pages')
+                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
+                # else:
+                #     transaction.set_rollback(True)
+                #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserialize_data.errors, 'Data': []})
 
 #================================----RoleAccessdata----================================================================================ 
                 
@@ -1721,17 +1730,17 @@ class SuperAdminView(CreateAPIView):
                     }
 
                 ]
-                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
-                if RoleAccessSerialize_data.is_valid():
+                # RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
+                # if RoleAccessSerialize_data.is_valid():
                    
-                    RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
-                        Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
-                    RoleAccessdata.delete()
-                    RoleAccessSerialize_data.save()
-                    print('RoleAccess')
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccessSerialize_data.errors, 'Data': []})
+                #     RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
+                #         Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
+                #     RoleAccessdata.delete()
+                #     RoleAccessSerialize_data.save()
+                #     print('RoleAccess')
+                # else:
+                #     transaction.set_rollback(True)
+                #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccessSerialize_data.errors, 'Data': []})
 
 #========================================================================================================================== 
 
