@@ -576,10 +576,9 @@ class M_Drivers(models.Model):
     Name =  models.CharField(max_length=300)
     DOB = models.DateField()
     Address = models.CharField(max_length=500)
-    UID = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
    
     class Meta:
@@ -595,11 +594,11 @@ class M_VehicleTypes(models.Model):
 class M_Vehicles(models.Model):
     VehicleNumber= models.CharField(max_length=300)
     Description = models.CharField(max_length=300)
-    Driver =models.ForeignKey(M_Drivers, related_name='DriverName', on_delete=models.DO_NOTHING) 
-    VehicleType = models.ForeignKey(M_VehicleTypes, related_name='VehicleType', on_delete=models.DO_NOTHING)
-    CreatedBy = models.IntegerField(blank=True, null=True)
+    Driver =models.ForeignKey(M_Drivers, related_name='DriverName', on_delete=models.PROTECT) 
+    VehicleType = models.ForeignKey(M_VehicleTypes, related_name='VehicleType', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
