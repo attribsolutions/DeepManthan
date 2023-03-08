@@ -16,9 +16,16 @@ class C_CompanySerializer1(serializers.ModelSerializer):
         model = C_Companies
         fields = ['id','Name']
 
-class M_RolesSerializer(serializers.ModelSerializer):
+class M_RolesSerializerforFilter(serializers.ModelSerializer):
     RoleEmployeeTypes= RoleEmployeeTypesSerializer(many=True)
     Company=C_CompanySerializer1(read_only=True)
+    class Meta:
+        model =  M_Roles 
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes','Company']
+        
+class M_RolesSerializer(serializers.ModelSerializer):
+    RoleEmployeeTypes= RoleEmployeeTypesSerializer(many=True)
+    # Company=C_CompanySerializer1(read_only=True)
     class Meta:
         model =  M_Roles 
         fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes','Company']
