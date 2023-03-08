@@ -12,6 +12,53 @@ from ..Serializer.S_Companies import *
 from ..models import C_Companies
 
 
+class C_CompaniesViewFilter(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+                   
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Logindata = JSONParser().parse(request)
+                UserID = Logindata['UserID']   
+                RoleID=  Logindata['RoleID']  
+                CompanyID=Logindata['CompanyID']
+                PartyID=Logindata['PartyID'] 
+
+                if(RoleID == 1 ):
+                    Groupquery = C_Companies.objects.all()
+                else:
+                    Groupquery = C_Companies.objects.filter(id=CompanyID)
+                
+                if Groupquery.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Companydata = C_CompanySerializerSecond(Groupquery, many=True).data
+                    CompanyList=list()
+                    for a in Companydata:
+                        CompanyList.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "CompanyGroup": a['CompanyGroup']['id'],
+                            "CompanyGroupName": a['CompanyGroup']['Name'],
+                            "Address": a['Address'],
+                            "GSTIN": a['GSTIN'],
+                            "PhoneNo": a['PhoneNo'],
+                            "CompanyAbbreviation": a['CompanyAbbreviation'],
+                            "EmailID": a['EmailID'],
+                            "IsSCM" : a['IsSCM'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
+
+
 class C_CompaniesView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
