@@ -129,7 +129,24 @@ class RoutesUpdateListView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
           
-           
+
+class RoutesUpdateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication 
+    
+    @transaction.atomic()
+    def post(self, request,id=0):
+        try:
+            with transaction.atomic():
+                PartySubPartydata = JSONParser().parse(request)
+                for a in PartySubPartydata['Data']:
+                    if(a['Route']!= ""):
+                        query = MC_PartySubParty.objects.filter(id=a['id'],Party=a['Party'],SubParty=a['SubParty']).update(Route=a['Route']) 
+                    else:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Not Updated', 'Data': []})     
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Updated Successfully', 'Data': []})  
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})             
 
 
 
