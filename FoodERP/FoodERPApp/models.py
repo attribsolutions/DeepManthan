@@ -72,11 +72,11 @@ class M_GeneralMaster(models.Model):
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
     '''PLPartyType means PriceListPartyType'''
-    PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.DO_NOTHING)
+    PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.PROTECT)
     BasePriceListID = models.IntegerField()
-    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.DO_NOTHING)
+    Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.PROTECT)
     MkUpMkDn = models.BooleanField(default=False)
-    CalculationPath=models.CharField(max_length=200)
+    CalculationPath=models.CharField(max_length=200,null=True, blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -416,6 +416,7 @@ class M_Roles(models.Model):
     isActive = models.BooleanField(default=False)
     isSCMRole = models.BooleanField(default=False)
     IsPartyConnection = models.BooleanField(default=False)
+    Company = models.ForeignKey(C_Companies, related_name='RoleCompany', on_delete=models.PROTECT)
     Dashboard = models.CharField(max_length=200)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1446,7 +1447,28 @@ class M_Bank(models.Model):
         db_table = "M_Bank"        
         
         
+
+class T_LoadingSheet(models.Model):
+    Date = models.DateField()
+    No = models.CharField(max_length=500)
+    Party = models.ForeignKey(M_Parties, related_name='LoadingsheetParty', on_delete=models.PROTECT)
+    Route = models.ForeignKey(M_Routes, related_name='LoadingsheetRoute', on_delete=models.PROTECT)
+    VehicleNo = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "LoadingSheet"
         
+class TC_LoadingSheetDetails(models.Model):
+    Loadingsheet = models.ForeignKey(T_LoadingSheet, related_name='Loadingsheet', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_Invoices, related_name='LoadingsheetInvoices', on_delete=models.PROTECT)
+    
+    class Meta:
+        db_table = "TC_LoadingSheetDetails"        
+                            
         
     
         

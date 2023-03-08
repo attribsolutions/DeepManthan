@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
+from django.db.models import Q
 
 from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
@@ -44,13 +45,19 @@ class M_PartiesFilterView(CreateAPIView):
                 Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
-                CompanyID=Logindata['CompanyID'] 
+                CompanyID=Logindata['CompanyID']
+                PartyID=Logindata['PartyID'] 
 
-                if(RoleID == 1 ):
-                    query=M_Parties.objects.all()
+                if PartyID == 0:
+
+                    if(RoleID == 1 ):
+                        query=M_Parties.objects.all()
+                    else:
+                        query=M_Parties.objects.filter(CreatedBy=UserID)
                 else:
-                    query=M_Parties.objects.filter(CreatedBy=UserID)
-                   
+                    query=M_Parties.objects.filter(Q(CreatedBy=UserID)| Q(id=PartyID) )
+                
+                print(query.query)
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:

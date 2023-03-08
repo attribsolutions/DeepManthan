@@ -10,6 +10,24 @@ from ..Serializer.S_PriceLists import *
 from ..models import *
 
 
+def CalculationPathLable(CalculationPathSting):
+    
+    if CalculationPathSting == '':
+        CalculationPathdata=[]
+    else:    
+        w=CalculationPathSting.split(",")
+        query=M_PriceList.objects.filter(id__in=w).values('id','Name')
+    
+        CalculationPathdata=list()
+        for p in query:
+            
+            CalculationPathdata.append({
+                "id" :p['id'],
+                "Name" : p['Name']   
+            })
+    
+    return CalculationPathdata
+
 def getchildnode(ParentID):
     
     Modulesdata = M_PriceList.objects.filter(BasePriceListID=ParentID)
@@ -20,9 +38,13 @@ def getchildnode(ParentID):
         
             cchild=getchildnode(z["id"])
             cdata.append({
+                
                 "value":z["id"],
                 "label":z["Name"],
                 "MkUpMkDn":z["MkUpMkDn"],
+                "BasePriceListID" :z['BasePriceListID'],
+                "CalculationPath":CalculationPathLable(z['CalculationPath']),
+
                 "children":cchild
             })
         return cdata
@@ -96,9 +118,10 @@ class PriceListViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
                 else:
                     PriceList_Serializer = PriceListSerializer(query, many=True).data
-                    
+                   
                     PriceListData = list()
                     for a in PriceList_Serializer:
+                      
                         aa=a['id']
                         
                         child=getchildnode(aa)
@@ -106,6 +129,9 @@ class PriceListViewSecond(CreateAPIView):
                             "value": a['id'],
                             "label": a['Name'],
                             "MkUpMkDn":a["MkUpMkDn"],
+                            "BasePriceListID" :a['BasePriceListID'],
+                            "CalculationPath":CalculationPathLable(a['CalculationPath']),
+
                             "children":child
                             })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
