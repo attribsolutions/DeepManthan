@@ -125,6 +125,8 @@ urlpatterns = [
 # Roles
             url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
             url(r'Roles$', M_RolesView.as_view()),
+            url(r'RolesFilter$', M_RolesViewFilter.as_view()),
+
     
 # PageMaster 
             url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
@@ -137,6 +139,7 @@ urlpatterns = [
 # Company 
             url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
             url(r'Company$', C_CompaniesView.as_view()),
+            url(r'CompanyFilter$', C_CompaniesViewFilter.as_view()),
             url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
             url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
     
