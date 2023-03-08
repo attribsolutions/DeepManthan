@@ -416,6 +416,7 @@ class M_Roles(models.Model):
     isActive = models.BooleanField(default=False)
     isSCMRole = models.BooleanField(default=False)
     IsPartyConnection = models.BooleanField(default=False)
+    Company = models.ForeignKey(C_Companies, related_name='RoleCompany', on_delete=models.PROTECT)
     Dashboard = models.CharField(max_length=200)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
