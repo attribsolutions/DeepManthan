@@ -416,6 +416,7 @@ class M_Roles(models.Model):
     isActive = models.BooleanField(default=False)
     isSCMRole = models.BooleanField(default=False)
     IsPartyConnection = models.BooleanField(default=False)
+    Company = models.ForeignKey(C_Companies, related_name='RoleCompany', on_delete=models.PROTECT)
     Dashboard = models.CharField(max_length=200)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1446,7 +1447,28 @@ class M_Bank(models.Model):
         db_table = "M_Bank"        
         
         
+
+class T_LoadingSheet(models.Model):
+    Date = models.DateField()
+    No = models.CharField(max_length=500)
+    Party = models.ForeignKey(M_Parties, related_name='LoadingsheetParty', on_delete=models.PROTECT)
+    Route = models.ForeignKey(M_Routes, related_name='LoadingsheetRoute', on_delete=models.PROTECT)
+    VehicleNo = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "LoadingSheet"
         
+class TC_LoadingSheetDetails(models.Model):
+    Loadingsheet = models.ForeignKey(T_LoadingSheet, related_name='Loadingsheet', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_Invoices, related_name='LoadingsheetInvoices', on_delete=models.PROTECT)
+    
+    class Meta:
+        db_table = "TC_LoadingSheetDetails"        
+                            
         
     
         
