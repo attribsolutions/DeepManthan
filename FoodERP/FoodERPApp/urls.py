@@ -125,6 +125,8 @@ urlpatterns = [
 # Roles
             url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
             url(r'Roles$', M_RolesView.as_view()),
+            url(r'RolesFilter$', M_RolesViewFilter.as_view()),
+            
     
 # PageMaster 
             url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
