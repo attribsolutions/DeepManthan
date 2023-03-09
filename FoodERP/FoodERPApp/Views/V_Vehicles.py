@@ -57,12 +57,14 @@ class VehicleView(CreateAPIView):
         try:
             with transaction.atomic():
                 Vehicle = M_Vehicles.objects.filter(id=id)
-                Vehicle_serializer = VehiclesSerializer(Vehicle, many=True).data
+                Vehicle_serializer = VehiclesSerializerSecond(Vehicle, many=True).data
                 VehicleData = list()
                 for a in Vehicle_serializer:
                     VehicleData.append({
                         "id": a['id'],
                         "VehicleNumber": a['VehicleNumber'],
+                        "Party": a['Party'],
+                        "Company": a['Company'],
                         "Description": a['Description'],
                         "VehicleType": a['VehicleType']['id'],
                         "VehicleTypeName": a['VehicleType']['Name'],
