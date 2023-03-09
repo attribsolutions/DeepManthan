@@ -19,13 +19,12 @@ class LoadingSheetListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Loadingsheet_data = JSONParser().parse(request)
-                Loadingsheet_Serializer = LoadingSheetSerializer(data=Loadingsheet_data)
-                if Loadingsheet_Serializer.is_valid():
-                    Loadingsheet_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'Data':[]})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Loadingsheet_Serializer.errors, 'Data':[]})
+                Party = Loadingsheet_data['Party']
+                Routequery = T_LoadingSheet.objects.filter(Party=Party)
+                if Routequery.exists():
+                    Loadingsheet_Serializer = LoadingSheetSerializer(Routequery, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Loadingsheet_Serializer})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
