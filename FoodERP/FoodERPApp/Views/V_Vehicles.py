@@ -24,8 +24,23 @@ class VehicleViewList(CreateAPIView):
                 Party = Vehicledata['Party']
                 VehicleNamedata = M_Vehicles.objects.filter(Party=Party,Company=Company)
                 if VehicleNamedata.exists():
-                    Vehicle_Serializer = VehiclesSerializer(VehicleNamedata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Vehicle_Serializer.data})
+                    Vehicle_Serializer = VehiclesSerializerSecond(VehicleNamedata, many=True).data
+                    VehicleData = list()
+                    for a in Vehicle_Serializer:
+                        VehicleData.append({
+                            "id": a['id'],
+                            "VehicleNumber": a['VehicleNumber'],
+                            "Party": a['Party'],
+                            "Company": a['Company'],
+                            "Description": a['Description'],
+                            "VehicleType": a['VehicleType']['id'],
+                            "VehicleTypeName": a['VehicleType']['Name'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -57,12 +72,14 @@ class VehicleView(CreateAPIView):
         try:
             with transaction.atomic():
                 Vehicle = M_Vehicles.objects.filter(id=id)
-                Vehicle_serializer = VehiclesSerializer(Vehicle, many=True).data
+                Vehicle_serializer = VehiclesSerializerSecond(Vehicle, many=True).data
                 VehicleData = list()
                 for a in Vehicle_serializer:
                     VehicleData.append({
                         "id": a['id'],
                         "VehicleNumber": a['VehicleNumber'],
+                        "Party": a['Party'],
+                        "Company": a['Company'],
                         "Description": a['Description'],
                         "VehicleType": a['VehicleType']['id'],
                         "VehicleTypeName": a['VehicleType']['Name'],

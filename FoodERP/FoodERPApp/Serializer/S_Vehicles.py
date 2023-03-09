@@ -2,17 +2,20 @@ from ..models import *
 from rest_framework import serializers
 
                
-class VehicleTypesSerializer(serializers.ModelSerializer):
+class VehicleTypesSerializerSecond(serializers.ModelSerializer):
     class Meta :
         model= M_VehicleTypes
-        fields = ['id','Name']  
+        fields = ['id','Name','Party','Company']  
         
 '''      POST Method Serializer      '''
 
-class VehiclesSerializer(serializers.ModelSerializer):
-    VehicleType= VehicleTypesSerializer()
+class VehiclesSerializerSecond(serializers.ModelSerializer):
+    VehicleType= VehicleTypesSerializerSecond()
     class Meta :
         model= M_Vehicles
         fields = ['id', 'VehicleNumber' , 'Description', 'VehicleType', 'Party', 'Company', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn']
           
-        
+class VehiclesSerializer(serializers.ModelSerializer):
+    class Meta :
+        model= M_Vehicles
+        fields = ['id', 'VehicleNumber' , 'Description', 'VehicleType', 'Party', 'Company', 'CreatedBy','UpdatedBy']        
