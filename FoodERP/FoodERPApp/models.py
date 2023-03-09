@@ -1445,7 +1445,26 @@ class M_Bank(models.Model):
     class Meta:
         db_table = "M_Bank"        
         
+class T_LoadingSheet(models.Model):
+    Date = models.DateField()
+    No = models.CharField(max_length=500)
+    Party = models.ForeignKey(M_Parties, related_name='LoadingSheetParty', on_delete=models.PROTECT)
+    Route = models.ForeignKey(M_Routes, related_name='LoadingSheetRoute', on_delete=models.PROTECT)
+    VehicleNo = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "T_LoadingSheet"
         
+class TC_LoadingSheetDetails(models.Model):
+    LoadingSheet = models.ForeignKey(T_LoadingSheet, related_name='LoadingSheetDetails', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_Invoices, related_name='LoadingSheetInvoice', on_delete=models.PROTECT)
+    
+    class Meta:
+        db_table = "TC_LoadingSheetDetails"             
 
    
                             
