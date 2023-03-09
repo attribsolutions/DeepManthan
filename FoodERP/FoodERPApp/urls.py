@@ -291,8 +291,9 @@ urlpatterns = [
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
 
 # Driver 
-            url(r'Driver/([0-9]+)$', M_DriverViewSecond.as_view()),
-            url(r'Driver$', M_DriverView.as_view()),
+            url(r'DriverList$', DriverViewList.as_view()),
+            url(r'Driver/([0-9]+)$', DriverView.as_view()),
+            url(r'Driver$', DriverView.as_view()),
 # Vehicle 
             url(r'VehicleTypes/([0-9]+)$', M_VehicleTypesViewSecond.as_view()),
             url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
