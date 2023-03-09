@@ -13,6 +13,6 @@ class VehiclesSerializer(serializers.ModelSerializer):
     VehicleType= VehicleTypesSerializer()
     class Meta :
         model= M_Vehicles
-        fields = ['id', 'VehicleNumber' , 'Description', 'VehicleType', 'Party', 'Company', 'CreatedBy', 'UpdatedBy']
+        fields = ['id', 'VehicleNumber' , 'Description', 'VehicleType', 'Party', 'Company', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn']
           
         

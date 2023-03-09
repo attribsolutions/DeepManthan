@@ -131,7 +131,7 @@ class M_Parties(models.Model):
     IsDivision = models.BooleanField(default=False)
     MkUpMkDn = models.BooleanField(default=False)
     isActive = models.BooleanField(default=False)
-    IsSCM= models.BooleanField(default=False)
+    
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -620,7 +620,7 @@ class M_Items(models.Model):
         M_Units, related_name='BaseUnitID', on_delete=models.DO_NOTHING)
     BarCode = models.CharField(max_length=500,null=True,blank=True) 
     isActive = models.BooleanField(default=False)
-    IsSCM= models.BooleanField(default=False)
+  
     CanBeSold = models.BooleanField(default=False)
     CanBePurchase = models.BooleanField(default=False)
     BrandName = models.CharField(max_length=500,null=True,blank=True)
