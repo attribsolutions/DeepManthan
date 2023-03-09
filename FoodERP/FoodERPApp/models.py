@@ -590,8 +590,8 @@ class M_Drivers(models.Model):
     
 class M_VehicleTypes(models.Model):
     Name= models.CharField(max_length=300)
-    Party = models.ForeignKey(M_Parties, related_name='VTParty', on_delete=models.PROTECT,null=True,blank=True)
-    Company = models.ForeignKey(C_Companies, related_name='VTCompany', on_delete=models.PROTECT ,null=True,blank=True)
+    Party = models.ForeignKey(M_Parties, related_name='VTParty', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='VTCompany', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_VehicleTypes" 
 
