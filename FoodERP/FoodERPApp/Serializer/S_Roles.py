@@ -1,4 +1,6 @@
 from dataclasses import fields
+
+
 from ..models import *
 from rest_framework import serializers
 
@@ -9,11 +11,24 @@ class RoleEmployeeTypesSerializer(serializers.ModelSerializer):
         model =  MC_RolesEmployeeTypes
         fields = ['EmployeeType']
 
-class M_RolesSerializer(serializers.ModelSerializer):
+class C_CompanySerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = C_Companies
+        fields = ['id','Name']
+
+class M_RolesSerializerforFilter(serializers.ModelSerializer):
     RoleEmployeeTypes= RoleEmployeeTypesSerializer(many=True)
+    Company=C_CompanySerializer1(read_only=True)
     class Meta:
         model =  M_Roles 
-        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes']
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes','Company']
+        
+class M_RolesSerializer(serializers.ModelSerializer):
+    RoleEmployeeTypes= RoleEmployeeTypesSerializer(many=True)
+    # Company=C_CompanySerializer1(read_only=True)
+    class Meta:
+        model =  M_Roles 
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes','Company']
         
     def create(self, validated_data):
         RoleEmployeeTypes_data = validated_data.pop('RoleEmployeeTypes')

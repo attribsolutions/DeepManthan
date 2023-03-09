@@ -96,6 +96,8 @@ from .Views.V_Challan import *
 
 from .Views.V_Routes import *
 
+from .Views.V_LoadingSheet import *
+
 from .Views.V_Salesman import *
 
 urlpatterns = [
@@ -125,6 +127,8 @@ urlpatterns = [
 # Roles
             url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
             url(r'Roles$', M_RolesView.as_view()),
+            url(r'RolesFilter$', M_RolesViewFilter.as_view()),
+
     
 # PageMaster 
             url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
@@ -137,6 +141,7 @@ urlpatterns = [
 # Company 
             url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
             url(r'Company$', C_CompaniesView.as_view()),
+            url(r'CompanyFilter$', C_CompaniesViewFilter.as_view()),
             url(r'GetCompanyByDivisionTypeID/([0-9]+)$', GetCompanyByDivisionType.as_view()),
             url(r'GetCompanyByEmployeeType/([0-9]+)$', GetCompanyByEmployeeType.as_view()),
     
@@ -202,6 +207,15 @@ urlpatterns = [
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
+            url(r'MultipleInvoices$',MultipleInvoicesView.as_view()),
+            
+
+#Loading Sheet All APIs
+            url(r'LoadingSheet/([0-9]+)$', LoadingSheetView.as_view()),
+            url(r'LoadingSheet$', LoadingSheetView.as_view()),
+                      
+            
+            
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
@@ -277,13 +291,15 @@ urlpatterns = [
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
 
 # Driver 
-            url(r'Driver/([0-9]+)$', M_DriverViewSecond.as_view()),
-            url(r'Driver$', M_DriverView.as_view()),
+            url(r'DriverList$', DriverViewList.as_view()),
+            url(r'Driver/([0-9]+)$', DriverView.as_view()),
+            url(r'Driver$', DriverView.as_view()),
 # Vehicle 
             url(r'VehicleTypes/([0-9]+)$', M_VehicleTypesViewSecond.as_view()),
             url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
-            url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
-            url(r'Vehicle$', M_VehicleView.as_view()),
+            url(r'Vehicle/([0-9]+)$', VehicleView.as_view()),
+            url(r'Vehicle$', VehicleView.as_view()),
+            url(r'VehicleList$', VehicleViewList.as_view()),
             
 # Routes 
             url(r'RoutesList$', RouteListView.as_view()), 

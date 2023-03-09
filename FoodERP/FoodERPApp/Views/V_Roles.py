@@ -11,23 +11,40 @@ from ..models import *
 
 
 
-class M_RolesView(CreateAPIView):
+class M_RolesViewFilter(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request):
         try:
             with transaction.atomic():
-                M_Roles_data = M_Roles.objects.all()
+                Logindata = JSONParser().parse(request)
+                UserID = Logindata['UserID']   
+                RoleID=  Logindata['RoleID']  
+                CompanyID=Logindata['CompanyID']
+                PartyID=Logindata['PartyID'] 
+
+                if(RoleID == 1 ):
+                    M_Roles_data = M_Roles.objects.all()
+                else:
+                    M_Roles_data = M_Roles.objects.filter(CreatedBy=UserID)
+                
                 if M_Roles_data.exists():
-                    M_Roles_serializer = M_RolesSerializer(M_Roles_data, many=True)
+                    M_Roles_serializer = M_RolesSerializerforFilter(M_Roles_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Roles_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Role Not available', 'Data': []})
         except Exception :
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Execution Error', 'Data':[]})
 
+
+class M_RolesView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    
     @transaction.atomic()
     def post(self, request):
         try:
