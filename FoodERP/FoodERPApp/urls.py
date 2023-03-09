@@ -297,8 +297,9 @@ urlpatterns = [
 # Vehicle 
             url(r'VehicleTypes/([0-9]+)$', M_VehicleTypesViewSecond.as_view()),
             url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
-            url(r'Vehicle/([0-9]+)$', M_VehicleViewSecond.as_view()),
-            url(r'Vehicle$', M_VehicleView.as_view()),
+            url(r'Vehicle/([0-9]+)$', VehicleView.as_view()),
+            url(r'Vehicle$', VehicleView.as_view()),
+            url(r'VehicleList$', VehicleViewList.as_view()),
             
 # Routes 
             url(r'RoutesList$', RouteListView.as_view()), 
