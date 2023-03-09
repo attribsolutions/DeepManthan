@@ -213,8 +213,7 @@ urlpatterns = [
 #Loading Sheet All APIs
             url(r'LoadingSheet/([0-9]+)$', LoadingSheetView.as_view()),
             url(r'LoadingSheet$', LoadingSheetView.as_view()),
-                      
-            
+            url(r'LoadingSheetList$', LoadingSheetListView.as_view()),
             
     
 # GRN All API's
