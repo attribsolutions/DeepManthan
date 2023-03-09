@@ -10,32 +10,38 @@ from ..Serializer.S_Vehicles import *
 from ..models import *
 
 
-class M_VehicleView(CreateAPIView):
-
+class VehicleViewList(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request):
         try:
             with transaction.atomic():
-                query = M_Vehicles.objects.raw(
-                    '''SELECT m_vehicles.id, m_vehicles.VehicleNumber, m_vehicles.Description, m_drivers.Name DriverName,m_vehicletypes.Name Vehicletype FROM  m_vehicles JOIN  m_drivers ON m_drivers.id = m_vehicles.Driver_id JOIN  m_vehicletypes ON m_vehicletypes.id = m_vehicles.VehicleType_id ''')
-                if not query:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not available', 'Data': []})
-                else:
-                    Vehicles_Serializer = M_VehiclesSerializerList(
-                        query, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Vehicles_Serializer.data})
+                Vehicledata = JSONParser().parse(request)
+                Company = Vehicledata['Company']
+                Party = Vehicledata['Party']
+                VehicleNamedata = M_Vehicles.objects.filter(Party=Party,Company=Company)
+                if VehicleNamedata.exists():
+                    Vehicle_Serializer = VehiclesSerializer(VehicleNamedata, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Vehicle_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+
+class VehicleView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
     @transaction.atomic()
     def post(self, request, id=0):
         try:
             with transaction.atomic():
                 Vehiclesdata = JSONParser().parse(request)
-                Vehicles_Serializer = M_VehiclesSerializer(data=Vehiclesdata)
+                Vehicles_Serializer = VehiclesSerializer(data=Vehiclesdata)
             if Vehicles_Serializer.is_valid():
                 Vehicles_Serializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Save Successfully', 'Data': []})
@@ -46,37 +52,21 @@ class M_VehicleView(CreateAPIView):
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
-
-class M_VehicleViewSecond(CreateAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
     @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
                 Vehicle = M_Vehicles.objects.filter(id=id)
-                Vehicle_serializer = VehiclesSerializerSecond(
+                Vehicle_serializer = VehiclesSerializer(
                     Vehicle, many=True).data
                 VehicleData = list()
                 for a in Vehicle_serializer:
-                    Divisions = list()
-                    for b in a['VehicleDivisions']:
-                        Divisions.append({
-                        "Division": b['Division']['id'],
-                        "DivisionName": b['Division']['Name'],
-
-                        })
                     VehicleData.append({
                         "id": a['id'],
                         "VehicleNumber": a['VehicleNumber'],
                         "Description": a['Description'],
-                        "Driver": a['Driver']['id'],
-                        "DriverName": a['Driver']['Name'],
                         "VehicleType": a['VehicleType']['id'],
                         "VehicleTypeName": a['VehicleType']['Name'],
-                        "VehicleDivisions": Divisions,
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
                         "UpdatedBy": a['UpdatedBy'],
@@ -92,7 +82,7 @@ class M_VehicleViewSecond(CreateAPIView):
             with transaction.atomic():
                 Vehiclesdata = JSONParser().parse(request)
                 VehiclesdataByID = M_Vehicles.objects.get(id=id)
-                Vehicle_Serializer = M_VehiclesSerializer(
+                Vehicle_Serializer = VehiclesSerializer(
                     VehiclesdataByID, data=Vehiclesdata)
                 if Vehicle_Serializer.is_valid():
                     Vehicle_Serializer.save()
