@@ -920,11 +920,6 @@ class TC_InvoicesReferences(models.Model):
         db_table = "TC_InvoicesReferences"        
 
 
-class MC_VehiclesDivisions(models.Model):
-    Vehicle = models.ForeignKey(M_Vehicles, related_name='VehicleDivisions', on_delete=models.DO_NOTHING) 
-    Division = models.ForeignKey(M_Parties, related_name='VDivision', on_delete=models.DO_NOTHING) 
-    class Meta:
-        db_table = "MC_VehiclesDivisions"
 
 class  MC_PartySubParty(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.CASCADE)
