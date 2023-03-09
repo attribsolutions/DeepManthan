@@ -1450,9 +1450,11 @@ class M_Bank(models.Model):
 class T_LoadingSheet(models.Model):
     Date = models.DateField()
     No = models.CharField(max_length=500)
+    InvoiceCount = models.IntegerField()
     Party = models.ForeignKey(M_Parties, related_name='LoadingSheetParty', on_delete=models.PROTECT)
     Route = models.ForeignKey(M_Routes, related_name='LoadingSheetRoute', on_delete=models.PROTECT)
     VehicleNo = models.CharField(max_length=500,blank=True, null=True)
+    TotalAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
