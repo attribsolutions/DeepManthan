@@ -24,7 +24,7 @@ class M_VehicleTypesView(CreateAPIView):
                 Party = VehicleTypedata['Party']
                 VehicleTypedata = M_VehicleTypes.objects.filter(Party=Party,Company=Company)
                 if VehicleTypedata.exists():
-                    VehicleType_Serializer = M_VehicleTypesSerializer(VehicleTypedata, many=True)
+                    VehicleType_Serializer = VehicleTypesSerializer(VehicleTypedata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleType_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Type Not Available', 'Data': []})
         except Exception as e:
@@ -43,7 +43,7 @@ class M_VehicleTypesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 VehicleTypedata = JSONParser().parse(request)
-                VehicleType_Serializer = M_VehicleTypesSerializer(data=VehicleTypedata)
+                VehicleType_Serializer = VehicleTypesSerializer(data=VehicleTypedata)
             if VehicleType_Serializer.is_valid():
                 VehicleType_Serializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Type Save Successfully', 'Data': []})
@@ -59,7 +59,7 @@ class M_VehicleTypesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 VehicleTypedata = M_VehicleTypes.objects.get(id=id)
-                VehicleType_Serializer = M_VehicleTypesSerializer(VehicleTypedata)
+                VehicleType_Serializer = VehicleTypesSerializer(VehicleTypedata)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': VehicleType_Serializer.data})
         except  M_VehicleTypes.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Vehicle Type Not available', 'Data': []})
@@ -72,7 +72,7 @@ class M_VehicleTypesViewSecond(CreateAPIView):
             with transaction.atomic():
                 VehicleTypedata = JSONParser().parse(request)
                 VehicleTypedataByID = M_VehicleTypes.objects.get(id=id)
-                VehicleType_Serializer = M_VehicleTypesSerializer(
+                VehicleType_Serializer = VehicleTypesSerializer(
                     VehicleTypedataByID, data=VehicleTypedata)
                 if VehicleType_Serializer.is_valid():
                     VehicleType_Serializer.save()
