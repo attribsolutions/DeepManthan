@@ -16,18 +16,28 @@ class M_VehicleTypesView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request):
         try:
             with transaction.atomic():
-                VehicleTypedata = M_VehicleTypes.objects.all()
+                VehicleTypedata = JSONParser().parse(request)
+                Company = VehicleTypedata['Company']
+                Party = VehicleTypedata['Party']
+                VehicleTypedata = M_VehicleTypes.objects.filter(Party=Party,Company=Company)
                 if VehicleTypedata.exists():
-                    VehicleType_Serializer = M_VehicleTypesSerializer(
-                        VehicleTypedata, many=True)
+                    VehicleType_Serializer = M_VehicleTypesSerializer(VehicleTypedata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleType_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Type Not Available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+   
 
+class M_VehicleTypesViewSecond(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    
+    
     @transaction.atomic()
     def post(self, request, id=0):
         try:
@@ -43,11 +53,6 @@ class M_VehicleTypesView(CreateAPIView):
         except Exception as e:
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
-class M_VehicleTypesViewSecond(CreateAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
