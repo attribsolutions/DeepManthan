@@ -599,8 +599,8 @@ class M_VehicleTypes(models.Model):
 class M_Vehicles(models.Model):
     VehicleNumber= models.CharField(max_length=300)
     Description = models.CharField(max_length=300)
-    Party = models.ForeignKey(M_Parties, related_name='VParty', on_delete=models.PROTECT,null=True,blank=True)
-    Company = models.ForeignKey(C_Companies, related_name='VCompany', on_delete=models.PROTECT ,null=True,blank=True)
+    # Party = models.ForeignKey(M_Parties, related_name='VParty', on_delete=models.PROTECT,null=True,blank=True)
+    # Company = models.ForeignKey(C_Companies, related_name='VCompany', on_delete=models.PROTECT ,null=True,blank=True)
     VehicleType = models.ForeignKey(M_VehicleTypes, related_name='VehicleType', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
