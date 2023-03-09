@@ -10,16 +10,19 @@ from ..Serializer.S_Drivers import *
 from ..models import *
 
 
-class M_DriverView(CreateAPIView):
+class DriverViewList(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def post(self, request):
         try:
             with transaction.atomic():
-                DriverNamedata = M_Drivers.objects.all()
+                Driverdata = JSONParser().parse(request)
+                Company = Driverdata['Company']
+                Party = Driverdata['Party']
+                DriverNamedata = M_Drivers.objects.filter(Party=Party,Company=Company)
                 if DriverNamedata.exists():
                     Drivers_Serializer = M_DriverSerializer(
                         DriverNamedata, many=True)
@@ -28,6 +31,13 @@ class M_DriverView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+    
+    
+class DriverView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
     @transaction.atomic()
     def post(self, request, id=0):
         try:
@@ -43,11 +53,6 @@ class M_DriverView(CreateAPIView):
         except Exception as e:
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
-class M_DriverViewSecond(CreateAPIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
