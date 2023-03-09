@@ -20,22 +20,18 @@ class VehicleTypesSerializer(serializers.ModelSerializer):
         fields = ['id','Name']  
         
 '''      POST Method Serializer      '''
-class VehiclesDivisionsSerializer(serializers.ModelSerializer):
-    class Meta :
-        model= MC_VehiclesDivisions
-        fields = ['Division']
+
 
 class M_VehiclesSerializer(serializers.ModelSerializer):
-    VehicleDivisions= VehiclesDivisionsSerializer(many=True)
+
     class Meta :
         model= M_Vehicles
-        fields = ['VehicleNumber' , 'Description', 'Driver', 'VehicleType','VehicleDivisions']
+        fields = ['VehicleNumber' , 'Description', 'Driver', 'VehicleType']
     
     def create(self, validated_data):
         VehicleDivisions_data = validated_data.pop('VehicleDivisions')
         VehicleID= M_Vehicles.objects.create(**validated_data)
-        for VehicleDivision_data in VehicleDivisions_data:
-            Vehicle = MC_VehiclesDivisions.objects.create(Vehicle=VehicleID, **VehicleDivision_data) 
+        
         return VehicleID
     
     def update(self, instance, validated_data):
@@ -54,10 +50,8 @@ class M_VehiclesSerializer(serializers.ModelSerializer):
         for a in instance.VehicleDivisions.all():
             a.delete()
                         
-        for VehicleDivision_data in  validated_data['VehicleDivisions']:
-            Vehicle = MC_VehiclesDivisions.objects.create(Vehicle=instance, **VehicleDivision_data) 
+       
         return instance
-        
         
                 
 ''' GET Method Single Data  Serializers''' 
@@ -66,14 +60,7 @@ class DivisionSerializerSecond(serializers.ModelSerializer):
         model = M_Parties
         fields = ['id','Name']
                     
-class VehiclesDivisionsSerializerSecond(serializers.ModelSerializer):
-    Division =DivisionSerializerSecond()
-    class Meta :
-        model= MC_VehiclesDivisions
-        fields = ['Division']
-
 class VehiclesSerializerSecond(serializers.ModelSerializer):
-    VehicleDivisions = VehiclesDivisionsSerializerSecond(read_only=True,many=True)
     Driver = DriverSerializer()
     VehicleType= VehicleTypesSerializer()
     class Meta :

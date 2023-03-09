@@ -96,6 +96,8 @@ from .Views.V_Challan import *
 
 from .Views.V_Routes import *
 
+from .Views.V_LoadingSheet import *
+
 from .Views.V_Salesman import *
 
 urlpatterns = [
@@ -206,6 +208,14 @@ urlpatterns = [
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
             url(r'MultipleInvoices$',MultipleInvoicesView.as_view()),
+            
+
+#Loading Sheet All APIs
+            url(r'LoadingSheet/([0-9]+)$', LoadingSheetView.as_view()),
+            url(r'LoadingSheet$', LoadingSheetView.as_view()),
+                      
+            
+            
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
