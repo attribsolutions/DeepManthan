@@ -7,6 +7,30 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
 from ..models import *
 
+
+
+class LoadingSheetListView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Loadingsheet_data = JSONParser().parse(request)
+                Loadingsheet_Serializer = LoadingSheetSerializer(data=Loadingsheet_data)
+                if Loadingsheet_Serializer.is_valid():
+                    Loadingsheet_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Loadingsheet_Serializer.errors, 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
+
 class LoadingSheetView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
