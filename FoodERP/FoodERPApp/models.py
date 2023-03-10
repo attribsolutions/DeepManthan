@@ -1435,6 +1435,7 @@ class TC_PurchaseReturnItems(models.Model):
 class M_Bank(models.Model):
     Name = models.CharField(max_length=500)
     Party = models.ForeignKey(M_Parties, related_name='PartyBank', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
     IFSC = models.CharField(max_length=500,blank=True, null=True)
     BranchName = models.CharField(max_length=500)
     AccountNo = models.CharField(max_length=500,blank=True, null=True)
@@ -1453,7 +1454,8 @@ class T_LoadingSheet(models.Model):
     InvoiceCount = models.IntegerField()
     Party = models.ForeignKey(M_Parties, related_name='LoadingSheetParty', on_delete=models.PROTECT)
     Route = models.ForeignKey(M_Routes, related_name='LoadingSheetRoute', on_delete=models.PROTECT)
-    VehicleNo = models.CharField(max_length=500,blank=True, null=True)
+    Vehicle = models.ForeignKey(M_Vehicles, related_name='LoadingSheetVehicle',on_delete=models.PROTECT)
+    Driver = models.ForeignKey(M_Drivers, related_name='LoadingSheetDriver',on_delete=models.PROTECT)
     TotalAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
