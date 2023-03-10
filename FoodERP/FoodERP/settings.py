@@ -88,7 +88,7 @@ DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fooderp',
+        'NAME': 'chitalescm20230310',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
         'HOST': '192.168.1.114',

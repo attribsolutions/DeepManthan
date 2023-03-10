@@ -53,7 +53,7 @@ class M_PartyType(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     # Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
-    IsRetailer = models.BooleanField(default=False)
+
  
     class Meta:
         db_table = 'M_PartyType'
@@ -140,8 +140,8 @@ class M_Parties(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    IsRetailer = models.BooleanField(default=False)
-    IsSCM = models.BooleanField(default=False)
+    # IsRetailer = models.BooleanField(default=False)
+    # IsSCM = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'M_Parties'
