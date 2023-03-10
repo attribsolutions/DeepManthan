@@ -290,7 +290,7 @@ urlpatterns = [
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
 
 # Driver 
-            url(r'DriverList$', DriverViewList.as_view()),
+            url(r'DriverFilter$', DriverViewList.as_view()),
             url(r'Driver/([0-9]+)$', DriverView.as_view()),
             url(r'Driver$', DriverView.as_view()),
 # Vehicle 
@@ -298,13 +298,13 @@ urlpatterns = [
             url(r'VehicleTypes$', M_VehicleTypesView.as_view()),
             url(r'Vehicle/([0-9]+)$', VehicleView.as_view()),
             url(r'Vehicle$', VehicleView.as_view()),
-            url(r'VehicleList$', VehicleViewList.as_view()),
+            url(r'VehicleFilter$', VehicleViewList.as_view()),
             
 # Routes 
-            url(r'RoutesList$', RouteListView.as_view()), 
+            url(r'RoutesFilter$', RouteListView.as_view()), 
             url(r'Routes/([0-9]+)$', RoutesView.as_view()), 
             url(r'Routes$', RoutesView.as_view()),
-            url(r'RouteUpdateList$', RoutesUpdateListView.as_view()),
+            url(r'RouteUpdateFilter$', RoutesUpdateListView.as_view()),
             url(r'RouteUpdate$',RoutesUpdateView.as_view()),               
             
 
