@@ -97,4 +97,42 @@ class LoadingSheetView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
   
+class LoadingSheetInvoicesView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoicedata = JSONParser().parse(request)
+                FromDate = Invoicedata['FromDate']
+                ToDate = Invoicedata['ToDate']
+                Party = Invoicedata['Party']
+                Route = Invoicedata['Route']
+                
+                if(Route == ''):
+                    query =  T_Invoices.objects.raw('''SELECT t_invoices.id as id, t_invoices.InvoiceDate, t_invoices.Customer_id, t_invoices.FullInvoiceNumber, t_invoices.GrandTotal, t_invoices.Party_id, t_invoices.CreatedOn,  t_invoices.UpdatedOn, m_parties.Name FROM t_invoices join m_parties on  m_parties.id=  t_invoices.Customer_id WHERE t_invoices.InvoiceDate BETWEEN %s AND %s AND t_invoices.Party_id = %s ''',[FromDate,ToDate,Party])
+                else:
+                    query =  T_Invoices.objects.raw('''SELECT t_invoices.id as id, t_invoices.InvoiceDate, t_invoices.Customer_id, t_invoices.FullInvoiceNumber, t_invoices.GrandTotal, t_invoices.Party_id, t_invoices.CreatedOn, t_invoices.UpdatedOn,m_parties.Name FROM t_invoices join m_parties on  m_parties.id=  t_invoices.Customer_id join mc_partysubparty on mc_partysubparty.SubParty_id = t_invoices.Customer_id and mc_partysubparty.Route_id =%s WHERE t_invoices.InvoiceDate BETWEEN %s AND %s AND t_invoices.Party_id=%s''', [Route,FromDate,ToDate,Party])
+           
+                if query:
+                    Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
+                    InvoiceListData = list()
+                    for a in Invoice_serializer:
+                        InvoiceListData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "Customer": a['Name'],
+                            "CustomerID": a['Customer_id'],
+                            "PartyID": a['Party_id'],
+                            "GrandTotal": a['GrandTotal'],
+                            "CreatedOn": a['CreatedOn'] 
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
