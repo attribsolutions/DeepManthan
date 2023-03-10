@@ -266,6 +266,11 @@ urlpatterns = [
             url(r'ProductionReIssue/([0-9]+)$',ProductionReIssueViewSecond.as_view()),
             url(r'ProductionMaterialIssueItem$',MaterialIssueItemsView.as_view()),
             url(r'ProductionReIsssueFilter$',ProductionReIsssueFilter.as_view()),
+            
+# Party_Type
+            url(r'PartyTypes/([0-9]+)/([0-9]+)$', PartyTypeView.as_view()),
+            url(r'PartyTypes$', PartyTypeView.as_view()),
+            url(r'PartyTypesFilter$', PartyTypeListView.as_view()),
 
 # Parties=================================================================================
             url(r'States$',M_StateView.as_view()),
@@ -274,11 +279,8 @@ urlpatterns = [
             url(r'PartiesFilter$', M_PartiesFilterView.as_view()),
             url(r'Divisions/([0-9]+)$', DivisionsView.as_view()),
             url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
-            url(r'PriceList$', PriceListView.as_view()),
-            url(r'PartyTypes/([0-9]+)/([0-9]+)$', PartyTypeViewSecond.as_view()),
-            url(r'PartyTypes$', PartyTypeView.as_view()),
+            url(r'PriceList$', PriceListView.as_view()),        
             url(r'ImageTypes$', M_ImageTypesView.as_view()),
-           
             url(r'GetVendorSupplierCustomer$',GetVendorSupplierCustomerListView.as_view()),
             # url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
             # url(r'GetCustomer/([0-9]+)$',GetCustomerView.as_view()),
