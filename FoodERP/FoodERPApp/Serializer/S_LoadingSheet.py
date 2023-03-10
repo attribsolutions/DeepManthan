@@ -24,6 +24,18 @@ class LoadingSheetSerializer(serializers.ModelSerializer):
             
         return LoadingSheetID 
        
-        
+
+class LoadingSheetInvoicesSerializer(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    InvoiceDate = serializers.DateField()
+    Customer_id = serializers.IntegerField()
+    FullInvoiceNumber =  serializers.CharField(max_length=500)
+    GrandTotal = serializers.CharField(max_length=500)
+    Party_id =  serializers.IntegerField()
+    CreatedOn = serializers.CharField(max_length=500)
+    UpdatedOn = serializers.EmailField(max_length=200)
+    Name = serializers.CharField(max_length=500)
+         
         
         
