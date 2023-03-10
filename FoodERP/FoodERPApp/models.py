@@ -52,9 +52,8 @@ class M_PartyType(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    
     IsRetailer = models.BooleanField(default=False)
-   
+    Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
  
     class Meta:
         db_table = 'M_PartyType'
