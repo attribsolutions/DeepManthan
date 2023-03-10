@@ -100,6 +100,8 @@ from .Views.V_LoadingSheet import *
 
 from .Views.V_Salesman import *
 
+from .Views.V_BankMaster import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -393,5 +395,10 @@ urlpatterns = [
             url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
+
+# BankMaster
+            url(r'Bank/([0-9]+)$', BankView.as_view()),
+            url(r'Bank$', BankView.as_view()),
+            url(r'BankFilter$', BankListView.as_view())
      
 ]
