@@ -168,6 +168,7 @@ class M_EmployeeTypes(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
+    Company = models.ForeignKey(C_Companies,related_name='Emp_Company',on_delete=models.PROTECT)
 
     class Meta:
         db_table = "M_EmployeeTypes"
