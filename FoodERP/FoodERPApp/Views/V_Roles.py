@@ -32,7 +32,7 @@ class M_RolesViewFilter(CreateAPIView):
                     M_Roles_data = M_Roles.objects.filter(CreatedBy=UserID)
                 
                 if M_Roles_data.exists():
-                    M_Roles_serializer = M_RolesSerializer(M_Roles_data, many=True)
+                    M_Roles_serializer = M_RolesSerializerforFilter(M_Roles_data, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Roles_serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Role Not available', 'Data': []})
         except Exception :
