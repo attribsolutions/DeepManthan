@@ -7,17 +7,7 @@ from activity_log.models import UserMixin
 def make_extra_data(request, response):
     return str(request.META)
    
-class M_PartyType(models.Model):
-    Name = models.CharField(max_length=100)
-    IsSCM =models.BooleanField(default=False)
-    IsDivision = models.BooleanField(default=False) 
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        db_table = 'M_PartyType'
  
 class C_CompanyGroups(models.Model):
 
@@ -53,6 +43,20 @@ class C_Companies(models.Model):
 
     class Meta:
         db_table = "C_Companies"
+        
+class M_PartyType(models.Model):
+    Name = models.CharField(max_length=100)
+    IsSCM =models.BooleanField(default=False)
+    IsDivision = models.BooleanField(default=False) 
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
+    IsRetailer = models.BooleanField(default=False)
+ 
+    class Meta:
+        db_table = 'M_PartyType'
         
 
 class M_GeneralMaster(models.Model):
