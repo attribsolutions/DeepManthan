@@ -9,22 +9,11 @@ from ..Serializer.S_EmployeeTypes import  *
 
 from ..models import *
 
+
 class M_EmployeeTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                M_EmployeeTypedata = M_EmployeeTypes.objects.all()
-                if M_EmployeeTypedata.exists():
-                    M_EmployeeType_serializer = M_EmployeeTypeSerializer(M_EmployeeTypedata, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_EmployeeType_serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -41,6 +30,26 @@ class M_EmployeeTypeView(CreateAPIView):
         except Exception :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
                    
+class M_EmployeeTypeFilterView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication 
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                EmployeeType_data = JSONParser().parse(request)
+                Company = EmployeeType_data['Company']
+                query = M_EmployeeTypes.objects.filter(Company_id=Company)
+                print(str(query))
+                if query:
+                    EmpType_serializer = M_EmployeeTypeSerializer(query,many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmpType_serializer})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})    
+        except Exception :
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})                  
+
 
 class M_EmployeeTypeViewSecond(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
