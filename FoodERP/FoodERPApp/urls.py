@@ -158,6 +158,9 @@ urlpatterns = [
 # Employees 
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
             url(r'Employees$', M_EmployeesView.as_view()),
+            url(r'EmployeesFilter$', M_EmployeesFilterView.as_view()),
+           
+#EmployeeTypes           
             url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
             url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
             url(r'EmployeeTypesFilter$', M_EmployeeTypeFilterView.as_view()),
@@ -268,7 +271,7 @@ urlpatterns = [
             url(r'ProductionReIsssueFilter$',ProductionReIsssueFilter.as_view()),
             
 # Party_Type
-            url(r'PartyTypes/([0-9]+)/([0-9]+)$', PartyTypeView.as_view()),
+            url(r'PartyTypes/([0-9]+)$', PartyTypeView.as_view()),
             url(r'PartyTypes$', PartyTypeView.as_view()),
             url(r'PartyTypesFilter$', PartyTypeListView.as_view()),
 
