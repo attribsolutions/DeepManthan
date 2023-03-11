@@ -18,8 +18,8 @@ class RouteListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Routesdata = JSONParser().parse(request)
-                Company = Routesdata['Company']
-                Party = Routesdata['Party']
+                Company = Routesdata['CompanyID']
+                Party = Routesdata['PartyID']
                 Routequery = M_Routes.objects.filter(Party=Party,Company=Company)
                 if Routequery.exists():
                     Routesdata = RoutesSerializer(Routequery, many=True).data
@@ -107,7 +107,7 @@ class RoutesUpdateListView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartySubpartydata = JSONParser().parse(request)
-                Party = PartySubpartydata['Party']
+                Party = PartySubpartydata['PartyID']
                 query = MC_PartySubParty.objects.filter(Party=Party)       
                 if query.exists():
                     SubPartydata = RoutesUpdateListSerializer(query, many=True).data
