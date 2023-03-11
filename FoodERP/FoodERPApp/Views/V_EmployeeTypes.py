@@ -40,15 +40,15 @@ class M_EmployeeTypeFilterView(CreateAPIView):
         try:
             with transaction.atomic():
                 EmployeeType_data = JSONParser().parse(request)
-                Company = EmployeeType_data['Company']
-                query = M_EmployeeTypes.objects.filter(Company_id=Company)
-                print(str(query))
+                Company = EmployeeType_data['CompanyID']
+                query = M_EmployeeTypes.objects.filter(Company=Company)
+                
                 if query:
                     EmpType_serializer = M_EmployeeTypeSerializer(query,many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmpType_serializer})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})                  
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})                  
 
 
 class M_EmployeeTypeViewSecond(RetrieveAPIView):
