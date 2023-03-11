@@ -18,14 +18,41 @@ class PartyTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyType_Data = JSONParser().parse(request)
-                Company = PartyType_Data['Company']
-                query = M_PartyType.objects.filter(Company_id=Company)
-                if query:
-                    PartyType_serializer = PartyTypeSerializer(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PartyType_serializer})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'PartyType not available', 'Data' : []})
+             
+                UserID = PartyType_Data['UserID']   
+                RoleID=  PartyType_Data['RoleID']  
+                CompanyID = PartyType_Data['CompanyID']  
+                IsSCM=PartyType_Data['IsSCM'] 
+                id=PartyType_Data['id'] 
+                
+                
+                if (id == 0):
+                    
+                    if(IsSCM == 0):
+                       
+                        query = M_PartyType.objects.filter(Company=CompanyID)
+                        p=0
+                    else:
+                       
+                        query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)
+                        print(str(query.query))
+                        p=0
+                else:    
+                    
+                    query = M_PartyType.objects.filter(id=id)
+                    p=1
+                
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data':[]})
+                else:    
+                    PartyTypes_Serializer = PartyTypeSerializer(query, many=True).data
+                    if p==0:
+                        data=PartyTypes_Serializer
+                    else:
+                        data=PartyTypes_Serializer[0]    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': data})   
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class PartyTypeView(CreateAPIView):
