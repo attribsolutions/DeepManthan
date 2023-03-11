@@ -21,10 +21,10 @@ class PartyTypeListView(CreateAPIView):
              
                 UserID = PartyType_Data['UserID']   
                 RoleID=  PartyType_Data['RoleID']  
-                CompanyID=PartyType_Data['CompanyID']  
-                IsSCM=PartyType_Data['CompanyID'] 
+                CompanyID = PartyType_Data['CompanyID']  
+                IsSCM=PartyType_Data['IsSCM'] 
                 id=PartyType_Data['id'] 
-                print(id)
+                
                 
                 if (id == 0):
                     
@@ -34,13 +34,14 @@ class PartyTypeListView(CreateAPIView):
                         p=0
                     else:
                        
-                        query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID) 
+                        query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)
+                        print(str(query.query))
                         p=0
                 else:    
                     
                     query = M_PartyType.objects.filter(id=id)
                     p=1
-               
+                
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data':[]})
                 else:    
