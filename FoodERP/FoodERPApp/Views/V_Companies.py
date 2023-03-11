@@ -99,14 +99,47 @@ class C_CompaniesView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
+                AdminDivisionDatalist=list()
                 Companiesdata = JSONParser().parse(request)
+
+
+                AdminDivisionDatalist.append({
+                        "Name": Companiesdata['Name']+' AdminDivision',
+                        "PartyType": 5,
+                        "Company": 1,
+                        "PAN": "AAAAA1234A",
+                        "Email": Companiesdata['EmailID'],
+                        "MobileNo": Companiesdata['PhoneNo'],
+                        "AlternateContactNo": "",
+                        "State": 22,
+                        "District": 1,
+                        "Taluka": 0,
+                        "City": 0,
+                        "GSTIN": Companiesdata['GSTIN'],
+                        "MkUpMkDn": False,
+                        "isActive": True,
+                        "IsDivision": True,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "IsRetailer" : 0
+                        
+              })
+                # Companiesdata.update({"AdminDivisionDatalist" : AdminDivisionDatalist})
+                # print(Companiesdata)
                 Companies_Serializer = C_CompanySerializer(data=Companiesdata)
-                if Companies_Serializer.is_valid():
+                AdminDivisionDatalist_Serializer=M_PartySerializer(data=AdminDivisionDatalist[0])
+                # print(Companies_Serializer)
+                if Companies_Serializer.is_valid() and AdminDivisionDatalist_Serializer.is_valid():
                     Companies_Serializer.save()
+                    ff=Companies_Serializer.data['id']
+                    AdminDivisionDatalist_Serializer.save()
+                    party=AdminDivisionDatalist_Serializer.data['id']
+                    M_Parties.objects.filter(id=party).update(Company=ff)
+
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Companies_Serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  AdminDivisionDatalist_Serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
             
