@@ -20,8 +20,8 @@ class DriverViewList(CreateAPIView):
         try:
             with transaction.atomic():
                 Driverdata = JSONParser().parse(request)
-                Company = Driverdata['Company']
-                Party = Driverdata['Party']
+                Company = Driverdata['CompanyID']
+                Party = Driverdata['PartyID']
                 DriverNamedata = M_Drivers.objects.filter(Party=Party,Company=Company)
                 if DriverNamedata.exists():
                     Drivers_Serializer = M_DriverSerializer(
