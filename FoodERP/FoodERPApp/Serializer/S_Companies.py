@@ -18,11 +18,18 @@ class C_CompanySerializerSecond(serializers.ModelSerializer):
         model = C_Companies
         fields = '__all__'
           
+class M_PartySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = '__all__'
+
 # POST AND PUT Method
 class C_CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = C_Companies
         fields = '__all__'
+
+       
 
 # GET Method
 
