@@ -20,8 +20,8 @@ class M_VehicleTypesView(CreateAPIView):
         try:
             with transaction.atomic():
                 VehicleTypedata = JSONParser().parse(request)
-                Company = VehicleTypedata['Company']
-                Party = VehicleTypedata['Party']
+                Company = VehicleTypedata['CompanyID']
+                Party = VehicleTypedata['PartyID']
                 VehicleTypedata = M_VehicleTypes.objects.filter(Party=Party,Company=Company)
                 if VehicleTypedata.exists():
                     VehicleType_Serializer = VehicleTypesSerializer(VehicleTypedata, many=True)
