@@ -585,7 +585,7 @@ class M_Drivers(models.Model):
     DOB = models.DateField()
     Address = models.CharField(max_length=500)
     Party = models.ForeignKey(M_Parties, related_name='DParty', on_delete=models.PROTECT)
-    # Company = models.ForeignKey(C_Companies, related_name='DCompany', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='DCompany', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -597,8 +597,8 @@ class M_Drivers(models.Model):
     
 class M_VehicleTypes(models.Model):
     Name= models.CharField(max_length=300)
-    # Party = models.ForeignKey(M_Parties, related_name='VTParty', on_delete=models.PROTECT)
-    # Company = models.ForeignKey(C_Companies, related_name='VTCompany', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties, related_name='VTParty', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='VTCompany', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_VehicleTypes" 
 
@@ -607,7 +607,7 @@ class M_Vehicles(models.Model):
     VehicleNumber= models.CharField(max_length=300)
     Description = models.CharField(max_length=300)
     Party = models.ForeignKey(M_Parties, related_name='VParty', on_delete=models.PROTECT)
-    # Company = models.ForeignKey(C_Companies, related_name='VCompany', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='VCompany', on_delete=models.PROTECT)
     VehicleType = models.ForeignKey(M_VehicleTypes, related_name='VehicleType', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
