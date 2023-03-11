@@ -23,7 +23,6 @@ class VehicleViewList(CreateAPIView):
                 Company = Vehicledata['Company']
                 Party = Vehicledata['Party']
                 VehicleNamedata = M_Vehicles.objects.filter(Party=Party,Company=Company)
-                print(str(VehicleNamedata.query))
                 if VehicleNamedata.exists():
                     Vehicle_Serializer = VehiclesSerializerSecond(VehicleNamedata, many=True).data
                     VehicleData = list()
