@@ -317,7 +317,7 @@ urlpatterns = [
             
 
 # Salesman 
-            url(r'SalesmanList$', SalesmanListView.as_view()), 
+            url(r'SalesmanFilter$', SalesmanListView.as_view()), 
             url(r'Salesman/([0-9]+)$', SalesmanView.as_view()), 
             url(r'Salesman$', SalesmanView.as_view()),             
 
