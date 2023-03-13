@@ -379,29 +379,30 @@ class GetUserDetailsView(APIView):
         UserId = request.data['UserId']
         Userdata = M_Users.objects.filter(id=UserId)
 
-        EmployeeID = UserListSerializerforgetdata(Userdata, many=True).data
+        UserSerializer = UserListSerializerforgetdata(Userdata, many=True).data
 
-        company = M_Employees.objects.filter(id=EmployeeID[0]['Employee'])
-        CompanyID = M_EmployeesSerializerforgetdata(company, many=True).data
+        Employee = M_Employees.objects.filter(id=UserSerializer[0]['Employee'])
+        EmployeeSerializer = M_EmployeesSerializerforgetdata(Employee, many=True).data
 
-        company_Group = C_Companies.objects.filter(id=CompanyID[0]['Company'])
-        CompanyGroupID = C_CompanySerializer(company_Group, many=True).data
+        Company = C_Companies.objects.filter(id=EmployeeSerializer[0]['Company'])
+        CompanySerializer = C_CompanySerializer(Company, many=True).data
 
         request.session['UserID'] = UserId
-        request.session['UserName'] = EmployeeID[0]["LoginName"]
-        request.session['EmployeeID'] = EmployeeID[0]["Employee"]
-        request.session['CompanyID'] = CompanyID[0]["Company"]
-        request.session['CompanyGroup'] = CompanyGroupID[0]["CompanyGroup"]
-        print(request.session.get('UserName'))
+        request.session['UserName'] = UserSerializer[0]["LoginName"]
+        request.session['EmployeeID'] = UserSerializer[0]["Employee"]
+        request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
+        request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
+        request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
+        print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
 
         a = list()
         a.append({
             "UserID": UserId,
-            "UserName":EmployeeID[0]["LoginName"],
-            "EmployeeID": EmployeeID[0]["Employee"],
-            "CompanyID": CompanyID[0]["Company"],
-            "IsSCMCompany": CompanyGroupID[0]["IsSCM"],
-            "CompanyGroup": CompanyGroupID[0]["CompanyGroup"]
+            "UserName":UserSerializer[0]["LoginName"],
+            "EmployeeID": UserSerializer[0]["Employee"],
+            "CompanyID": EmployeeSerializer[0]["Company"],
+            "IsSCMCompany": CompanySerializer[0]["IsSCM"],
+            "CompanyGroup": CompanySerializer[0]["CompanyGroup"]
 
         })
 
