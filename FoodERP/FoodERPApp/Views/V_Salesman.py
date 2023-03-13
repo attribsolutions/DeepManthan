@@ -17,8 +17,8 @@ class SalesmanListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Salesmandata = JSONParser().parse(request)
-                Company = Salesmandata['Company']
-                Party = Salesmandata['Party']
+                Company = Salesmandata['CompanyID']
+                Party = Salesmandata['PartyID']
                 Salesmanquery = M_Salesman.objects.filter(Party=Party,Company=Company)
                 if Salesmanquery.exists():
                     Salesmandata_serialiazer = SalemanSerializer(Salesmanquery, many=True).data

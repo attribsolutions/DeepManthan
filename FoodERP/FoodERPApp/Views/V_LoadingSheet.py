@@ -6,6 +6,7 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
 from ..models import *
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 
 
 
@@ -19,7 +20,7 @@ class LoadingSheetListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Loadingsheet_data = JSONParser().parse(request)
-                Party = Loadingsheet_data['Party']
+                Party = Loadingsheet_data['PartyID']
                 Routequery = T_LoadingSheet.objects.filter(Party=Party)
                 if Routequery.exists():
                     Loadingsheet_Serializer = LoadingSheetSerializer(Routequery, many=True).data
@@ -39,8 +40,12 @@ class LoadingSheetView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Loadingsheet_data = JSONParser().parse(request)
-                Loadingsheet_Serializer = LoadingSheetSerializer(data=Loadingsheet_data)
+                Loadingsheetdata = JSONParser().parse(request)
+                Party = Loadingsheetdata['Party']
+                Date = Loadingsheetdata['Date']
+                a = GetMaxNumber.GetLoadingSheetNumber(Party,Date)
+                Loadingsheetdata['No'] = str(a)
+                Loadingsheet_Serializer = LoadingSheetSerializer(data=Loadingsheetdata)
                 if Loadingsheet_Serializer.is_valid():
                     Loadingsheet_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'Data':[]})
