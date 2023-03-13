@@ -132,7 +132,7 @@ class GetMaxNumber:
     def GetIBInwardNumber(*args):
         
         MaxIBInwardNumber=T_InterBranchInward.objects.filter(Customer_id=args[0]).values('IBInwardNumber').order_by('-id')[:1]
-        print(str(MaxIBInwardNumber.query))
+        # print(str(MaxIBInwardNumber.query))
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
         if(not MaxIBInwardNumber):
@@ -147,6 +147,25 @@ class GetMaxNumber:
                 a=int(MaxIBInwardNumber[0]['IBInwardNumber'])
                 a=a+1
         return a
+    
+    
+    def GetLoadingSheetNumber(*args):
+        
+        MaxLoadingSheetNumber=T_LoadingSheet.objects.filter(Party_id=args[0]).values('No').order_by('-id')[:1]
+        # print(str(MaxLoadingSheetNumber.query))
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxLoadingSheetNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else: 
+                a=int(MaxLoadingSheetNumber[0]['No'])
+                a=a+1
+        return a
+    
+    
     
 
 class GetPrifix:
@@ -222,6 +241,7 @@ class GetPrifix:
         else:
             a=Prifix[0]['IBInwardprefix']
         return a
+    
     
 class SystemBatchCodeGeneration:
     
