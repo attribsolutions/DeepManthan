@@ -6,7 +6,7 @@ from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
 from ..models import *
-from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Views.V_TransactionNumberfun import GetMaxNumber
 
 
 
