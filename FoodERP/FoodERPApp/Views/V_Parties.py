@@ -5,6 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from django.db.models import Q
+from django.contrib.sessions.backends.db import SessionStore
 
 from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
@@ -32,7 +33,14 @@ class DivisionsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
-  
+# def get_session(request):
+#     # Create a new session object using the same session key
+#     session = SessionStore(session_key=request.session.session_key)
+    
+#     # Get the session variable
+#     my_var = session.get('my_var', None)
+#     print(my_var)
+#     return render(request, 'index.html', {'my_var': my_var})  
 
 class M_PartiesFilterView(CreateAPIView):
     
@@ -40,27 +48,57 @@ class M_PartiesFilterView(CreateAPIView):
     authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request):
+        
+        session = SessionStore(session_key=request.session.session_key)
+        print('bbbbbbbbbbbbbbbbb',session.get('UserName'))
         try:
             with transaction.atomic():
+                
                 Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']
                 PartyID=Logindata['PartyID'] 
+                # IsSCMCompany = Logindata['IsSCMCompany']
+                CompanyGroupID =Logindata['CompanyGroup'] 
+                IsSCMCompany = Logindata['IsSCMCompany'] 
+               
+                if (RoleID == 1): # SuperAdmin
+                  
+                    q1=M_PartyType.objects.filter(Company=CompanyID)
+                    query=M_Parties.objects.filter(PartyType__in = q1)
 
-                if PartyID == 0:
+                elif(RoleID == 2 and IsSCMCompany == 0): # Admin
+                   
+                    q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer = 0)
+                    query=M_Parties.objects.filter(PartyType__in = q1)
 
-                    if(RoleID == 1 ):
-                        query=M_Parties.objects.all()
-                    else:
-                        query=M_Parties.objects.filter(CreatedBy=UserID)
+                elif(RoleID == 2 and IsSCMCompany == 1): # SCM Company Admin
+                  
+                    q0=C_Companies.objects.filter(CompanyGroup = CompanyGroupID,IsSCM = 1)
+                    q1=M_PartyType.objects.filter(Company__in=q0,IsRetailer = 0)
+                    query=M_Parties.objects.filter(PartyType__in = q1)
+
                 else:
-                    query=M_Parties.objects.filter(Q(CreatedBy=UserID)| Q(id=PartyID) )
+                    q0 = MC_PartySubParty.objects.filter(Party = PartyID).values('SubParty')
+                    query = M_Parties.objects.filter(id__in = q0)  
+
+
+                # if PartyID == 0:
+
+                #     if(RoleID == 1 ):
+                #         q1=M_PartyType.objects.filter(Company=CompanyID)
+                #         query=M_Parties.objects.filter(PartyType__in = q1)
+                #     else:
+                #         query=M_Parties.objects.filter(Company=CompanyID)
+                # else:
+                #     query=MC_PartySubParty.objects.filter(Party=PartyID)
                 
-                # print(query.query)
+                print((query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
+
                     M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Data':M_Parties_serializer})
         except Exception as e:
