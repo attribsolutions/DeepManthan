@@ -378,12 +378,12 @@ class EditOrderView(CreateAPIView):
                 # Order Page Login Customer
                 Customer = request.data['Customer']
                 q1= M_Parties.objects.filter(id=Customer).values('PartyType')
-                q2 = M_PartyType.objects.filter(id =q1).values('IsRetailer')
-      
-                if (q2 == 1):
-                    PartyItem = Party
-                else:
+                q2 = M_PartyType.objects.filter(id =q1[0]['PartyType']).values('IsRetailer','IsSCM')
+                
+                if (q2[0]['IsRetailer'] == 0 and q2[0]['IsSCM'] == 1): # Is Not Retailer but is SSDD Order
                     PartyItem = Customer
+                else:
+                    PartyItem = Party
       
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
