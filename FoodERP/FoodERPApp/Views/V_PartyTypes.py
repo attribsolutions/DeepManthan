@@ -22,7 +22,7 @@ class PartyTypeListView(CreateAPIView):
                 UserID = PartyType_Data['UserID']   
                 RoleID=  PartyType_Data['RoleID']  
                 CompanyID = PartyType_Data['CompanyID']  
-                IsSCM=PartyType_Data['IsSCM'] 
+                IsSCM=PartyType_Data['IsSCMCompany'] 
                 id=PartyType_Data['id'] 
                 
                 
