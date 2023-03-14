@@ -23,25 +23,44 @@ class PartyAddressSerializer(serializers.ModelSerializer):
         model = MC_PartyAddress
         fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']                
 
+class MC_PartySubPartySerializer(serializers.ModelSerializer):
+    class Meta:
+        model =MC_PartySubParty
+        fields =['Party','CreatedBy','UpdatedBy']
+
+class M_PartiesinstanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  M_Parties
+        fields = ['id']       
+
 class M_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializer(many=True)
     PartyPrefix = PartyPrefixsSerializer(many=True)
+    PartySubParty = MC_PartySubPartySerializer(many=True)
     class Meta:
         model =  M_Parties
         fields = '__all__'
         
+        
     def create(self, validated_data):
-    
+       
         PartyAddress_data = validated_data.pop('PartyAddress')
         PartyPrefix_data = validated_data.pop('PartyPrefix')
+        
+        PartySubPartys=validated_data.pop('PartySubParty')
+        
         PartyID= M_Parties.objects.create(**validated_data)
+        
+        for PartySubParty in PartySubPartys:
+            PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)
         
         for PartyAddress in PartyAddress_data:
             Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
 
         for PartyPrefix in PartyPrefix_data:
             Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix)     
-               
+
+              
         return PartyID
     
     def update(self, instance, validated_data):

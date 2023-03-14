@@ -377,6 +377,14 @@ class EditOrderView(CreateAPIView):
                 Party = request.data['Party']  # Order Page Supplier DropDown
                 # Order Page Login Customer
                 Customer = request.data['Customer']
+                q1= M_Parties.objects.filter(id=Customer).values('PartyType')
+                q2 = M_PartyType.objects.filter(id =q1).values('IsRetailer')
+      
+                if (q2 == 1):
+                    PartyItem = Party
+                else:
+                    PartyItem = Customer
+      
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
 
@@ -393,12 +401,10 @@ left join m_mrpmaster on m_mrpmaster.id =a.MRP_id
 left join mc_itemunits on mc_itemunits.id=a.Unit_id
 left join m_units on m_units.id=mc_itemunits.UnitID_id
 left join m_gsthsncode on m_gsthsncode.id=a.GST_id
-left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([OrderID], [Party]))
-
-                OrderItemSerializer = OrderEditserializer(
-                    Itemquery, many=True).data
-                # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': OrderItemSerializer})
-
+left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([OrderID], [PartyItem]))
+                
+                OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
+                
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     GSTID = b['GST_id']
