@@ -222,29 +222,6 @@ class CreditlimitView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
         
         
-class PartyDropDownForPartySubParty(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
-    
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                PartySubPartydata = JSONParser().parse(request)
-               
-                CompanyID=PartySubPartydata['CompanyID']
-                
-                q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0)
-                
-                q1=M_Parties.objects.filter(PartyType__in=q0)
-               
-                PartySerializer_data=PartySerializer(q1,many=True).data
-                
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartySerializer_data})  
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
-        
-    
 class RetailerandSSDDView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication 

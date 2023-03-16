@@ -220,7 +220,6 @@ urlpatterns = [
             url(r'LoadingSheet$', LoadingSheetView.as_view()),
             url(r'LoadingSheetList$', LoadingSheetListView.as_view()),
             url(r'LoadingSheetInvoices$', LoadingSheetInvoicesView.as_view()),
-             url(r'LoadingSheetPrint/([0-9]+)$', LoadingSheetPrintView.as_view()),
             
     
 # GRN All API's
@@ -297,9 +296,6 @@ urlpatterns = [
             url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
             url(r'PartySubParty$',PartySubPartyView.as_view()),
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
-            url(r'PartySubPartyPartyDropDown$',PartyDropDownForPartySubParty.as_view()),
-            url(r'RetailerandSSDD$',RetailerandSSDDView.as_view()),
-
 
 # Driver 
             url(r'DriverFilter$', DriverViewList.as_view()),
