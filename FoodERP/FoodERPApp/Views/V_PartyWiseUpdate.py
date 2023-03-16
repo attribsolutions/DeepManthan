@@ -20,18 +20,24 @@ class PartyWiseUpdateView(CreateAPIView):
                 Party_data = JSONParser().parse(request)
                 Party = Party_data['PartyID']
                 Route = Party_data['Route']
+                Type = Party_data['Type']
                 query = MC_PartySubParty.objects.filter(Party=Party,Route=Route)
-                
-                if query:
+                if query.exists:
                     PartyID_serializer = PartyWiseSerializer(query,many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyID_serializer})
                     SubPartyListData = list()
                     for a in PartyID_serializer:
+                        if(Type == 'District' or Type == 'State' or Type == 'PriceList' or Type == 'PartyType' or Type == 'Company' ):
+                            aa = a['SubParty'][Type]['Name']
+                        else:
+                            aa = a['SubParty'][Type]    
                         SubPartyListData.append({
                             "id": a['id'],
-                            "SubParty":a['SubParty']['MobileNo']
-                    })
+                            "SubParty":a['SubParty'],
+                            "SubParty":a['SubParty']['Name'],
+                            Type:aa,
+                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party Not available', 'Data': []})    
-        except Exception :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  PartyID_serializer.error, 'Data': []})    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
