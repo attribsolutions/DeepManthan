@@ -1,5 +1,7 @@
 from django.urls import re_path as url
 
+
+
 from .Views.V_ProductionReIssue import *
 
 from .Views.V_Production import *
@@ -101,6 +103,8 @@ from .Views.V_LoadingSheet import *
 from .Views.V_Salesman import *
 
 from .Views.V_BankMaster import *
+
+from .Views.V_PartyWiseUpdate import *
 
 urlpatterns = [
     
@@ -297,6 +301,9 @@ urlpatterns = [
             url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
             url(r'PartySubParty$',PartySubPartyView.as_view()),
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
+            
+# PartyWiseUpdate            
+            url(r'PartyWiseUpdate$', PartyWiseUpdateView.as_view()),
 
 # Driver 
             url(r'DriverFilter$', DriverViewList.as_view()),
