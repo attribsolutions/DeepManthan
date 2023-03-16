@@ -26,10 +26,12 @@ class M_RolesViewFilter(CreateAPIView):
                 CompanyID=Logindata['CompanyID']
                 PartyID=Logindata['PartyID'] 
 
-                if(RoleID == 1 ):
-                    M_Roles_data = M_Roles.objects.all()
-                else:
-                    M_Roles_data = M_Roles.objects.filter(CreatedBy=UserID)
+                # if(RoleID == 1 ):
+                #     M_Roles_data = M_Roles.objects.all()
+                # else:
+                #     M_Roles_data = M_Roles.objects.filter(CreatedBy=UserID)
+                
+                M_Roles_data = M_Roles.objects.filter(Company=CompanyID)
                 
                 if M_Roles_data.exists():
                     M_Roles_serializer = M_RolesSerializerforFilter(M_Roles_data, many=True)

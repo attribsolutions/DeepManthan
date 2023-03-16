@@ -233,7 +233,7 @@ class RetailerandSSDDView(CreateAPIView):
                 PartySubPartydata = JSONParser().parse(request)
                 CompanyID=PartySubPartydata['CompanyID']
                 PartyID=PartySubPartydata['PartyID']
-                Type=PartySubPartydata['Type']    #1 : Reatiler,  2 : SS/DD
+                Type=PartySubPartydata['Type']   
                 
                 if Type==1: ##All Retailer under given Party and Company
                     q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=1,IsSCM=1)
