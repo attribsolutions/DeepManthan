@@ -27,11 +27,11 @@ class C_CompaniesViewFilter(CreateAPIView):
                 CompanyID=Logindata['CompanyID']
                 PartyID=Logindata['PartyID'] 
 
-                # if(RoleID == 1 ):
-                #     Groupquery = C_Companies.objects.all()
-                # else:
-                #     Groupquery = C_Companies.objects.filter(id=CompanyID)
-                Groupquery = C_Companies.objects.filter(id=CompanyID)
+                if(RoleID == 1 ):
+                    Groupquery = C_Companies.objects.all()
+                else:
+                    Groupquery = C_Companies.objects.filter(id=CompanyID)
+               
                 if Groupquery.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     Companydata = C_CompanySerializerSecond(Groupquery, many=True).data
