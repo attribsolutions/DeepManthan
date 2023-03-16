@@ -5,9 +5,9 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
+from ..Serializer.S_Invoices import *
 from ..models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
-
 
 
 class LoadingSheetListView(CreateAPIView):
@@ -19,12 +19,27 @@ class LoadingSheetListView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Loadingsheet_data = JSONParser().parse(request)
-                Party = Loadingsheet_data['PartyID']
-                Routequery = T_LoadingSheet.objects.filter(Party=Party)
-                if Routequery.exists():
-                    Loadingsheet_Serializer = LoadingSheetSerializer(Routequery, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Loadingsheet_Serializer})
+                Loadingsheetdata = JSONParser().parse(request)
+                FromDate = Loadingsheetdata['FromDate']
+                ToDate = Loadingsheetdata['ToDate']
+                Party = Loadingsheetdata['PartyID']
+                query = T_LoadingSheet.objects.filter(Date__range=[FromDate, ToDate], Party=Party)
+                if query.exists():
+                    LoadingSheet_Serializer = LoadingSheetListSerializer(query, many=True).data
+                    LoadingSheetListData = list()
+                    for a in LoadingSheet_Serializer:
+                        LoadingSheetListData.append({
+                            "id": a['id'],
+                            "Date": a['Date'],
+                            "LoadingSheetNo": a['No'],
+                            "Route Name": a['Route']['Name'],
+                            "TotalAmount": a['TotalAmount'],
+                            "InvoiceCount": a['InvoiceCount'],
+                            "VehicleNo": a['Vehicle']['VehicleNumber'],
+                            "VehicleType": a['Vehicle']['VehicleType']['Name'],
+                            "DriverName": a['Driver']['Name'],
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -150,62 +165,146 @@ class LoadingSheetPrintView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Loadingsheetquery = T_LoadingSheet.objects.filter(id=id)
-                if Loadingsheetquery.exists():
-                    LoadingSheetdata = LoadingSheetSerializer(Loadingsheetquery, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetdata})
-                
-                # InvoiceQuery = T_Invoices.objects.filter(id=id)
-                # if InvoiceQuery.exists():
-                #     InvoiceSerializedata = InvoiceSerializerSecond(
-                #         InvoiceQuery, many=True).data
-                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-                #     InvoiceData = list()
-                #     for a in InvoiceSerializedata:
-                #         InvoiceItemDetails = list()
-                #         for b in a['InvoiceItems']:
-                #             InvoiceItemDetails.append({
-                #                 "Item": b['Item']['id'],
-                #                 "ItemName": b['Item']['Name'],
-                #                 "Quantity": b['Quantity'],
-                #                 "MRP": b['MRP']['id'],
-                #                 "MRPValue": b['MRP']['MRP'],
-                #                 "Rate": b['Rate'],
-                #                 "TaxType": b['TaxType'],
-                #                 "UnitName": b['Unit']['BaseUnitConversion'],
-                #                 "BaseUnitQuantity": b['BaseUnitQuantity'],
-                #                 "GST": b['GST']['id'],
-                #                 "GSTPercentage": b['GST']['GSTPercentage'],
-                #                 "MarginValue": b['Margin']['Margin'],
-                #                 "BasicAmount": b['BasicAmount'],
-                #                 "GSTAmount": b['GSTAmount'],
-                #                 "CGST": b['CGST'],
-                #                 "SGST": b['SGST'],
-                #                 "IGST": b['IGST'],
-                #                 "CGSTPercentage": b['CGSTPercentage'],
-                #                 "SGSTPercentage": b['SGSTPercentage'],
-                #                 "IGSTPercentage": b['IGSTPercentage'],
-                #                 "Amount": b['Amount'],
-                #                 "BatchCode": b['BatchCode'],
-                #                 "BatchDate": b['BatchDate'],
-                #             })
-                            
-                #         InvoiceData.append({
-                #             "id": a['id'],
-                #             "InvoiceDate": a['InvoiceDate'],
-                #             "InvoiceNumber": a['InvoiceNumber'],
-                #             "FullInvoiceNumber": a['FullInvoiceNumber'],
-                #             "GrandTotal": a['GrandTotal'],
-                #             "RoundOffAmount":a['RoundOffAmount'],
-                #             "Customer": a['Customer']['id'],
-                #             "CustomerName": a['Customer']['Name'],
-                #             "CustomerGSTIN": a['Customer']['GSTIN'],
-                #             "Party": a['Party']['id'],
-                #             "PartyName": a['Party']['Name'],
-                #             "PartyGSTIN": a['Party']['GSTIN'],
-                #             "InvoiceItems": InvoiceItemDetails,
-                #         })
-                #     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
+                query = T_LoadingSheet.objects.filter(id=id)
+                LoadingSheet_Serializer = LoadingSheetListSerializer(query, many=True).data
+                InvoiceData = list()
+                LoadingSheetListData = list()
+                for a in LoadingSheet_Serializer:
+                    
+                    LoadingSheetListData.append({
+                        "id": a['id'],
+                        "Date": a['Date'],
+                        "Party":a['Party']['Name'],
+                        "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
+                        "LoadingSheetNo": a['No'],
+                        "RouteName": a['Route']['Name'],
+                        "TotalAmount": a['TotalAmount'],
+                        "InvoiceCount": a['InvoiceCount'],
+                        "VehicleNo": a['Vehicle']['VehicleNumber'],
+                        "VehicleType": a['Vehicle']['VehicleType']['Name'],
+                        "DriverName": a['Driver']['Name'],
+                    })
+                 
+                q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
+                InvoiceQuery = T_Invoices.objects.filter(id__in=q1)
+                if InvoiceQuery.exists():
+                    InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
+                    InvoiceParent = list()
+                    InvoiceItemDetails = list()
+                    for a in InvoiceSerializedata:
+                        for b in a['InvoiceItems']:
+                            InvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                            })
+                        InvoiceParent.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "InvoiceNumber": a['InvoiceNumber'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                        })
+                    InvoiceData.append({
+                        "PartyDetails":LoadingSheetListData[0],
+                        "InvoiceItems":InvoiceItemDetails,
+                        "InvoiceParent":InvoiceParent,
+                    })    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class MultipleInvoicesView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
+                InvoiceIDs = T_Invoices.objects.filter(id__in=q1).values('id')
+                InvoiceList = list()
+                for InvoiceID in InvoiceIDs:
+                    InvoiceQuery = T_Invoices.objects.filter(id=InvoiceID['id'])
+                    if InvoiceQuery.exists():
+                        InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        
+                        InvoiceData = list()
+                        for a in InvoiceSerializedata:
+                            InvoiceItemDetails = list()
+                            for b in a['InvoiceItems']:
+                                InvoiceItemDetails.append({
+                                    "Item": b['Item']['id'],
+                                    "ItemName": b['Item']['Name'],
+                                    "Quantity": b['Quantity'],
+                                    "MRP": b['MRP']['id'],
+                                    "MRPValue": b['MRP']['MRP'],
+                                    "Rate": b['Rate'],
+                                    "TaxType": b['TaxType'],
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                    "GST": b['GST']['id'],
+                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "MarginValue": b['Margin']['Margin'],
+                                    "BasicAmount": b['BasicAmount'],
+                                    "GSTAmount": b['GSTAmount'],
+                                    "CGST": b['CGST'],
+                                    "SGST": b['SGST'],
+                                    "IGST": b['IGST'],
+                                    "CGSTPercentage": b['CGSTPercentage'],
+                                    "SGSTPercentage": b['SGSTPercentage'],
+                                    "IGSTPercentage": b['IGSTPercentage'],
+                                    "Amount": b['Amount'],
+                                    "BatchCode": b['BatchCode'],
+                                    "BatchDate": b['BatchDate'],
+                                })
+                                
+                            InvoiceData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "InvoiceNumber": a['InvoiceNumber'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount":a['RoundOffAmount'],
+                                "Customer": a['Customer']['id'],
+                                "CustomerName": a['Customer']['Name'],
+                                "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "Party": a['Party']['id'],
+                                "PartyName": a['Party']['Name'],
+                                "PartyGSTIN": a['Party']['GSTIN'],
+                                "InvoiceItems": InvoiceItemDetails,
+                            })
+                    InvoiceList.append( InvoiceData[0] )   
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  

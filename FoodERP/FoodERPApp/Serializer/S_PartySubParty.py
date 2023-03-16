@@ -7,7 +7,7 @@ from ..models import *
 class PartySerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
-        fields = '__all__'
+        fields = ['id','Name','PartyType']
         
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:

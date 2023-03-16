@@ -31,7 +31,7 @@ class C_CompaniesViewFilter(CreateAPIView):
                     Groupquery = C_Companies.objects.all()
                 else:
                     Groupquery = C_Companies.objects.filter(id=CompanyID)
-                
+               
                 if Groupquery.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     Companydata = C_CompanySerializerSecond(Groupquery, many=True).data
