@@ -5,8 +5,10 @@ from ..models import *
 from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
 from ..Serializer.S_Routes import  *
+from ..Serializer.S_Parties import  *
 
 class LoadingSheetListSerializer(serializers.ModelSerializer):
+    Party = M_PartiesSerializerSecond()
     Route = RouteSerializer()
     Driver = M_DriverSerializer()
     Vehicle = VehiclesSerializerSecond()

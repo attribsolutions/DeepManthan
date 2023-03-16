@@ -10,7 +10,6 @@ from ..models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
 
-
 class LoadingSheetListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -166,14 +165,34 @@ class LoadingSheetPrintView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
+                query = T_LoadingSheet.objects.filter(id=id)
+                LoadingSheet_Serializer = LoadingSheetListSerializer(query, many=True).data
+                InvoiceData = list()
+                LoadingSheetListData = list()
+                for a in LoadingSheet_Serializer:
+                    query = MC_PartyAddress.objects.filter(Party=a['Party'])
+                    LoadingSheetListData.append({
+                        "id": a['id'],
+                        "Date": a['Date'],
+                        "Party":a['Party']['Name'],
+                        "PartyAddress":a['Party']['PartyAddress'][0],
+                        "LoadingSheetNo": a['No'],
+                        "Route Name": a['Route']['Name'],
+                        "TotalAmount": a['TotalAmount'],
+                        "InvoiceCount": a['InvoiceCount'],
+                        "VehicleNo": a['Vehicle']['VehicleNumber'],
+                        "VehicleType": a['Vehicle']['VehicleType']['Name'],
+                        "DriverName": a['Driver']['Name'],
+                    })
+                 
                 q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
                 InvoiceQuery = T_Invoices.objects.filter(id__in=q1)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
-                    InvoiceData = list()
+                    InvoiceParent = list()
+                    InvoiceItemDetails = list()
                     for a in InvoiceSerializedata:
-                        InvoiceItemDetails = list()
                         for b in a['InvoiceItems']:
                             InvoiceItemDetails.append({
                                 "Item": b['Item']['id'],
@@ -200,8 +219,7 @@ class LoadingSheetPrintView(CreateAPIView):
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
                             })
-                            
-                        InvoiceData.append({
+                        InvoiceParent.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
                             "InvoiceNumber": a['InvoiceNumber'],
@@ -214,9 +232,13 @@ class LoadingSheetPrintView(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
-                            "InvoiceItems": InvoiceItemDetails,
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData })
+                    InvoiceData.append({
+                        "PartyDetails":LoadingSheetListData[0],
+                        "InvoiceItems":InvoiceItemDetails,
+                        "InvoiceParent":InvoiceParent,
+                    })    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
