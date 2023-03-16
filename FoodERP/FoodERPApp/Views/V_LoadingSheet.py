@@ -242,3 +242,69 @@ class LoadingSheetPrintView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class MultipleInvoicesView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
+                InvoiceIDs = T_Invoices.objects.filter(id__in=q1).values('id')
+                InvoiceList = list()
+                for InvoiceID in InvoiceIDs:
+                    InvoiceQuery = T_Invoices.objects.filter(id=InvoiceID['id'])
+                    if InvoiceQuery.exists():
+                        InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        
+                        InvoiceData = list()
+                        for a in InvoiceSerializedata:
+                            InvoiceItemDetails = list()
+                            for b in a['InvoiceItems']:
+                                InvoiceItemDetails.append({
+                                    "Item": b['Item']['id'],
+                                    "ItemName": b['Item']['Name'],
+                                    "Quantity": b['Quantity'],
+                                    "MRP": b['MRP']['id'],
+                                    "MRPValue": b['MRP']['MRP'],
+                                    "Rate": b['Rate'],
+                                    "TaxType": b['TaxType'],
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                    "GST": b['GST']['id'],
+                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "MarginValue": b['Margin']['Margin'],
+                                    "BasicAmount": b['BasicAmount'],
+                                    "GSTAmount": b['GSTAmount'],
+                                    "CGST": b['CGST'],
+                                    "SGST": b['SGST'],
+                                    "IGST": b['IGST'],
+                                    "CGSTPercentage": b['CGSTPercentage'],
+                                    "SGSTPercentage": b['SGSTPercentage'],
+                                    "IGSTPercentage": b['IGSTPercentage'],
+                                    "Amount": b['Amount'],
+                                    "BatchCode": b['BatchCode'],
+                                    "BatchDate": b['BatchDate'],
+                                })
+                                
+                            InvoiceData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "InvoiceNumber": a['InvoiceNumber'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount":a['RoundOffAmount'],
+                                "Customer": a['Customer']['id'],
+                                "CustomerName": a['Customer']['Name'],
+                                "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "Party": a['Party']['id'],
+                                "PartyName": a['Party']['Name'],
+                                "PartyGSTIN": a['Party']['GSTIN'],
+                                "InvoiceItems": InvoiceItemDetails,
+                            })
+                    InvoiceList.append( InvoiceData[0] )   
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
