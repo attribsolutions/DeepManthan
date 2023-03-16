@@ -72,11 +72,11 @@ class UserListView(CreateAPIView):
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']        
                 
-                if (RoleID == 1):
-                    Usersdata = M_Users.objects.all()
-                else:                
-                    Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
-                
+                # if (RoleID == 1):
+                #     Usersdata = M_Users.objects.all()
+                # else:                
+                #     Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
+                Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
                     UserData = list()
