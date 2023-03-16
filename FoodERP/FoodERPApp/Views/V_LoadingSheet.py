@@ -170,7 +170,6 @@ class LoadingSheetPrintView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
-                    query = MC_PartyAddress.objects.filter(Party=a['Party'])
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
