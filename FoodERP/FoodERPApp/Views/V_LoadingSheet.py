@@ -170,13 +170,14 @@ class LoadingSheetPrintView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
+                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
                         "Party":a['Party']['Name'],
-                        "PartyAddress":a['Party']['PartyAddress'][0],
+                        "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
                         "LoadingSheetNo": a['No'],
-                        "Route Name": a['Route']['Name'],
+                        "RouteName": a['Route']['Name'],
                         "TotalAmount": a['TotalAmount'],
                         "InvoiceCount": a['InvoiceCount'],
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
