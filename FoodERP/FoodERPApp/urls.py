@@ -224,6 +224,7 @@ urlpatterns = [
             url(r'LoadingSheet$', LoadingSheetView.as_view()),
             url(r'LoadingSheetList$', LoadingSheetListView.as_view()),
             url(r'LoadingSheetInvoices$', LoadingSheetInvoicesView.as_view()),
+             url(r'LoadingSheetPrint/([0-9]+)$', LoadingSheetPrintView.as_view()),
             
     
 # GRN All API's
