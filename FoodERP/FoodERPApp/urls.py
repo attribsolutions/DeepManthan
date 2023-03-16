@@ -300,6 +300,7 @@ urlpatterns = [
             url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
             url(r'PartySubParty$',PartySubPartyView.as_view()),
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
+            url(r'RetailerandSSDD$',RetailerandSSDDView.as_view()),
             
 # PartyWiseUpdate            
             url(r'PartyWiseUpdate$', PartyWiseUpdateView.as_view()),
