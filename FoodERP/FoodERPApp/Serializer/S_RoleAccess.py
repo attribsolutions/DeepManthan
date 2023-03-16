@@ -113,7 +113,7 @@ class M_RoleAccessSerializerGETList(serializers.Serializer):
     DivisionName = serializers.CharField(max_length=500)
     Company_id = serializers.IntegerField() 
     CompanyName = serializers.CharField(max_length=500)     
-        
+    CreatedBy=    serializers.IntegerField()
 
 class M_RoleAccessSerializerNewUpdated(serializers.Serializer):
     id = serializers.IntegerField()
