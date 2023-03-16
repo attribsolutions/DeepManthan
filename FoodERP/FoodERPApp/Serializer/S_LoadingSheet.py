@@ -2,6 +2,17 @@ from dataclasses import fields
 from django.forms import SlugField
 from rest_framework import serializers
 from ..models import *
+from ..Serializer.S_Drivers import  *
+from ..Serializer.S_Vehicles import  *
+from ..Serializer.S_Routes import  *
+
+class LoadingSheetListSerializer(serializers.ModelSerializer):
+    Route = RouteSerializer()
+    Driver = M_DriverSerializer()
+    Vehicle = VehiclesSerializerSecond()
+    class Meta:
+        model = T_LoadingSheet
+        fields = ['id', 'Date', 'No', 'Party', 'Route','TotalAmount', 'InvoiceCount', 'Vehicle', 'Driver', 'CreatedBy', 'UpdatedBy', 'LoadingSheetDetails']
 
 # Post and Put Methods Serializer
 
