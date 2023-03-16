@@ -30,7 +30,7 @@ class PartySubPartyListFilterView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
-class PartySubPartyView(CreateAPIView):
+class PartySubPartyView(CreateAPIView):     # PartySubParty Save
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     
@@ -222,7 +222,37 @@ class CreditlimitView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
         
         
-      
+class RetailerandSSDDView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication 
     
-              
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                PartySubPartydata = JSONParser().parse(request)
+                CompanyID=PartySubPartydata['CompanyID']
+                PartyID=PartySubPartydata['PartyID']
+                Type=PartySubPartydata['Type']   
+                
+                if Type==1: ##All Retailer under given Party and Company
+                    q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=1,IsSCM=1)
+                    q1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
+                    q2=M_Parties.objects.filter(PartyType__in=q0,id__in=q1)
+                  
+                elif Type==2:  ##All SS/DD under given Party and Company
+                    
+                    q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
+                    q1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
+                    q2=M_Parties.objects.filter(PartyType__in=q0,id__in=q1)
+                
+                elif Type==3:  #All SS/DD under given Company
+                    q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
+                    q2=M_Parties.objects.filter(PartyType__in=q0)
+                
+                PartySerializer_data=PartySerializer(q2,many=True).data
 
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartySerializer_data})  
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
+        
