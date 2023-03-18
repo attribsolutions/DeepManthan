@@ -35,7 +35,7 @@ class PartyWiseUpdateView(CreateAPIView):
                             aa = a['SubParty'][Type]['Name'],
                             SubPartyListData.append({
                                 "id": a['id'],
-                                "SubParty": a['SubParty']['Name'],
+                                "PartyName": a['SubParty']['Name'],
                                  Type: aa[0],
                             })
 
@@ -46,7 +46,7 @@ class PartyWiseUpdateView(CreateAPIView):
                                 query1, many=True).data
                             SubPartyListData.append({
                                 "id": a['id'],
-                                "SubParty": a['SubParty']['Name'],
+                                "PartyName": a['SubParty']['Name'],
                                 "FSSAINo": FSSAI_Serializer[0]['FSSAINo'],
                                 "FSSAIExipry":  FSSAI_Serializer[0]['FSSAIExipry']
                                 })
@@ -55,7 +55,7 @@ class PartyWiseUpdateView(CreateAPIView):
                            
                             SubPartyListData.append({
                                 "id": a['id'],
-                                "SubParty": a['SubParty']['Name'],
+                                "PartyName": a['SubParty']['Name'],
                                 Type: a[Type],
                                 })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
