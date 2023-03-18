@@ -276,7 +276,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "RoleAccess_Pdfdownload": RolePageAccessSerializer[9]['id'],
                 "RoleAccess_Exceldownload": RolePageAccessSerializer[10]['id'],
                 "RoleAccess_IsCopy": RolePageAccessSerializer[11]['id'],
-                "RoleAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id'],
+                "RoleAccess_IsMultipleInvoicePrint": RolePageAccessSerializer[12]['id'],
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
