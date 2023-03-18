@@ -11,6 +11,7 @@ from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
 from ..Serializer.S_Bom import *
 from ..Serializer.S_Challan import *
+from ..Serializer.S_Invoices import *
 from django.db.models import Sum
 from ..models import *
 
@@ -120,7 +121,42 @@ class OrderListFilterViewSecond(CreateAPIView):
                 OrderType = Orderdata['OrderType']
                 
                 d = date.today()
-                if(OrderType == 1): #OrderType -1 PO Order
+                
+                if(OrderType == 3):# OrderType - 3 for GRN STP Showing Invoices for Making GRN
+                    if(Supplier == ''):
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
+                    else:
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer,Supplier=Supplier)    
+                    # return JsonResponse({'query': str(Orderdata.query)})
+                    if query:
+                        Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                        InvoiceListData = list()
+                        for a in Invoice_serializer:
+                            InvoiceListData.append({
+                                "id": a['id'],
+                                "OrderDate": a['InvoiceDate'],
+                                "FullOrderNumber": a['FullInvoiceNumber'],
+                                "DeliveryDate": "",
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "SupplierID": a['Party']['id'],
+                                "Supplier": a['Party']['Name'],
+                                "OrderAmount": a['GrandTotal'],
+                                "Description": "",
+                                "OrderType" : "",
+                                "POType" : "",
+                                "BillingAddress": "",
+                                "ShippingAddress": "",
+                                "CreatedBy": a['CreatedBy'],
+                                "CreatedOn": a['CreatedOn'],
+                                "Inward": "",
+                                "Percentage" : "",
+                            })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+                elif(OrderType == 1): #OrderType -1 PO Order
                     if(Supplier == ''):
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer,  OrderType=1)
                         queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, OrderType=1)
@@ -210,6 +246,7 @@ class OrderListFilterViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})          
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
 class T_OrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
