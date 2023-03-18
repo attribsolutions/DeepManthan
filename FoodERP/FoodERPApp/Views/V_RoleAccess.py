@@ -276,6 +276,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "RoleAccess_Pdfdownload": RolePageAccessSerializer[9]['id'],
                 "RoleAccess_Exceldownload": RolePageAccessSerializer[10]['id'],
                 "RoleAccess_IsCopy": RolePageAccessSerializer[11]['id'],
+                "RoleAccess_IsMultipleInvoicePrint": RolePageAccessSerializer[12]['id'],
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
@@ -288,6 +289,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
                 "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
                 "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
+                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id']
 
             })
 
@@ -348,6 +350,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RoleAccess_Pdfdownload": 0,
                 "RoleAccess_Exceldownload": 0,
                 "RoleAccess_IsCopy": 0,
+                "RoleAccess_IsMultipleInvoicePrint":0,
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
@@ -359,7 +362,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
                 "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
                 "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
-                "PageAccess_IsCopy": PageAccessSerializer[11]['id']
+                "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
+                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id']
                    
             })
 

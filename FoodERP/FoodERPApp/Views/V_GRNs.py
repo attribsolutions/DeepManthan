@@ -10,6 +10,7 @@ from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Challan import *
+from ..Serializer.S_Invoices import *
 from ..Serializer.S_Bom import *
 from ..models import *
 from django.db.models import *
@@ -333,7 +334,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
-                elif Mode == 2:
+                elif Mode == 2: #Make GRN from Challan
                     
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
                     if ChallanQuery.exists():
@@ -423,7 +424,65 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "OrderItem": ChallanItemDetails,
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []}) 
+                    
+                elif Mode == 3: #Make GRN from Invoice
+                    
+                    InvoiceQuery = T_Invoices.objects.filter(id=POOrderIDs)
+                    if InvoiceQuery.exists():
+                        InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        InvoiceData = list()
+                        for a in InvoiceSerializedata:
+                            InvoiceItemDetails = list()
+                            for b in a['InvoiceItems']:
+                                Parentquery = MC_ItemUnits.objects.filter(Item_id=b['Item']['id'],IsDeleted=0)
+                                    # print(query.query)
+                                if Parentquery.exists():
+                                    ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                                    ParentUnitDetails = list()
+                                    for b in ParentUnitdata:
+                                        if b['IsDeleted']== 0 :
+                                                ParentUnitDetails.append({
+                                                "Unit": b['id'],
+                                                "UnitName": b['BaseUnitConversion'],
+                                            })
+                                InvoiceItemDetails.append({
+                                    "Item": b['Item']['id'],
+                                    "ItemName": b['Item']['Name'],
+                                    "Quantity": b['Quantity'],
+                                    "MRP": b['MRP']['id'],
+                                    "MRPValue": b['MRP']['MRP'],
+                                    "Rate": b['Rate'],
+                                    "TaxType": b['TaxType'],
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                    "GST": b['GST']['id'],
+                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "MarginValue": b['Margin']['Margin'],
+                                    "BasicAmount": b['BasicAmount'],
+                                    "GSTAmount": b['GSTAmount'],
+                                    "CGST": b['CGST'],
+                                    "SGST": b['SGST'],
+                                    "IGST": b['IGST'],
+                                    "CGSTPercentage": b['CGSTPercentage'],
+                                    "SGSTPercentage": b['SGSTPercentage'],
+                                    "IGSTPercentage": b['IGSTPercentage'],
+                                    "Amount": b['Amount'],
+                                    "BatchCode": b['BatchCode'],
+                                    "BatchDate": b['BatchDate'],
+                                    "UnitDetails":ParentUnitDetails,
+                                    
+                                })
+                                
+                            InvoiceData.append({
+                                "id": a['id'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "OrderAmount": a['GrandTotal'],
+                                "Customer": a['Customer']['id'],
+                                "Supplier": a['Party']['id'],
+                                "SupplierName": a['Party']['Name'],
+                                "OrderItem": InvoiceItemDetails,
+                            })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
