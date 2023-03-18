@@ -1,6 +1,13 @@
 from django.forms import SlugField
 from rest_framework import serializers
 from ..models import  *
+
+        
+class FSSAINoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+        
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = C_Companies
@@ -32,12 +39,15 @@ class SubPartySerializer(serializers.ModelSerializer):
     PriceList= PriceListSerializer(read_only=True)
     PartyType= PartyTypeSerializer(read_only=True)
     Company= CompanySerializer(read_only=True)
+    
     class Meta:
         model = M_Parties
         fields = '__all__' 
-            
+
+
 class PartyWiseSerializer(serializers.ModelSerializer):
     SubParty= SubPartySerializer(read_only=True)
+
     class Meta:
         model =   MC_PartySubParty
         fields = '__all__'
