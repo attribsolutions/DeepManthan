@@ -434,6 +434,17 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         for a in InvoiceSerializedata:
                             InvoiceItemDetails = list()
                             for b in a['InvoiceItems']:
+                                Parentquery = MC_ItemUnits.objects.filter(Item_id=b['Item']['id'],IsDeleted=0)
+                                    # print(query.query)
+                                if Parentquery.exists():
+                                    ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                                    ParentUnitDetails = list()
+                                    for b in ParentUnitdata:
+                                        if b['IsDeleted']== 0 :
+                                                ParentUnitDetails.append({
+                                                "Unit": b['id'],
+                                                "UnitName": b['BaseUnitConversion'],
+                                            })
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
@@ -458,6 +469,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "BatchCode": b['BatchCode'],
                                     "BatchDate": b['BatchDate'],
+                                    "UnitDetails":ParentUnitDetails,
+                                    
                                 })
                                 
                             InvoiceData.append({

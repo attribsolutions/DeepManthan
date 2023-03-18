@@ -90,7 +90,7 @@ class GeneralMasterSubTypeView(CreateAPIView):
                 GeneralMasterdata = JSONParser().parse(request)
                 CompanyID = GeneralMasterdata['Company'] 
                 Type = GeneralMasterdata['TypeID'] 
-                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=Type)
+                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=Type,IsActive = 1)
                 
                 GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                 GeneralMaster_SerializerList = list()
