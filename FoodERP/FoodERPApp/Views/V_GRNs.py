@@ -481,7 +481,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "Supplier": a['Party']['id'],
                                 "SupplierName": a['Party']['Name'],
                                 "OrderAmount": a['GrandTotal'],
-                                "Customer": a['Party']['id'],
+                                "Customer": a['Customer']['id'],
                                 "InvoiceNumber":a['FullInvoiceNumber'], 
                                 "OrderItem": InvoiceItemDetails,
                                 
