@@ -481,7 +481,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "SupplierName": a['Party']['Name'],
                                 "OrderAmount": a['GrandTotal'],
                                 "Customer": a['Party']['id'],
+                                "InvoiceNumber":a['FullInvoiceNumber'], 
                                 "OrderItem": InvoiceItemDetails,
+                                
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
                 else:
