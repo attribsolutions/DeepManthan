@@ -457,6 +457,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
+                                    "Unit": b['Unit']['id'],
                                     "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
