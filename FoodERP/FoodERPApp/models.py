@@ -752,16 +752,6 @@ class M_POType(models.Model):
     class Meta:
         db_table = "M_POType"
 
-class M_InvoiceType(models.Model): 
-    Name = models.CharField(max_length=500)
-    Company=	models.ForeignKey(C_Companies,  on_delete=models.PROTECT)		
-    Division=models.ForeignKey(M_Parties, on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    class Meta:
-        db_table = "M_InvoiceType" 
 
 class M_TermsAndConditions(models.Model):
     Name = models.CharField(max_length=500)
@@ -1047,13 +1037,7 @@ class TC_GRNReferences(models.Model):
     class Meta:
         db_table = "TC_GRNReferences"              
         
-class M_TransactionType(models.Model):
-    Name= models.CharField(max_length=100)
-    class Meta:
-        db_table = "M_TransactionType"
-
-
-
+        
 class M_BillOfMaterial(models.Model):
     BomDate = models.DateField()
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
