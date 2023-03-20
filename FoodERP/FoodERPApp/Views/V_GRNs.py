@@ -426,25 +426,29 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
                     
                 elif Mode == 3: #Make GRN from Invoice
-                    
+                   
                     InvoiceQuery = T_Invoices.objects.filter(id=POOrderIDs)
                     if InvoiceQuery.exists():
                         InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
                             InvoiceItemDetails = list()
+                            
                             for b in a['InvoiceItems']:
-                                Parentquery = MC_ItemUnits.objects.filter(Item_id=b['Item']['id'],IsDeleted=0)
-                                    # print(query.query)
-                                if Parentquery.exists():
-                                    ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
-                                    ParentUnitDetails = list()
-                                    for b in ParentUnitdata:
-                                        if b['IsDeleted']== 0 :
-                                                ParentUnitDetails.append({
-                                                "Unit": b['id'],
-                                                "UnitName": b['BaseUnitConversion'],
-                                            })
+                                
+                                Item= b['Item']['id']
+                                query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
+                                # print(query.query)
+                                if query.exists():
+                                    Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                    UnitDetails = list()
+                                    for c in Unitdata:
+                                        if c['IsDeleted']== 0 :
+                                            UnitDetails.append({
+                                            "Unit": c['id'],
+                                            "UnitName": c['BaseUnitConversion'],
+                                        })
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
@@ -469,17 +473,14 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "BatchCode": b['BatchCode'],
                                     "BatchDate": b['BatchDate'],
-                                    "UnitDetails":ParentUnitDetails,
-                                    
+                                    "UnitDetails":UnitDetails 
                                 })
                                 
                             InvoiceData.append({
-                                "id": a['id'],
-                                "FullInvoiceNumber": a['FullInvoiceNumber'],
-                                "OrderAmount": a['GrandTotal'],
-                                "Customer": a['Customer']['id'],
                                 "Supplier": a['Party']['id'],
                                 "SupplierName": a['Party']['Name'],
+                                "OrderAmount": a['GrandTotal'],
+                                "Customer": a['Party']['id'],
                                 "OrderItem": InvoiceItemDetails,
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
