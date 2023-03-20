@@ -46,6 +46,7 @@ class C_Companies(models.Model):
         
 class M_PartyType(models.Model):
     Name = models.CharField(max_length=100)
+    IsVendor =models.BooleanField(default=False)
     IsSCM =models.BooleanField(default=False)
     IsDivision = models.BooleanField(default=False) 
     CreatedBy = models.IntegerField()
