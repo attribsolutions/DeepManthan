@@ -457,6 +457,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
+                                    "Unit": b['Unit']['id'],
                                     "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
@@ -480,8 +481,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "Supplier": a['Party']['id'],
                                 "SupplierName": a['Party']['Name'],
                                 "OrderAmount": a['GrandTotal'],
-                                "Customer": a['Party']['id'],
+                                "Customer": a['Customer']['id'],
+                                "InvoiceNumber":a['FullInvoiceNumber'], 
                                 "OrderItem": InvoiceItemDetails,
+                                
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
                 else:
