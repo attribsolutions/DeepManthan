@@ -330,6 +330,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "SupplierName": OrderSerializedata[0]['SupplierName'],
                             "OrderAmount": OrderSerializedata[0]['OrderAmount'],
                             "Customer": OrderSerializedata[0]['CustomerID'],
+                            "InvoiceNumber":" ",
                             "OrderItem": OrderItemDetails,
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
@@ -421,6 +422,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "SupplierName": x['Customer']['Name'],
                             "OrderAmount": x['GrandTotal'],
                             "Customer": x['Party']['id'],
+                            "InvoiceNumber":" ",
                             "OrderItem": ChallanItemDetails,
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
