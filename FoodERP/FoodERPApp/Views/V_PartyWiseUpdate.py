@@ -23,42 +23,53 @@ class PartyWiseUpdateView(CreateAPIView):
                 Type = Party_data['Type']
                 query = MC_PartySubParty.objects.filter(Party=Party, Route=Route)
                 if query.exists:
-                    PartyID_serializer = PartyWiseSerializer(
-                        query, many=True).data
+                    PartyID_serializer = PartyWiseSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyID_serializer})
                     SubPartyListData = list()
                     # aa = list()
                     for a in PartyID_serializer:
 
                         if (Type == 'District' or Type == 'State' or Type == 'PriceList' or Type == 'PartyType' or Type == 'Company'):
-
                             aa = a['SubParty'][Type]['Name'],
                             SubPartyListData.append({
                                 "id": a['id'],
+                                "PartyID":a['Party']['id'],
+                                "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
-                                 Type: aa[0],
+                                Type: aa[0],
                             })
-
+                            
                         elif (Type == 'FSSAINo'):
-                            query1 = MC_PartyAddress.objects.filter(
-                                Party=a['SubParty']['id'])
-                            FSSAI_Serializer = FSSAINoSerializer(
-                                query1, many=True).data
+                            query1 = MC_PartyAddress.objects.filter(Party=a['SubParty']['id'])
+                            FSSAI_Serializer = FSSAINoSerializer(query1, many=True).data
                             SubPartyListData.append({
                                 "id": a['id'],
+                                "PartyID":a['Party']['id'],
+                                "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
                                 "FSSAINo": FSSAI_Serializer[0]['FSSAINo'],
                                 "FSSAIExipry":  FSSAI_Serializer[0]['FSSAIExipry']
                                 })
-
-                        else:
-                           
+                            
+                        elif (Type == 'Creditlimit'):
                             SubPartyListData.append({
                                 "id": a['id'],
+                                "PartyID":a['Party']['id'],
+                                "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
                                 Type: a[Type],
+                            })
+                     
+                        else:                           
+                            SubPartyListData.append({
+                                "id": a['id'],
+                                "PartyID":a['Party']['id'],
+                                "SubPartyID":a['SubParty']['id'],
+                                "PartyName": a['SubParty']['Name'],
+                                Type: a['SubParty'][Type],
                                 })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  PartyID_serializer.error, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
