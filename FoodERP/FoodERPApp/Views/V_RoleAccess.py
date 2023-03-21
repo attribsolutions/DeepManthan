@@ -135,6 +135,7 @@ class RoleAccessView(RetrieveAPIView):
             response1 = {
                 "ModuleID": a['id'],
                 "ModuleName":a["Name"],
+                "ModuleIcon":a["Icon"],
                 "ModuleData": Pagesdata,
 
             }
