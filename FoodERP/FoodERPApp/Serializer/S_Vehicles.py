@@ -5,7 +5,7 @@ from rest_framework import serializers
 class VehicleTypesSerializerSecond(serializers.ModelSerializer):
     class Meta :
         model= M_VehicleTypes
-        fields = ['id','Name','Party','Company']  
+        fields = ['id','Name','Company']  
         
 '''      POST Method Serializer      '''
 
