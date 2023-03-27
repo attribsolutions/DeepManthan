@@ -306,6 +306,7 @@ urlpatterns = [
             
 # PartyWiseUpdate            
             url(r'PartyWiseUpdate$', PartyWiseUpdateView.as_view()),
+            url(r'PartyWiseSave$', PartyWiseUpdateViewSecond.as_view()),
 
 # Driver 
             url(r'DriverFilter$', DriverViewList.as_view()),
