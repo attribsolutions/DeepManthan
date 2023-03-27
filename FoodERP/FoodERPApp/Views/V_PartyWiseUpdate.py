@@ -30,12 +30,14 @@ class PartyWiseUpdateView(CreateAPIView):
                     for a in PartyID_serializer:
                         if ( Type == 'PriceList' or Type == 'PartyType' or Type == 'Company'):
                             aa = a['SubParty'][Type]['Name'],
+                            ab = a['SubParty'][Type]['id'],
                             SubPartyListData.append({
                                 "id": a['id'],
                                 "PartyID":a['Party']['id'],
                                 "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
                                 Type: aa[0],
+                                "TypeID": ab[0]
                             })
                            
                         elif(Type == 'State'):
