@@ -401,6 +401,7 @@ class GetUserDetailsView(APIView):
             "UserName":UserSerializer[0]["LoginName"],
             "EmployeeID": UserSerializer[0]["Employee"],
             "CompanyID": EmployeeSerializer[0]["Company"],
+            "CompanyName": CompanySerializer[0]["Name"],
             "IsSCMCompany": CompanySerializer[0]["IsSCM"],
             "CompanyGroup": CompanySerializer[0]["CompanyGroup"]
 
