@@ -38,6 +38,7 @@ class LoadingSheetListView(CreateAPIView):
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "VehicleType": a['Vehicle']['VehicleType']['Name'],
                             "DriverName": a['Driver']['Name'],
+                            "CreatedOn" :a['CreatedOn']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
@@ -183,6 +184,7 @@ class LoadingSheetPrintView(CreateAPIView):
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
                         "VehicleType": a['Vehicle']['VehicleType']['Name'],
                         "DriverName": a['Driver']['Name'],
+                        "CreatedOn" : a['CreatedOn']
                     })
                  
                 q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
@@ -302,6 +304,7 @@ class MultipleInvoicesView(CreateAPIView):
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
                                 "PartyGSTIN": a['Party']['GSTIN'],
+                                "CreatedOn" : a['CreatedOn'],
                                 "InvoiceItems": InvoiceItemDetails,
                             })
                     InvoiceList.append( InvoiceData[0] )   
