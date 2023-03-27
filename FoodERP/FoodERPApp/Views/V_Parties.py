@@ -94,7 +94,7 @@ class M_PartiesFilterView(CreateAPIView):
                 # else:
                 #     query=MC_PartySubParty.objects.filter(Party=PartyID)
                 
-                print((query.query))
+                # print((query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
