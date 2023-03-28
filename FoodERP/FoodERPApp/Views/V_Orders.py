@@ -459,6 +459,14 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         Stock = 0.0
                     else:
                         Stock = stockquery['Qty']
+                        
+            # =====================Current MRP================================================
+                    TodaysMRP=MRPMaster(ItemID,0,0,EffectiveDate).GetTodaysDateMRP()
+                    print(TodaysMRP)
+                    b['MRP_id'] = TodaysMRP[0]['Mrpid']
+                    b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
+                    
+                   
             # =====================Rate================================================
 
                     ratequery = TC_OrderItems.objects.filter(
