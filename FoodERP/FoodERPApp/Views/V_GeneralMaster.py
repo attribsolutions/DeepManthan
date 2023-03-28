@@ -31,7 +31,7 @@ class GeneralMasterFilterView(CreateAPIView):
                     GeneralMaster_SerializerList = list()
                     for a in GeneralMaster_Serializer:
                         type=a['TypeID']
-                        query2 =M_GeneralMaster.objects.filter(id=type,Company=Company).values('Name')
+                        query2 =M_GeneralMaster.objects.filter(id=type).values('Name')
                         if type == 0:
                             TypeName='NewGeneralMasterType'
                         else:
@@ -62,17 +62,20 @@ class GeneralMasterTypeView(CreateAPIView):
         try:
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
-                CompanyID = GeneralMasterdata['Company'] 
-                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=0)
-                GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
-                GeneralMaster_SerializerList = list()
-                for a in GeneralMaster_Serializer:   
-                    GeneralMaster_SerializerList.append({
-                    "id":a['id'],    
-                    "TypeID": a['TypeID'],
-                    "Name": a['Name']   
-                    })
-                GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})     
+                CompanyID = GeneralMasterdata['Company']
+                if (CompanyID >1):
+                    query = M_GeneralMaster.objects.filter(Company=1)    
+                    GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
+                    GeneralMaster_SerializerList = list()
+                    for a in GeneralMaster_Serializer:   
+                        GeneralMaster_SerializerList.append({
+                        "id":a['id'],    
+                        "TypeID": a['TypeID'],
+                        "Name": a['Name']   
+                        })
+                else:
+                    GeneralMaster_SerializerList = list()
+                    GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
@@ -88,9 +91,8 @@ class GeneralMasterSubTypeView(CreateAPIView):
         try:
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
-                CompanyID = GeneralMasterdata['Company'] 
                 Type = GeneralMasterdata['TypeID'] 
-                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=Type,IsActive = 1)
+                query = M_GeneralMaster.objects.filter(Company=1,TypeID=Type,IsActive = 1)
                 
                 GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                 GeneralMaster_SerializerList = list()
@@ -218,4 +220,9 @@ class GeneralMasterBrandName(CreateAPIView):
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+        
+        
+        
+        
+              
