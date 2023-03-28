@@ -63,7 +63,7 @@ class GeneralMasterTypeView(CreateAPIView):
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
                 CompanyID = GeneralMasterdata['Company'] 
-                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=0)
+                query = M_GeneralMaster.objects.filter(Company=CompanyID,)
                 GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                 GeneralMaster_SerializerList = list()
                 for a in GeneralMaster_Serializer:   
@@ -88,9 +88,8 @@ class GeneralMasterSubTypeView(CreateAPIView):
         try:
             with transaction.atomic():
                 GeneralMasterdata = JSONParser().parse(request)
-                CompanyID = GeneralMasterdata['Company'] 
                 Type = GeneralMasterdata['TypeID'] 
-                query = M_GeneralMaster.objects.filter(Company=CompanyID,TypeID=Type,IsActive = 1)
+                query = M_GeneralMaster.objects.filter(Company=1,TypeID=Type,IsActive = 1)
                 
                 GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                 GeneralMaster_SerializerList = list()
