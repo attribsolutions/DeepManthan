@@ -126,7 +126,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                     if(Supplier == ''):
                         query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer,Supplier=Supplier)    
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer,Party=Supplier)    
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
                         Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
