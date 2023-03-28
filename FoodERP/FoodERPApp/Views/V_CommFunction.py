@@ -169,6 +169,7 @@ class MarginMaster:
             P=Q(Party_id__isnull=True)
         
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
+        print(str(ItemMargindata.query))
         if ItemMargindata.exists:
            
             P=Q(Party_id__isnull=True)
@@ -392,10 +393,13 @@ class RateCalculationFunction:
         self.calculationPath=str(query1[0]['CalculationPath']).split(',')
        
     def RateWithGST(self):
+      
         
      
         for i in self.calculationPath:
+           
             Margin=MarginMaster(self.ItemID,i,self.PartyID,self.today).GetTodaysDateMargin()
+           
             Margin=float(Margin[0]['TodaysMargin'])
             GSTRate=self.MRP/(100+Margin)*100;
             RatewithoutGST=GSTRate*100/(100+self.GST)
