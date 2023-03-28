@@ -414,6 +414,8 @@ class EditOrderView(CreateAPIView):
                 Party = request.data['Party']  # Order Page Supplier DropDown
                 # Order Page Login Customer
                 Customer = request.data['Customer']
+                # Who's Rate you want 
+                RateParty = request.data['RateParty']
                 q1= M_Parties.objects.filter(id=Customer).values('PartyType')
                 q2 = M_PartyType.objects.filter(id =q1[0]['PartyType']).values('IsRetailer','IsSCM')
                 
@@ -465,8 +467,7 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                     print(TodaysMRP)
                     b['MRP_id'] = TodaysMRP[0]['Mrpid']
                     b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
-                    
-                   
+                        
             # =====================Rate================================================
 
                     ratequery = TC_OrderItems.objects.filter(
@@ -478,15 +479,18 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
 
                     if b['Rate'] is None:
                         b['Rate'] = r
-            # =====================Rate================================================
+            # =====================Unit================================================
                     UnitDetails = list()
                     ItemUnitquery = MC_ItemUnits.objects.filter(
                         Item=ItemID, IsDeleted=0)
                     ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
                         ItemUnitquery, many=True).data
-
+                    
+                    RateMcItemUnit = ""    
                     for d in ItemUnitqueryserialize:
-                     
+                        if (d['PODefaultUnit'] == True):
+                            RateMcItemUnit = d['id']
+
                         UnitDetails.append({
                             "UnitID": d['id'],
                             "UnitName": d['BaseUnitConversion'] ,
@@ -494,8 +498,11 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],
 
-
                         })
+             # =====================Rate With GST================================================ 
+             #Parameter Pass to Below Function (BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit)            
+                    CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,RateMcItemUnit).RateWithGST()
+                    b.update({"CalculatedRate": CalculatedRateusingMRPMargin })
             # =====================IsDefaultTermsAndConditions================================================
 
                     b.update({"StockQuantity": Stock,
