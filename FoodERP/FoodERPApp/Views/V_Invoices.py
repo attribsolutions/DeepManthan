@@ -272,6 +272,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
+                            "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})

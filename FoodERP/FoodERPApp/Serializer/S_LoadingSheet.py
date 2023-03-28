@@ -14,7 +14,7 @@ class LoadingSheetListSerializer(serializers.ModelSerializer):
     Vehicle = VehiclesSerializerSecond()
     class Meta:
         model = T_LoadingSheet
-        fields = ['id', 'Date', 'No', 'Party', 'Route','TotalAmount', 'InvoiceCount', 'Vehicle', 'Driver', 'CreatedBy', 'UpdatedBy', 'LoadingSheetDetails']
+        fields = ['id', 'Date', 'No', 'Party', 'Route','TotalAmount', 'InvoiceCount', 'Vehicle', 'Driver', 'CreatedBy', 'UpdatedBy','CreatedOn', 'LoadingSheetDetails']
 
 # Post and Put Methods Serializer
 
@@ -27,7 +27,7 @@ class LoadingSheetSerializer(serializers.ModelSerializer):
     LoadingSheetDetails = LoadingSheetDetailsSerializer(many=True)
     class Meta:
         model = T_LoadingSheet
-        fields = ['id', 'Date', 'No', 'Party', 'Route','TotalAmount', 'InvoiceCount', 'Vehicle', 'Driver', 'CreatedBy', 'UpdatedBy', 'LoadingSheetDetails']
+        fields = ['id', 'Date', 'No', 'Party', 'Route','TotalAmount', 'InvoiceCount', 'Vehicle', 'Driver', 'CreatedBy', 'UpdatedBy','CreatedOn', 'LoadingSheetDetails']
         
     def create(self, validated_data):
         LoadingSheetDetails_data = validated_data.pop('LoadingSheetDetails')
