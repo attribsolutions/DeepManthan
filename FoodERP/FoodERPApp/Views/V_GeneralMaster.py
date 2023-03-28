@@ -74,6 +74,7 @@ class GeneralMasterTypeView(CreateAPIView):
                         "Name": a['Name']   
                         })
                 else:
+                    GeneralMaster_SerializerList = list()
                     GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
