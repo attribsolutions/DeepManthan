@@ -908,8 +908,8 @@ class TC_InvoiceItems(models.Model):
         db_table = "TC_InvoiceItems"
 
 class TC_InvoicesReferences(models.Model):
-    Invoice = models.ForeignKey(T_Invoices, on_delete=models.CASCADE)
-    Order = models.ForeignKey(T_Orders, on_delete=models.PROTECT)
+    Invoice = models.ForeignKey(T_Invoices, related_name='InvoicesReferences', on_delete=models.CASCADE)
+    Order = models.ForeignKey(T_Orders, related_name='InvoiceOrderReferences', on_delete=models.PROTECT)
     class Meta:
         db_table = "TC_InvoicesReferences"        
 
