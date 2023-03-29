@@ -31,6 +31,8 @@ from ..Serializer.S_Login import UserRegistrationSerializer
 
 from ..Serializer.S_Employees import M_EmployeesSerializer
 
+from ..Serializer.S_GeneralMaster import GeneralMasterserializer
+
 from ..Serializer.S_SuperAdmin import *
 
 
@@ -45,12 +47,13 @@ class SuperAdminView(CreateAPIView):
 
 
                 # aaa=M_Users.objects.filter(LoginName__exact='S')
-#===========================------EmployeeTyep------========================================================================= 
+#===========================------EmployeeType------========================================================================= 
                 EmployeeTypeJSON = [{
                     "Name": "SuperAdmin",
                     "IsPartyConnection": 0,
                     "IsSCM": 0,
-                    "Description": "SuperAdmin", 
+                    "Description": "SuperAdmin",
+                    "Company":1, 
                     "CreatedBy": 1,
                     "UpdatedBy": 1
                 },
@@ -59,6 +62,7 @@ class SuperAdminView(CreateAPIView):
                     "IsPartyConnection": 0,
                     "IsSCM": 0,
                     "Description": "Admin", 
+                    "Company":1, 
                     "CreatedBy": 1,
                     "UpdatedBy": 1
                 }
@@ -79,6 +83,8 @@ class SuperAdminView(CreateAPIView):
                     "Description": "SuperAdmin",
                     "isActive":  1,
                     "isSCMRole": 0,
+                    "IsPartyConnection":0,
+                    "Company":1,
                     "Dashboard": "SuperAdminDashboard",
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
@@ -88,6 +94,8 @@ class SuperAdminView(CreateAPIView):
                     "Description": "Admin",
                     "isActive":  1,
                     "isSCMRole": 0,
+                    "IsPartyConnection":0,
+                    "Company":1,
                     "Dashboard": "AdminDashboard",
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
@@ -101,27 +109,27 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Role_Serializer.errors, 'Data': []})
 
-#============================-----Designation------========================================================================= 
+#============================-----PartyType------========================================================================= 
 
-                DesignationJSON = [{
-                    "Name": "SuperAdmin",
-                    "CreatedBy": 1,
-                    "UpdatedBy": 1
-                },
-                {   "Name": "Admin",
+                PartyTypeJSON = [{
+                    "Name": "Company Division",
+                    "IsSCM":0,
+                    "IsDivision":1,
+                    "IsRetailer":0,
+                    "IsVendor":0,
+                    "Company":1,  
                     "CreatedBy": 1,
                     "UpdatedBy": 1
                 }
                 ]
-                Designationsdata_Serializer = M_DesignationsSerializer(
-                    data=DesignationJSON,many=True)
-                if Designationsdata_Serializer.is_valid():
-                    Designationsdata_Serializer.save()
-                    print('Designations')
-
+                Partytypedata_Serializer = PartyTypeSerializer(
+                    data=PartyTypeJSON,many=True)
+                if Partytypedata_Serializer.is_valid():
+                    Partytypedata_Serializer.save()
+                    print('PartyType')
                 else:
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Designationsdata_Serializer.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Partytypedata_Serializer.errors, 'Data': []})
 
 #============================-----CompanyGroup-----=========================================================================
                 CompanyGroupJSON = {
@@ -166,6 +174,44 @@ class SuperAdminView(CreateAPIView):
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Companies_Serializer.errors, 'Data': []})
+                
+                
+#================================----General Master----================================================================================      
+                
+                GeneralMasterJSON =[
+                    {
+                    "Name": "Brand Name",
+                    "IsActive": 1,
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    "Company": 1,
+                    "TypeID":0
+                    },
+                    {
+                    "Name": "Party Master Bulk Update",
+                    "IsActive": 1,
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    "Company": 1,
+                    "TypeID":0
+                    },
+                    {
+                    "Name": "Receipt Mode",
+                    "IsActive": 1,
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    "Company": 1,
+                    "TypeID":0
+                    }
+                ]
+
+                Generalmaster_Serializer = GeneralMasterserializer(data=GeneralMasterJSON,many=True)
+                if Generalmaster_Serializer.is_valid():
+                    Generalmaster_Serializer.save()
+                    print('General Master')
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Generalmaster_Serializer.errors, 'Data': []})
 
 #================================----state----================================================================================ 
 
@@ -633,29 +679,29 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': District_Serializer.errors, 'Data': []})
 
-#================================----EMployee----================================================================================ 
+#================================----Employee----================================================================================ 
 
     
                 EmployeeJSON = {
 
                     "Name": "Super Admin",
-                    "Address": "Baner Pune",
-                    "Mobile": "9865321245",
-                    "email": "superadmin@gmail.com",
-                    "DOB": "1993-08-09",
+                    "Address": "Pune",
+                    "Mobile": "9860191393",
+                    "email": "a.kiranmali@gmail.com",
+                    "DOB": "1985-10-08",
                     "PAN": "qwer147852",
                     "AadharNo": "123456789",
-                                "working_hours": "9.00",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "Company": 1,
-                                "Designation": 1,
-                                "EmployeeType": 1,
-                                "State": 1,
-                                "District": 1,
-                                "EmployeeParties": [
-                                    {"Party":  ""}
-                                ]
+                    "working_hours": "9.00",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    "Company": 1,
+                    "Designation": 1,
+                    "EmployeeType": 1,
+                    "State": 1,
+                    "District": 1,
+                    "EmployeeParties": [
+                        {"Party":  ""}
+                        ]
 
                 }
 
@@ -710,13 +756,59 @@ class SuperAdminView(CreateAPIView):
                 },
                 {
 
-                    "Name": "Master",
+                    "Name": "Purchase",
                     "DisplayIndex": 2,
                     "isActive": 1,
                     "Icon": "home",
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     
+                },
+                {
+
+                    "Name": "Sales",
+                    "DisplayIndex": 3,
+                    "isActive": 1,
+                    "Icon": "home",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,
+                    
+                },
+                {
+
+                    "Name": "Inventory",
+                    "DisplayIndex": 4,
+                    "isActive": 1,
+                    "Icon": "home",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,   
+                },
+                {
+
+                    "Name": "Master",
+                    "DisplayIndex": 5,
+                    "isActive": 1,
+                    "Icon": "home",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,   
+                },
+                {
+
+                    "Name": "Accounting",
+                    "DisplayIndex": 6,
+                    "isActive": 1,
+                    "Icon": "home",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,   
+                },
+                {
+
+                    "Name": "Reports",
+                    "DisplayIndex": 7,
+                    "isActive": 1,
+                    "Icon": "home",
+                    "CreatedBy": 1,
+                    "UpdatedBy": 1,   
                 }
                 ]
                 Modules_Serializer = H_ModulesSerializer(data=Modulesdata, many=True)
@@ -735,109 +827,92 @@ class SuperAdminView(CreateAPIView):
                         "id": 1,
                         "Name": "IsShowOnMenu",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 1
                     },
                     {
                         "id": 2,
                         "Name": "IsSave",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 2
                     },
                     {
                         "id": 3,
                         "Name": "IsView",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 3
                     },
                     {
                         "id": 4,
                         "Name": "IsEdit",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 4
                     },
                     {
                         "id": 5,
                         "Name": "IsDelete",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 5
                     },
                     {
                         "id": 6,
                         "Name": "IsEditSelf",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 6
                     },
                     {
                         "id": 7,
                         "Name": "IsDeleteSelf",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 7
                     },
                     {
                         "id": 8,
                         "Name": "IsPrint",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 8
                     },
                     {
                         "id": 9,
                         "Name": "IsTopOfTheDivision",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 9
                     },
                     {
                         "id": 10,
                         "Name": "Pdfdownload",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 10
                     },
                     {
                         "id": 11,
                         "Name": "Exceldownload",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 11
                     },
                     {
                         "id": 12,
                         "Name": "IsCopy",
                         "CreatedBy": 1,
-                        "CreatedOn": "2022-07-29T00:00:00",
                         "UpdatedBy": 1,
-                        "UpdatedOn": "2022-07-29T00:00:00",
                         "Sequence": 12
+                    },
+                    {
+                        "id": 13,
+                        "Name": "IsMultipleInvoicePrint",
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "Sequence": 13
                     }
                 ]
 
@@ -852,534 +927,13 @@ class SuperAdminView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserializea_data.errors, 'Data': []})
 
-#================================----HPages----================================================================================ 
-
-               
-                HPagesdata = [
-
-                     {
-                        "Name": "Company Master",
-                        "PageHeading": "Company Master",
-                        "PageDescription": "Page Description : Company Master",
-                        "PageDescriptionDetails": "Page Description Details :Company Master",
-                        "Module": 1,
-                        "ModuleName": "Administration",
-                        "isActive": 1,
-                        "DisplayIndex": 3,
-                        "Icon": "Company Master Icon",
-                        "ActualPagePath": "CompanyMaster",
-                        "PageType": 1,
-                        "RelatedPageID": 0,
-                        "RelatedPageName": NULL,
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
-                        "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    
-                    {
-                        "Name": "Company List",
-                        "PageHeading": "Company List",
-                        "PageDescription": "Page Description : Company Master",
-                        "PageDescriptionDetails": "Page Description Details : Company Master",
-                        "Module": 1,
-                        "ModuleName": "Administration",
-                        "isActive": 1,
-                        "DisplayIndex": 4,
-                        "Icon": "Company List Icon",
-                        "ActualPagePath": "CompanyList",
-                        "PageType": 2,
-                        "RelatedPageID": 1,
-                        "RelatedPageName": "Company Master",
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
-                        "PagePageAccess": [
-                            {
-                                "Access": 1,
-                                "AccessName": "IsShowOnMenu"
-                            },
-                            {
-                                "Access": 2,
-                                "AccessName": "IsSave"
-                            },
-                            {
-                                "Access": 3,
-                                "AccessName": "IsView"
-                            },
-                            {
-                                "Access": 4,
-                                "AccessName": "IsEdit"
-                            },
-                            {
-                                "Access": 5,
-                                "AccessName": "IsDelete"
-                            },
-                            {
-                                "Access": 6,
-                                "AccessName": "IsEditSelf"
-                            }
-                        ],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "CompanyGroup Master",
-                                "PageHeading": "CompanyGroup Master",
-                                "PageDescription": "CompanyGroup Master",
-                                "PageDescriptionDetails": "Page Description Details : CompanyGroup Master",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 1,
-                                "Icon": "dfgdf",
-                                "ActualPagePath": "CompanyGroupMaster",
-                                "PageType": 1,
-                                "RelatedPageID": 0,
-                                "RelatedPageName": NULL,
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "CompanyGroup List",
-                                "PageHeading": "CompanyGroup List",
-                                "PageDescription": "CompanyGroup List",
-                                "PageDescriptionDetails": "Page Description Details : CompanyGroup List",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 2,
-                                "Icon": "erht",
-                                "ActualPagePath": "CompanyGroupList",
-                                "PageType": 2,
-                                "RelatedPageID": 3,
-                                "RelatedPageName": "CompanyGroupMaster",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [
-                                    {
-                                    "Access": 1,
-                                    "AccessName": "IsShowOnMenu"
-                                    },
-                                    {
-                                    "Access": 2,
-                                    "AccessName": "IsSave"
-                                    },
-                                    {
-                                    "Access": 3,
-                                    "AccessName": "IsView"
-                                    },
-                                    {
-                                    "Access": 6,
-                                    "AccessName": "IsEditSelf"
-                                    },
-                                    {
-                                    "Access": 4,
-                                    "AccessName": "IsEdit"
-                                    },
-                                    {
-                                    "Access": 5,
-                                    "AccessName": "IsDelete"
-                                    },
-                                    {
-                                    "Access": 8,
-                                    "AccessName": "IsPrint"
-                                    }
-                                ],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "Module Master",
-                                "PageHeading": "Module Master",
-                                "PageDescription": "Module Master",
-                                "PageDescriptionDetails": "Module Master",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 5,
-                                "Icon": "dfasdf",
-                                "ActualPagePath": "ModuleMaster",
-                                "PageType": 1,
-                                "RelatedPageID": 0,
-                                "RelatedPageName": "Module List",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "Module List",
-                                "PageHeading": "Module List",
-                                "PageDescription": "Module List",
-                                "PageDescriptionDetails": "Module List",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 6,
-                                "Icon": "xfgd",
-                                "ActualPagePath": "ModuleList",
-                                "PageType": 2,
-                                "RelatedPageID": 5,
-                                "RelatedPageName": "Module Master",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [
-                                    {
-                                    "Access": 1,
-                                    "AccessName": "IsShowOnMenu"
-                                    },
-                                    {
-                                    "Access": 2,
-                                    "AccessName": "IsSave"
-                                    },
-                                    {
-                                    "Access": 3,
-                                    "AccessName": "IsView"
-                                    },
-                                    {
-                                    "Access": 6,
-                                    "AccessName": "IsEditSelf"
-                                    },
-                                    {
-                                    "Access": 4,
-                                    "AccessName": "IsEdit"
-                                    },
-                                    {
-                                    "Access": 5,
-                                    "AccessName": "IsDelete"
-                                    }
-                                ],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "PageMaster",
-                                "PageHeading": "PageMaster",
-                                "PageDescription": "PageMaster",
-                                "PageDescriptionDetails": "PageMaster",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 7,
-                                "Icon": "fa-fa-paw",
-                                "ActualPagePath": "PageMaster",
-                                "PageType": 1,
-                                "RelatedPageID": 0,
-                                "RelatedPageName": "PageList",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "PageList",
-                                "PageHeading": "PageList",
-                                "PageDescription": "PageList",
-                                "PageDescriptionDetails": "PageList",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 8,
-                                "Icon": "fa-fa-paw",
-                                "ActualPagePath": "PageList",
-                                "PageType": 2,
-                                "RelatedPageID": 7,
-                                "RelatedPageName": "PageMaster",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [
-                                    {
-                                    "Access": 1,
-                                    "AccessName": "IsShowOnMenu"
-                                    },
-                                    {
-                                    "Access": 2,
-                                    "AccessName": "IsSave"
-                                    },
-                                    {
-                                    "Access": 5,
-                                    "AccessName": "IsDelete"
-                                    },
-                                    {
-                                    "Access": 3,
-                                    "AccessName": "IsView"
-                                    },
-                                    {
-                                    "Access": 6,
-                                    "AccessName": "IsEditSelf"
-                                    },
-                                    {
-                                    "Access": 4,
-                                    "AccessName": "IsEdit"
-                                    }
-                                ],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "Role Access",
-                                "PageHeading": "Role Access",
-                                "PageDescription": "Role Access",
-                                "PageDescriptionDetails": "Role Access",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 9,
-                                "Icon": "a",
-                                "ActualPagePath": "RoleAccess",
-                                "PageType": 1,
-                                "RelatedPageID": 0,
-                                "RelatedPageName": NULL,
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "RoleAccess List",
-                                "PageHeading": "RoleAccess List",
-                                "PageDescription": "RoleAccess List",
-                                "PageDescriptionDetails": "RoleAccess List",
-                                "Module": 1,
-                                "ModuleName": "Administration",
-                                "isActive": 1,
-                                "DisplayIndex": 10,
-                                "Icon": "wsd",
-                                "ActualPagePath": "RoleAccessList",
-                                "PageType": 2,
-                                "RelatedPageID": 9,
-                                "RelatedPageName": "Role Access",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [
-                                    {
-                                    "Access": 1,
-                                    "AccessName": "IsShowOnMenu"
-                                    },
-                                    {
-                                    "Access": 2,
-                                    "AccessName": "IsSave"
-                                    },
-                                    {
-                                    "Access": 3,
-                                    "AccessName": "IsView"
-                                    },
-                                    {
-                                    "Access": 6,
-                                    "AccessName": "IsEditSelf"
-                                    },
-                                    {
-                                    "Access": 4,
-                                    "AccessName": "IsEdit"
-                                    },
-                                    {
-                                    "Access": 5,
-                                    "AccessName": "IsDelete"
-                                    }
-                                ],
-                        "PageFieldMaster": []
-                    },
-                    # {
-                    #             "Name": "Role Master",
-                    #             "PageHeading": "Role Master",
-                    #             "PageDescription": "Role Master",
-                    #             "PageDescriptionDetails": "Role Master",
-                    #             "Module": 1,
-                    #             "ModuleName": "Administration",
-                    #             "isActive": 1,
-                    #             "DisplayIndex": 12,
-                    #             "Icon": "sfdgsdfgsg",
-                    #             "ActualPagePath": "RoleMaster",
-                    #             "PageType": 1,
-                    #             "RelatedPageID": 0,
-                    #             "RelatedPageName": NULL,
-                    #             "PagePageAccess": []
-                    # },
-                    # {
-                    #             "Name": "Role List",
-                    #             "PageHeading": "Role List",
-                    #             "PageDescription": "Role List",
-                    #             "PageDescriptionDetails": "Role List",
-                    #             "Module": 1,
-                    #             "ModuleName": "Administration",
-                    #             "isActive": 1,
-                    #             "DisplayIndex": 13,
-                    #             "Icon": "adfg",
-                    #             "ActualPagePath": "RoleList",
-                    #             "PageType": 2,
-                    #             "RelatedPageID": 11,
-                    #             "RelatedPageName": "Role Master",
-                    #             "PagePageAccess": [
-                    #                 {
-                    #                 "AccessID": 1,
-                    #                 "AccessName": "IsShowOnMenu"
-                    #                 },
-                    #                 {
-                    #                 "AccessID": 2,
-                    #                 "AccessName": "IsSave"
-                    #                 },
-                    #                 {
-                    #                 "AccessID": 3,
-                    #                 "AccessName": "IsView"
-                    #                 },
-                    #                 {
-                    #                 "AccessID": 6,
-                    #                 "AccessName": "IsEditSelf"
-                    #                 },
-                    #                 {
-                    #                 "AccessID": 4,
-                    #                 "AccessName": "IsEdit"
-                    #                 },
-                    #                 {
-                    #                 "AccessID": 5,
-                    #                 "AccessName": "IsDelete"
-                    #                 }
-                    #             ]
-                    # },
-                    {
-                                "Name": "Employee Master",
-                                "PageHeading": "Employee Master",
-                                "PageDescription": "Employee Master",
-                                "PageDescriptionDetails": "Employee Master",
-                                "Module": 2,
-                                "ModuleName": "Master",
-                                "isActive": 1,
-                                "DisplayIndex": 1,
-                                "Icon": "sdfc",
-                                "ActualPagePath": "EmployeeMaster",
-                                "PageType": 1,
-                                "RelatedPageID": 0,
-                                "RelatedPageName": "Employee List",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    {
-                                "Name": "Employee List",
-                                "PageHeading": "Employee List",
-                                "PageDescription": "Employee List",
-                                "PageDescriptionDetails": "Employee List",
-                                "Module": 2,
-                                "ModuleName": "Master",
-                                "isActive": 1,
-                                "DisplayIndex": 2,
-                                "Icon": "sf",
-                                "ActualPagePath": "EmployeeList",
-                                "PageType": 2,
-                                "RelatedPageID": 11,
-                                "RelatedPageName": "Employee Master",
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
-                                "PagePageAccess": [
-                                    {
-                                    "Access": 1,
-                                    "AccessName": "IsShowOnMenu"
-                                    },
-                                    {
-                                    "Access": 2,
-                                    "AccessName": "IsSave"
-                                    },
-                                    {
-                                    "Access": 3,
-                                    "AccessName": "IsView"
-                                    },
-                                    {
-                                    "Access": 6,
-                                    "AccessName": "IsEditSelf"
-                                    },
-                                    {
-                                    "Access": 4,
-                                    "AccessName": "IsEdit"
-                                    },
-                                    {
-                                    "Access": 5,
-                                    "AccessName": "IsDelete"
-                                    }
-                                ],
-                        "PageFieldMaster": []
-                    },
-                   
-                    {
-                        "Name": "User Master",
-                        "PageHeading": "Registration",
-                        "PageDescription": "Registration Page",
-                        "PageDescriptionDetails": "New User Registration",
-                        "Module": 1,
-                        "ModuleName": "Administration",
-                        "isActive": 1,
-                        "DisplayIndex": 11,
-                        "Icon": "fa-fa-paw",
-                        "ActualPagePath": "UserMaster",
-                        "PageType": 1,
-                        "RelatedPageID": 0,
-                        "RelatedPageName": NULL,
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
-                        "PagePageAccess": [],
-                        "PageFieldMaster": []
-                    },
-                    {
-                        "Name": "User List",
-                        "PageHeading": "User List",
-                        "PageDescription": "All Users",
-                        "PageDescriptionDetails": "User List",
-                        "Module": 1,
-                        "ModuleName": "Administration",
-                        "isActive": 1,
-                        "DisplayIndex": 12,
-                        "Icon": "fa-fa-paw",
-                        "ActualPagePath": "UserList",
-                        "PageType": 2,
-                        "RelatedPageID": 13,
-                        "RelatedPageName": "User Master",
-                        "CreatedBy": 1,
-                        "UpdatedBy": 1,
-                        "PagePageAccess": [
-                            {
-                                "Access": 1,
-                                "AccessName": "IsShowOnMenu"
-                            },
-                            {
-                                "Access": 2,
-                                "AccessName": "IsSave"
-                            },
-                            {
-                                "Access": 5,
-                                "AccessName": "IsDelete"
-                            },
-                            {
-                                "Access": 3,
-                                "AccessName": "IsView"
-                            },
-                            {
-                                "Access": 6,
-                                "AccessName": "IsEditSelf"
-                            },
-                            {
-                                "Access": 4,
-                                "AccessName": "IsEdit"
-                            }
-                        ],
-                        "PageFieldMaster": []
-                    }
-                ]
-
-
-                # HPagesserialize_data = M_PagesSerializer1(
-                #     data=HPagesdata, many=True)
-                # if HPagesserialize_data.is_valid():
-                #     HPagesserialize_data.save()
-                #     print('pages')
-                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Save Successfully', 'Data': []})
-                # else:
-                #     transaction.set_rollback(True)
-                #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  HPagesserialize_data.errors, 'Data': []})
 
 #================================----RoleAccessdata----================================================================================ 
                 
                 RoleAccessdata = [
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company":1, 
                         "Division": "",
                         "Modules": 1,
                         "Pages": 1,
@@ -1403,7 +957,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 2,
@@ -1429,7 +983,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 3,
@@ -1454,7 +1008,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 4,
@@ -1480,7 +1034,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 5,
@@ -1504,7 +1058,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 6,
@@ -1530,7 +1084,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 7,
@@ -1554,7 +1108,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company":1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 8,
@@ -1580,7 +1134,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 9,
@@ -1604,7 +1158,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 10,
@@ -1630,7 +1184,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company":1,
                         "Division": "",
                         "Modules": 2,
                         "Pages": 11,
@@ -1654,7 +1208,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 2,
                         "Pages": 12,
@@ -1680,7 +1234,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company": 1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 13,
@@ -1704,7 +1258,7 @@ class SuperAdminView(CreateAPIView):
                     },
                     {
                         "Role": 1,
-                        "Company": "",
+                        "Company":1,
                         "Division": "",
                         "Modules": 1,
                         "Pages": 14,
@@ -1727,20 +1281,71 @@ class SuperAdminView(CreateAPIView):
                                 "PageAccess": 5
                             }
                         ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company":1,
+                        "Division": "",
+                        "Modules": 2,
+                        "Pages": 119,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            {
+                                "PageAccess": 1
+                            },
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
+                    },
+                    {
+                        "Role": 1,
+                        "Company":1,
+                        "Division": "",
+                        "Modules": 2,
+                        "Pages": 120,
+                        "CreatedBy": 1,
+                        "UpdatedBy": 1,
+                        "RolePageAccess": [
+                            {
+                                "PageAccess": 1
+                            },
+                            {
+                                "PageAccess": 2
+                            },
+                            {
+                                "PageAccess": 3
+                            },
+                            {
+                                "PageAccess": 4
+                            },
+                            {
+                                "PageAccess": 5
+                            }
+                        ]
                     }
 
                 ]
-                # RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
-                # if RoleAccessSerialize_data.is_valid():
-                   
-                #     RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
-                #         Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
-                #     RoleAccessdata.delete()
-                #     RoleAccessSerialize_data.save()
-                #     print('RoleAccess')
-                # else:
-                #     transaction.set_rollback(True)
-                #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccessSerialize_data.errors, 'Data': []})
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
+                if RoleAccessSerialize_data.is_valid():
+                    # RoleAccessdata = M_RoleAccess.objects.filter(Role=RoleAccessSerialize_data.data[0]['Role']).filter(
+                    #     Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
+                    # RoleAccessdata.delete()
+                    RoleAccessSerialize_data.save()
+                    print('RoleAccess')
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccessSerialize_data.errors, 'Data': []})
 
 #========================================================================================================================== 
 
