@@ -30,5 +30,15 @@ class RoutesUpdateListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartySubParty
         fields = '__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(RoutesUpdateListSerializer, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Route", None):
+            ret["Route"] = {"id": None, "Name": None}
+           
+        return ret    
+        
 
 
