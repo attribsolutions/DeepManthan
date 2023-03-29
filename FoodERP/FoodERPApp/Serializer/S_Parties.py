@@ -102,14 +102,15 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             
         instance.save()   
         
-        for a in instance.PartyAddress.all():
-            a.delete()
+        # for a in instance.PartyAddress.all():
+        #     a.delete()
 
         for a in instance.PartyPrefix.all():
             a.delete()    
         
         for PartyAddress_data in validated_data['PartyAddress']:
-            Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_data) 
+            # Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_data) 
+            Party = MC_PartyAddress.objects.filter(id =PartyAddress_data['id'],Party=instance).update(Address=PartyAddress_data['Address'],FSSAINo=PartyAddress_data['FSSAINo'],FSSAIExipry=PartyAddress_data['FSSAIExipry'],PIN=PartyAddress_data['PIN'],IsDefault=PartyAddress_data['IsDefault'],fssaidocument=PartyAddress_data['fssaidocument'])
 
         for PartyPrefixs_data in validated_data['PartyPrefix']:
             Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)     
