@@ -17,9 +17,10 @@ class ReceiptModeView(CreateAPIView):
     def post(self, request,id=0):
         try:
             with transaction.atomic():
-                receiptdata = JSONParser().parse(request)
-                CompanyID = receiptdata['Company']
-                ReceiptmodeQuery = M_GeneralMaster.objects.filter(TypeID=3,Company=1).filter(Company=CompanyID)
+                ReceiptJsondata = JSONParser().parse(request)
+                CompanyID = ReceiptJsondata['Company']
+                ReceiptmodeQuery = M_GeneralMaster.objects.filter(Company__in=[1,CompanyID]).filter(TypeID=3)
+                
                 if ReceiptmodeQuery.exists():
                     Receiptdata = ReceiptModeSerializer(ReceiptmodeQuery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Receiptdata})
