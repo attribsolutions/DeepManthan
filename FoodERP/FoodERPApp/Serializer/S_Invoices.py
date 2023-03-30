@@ -5,10 +5,23 @@ from rest_framework import serializers
 from ..Serializer.S_Items import *
 from ..Serializer.S_Orders import  *
 
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_States
+        fields = '__all__'
+        
+class MC_PartyAdressSerializer(serializers.ModelSerializer):
+    Address = serializers.CharField() 
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+        
 class PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyAddress=MC_PartyAdressSerializer(many=True)
+    State = StateSerializer(read_only=True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email']
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -20,7 +33,7 @@ class Mc_ItemUnitSerializerThird(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
         fields = ['id','UnitID','BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion'] 
-        
+       
 class LiveBatchSerializer(serializers.ModelSerializer):
     MRP = M_MRPsSerializer(read_only=True)
     GST = M_GstHsnCodeSerializer(read_only=True)
@@ -46,17 +59,18 @@ class StockQtyserializerForInvoice(serializers.ModelSerializer):
     Item =  ItemSerializerSecond()
     class Meta:
         model = O_BatchWiseLiveStock
-        fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche','Unit']  
-
+        fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche','Unit'] 
+         
 class OrderserializerforInvoice(serializers.ModelSerializer):
     class Meta:
         model = T_Orders
         fields = '__all__'
 
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
+    Order = OrderserializerforInvoice(read_only=True)
     class Meta:
         model = TC_InvoicesReferences
-        fields = ['Order']
+        fields = '__all__'
         
 class InvoiceItemsSerializer(serializers.ModelSerializer):
     
@@ -89,7 +103,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
             
                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
-                
+                print(OBatchQuantity[0]['BaseUnitQuantity'],O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 else:
@@ -132,7 +146,8 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
     InvoiceItems = InvoiceItemsSerializerSecond(many=True)
- 
+    InvoicesReferences = InvoicesReferencesSerializer(many=True)
+    
     class Meta:
         model = T_Invoices
         fields = '__all__'    

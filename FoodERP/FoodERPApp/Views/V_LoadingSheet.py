@@ -38,6 +38,7 @@ class LoadingSheetListView(CreateAPIView):
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "VehicleType": a['Vehicle']['VehicleType']['Name'],
                             "DriverName": a['Driver']['Name'],
+                            "CreatedOn" :a['CreatedOn']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetListData})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
@@ -183,6 +184,7 @@ class LoadingSheetPrintView(CreateAPIView):
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
                         "VehicleType": a['Vehicle']['VehicleType']['Name'],
                         "DriverName": a['Driver']['Name'],
+                        "CreatedOn" : a['CreatedOn']
                     })
                  
                 q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
@@ -289,6 +291,14 @@ class MultipleInvoicesView(CreateAPIView):
                                     "BatchDate": b['BatchDate'],
                                 })
                                 
+                                InvoiceReferenceDetails = list()
+                            for d in a['InvoicesReferences']:
+                                InvoiceReferenceDetails.append({
+                                    "Invoice": d['Invoice'],
+                                    "Order": d['Order']['id'],
+                                    "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                })
+                                
                             InvoiceData.append({
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
@@ -301,8 +311,16 @@ class MultipleInvoicesView(CreateAPIView):
                                 "CustomerGSTIN": a['Customer']['GSTIN'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
+                                "PartyState": a['Party']['State']['Name'],
+                                "CustomerState": a['Customer']['State']['Name'],
+                                "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                                "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                                "PartyAddress": a['Party']['PartyAddress'],
+                                "CustomerAddress": a['Customer']['PartyAddress'],
                                 "PartyGSTIN": a['Party']['GSTIN'],
+                                "CreatedOn" : a['CreatedOn'],
                                 "InvoiceItems": InvoiceItemDetails,
+                                "InvoicesReferences": InvoiceReferenceDetails,
                             })
                     InvoiceList.append( InvoiceData[0] )   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        

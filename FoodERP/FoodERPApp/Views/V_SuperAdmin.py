@@ -1,31 +1,21 @@
-from asyncio.windows_events import NULL
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, connection, transaction
-from rest_framework.parsers import JSONParser
+from rest_framework.generics import CreateAPIView
+from django.db import transaction
 
 
 from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
-from ..Serializer.S_Parties import M_PartiesSerializer
 
-from ..Serializer.S_PageAccess import H_PageAccessSerializer
 
-from ..Serializer.S_Modules import H_ModulesSerializer
 
 from ..Serializer.S_RoleAccess import M_RoleAccessSerializer
 
-from ..Serializer.S_Pages import M_PagesSerializer1
 
-from ..Serializer.S_States import DistrictsSerializer, StateSerializer
 
 from ..Serializer.S_Companies import  C_CompanySerializer
 
 from ..Serializer.S_CompanyGroup import C_CompanyGroupSerializer
 
-from ..Serializer.S_Designations import M_DesignationsSerializer
 
 from ..Serializer.S_Login import UserRegistrationSerializer
 
@@ -231,7 +221,6 @@ class SuperAdminView(CreateAPIView):
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     "Company": 1,
-                    "Designation": 1,
                     "EmployeeType": 1,
                     "State": 1,
                     "District": 1,

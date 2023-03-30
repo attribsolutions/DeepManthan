@@ -118,20 +118,22 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 Type=Partydata['Type']
                 id=Partydata['PartyID']
                 Company=Partydata['Company']
-                if(Type==1): #Vendor
-                    aa=M_Parties.objects.filter(PartyType = 3).values('id') 
-                    Query = MC_PartySubParty.objects.filter(SubParty=id,Party__in=aa)
                 
-                elif(Type==2): #Supplier
-                    aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
-                    Query = MC_PartySubParty.objects.filter(SubParty=id,Party__in=aa)
-                   
-                elif(Type==3):  #Customer
-                    aa=M_Parties.objects.exclude(PartyType = 3).values('id') 
-                    Query = MC_PartySubParty.objects.filter(Party=id,SubParty__in=aa)
-                else:
-                    Query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=id))
+                if(Type==1): #Vendor
+                    q0=M_PartyType.objects.filter(Company=Company,IsVendor=1)
+                    Query = MC_PartySubParty.objects.filter(SubParty=id,Party__PartyType__in=q0).select_related('Party')
                     
+                elif(Type==2): #Supplier
+                    q0=M_PartyType.objects.filter(Company=Company,IsVendor=0)
+                    Query = MC_PartySubParty.objects.filter(SubParty=id,Party__PartyType__in=q0).select_related('Party')
+                    
+                elif(Type==3):  #Customer
+                    q0=M_PartyType.objects.filter(Company=Company,IsVendor=0)
+                    Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0).select_related('Party')
+                
+                elif (Type==4):
+                    Query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=id))
+                
                 if Query:
                     
                     if(Type==4):
