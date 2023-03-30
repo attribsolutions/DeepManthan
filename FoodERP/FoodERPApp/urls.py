@@ -44,8 +44,6 @@ from .Views.V_EmployeeTypes import *
 
 from .Views.V_States import *
 
-from .Views.V_Designations import *
-
 from .Views.V_PriceLists import  *
 
 from .Views.V_PartyTypes import *
@@ -157,9 +155,7 @@ urlpatterns = [
             url(r'CompanyGroups/([0-9]+)$', C_CompanyGroupViewSecond.as_view()),
             url(r'CompanyGroups$', C_CompanyGroupView.as_view()),
     
-# Designations 
-            url(r'Designations/([0-9]+)$', M_DesignationsViewSecond.as_view()),
-            url(r'Designations$',M_DesignationsView.as_view()),
+
     
 # Employees 
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),

@@ -136,13 +136,11 @@ class M_Parties(models.Model):
     IsDivision = models.BooleanField(default=False)
     MkUpMkDn = models.BooleanField(default=False)
     isActive = models.BooleanField(default=False)
-    
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    # IsRetailer = models.BooleanField(default=False)
-    # IsSCM = models.BooleanField(default=False)
+
 
     class Meta:
         db_table = 'M_Parties'
@@ -177,16 +175,6 @@ class M_EmployeeTypes(models.Model):
         db_table = "M_EmployeeTypes"
 
 
-class M_Designations(models.Model):
-    Name = models.CharField(max_length=100)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = "M_Designations"
-
 
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
@@ -202,8 +190,7 @@ class M_Employees(models.Model):
         C_Companies, related_name='EmployeesCompany', on_delete=models.DO_NOTHING)
     EmployeeType = models.ForeignKey(
         M_EmployeeTypes, related_name='EmployeeType', on_delete=models.DO_NOTHING)
-    Designation = models.ForeignKey(
-        M_Designations, related_name='EmployeesDesignation', on_delete=models.DO_NOTHING, null=True)
+   
     State = models.ForeignKey(
         M_States, related_name='EmployeesState', on_delete=models.DO_NOTHING)
     District = models.ForeignKey(
