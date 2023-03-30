@@ -64,7 +64,7 @@ class GeneralMasterTypeView(CreateAPIView):
                 GeneralMasterdata = JSONParser().parse(request)
                 CompanyID = GeneralMasterdata['Company']
                 if (CompanyID >1):
-                    query = M_GeneralMaster.objects.filter(Company=1)    
+                    query = M_GeneralMaster.objects.filter(Company=1,TypeID=0)    
                     GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                     GeneralMaster_SerializerList = list()
                     for a in GeneralMaster_Serializer:   
@@ -74,7 +74,15 @@ class GeneralMasterTypeView(CreateAPIView):
                         "Name": a['Name']   
                         })
                 else:
+                    query = M_GeneralMaster.objects.filter(Company=1,TypeID=0)    
+                    GeneralMaster_Serializer = GeneralMasterserializer(query, many=True).data
                     GeneralMaster_SerializerList = list()
+                    for a in GeneralMaster_Serializer:   
+                        GeneralMaster_SerializerList.append({
+                        "id":a['id'],    
+                        "TypeID": a['TypeID'],
+                        "Name": a['Name']   
+                        })
                     GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
