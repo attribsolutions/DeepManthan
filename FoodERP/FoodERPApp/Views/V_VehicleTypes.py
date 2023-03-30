@@ -20,8 +20,7 @@ class M_VehicleTypesView(CreateAPIView):
         try:
             with transaction.atomic():
                 VehicleTypedata = JSONParser().parse(request)
-                Company = VehicleTypedata['CompanyID']
-                VehicleTypedata = M_VehicleTypes.objects.filter(Company=Company)
+                VehicleTypedata = M_VehicleTypes.objects.filter(Company=1)
                 if VehicleTypedata.exists():
                     VehicleType_Serializer = VehicleTypesSerializer(VehicleTypedata, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleType_Serializer.data})
