@@ -358,6 +358,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "SupplierName": a['Supplier']['Name'],
                             "BillingAddressID": a['BillingAddress']['id'],
                             "BillingAddress": a['BillingAddress']['Address'],
+                            "BillingFssai": a['BillingAddress']['FSSAINo'],
                             "ShippingAddressID": a['ShippingAddress']['id'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
                             "ShippingFssai": a['ShippingAddress']['FSSAINo'],
