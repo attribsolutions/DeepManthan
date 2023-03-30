@@ -228,7 +228,7 @@ class InvoiceViewSecond(CreateAPIView):
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(
                         InvoiceQuery, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                     InvoiceData = list()
                     for a in InvoiceSerializedata:
                         InvoiceItemDetails = list()
@@ -259,6 +259,14 @@ class InvoiceViewSecond(CreateAPIView):
                                 "BatchDate": b['BatchDate'],
                             })
                             
+                            InvoiceReferenceDetails = list()
+                            for d in a['InvoicesReferences']:
+                                InvoiceReferenceDetails.append({
+                                    "Invoice": d['Invoice'],
+                                    "Order": d['Order']['id'],
+                                    "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                })
+                            
                         InvoiceData.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
@@ -272,16 +280,21 @@ class InvoiceViewSecond(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "CustomerState": a['Customer']['State']['Name'],
+                            "PartyAddress": a['Party']['PartyAddress'],
+                            "CustomerAddress": a['Customer']['PartyAddress'][0]['Address'],
                             "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
+                            "InvoicesReferences": InvoiceReferenceDetails,
+                                                        
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
-    
-    
 
     @transaction.atomic()
     def delete(self, request, id=0):
