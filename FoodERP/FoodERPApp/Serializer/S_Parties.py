@@ -44,21 +44,18 @@ class M_PartiesSerializer(serializers.ModelSerializer):
        
         PartyAddress_data = validated_data.pop('PartyAddress')
         PartyPrefix_data = validated_data.pop('PartyPrefix')
-        
         PartySubPartys=validated_data.pop('PartySubParty')
-        
         PartyID= M_Parties.objects.create(**validated_data)
-        
-        for PartySubParty in PartySubPartys:
-            PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)
         
         for PartyAddress in PartyAddress_data:
             Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
 
         for PartyPrefix in PartyPrefix_data:
-            Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix)     
-
-              
+            Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix) 
+       
+        for PartySubParty in PartySubPartys:
+            PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)         
+    
         return PartyID
     
     def update(self, instance, validated_data):
@@ -100,21 +97,21 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             
         instance.save()   
         
-        # for a in instance.PartyAddress.all():
-        #     a.delete()
-
         for a in instance.PartyPrefix.all():
-            a.delete()    
+            a.delete() 
         
-        for PartyAddress_data in validated_data['PartyAddress']:
-        
-           
-            Party = MC_PartyAddress.objects.filter(id=PartyAddress_data['id'],Party=instance).update(Address=PartyAddress_data['Address'],FSSAINo=PartyAddress_data['FSSAINo'],FSSAIExipry=PartyAddress_data['FSSAIExipry'],PIN=PartyAddress_data['PIN'],IsDefault=PartyAddress_data['IsDefault'],fssaidocument=PartyAddress_data['fssaidocument'])
-         
+        for a in instance.PartySubParty.all():
+            a.delete()       
             
+        for PartyAddress_data in validated_data['PartyAddress']:
+            Party = MC_PartyAddress.objects.filter(id=PartyAddress_data['id'],Party=instance).update(Address=PartyAddress_data['Address'],FSSAINo=PartyAddress_data['FSSAINo'],FSSAIExipry=PartyAddress_data['FSSAIExipry'],PIN=PartyAddress_data['PIN'],IsDefault=PartyAddress_data['IsDefault'],fssaidocument=PartyAddress_data['fssaidocument'])
 
         for PartyPrefixs_data in validated_data['PartyPrefix']:
-            Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)     
+            Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)
+            
+        for PartySubParty in validated_data['PartySubParty']:
+            PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
+                 
                   
         return instance
             
