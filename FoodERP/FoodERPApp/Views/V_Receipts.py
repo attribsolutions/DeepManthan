@@ -14,13 +14,15 @@ class ReceiptModeView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request,id=0):
+    def post(self, request,id=0):
         try:
             with transaction.atomic():
-                ReceiptmodeQuery = M_GeneralMaster.objects.filter(TypeID=3,Company=1)
+                receiptdata = JSONParser().parse(request)
+                CompanyID = receiptdata['Company']
+                ReceiptmodeQuery = M_GeneralMaster.objects.filter(TypeID=3,Company=1).filter(Company=CompanyID)
                 if ReceiptmodeQuery.exists():
-                    Routesdata = ReceiptModeSerializer(ReceiptmodeQuery, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Routesdata})
+                    Receiptdata = ReceiptModeSerializer(ReceiptmodeQuery, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Receiptdata})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Receipt Mode Not available ', 'Data': []})
         except M_GeneralMaster.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Receipt Mode Not available', 'Data': []})
