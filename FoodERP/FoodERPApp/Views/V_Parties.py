@@ -151,52 +151,6 @@ class M_PartiesViewSecond(CreateAPIView):
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer[0]})
-                    PartiesData=list()
-                    for a in M_Parties_serializer:
-                        PartyAddresslist=list()
-                        for b in a['PartyAddress']:
-                            PartyAddresslist.append({
-                                "id": b['id'],
-                                "Address": b['Address'],
-                                "FSSAINo": b['FSSAINo'],
-                                "FSSAIExipry": b['FSSAIExipry'],
-                                "PIN": b['PIN'],
-                                "IsDefault": b['IsDefault'],
-                                # "AddressType": b['AddressType']['id'],
-                                # "AddressTypeName": b['AddressType']['Name'],
-                            })
-                        
-                        PartiesData.append({
-                            "id": a['id'],
-                            "Name": a['Name'],
-                            "Email": a['Email'],
-                            "MobileNo": a['MobileNo'],
-                            "AlternateContactNo": a['AlternateContactNo'],
-                            "Taluka": a['Taluka'],
-                            "City": a['City'],
-                            "GSTIN": a['GSTIN'],
-                            "PAN": a['PAN'],
-                            "isActive":a['isActive'] ,
-                            "IsDivision": a['IsDivision'],
-                            "MkUpMkDn":a['MkUpMkDn'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn'],
-                            "PriceList":a['PriceList']['id'],
-                            "PriceListName":a['PriceList']['Name'],
-                            "PartyType":a['PartyType']['id'],
-                            "PartyTypeName":a['PartyType']['Name'],
-                            "Company":a['Company']['id'],
-                            "CompanyName":a['Company']['Name'],
-                            "State":a['State']['id'],
-                            "StateName":a['State']['Name'],
-                            "District":a['District']['id'],
-                            "DistrictName":a['District']['Name'],
-                            "PartyAddress":PartyAddresslist
-                        })
-
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartiesData[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
