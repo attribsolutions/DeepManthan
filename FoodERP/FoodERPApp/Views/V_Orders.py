@@ -126,7 +126,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                     if(Supplier == ''):
                         query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer,Supplier=Supplier)    
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer,Party=Supplier)    
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
                         Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
@@ -501,8 +501,10 @@ left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order
                         })
              # =====================Rate With GST================================================ 
              #Parameter Pass to Below Function (BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit)            
+
                     # CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,RateMcItemUnit).RateWithGST()
                     # b.update({"CalculatedRate": CalculatedRateusingMRPMargin })
+                   
             # =====================IsDefaultTermsAndConditions================================================
 
                     b.update({"StockQuantity": Stock,

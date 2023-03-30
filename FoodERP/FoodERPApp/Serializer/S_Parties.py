@@ -1,9 +1,7 @@
 from asyncore import read
 from dataclasses import fields
-
 from ..models import *
 from rest_framework import serializers
-
 
 class DivisionsSerializer(serializers.ModelSerializer):
     
@@ -11,17 +9,17 @@ class DivisionsSerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id','Name','PartyType'] 
               
-
-        
+    
 class PartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
         fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix']
 
 class PartyAddressSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     class Meta:
         model = MC_PartyAddress
-        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']                
+        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']                
 
 class MC_PartySubPartySerializer(serializers.ModelSerializer):
     class Meta:
@@ -102,14 +100,18 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             
         instance.save()   
         
-        for a in instance.PartyAddress.all():
-            a.delete()
+        # for a in instance.PartyAddress.all():
+        #     a.delete()
 
         for a in instance.PartyPrefix.all():
             a.delete()    
         
         for PartyAddress_data in validated_data['PartyAddress']:
-            Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_data) 
+        
+           
+            Party = MC_PartyAddress.objects.filter(id=PartyAddress_data['id'],Party=instance).update(Address=PartyAddress_data['Address'],FSSAINo=PartyAddress_data['FSSAINo'],FSSAIExipry=PartyAddress_data['FSSAIExipry'],PIN=PartyAddress_data['PIN'],IsDefault=PartyAddress_data['IsDefault'],fssaidocument=PartyAddress_data['fssaidocument'])
+         
+            
 
         for PartyPrefixs_data in validated_data['PartyPrefix']:
             Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)     

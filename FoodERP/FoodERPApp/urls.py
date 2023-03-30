@@ -106,6 +106,8 @@ from .Views.V_BankMaster import *
 
 from .Views.V_PartyWiseUpdate import *
 
+from .Views.V_Receipts import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -392,6 +394,14 @@ urlpatterns = [
             url(r'GetMRP$',GETMrpDetails.as_view()),
             url(r'GetMargin$',GETMarginDetails.as_view()),
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
+            
+# BankMaster
+            url(r'Bank/([0-9]+)$', BankView.as_view()),
+            url(r'Bank$', BankView.as_view()),
+            url(r'BankFilter$', BankListView.as_view()),
+
+# Receipt    
+            url(r'ReceiptMode$', ReceiptModeView.as_view()),                     
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
@@ -413,9 +423,6 @@ urlpatterns = [
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
 
-# BankMaster
-            url(r'Bank/([0-9]+)$', BankView.as_view()),
-            url(r'Bank$', BankView.as_view()),
-            url(r'BankFilter$', BankListView.as_view())
+
      
 ]
