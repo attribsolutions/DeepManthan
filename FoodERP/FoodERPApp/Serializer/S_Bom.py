@@ -1,4 +1,3 @@
-from dataclasses import fields
 from rest_framework import serializers
 from ..models import *
 from ..Serializer.S_Items import *
