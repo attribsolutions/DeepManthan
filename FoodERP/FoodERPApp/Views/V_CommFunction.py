@@ -206,13 +206,10 @@ class MarginMaster:
             P=Q(Party_id__isnull=True)
         
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
-        print(str(ItemMargindata.query))
-        print('AAAAAA')
+        # print(str(ItemMargindata.query))
         # if ItemMargindata.count() == 0:
         if ItemMargindata.exists():
-            print('BBBBB')
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
-            print('CCCCC')
             EffectiveDateMargin=   Margin_Serializer[0]['Margin']
         else:
             EffectiveDateMargin = ""
