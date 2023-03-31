@@ -1,16 +1,13 @@
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, connection, transaction
+from django.db import transaction
 from rest_framework.parsers import JSONParser
-from django.db.models import Sum
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_WorkOrder import *
 from ..Serializer.S_MaterialIssue import *
 from ..models import *
-from rest_framework.views import exception_handler
 
 
 class WorkOrderDetailsView(CreateAPIView):
