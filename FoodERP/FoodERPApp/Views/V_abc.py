@@ -1,10 +1,9 @@
-from genericpath import exists
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, connection, transaction
-from rest_framework.parsers import JSONParser,MultiPartParser, FormParser
+from django.db import transaction
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from ..Views.V_CommFunction import GetO_BatchWiseLiveStock
 
