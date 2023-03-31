@@ -267,6 +267,16 @@ class InvoiceViewSecond(CreateAPIView):
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
                                 })
                             
+                        DefCustomerAddress = ''  
+                        for ad in a['Customer']['PartyAddress']:
+                            if ad['IsDefault'] == True :
+                                DefCustomerAddress = ad['Address']
+                                
+                        DefPartyAddress = ''
+                        for x in a['Party']['PartyAddress']:
+                            if x['IsDefault'] == True :
+                                DefPartyAddress = x['Address']
+                    
                         InvoiceData.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
@@ -284,8 +294,8 @@ class InvoiceViewSecond(CreateAPIView):
                             "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
                             "PartyState": a['Party']['State']['Name'],
                             "CustomerState": a['Customer']['State']['Name'],
-                            "PartyAddress": a['Party']['PartyAddress'],
-                            "CustomerAddress": a['Customer']['PartyAddress'][0]['Address'],
+                            "PartyAddress": DefPartyAddress,                            
+                            "CustomerAddress": DefCustomerAddress,
                             "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,

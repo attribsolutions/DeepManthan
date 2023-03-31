@@ -20,7 +20,12 @@ class PartyWiseUpdateView(CreateAPIView):
                 Party = Party_data['PartyID']
                 Route = Party_data['Route']
                 Type = Party_data['Type']
-                query = MC_PartySubParty.objects.filter(Party=Party, Route=Route)
+                     
+               
+                if Route ==0:
+                    query = MC_PartySubParty.objects.filter(Party=Party)
+                else:
+                     query = MC_PartySubParty.objects.filter(Party=Party,Route=Route)
                 print(query.query)
                 if query.exists:
                     PartyID_serializer = PartyWiseSerializer(query, many=True).data
