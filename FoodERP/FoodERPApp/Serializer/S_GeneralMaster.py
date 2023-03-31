@@ -5,7 +5,6 @@ from ..models import *
 
 from .S_Companies import * 
  
-
 #List Filter 
 class GeneralMasterserializerSecond(serializers.ModelSerializer):
     Company =C_CompanySerializer(read_only=True)
