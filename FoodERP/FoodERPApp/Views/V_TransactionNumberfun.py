@@ -1,5 +1,4 @@
 from ..models import *
-from django.db.models import Max
 from ..Serializer.S_Orders import *
 from datetime import date
 

@@ -1,14 +1,11 @@
 from ..models import *
 from ..Serializer.S_BankMaster import *
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, connection, transaction
+from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-from rest_framework import status
-from rest_framework.response import Response
-import json
 
 class BankListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)

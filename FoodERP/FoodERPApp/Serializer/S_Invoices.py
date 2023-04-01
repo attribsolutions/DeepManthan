@@ -1,5 +1,3 @@
-from dataclasses import fields
-import json
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_Items import *
@@ -65,13 +63,15 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
     class Meta:
         model = T_Orders
         fields = '__all__'
-
+       
+       
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
-    Order = OrderserializerforInvoice(read_only=True)
+    # Order = OrderserializerforInvoice(read_only=True)
     class Meta:
         model = TC_InvoicesReferences
-        fields = '__all__'
-        
+        # fields = '__all__'
+        fields = ['Order'] 
+         
 class InvoiceItemsSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -111,7 +111,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Not In Stock ")    
           
         for InvoicesReference_data in InvoicesReferences_data:
-            InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)       
+            print(InvoiceID) 
+            InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)   
+              
         
         return InvoiceID   
     

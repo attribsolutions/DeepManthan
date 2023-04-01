@@ -59,8 +59,22 @@ class DriverView(CreateAPIView):
         try:
             with transaction.atomic():
                 Driverdata = M_Drivers.objects.get(id=id)
-                Driver_Serializer = M_DriverSerializer(Driverdata)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Driver_Serializer.data})
+                Driver_Serializer = M_DriverSerializer2(Driverdata).data
+                DriverList = list()
+                DriverList.append({
+                        "id": Driver_Serializer['id'],
+                        "Name":Driver_Serializer['Name'],
+                        "DOB": Driver_Serializer['DOB'],
+                        "Address":Driver_Serializer['Address'],
+                        "Party": Driver_Serializer['Party']['id'],
+                        "PartyName": Driver_Serializer['Party']['Name'],
+                        "Company": Driver_Serializer['Company'],
+                        "CreatedBy": Driver_Serializer['CreatedBy'],
+                        "CreatedOn":  Driver_Serializer['CreatedOn'],
+                        "UpdatedBy":  Driver_Serializer['UpdatedBy'],
+                        "UpdatedOn":  Driver_Serializer['UpdatedOn'],
+                        })
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': DriverList[0]})
         except  M_Drivers.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Driver Not available', 'Data': []})
         except Exception as e:

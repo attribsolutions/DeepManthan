@@ -1,13 +1,17 @@
-from asyncore import read
-from dataclasses import fields
 from ..models import *
 from rest_framework import serializers
-
+      
+        
 class DivisionsSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType'] 
+        fields = ['id','Name']
+         
+class PartySubPartySerializer2(serializers.ModelSerializer):
+    Party = DivisionsSerializer()
+    class Meta:
+        model = MC_PartySubParty
+        fields = ['Party']
               
     
 class PartyPrefixsSerializer(serializers.ModelSerializer):

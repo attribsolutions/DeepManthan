@@ -1,11 +1,12 @@
 from ..models import MC_PartySubParty
 from ..Serializer.S_PartyWiseUpdate import *
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, connection, transaction
+from django.db import transaction
 from rest_framework.parsers import JSONParser
+from django.db.models import Q
 
 class PartyWiseUpdateView(CreateAPIView):
 
@@ -19,9 +20,21 @@ class PartyWiseUpdateView(CreateAPIView):
                 Party_data = JSONParser().parse(request)
                 Party = Party_data['PartyID']
                 Route = Party_data['Route']
+                FilterPartyID = Party_data['FilterPartyID']
                 Type = Party_data['Type']
-                query = MC_PartySubParty.objects.filter(Party=Party, Route=Route)
-                print(query.query)
+                
+                if not (Route == 0):
+                    a = Q(Route=Route)
+                else:
+                    a = ~Q(Route=Route)
+                    
+                if not (FilterPartyID == 0):
+                    b = Q(SubParty=FilterPartyID)
+                else:
+                    b = ~Q(SubParty=FilterPartyID)
+                    
+                query = MC_PartySubParty.objects.filter(Party=Party).filter(a).filter(b)
+                
                 if query.exists:
                     PartyID_serializer = PartyWiseSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyID_serializer})
@@ -112,7 +125,7 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                     else:    
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})
                    
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': ' update', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Update Successfully', 'Data': []})
                 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     

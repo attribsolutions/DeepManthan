@@ -1,13 +1,11 @@
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, connection, transaction
+from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-from django.db.models import Q
 from django.contrib.sessions.backends.db import SessionStore
 
-from ..Serializer.S_PartyTypes import PartyTypeSerializer
 
 from ..Serializer.S_Parties import *
 
@@ -146,11 +144,24 @@ class M_PartiesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Parties_data=M_Parties.objects.filter(id=id)
+                # print(str( M_Parties_data.query))
                 if not M_Parties_data:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer[0]})
+                    query = MC_PartySubParty.objects.filter(SubParty=id)
+                    PartySubParty_Serializer= PartySubPartySerializer2(query,many=True).data
+                    PartySubPartyList = list()
+                    for a in PartySubParty_Serializer:
+                        PartySubPartyList.append({
+                            "Party":a['Party']['id'],
+                            "PartyName":a['Party']['Name']
+                        })
+                  
+                    M_Parties_serializer.extend(PartySubPartyList)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':M_Parties_serializer})
+                    
+                    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
