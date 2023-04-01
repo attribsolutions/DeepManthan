@@ -68,8 +68,11 @@ class DriverView(CreateAPIView):
                         "Address":Driver_Serializer['Address'],
                         "Party": Driver_Serializer['Party']['id'],
                         "PartyName": Driver_Serializer['Party']['Name'],
-                        "Company": Driver_Serializer['Company']
-
+                        "Company": Driver_Serializer['Company'],
+                        "CreatedBy": Driver_Serializer['CreatedBy'],
+                        "CreatedOn":  Driver_Serializer['CreatedOn'],
+                        "UpdatedBy":  Driver_Serializer['UpdatedBy'],
+                        "UpdatedOn":  Driver_Serializer['UpdatedOn'],
                         })
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': DriverList[0]})
         except  M_Drivers.DoesNotExist:
