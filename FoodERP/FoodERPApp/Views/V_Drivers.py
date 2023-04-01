@@ -59,7 +59,7 @@ class DriverView(CreateAPIView):
         try:
             with transaction.atomic():
                 Driverdata = M_Drivers.objects.get(id=id)
-                Driver_Serializer = M_DriverSerializer(Driverdata).data
+                Driver_Serializer = M_DriverSerializer2(Driverdata).data
                 DriverList = list()
                 DriverList.append({
                         "id": Driver_Serializer['id'],
