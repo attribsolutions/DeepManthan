@@ -144,11 +144,24 @@ class M_PartiesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Parties_data=M_Parties.objects.filter(id=id)
+                # print(str( M_Parties_data.query))
                 if not M_Parties_data:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []}) 
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': M_Parties_serializer[0]})
+                    query = MC_PartySubParty.objects.filter(SubParty=id)
+                    PartySubParty_Serializer= PartySubPartySerializer2(query,many=True).data
+                    PartySubPartyList = list()
+                    for a in PartySubParty_Serializer:
+                        PartySubPartyList.append({
+                            "Party":a['Party']['id'],
+                            "PartyName":a['Party']['Name']
+                        })
+                  
+                    M_Parties_serializer.extend(PartySubPartyList)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':M_Parties_serializer})
+                    
+                    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
