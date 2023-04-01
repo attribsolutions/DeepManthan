@@ -21,12 +21,10 @@ class M_EmployeesSerializer02(serializers.Serializer):
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
     CompanyName = serializers.CharField(max_length=100)
-    DesignationName = serializers.CharField(max_length=100)
     EmployeeTypeName = serializers.CharField(max_length=100)
     StateName = serializers.CharField(max_length=100)
     DistrictName = serializers.CharField(max_length=100)
     Company_id = serializers.IntegerField()
-    Designation_id = serializers.IntegerField()
     EmployeeType_id = serializers.IntegerField()
     State_id = serializers.IntegerField()
     District_id =serializers.IntegerField()
@@ -69,8 +67,6 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
             'working_hours', instance.working_hours) 
         instance.Company = validated_data.get(
             'Company', instance.Company)
-        instance.Designation = validated_data.get(
-            'Designation', instance.Designation)
         instance.EmployeeType = validated_data.get(
             'EmployeeType', instance.EmployeeType)
         instance.State = validated_data.get(
