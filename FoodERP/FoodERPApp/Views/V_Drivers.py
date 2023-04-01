@@ -71,7 +71,7 @@ class DriverView(CreateAPIView):
                         "Company": Driver_Serializer['Company']
 
                         })
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': DriverList})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': DriverList[0]})
         except  M_Drivers.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Driver Not available', 'Data': []})
         except Exception as e:
