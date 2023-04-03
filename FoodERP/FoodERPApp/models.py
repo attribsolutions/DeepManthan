@@ -49,6 +49,7 @@ class M_PartyType(models.Model):
     IsVendor =models.BooleanField(default=False)
     IsSCM =models.BooleanField(default=False)
     IsDivision = models.BooleanField(default=False) 
+    IsAdminDivision = models.BooleanField(default=False) 
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -163,6 +164,7 @@ class M_EmployeeTypes(models.Model):
     Name = models.CharField(max_length=100)
     ''' If IsPartyConnection Flag is True then we are able to assign multipal Parties from Employee Master  '''
     IsPartyConnection=models.BooleanField(default=False)
+    IsSalesTeamMember =models.BooleanField(default=False)
     IsSCM =models.BooleanField(default=False)
     Description= models.CharField(max_length=100,blank=True,null=True)
     CreatedBy = models.IntegerField()
