@@ -246,6 +246,15 @@ class MC_EmployeeParties(models.Model):
     class Meta:
         db_table = "MC_EmployeeParties"
 
+class MC_ManagementParties(models.Model):
+    Employee = models.ForeignKey(
+        M_Employees, related_name='ManagementEmployee', on_delete=models.DO_NOTHING)
+    Party = models.ForeignKey(
+        M_Parties, related_name='ManagementEmpparty',  on_delete=models.DO_NOTHING)
+
+    class Meta:
+        db_table = "MC_ManagementParties"        
+
 
 class UserManager(BaseUserManager):
     '''
