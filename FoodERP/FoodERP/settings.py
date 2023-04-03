@@ -105,6 +105,10 @@ DATABASES = {
     }
 }
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
 ACTIVITYLOG_AUTOCREATE_DB = True
 # Log anonymous actions?
 ACTIVITYLOG_ANONYMOUS = True

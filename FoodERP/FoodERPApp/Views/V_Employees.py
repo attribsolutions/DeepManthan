@@ -25,11 +25,10 @@ class M_EmployeesFilterView(CreateAPIView):
                 if (RoleID == 1):
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
-M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,M_Designations.Name DesignationName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.Designation_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
-JOIN M_Designations ON M_Designations.id=M_Employees.Designation_id
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
 JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
@@ -37,11 +36,11 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
                 else:
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
-M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,M_Designations.Name DesignationName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.Designation_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
-left JOIN M_Designations ON M_Designations.id=M_Employees.Designation_id
+
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
 JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
@@ -50,9 +49,43 @@ where M_Employees.CreatedBy=%s
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
                 else:
-                    M_Employees_Serializer = M_EmployeesSerializer02(
-                        query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
+                    M_Employees_Serializer = M_EmployeesSerializer02(query, many=True).data
+                    EmployeesData = list()
+                    for a in M_Employees_Serializer:
+                        ID =a['id']
+                        query2 = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, m_parties.Name FROM mc_employeeparties join m_parties on m_parties.id = mc_employeeparties.Party_id where Employee_id=%s''', [ID])
+                        EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(query2, many=True).data
+                        EmployeeParties = list()
+                        for b in EmployeepartiesData_Serializer:
+                            EmployeeParties.append({
+                                'PartyID': b['id'],
+                                'Name': b['Name']
+                            })
+                        EmployeesData.append({
+                        'id':  a['id'],
+                        'Name': a['Name'],
+                        'Address': a['Address'],
+                        'Mobile': a['Mobile'],
+                        'email': a['email'],
+                        'DOB' : a['DOB'],
+                        'PAN' : a['PAN'],
+                        'AadharNo':a['AadharNo'],
+                        'working_hours' :a['working_hours'],
+                        'CreatedBy':a['CreatedBy'],
+                        'CreatedOn' :  a['CreatedOn'],
+                        'UpdatedBy': a['UpdatedBy'],
+                        'UpdatedOn': a['UpdatedOn'],
+                        'CompanyName':a['CompanyName'],
+                        'EmployeeTypeName' : a['EmployeeTypeName'],
+                        'StateName' :  a['StateName'],
+                        'DistrictName' :  a['DistrictName'],
+                        'Company_id':  a['Company_id'],
+                        'EmployeeType_id':  a['EmployeeType_id'],
+                        'State_id': a['State_id'],
+                        'District_id' :  a['District_id'],
+                        'EmployeeParties' : EmployeeParties
+                        })    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmployeesData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
@@ -63,7 +96,6 @@ class M_EmployeesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
 
-    
     @transaction.atomic()
     def post(self, request):
         try:
@@ -117,7 +149,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                         })
                     
                     GetAllData.append({
-                    'id':  M_Employees_Serializer[0]['id'],
+                        'id':  M_Employees_Serializer[0]['id'],
                         'Name':  M_Employees_Serializer[0]['Name'],
                         'Address':  M_Employees_Serializer[0]['Address'],
                         'Mobile': M_Employees_Serializer[0]['Mobile'],
