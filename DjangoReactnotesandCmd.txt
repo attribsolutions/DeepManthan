@@ -27,11 +27,45 @@ django-admin --version
 install django in virtual environment
 python -m venv EnvName
 EnvName\Scripts\activate
-pip install Django==3.0.8
+pip install Django==3.0.8  //// ( 3.2 v)
 pip install djangorestframework
-pip install mysqlclient pymysql
+pip install mysqlclient pymysql/////pip install pymysql
 pip install django-cors-headers
-pip install activity  
+pip install django-user-activity-log
+
+========================================================
+mysql user creation on server
+
+Open file
+
+su         
+nano /etc/sudoers
+Then add the user below admin user like below syntax.
+
+user_name ALL=(ALL)  ALL
+
+-----------------------------------------------------------------
+sudo yum install mysql-server    \\\install mysqlclient
+
+sudo service mysqld start
+
+sudo mysql –u root –p
+
+sudo service mysqld Status
+
+
+
+
+
+
+========================================================
+
+
+
+
+
+
+
 
 pip install PyJWT==1.7.1       //Error :--attributeerror 'str' object has no attribute 'decode' django jwt      
 #Enable CORS -cross origin resource sharing,install cors headers in djangoProject.
