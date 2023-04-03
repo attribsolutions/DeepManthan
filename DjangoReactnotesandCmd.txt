@@ -53,9 +53,18 @@ sudo mysql –u root –p
 
 sudo service mysqld Status
 
+--------------------------------------------------------------------
+//sudo yum install python3-devel mysql-devel
+sudo yum install mysql-devel
+activate Env 
+pip install mysqlclient
 
+pip install requests
 
+mysql> CREATE USER 'pk'@'%' IDENTIFIED BY 'P@ssw0rd';
 
+mysql>  GRANT ALL PRIVILEGES ON * . * TO 'pk'@'%';
+mysql> FLUSH PRIVILEGES;
 
 
 ========================================================
