@@ -243,8 +243,29 @@ class ManagementEmployeePartiesListView(CreateAPIView):
                        
                         })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GetAllData})
-
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
+
+class ManagementEmployeePartiesView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                ManagementEmployeePartiesdata = JSONParser().parse(request)
+                ManagementEmployeesParties_Serializer = ManagementEmployeeParties(data=ManagementEmployeePartiesdata)
+                if ManagementEmployeesParties_Serializer.is_valid():
+                    Emploeepartiesdata = MC_ManagementParties.objects.get(Employee=ManagementEmployeePartiesdata['Employee'])
+                    Emploeepartiesdata.delete()
+                    ManagementEmployeesParties_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Management Employee Parties Data Save Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
      
