@@ -186,7 +186,7 @@ class M_Employees(models.Model):
     DOB = models.CharField(max_length=100)
     PAN = models.CharField(max_length=100)
     AadharNo = models.CharField(max_length=100)
-    working_hours = models.DecimalField(max_digits=15, decimal_places=2)
+
 
     Company = models.ForeignKey(
         C_Companies, related_name='EmployeesCompany', on_delete=models.DO_NOTHING)
