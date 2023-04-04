@@ -1,11 +1,6 @@
 from ..models import *
 from rest_framework import serializers
 
-
-
-
-
-
 class M_EmployeesSerializer02(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
@@ -15,7 +10,6 @@ class M_EmployeesSerializer02(serializers.Serializer):
     DOB = serializers.CharField(max_length=100)
     PAN = serializers.CharField(max_length=100)
     AadharNo = serializers.CharField(max_length=100)
-    working_hours =  serializers.DecimalField(max_digits = 15,decimal_places=2)
     CreatedBy = serializers.IntegerField(default=False)
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
@@ -63,8 +57,6 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
             'PAN', instance.PAN)
         instance.AadharNo = validated_data.get(
             'AadharNo', instance.AadharNo)
-        instance.working_hours = validated_data.get(
-            'working_hours', instance.working_hours) 
         instance.Company = validated_data.get(
             'Company', instance.Company)
         instance.EmployeeType = validated_data.get(
