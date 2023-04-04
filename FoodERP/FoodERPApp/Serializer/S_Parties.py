@@ -200,6 +200,16 @@ class M_PartiesSerializerThird(serializers.Serializer):
     Name = serializers.CharField(max_length=500)
     ManagementEmpparty__Party_id = serializers.IntegerField()
     
+
+class M_PartiesSerializerFourth(serializers.ModelSerializer):
+   
+    District= DistrictSerializerSecond()
+    State= StateSerializerSecond()
+    PartyType = PartyTypeSerializerSecond()
+    class Meta:
+        model =  M_Parties
+        fields = '__all__'    
+    
     
    
    

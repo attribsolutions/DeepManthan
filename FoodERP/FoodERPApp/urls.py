@@ -156,7 +156,6 @@ urlpatterns = [
             url(r'CompanyGroups$', C_CompanyGroupView.as_view()),
     
 
-    
 # Employees 
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
             url(r'Employees$', M_EmployeesView.as_view()),
@@ -170,11 +169,9 @@ urlpatterns = [
             
 # ManagementEmployeeParties
             url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesListView.as_view()),
-            url(r'ManagementEmpParties$', ManagementEmployeePartiesView.as_view()),
+            url(r'ManagementEmpParties$', ManagementEmployeePartiesSaveView.as_view()),
          
 
-             
-    
 # Order All APIs
             url(r'TestOrderget/([0-9]+)$',TestOrdersView.as_view()),
             url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
