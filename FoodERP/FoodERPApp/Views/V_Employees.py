@@ -230,24 +230,21 @@ class ManagementEmployeePartiesListView(CreateAPIView):
                 GetAllData = list()
                 for a in Parties_serializer:
                     q3 =M_Parties.objects.filter(id=int(a['id'])).select_related('PartyType','District','State')
-                    Parties_serializer2 = M_PartiesSerializerSecond(q3,many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Parties_serializer2})
-                    
+                    Parties_serializer2 = M_PartiesSerializerFourth(q3,many=True).data
                     GetAllData.append({
                         'id':  a['id'],
                         'Name':  a['Name'],
                         'Party': a['ManagementEmpparty__Party_id'],
                         'PartyType': Parties_serializer2[0]['PartyType']['Name'],
                         'State': Parties_serializer2[0]['State']['Name'],
-                        'District': Parties_serializer2[0]['District']['Name']
+                        'District': Parties_serializer2[0]['District']['Name'],
                        
                         })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GetAllData})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
-
-
-class ManagementEmployeePartiesView(CreateAPIView):
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
+        
+class ManagementEmployeePartiesSaveView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     authentication__Class = JSONWebTokenAuthentication
@@ -267,5 +264,4 @@ class ManagementEmployeePartiesView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-     
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
