@@ -192,6 +192,18 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = '__all__'
+        
+
+class M_PartiesSerializerThird(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+    ManagementEmpparty__Party_id = serializers.IntegerField()
+    
+    
+   
+   
+  
 
 
 
