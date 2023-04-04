@@ -16,18 +16,15 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.114','10.10.201.19']
+ALLOWED_HOSTS = ['192.168.1.114']
 
 
 # Application definition
@@ -88,10 +85,10 @@ DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm2023',
+        'NAME': 'chitalescm20230310',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
     ,
@@ -100,7 +97,7 @@ DATABASES = {
         'NAME': 'transactionlogdb',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
 }
