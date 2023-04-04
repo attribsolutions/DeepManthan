@@ -208,8 +208,28 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employee used in another table', 'Data': []})
+        
 
+class ManagementEmployeeViewList(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
 
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                ManagementEmployeedata = JSONParser().parse(request)
+                Company = ManagementEmployeedata['Company']
+                query =M_EmployeeTypes.objects.filter(Company=Company,IsSalesTeamMember=1)
+                if query.exists():
+                    query2 =M_Employees.objects.filter(Company=Company,EmployeeType__in=query)
+                    Employee_Serializer = M_EmployeesSerializer(query2, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Employee_Serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Drivers Not Available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
 
 class ManagementEmployeePartiesFilterView(CreateAPIView):
     
@@ -244,6 +264,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
         
+        
 class ManagementEmployeePartiesSaveView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -268,22 +289,4 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
         
         
         
-class ManagementEmployeeViewList(CreateAPIView):
-    
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
-
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                ManagementEmployeedata = JSONParser().parse(request)
-                Company = ManagementEmployeedata['Company']
-                query =M_EmployeeTypes.objects.filter(Company=Company,IsSalesTeamMember=1)
-                if query.exists():
-                    query2 =M_Employees.objects.filter(Company=Company,EmployeeType__in=query)
-                    Employee_Serializer = M_EmployeesSerializer(query2, many=True)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Employee_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Drivers Not Available', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
+              
