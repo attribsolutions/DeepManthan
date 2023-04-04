@@ -83,19 +83,15 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
         for items in instance.EmployeeParties.all():
             items.delete()
 
-        
         for OrderItem_data in validated_data['EmployeeParties']:
             Items = MC_EmployeeParties.objects.create(Employee=instance, **OrderItem_data)
             instance.EmployeeParties.add(Items)
  
         return instance      
 
-
 class EmployeepartiesDataSerializer(serializers.Serializer):
     id= serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
-
-
 
 class M_EmployeesSerializerforgetdata(serializers.ModelSerializer):
     # Company_id =  serializers.IntegerField()
@@ -103,5 +99,10 @@ class M_EmployeesSerializerforgetdata(serializers.ModelSerializer):
         model =  M_Employees
         fields = ['Company']
 
+class ManagementEmployeeParties(serializers.ModelSerializer):
+    
+    class Meta:
+        model =  MC_ManagementParties
+        fields = '__all__'
    
     
