@@ -5,7 +5,9 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Employees import *
+from ..Serializer.S_Parties import *
 from ..models import *
+from django.db.models import F,Q
 
 
 class M_EmployeesFilterView(CreateAPIView):
@@ -206,3 +208,43 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employee used in another table', 'Data': []})
+
+
+
+class ManagementEmployeePartiesListView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication 
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                ManagementEmpParties_data = JSONParser().parse(request)
+                EmployeeID = ManagementEmpParties_data['Employee']
+                CompanyID = ManagementEmpParties_data['Company']
+                q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
+                q0 = MC_ManagementParties.objects.filter(Employee=EmployeeID).select_related('Party')
+                q2=M_Parties.objects.filter(PartyType__in=q1).filter(Q(ManagementEmpparty__isnull=True)| Q(id__in=[MC_ManagementParties.Party_id for MC_ManagementParties in q0 ])).distinct().values('id','Name','PartyType','ManagementEmpparty__Party_id')
+                Parties_serializer = M_PartiesSerializerThird(q2,many=True).data
+                GetAllData = list()
+                for a in Parties_serializer:
+                    q3 =M_Parties.objects.filter(id=int(a['id'])).select_related('PartyType','District','State')
+                    Parties_serializer2 = M_PartiesSerializerSecond(q3,many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Parties_serializer2})
+                    
+                    GetAllData.append({
+                        'id':  a['id'],
+                        'Name':  a['Name'],
+                        'Party': a['ManagementEmpparty__Party_id'],
+                        'PartyType': Parties_serializer2[0]['PartyType']['Name'],
+                        'State': Parties_serializer2[0]['State']['Name'],
+                        'District': Parties_serializer2[0]['District']['Name']
+                       
+                        })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GetAllData})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
+
+     
