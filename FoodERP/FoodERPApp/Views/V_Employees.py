@@ -257,9 +257,9 @@ class ManagementEmployeePartiesView(CreateAPIView):
         try:
             with transaction.atomic():
                 ManagementEmployeePartiesdata = JSONParser().parse(request)
-                ManagementEmployeesParties_Serializer = ManagementEmployeeParties(data=ManagementEmployeePartiesdata)
+                ManagementEmployeesParties_Serializer = ManagementEmployeeParties(data=ManagementEmployeePartiesdata,many =True)
                 if ManagementEmployeesParties_Serializer.is_valid():
-                    Emploeepartiesdata = MC_ManagementParties.objects.get(Employee=ManagementEmployeePartiesdata['Employee'])
+                    Emploeepartiesdata = MC_ManagementParties.objects.filter(Employee=ManagementEmployeesParties_Serializer.data[0]['Employee'])
                     Emploeepartiesdata.delete()
                     ManagementEmployeesParties_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Management Employee Parties Data Save Successfully', 'Data': []})
