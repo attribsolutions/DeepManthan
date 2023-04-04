@@ -168,7 +168,8 @@ urlpatterns = [
             
             
 # ManagementEmployeeParties
-            url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesListView.as_view()),
+            url(r'ManagementEmployeeList$', ManagementEmployeeViewList.as_view()),
+            url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesFilterView.as_view()),
             url(r'ManagementEmpParties$', ManagementEmployeePartiesSaveView.as_view()),
          
 
