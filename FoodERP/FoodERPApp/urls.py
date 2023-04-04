@@ -166,6 +166,14 @@ urlpatterns = [
             url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
             url(r'EmployeeTypes$', M_EmployeeTypeView.as_view()),
             url(r'EmployeeTypesFilter$', M_EmployeeTypeFilterView.as_view()),
+            
+            
+# ManagementEmployeeParties
+            url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesListView.as_view()),
+            url(r'ManagementEmpParties$', ManagementEmployeePartiesView.as_view()),
+         
+
+             
     
 # Order All APIs
             url(r'TestOrderget/([0-9]+)$',TestOrdersView.as_view()),
