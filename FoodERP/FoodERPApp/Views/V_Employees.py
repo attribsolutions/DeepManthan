@@ -26,7 +26,7 @@ class M_EmployeesFilterView(CreateAPIView):
 
                 if (RoleID == 1):
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
-M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
+M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
 M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
 FROM M_Employees
@@ -37,7 +37,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
 ''')
                 else:
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
-M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
+M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
 M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
 FROM M_Employees
@@ -72,7 +72,6 @@ where M_Employees.CreatedBy=%s
                         'DOB' : a['DOB'],
                         'PAN' : a['PAN'],
                         'AadharNo':a['AadharNo'],
-                        'working_hours' :a['working_hours'],
                         'CreatedBy':a['CreatedBy'],
                         'CreatedOn' :  a['CreatedOn'],
                         'UpdatedBy': a['UpdatedBy'],
@@ -124,7 +123,7 @@ class M_EmployeesViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
-M_Employees.PAN,M_Employees.AadharNo,M_Employees.working_hours,M_Employees.CreatedBy,M_Employees.CreatedOn,
+M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
 M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
 FROM M_Employees
@@ -159,7 +158,6 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                         'DOB' : M_Employees_Serializer[0]['DOB'],
                         'PAN' : M_Employees_Serializer[0]['PAN'],
                         'AadharNo':M_Employees_Serializer[0]['AadharNo'],
-                        'working_hours' : M_Employees_Serializer[0]['working_hours'],
                         'CreatedBy':M_Employees_Serializer[0]['CreatedBy'],
                         'CreatedOn' :  M_Employees_Serializer[0]['CreatedOn'],
                         'UpdatedBy': M_Employees_Serializer[0]['UpdatedBy'],
