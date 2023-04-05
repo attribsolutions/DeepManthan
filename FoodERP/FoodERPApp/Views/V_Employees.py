@@ -291,10 +291,8 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_ManagementParties.objects.filter(Employee=id).values('Party')
-                # print(str(query.query))
                 if query.exists():
                     q2=M_Parties.objects.filter(id__in=query)
-                    print(str(q2.query))
                     Parties_serializer = DivisionsSerializer(q2,many=True).data
                     Partylist = list()
                     for a in Parties_serializer:
