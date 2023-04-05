@@ -404,7 +404,9 @@ urlpatterns = [
             url(r'Bank$', BankView.as_view()),
             url(r'BankFilter$', BankListView.as_view()),
 
-# Receipt    
+# Receipt
+            url(r'ReceiptInvoices$', ReceiptInvociesViewList.as_view()),
+    
                                 
     
 # RoleAccess========================================= 

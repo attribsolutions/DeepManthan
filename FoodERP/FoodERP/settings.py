@@ -27,6 +27,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['192.168.1.114']
 
 
+
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 INSTALLED_APPS = [
@@ -85,10 +86,10 @@ DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm2023',
+        'NAME': 'chitalescm20230310',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
     ,
@@ -97,7 +98,7 @@ DATABASES = {
         'NAME': 'transactionlogdb',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
 }
