@@ -52,22 +52,19 @@ class ReceiptViewList(CreateAPIView):
                 Receiptdata = JSONParser().parse(request)
                 Party = Receiptdata['Party']
                 Customer = Receiptdata['Customer']
-
                 '''Get Max Receipt Number'''
-                a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
+                a = GetMaxNumber.GetOrderNumber(Party)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-            
-                
-                Receiptdata['OrderNo'] = a
-                '''Get Order Prifix '''
-                b = GetPrifix.GetOrderPrifix(Division)
-                Orderdata['FullOrderNumber'] = b+""+str(a)
+                Receiptdata['ReceiptNo'] = a
+                '''Get Receipt Prifix '''
+                b = GetPrifix.GetReceiptPrifix(Party)
+                Receiptdata['FullReceiptNumber'] = b+""+str(a)
                 # return JsonResponse({ 'Data': Orderdata })
-                Order_serializer = ReceiptSerializer(data=Orderdata)
-                if Order_serializer.is_valid():
-                    Order_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'Data': []})
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
+                Receipt_serializer = ReceiptSerializer(data=Receiptdata)
+                if Receipt_serializer.is_valid():
+                    Receipt_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         

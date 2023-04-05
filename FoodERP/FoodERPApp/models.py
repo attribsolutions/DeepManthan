@@ -1471,12 +1471,16 @@ class T_Receipts(models.Model):
     DepositorBank =  models.ForeignKey(M_Bank, related_name='DepositorBank', on_delete=models.PROTECT, blank=True, null=True)
     Customer = models.ForeignKey(M_Parties, related_name='ReceiptCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='ReceiptParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "T_Receipts"
 
 class TC_ReceiptInvoices(models.Model):
-    Receipt = models.ForeignKey(T_Receipts, related_name='Receipt', on_delete=models.PROTECT)
+    Receipt = models.ForeignKey(T_Receipts, related_name='ReceiptInvoices', on_delete=models.PROTECT)
     Invoice = models.ForeignKey(T_Invoices, related_name='RInvoice', on_delete=models.PROTECT,blank=True, null=True)
     GrandTotal =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     PaidAmount =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
