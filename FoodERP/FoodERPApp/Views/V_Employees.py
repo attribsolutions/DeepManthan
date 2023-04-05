@@ -224,7 +224,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                     query2 =M_Employees.objects.filter(Company=Company,EmployeeType__in=query)
                     Employee_Serializer = M_EmployeesSerializer(query2, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Employee_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Drivers Not Available', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Employee Not Available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
