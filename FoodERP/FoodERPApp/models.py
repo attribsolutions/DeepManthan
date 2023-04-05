@@ -290,7 +290,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class M_Users(AbstractBaseUser, UserMixin):
+class M_Users(AbstractBaseUser):
 
     LoginName = models.CharField(max_length=100, unique=True)
     Employee = models.ForeignKey(
