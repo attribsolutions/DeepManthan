@@ -38,3 +38,36 @@ class ReceiptInvociesViewList(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': ReceiptInvoiceList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+class ReceiptViewList(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Receiptdata = JSONParser().parse(request)
+                Party = Receiptdata['Party']
+                Customer = Receiptdata['Customer']
+
+                '''Get Max Receipt Number'''
+                a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
+                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+            
+                
+                Receiptdata['OrderNo'] = a
+                '''Get Order Prifix '''
+                b = GetPrifix.GetOrderPrifix(Division)
+                Orderdata['FullOrderNumber'] = b+""+str(a)
+                # return JsonResponse({ 'Data': Orderdata })
+                Order_serializer = ReceiptSerializer(data=Orderdata)
+                if Order_serializer.is_valid():
+                    Order_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
