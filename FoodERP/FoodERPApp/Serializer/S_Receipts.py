@@ -1,10 +1,6 @@
 from ..models import *
 from rest_framework import serializers
 
-
-
-
-
 class ReceiptInvoiceserializer(serializers.Serializer):
    
     Receipt_id=serializers.IntegerField()
@@ -15,3 +11,10 @@ class ReceiptInvoiceserializer(serializers.Serializer):
     PaidAmount=serializers.DecimalField(max_digits=10, decimal_places=2)  
     BalAmt=serializers.DecimalField(max_digits=10, decimal_places=2)  
     
+
+
+class ReceiptSerializer(serializers.ModelSerializer):
+    
+    class Meta :
+        model= T_Receipts
+        fields = '__all__'
