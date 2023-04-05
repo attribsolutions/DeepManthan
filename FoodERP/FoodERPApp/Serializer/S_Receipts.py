@@ -12,9 +12,13 @@ class ReceiptInvoiceserializer(serializers.Serializer):
     BalAmt=serializers.DecimalField(max_digits=10, decimal_places=2)  
     
 
+class ReceiptInvoiceSerializer(serializers.ModelSerializer):
+    class Meta :
+        model= TC_ReceiptInvoices
+        fields = '__all__'
 
 class ReceiptSerializer(serializers.ModelSerializer):
-    
+    ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
     class Meta :
         model= T_Receipts
         fields = '__all__'
