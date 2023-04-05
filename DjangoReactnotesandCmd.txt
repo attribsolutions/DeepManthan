@@ -48,10 +48,12 @@ user_name ALL=(ALL)  ALL
 sudo yum install mysql-server    \\\install mysqlclient
 
 sudo service mysqld start
+systemctl start mysqld
+
 
 sudo mysql –u root –p
 
-sudo service mysqld Status
+systemctl status mysqld
 
 --------------------------------------------------------------------
 //sudo yum install python3-devel mysql-devel
