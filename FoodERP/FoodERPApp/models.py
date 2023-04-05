@@ -164,7 +164,7 @@ class M_EmployeeTypes(models.Model):
     Name = models.CharField(max_length=100)
     ''' If IsPartyConnection Flag is True then we are able to assign multipal Parties from Employee Master  '''
     IsPartyConnection=models.BooleanField(default=False)
-    IsSalesTeamMember =models.BooleanField(default=False)
+   
     IsSCM =models.BooleanField(default=False)
     Description= models.CharField(max_length=100,blank=True,null=True)
     CreatedBy = models.IntegerField()
@@ -1483,8 +1483,7 @@ class TC_ReceiptInvoices(models.Model):
     GrandTotal =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     PaidAmount =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     AdvanceAmtAdjusted =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    
-    
+    flag = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_ReceiptInvoices"        
    
