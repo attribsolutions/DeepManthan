@@ -284,6 +284,28 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
+
+
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                query = MC_ManagementParties.objects.filter(Employee=id).values('Party')
+                # print(str(query.query))
+                if query.exists():
+                    q2=M_Parties.objects.filter(id__in=query)
+                    print(str(q2.query))
+                    Parties_serializer = DivisionsSerializer(q2,many=True).data
+                    Partylist = list()
+                    for a in Parties_serializer:
+                     Partylist.append({
+                        'id':  a['id'],
+                        'Name':  a['Name'],
+                    })
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Partylist})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})           
         
         
         
