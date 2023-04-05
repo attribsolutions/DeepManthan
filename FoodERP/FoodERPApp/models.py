@@ -1458,7 +1458,7 @@ class TC_LoadingSheetDetails(models.Model):
                      
 class T_Receipts(models.Model):
     ReceiptDate = models.DateField()
-    ReceiptNo = models.CharField(max_length=500,blank=True, null=True)
+    # ReceiptNo = models.CharField(max_length=500,blank=True, null=True)
     Description = models.CharField(max_length=500,blank=True, null=True)
     AmountPaid =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     OpeningBalanceAdjusted =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
@@ -1472,9 +1472,9 @@ class T_Receipts(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='ReceiptCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='ReceiptParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
+    # CreatedOn = models.DateTimeField(auto_now_add=True)
+    # UpdatedBy = models.IntegerField()
+    # UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "T_Receipts"
