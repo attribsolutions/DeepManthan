@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
-    'activity_log',
+#     'activity_log',
 ]
 
 MIDDLEWARE = [
