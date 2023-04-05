@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from activity_log.models import UserMixin
 
-Create your models here.
+# Create your models here.
 
 def make_extra_data(request, response):
     return str(request.META)
