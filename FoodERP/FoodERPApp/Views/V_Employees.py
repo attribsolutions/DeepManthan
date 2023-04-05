@@ -224,7 +224,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                     query2 =M_Employees.objects.filter(Company=Company,EmployeeType__in=query)
                     Employee_Serializer = M_EmployeesSerializer(query2, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Employee_Serializer.data})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Drivers Not Available', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Employee Not Available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -284,6 +284,26 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
+
+
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                query = MC_ManagementParties.objects.filter(Employee=id).values('Party')
+                if query.exists():
+                    q2=M_Parties.objects.filter(id__in=query)
+                    Parties_serializer = DivisionsSerializer(q2,many=True).data
+                    Partylist = list()
+                    for a in Parties_serializer:
+                     Partylist.append({
+                        'id':  a['id'],
+                        'Name':  a['Name'],
+                    })
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Partylist})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})           
         
         
         

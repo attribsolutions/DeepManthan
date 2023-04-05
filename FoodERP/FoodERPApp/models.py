@@ -164,8 +164,9 @@ class M_EmployeeTypes(models.Model):
     Name = models.CharField(max_length=100)
     ''' If IsPartyConnection Flag is True then we are able to assign multipal Parties from Employee Master  '''
     IsPartyConnection=models.BooleanField(default=False)
-    IsSalesTeamMember =models.BooleanField(default=False)
+   
     IsSCM =models.BooleanField(default=False)
+    IsSalesTeamMember =models.BooleanField(default=False)
     Description= models.CharField(max_length=100,blank=True,null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1483,10 +1484,58 @@ class TC_ReceiptInvoices(models.Model):
     GrandTotal =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     PaidAmount =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     AdvanceAmtAdjusted =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    
+    flag = models.BooleanField(default=False)
+    class Meta:
+        db_table = "TC_ReceiptInvoices"
+        
+class T_CreditNotes(models.Model):
+    NoteType = models.IntegerField()
+    NoteTypeMode = models.CharField(max_length=20)
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT)
+    NoteNumber = models.IntegerField()    
+    CreditNoteDate = models.DateField(blank=True,null=True)
+    Invoice = models.ForeignKey(T_Invoices,related_name='CNInvoice', on_delete=models.PROTECT)
+    Customer = models.ForeignKey(M_Parties,related_name='CNCustomer',on_delete=models.PROTECT)
+    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2, blank=True,null=True)
+    RoundOffAmount = models.DecimalField(max_digits=20, decimal_places=2, blank=True,null=True)
+    CreditNoteReason = models.CharField(max_length=50,blank=True,null=True)
+    Party = models.ForeignKey(M_Parties,related_name='T_CreditNotesParty', on_delete=models.PROTECT)
+    DebitNoteReason = models.CharField(max_length=50,blank=True,null=True)
+    IsChequeBounce = models.BooleanField(default=False)
+    ReceiptNo = models.CharField(max_length=500,blank=True, null=True)
+    Narration = models.CharField(max_length=500,blank=True, null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
-        db_table = "TC_ReceiptInvoices"        
+        db_table = "T_CreditNotes"
+        
+class TC_CreditNotesItems(models.Model):
+    CreditNote = models.ForeignKey(T_CreditNotes,related_name='CNoteID',on_delete=models.PROTECT)
+    Item = models.ForeignKey(M_Items,on_delete=models.PROTECT)
+    HSNCode = models.CharField(max_length=500,blank=True, null=True)
+    Quantity = models.IntegerField()
+    Unit = models.ForeignKey(M_Units,on_delete=models.PROTECT)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='CNoteMRP', on_delete=models.PROTECT,null=True,blank=True) 
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    TaxType = models.CharField(max_length=500)
+    GSTRate = models.DecimalField(max_digits=20, decimal_places=2)
+    GSTAmount = models.DecimalField(max_digits=10, decimal_places=2)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    NOC = models.CharField(max_length=20)
+    BatchCode = models.CharField(max_length=500)
+    
+    class Meta:
+        db_table = "TC_CreditNotesItems"                
    
         
     
