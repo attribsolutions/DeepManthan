@@ -9,6 +9,7 @@ from ..Serializer.S_Receipts import *
 from django.db.models import Sum
 from ..models import *
 
+
 class ReceiptInvoicesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -74,6 +75,7 @@ class ReceiptListView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "Description": a['Description'],
                             "ReceiptMode": a['ReceiptMode']['Name'],
+                            "ReceiptType": a['ReceiptType']['Name'],
                             "AmountPaid": a['AmountPaid'],
                             "DocumentNo": a['DocumentNo'],
                             "BalanceAmount": a['BalanceAmount'],
