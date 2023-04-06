@@ -35,7 +35,7 @@ class LoadingSheetSerializer(serializers.ModelSerializer):
             # print(LoadingSheet_data['Invoice'])
             # print(validated_data['Vehicle'])
             # print(validated_data['Driver'])
-            InvoiceVehicleandDriverupdate=T_Invoices.objects.filter(id=int(LoadingSheet_data['Invoice'])).update(Vehicle = int(validated_data['Vehicle']),Driver = int(validated_data['Driver']))
+            InvoiceVehicleandDriverupdate=T_Invoices.objects.filter(id=int(str(LoadingSheet_data['Invoice']))).update(Vehicle = int(str(validated_data['Vehicle'])),Driver = int(str(validated_data['Driver'])))
             
             
         return LoadingSheetID 
