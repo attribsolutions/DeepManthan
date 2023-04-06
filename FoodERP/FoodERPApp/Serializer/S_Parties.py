@@ -19,12 +19,17 @@ class PartyPrefixsSerializer(serializers.ModelSerializer):
         model = MC_PartyPrefixs
         fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix']
 
+# class PartyAddressSerializer(serializers.ModelSerializer):
+#     id = serializers.IntegerField()
+#     class Meta:
+#         model = MC_PartyAddress
+#         fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
+                      
 class PartyAddressSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
+
     class Meta:
         model = MC_PartyAddress
-        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']                
-
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
 class MC_PartySubPartySerializer(serializers.ModelSerializer):
     class Meta:
         model =MC_PartySubParty
