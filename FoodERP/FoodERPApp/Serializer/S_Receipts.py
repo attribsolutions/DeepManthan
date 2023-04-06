@@ -39,6 +39,7 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
     Party = PartiesSerializer(read_only=True)
     ReceiptMode = GeneralMasterserializer(read_only=True)
+    ReceiptType = GeneralMasterserializer(read_only=True)
     Bank = BankSerializer(read_only=True)
     DepositorBank = BankSerializer(read_only=True)
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
