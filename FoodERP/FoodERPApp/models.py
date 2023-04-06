@@ -1459,6 +1459,7 @@ class TC_LoadingSheetDetails(models.Model):
 class T_Receipts(models.Model):
     ReceiptDate = models.DateField()
     ReceiptNo = models.CharField(max_length=500,blank=True, null=True)
+    FullReceiptNumber = models.CharField(max_length=500)
     Description = models.CharField(max_length=500,blank=True, null=True)
     AmountPaid =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     OpeningBalanceAdjusted =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)

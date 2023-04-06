@@ -22,3 +22,25 @@ class ReceiptSerializer(serializers.ModelSerializer):
     class Meta :
         model= T_Receipts
         fields = '__all__'
+
+
+class GeneralMasterserializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_GeneralMaster
+        fields = '__all__'
+
+class PartiesSerializer(serializers.ModelSerializer):
+   
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name','GSTIN','PAN','Email']        
+        
+class ReceiptSerializerSecond(serializers.ModelSerializer):
+    Customer = PartiesSerializer(read_only=True)
+    Party = PartiesSerializer(read_only=True)
+    ReceiptMode = GeneralMasterserializer(read_only=True)
+    ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
+    
+    class Meta:
+        model = T_Receipts
+        fields = '__all__'        
