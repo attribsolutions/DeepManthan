@@ -74,6 +74,7 @@ class ReceiptListView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "Description": a['Description'],
                             "ReceiptMode": a['ReceiptMode']['Name'],
+                            "ReceiptType": a['ReceiptType']['Name'],
                             "AmountPaid": a['AmountPaid'],
                             "DocumentNo": a['DocumentNo'],
                             "BalanceAmount": a['BalanceAmount'],
