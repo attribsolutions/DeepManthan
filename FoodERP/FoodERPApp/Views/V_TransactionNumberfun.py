@@ -165,6 +165,23 @@ class GetMaxNumber:
         return a
     
     
+    def GetReceiptNumber(*args):
+        
+        MaxReceiptNumber=T_Receipts.objects.filter(Party_id=args[0]).values('ReceiptNo').order_by('-id')[:1]
+        # print(str(MaxReceiptNumber.query))
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+        if(not MaxReceiptNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else: 
+                a=int(MaxReceiptNumber[0]['ReceiptNo'])
+                a=a+1
+        return a
+    
+    
     
 
 class GetPrifix:
@@ -239,6 +256,14 @@ class GetPrifix:
             a=""
         else:
             a=Prifix[0]['IBInwardprefix']
+        return a
+    
+    def GetReceiptPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Receiptprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['Receiptprefix']
         return a
     
     

@@ -10,7 +10,6 @@ class GeneralMasterserializerSecond(serializers.ModelSerializer):
         model = M_GeneralMaster
         fields = '__all__'    
 
-
 #Get type,Post data,get single,put  Method
 class GeneralMasterserializer(serializers.ModelSerializer):
     class Meta:
