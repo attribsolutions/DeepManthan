@@ -33,8 +33,8 @@ class LoadingSheetSerializer(serializers.ModelSerializer):
         for LoadingSheet_data in LoadingSheetDetails_data:
             TC_LoadingSheetDetails.objects.create(LoadingSheet=LoadingSheetID, **LoadingSheet_data)
             print(LoadingSheet_data['Invoice'])
-            print(validated_data[0]['Vehicle'])
-            print(validated_data[0]['Driver'])
+            print(validated_data['Vehicle'])
+            print(validated_data['Driver'])
             # InvoiceVehicleandDriverupdate=T_Invoices.objects.filter(id=LoadingSheet_data['Invoice']).update(Vehicle = validated_data[0]['Vehicle'],Driver = validated_data[0]['Driver'])
             
             
