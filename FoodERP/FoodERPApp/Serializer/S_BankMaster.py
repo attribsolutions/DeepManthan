@@ -7,7 +7,6 @@ class BankSerializer(serializers.ModelSerializer):
         model =  M_Bank
         fields = '__all__'
 
-# Get ALL Category,Get Single Category,Get Category On CategoryType Methods Serializers
 class BankSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =  M_Bank
