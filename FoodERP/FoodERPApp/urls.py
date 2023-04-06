@@ -405,9 +405,9 @@ urlpatterns = [
             url(r'BankFilter$', BankListView.as_view()),
 
 # Receipt
-            url(r'ReceiptInvoices$', ReceiptInvociesViewList.as_view()),
-    
-                                
+            url(r'ReceiptInvoices$', ReceiptInvoicesView.as_view()),
+            url(r'Receipt/([0-9]+)$', ReceiptView.as_view()),
+            url(r'ReceiptFilter$', ReceiptListView.as_view()),
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
