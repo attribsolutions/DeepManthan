@@ -68,22 +68,21 @@ class ReceiptListView(CreateAPIView):
                             "id": a['id'],
                             "ReceiptDate": a['ReceiptDate'],
                             "FullReceiptNumber": a['FullReceiptNumber'],
-                            "Description": a['Description'],
-                            "AmountPaid": a['AmountPaid'],
-                            "BalanceAmount": a['BalanceAmount'],
-                            "OpeningBalanceAdjusted": a['OpeningBalanceAdjusted'],
-                            "ChequeDate": a['ChequeDate'],
-                            "DocumentNo": a['DocumentNo'],
-                            "Bank_id": a['Bank_id'],
-                            "DepositorBank_id": a['DepositorBank_id'],
-                            "ReceiptMode_id": a['ReceiptMode_id'],
-                            "CreatedOn": a['CreatedOn'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
-                            "CreatedOn": a['CreatedOn'] 
-                            
+                            "Description": a['Description'],
+                            "ReceiptMode": a['ReceiptMode']['Name'],
+                            "AmountPaid": a['AmountPaid'],
+                            "DocumentNo": a['DocumentNo'],
+                            "BalanceAmount": a['BalanceAmount'],
+                            "OpeningBalanceAdjusted": a['OpeningBalanceAdjusted'],
+                            "ChequeDate": a['ChequeDate'],
+                            "Bank": a['Bank']['Name'],
+                            "DepositorBank": a['DepositorBank']['Name'],
+                            "CreatedOn": a['CreatedOn']
+
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
