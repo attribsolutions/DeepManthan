@@ -61,8 +61,8 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "PartyID":a['Party']['id'],
                                 "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
-                                "State": State_Serializer[0]['State'],
-                                "District":  State_Serializer[0]['District']
+                                "State": State_Serializer[0]['State']['Name'],
+                                "District":  State_Serializer[0]['District']['Name']
                                 })
                                                        
                         elif (Type == 'FSSAINo'):
