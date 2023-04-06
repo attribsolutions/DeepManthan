@@ -1465,7 +1465,7 @@ class T_Receipts(models.Model):
     OpeningBalanceAdjusted =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     BalanceAmount =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     OpeningBalanceAdjusted =  models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    ReceiptMode = models.ForeignKey(M_GeneralMaster, related_name='Receiptmode', on_delete=models.PROTECT, blank=True, null=True)
+ 
     ChequeDate =models.DateField(blank=True, null=True)
     DocumentNo =models.CharField(max_length=500,blank=True, null=True)
     Bank =  models.ForeignKey(M_Bank, related_name='Bank', on_delete=models.PROTECT, blank=True, null=True)

@@ -215,7 +215,6 @@ urlpatterns = [
             url(r'GeneralMasterType$', GeneralMasterTypeView.as_view()),
             url(r'GeneralMasterSubType$', GeneralMasterSubTypeView.as_view()),
             url(r'GeneralMasterBrandName$', GeneralMasterBrandName.as_view()),
-            url(r'ReceiptMode$', ReceiptModeView.as_view()), 
 
 #Invoice All APIs
             url(r'Invoice/([0-9]+)$', InvoiceViewSecond.as_view()),
