@@ -57,6 +57,5 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
         
         if not ret.get("DepositorBank", None):
             ret["DepositorBank"] = {"id": None, "Name": None}
-                
-             
+                  
         return ret            

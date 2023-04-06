@@ -9,6 +9,7 @@ from ..Serializer.S_Receipts import *
 from django.db.models import Sum
 from ..models import *
 
+
 class ReceiptInvoicesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
