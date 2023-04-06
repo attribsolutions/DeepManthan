@@ -106,6 +106,8 @@ from .Views.V_PartyWiseUpdate import *
 
 from .Views.V_Receipts import *
 
+from .Views.V_CreditDebit import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -428,6 +430,9 @@ urlpatterns = [
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
 
-
+#CreditDebit 
+            url(r'CreditNotesList$', CreditNotesView.as_view()),
+            url(r'CreditNotes/([0-9]+)$', CreditNotesViewSecond.as_view()),
+            url(r'CreditNotes$', CreditNotesViewSecond.as_view()),
      
 ]
