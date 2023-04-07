@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 
 from ..Serializer.S_Units import *
@@ -11,7 +11,7 @@ from ..models import *
 class M_UnitsView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request):

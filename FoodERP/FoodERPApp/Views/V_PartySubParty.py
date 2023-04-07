@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 
@@ -13,7 +13,7 @@ from ..models import *
 
 class PartySubPartyListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request):
@@ -30,7 +30,7 @@ class PartySubPartyListFilterView(CreateAPIView):
     
 class PartySubPartyView(CreateAPIView):     # PartySubParty Save
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -60,7 +60,7 @@ class PartySubPartyView(CreateAPIView):     # PartySubParty Save
 
 class PartySubPartyViewSecond(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
        
     @transaction.atomic()
     def get(self, request, id=0):
@@ -106,7 +106,7 @@ class PartySubPartyViewSecond(CreateAPIView):
 
 class GetVendorSupplierCustomerListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
+    # authentication_class = JSONWebTokenAuthentication 
             
     @transaction.atomic()
     def post(self, request):
@@ -170,7 +170,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                       
 class CreditlimitListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
+    # authentication_class = JSONWebTokenAuthentication 
     
     
     @transaction.atomic()
@@ -205,7 +205,7 @@ class CreditlimitListView(CreateAPIView):
 
 class CreditlimitView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
+    # authentication_class = JSONWebTokenAuthentication 
     
     @transaction.atomic()
     def post(self, request,id=0):
@@ -224,7 +224,7 @@ class CreditlimitView(CreateAPIView):
         
 class RetailerandSSDDView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication 
+    # authentication_class = JSONWebTokenAuthentication 
     
     @transaction.atomic()
     def post(self, request):

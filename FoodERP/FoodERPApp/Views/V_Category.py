@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Category import *
@@ -10,7 +10,7 @@ from ..models import *
 class CategoryView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request,id=0):
@@ -58,7 +58,7 @@ class CategoryView(CreateAPIView):
 class CategoryViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request,id=0):
@@ -124,7 +124,7 @@ class CategoryViewSecond(CreateAPIView):
 class GetCategoryByCategoryTypeID(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request,id=0):

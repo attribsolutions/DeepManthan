@@ -2,7 +2,7 @@ import datetime
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 
@@ -17,7 +17,7 @@ from django.db.models import *
 
 class BranchInvoiceDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request, id=0):
@@ -81,7 +81,7 @@ class BranchInvoiceDetailsView(CreateAPIView):
 class InterBranchInwardListFilterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -128,7 +128,7 @@ class InterBranchInwardListFilterView(CreateAPIView):
 class InterBranchInwardView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -213,7 +213,7 @@ class InterBranchInwardView(CreateAPIView):
 
 class InterBranchInwardViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def delete(self, request, id=0):
