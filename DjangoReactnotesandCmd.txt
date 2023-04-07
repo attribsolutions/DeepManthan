@@ -210,3 +210,21 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': None,
 }
+
+=======================================================================================
+sudo yum update
+sudo yum install python3-pip python3-dev nginx
+sudo pip3 install virtualenv
+git clone project path
+virtualenv FoodERPEnv
+source FoodERPEnv/bin/activate
+pip install django gunicorn
+pip install Django
+pip install djangorestframework
+pip install mysqlclient pymysql
+pip install django-cors-headers
+pip install django-user-activity-log
+pip install djangorestframework-jwt
+pip install requests
+python manage.py migrate
+python manage.py runserver 10.1.201.19:8000
