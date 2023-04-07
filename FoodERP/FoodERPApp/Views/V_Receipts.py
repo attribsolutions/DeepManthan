@@ -104,7 +104,7 @@ class ReceiptView(CreateAPIView):
                 Receiptdata = JSONParser().parse(request)
                 Party = Receiptdata['Party']
                 '''Get Max Receipt Number'''
-                a = GetMaxNumber.GetOrderNumber(Party)
+                a = GetMaxNumber.GetReceiptNumber(Party)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 Receiptdata['ReceiptNo'] = a
                 '''Get Receipt Prifix '''
