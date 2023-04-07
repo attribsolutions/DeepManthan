@@ -2,7 +2,9 @@ from rest_framework import serializers
 from ..models import *
 
 
-class CreditNoteSerializer(serializers.ModelSerializer):
+
+# Credit Or Debit Save Serializer 
+class CreditDebitNoteSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= T_CreditDebitNotes
