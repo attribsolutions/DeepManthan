@@ -110,6 +110,7 @@ class ReceiptView(CreateAPIView):
                 Receiptdata['ReceiptNo'] = a
                 '''Get Receipt Prifix '''
                 b = GetPrifix.GetReceiptPrifix(Party)
+                print(b)
                 Receiptdata['FullReceiptNumber'] = b+""+str(a)
                 # return JsonResponse({ 'Data': Orderdata })
                 Receipt_serializer = ReceiptSerializer(data=Receiptdata)

@@ -1500,7 +1500,7 @@ class T_CreditDebitNotes(models.Model):
    
     NoteDate = models.DateField()
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
-    NoteNo = models.IntegerField()
+    NoteNo = models.CharField(max_length=500,blank=True, null=True)
     FullNoteNumber = models.CharField(max_length=500)
     NoteReason = models.CharField(max_length=50,blank=True,null=True)
     GrandTotal = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
