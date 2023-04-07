@@ -57,5 +57,11 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
         
         if not ret.get("DepositorBank", None):
             ret["DepositorBank"] = {"id": None, "Name": None}
+        
+        if not ret.get("ReceiptMode", None):
+            ret["ReceiptMode"] = {"id": None, "Name": None}  
+        
+        if not ret.get("ReceiptType", None):
+            ret["ReceiptType"] = {"id": None, "Name": None}      
                   
         return ret            
