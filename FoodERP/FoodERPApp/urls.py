@@ -411,6 +411,11 @@ urlpatterns = [
             url(r'Receipt/([0-9]+)$', ReceiptView.as_view()),
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
+            
+            
+#CreditDebit 
+            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),            
+            
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
@@ -432,9 +437,4 @@ urlpatterns = [
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
 
-#CreditDebit 
-            url(r'CreditNotesList$', CreditNotesView.as_view()),
-            url(r'CreditNotes/([0-9]+)$', CreditNotesViewSecond.as_view()),
-            url(r'CreditNotes$', CreditNotesViewSecond.as_view()),
-     
 ]
