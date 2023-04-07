@@ -294,11 +294,9 @@ class GetPrifix:
         else:
             
             if args[1]==37:
-                
                 a=Prifix[0]['Creditprefix']
             else:
-                a=Prifix[0]['Debitprefix']
-                    
+                a=Prifix[0]['Debitprefix']         
         return a
     
     
