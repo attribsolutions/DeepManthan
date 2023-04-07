@@ -27,7 +27,7 @@ class CreditDebitNoteView(CreateAPIView):
                 CreditNotedata['NoteNo'] = a
                 '''Get Receipt Prifix '''
                 b = GetPrifix.GetCRDRPrifix(Party,NoteType)
-                CreditNotedata['FullNoteNumber'] = b+""+a
+                CreditNotedata['FullNoteNumber'] = b+""+str(a)
                 CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
                     CreditNote_Serializer.save()
