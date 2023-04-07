@@ -16,13 +16,25 @@ class ReceiptInvoiceserializer(serializers.Serializer):
 class ReceiptInvoiceSerializer(serializers.ModelSerializer):
     class Meta :
         model= TC_ReceiptInvoices
-        fields = '__all__'
+        fields = ['Invoice','GrandTotal','PaidAmount','AdvanceAmtAdjusted','flag']
 
 class ReceiptSerializer(serializers.ModelSerializer):
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
     class Meta :
         model= T_Receipts
-        fields = '__all__'
+        fields = ['ReceiptDate', 'ReceiptNo', 'Description', 'AmountPaid','BalanceAmount', 'OpeningBalanceAdjusted', 'DocumentNo' , 'Bank', 'Customer', 'DepositorBank', 'Party', 'CreatedBy', 'UpdatedBy', 'FullReceiptNumber', 'ReceiptMode', 'ReceiptType','ReceiptInvoices']
+        
+    def create(self, validated_data):
+        ReceiptInvoices_data = validated_data.pop('ReceiptInvoices')
+     
+        Receipts = T_Receipts.objects.create(**validated_data)
+        
+        for ReceiptInvoice_data in ReceiptInvoices_data:
+           TC_ReceiptInvoices.objects.create(Receipt=Receipts, **ReceiptInvoice_data)
+
+        return Receipts    
+        
+        
         
 class GeneralMasterserializer(serializers.ModelSerializer):
     class Meta:
