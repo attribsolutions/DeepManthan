@@ -33,8 +33,7 @@ class StateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class SubPartySerializer(serializers.ModelSerializer):
-    District= DistrictSerializer(read_only=True)
-    State= StateSerializer(read_only=True)
+    
     PriceList= PriceListSerializer(read_only=True)
     PartyType= PartyTypeSerializer(read_only=True)
     Company= CompanySerializer(read_only=True)
