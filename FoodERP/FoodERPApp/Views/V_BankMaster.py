@@ -16,8 +16,8 @@ class BankListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Bank_data = JSONParser().parse(request)
-                Party = Bank_data['Party']
-                Company = Bank_data['Company']
+                Party = Bank_data['PartyID']
+                Company = Bank_data['CompanyID']
                 query = M_Bank.objects.filter(Party=Party, Company=Company)
         
                 if query:
@@ -26,6 +26,28 @@ class BankListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+class DepositorBankListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self,request,id=0):
+        try:
+            with transaction.atomic():
+                Bank_data = JSONParser().parse(request)
+                Party = Bank_data['PartyID']
+                Company = Bank_data['CompanyID']
+                query = M_Bank.objects.filter(Party=Party, Company=Company,IsSelfDepositoryBank=1)
+        
+                if query:
+                    bank_serializer = BankSerializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
         
 class BankView(CreateAPIView):
 

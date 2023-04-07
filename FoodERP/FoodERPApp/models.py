@@ -859,6 +859,8 @@ class O_LiveBatches(models.Model):
 class T_Invoices(models.Model):
     InvoiceDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='InvoicesCustomer', on_delete=models.PROTECT)
+    Vehicle = models.ForeignKey(M_Vehicles, related_name='InvoiceVehicle',on_delete=models.PROTECT,null=True,blank=True)
+    Driver = models.ForeignKey(M_Drivers, related_name='InvoiceDriver',on_delete=models.PROTECT,null=True,blank=True)
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
