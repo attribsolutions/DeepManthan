@@ -254,11 +254,6 @@ class RetailerandSSDDView(CreateAPIView):
                     q1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
                     q2=M_Parties.objects.filter(id__in=q1)    
                 
-                elif Type ==5: #All Retailer/ SSDD  under given Party and Company
-                    q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer__in=(0,1),IsSCM=1)
-                    q1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
-                    q2=M_Parties.objects.filter(PartyType__in=q0,id__in=q1)
-                    
                 PartySerializer_data=PartySerializer(q2,many=True).data
 
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartySerializer_data})  
