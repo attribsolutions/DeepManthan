@@ -8,3 +8,4 @@ class CreditNoteSerializer(serializers.ModelSerializer):
         model= T_CreditNotes
         fields = '__all__'
         
+        
