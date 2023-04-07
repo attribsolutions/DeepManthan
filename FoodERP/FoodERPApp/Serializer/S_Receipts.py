@@ -22,7 +22,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
     class Meta :
         model= T_Receipts
-        fields = ['ReceiptDate', 'ReceiptNo', 'Description', 'AmountPaid','BalanceAmount', 'OpeningBalanceAdjusted', 'DocumentNo' , 'Bank', 'Customer', 'DepositorBank', 'Party', 'CreatedBy', 'UpdatedBy', 'FullReceiptNumber', 'ReceiptMode', 'ReceiptType','ReceiptInvoices']
+        fields = ['ReceiptDate', 'ReceiptNo', 'Description', 'AmountPaid', 'ChequeDate','BalanceAmount', 'OpeningBalanceAdjusted', 'DocumentNo' , 'Bank', 'Customer', 'DepositorBank', 'Party', 'CreatedBy', 'UpdatedBy', 'FullReceiptNumber', 'ReceiptMode', 'ReceiptType','ReceiptInvoices']
         
     def create(self, validated_data):
         ReceiptInvoices_data = validated_data.pop('ReceiptInvoices')
