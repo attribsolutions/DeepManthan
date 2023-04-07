@@ -406,6 +406,7 @@ urlpatterns = [
 # Receipt
             url(r'ReceiptInvoices$', ReceiptInvoicesView.as_view()),
             url(r'Receipt/([0-9]+)$', ReceiptView.as_view()),
+            url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
     
 # RoleAccess========================================= 
