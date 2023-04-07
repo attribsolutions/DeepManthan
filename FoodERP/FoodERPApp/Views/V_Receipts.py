@@ -103,8 +103,9 @@ class ReceiptView(CreateAPIView):
             with transaction.atomic():
                 Receiptdata = JSONParser().parse(request)
                 Party = Receiptdata['Party']
+                Date = Receiptdata['Date']
                 '''Get Max Receipt Number'''
-                a = GetMaxNumber.GetReceiptNumber(Party)
+                a = GetMaxNumber.GetReceiptNumber(Party,Date)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 Receiptdata['ReceiptNo'] = a
                 '''Get Receipt Prifix '''
