@@ -1,4 +1,5 @@
-from django.urls import re_path as url
+from django.urls import re_path as url ,path
+from rest_framework_simplejwt import views as jwt_views
 
 
 
@@ -113,6 +114,8 @@ urlpatterns = [
     # Master APIs IN Projects Add Page ,List Page
     url(r'test', AbcView.as_view()),
 # User 
+            path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+            path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
             url(r'Registration', UserRegistrationView.as_view()),
             url(r'Login', UserLoginView.as_view()),
             url(r'ChangePassword', ChangePasswordView.as_view()),

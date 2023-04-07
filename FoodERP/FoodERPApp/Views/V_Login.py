@@ -9,7 +9,7 @@ from ..Serializer.S_Login import *
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.parsers import JSONParser
@@ -57,7 +57,7 @@ class UserRegistrationView(CreateAPIView):
 class UserListView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -119,7 +119,7 @@ class UserListView(CreateAPIView):
 class UserListViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -245,7 +245,7 @@ class UserLoginView(RetrieveAPIView):
             'Status': 'True',
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
-            'token': serializer.data['token'],
+            # 'token': serializer.data['token'],
             'UserID': serializer.data['UserID']
 
 
@@ -258,7 +258,7 @@ class UserLoginView(RetrieveAPIView):
 class ChangePasswordView(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     serializer_class = ChangePasswordSerializer
 
@@ -279,7 +279,7 @@ class ChangePasswordView(RetrieveAPIView):
 class RegenrateToken(APIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     def post(self, request):
         OldToken = request.data['OldToken']
@@ -296,7 +296,7 @@ class RegenrateToken(APIView):
 class UserPartiesViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -318,7 +318,7 @@ class UserPartiesViewSecond(CreateAPIView):
 class UserPartiesForLoginPage(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     serializer_class = M_UserPartiesSerializer
 
     @transaction.atomic()
@@ -349,7 +349,7 @@ class UserPartiesForLoginPage(CreateAPIView):
 class GetEmployeeViewForUserCreation(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     def get(self, request, id=0):
         try:
@@ -369,7 +369,7 @@ NOT IN (SELECT Employee_id From m_users) ''')
 class GetUserDetailsView(APIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     def post(self, request):
         UserId = request.data['UserId']

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 
@@ -13,7 +13,7 @@ from ..models import M_Pages
 class M_PageTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request):
@@ -31,7 +31,7 @@ class M_PageTypeView(CreateAPIView):
 class M_PagesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request):
@@ -64,7 +64,7 @@ class M_PagesView(CreateAPIView):
 class M_PagesViewSecond(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -223,7 +223,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
 class showPagesListOnPageType(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request):
@@ -245,7 +245,7 @@ class showPagesListOnPageType(RetrieveAPIView):
 class PagesMasterForRoleAccessView(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -299,7 +299,7 @@ where mc_pagepageaccess.Page_id=%s''', [id])
 class ControlTypeMasterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request):
@@ -316,7 +316,7 @@ class ControlTypeMasterView(CreateAPIView):
 class FieldValidationsView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request,id=0):
