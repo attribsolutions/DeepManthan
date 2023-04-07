@@ -134,8 +134,8 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                     elif (Type == 'FSSAINo'):
                         query = MC_PartyAddress.objects.filter(Party=a['SubPartyID'], IsDefault=1).update(FSSAINo=a['Value1'], FSSAIExipry=a['Value2'])
                     elif (Type == 'State'):
-                        query = M_Parties.objects.filter(id=a['SubPartyID'])#.update(State=a['Value1'])
-                        print(str(query.query))
+                        query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'])
+                        # print(str(query.query))
                     elif (Type == 'District'):
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(District=a['Value1'])
                         # print(str(query.query))
