@@ -51,8 +51,8 @@ class ReceiptListView(CreateAPIView):
                 Receiptdata = JSONParser().parse(request)
                 FromDate = Receiptdata['FromDate']
                 ToDate = Receiptdata['ToDate']
-                Customer = Receiptdata['Customer']
-                Party = Receiptdata['Party']
+                Customer = Receiptdata['CustomerID']
+                Party = Receiptdata['PartyID']
                
                 if(Customer == ''):
                     query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Party=Party)
@@ -103,8 +103,9 @@ class ReceiptView(CreateAPIView):
             with transaction.atomic():
                 Receiptdata = JSONParser().parse(request)
                 Party = Receiptdata['Party']
+                Date = Receiptdata['ReceiptDate']
                 '''Get Max Receipt Number'''
-                a = GetMaxNumber.GetOrderNumber(Party)
+                a = GetMaxNumber.GetReceiptNumber(Party,Date)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 Receiptdata['ReceiptNo'] = a
                 '''Get Receipt Prifix '''
