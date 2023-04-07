@@ -41,6 +41,22 @@ class CreditNotesViewSecond(CreateAPIView):
 
 
     @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                CreditNotedata = JSONParser().parse(request)
+                CreditNote_Serializer = CreditNoteSerializer(data=CreditNotedata)
+                if CreditNote_Serializer.is_valid():
+                    CreditNote_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
+                else :
+                    transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+    
+    @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
@@ -66,4 +82,17 @@ class CreditNotesViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' :[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
+
+
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Credit_Notedata = T_CreditNotes.objects.get(id=id)
+                Credit_Notedata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Deleted Successfully','Data':[]})
+        except M_Bank.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'CreditNote Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'CreditNote used in transaction', 'Data': []})        
