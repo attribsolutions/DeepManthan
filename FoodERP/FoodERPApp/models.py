@@ -1495,7 +1495,7 @@ class TC_ReceiptInvoices(models.Model):
   
         
 class T_CreditDebitNotes(models.Model):
-    NoteType = models.IntegerField()
+   
     NoteDate = models.DateField()
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
     NoteNo = models.IntegerField()    
@@ -1503,6 +1503,7 @@ class T_CreditDebitNotes(models.Model):
     NoteReason = models.CharField(max_length=50,blank=True,null=True)
     GrandTotal = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
     RoundOffAmount = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
+    NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
     Invoice = models.ForeignKey(T_Invoices,related_name='Invoice', on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
     Customer = models.ForeignKey(M_Parties,related_name='NoteCustomer',on_delete=models.PROTECT)
