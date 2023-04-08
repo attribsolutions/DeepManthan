@@ -22,17 +22,16 @@ class CreditDebitNoteView(CreateAPIView):
                 Party = CreditNotedata['Party']
                 NoteDate = CreditNotedata['NoteDate']
                 NoteType = CreditNotedata['NoteType']
-                '''Get Max Receipt Number'''
+                '''Get Max Credit Debit Number'''
                 a = GetMaxNumber.GetCreditDebitNumber(Party,NoteType,NoteDate)
                 CreditNotedata['NoteNo'] = a
-                print(a)
-                '''Get Receipt Prifix '''
+                '''Get  Credit Debit Prifix '''
                 b = GetPrifix.GetCRDRPrifix(Party,NoteType)
-                print(b)
-                CreditNotedata['FullNoteNumber'] = b+""+str(a)
+                CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
+                
                 CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
-                    # CreditNote_Serializer.save()
+                    CreditNote_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
                 else :
                     transaction.set_rollback(True)
