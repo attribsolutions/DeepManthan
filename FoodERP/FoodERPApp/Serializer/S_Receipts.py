@@ -1,6 +1,8 @@
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_BankMaster import *
+from ..Serializer.S_GeneralMaster import  *
+from ..Serializer.S_Parties import  *
 
 class ReceiptInvoiceserializer(serializers.Serializer):
    
@@ -34,18 +36,6 @@ class ReceiptSerializer(serializers.ModelSerializer):
 
         return Receipts    
         
-        
-        
-class GeneralMasterserializer(serializers.ModelSerializer):
-    class Meta:
-        model = M_GeneralMaster
-        fields = '__all__'
-
-class PartiesSerializer(serializers.ModelSerializer):
-   
-    class Meta:
-        model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email']        
         
 class ReceiptSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
