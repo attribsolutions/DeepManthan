@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 
@@ -12,7 +12,7 @@ from ..Serializer.S_GeneralMaster import *
 class ReceiptModeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request,id=0):
@@ -35,7 +35,7 @@ class ReceiptModeView(CreateAPIView):
 
 class GeneralMasterFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -75,7 +75,7 @@ class GeneralMasterFilterView(CreateAPIView):
 class GeneralMasterTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request):
         try:
@@ -112,7 +112,7 @@ class GeneralMasterTypeView(CreateAPIView):
 class GeneralMasterSubTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request):
         try:
@@ -138,7 +138,7 @@ class GeneralMasterSubTypeView(CreateAPIView):
 class GeneralMasterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication                      
+    # authentication_class = JSONWebTokenAuthentication                      
 
     @transaction.atomic()
     def post(self, request):
@@ -158,7 +158,7 @@ class GeneralMasterView(CreateAPIView):
 class GeneralMasterViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request,id=0):
@@ -224,7 +224,7 @@ class GeneralMasterViewSecond(CreateAPIView):
 
 class GeneralMasterBrandName(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request, id=0 ):

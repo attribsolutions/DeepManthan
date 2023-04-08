@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
@@ -10,9 +10,37 @@ from django.db.models import Sum
 from ..models import *
 
 
-class CreditDebitNoteView(CreateAPIView):
+
+class CreditNotesView(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self,request):
+        try:
+            with transaction.atomic():
+                Credit_Notedata = JSONParser().parse(request)
+                Party = Credit_Notedata['Party']
+                CreditNoteDate = Credit_Notedata['CreditNoteDate']
+                query =  T_CreditDebitNotes.objects.filter(Party=Party,CreditNoteDate=CreditNoteDate)
+                if query:
+                    CreditNote_Serializer = CreditNoteSerializer(query,many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :CreditNote_Serializer})
+                else :
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'CreditNote Not Available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+        
+class CreditNotesViewSecond(CreateAPIView):
+
+
+class CreditDebitNoteView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):

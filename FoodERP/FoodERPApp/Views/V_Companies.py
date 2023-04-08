@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 
@@ -15,7 +15,7 @@ from ..models import C_Companies
 class C_CompaniesViewFilter(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
                    
     @transaction.atomic()
     def post(self, request):
@@ -62,7 +62,7 @@ class C_CompaniesViewFilter(CreateAPIView):
 class C_CompaniesView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
                    
     @transaction.atomic()
     def get(self, request,id=0):
@@ -148,7 +148,7 @@ class C_CompaniesView(CreateAPIView):
 class C_CompaniesViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def get(self, request,id=0):
@@ -219,7 +219,7 @@ class C_CompaniesViewSecond(CreateAPIView):
 class GetCompanyByDivisionType(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -242,7 +242,7 @@ class GetCompanyByDivisionType(CreateAPIView):
 class GetCompanyByEmployeeType(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
