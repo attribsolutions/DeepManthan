@@ -291,10 +291,8 @@ class GetPrifix:
             Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Debitprefix')
        
         if not Prifix :
-           
             a=""
         else:
-            
             if (args[1]==37):
                 a=Prifix[0]['Creditprefix']
             else:
