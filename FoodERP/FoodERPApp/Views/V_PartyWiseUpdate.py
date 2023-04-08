@@ -3,7 +3,7 @@ from ..Serializer.S_PartyWiseUpdate import *
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from django.db.models import Q
@@ -66,10 +66,9 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "State": State_Serializer[0]['State']['Name'],
                                 "District":  State_Serializer[0]['District']['Name'],
                                 "DistrictID": State_Serializer[0]['District']['id'],
-
-                        
+                            })
                                                        
-                        elif (Type == 'FSSAINo'):
+                        elif(Type == 'FSSAINo'):
                             query2 = MC_PartyAddress.objects.filter(Party=a['SubParty']['id'])
                             FSSAI_Serializer = FSSAINoSerializer(query2, many=True).data
                             SubPartyListData.append({
@@ -107,7 +106,7 @@ class PartyWiseUpdateView(CreateAPIView):
 class PartyWiseUpdateViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
+    authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
