@@ -8,6 +8,7 @@ from  ..models import C_CompanyGroups, M_Employees, M_Parties, M_Roles, M_Users,
 from rest_framework import serializers
 
 from ..models import M_Users
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 # JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -108,6 +109,9 @@ class UserLoginSerializer(serializers.Serializer):
         try:
             # payload = JWT_PAYLOAD_HANDLER(user)
             # jwt_token = JWT_ENCODE_HANDLER(payload)
+            refresh = RefreshToken.for_user(user)
+
+            
 
             update_last_login(None, user)
         except M_Users.DoesNotExist:
@@ -117,8 +121,9 @@ class UserLoginSerializer(serializers.Serializer):
         return {
             'LoginName': user.LoginName,
             'EmployeeID':user.Employee_id,
-            # 'token': jwt_token,
-            'UserID' : user.id
+            'token': str(refresh.access_token),
+            'UserID' : user.id,
+            'refresh': str(refresh)
         }
 
 
