@@ -26,8 +26,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.1.114']
 
-
-
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 INSTALLED_APPS = [
