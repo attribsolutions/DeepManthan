@@ -183,10 +183,12 @@ class GetMaxNumber:
     
     def GetCreditDebitNumber(*args):
         
+
         MaxCreditDebitNumber=T_CreditDebitNotes.objects.filter(Party_id=args[0], NoteType= args[1]).values('NoteNo').order_by('-id')[:1]
         # print(str(MaxReceiptNumber.query))
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[2]
+
         if(not MaxCreditDebitNumber):
             a=1
         else:

@@ -9,11 +9,11 @@ from ..Serializer.S_CreditDebit import *
 from django.db.models import Sum
 from ..models import *
 
-
 class CreditDebitNoteView(CreateAPIView):
+
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
-
+    
     @transaction.atomic()
 
     def post(self, request):
@@ -21,6 +21,7 @@ class CreditDebitNoteView(CreateAPIView):
             with transaction.atomic():
                 CreditNotedata = JSONParser().parse(request)
                 Party = CreditNotedata['Party']
+
                 NoteDate = CreditNotedata['NoteDate']
                 NoteType = CreditNotedata['NoteType']
                 '''Get Max Credit Debit Number'''
@@ -30,6 +31,16 @@ class CreditDebitNoteView(CreateAPIView):
                 b = GetPrifix.GetCRDRPrifix(Party,NoteType)
                 CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
                 
+
+                Date = CreditNotedata['NoteDate']
+                NoteType = CreditNotedata['NoteType']
+                '''Get Max Receipt Number'''
+                a = GetMaxNumber.GetCreditDebitNumber(Party,Date,NoteType)
+                CreditNotedata['NoteNo'] = a
+                '''Get Receipt Prifix '''
+                b = GetPrifix.GetCRDRPrifix(Party,NoteType)
+                CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
+
                 CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
                     CreditNote_Serializer.save()
@@ -42,6 +53,50 @@ class CreditDebitNoteView(CreateAPIView):
 
 
 # class CreditNotesView(CreateAPIView):
+
+    
+#     permission_classes = (IsAuthenticated,)
+#     authentication_class = JSONWebTokenAuthentication
+
+#     @transaction.atomic()
+#     def post(self,request):
+#         try:
+#             with transaction.atomic():
+#                 Credit_Notedata = JSONParser().parse(request)
+#                 Party = Credit_Notedata['Party']
+#                 CreditNoteDate = Credit_Notedata['CreditNoteDate']
+#                 query =  T_CreditDebitNotes.objects.filter(Party=Party,CreditNoteDate=CreditNoteDate)
+#                 if query:
+#                     CreditNote_Serializer = CreditNoteSerializer(query,many=True).data
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :CreditNote_Serializer})
+#                 else :
+#                     transaction.set_rollback(True)
+#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'CreditNote Not Available', 'Data' : []})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+        
+# class CreditNotesViewSecond(CreateAPIView):
+
+#     permission_classes = (IsAuthenticated,)
+#     authentication_class = JSONWebTokenAuthentication
+
+
+#     @transaction.atomic()
+#     def post(self, request):
+#         try:
+#             with transaction.atomic():
+#                 CreditNotedata = JSONParser().parse(request)
+#                 CreditNote_Serializer = CreditNoteSerializer(data=CreditNotedata)
+#                 if CreditNote_Serializer.is_valid():
+#                     CreditNote_Serializer.save()
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
+#                 else :
+#                     transaction.set_rollback(True)
+#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
     
 #     permission_classes = (IsAuthenticated,)
 #     authentication_class = JSONWebTokenAuthentication
@@ -85,7 +140,8 @@ class CreditDebitNoteView(CreateAPIView):
 #         except Exception as e:
 #             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
-    
+
+ 
 #     @transaction.atomic()
 #     def get(self, request, id=0):
 #         try:
