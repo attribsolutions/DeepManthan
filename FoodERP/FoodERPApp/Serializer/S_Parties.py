@@ -1,6 +1,11 @@
 from ..models import *
 from rest_framework import serializers
-      
+
+class PartiesSerializer(serializers.ModelSerializer):
+       
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name','GSTIN','PAN','Email']       
         
 class DivisionsSerializer(serializers.ModelSerializer):
     class Meta:
