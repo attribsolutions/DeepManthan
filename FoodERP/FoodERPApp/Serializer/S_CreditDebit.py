@@ -4,7 +4,7 @@ from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
 from ..Serializer.S_Receipts import  *
 from ..Serializer.S_Invoices import  *
-
+from ..Serializer.S_PurchaseReturn import *
 
 # Credit Or Debit Save Serializer 
 
@@ -22,14 +22,14 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     NoteType = GeneralMasterserializer(read_only=True)
     Receipt = ReceiptSerializer(read_only=True)
     Invoice = InvoiceSerializer(read_only=True)
-   
+    PurchaseReturn = PurchaseReturnSerializer(read_only=True)
     class Meta :
         model= T_CreditDebitNotes
         fields = '__all__'
                 
     def to_representation(self, instance):
         # get representation from ModelSerializer
-        ret = super(ReceiptSerializerSecond, self).to_representation(instance)
+        ret = super(CreditDebitNoteSecondSerializer, self).to_representation(instance)
         # if parent is None, overwrite
         if not ret.get("NoteReason", None):
             ret["NoteReason"] = {"id": None, "Name": None}
@@ -38,9 +38,12 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
             ret["NoteType"] = {"id": None, "Name": None}
         
         if not ret.get("Receipt", None):
-            ret["Receipt"] = {"id": None, "Name": None}  
+            ret["Receipt"] = {"id": None, "FullReceiptNumber": None}  
         
         if not ret.get("Invoice", None):
-            ret["Invoice"] = {"id": None, "Name": None}      
+            ret["Invoice"] = {"id": None, "FullInvoiceNumber": None} 
+            
+        if not ret.get("PurchaseReturn", None):
+            ret["PurchaseReturn"] = {"id": None, "FullReturnNumber": None}         
                   
         return ret    
