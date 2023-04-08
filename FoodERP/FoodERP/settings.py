@@ -24,8 +24,8 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.1.201.19']
 
+ALLOWED_HOSTS = ['10.1.201.19']
 
 
 # Application definition
@@ -78,7 +78,6 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 
 # DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
 # DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
-
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
