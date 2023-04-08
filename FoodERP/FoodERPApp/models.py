@@ -1496,55 +1496,55 @@ class TC_ReceiptInvoices(models.Model):
         db_table = "TC_ReceiptInvoices"
   
         
-class T_CreditDebitNotes(models.Model):
+# class T_CreditDebitNotes(models.Model):
    
-    NoteDate = models.DateField()
-    PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
-    NoteNo = models.CharField(max_length=500,blank=True, null=True)
-    FullNoteNumber = models.CharField(max_length=500)
-    NoteReason = models.CharField(max_length=50,blank=True,null=True)
-    GrandTotal = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
-    RoundOffAmount = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
-    NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
-    Invoice = models.ForeignKey(T_Invoices,related_name='Invoice', on_delete=models.PROTECT,blank=True, null=True)
-    Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
-    Customer = models.ForeignKey(M_Parties,related_name='NoteCustomer',on_delete=models.PROTECT)
-    IsChequeBounce = models.BooleanField(default=False)
-    Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
-    Narration = models.CharField(max_length=500,blank=True, null=True)
-    Comment = models.CharField(max_length=500,blank=True, null=True)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
+#     NoteDate = models.DateField()
+#     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
+#     NoteNo = models.CharField(max_length=500,blank=True, null=True)
+#     FullNoteNumber = models.CharField(max_length=500)
+#     NoteReason = models.CharField(max_length=50,blank=True,null=True)
+#     GrandTotal = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
+#     RoundOffAmount = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
+#     NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
+#     Invoice = models.ForeignKey(T_Invoices,related_name='Invoice', on_delete=models.PROTECT,blank=True, null=True)
+#     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
+#     Customer = models.ForeignKey(M_Parties,related_name='NoteCustomer',on_delete=models.PROTECT)
+#     IsChequeBounce = models.BooleanField(default=False)
+#     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
+#     Narration = models.CharField(max_length=500,blank=True, null=True)
+#     Comment = models.CharField(max_length=500,blank=True, null=True)
+#     CreatedBy = models.IntegerField()
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+#     UpdatedBy = models.IntegerField()
+#     UpdatedOn = models.DateTimeField(auto_now=True)
     
-    class Meta:
-        db_table = "T_CreditDebitNotes"
+#     class Meta:
+#         db_table = "T_CreditDebitNotes"
         
-class TC_CreditDebitNoteItems(models.Model):
-    Note = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNote',on_delete=models.PROTECT)
-    Item = models.ForeignKey(M_Items,on_delete=models.PROTECT,blank=True, null=True)
-    HSNCode = models.CharField(max_length=500,blank=True, null=True)
-    Quantity = models.IntegerField()
-    Unit = models.ForeignKey(M_Units,on_delete=models.PROTECT,blank=True, null=True)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='CRDRMRP', on_delete=models.PROTECT,null=True,blank=True) 
-    Rate = models.DecimalField(max_digits=20, decimal_places=3)
-    BasicAmount = models.DecimalField(max_digits=15, decimal_places=3)
-    TaxType = models.CharField(max_length=500)
-    GSTRate = models.DecimalField(max_digits=20, decimal_places=3)
-    GSTAmount = models.DecimalField(max_digits=10, decimal_places=3)
-    Amount = models.DecimalField(max_digits=15, decimal_places=3)
-    CGST = models.DecimalField(max_digits=15, decimal_places=3)
-    SGST = models.DecimalField(max_digits=15, decimal_places=2)
-    IGST = models.DecimalField(max_digits=15, decimal_places=3)
-    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=3)
-    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=3)
-    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=3)
-    NOC = models.CharField(max_length=20)
-    BatchCode = models.CharField(max_length=500)
+# class TC_CreditDebitNoteItems(models.Model):
+#     Note = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNote',on_delete=models.PROTECT)
+#     Item = models.ForeignKey(M_Items,on_delete=models.PROTECT,blank=True, null=True)
+#     HSNCode = models.CharField(max_length=500,blank=True, null=True)
+#     Quantity = models.IntegerField()
+#     Unit = models.ForeignKey(M_Units,on_delete=models.PROTECT,blank=True, null=True)
+#     MRP = models.ForeignKey(M_MRPMaster, related_name='CRDRMRP', on_delete=models.PROTECT,null=True,blank=True) 
+#     Rate = models.DecimalField(max_digits=20, decimal_places=3)
+#     BasicAmount = models.DecimalField(max_digits=15, decimal_places=3)
+#     TaxType = models.CharField(max_length=500)
+#     GSTRate = models.DecimalField(max_digits=20, decimal_places=3)
+#     GSTAmount = models.DecimalField(max_digits=10, decimal_places=3)
+#     Amount = models.DecimalField(max_digits=15, decimal_places=3)
+#     CGST = models.DecimalField(max_digits=15, decimal_places=3)
+#     SGST = models.DecimalField(max_digits=15, decimal_places=2)
+#     IGST = models.DecimalField(max_digits=15, decimal_places=3)
+#     CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=3)
+#     SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=3)
+#     IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=3)
+#     NOC = models.CharField(max_length=20)
+#     BatchCode = models.CharField(max_length=500)
     
-    class Meta:
-        db_table = "TC_CreditDebitNoteItems"                
+#     class Meta:
+#         db_table = "TC_CreditDebitNoteItems"                
    
         
     
