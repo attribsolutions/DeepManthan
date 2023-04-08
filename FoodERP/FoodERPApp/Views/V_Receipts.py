@@ -53,11 +53,12 @@ class ReceiptListView(CreateAPIView):
                 ToDate = Receiptdata['ToDate']
                 Customer = Receiptdata['CustomerID']
                 Party = Receiptdata['PartyID']
+                ReceiptType = Receiptdata['ReceiptType']
                
                 if(Customer == ''):
-                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Party=Party)
+                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Party=Party, ReceiptType=ReceiptType)
                 else:
-                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Customer, Party=Party)
+                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Customer, Party=Party, ReceiptType=ReceiptType)
                    
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
