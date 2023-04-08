@@ -29,13 +29,14 @@ class CreditDebitNoteListView(CreateAPIView):
                 NoteType = CreditDebitdata['NoteType']
                
                 if(Customer == ''):
+                    
                     query = T_CreditDebitNotes.objects.filter(NoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
+                    
                 else:
-                    query = T_CreditDebitNotes.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
-            
+                    query = T_CreditDebitNotes.objects.filter(NoteDate__range=[FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
+
                 if query:
                     CreditDebit_serializer = CreditDebitNoteSecondSerializer(query, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': CreditDebit_serializer})
                     CreditDebitListData = list()
                     for a in CreditDebit_serializer:
                         CreditDebitListData.append({
@@ -53,14 +54,16 @@ class CreditDebitNoteListView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
                             "Comment": a['Comment'],
-                            "Receipt": a['Receipt'],
-                            "Invoice": a['Invoice'],
+                            "Receipt": a['Receipt']['FullReceiptNumber'],
+                            "Invoice": a['Invoice']['FullInvoiceNumber'],
+                            "PurchaseReturn": a['PurchaseReturn']['FullReturnNumber'],
                             "CreatedOn": a['CreatedOn']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
         
 class CreditDebitNoteView(CreateAPIView):
 
@@ -93,6 +96,7 @@ class CreditDebitNoteView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
 
 
 # class CreditNotesView(CreateAPIView):
