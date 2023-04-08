@@ -772,6 +772,8 @@ class MC_PartyPrefixs(models.Model):
     Invoiceprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Grnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Receiptprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Creditprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    Debitprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Challanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     WorkOrderprefix = models.CharField(max_length=500 ,null=True,blank=True)
     MaterialIssueprefix = models.CharField(max_length=500 ,null=True,blank=True)
@@ -1498,7 +1500,7 @@ class T_CreditDebitNotes(models.Model):
    
     NoteDate = models.DateField()
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
-    NoteNo = models.IntegerField()    
+    NoteNo = models.IntegerField()
     FullNoteNumber = models.CharField(max_length=500)
     NoteReason = models.CharField(max_length=50,blank=True,null=True)
     GrandTotal = models.DecimalField(max_digits=20, decimal_places=3, blank=True,null=True)
