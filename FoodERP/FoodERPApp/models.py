@@ -926,6 +926,17 @@ class  MC_PartySubParty(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "MC_PartySubParty"
+        
+class  MC_PartySubPartyOpeningBalance(models.Model):
+    Party = models.ForeignKey(M_Parties, related_name='MParty', on_delete=models.CASCADE)
+    SubParty = models.ForeignKey(M_Parties, related_name='MSubParty', on_delete=models.CASCADE)
+    OpeningBalanceAmount = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=3)
+    CreatedBy = models.IntegerField(blank=True, null=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(blank=True, null=True)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "MC_PartySubPartyOpeningBalance"        
                                      
 
 class T_GRNs(models.Model):
