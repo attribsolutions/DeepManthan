@@ -53,17 +53,31 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "TypeID": ab[0]
                             })
                            
-                        elif(Type == 'State' or Type == 'District'):
+                        elif(Type == 'State'):
                             query1 = M_Parties.objects.filter(id=a['SubParty']['id'])
-                            State_Serializer = SubPartySerializer(query1,many=True).data
+                            State_Serializer = StateSerializer(query1,many=True).data
                             SubPartyListData.append({
                                 "id": a['id'],
                                 "PartyID":a['Party']['id'],
                                 "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
                                 "State": State_Serializer[0]['State']['Name'],
-                                "District":  State_Serializer[0]['District']['Name']
+                               
                                 })
+                        elif(Type == 'District'):
+                            query1 = M_Parties.objects.filter(id=a['SubParty']['id'])
+                            State_Serializer = DistrictSerializer(query1,many=True).data
+                            SubPartyListData.append({
+                                "id": a['id'],
+                                "PartyID":a['Party']['id'],
+                                "SubPartyID":a['SubParty']['id'],
+                                "PartyName": a['SubParty']['Name'],
+                                "StateID": State_Serializer[0]['State']['id'],
+                                "State": State_Serializer[0]['State']['Name'],
+                                
+                                "District":  State_Serializer[0]['District']['Name']
+
+                                })        
                                                        
                         elif (Type == 'FSSAINo'):
                             query2 = MC_PartyAddress.objects.filter(Party=a['SubParty']['id'])
@@ -120,7 +134,10 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                     elif (Type == 'FSSAINo'):
                         query = MC_PartyAddress.objects.filter(Party=a['SubPartyID'], IsDefault=1).update(FSSAINo=a['Value1'], FSSAIExipry=a['Value2'])
                     elif (Type == 'State'):
-                        query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'], District=a['Value2'])
+                        query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'])
+                        # print(str(query.query))
+                    elif (Type == 'District'):
+                        query = M_Parties.objects.filter(id=a['SubPartyID']).update(District=a['Value1'])
                         # print(str(query.query))
                     else:    
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})
