@@ -9,7 +9,6 @@ from ..Serializer.S_CreditDebit import *
 from django.db.models import Sum
 from ..models import *
 
-
 class CreditDebitNoteView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
