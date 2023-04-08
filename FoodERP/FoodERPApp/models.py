@@ -1509,7 +1509,6 @@ class T_CreditDebitNotes(models.Model):
     Invoice = models.ForeignKey(T_Invoices,related_name='Invoice', on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
     Customer = models.ForeignKey(M_Parties,related_name='NoteCustomer',on_delete=models.PROTECT)
-    IsChequeBounce = models.BooleanField(default=False)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
     Narration = models.CharField(max_length=500,blank=True, null=True)
     Comment = models.CharField(max_length=500,blank=True, null=True)
