@@ -930,7 +930,7 @@ class  MC_PartySubParty(models.Model):
 class  MC_PartySubPartyOpeningBalance(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='MParty', on_delete=models.CASCADE)
     SubParty = models.ForeignKey(M_Parties, related_name='MSubParty', on_delete=models.CASCADE)
-    year = models.CharField(max_length=50,blank=True, null=True)
+    Year = models.CharField(max_length=50,blank=True, null=True)
     OpeningBalanceAmount = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
