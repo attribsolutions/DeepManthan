@@ -9,6 +9,59 @@ from ..Serializer.S_CreditDebit import *
 from django.db.models import Sum
 from ..models import *
 
+########## Plain Credit Debit Note ########################################################
+
+class CreditDebitNoteListView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                CreditDebitdata = JSONParser().parse(request)
+                FromDate = CreditDebitdata['FromDate']
+                ToDate = CreditDebitdata['ToDate']
+                Customer = CreditDebitdata['CustomerID']
+                Party = CreditDebitdata['PartyID']
+                NoteType = CreditDebitdata['NoteType']
+               
+                if(Customer == ''):
+                    query = T_CreditDebitNotes.objects.filter(NoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
+                else:
+                    query = T_CreditDebitNotes.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
+            
+                if query:
+                    CreditDebit_serializer = CreditDebitNoteSecondSerializer(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': CreditDebit_serializer})
+                    CreditDebitListData = list()
+                    for a in CreditDebit_serializer:
+                        CreditDebitListData.append({
+                            "id": a['id'],
+                            "NoteDate": a['NoteDate'],
+                            "NoteNo": a['NoteNo'],
+                            "FullNoteNumber": a['FullNoteNumber'],
+                            "NoteType": a['NoteType']['Name'],
+                            "NoteReason": a['NoteReason']['Name'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "Narration": a['Narration'],
+                            "Comment": a['Comment'],
+                            "Receipt": a['Receipt'],
+                            "Invoice": a['Invoice'],
+                            "CreatedOn": a['CreatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
 class CreditDebitNoteView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -21,26 +74,16 @@ class CreditDebitNoteView(CreateAPIView):
             with transaction.atomic():
                 CreditNotedata = JSONParser().parse(request)
                 Party = CreditNotedata['Party']
-
                 NoteDate = CreditNotedata['NoteDate']
                 NoteType = CreditNotedata['NoteType']
-                '''Get Max Credit Debit Number'''
+                # ==========================Get Max Credit Debit  Number=====================================================
                 a = GetMaxNumber.GetCreditDebitNumber(Party,NoteType,NoteDate)
                 CreditNotedata['NoteNo'] = a
                 '''Get  Credit Debit Prifix '''
                 b = GetPrifix.GetCRDRPrifix(Party,NoteType)
                 CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
-                
-
-                Date = CreditNotedata['NoteDate']
-                NoteType = CreditNotedata['NoteType']
-                '''Get Max Receipt Number'''
-                a = GetMaxNumber.GetCreditDebitNumber(Party,Date,NoteType)
-                CreditNotedata['NoteNo'] = a
-                '''Get Receipt Prifix '''
-                b = GetPrifix.GetCRDRPrifix(Party,NoteType)
-                CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
-
+                #==================================================================================================  
+            
                 CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
                     CreditNote_Serializer.save()
