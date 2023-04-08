@@ -53,11 +53,12 @@ class ReceiptListView(CreateAPIView):
                 ToDate = Receiptdata['ToDate']
                 Customer = Receiptdata['CustomerID']
                 Party = Receiptdata['PartyID']
+                ReceiptType = Receiptdata['ReceiptType']
                
                 if(Customer == ''):
-                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Party=Party)
+                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Party=Party, ReceiptType=ReceiptType)
                 else:
-                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Customer, Party=Party)
+                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Customer, Party=Party, ReceiptType=ReceiptType)
                    
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
@@ -110,6 +111,7 @@ class ReceiptView(CreateAPIView):
                 Receiptdata['ReceiptNo'] = a
                 '''Get Receipt Prifix '''
                 b = GetPrifix.GetReceiptPrifix(Party)
+                print(b)
                 Receiptdata['FullReceiptNumber'] = b+""+str(a)
                 # return JsonResponse({ 'Data': Orderdata })
                 Receipt_serializer = ReceiptSerializer(data=Receiptdata)

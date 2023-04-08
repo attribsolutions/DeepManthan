@@ -28,8 +28,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['10.1.201.19']
 
 
-
-
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 INSTALLED_APPS = [
@@ -80,7 +78,6 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 
 # DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
 # DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
-
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
