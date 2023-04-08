@@ -10,33 +10,33 @@ from django.db.models import Sum
 from ..models import *
 
 
-class CreditDebitNoteView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+# class CreditDebitNoteView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication_class = JSONWebTokenAuthentication
 
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-                CreditNotedata = JSONParser().parse(request)
-                Party = CreditNotedata['Party']
-                Date = CreditNotedata['NoteDate']
-                NoteType = CreditNotedata['NoteType']
-                '''Get Max Receipt Number'''
-                a = GetMaxNumber.GetCreditDebitNumber(Party,Date,NoteType)
-                CreditNotedata['NoteNo'] = a
-                '''Get Receipt Prifix '''
-                b = GetPrifix.GetCRDRPrifix(Party,NoteType)
-                CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
-                CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
-                if CreditNote_Serializer.is_valid():
-                    CreditNote_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
-                else :
-                    transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+#     @transaction.atomic()
+#     def post(self, request):
+#         try:
+#             with transaction.atomic():
+#                 CreditNotedata = JSONParser().parse(request)
+#                 Party = CreditNotedata['Party']
+#                 Date = CreditNotedata['NoteDate']
+#                 NoteType = CreditNotedata['NoteType']
+#                 '''Get Max Receipt Number'''
+#                 a = GetMaxNumber.GetCreditDebitNumber(Party,Date,NoteType)
+#                 CreditNotedata['NoteNo'] = a
+#                 '''Get Receipt Prifix '''
+#                 b = GetPrifix.GetCRDRPrifix(Party,NoteType)
+#                 CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
+#                 CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
+#                 if CreditNote_Serializer.is_valid():
+#                     CreditNote_Serializer.save()
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
+#                 else :
+#                     transaction.set_rollback(True)
+#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 # class CreditNotesView(CreateAPIView):
