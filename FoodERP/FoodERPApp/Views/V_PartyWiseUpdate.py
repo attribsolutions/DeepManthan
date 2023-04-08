@@ -66,6 +66,7 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "District":  State_Serializer[0]['District']['Name'],
                                 "DistrictID": State_Serializer[0]['District']['id'],
                                
+                               
                                 })        
                                                        
                         elif (Type == 'FSSAINo'):
