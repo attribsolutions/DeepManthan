@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, connection, transaction
 from rest_framework.parsers import JSONParser
 
@@ -13,7 +13,7 @@ from ..models import *
 class DriverViewList(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -36,7 +36,7 @@ class DriverViewList(CreateAPIView):
 class DriverView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request, id=0):

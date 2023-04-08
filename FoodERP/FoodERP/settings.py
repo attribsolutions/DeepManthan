@@ -24,7 +24,9 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.114']
+
+ALLOWED_HOSTS = ['10.1.201.19']
+
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -38,7 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
-    'activity_log',
+    # 'activity_log',
 ]
 
 MIDDLEWARE = [
@@ -50,7 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'activity_log.middleware.ActivityLogMiddleware',
+    # 'activity_log.middleware.ActivityLogMiddleware',
 ]
 
 ROOT_URLCONF = 'FoodERP.urls'
@@ -74,8 +76,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
-DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+# DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+# DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -83,10 +85,10 @@ DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm20230310',
+        'NAME': 'chitalescm2023',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '192.168.1.114',
+        'HOST': '10.1.201.19',
         'PORT': '3306'
     }
     ,
@@ -95,7 +97,7 @@ DATABASES = {
         'NAME': 'transactionlogdb',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '192.168.1.114',
+        'HOST': '10.1.201.19',
         'PORT': '3306'
     }
 }
@@ -104,25 +106,25 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
-ACTIVITYLOG_AUTOCREATE_DB = True
-# Log anonymous actions?
-ACTIVITYLOG_ANONYMOUS = True
-# Update last activity datetime in user profile. Needs updates for user model.
-ACTIVITYLOG_LAST_ACTIVITY = True
+# ACTIVITYLOG_AUTOCREATE_DB = True
+# # Log anonymous actions?
+# ACTIVITYLOG_ANONYMOUS = True
+# # Update last activity datetime in user profile. Needs updates for user model.
+# ACTIVITYLOG_LAST_ACTIVITY = True
 
-# Only this methods will be logged
-ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
+# # Only this methods will be logged
+# ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
 
-# List of response statuses, which logged. By default - all logged.
-# Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
-ACTIVITYLOG_STATUSES = (200, )
+# # List of response statuses, which logged. By default - all logged.
+# # Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
+# ACTIVITYLOG_STATUSES = (200, )
 
-# List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
-# ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
+# # List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
+# # ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
 
-# URL substrings, which ignores
-ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
-ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
+# # URL substrings, which ignores
+# ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
+# ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -182,50 +184,51 @@ REST_FRAMEWORK = {
          'rest_framework.permissions.IsAdminUser',
          ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-     'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-     'rest_framework.authentication.SessionAuthentication'
+    #  'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+     'rest_framework.authentication.SessionAuthentication',
+     'rest_framework_simplejwt.authentication.JWTAuthentication',
      )
 }
 
 # Jwt Authentication
 
-JWT_AUTH = {
-    'JWT_ENCODE_HANDLER':
-    'rest_framework_jwt.utils.jwt_encode_handler',
+# JWT_AUTH = {
+#     'JWT_ENCODE_HANDLER':
+#     'rest_framework_jwt.utils.jwt_encode_handler',
 
-    'JWT_DECODE_HANDLER':
-    'rest_framework_jwt.utils.jwt_decode_handler',
+#     'JWT_DECODE_HANDLER':
+#     'rest_framework_jwt.utils.jwt_decode_handler',
 
-    'JWT_PAYLOAD_HANDLER':
-    'rest_framework_jwt.utils.jwt_payload_handler',
+#     'JWT_PAYLOAD_HANDLER':
+#     'rest_framework_jwt.utils.jwt_payload_handler',
 
-    'JWT_PAYLOAD_GET_USER_ID_HANDLER':
-    'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+#     'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+#     'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
 
-    'JWT_RESPONSE_PAYLOAD_HANDLER':
-    'rest_framework_jwt.utils.jwt_response_payload_handler',
+#     'JWT_RESPONSE_PAYLOAD_HANDLER':
+#     'rest_framework_jwt.utils.jwt_response_payload_handler',
 
-    'JWT_SECRET_KEY': 'SECRET_KEY',
-    'JWT_GET_USER_SECRET_KEY': None,
-    'JWT_PUBLIC_KEY': None,
-    'JWT_PRIVATE_KEY': None,
-    'JWT_ALGORITHM': 'HS256',
-    'JWT_VERIFY': True,
-    'JWT_VERIFY_EXPIRATION': True,
-    'JWT_LEEWAY': 0,
-    # 'JWT_EXPIRATION_DELTA': timedelta(minutes=1),
-    'JWT_EXPIRATION_DELTA': timedelta(days=30),
+#     'JWT_SECRET_KEY': 'SECRET_KEY',
+#     'JWT_GET_USER_SECRET_KEY': None,
+#     'JWT_PUBLIC_KEY': None,
+#     'JWT_PRIVATE_KEY': None,
+#     'JWT_ALGORITHM': 'HS256',
+#     'JWT_VERIFY': True,
+#     'JWT_VERIFY_EXPIRATION': True,
+#     'JWT_LEEWAY': 0,
+#     # 'JWT_EXPIRATION_DELTA': timedelta(minutes=1),
+#     'JWT_EXPIRATION_DELTA': timedelta(days=30),
 
-    'JWT_AUDIENCE': None,
-    'JWT_ISSUER': None,
+#     'JWT_AUDIENCE': None,
+#     'JWT_ISSUER': None,
 
-    'JWT_ALLOW_REFRESH': False,
-    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
+#     'JWT_ALLOW_REFRESH': False,
+#     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
 
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-    'JWT_AUTH_COOKIE': None,
+#     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+#     'JWT_AUTH_COOKIE': None,
 
-    'JWT_PAYLOAD_HANDLER':
-    'rest_framework_jwt.utils.jwt_payload_handler',
+#     'JWT_PAYLOAD_HANDLER':
+#     'rest_framework_jwt.utils.jwt_payload_handler',
 
-}
+# }

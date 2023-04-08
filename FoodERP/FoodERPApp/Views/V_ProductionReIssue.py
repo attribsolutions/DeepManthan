@@ -2,7 +2,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 
@@ -20,7 +20,7 @@ from ..models import *
 class MaterialIssueItemsView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -102,7 +102,7 @@ class MaterialIssueItemsView(CreateAPIView):
 
 class ProductionReIssueView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -143,7 +143,7 @@ class ProductionReIssueView(CreateAPIView):
 class ProductionReIssueViewSecond(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -182,7 +182,7 @@ class ProductionReIssueViewSecond(RetrieveAPIView):
 
 class ProductionReIsssueFilter(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):

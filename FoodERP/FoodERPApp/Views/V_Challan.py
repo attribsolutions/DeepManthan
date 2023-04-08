@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GRNs import *
@@ -14,7 +14,7 @@ from ..models import  *
 
 class ChallanItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request, id=0 ):
         try:
@@ -34,7 +34,7 @@ class ChallanItemsView(CreateAPIView):
         
 class ChallanItemStockView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request, id=0 ):
         try:
@@ -79,7 +79,7 @@ class ChallanItemStockView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 class ChallanView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -214,7 +214,7 @@ class ChallanView(CreateAPIView):
 
 class ChallanListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request, id=0):

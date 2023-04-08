@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 
@@ -32,7 +32,7 @@ def GetRelatedPageID(id):
 class RoleAccessView(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, PartyID=0, EmployeeID=0,CompanyID=0):    
         
@@ -174,7 +174,7 @@ class RoleAccessView(RetrieveAPIView):
 class RoleAccessViewList(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
@@ -213,7 +213,7 @@ class RoleAccessViewList(RetrieveAPIView):
 class RoleAccessViewNewUpdated(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     def get(self, request,Role=0,Division=0 ,Company=0):
         if int(Division) > 0:
@@ -326,7 +326,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
 class RoleAccessViewAddPage(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, pageid=0):
         roleaccessquery = M_Pages.objects.raw('''SELECT h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id id,m_pages.RelatedPageID, m_pages.name PageName FROM m_pages JOIN h_modules ON h_modules.id=m_pages.Module_id WHERE m_pages.id=%s''',[pageid])
@@ -384,7 +384,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
 class RoleAccessGetPagesOnModule(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
     
     def get(self, request, moduleid=0,Division=0):
         try:
@@ -409,7 +409,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
 class CopyRoleAccessView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication_class = JSONWebTokenAuthentication
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):       

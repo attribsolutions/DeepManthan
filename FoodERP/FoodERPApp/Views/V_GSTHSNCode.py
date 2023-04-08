@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GSTHSNCode import *
@@ -13,7 +13,7 @@ from ..models import *
 class M_GstHsnCodeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     
     @transaction.atomic()
@@ -57,7 +57,7 @@ class M_GstHsnCodeView(CreateAPIView):
 ''' GST HSNCode Master List Delete Api Depend on ID '''
 class M_GSTHSNCodeViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -77,7 +77,7 @@ class M_GSTHSNCodeViewSecond(CreateAPIView):
 ''' GST HSNCode Master List Delete Api Depend on CommonID '''
 class M_GSTHSNCodeViewThird(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -99,7 +99,7 @@ class M_GSTHSNCodeViewThird(CreateAPIView):
 
 class GETGstHsnDetails(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
-    authentication__Class = JSONWebTokenAuthentication
+    # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request):
         try:
