@@ -109,6 +109,9 @@ from .Views.V_Receipts import *
 
 from .Views.V_CreditDebit import *
 
+from .Views.V_CommFunction import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -130,6 +133,8 @@ urlpatterns = [
             url(r'UserPartiesForUserMaster/([0-9]+)$', UserPartiesViewSecond.as_view()),
             url(r'SendMail$', SendViewMail.as_view()),
             url(r'VerifyOTP$', VerifyOTPwithUserData.as_view()),
+            url(r'GetOpeningBalance$', GetOpeningBalanceView.as_view()),
+            
 
 # Modules 
             url(r'Modules/([0-9]+)$', H_ModulesViewSecond.as_view()),
