@@ -28,14 +28,18 @@ class LoadingSheetSerializer(serializers.ModelSerializer):
         fields = ['id', 'Date', 'No', 'Party', 'Route','TotalAmount', 'InvoiceCount', 'Vehicle', 'Driver', 'CreatedBy', 'UpdatedBy','CreatedOn', 'LoadingSheetDetails']
         
     def create(self, validated_data):
+     
+        Vehicle = validated_data.get('Vehicle')
+        Driver = validated_data.get('Driver')
+     
         LoadingSheetDetails_data = validated_data.pop('LoadingSheetDetails')
         LoadingSheetID = T_LoadingSheet.objects.create(**validated_data)
         for LoadingSheet_data in LoadingSheetDetails_data:
+            
             TC_LoadingSheetDetails.objects.create(LoadingSheet=LoadingSheetID, **LoadingSheet_data)
-            # print(LoadingSheet_data['Invoice'])
-            # print(validated_data['Vehicle'])
-            # print(validated_data['Driver'])
-            # InvoiceVehicleandDriverupdate=T_Invoices.objects.filter(id=LoadingSheet_data['Invoice']).update(Vehicle = validated_data['Vehicle'],Driver = validated_data['Driver'])
+            InvoiceID = LoadingSheet_data.get('Invoice')
+            
+            InvoiceVehicleandDriverupdate=T_Invoices.objects.filter(id=InvoiceID.id).update(Vehicle = Vehicle,Driver = Driver)
         return LoadingSheetID 
        
 
