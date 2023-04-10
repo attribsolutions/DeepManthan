@@ -134,9 +134,9 @@ class LoadingSheetInvoicesView(CreateAPIView):
                 Route = Invoicedata['Route']
                 
                 if(Route == ''):
-                    query =  T_Invoices.objects.raw('''SELECT t_invoices.id as id, t_invoices.InvoiceDate, t_invoices.Customer_id, t_invoices.FullInvoiceNumber, t_invoices.GrandTotal, t_invoices.Party_id, t_invoices.CreatedOn,  t_invoices.UpdatedOn, m_parties.Name FROM t_invoices join m_parties on  m_parties.id=  t_invoices.Customer_id WHERE t_invoices.InvoiceDate BETWEEN %s AND %s AND t_invoices.Party_id = %s ''',[FromDate,ToDate,Party])
+                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s ''',[FromDate,ToDate,Party])
                 else:
-                    query =  T_Invoices.objects.raw('''SELECT t_invoices.id as id, t_invoices.InvoiceDate, t_invoices.Customer_id, t_invoices.FullInvoiceNumber, t_invoices.GrandTotal, t_invoices.Party_id, t_invoices.CreatedOn, t_invoices.UpdatedOn,m_parties.Name FROM t_invoices join m_parties on  m_parties.id=  t_invoices.Customer_id join mc_partysubparty on mc_partysubparty.SubParty_id = t_invoices.Customer_id and mc_partysubparty.Route_id =%s WHERE t_invoices.InvoiceDate BETWEEN %s AND %s AND t_invoices.Party_id=%s''', [Route,FromDate,ToDate,Party])
+                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s''', [Route,FromDate,ToDate,Party])
            
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data

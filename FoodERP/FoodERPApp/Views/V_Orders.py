@@ -427,20 +427,20 @@ class EditOrderView(CreateAPIView):
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
 
-                Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
-m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
+                Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
+M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
                 from
 ((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
 FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s)) 
 UNION 
 (SELECT 1 id,`Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`,NULL AS `Comment` 
 FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s))a
-join m_items on m_items.id=a.Item_id 
-left join m_mrpmaster on m_mrpmaster.id =a.MRP_id
-left join mc_itemunits on mc_itemunits.id=a.Unit_id
-left join m_units on m_units.id=mc_itemunits.UnitID_id
-left join m_gsthsncode on m_gsthsncode.id=a.GST_id
-left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([OrderID], [PartyItem]))
+join M_Items on M_Items.id=a.Item_id 
+left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
+left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
+left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
+left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order By M_Items.Sequence''', ([OrderID], [PartyItem]))
                 
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
                 
