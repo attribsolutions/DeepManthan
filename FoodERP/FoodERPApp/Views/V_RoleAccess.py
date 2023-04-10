@@ -43,10 +43,10 @@ class RoleAccessView(RetrieveAPIView):
       
         if (int(PartyID) > 0)  : 
             Division="M_RoleAccess.Division_id = "+PartyID
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id= %s and m_users.Employee_id=%s''',[PartyID,EmployeeID])
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id where Party_id= %s and M_Users.Employee_id=%s''',[PartyID,EmployeeID])
         else:
             Division="M_RoleAccess.Division_id is null "
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM mc_userroles join m_users on m_users.id=mc_userroles.User_id where Party_id IS NULL and m_users.Employee_id=%s ''',[EmployeeID])
+            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id where Party_id IS NULL and M_Users.Employee_id=%s ''',[EmployeeID])
            
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
@@ -104,8 +104,8 @@ class RoleAccessView(RetrieveAPIView):
             for a1 in PageSerializer:
                 id = a1['id']
                
-                RolePageAccess = MC_RolePageAccess.objects.raw(''' SELECT mc_rolepageaccess.PageAccess_id id,Name  FROM mc_rolepageaccess 
-                JOIN h_pageaccess ON h_pageaccess.id=mc_rolepageaccess.PageAccess_id  WHERE mc_rolepageaccess.RoleAccess_id=%s ''', [id])
+                RolePageAccess = MC_RolePageAccess.objects.raw(''' SELECT MC_RolePageAccess.PageAccess_id id,Name  FROM MC_RolePageAccess 
+                JOIN H_PageAccess ON H_PageAccess.id=MC_RolePageAccess.PageAccess_id  WHERE MC_RolePageAccess.RoleAccess_id=%s ''', [id])
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(
                     RolePageAccess,  many=True).data
                 # print(str(RolePageAccess.query))
@@ -217,9 +217,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
 
     def get(self, request,Role=0,Division=0 ,Company=0):
         if int(Division) > 0:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id Join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By m_pages.name ''',([Role],[Division],[Company]))
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleaAccess JOIN M_Pages ON M_Pages.id=M_RoleaAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleaAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By M_Pages.name ''',([Role],[Division],[Company]))
         else:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id, h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id pageid,m_pages.RelatedPageID, m_pages.name PageName  FROM m_roleaccess JOIN m_pages ON m_pages.id=m_roleaccess.Pages_id JOIN h_modules ON h_modules.id=m_roleaccess.Modules_id Join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By m_pages.name   ''',([Role],[Company]))            
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleaAccess JOIN M_Pages ON M_Pages.id=M_RoleaAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleaAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By M_Pages.name   ''',([Role],[Company]))            
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_RoleAccessSerializerNewUpdated(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -236,16 +236,16 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             
             
             if int(Division) > 0:
-                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id,'a' as Name FROM m_roleaccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id=%s AND Company_id=%s   ''',([RelatedPageID],[Role],[Division],[Company]))
+                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id,'a' as Name FROM M_RoleaAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id=%s AND Company_id=%s   ''',([RelatedPageID],[Role],[Division],[Company]))
             else:
                
-                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT m_roleaccess.id id,'a' as Name FROM m_roleaccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id is null AND Company_id=%s   ''',([RelatedPageID],[Role],[Company]))
+                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id,'a' as Name FROM M_RoleaAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id is null AND Company_id=%s   ''',([RelatedPageID],[Role],[Company]))
             # print(pageid)
             # print('vvvvvvvvvvvvvv',RelatedPageroleaccessquery.query)
             RelatedPageRoleAccessdata = MC_RolePageAccessSerializerNewUpdated(RelatedPageroleaccessquery, many=True).data
             # print(RelatedPageRoleAccessdata)
             
-            rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [id])
+            rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_RolePageAccess.PageAccess_id,0) id from H_PageAccess left JOIN MC_RolePageAccess ON MC_RolePageAccess.PageAccess_id=H_PageAccess.id AND MC_RolePageAccess.RoleAccess_id=%s ''', [id])
             # # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializerforListPAge = MC_RolePageAccessSerializerNewUpdated(rolepageaccessqueryforlistPage,  many=True).data
             # # return JsonResponse({'query':  RolePageAccessSerializerforListPAge})
@@ -255,12 +255,12 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 
                 roleaccessID=d['id']
             # print(roleaccessID)   
-            rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_rolepageaccess.PageAccess_id,0) id from h_pageaccess left JOIN mc_rolepageaccess ON mc_rolepageaccess.PageAccess_id=h_pageaccess.id AND mc_rolepageaccess.RoleAccess_id=%s ''', [roleaccessID])
+            rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_RolePageAccess.PageAccess_id,0) id from H_PageAccess left JOIN MC_RolePageAccess ON MC_RolePageAccess.PageAccess_id=H_PageAccess.id AND MC_RolePageAccess.RoleAccess_id=%s ''', [roleaccessID])
             # print(rolepageaccessquery.query)
             # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
             # return JsonResponse({'data':  RolePageAccessSerializer})
-            pageaccessquery =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_pagepageaccess.Access_id,0) id from h_pageaccess left JOIN mc_pagepageaccess ON mc_pagepageaccess.Access_id=h_pageaccess.id AND mc_pagepageaccess.Page_id=%s order by Sequence''', [pageid])
+            pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerNewUpdated(pageaccessquery,  many=True).data
             Moduledata.append({
@@ -329,13 +329,13 @@ class RoleAccessViewAddPage(RetrieveAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, pageid=0):
-        roleaccessquery = M_Pages.objects.raw('''SELECT h_modules.id moduleid, h_modules.Name ModuleName,m_pages.id id,m_pages.RelatedPageID, m_pages.name PageName FROM m_pages JOIN h_modules ON h_modules.id=m_pages.Module_id WHERE m_pages.id=%s''',[pageid])
+        roleaccessquery = M_Pages.objects.raw('''SELECT H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id id,M_Pages.RelatedPageID, M_Pages.name PageName FROM M_Pages JOIN H_Modules ON H_Modules.id=M_Pages.Module_id WHERE M_Pages.id=%s''',[pageid])
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_PageSerializerAddPage(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
         Moduledata = list()
         for a in RoleAccessdata:
-            pageaccessquery =  H_PageAccess.objects.raw('''SELECT h_pageaccess.Name,ifnull(mc_pagepageaccess.Access_id,0) id from h_pageaccess left JOIN mc_pagepageaccess ON mc_pagepageaccess.Access_id=h_pageaccess.id AND mc_pagepageaccess.Page_id=%s order by Sequence''', [pageid])
+            pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerAddPage(pageaccessquery,many=True).data
             Moduledata.append({
@@ -391,10 +391,10 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
             with transaction.atomic():
                 
                 if int(Division) > 0:
-                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages Join m_pagetype on m_pagetype.id= m_pages.PageType   WHERE m_pagetype.IsAvailableForAccess=1 and m_pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
+                    query = M_Pages.objects.raw('''Select M_Pages.id,M_Pages.Name FROM M_Pages Join M_PageType on M_PageType.id= M_Pages.PageType   WHERE M_PageType.IsAvailableForAccess=1 and M_Pages.IsDivisionRequired IN(1,0) and  Module_id=%s''',[moduleid])
                     
                 else:
-                    query = M_Pages.objects.raw('''Select m_pages.id,m_pages.Name FROM m_pages join m_pagetype on m_pagetype.id= m_pages.PageType  WHERE m_pagetype.IsAvailableForAccess=1  and m_pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
+                    query = M_Pages.objects.raw('''Select M_Pages.id,M_Pages.Name FROM M_Pages join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1  and M_Pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
                    
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
