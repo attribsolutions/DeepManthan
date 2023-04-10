@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
-from ..Views.V_CommFunction import GetOpeningBalance
 from ..Serializer.S_Receipts import *
 from django.db.models import Sum
 from datetime import date
@@ -22,13 +21,10 @@ class ReceiptInvoicesView(CreateAPIView):
         try:
             with transaction.atomic():
                 Receiptdata = JSONParser().parse(request)
-                Party = Receiptdata['Party']
-                Customer = Receiptdata['Customer']
-                CurrentDate = Receiptdata['ReceiptDate']
+                Party = Receiptdata['PartyID']
+                Customer = Receiptdata['CustomerID']
+                ReceiptDate = Receiptdata['ReceiptDate']
                 Receiptinvoicequery = TC_ReceiptInvoices.objects.raw('''SELECT '0' id, '2' aa,'0' flag,TC_ReceiptInvoices.Receipt_id,T_Invoices.id as Invoice_ID ,T_Invoices.InvoiceDate,T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal,SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)) PaidAmount,(T_Invoices.GrandTotal - SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)))  BalAmt FROM T_Invoices LEFT JOIN TC_ReceiptInvoices ON T_Invoices.id=TC_ReceiptInvoices.Invoice_id and TC_ReceiptInvoices.flag=0 WHERE T_Invoices.id NOT IN (SELECT Invoice_ID FROM (SELECT Invoice_id,TC_ReceiptInvoices.GrandTotal,SUM(PaidAmount) PaidAmount FROM TC_ReceiptInvoices JOIN T_Invoices  ON T_Invoices.id= TC_ReceiptInvoices.Invoice_id and TC_ReceiptInvoices.flag=0 WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id ) Invoicess WHERE (GrandTotal-PaidAmount)=0) AND T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id	''', ([Party], [Customer], [Party], [Customer]))
-                today = date.today()
-                OpeningBalanceAmt = GetOpeningBalance(Party,Customer,today.year,CurrentDate).OpeningBalanceAmount()
-                print(OpeningBalanceAmt) 
                 OrderItemSerializer = ReceiptInvoiceserializer(Receiptinvoicequery, many=True).data
                 ReceiptInvoiceList = list()
                 for a in OrderItemSerializer:
@@ -40,7 +36,7 @@ class ReceiptInvoicesView(CreateAPIView):
                         "GrandTotal":a['GrandTotal'],
                         "PaidAmount":a['PaidAmount'],
                         "BalanceAmount":a['BalAmt'],
-                        "OpeningBalanceAmt":OpeningBalanceAmt
+                        
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': ReceiptInvoiceList})
         except Exception as e:
