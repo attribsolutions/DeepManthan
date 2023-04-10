@@ -36,9 +36,9 @@ class GetOpeningBalanceView(CreateAPIView):
         try:
             with transaction.atomic():
                 OpeningBalancedata = JSONParser().parse(request)
-                ReceiptDate = OpeningBalancedata['ReceiptDate']
                 Party = OpeningBalancedata['PartyID']
                 Customer = OpeningBalancedata['CustomerID']
+                ReceiptDate = OpeningBalancedata['ReceiptDate']
                 today = date.today()
         
                 query = MC_PartySubPartyOpeningBalance.objects.filter(Party=Party,SubParty=Customer,Year=today.year).values('OpeningBalanceAmount')
@@ -56,9 +56,10 @@ class GetOpeningBalanceView(CreateAPIView):
                     ReceiptAmount = ReceiptAmount + float(a['ReceiptAmount'] or 0)
                 # print(self.OpeningBalanceAmt,InvoiceAmount,ReceiptAmount)
                 
-                OpeningBalance = (float(OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount      
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': OpeningBalance})
-
+                OpeningBalance = (float(OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount
+                aa = list()
+                aa.append({"OpeningBalanceAmount": OpeningBalance })
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': aa[0]})
         except Exception as e:
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
