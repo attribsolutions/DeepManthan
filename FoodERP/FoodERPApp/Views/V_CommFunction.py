@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.db.models import Max
-
+from django.http import JsonResponse
 
 
 from ..Serializer.S_CommFunction import *
@@ -22,6 +22,7 @@ from datetime import date
 6) class ShowBaseUnitQtyOnUnitDropDown - ShowDetails(baseunitname), TrimQty(Baseunitqty)
 7) class UnitwiseQuantityConversion - GetBaseUnitQuantity,ConvertintoSelectedUnit
 8) class ShowBaseUnitQtyOnUnitDropDown -ShowDetails
+
 
 '''
 
@@ -372,7 +373,6 @@ class RateCalculationFunction:
             # q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQantity')
             # q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).filter( a ).values('BaseUnitQantity')
             
-            
         else:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
             MRPfun = MRPMaster(ItemID,DivisionID,0,self.today).GetTodaysDateMRP()
@@ -385,8 +385,6 @@ class RateCalculationFunction:
        
     def RateWithGST(self):
       
-        
-     
         for i in self.calculationPath:
            
             Margin=MarginMaster(self.ItemID,i,self.PartyID,self.today).GetTodaysDateMargin()
@@ -402,7 +400,42 @@ class RateCalculationFunction:
             "RateWithoutGST": round(RatewithoutGST,0),
         })
         
-        
-        
-        
         return RateDetails
+
+class GetOpeningBalance:
+    
+    def __init__(self,PartyID,CustomerID,Year,CurrentDate):
+       
+        self.PartyID    =   PartyID 
+        self.CustomerID =   CustomerID
+        self.Year =  Year
+        self.CurrentDate = CurrentDate
+        
+        query = MC_PartySubPartyOpeningBalance.objects.filter(Party=PartyID,SubParty=CustomerID,Year=Year).values('OpeningBalanceAmount')
+        self.OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
+     
+        
+    def OpeningBalanceAmount(self):    
+        query2 = T_Invoices.objects.raw(''' SELECT '0' id, TransactionDate, InvoiceAmount, ReceiptAmount FROM ( SELECT T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount FROM t_invoices WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id =%s  AND InvoiceDate <= %s  UNION ALL SELECT T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36  UNION ALL SELECT T_CreditDebitNotes.NoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.NoteDate <= %s ) A   Order By TransactionDate ''', ([self.PartyID], [self.CustomerID], [self.CurrentDate ], [self.PartyID], [self.CustomerID], [self.CurrentDate ],[self.PartyID], [self.CustomerID], [self.CurrentDate ]))
+        # print(str(query2.query))
+        query2_serializer = OpeningBalanceSerializer(query2, many=True).data
+        OpeningBalance = 0.000
+        InvoiceAmount=0.000
+        ReceiptAmount=0.000
+        
+        for a in query2_serializer:
+            InvoiceAmount = InvoiceAmount + float(a['InvoiceAmount'] or 0)
+            ReceiptAmount = ReceiptAmount + float(a['ReceiptAmount'] or 0)
+        
+        # print(self.OpeningBalanceAmt,InvoiceAmount,ReceiptAmount)
+           
+        OpeningBalance = (float(self.OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount      
+        return OpeningBalance
+ 
+        
+        
+        
+        
+        
+ 
+        
