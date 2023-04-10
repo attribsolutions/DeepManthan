@@ -13,7 +13,7 @@ class PartyWiseUpdateView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
  
-    @transaction.atomic()
+    @transaction.atomic() 
     def post(self, request):
         try:
             with transaction.atomic():
