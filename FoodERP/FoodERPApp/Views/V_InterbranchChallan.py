@@ -44,7 +44,7 @@ class DemandDetailsForIBChallan(CreateAPIView):
                     for x in Serializedata:
                         Order_list.append(x['id'])
                         
-                    OrderQuery=T_Demands.objects.raw("SELECT T_Demands.Supplier_id id,m_parties.Name SupplierName,sum(T_Demands.DemandAmount) OrderAmount ,T_Demands.Customer_id CustomerID FROM T_Demands join m_parties on m_parties.id=T_Demands.Supplier_id where T_Demands.id IN %s group by T_Demands.Supplier_id;",[Order_list])
+                    OrderQuery=T_Demands.objects.raw("SELECT T_Demands.Supplier_id id,M_Parties.Name SupplierName,sum(T_Demands.DemandAmount) OrderAmount ,T_Demands.Customer_id CustomerID FROM T_Demands join M_Parties on M_Parties.id=T_Demands.Supplier_id where T_Demands.id IN %s group by T_Demands.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
                     OrderItemQuery=TC_DemandItems.objects.filter(Demand__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_DemandItemsSerializerSecond(OrderItemQuery,many=True).data

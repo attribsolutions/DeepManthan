@@ -17,7 +17,7 @@ class PartyItemsListView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_PartyItems.objects.raw(
-                    '''select mc_partyitems.id,m_parties.Name, mc_partyitems.Party_id,count(mc_partyitems.Item_id)As Total From mc_partyitems join m_parties on m_parties.id=mc_partyitems.Party_id group by mc_partyitems.Party_id  ''')
+                    '''select MC_PartyItems.id,M_Parties.Name, MC_PartyItems.Party_id,count(MC_PartyItems.Item_id)As Total From MC_PartyItems join M_Parties on M_Parties.id=MC_PartyItems.Party_id group by MC_PartyItems.Party_id  ''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
@@ -45,7 +45,7 @@ class PartyItemsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Itemquery= MC_PartyItems.objects.raw('''SELECT m_items.id,m_items.Name,ifnull(mc_partyitems.Party_id,0) Party_id,ifnull(m_parties.Name,'') PartyName from m_items left JOIN mc_partyitems ON mc_partyitems.item_id=m_items.id AND mc_partyitems.Party_id=%s left JOIN m_parties ON m_parties.id=mc_partyitems.Party_id''',([id]))
+                Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName from M_Items left JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id''',([id]))
                 
                 if not Itemquery:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
