@@ -417,7 +417,8 @@ urlpatterns = [
             
             
 #CreditDebit 
-            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),            
+            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),  
+            url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()),           
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID

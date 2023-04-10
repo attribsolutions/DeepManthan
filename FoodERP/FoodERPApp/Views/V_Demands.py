@@ -49,22 +49,22 @@ class InterBranchItemsView(CreateAPIView):
                 EffectiveDate = request.data['EffectiveDate']
                 DemandID = request.data['OrderID']
 
-                Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,m_mrpmaster.MRP MRPValue,a.Rate,a.Unit_id,m_units.Name UnitName,a.BaseUnitQuantity,a.GST_id,m_gsthsncode.GSTPercentage,
-m_gsthsncode.HSNCode,a.Margin_id,m_marginmaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
+                Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
+M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
                 from
 ((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`
-FROM `tc_demanditems` WHERE (`tc_demanditems`.`IsDeleted` = False AND `tc_demanditems`.`Demand_id` = %s)) 
+FROM `TC_DemandItems` WHERE (`TC_DemandItems`.`IsDeleted` = False AND `TC_DemandItems`.`Demand_id` = %s)) 
 UNION 
-(SELECT 1 id,m_items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`
-FROM `m_items` Join mc_partyitems a On m_items.id = a.Item_id
-join mc_partyitems b On m_items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
+(SELECT 1 id,M_Items.id `Item_id`, NULL AS `Quantity`, NULL AS `MRP`, NULL AS `Rate`, NULL AS `Unit`, NULL AS `BaseUnitQuantity`, NULL AS `GST`, NULL AS `Margin`, NULL AS `BasicAmount`, NULL AS `GSTAmount`, NULL AS `CGST`, NULL AS `SGST`, NULL AS `IGST`, NULL AS `CGSTPercentage`, NULL AS `SGSTPercentage`, NULL AS `IGSTPercentage`, NULL AS `Amount`
+FROM `M_Items` Join MC_PartyItems a On M_Items.id = a.Item_id
+join MC_PartyItems b On M_Items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
 
-join m_items on m_items.id=a.Item_id 
-left join m_mrpmaster on m_mrpmaster.id =a.MRP_id
-left join mc_itemunits on mc_itemunits.id=a.Unit_id
-left join m_units on m_units.id=mc_itemunits.UnitID_id
-left join m_gsthsncode on m_gsthsncode.id=a.GST_id
-left join m_marginmaster on m_marginmaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([DemandID], [Party], [Customer]))
+join M_Items on M_Items.id=a.Item_id 
+left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
+left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
+left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
+left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([DemandID], [Party], [Customer]))
                 
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': str(Itemquery.query)})
                 DemandItemSerializer = DemandEditserializer(
