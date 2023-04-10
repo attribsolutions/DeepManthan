@@ -18,4 +18,12 @@ class ItemSerializerSecond(serializers.ModelSerializer):
     BaseUnitID = UnitSerializerSecond()
     class Meta:
         model = M_Items
-        fields='__all__'       
+        fields='__all__'
+             
+class OpeningBalanceSerializer(serializers.Serializer):
+    
+    TransactionDate = serializers.DateField()
+    InvoiceAmount=serializers.DecimalField(max_digits=30, decimal_places=3)  
+    ReceiptAmount=serializers.DecimalField(max_digits=30, decimal_places=3)  
+
+                            

@@ -5,8 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Views.V_CommFunction import GetOpeningBalance
 from ..Serializer.S_Receipts import *
 from django.db.models import Sum
+from datetime import date
 from ..models import *
 
 
@@ -22,8 +24,11 @@ class ReceiptInvoicesView(CreateAPIView):
                 Receiptdata = JSONParser().parse(request)
                 Party = Receiptdata['Party']
                 Customer = Receiptdata['Customer']
-                Receiptinvoicequery = TC_ReceiptInvoices.objects.raw('''SELECT '0' id, '2' aa,'0' flag,tc_receiptinvoices.Receipt_id,t_invoices.id as Invoice_ID ,t_invoices.InvoiceDate,t_invoices.FullInvoiceNumber, t_invoices.GrandTotal,SUM(IFNULL(tc_receiptinvoices.PaidAmount,0)) PaidAmount,(t_invoices.GrandTotal - SUM(IFNULL(tc_receiptinvoices.PaidAmount,0)))  BalAmt FROM t_invoices LEFT JOIN tc_receiptinvoices ON t_invoices.id=tc_receiptinvoices.Invoice_id and tc_receiptinvoices.flag=0 WHERE t_invoices.id NOT IN (SELECT Invoice_ID FROM (SELECT Invoice_id,tc_receiptinvoices.GrandTotal,SUM(PaidAmount) PaidAmount FROM tc_receiptinvoices JOIN t_invoices  ON t_invoices.id= tc_receiptinvoices.Invoice_id and tc_receiptinvoices.flag=0 WHERE t_invoices.Party_id=%s AND t_invoices.Customer_id=%s GROUP BY t_invoices.id ) Invoicess WHERE (GrandTotal-PaidAmount)=0) AND t_invoices.Party_id=%s AND t_invoices.Customer_id=%s GROUP BY t_invoices.id	''', ([Party], [Customer], [Party], [Customer]))
-           
+                CurrentDate = Receiptdata['ReceiptDate']
+                Receiptinvoicequery = TC_ReceiptInvoices.objects.raw('''SELECT '0' id, '2' aa,'0' flag,TC_ReceiptInvoices.Receipt_id,T_Invoices.id as Invoice_ID ,T_Invoices.InvoiceDate,T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal,SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)) PaidAmount,(T_Invoices.GrandTotal - SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)))  BalAmt FROM T_Invoices LEFT JOIN TC_ReceiptInvoices ON T_Invoices.id=TC_ReceiptInvoices.Invoice_id and TC_ReceiptInvoices.flag=0 WHERE T_Invoices.id NOT IN (SELECT Invoice_ID FROM (SELECT Invoice_id,TC_ReceiptInvoices.GrandTotal,SUM(PaidAmount) PaidAmount FROM TC_ReceiptInvoices JOIN T_Invoices  ON T_Invoices.id= TC_ReceiptInvoices.Invoice_id and TC_ReceiptInvoices.flag=0 WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id ) Invoicess WHERE (GrandTotal-PaidAmount)=0) AND T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id	''', ([Party], [Customer], [Party], [Customer]))
+                today = date.today()
+                OpeningBalanceAmt = GetOpeningBalance(Party,Customer,today.year,CurrentDate).OpeningBalanceAmount()
+                print(OpeningBalanceAmt) 
                 OrderItemSerializer = ReceiptInvoiceserializer(Receiptinvoicequery, many=True).data
                 ReceiptInvoiceList = list()
                 for a in OrderItemSerializer:
@@ -34,7 +39,8 @@ class ReceiptInvoicesView(CreateAPIView):
                         "FullInvoiceNumber":a['FullInvoiceNumber'],
                         "GrandTotal":a['GrandTotal'],
                         "PaidAmount":a['PaidAmount'],
-                        "BalanceAmount":a['BalAmt']
+                        "BalanceAmount":a['BalAmt'],
+                        "OpeningBalanceAmt":OpeningBalanceAmt
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': ReceiptInvoiceList})
         except Exception as e:
@@ -111,7 +117,7 @@ class ReceiptView(CreateAPIView):
                 Receiptdata['ReceiptNo'] = a
                 '''Get Receipt Prifix '''
                 b = GetPrifix.GetReceiptPrifix(Party)
-                print(b)
+             
                 Receiptdata['FullReceiptNumber'] = b+""+str(a)
                 # return JsonResponse({ 'Data': Orderdata })
                 Receipt_serializer = ReceiptSerializer(data=Receiptdata)
