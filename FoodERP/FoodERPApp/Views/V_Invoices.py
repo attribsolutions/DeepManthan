@@ -31,7 +31,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 Orderdata = list()
                
                 if POOrderIDs != '':
-                    OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
+                    OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
@@ -42,7 +42,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     for x in Serializedata:
                         Order_list.append(x['id'])
                         
-                    OrderQuery=T_Orders.objects.raw("SELECT t_orders.Supplier_id id,m_parties.Name SupplierName,sum(t_orders.OrderAmount) OrderAmount ,t_orders.Customer_id CustomerID FROM t_orders join m_parties on m_parties.id=t_orders.Supplier_id where t_orders.id IN %s group by t_orders.Supplier_id;",[Order_list])
+                    OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
                     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
                     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data

@@ -19,7 +19,7 @@ class PartySubPartyListFilterView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT mc_partysubparty.id,mc_partysubparty.Party_id,M_Parties.Name PartyName,count(mc_partysubparty.SubParty_id)Subparty FROM mc_partysubparty join m_parties ON m_parties.id=mc_partysubparty.Party_id group by Party_id''')
+                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,MC_PartySubParty.Party_id,M_Parties.Name PartyName,count(MC_PartySubParty.SubParty_id)Subparty FROM MC_PartySubParty join M_Parties ON M_Parties.id=MC_PartySubParty.Party_id group by Party_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
