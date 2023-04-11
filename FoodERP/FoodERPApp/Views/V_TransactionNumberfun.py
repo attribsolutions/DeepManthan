@@ -199,6 +199,23 @@ class GetMaxNumber:
                 a=a+1
         return a
     
+    def GetPurchaseReturnNumber(*args):
+        
+        MaxReturnNumber=T_PurchaseReturn.objects.filter(Party_id=args[0]).values('ReturnNo').order_by('-id')[:1]
+        # print(str(MaxReceiptNumber.query))
+        firstdatefinancial = date.today().strftime('%Y-04-01')
+        b=args[1]
+
+        if(not MaxReturnNumber):
+            a=1
+        else:
+            if(b==firstdatefinancial):
+                a = 1
+            else: 
+                a=int(MaxReturnNumber[0]['ReturnNo'])
+                a=a+1
+        return a
+    
     
     
 
@@ -299,6 +316,14 @@ class GetPrifix:
                 a=Prifix[0]['Creditprefix']
             else:
                 a=Prifix[0]['Debitprefix']               
+        return a
+    
+    def GetPurchaseReturnPrifix(*args):
+        Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('PurchaseReturnprefix')
+        if not Prifix :
+            a=""
+        else:
+            a=Prifix[0]['PurchaseReturnprefix']
         return a
     
     

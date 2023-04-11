@@ -779,6 +779,7 @@ class MC_PartyPrefixs(models.Model):
     MaterialIssueprefix = models.CharField(max_length=500 ,null=True,blank=True)
     IBChallanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     IBInwardprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    PurchaseReturnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     
     class Meta:
         db_table = "MC_PartyPrefixs"        
@@ -868,6 +869,7 @@ class T_Invoices(models.Model):
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    IsLoadingSheetCreated = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1388,7 +1390,7 @@ class TC_ProductionReIssueItems(models.Model):
 class T_PurchaseReturn(models.Model):
     ReturnDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
-    ReturnNumber = models.IntegerField()
+    ReturnNo = models.CharField(max_length=500,blank=True, null=True)
     FullReturnNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
