@@ -169,7 +169,11 @@ class InvoiceListFilterView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount'], 
+                            "RoundOffAmount": a['RoundOffAmount'],
+                            "IsLoadingSheetCreated": a['IsLoadingSheetCreated'], 
+                            "DriverName": a['Driver']['Name'],
+                            "VehicleName": a['Vehicle']['VehicleNumber'],
+                            "Party": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'] 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
