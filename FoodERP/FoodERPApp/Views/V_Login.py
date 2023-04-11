@@ -132,7 +132,7 @@ class UserListViewSecond(CreateAPIView):
                     UserData = list()
                     for a in Usersdata_Serializer:
                         RoleData = list()
-                        UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s group by Party_id ''',[id])
+                        UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s  ''',[id])
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
@@ -332,7 +332,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
                      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
                      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
-                     WHERE M_Users.Employee_id=%s group by MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id ,M_Users.Employee_id''', [id])
+                     WHERE M_Users.Employee_id=%s ''', [id])
                 # print(str(query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
