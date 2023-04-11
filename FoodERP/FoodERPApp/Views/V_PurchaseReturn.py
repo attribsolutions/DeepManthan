@@ -10,3 +10,32 @@ from django.db.models import Sum
 from ..models import *
 
 
+
+class PurchaseReturnView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                PurchaseReturndata = JSONParser().parse(request)
+                Party = PurchaseReturndata['Party']
+                Date = PurchaseReturndata['Date']
+                a = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
+                PurchaseReturndata['ReturnNo'] = str(a)
+                b = GetPrifix.GetPurchaseReturnPrifix(Party)
+                PurchaseReturndata['FullReturnNumber'] = b+""+str(a)
+                PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
+                if PurchaseReturn_Serializer.is_valid():
+                    PurchaseReturn_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Purchase Return Save Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+
+
