@@ -172,7 +172,7 @@ class InvoiceListFilterView(CreateAPIView):
                             "RoundOffAmount": a['RoundOffAmount'],
                             "IsLoadingSheetCreated": a['IsLoadingSheetCreated'], 
                             "DriverName": a['Driver']['Name'],
-                            "VehicleName": a['Vehicle']['VehicleNumber'],
+                            "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "Party": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'] 
                         })
@@ -299,6 +299,8 @@ class InvoiceViewSecond(CreateAPIView):
                             "CustomerState": a['Customer']['State']['Name'],
                             "PartyAddress": DefPartyAddress,                            
                             "CustomerAddress": DefCustomerAddress,
+                            "DriverName":a['Driver']['Name'],
+                            "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
