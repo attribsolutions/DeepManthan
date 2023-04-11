@@ -1388,7 +1388,7 @@ class TC_ProductionReIssueItems(models.Model):
 class T_PurchaseReturn(models.Model):
     ReturnDate = models.DateField()
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
-    ReturnNumber = models.IntegerField()
+    ReturnNo = models.CharField(max_length=500,blank=True, null=True)
     FullReturnNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
