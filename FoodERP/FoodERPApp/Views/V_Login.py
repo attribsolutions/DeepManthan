@@ -326,13 +326,13 @@ class UserPartiesForLoginPage(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,MC_UserRoles.Party_id,M_Parties.Name AS PartyName ,M_Users.Employee_id
+                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id
 
                      FROM  MC_UserRoles
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
                      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
                      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
-                     WHERE M_Users.Employee_id=%s group by MC_UserRoles.Party_id''', [id])
+                     WHERE M_Users.Employee_id=%s group by MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id ,M_Users.Employee_id''', [id])
                 # print(str(query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
