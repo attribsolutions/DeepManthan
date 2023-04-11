@@ -779,6 +779,7 @@ class MC_PartyPrefixs(models.Model):
     MaterialIssueprefix = models.CharField(max_length=500 ,null=True,blank=True)
     IBChallanprefix = models.CharField(max_length=500 ,null=True,blank=True)
     IBInwardprefix = models.CharField(max_length=500 ,null=True,blank=True)
+    PurchaseReturnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     
     class Meta:
         db_table = "MC_PartyPrefixs"        
