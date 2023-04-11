@@ -23,12 +23,14 @@ class PurchaseReturnView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['Date']
-                a = GetMaxNumber.GetLoadingSheetNumber(Party,Date)
-                PurchaseReturndata['No'] = str(a)
-                PurchaseReturn_Serializer = PurchaseReturndata(data=PurchaseReturndata)
+                a = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
+                PurchaseReturndata['ReturnNo'] = str(a)
+                b = GetPrifix.GetPurchaseReturnPrifix(Party)
+                PurchaseReturndata['FullReturnNumber'] = b+""+str(a)
+                PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Purchase Return Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
