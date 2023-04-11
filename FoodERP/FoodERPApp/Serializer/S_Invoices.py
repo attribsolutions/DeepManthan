@@ -2,6 +2,8 @@ from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_Items import *
 from ..Serializer.S_Orders import  *
+from ..Serializer.S_Drivers import  *
+from ..Serializer.S_Vehicles import  *
 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -149,10 +151,25 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     Party = PartiesSerializerSecond(read_only=True)
     InvoiceItems = InvoiceItemsSerializerSecond(many=True)
     InvoicesReferences = InvoicesReferencesSerializer(many=True)
-    
+    Driver= M_DriverSerializer(read_only=True)
+    Vehicle = VehiclesSerializer(read_only=True)
     class Meta:
         model = T_Invoices
-        fields = '__all__'    
+        fields = '__all__'
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(InvoiceSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Driver", None):
+            ret["Driver"] = {"id": None, "Name": None}
+            
+        if not ret.get("Vehicle", None):
+            ret["Vehicle"] = {"id": None, "VehicleNumber": None}
+        
+        return ret          
+        
+            
 
 class InvoiceSerializerForDelete(serializers.ModelSerializer):
     InvoiceItems = InvoiceItemsSerializer(many=True)

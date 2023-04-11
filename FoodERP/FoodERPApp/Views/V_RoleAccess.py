@@ -217,9 +217,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
 
     def get(self, request,Role=0,Division=0 ,Company=0):
         if int(Division) > 0:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleaAccess JOIN M_Pages ON M_Pages.id=M_RoleaAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleaAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By M_Pages.name ''',([Role],[Division],[Company]))
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleAccess JOIN M_Pages ON M_Pages.id=M_RoleAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By M_Pages.name ''',([Role],[Division],[Company]))
         else:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleaAccess JOIN M_Pages ON M_Pages.id=M_RoleaAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleaAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By M_Pages.name   ''',([Role],[Company]))            
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleAccess JOIN M_Pages ON M_Pages.id=M_RoleAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By M_Pages.name   ''',([Role],[Company]))            
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_RoleAccessSerializerNewUpdated(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -236,10 +236,10 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             
             
             if int(Division) > 0:
-                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id,'a' as Name FROM M_RoleaAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id=%s AND Company_id=%s   ''',([RelatedPageID],[Role],[Division],[Company]))
+                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id,'a' as Name FROM M_RoleAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id=%s AND Company_id=%s   ''',([RelatedPageID],[Role],[Division],[Company]))
             else:
                
-                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleaAccess.id id,'a' as Name FROM M_RoleaAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id is null AND Company_id=%s   ''',([RelatedPageID],[Role],[Company]))
+                RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id,'a' as Name FROM M_RoleAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id is null AND Company_id=%s   ''',([RelatedPageID],[Role],[Company]))
             # print(pageid)
             # print('vvvvvvvvvvvvvv',RelatedPageroleaccessquery.query)
             RelatedPageRoleAccessdata = MC_RolePageAccessSerializerNewUpdated(RelatedPageroleaccessquery, many=True).data
