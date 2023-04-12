@@ -190,13 +190,13 @@ class RoleAccessViewList(RetrieveAPIView):
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
     left join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
-    left join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id where M_RoleAccess.CreatedBy=%s  group by Role_id,Division_id,Company_id''',[UserID])
+    left join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id where M_RoleAccess.CreatedBy=%s  ''',[UserID])
                 else:
                     query = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id,M_RoleAccess.Role_id,M_Roles.Name RoleName,M_RoleAccess.Division_id,M_Parties.Name DivisionName,M_RoleAccess.Company_id,C_Companies.Name CompanyName,M_RoleAccess.CreatedBy
     FROM M_RoleAccess
     join M_Roles ON M_Roles.id=M_RoleAccess.Role_id
     left join M_Parties  ON M_Parties.id=M_RoleAccess.Division_id
-    left join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id where M_RoleAccess.CreatedBy=%s  group by Role_id,Division_id,Company_id''',[UserID]) 
+    left join C_Companies  ON C_Companies.id=M_RoleAccess.Company_id where M_RoleAccess.CreatedBy=%s  ''',[UserID]) 
 
                 
                 if not query:
