@@ -105,7 +105,7 @@ class C_CompaniesView(CreateAPIView):
 
                 AdminDivisionDatalist.append({
                         "Name": Companiesdata['Name']+' AdminDivision',
-                        "PartyType": 5,
+                        "PartyType": 1,
                         "Company": 1,
                         "PAN": "AAAAA1234A",
                         "Email": Companiesdata['EmailID'],

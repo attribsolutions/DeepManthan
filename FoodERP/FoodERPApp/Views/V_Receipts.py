@@ -77,15 +77,19 @@ class ReceiptListView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Description": a['Description'],
-                            "ReceiptMode": a['ReceiptMode']['Name'],
+                            "ReceiptModeName": a['ReceiptMode']['Name'],
+                            "ReceiptMode": a['ReceiptMode']['id'],
                             "ReceiptType": a['ReceiptType']['Name'],
+                            "ReceiptTypeName": a['ReceiptType']['id'],
                             "AmountPaid": a['AmountPaid'],
                             "DocumentNo": a['DocumentNo'],
                             "BalanceAmount": a['BalanceAmount'],
                             "OpeningBalanceAdjusted": a['OpeningBalanceAdjusted'],
                             "ChequeDate": a['ChequeDate'],
-                            "Bank": a['Bank']['Name'],
-                            "DepositorBank": a['DepositorBank']['Name'],
+                            "Bank": a['Bank']['id'],
+                            "BankName": a['Bank']['Name'],
+                            "DepositorBankName": a['DepositorBank']['id'],
+                            "DepositorBankName": a['DepositorBank']['Name'],
                             "CreatedOn": a['CreatedOn']
 
                         })
