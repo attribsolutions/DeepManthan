@@ -416,8 +416,6 @@ urlpatterns = [
             url(r'PartyBankFilter$', PartyBanksFilterView.as_view()),
             url(r'PartyBank$', PartyBanksView.as_view()),
             url(r'PartyBankSave$', PartyBanksSaveView.as_view()),
-            
-            
 
 # Receipt
             url(r'ReceiptInvoices$', ReceiptInvoicesView.as_view()),
@@ -427,12 +425,6 @@ urlpatterns = [
             
             # Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
-            
-            
-            
-            
-            
-            
             
 #CreditDebit 
             url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),  
