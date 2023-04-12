@@ -57,15 +57,16 @@ class PartyBanksSaveView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyBanks_data = JSONParser().parse(request)
-                PartyBanks_serializer = PartyBanksSerializer(data=PartyBanks_data, many=True)
-            if PartyBanks_serializer.is_valid():
-                id = PartyBanks_serializer.data[0]['Party']
-                MC_PartyBanks_data = MC_PartyBanks_data.objects.filter(Party=id)
-                MC_PartyBanks_data.delete()
-                PartyBanks_serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Banks Save Successfully', 'Data': []})
-            else:
-                transaction.set_rollback(True)
+                PartyBanks_serializer = PartyBanksSerializerSecond(data=PartyBanks_data, many=True)
+                if PartyBanks_serializer.is_valid():
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PartyBanks_serializer.data})
+                    id = PartyBanks_serializer.data[0]['Party']
+                    MC_PartyBanks_data = MC_PartyBanks.objects.filter(Party=id)
+                    MC_PartyBanks_data.delete()
+                    PartyBanks_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Banks Save Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyBanks_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
