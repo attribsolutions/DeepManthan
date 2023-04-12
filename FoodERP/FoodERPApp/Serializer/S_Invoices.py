@@ -68,7 +68,7 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
        
        
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
-    # Order = OrderserializerforInvoice(read_only=True)
+    Order = OrderserializerforInvoice(read_only=True)
     class Meta:
         model = TC_InvoicesReferences
         # fields = '__all__'

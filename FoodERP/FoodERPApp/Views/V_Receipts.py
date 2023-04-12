@@ -134,5 +134,51 @@ class ReceiptView(CreateAPIView):
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Receipt used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
+        
+         
+        
+class MakeReceiptOfPaymentListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Receiptdata = JSONParser().parse(request)
+                FromDate = Receiptdata['FromDate']
+                ToDate = Receiptdata['ToDate']
+                Party = Receiptdata['PartyID']
+                ReceiptType = Receiptdata['ReceiptType']
+            
+                query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType)
+                if query:
+                    Receipt_serializer = ReceiptSerializerSecond(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    ReceiptListData = list()
+                    for a in Receipt_serializer:
+                        ReceiptListData.append({
+                            "id": a['id'],
+                            "ReceiptDate": a['ReceiptDate'],
+                            "FullReceiptNumber": a['FullReceiptNumber'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "Description": a['Description'],
+                            "ReceiptMode": a['ReceiptMode']['Name'],
+                            "ReceiptType": a['ReceiptType']['Name'],
+                            "AmountPaid": a['AmountPaid'],
+                            "DocumentNo": a['DocumentNo'],
+                            "BalanceAmount": a['BalanceAmount'],
+                            "OpeningBalanceAdjusted": a['OpeningBalanceAdjusted'],
+                            "ChequeDate": a['ChequeDate'],
+                            "Bank": a['Bank']['Name'],
+                            "DepositorBank": a['DepositorBank']['Name'],
+                            "CreatedOn": a['CreatedOn']
+
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})          
         
