@@ -133,7 +133,7 @@ class ReceiptView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = T_Invoices.objects.filter(id=id)
+                query = T_Receipts.objects.filter(id=id)
                 if query.exists():
                     Receipt_serializer = ReceiptSerializerSecond(query, many=True).data
                     ReceiptListData = list()
