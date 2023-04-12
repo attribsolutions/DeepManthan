@@ -265,7 +265,7 @@ class InvoiceViewSecond(CreateAPIView):
                             InvoiceReferenceDetails = list()
                             for d in a['InvoicesReferences']:
                                 InvoiceReferenceDetails.append({
-                                    "Invoice": d['Invoice'],
+                                    # "Invoice": d['Invoice'],
                                     "Order": d['Order']['id'],
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
                                 })
