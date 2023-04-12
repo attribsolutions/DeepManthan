@@ -42,7 +42,7 @@ class PartyBanksView(CreateAPIView):
                 if IsSelfDepositoryBank == 1:
                     query = MC_PartyBanks.objects.filter(Party=Party, Company=Company,IsSelfDepositoryBank=1)
                 else:
-                    query = MC_PartyBanks.objects.filter(Party=Party, Company=Company)
+                    query = MC_PartyBanks.objects.filter(Party=Party, Company=Company,IsSelfDepositoryBank=0)
                 if query:
                     bank_serializer = PartyBanksSerializer(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
