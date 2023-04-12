@@ -32,7 +32,10 @@ class PartyBanksSerializer(serializers.ModelSerializer):
         data['BankName'] = instance.Bank.Name
         return data
     
-                
+class PartyBanksSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyBanks
+        fields = '__all__'                
 
 
          
