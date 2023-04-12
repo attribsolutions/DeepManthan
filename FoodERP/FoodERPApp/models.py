@@ -1453,6 +1453,7 @@ class MC_PartyBanks(models.Model):
     BranchName = models.CharField(max_length=500,blank=True, null=True)
     AccountNo = models.CharField(max_length=500,blank=True, null=True)
     IsSelfDepositoryBank = models.BooleanField(default=False)
+    IsDefault = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
