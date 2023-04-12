@@ -127,6 +127,50 @@ class ReceiptView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = T_Invoices.objects.filter(id=id)
+                if query.exists():
+                    Receipt_serializer = ReceiptSerializerSecond(query, many=True).data
+                    ReceiptListData = list()
+                    for a in Receipt_serializer:
+                        ReceiptListData.append({
+                            "id": a['id'],
+                            "ReceiptDate": a['ReceiptDate'],
+                            "FullReceiptNumber": a['FullReceiptNumber'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "Description": a['Description'],
+                            "ReceiptModeName": a['ReceiptMode']['Name'],
+                            "ReceiptMode": a['ReceiptMode']['id'],
+                            "ReceiptType": a['ReceiptType']['Name'],
+                            "ReceiptTypeName": a['ReceiptType']['id'],
+                            "AmountPaid": a['AmountPaid'],
+                            "DocumentNo": a['DocumentNo'],
+                            "BalanceAmount": a['BalanceAmount'],
+                            "OpeningBalanceAdjusted": a['OpeningBalanceAdjusted'],
+                            "ChequeDate": a['ChequeDate'],
+                            "Bank": a['Bank']['id'],
+                            "BankName": a['Bank']['Name'],
+                            "DepositorBankName": a['DepositorBank']['id'],
+                            "DepositorBankName": a['DepositorBank']['Name'],
+                            "CreatedOn": a['CreatedOn']
+
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+        
+        
+        
+        
     
     @transaction.atomic()
     def delete(self, request, id=0):
