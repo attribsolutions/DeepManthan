@@ -409,10 +409,13 @@ urlpatterns = [
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
             
 # BankMaster
-            url(r'Bank/([0-9]+)$', BankView.as_view()),
-            url(r'Bank$', BankView.as_view()),
-            url(r'BankFilter$', BankListView.as_view()),
-            url(r'DepositorBankFilter$', DepositorBankListView.as_view()),
+            # url(r'Bank/([0-9]+)$', BankView.as_view()),
+            # url(r'Bank$', BankView.as_view()),
+            # url(r'BankFilter$', BankListView.as_view()),
+            
+            url(r'PartyBankFilter$', PartyBanksFilterView.as_view()),
+            url(r'PartyBank$', PartyBanksView.as_view()),
+            url(r'PartyBankSave$', PartyBanksSaveView.as_view()),
 
 # Receipt
             url(r'ReceiptInvoices$', ReceiptInvoicesView.as_view()),
