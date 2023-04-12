@@ -152,9 +152,7 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                 Party = Receiptdata['PartyID']
                 ReceiptType = Receiptdata['ReceiptType']
             
-                query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, Party=Party, ReceiptType=ReceiptType)
-                   
-                # return JsonResponse({'query': str(Orderdata.query)})
+                query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType)
                 if query:
                     Receipt_serializer = ReceiptSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
@@ -164,8 +162,6 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                             "id": a['id'],
                             "ReceiptDate": a['ReceiptDate'],
                             "FullReceiptNumber": a['FullReceiptNumber'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Description": a['Description'],
