@@ -95,48 +95,65 @@ class BankListView(CreateAPIView):
 
 
 
-
-    # @transaction.atomic()
-    # def get(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             Bankdata = M_Bank.objects.get(id=id)
-    #             Bank_serializer = BankSerializer(Bankdata)
-    #             return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Bank_serializer.data})
-    #     except  M_Bank.DoesNotExist:
-    #         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Bank Not available', 'Data': []})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+class BankView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Bank_data = JSONParser().parse(request)
+                Bank_serializer = BankSerializer(data=Bank_data)
+                if Bank_serializer.is_valid():
+                    Bank_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Save Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Bank_serializer.errors, 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Bankdata = M_Bank.objects.get(id=id)
+                Bank_serializer = BankSerializer(Bankdata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Bank_serializer.data})
+        except  M_Bank.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Bank Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-    # @transaction.atomic()
-    # def put(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             Bankdata = JSONParser().parse(request)
-    #             BankdataByID = M_Bank.objects.get(id=id)
-    #             Bank_serializer = BankSerializer(
-    #                 BankdataByID, data=Bankdata)
-    #             if Bank_serializer.is_valid():
-    #                 Bank_serializer.save()
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Updated Successfully','Data' :[]})
-    #             else:
-    #                 transaction.set_rollback(True)
-    #                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Bank_serializer.errors, 'Data' :[]})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Bankdata = JSONParser().parse(request)
+                BankdataByID = M_Bank.objects.get(id=id)
+                Bank_serializer = BankSerializer(
+                    BankdataByID, data=Bankdata)
+                if Bank_serializer.is_valid():
+                    Bank_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Updated Successfully','Data' :[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Bank_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 
-    # @transaction.atomic()
-    # def delete(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             Bankdata = M_Bank.objects.get(id=id)
-    #             Bankdata.delete()
-    #             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Deleted Successfully','Data':[]})
-    #     except M_Bank.DoesNotExist:
-    #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank Not available', 'Data': []})
-    #     except IntegrityError:
-    #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Bankdata = M_Bank.objects.get(id=id)
+                Bankdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Deleted Successfully','Data':[]})
+        except M_Bank.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
             
             
 
