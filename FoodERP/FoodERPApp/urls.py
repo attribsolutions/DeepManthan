@@ -413,7 +413,7 @@ urlpatterns = [
             url(r'Bank$', BankView.as_view()),
             url(r'BankFilter$', BankListView.as_view()),
             
-            url(r'PartyBankFilter$', PartyBanksFilterView.as_view()),
+            url(r'PartyBanksFilter$', PartyBanksFilterView.as_view()),
             url(r'PartyBankList$', PartyBanksListView.as_view()),
             url(r'PartyBankSave$', PartyBanksSaveView.as_view()),
 
