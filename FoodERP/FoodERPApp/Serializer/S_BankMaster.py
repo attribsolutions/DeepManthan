@@ -7,18 +7,6 @@ class BankSerializer(serializers.ModelSerializer):
         model =  M_Bank
         fields = '__all__'
 
-class BankSerializerSecond(serializers.ModelSerializer):
-    class Meta:
-        model =  M_Bank
-        fields = '__all__'
-
-class BankSerializerSecond(serializers.ModelSerializer):
-    BankMaster = BankSerializerSecond(read_only=True)
-    class Meta:
-        model = M_Bank
-        fields = '__all__'
-        
-          
 class PartyBanksSerializer(serializers.ModelSerializer):
     Bank = BankSerializer(read_only=True)
     class Meta:

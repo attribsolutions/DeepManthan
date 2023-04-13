@@ -414,7 +414,7 @@ urlpatterns = [
             url(r'BankFilter$', BankListView.as_view()),
             
             url(r'PartyBankFilter$', PartyBanksFilterView.as_view()),
-            url(r'PartyBank$', PartyBanksView.as_view()),
+            url(r'PartyBankList$', PartyBanksListView.as_view()),
             url(r'PartyBankSave$', PartyBanksSaveView.as_view()),
 
 # Receipt
