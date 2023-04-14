@@ -1520,6 +1520,7 @@ class TC_ReceiptInvoices(models.Model):
     PaidAmount =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     AdvanceAmtAdjusted =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     flag = models.BooleanField(default=False)
+    Payment = models.ForeignKey(T_Receipts, related_name='Payment', on_delete=models.PROTECT,blank=True, null=True)
     class Meta:
         db_table = "TC_ReceiptInvoices"
   
