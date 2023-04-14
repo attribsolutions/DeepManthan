@@ -156,6 +156,13 @@ class LoadingSheetInvoicesView(CreateAPIView):
                             "GrandTotal": a['GrandTotal'],
                             "CreatedOn": a['CreatedOn'] 
                         })
+                    if(LoadingSheet != ''):
+                        Loadingsheetquery = T_LoadingSheet.objects.filter(id=LoadingSheet)
+                        LoadingSheetdata = LoadingSheetSerializer(Loadingsheetquery, many=True).data
+                        InvoiceListData.append({
+                            "LoadingSheetNo":LoadingSheetdata[0]['No'],
+                            "LoadingSheetDate":LoadingSheetdata[0]['Date']   
+                        })   
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
