@@ -157,6 +157,7 @@ class LoadingSheetInvoicesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+######################################## Loading Sheet Print API ##################################################
 
 class LoadingSheetPrintView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -244,7 +245,7 @@ class LoadingSheetPrintView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
+######################################## MultipleInvoice Loading Sheet Print API ##################################################
 class MultipleInvoicesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
@@ -258,7 +259,7 @@ class MultipleInvoicesView(CreateAPIView):
                 for InvoiceID in InvoiceIDs:
                     InvoiceQuery = T_Invoices.objects.filter(id=InvoiceID['id'])
                     if InvoiceQuery.exists():
-                        InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        InvoiceSerializedata = InvoiceSerializerThird(InvoiceQuery, many=True).data
                         
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
