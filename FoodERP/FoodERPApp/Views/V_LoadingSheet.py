@@ -132,12 +132,15 @@ class LoadingSheetInvoicesView(CreateAPIView):
                 ToDate = Invoicedata['ToDate']
                 Party = Invoicedata['Party']
                 Route = Invoicedata['Route']
+                LoadingSheet = Invoicedata['LoadingSheetID']
                 
-                if(Route == ''):
-                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
+                if(LoadingSheet == ''):
+                    if(Route == ''):
+                        query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
+                    else:
+                        query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
                 else:
-                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
-           
+                    query =  T_LoadingSheet.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_LoadingSheet join TC_LoadingSheetDetails ON T_LoadingSheet.id = TC_LoadingSheetDetails.LoadingSheet_id JOIN T_Invoices  ON TC_LoadingSheetDetails.Invoice_id = T_Invoices.id join M_Parties on M_Parties.id=  T_Invoices.Customer_id WHERE TC_LoadingSheetDetails.LoadingSheet_id =%s order by T_Invoices.id  ''', [LoadingSheet])
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
