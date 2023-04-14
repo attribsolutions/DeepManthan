@@ -1436,6 +1436,7 @@ class TC_PurchaseReturnItems(models.Model):
 
 class M_Bank(models.Model):
     Name = models.CharField(max_length=500)
+    Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
