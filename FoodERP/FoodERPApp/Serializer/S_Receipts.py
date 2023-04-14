@@ -18,7 +18,7 @@ class ReceiptInvoiceserializer(serializers.Serializer):
 class ReceiptInvoiceSerializer(serializers.ModelSerializer):
     class Meta :
         model= TC_ReceiptInvoices
-        fields = ['Invoice','GrandTotal','PaidAmount','AdvanceAmtAdjusted','flag']
+        fields = ['Invoice','GrandTotal','PaidAmount','AdvanceAmtAdjusted','flag','Payment']
 
 class ReceiptSerializer(serializers.ModelSerializer):
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
