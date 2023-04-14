@@ -127,20 +127,16 @@ class LoadingSheetInvoicesView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
-                
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
                 Party = Invoicedata['Party']
                 Route = Invoicedata['Route']
-                LoadingSheet = Invoicedata['LoadingSheetID']
                 
-                if(LoadingSheet == ''):
-                    if(Route == ''):
-                        query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
-                    else:
-                        query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
+                if(Route == ''):
+                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
                 else:
-                    query =  T_LoadingSheet.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_LoadingSheet join TC_LoadingSheetDetails ON T_LoadingSheet.id = TC_LoadingSheetDetails.LoadingSheet_id JOIN T_Invoices  ON TC_LoadingSheetDetails.Invoice_id = T_Invoices.id join M_Parties on M_Parties.id=  T_Invoices.Customer_id WHERE TC_LoadingSheetDetails.LoadingSheet_id =%s order by T_Invoices.id  ''', [LoadingSheet])
+                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
+                
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
@@ -156,18 +152,12 @@ class LoadingSheetInvoicesView(CreateAPIView):
                             "GrandTotal": a['GrandTotal'],
                             "CreatedOn": a['CreatedOn'] 
                         })
-                    if(LoadingSheet != ''):
-                        Loadingsheetquery = T_LoadingSheet.objects.filter(id=LoadingSheet)
-                        LoadingSheetdata = LoadingSheetSerializer(Loadingsheetquery, many=True).data
-                        InvoiceListData.append({
-                            "LoadingSheetNo":LoadingSheetdata[0]['No'],
-                            "LoadingSheetDate":LoadingSheetdata[0]['Date']   
-                        })   
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+######################################## Loading Sheet Print API ##################################################
 
 class LoadingSheetPrintView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -255,7 +245,7 @@ class LoadingSheetPrintView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
+######################################## MultipleInvoice Loading Sheet Print API ##################################################
 class MultipleInvoicesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
@@ -269,7 +259,7 @@ class MultipleInvoicesView(CreateAPIView):
                 for InvoiceID in InvoiceIDs:
                     InvoiceQuery = T_Invoices.objects.filter(id=InvoiceID['id'])
                     if InvoiceQuery.exists():
-                        InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        InvoiceSerializedata = InvoiceSerializerThird(InvoiceQuery, many=True).data
                         
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
