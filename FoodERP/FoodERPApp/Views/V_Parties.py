@@ -159,7 +159,7 @@ class M_PartiesViewSecond(CreateAPIView):
                         })
                   
                     M_Parties_serializer.extend(PartySubPartyList)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':M_Parties_serializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':M_Parties_serializer[0]})
                     
                     
         except Exception as e:

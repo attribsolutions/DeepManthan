@@ -125,6 +125,7 @@ urlpatterns = [
             url(r'UserList/([0-9]+)$', UserListViewSecond.as_view()),
             url(r'UserList$', UserListView.as_view()),
             #PartyDropdownforloginpage/EmployeeID
+            # url(r'Muiltiple$', MultipleReceiptView.as_view()),
             # This below API used for Dropdown populated when user have multiple role and parties.
             url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
             url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
@@ -422,6 +423,8 @@ urlpatterns = [
             url(r'Receipt/([0-9]+)$', ReceiptView.as_view()),
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
+            
+            
             
             # Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
