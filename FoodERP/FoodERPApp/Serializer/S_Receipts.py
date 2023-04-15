@@ -7,8 +7,10 @@ from ..Serializer.S_Parties import  *
 class ReceiptInvoiceserializer(serializers.Serializer):
    
     Receipt_id=serializers.IntegerField()
+    Customer_id=serializers.IntegerField()
     Invoice_ID=serializers.IntegerField()
     InvoiceDate = serializers.DateField()
+    CustomerName=serializers.CharField(max_length=100)
     FullInvoiceNumber=serializers.CharField(max_length=100)
     GrandTotal=serializers.DecimalField(max_digits=10, decimal_places=2)  
     PaidAmount=serializers.DecimalField(max_digits=10, decimal_places=2)  
