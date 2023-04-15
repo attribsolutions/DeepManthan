@@ -29,7 +29,7 @@ class ReceiptInvoiceSerializer(serializers.ModelSerializer):
 
 class ReceiptSerializer(serializers.ModelSerializer):
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
-    PaymentReceipt=PaymentReceiptSerializer()
+    PaymentReceipt=PaymentReceiptSerializer(many=True)
     class Meta :
         model= T_Receipts
         fields = ['ReceiptDate', 'ReceiptNo', 'Description', 'AmountPaid', 'ChequeDate','BalanceAmount', 'OpeningBalanceAdjusted', 'DocumentNo' , 'Bank', 'Customer', 'DepositorBank', 'Party', 'CreatedBy', 'UpdatedBy', 'FullReceiptNumber', 'ReceiptMode', 'ReceiptType','ReceiptInvoices','PaymentReceipt']
