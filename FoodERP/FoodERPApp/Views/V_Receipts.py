@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_Receipts import *
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from datetime import date
 from ..models import *
 
@@ -29,7 +29,7 @@ class ReceiptInvoicesView(CreateAPIView):
                     Receiptinvoicequery = TC_ReceiptInvoices.objects.raw('''SELECT '0' id,TC_ReceiptInvoices.Receipt_id,T_Invoices.id as Invoice_ID ,T_Invoices.InvoiceDate,T_Invoices.FullInvoiceNumber,T_Invoices.Customer_id,M_Parties.Name AS CustomerName, T_Invoices.GrandTotal,SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)) PaidAmount,(T_Invoices.GrandTotal - SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)))  BalAmt FROM T_Invoices LEFT JOIN TC_ReceiptInvoices ON T_Invoices.id=TC_ReceiptInvoices.Invoice_id JOIN M_Parties ON M_Parties.id= T_Invoices.Customer_id  WHERE T_Invoices.id NOT IN (SELECT Invoice_id FROM TC_ReceiptInvoices) AND T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id	''', ([Party], [Customer]))
                 else:
                     Receiptinvoicequery = TC_ReceiptInvoices.objects.raw('''SELECT '0' id,TC_ReceiptInvoices.Receipt_id,T_Invoices.id as Invoice_ID ,T_Invoices.InvoiceDate,T_Invoices.FullInvoiceNumber,T_Invoices.Customer_id,M_Parties.Name AS CustomerName, T_Invoices.GrandTotal,SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)) PaidAmount,(T_Invoices.GrandTotal - SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)))  BalAmt FROM T_Invoices LEFT JOIN TC_ReceiptInvoices ON T_Invoices.id=TC_ReceiptInvoices.Invoice_id JOIN M_Parties ON M_Parties.id= T_Invoices.Customer_id  WHERE T_Invoices.Party_id=%s AND T_Invoices.id IN %s  GROUP BY T_Invoices.id	''', ([Party],Invoice_list))
-                    
+                    # print(str(Receiptinvoicequery.query))  
                 ReceiptInvoiceSerializer = ReceiptInvoiceserializer(Receiptinvoicequery, many=True).data
                 ReceiptInvoiceList = list()
                 for a in ReceiptInvoiceSerializer:
@@ -224,9 +224,10 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                 Customer = Receiptdata['CustomerID']
                 ReceiptType = Receiptdata['ReceiptType']
                 if(Customer == ''):
-                   
-                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType)
-                   
+                    subquery = TC_ReceiptInvoices.objects.filter().values('Payment')
+                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType).filter(~Q(T_Receipts.id).notin_(subquery))
+                    print(query.query)
+                 
                 else:    
                     query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, Party=Customer, ReceiptType=ReceiptType)
                
