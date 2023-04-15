@@ -126,6 +126,7 @@ class ReceiptView(CreateAPIView):
                     Receipt_serializer = ReceiptSerializer(data=aa)
                     if Receipt_serializer.is_valid():
                         Receipt_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})   
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
