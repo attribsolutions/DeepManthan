@@ -224,10 +224,7 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                 Customer = Receiptdata['CustomerID']
                 ReceiptType = Receiptdata['ReceiptType']
                 if(Customer == ''):
-                    subquery = TC_ReceiptInvoices.objects.filter().values('Payment')
-                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType).filter(~Q(T_Receipts.id).notin_(subquery))
-                    print(query.query)
-                 
+                    query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType)
                 else:    
                     query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, Party=Customer, ReceiptType=ReceiptType)
                
