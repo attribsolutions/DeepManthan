@@ -56,7 +56,7 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
     Bank = BankSerializer(read_only=True)
     DepositorBank = BankSerializer(read_only=True)
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
-    PaymentReceipt=PaymentReceiptSerializer()
+    PaymentReceipt=PaymentReceiptSerializer(read_only=True,many=True)
     
     class Meta:
         model = T_Receipts
@@ -76,6 +76,9 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
             ret["ReceiptMode"] = {"id": None, "Name": None}  
         
         if not ret.get("ReceiptType", None):
-            ret["ReceiptType"] = {"id": None, "Name": None}      
+            ret["ReceiptType"] = {"id": None, "Name": None}
+        
+        if not ret.get("PaymentReceipt", None):
+            ret["PaymentReceipt"] = {"id": None, "Payment": None}          
                   
         return ret            
