@@ -1519,10 +1519,14 @@ class TC_ReceiptInvoices(models.Model):
     GrandTotal =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     PaidAmount =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     AdvanceAmtAdjusted =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
-    flag = models.BooleanField(default=False)
-    Payment = models.ForeignKey(T_Receipts, related_name='Payment', on_delete=models.PROTECT,blank=True, null=True)
     class Meta:
         db_table = "TC_ReceiptInvoices"
+        
+class TC_PaymentReceipt(models.Model):
+    Receipt = models.ForeignKey(T_Receipts, related_name='PaymentReceipt', on_delete=models.CASCADE)
+    Payment = models.ForeignKey(T_Receipts, on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_PaymentReceipt"        
   
         
 class T_CreditDebitNotes(models.Model):
