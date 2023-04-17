@@ -71,19 +71,56 @@ class LoadingSheetView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
-    @transaction.atomic()
-    def get(self, request,id=0):
+    def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Loadingsheetquery = T_LoadingSheet.objects.filter(id=id)
-                if Loadingsheetquery.exists():
-                    LoadingSheetdata = LoadingSheetSerializer(Loadingsheetquery, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetdata})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Not available ', 'Data': []})
-        except M_Routes.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Loading Sheet Not available', 'Data': []})
+                query = T_LoadingSheet.objects.filter(id=id)
+                LoadingSheet_Serializer = LoadingSheetListSerializer(query, many=True).data
+                InvoiceData = list()
+                LoadingSheetListData = list()
+                for a in LoadingSheet_Serializer:
+                    LoadingSheetListData.append({
+                        "id": a['id'],
+                        "Date": a['Date'],
+                        "Party":a['Party']['Name'],
+                        "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
+                        "LoadingSheetNo": a['No'],
+                        "RouteName": a['Route']['Name'],
+                        "TotalAmount": a['TotalAmount'],
+                        "InvoiceCount": a['InvoiceCount'],
+                        "VehicleNo": a['Vehicle']['VehicleNumber'],
+                        "VehicleType": a['Vehicle']['VehicleType']['Name'],
+                        "DriverName": a['Driver']['Name'],
+                        "CreatedOn" : a['CreatedOn']
+                    })
+                q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
+                InvoiceQuery = T_Invoices.objects.filter(id__in=q1)
+                if InvoiceQuery.exists():
+                    InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                    InvoiceParent = list()
+                    for a in InvoiceSerializedata:
+                        InvoiceParent.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "InvoiceNumber": a['InvoiceNumber'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                        })
+                    InvoiceData.append({
+                        "PartyDetails":LoadingSheetListData[0],
+                        "InvoiceParent":InvoiceParent,
+                    })    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
     @transaction.atomic()
@@ -127,7 +164,6 @@ class LoadingSheetInvoicesView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
-                
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
                 Party = Invoicedata['Party']
@@ -137,7 +173,7 @@ class LoadingSheetInvoicesView(CreateAPIView):
                     query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
                 else:
                     query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
-           
+                
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
@@ -158,6 +194,7 @@ class LoadingSheetInvoicesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+######################################## Loading Sheet Print API ##################################################
 
 class LoadingSheetPrintView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -245,7 +282,7 @@ class LoadingSheetPrintView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-
+######################################## MultipleInvoice Loading Sheet Print API ##################################################
 class MultipleInvoicesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
@@ -259,7 +296,7 @@ class MultipleInvoicesView(CreateAPIView):
                 for InvoiceID in InvoiceIDs:
                     InvoiceQuery = T_Invoices.objects.filter(id=InvoiceID['id'])
                     if InvoiceQuery.exists():
-                        InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        InvoiceSerializedata = InvoiceSerializerThird(InvoiceQuery, many=True).data
                         
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
