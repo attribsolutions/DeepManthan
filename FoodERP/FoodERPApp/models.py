@@ -1406,6 +1406,7 @@ class T_PurchaseReturn(models.Model):
 
 class TC_PurchaseReturnItems(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Returnitems', on_delete=models.CASCADE)
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='Returnreason', on_delete=models.PROTECT, blank=True, null=True)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
