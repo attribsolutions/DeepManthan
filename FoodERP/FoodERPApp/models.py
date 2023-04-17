@@ -1452,6 +1452,7 @@ class MC_PartyBanks(models.Model):
     Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
     IFSC = models.CharField(max_length=500,blank=True, null=True)
     BranchName = models.CharField(max_length=500,blank=True, null=True)
+    CustomerBank = models.BooleanField(default=False)
     AccountNo = models.CharField(max_length=500,blank=True, null=True)
     IsSelfDepositoryBank = models.BooleanField(default=False)
     IsDefault = models.BooleanField(default=False)
@@ -1519,9 +1520,14 @@ class TC_ReceiptInvoices(models.Model):
     GrandTotal =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     PaidAmount =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     AdvanceAmtAdjusted =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
-    flag = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_ReceiptInvoices"
+        
+class TC_PaymentReceipt(models.Model):
+    Receipt = models.ForeignKey(T_Receipts, related_name='PaymentReceipt', on_delete=models.CASCADE,blank=True, null=True)
+    Payment = models.ForeignKey(T_Receipts, on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_PaymentReceipt"        
   
         
 class T_CreditDebitNotes(models.Model):
