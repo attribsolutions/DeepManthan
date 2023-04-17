@@ -1452,6 +1452,7 @@ class MC_PartyBanks(models.Model):
     Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
     IFSC = models.CharField(max_length=500,blank=True, null=True)
     BranchName = models.CharField(max_length=500,blank=True, null=True)
+    CustomerBank = models.BooleanField(default=False)
     AccountNo = models.CharField(max_length=500,blank=True, null=True)
     IsSelfDepositoryBank = models.BooleanField(default=False)
     IsDefault = models.BooleanField(default=False)
