@@ -1584,7 +1584,7 @@ class TC_CreditDebitNoteItems(models.Model):
 class M_ImportFields(models.Model):
     FieldName = models.CharField(max_length=500)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
-    FieldDataType = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
+    FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
     
     class Meta:
