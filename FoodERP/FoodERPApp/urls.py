@@ -436,7 +436,8 @@ urlpatterns = [
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
 
 #ImportField
-             url(r'ImportField$', ImportFieldSaveView.as_view()),          
+            url(r'ImportField$', ImportFieldSaveView.as_view()),    
+            url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),      
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
