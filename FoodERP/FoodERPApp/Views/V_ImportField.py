@@ -48,5 +48,25 @@ class PartyImportFieldFilterView(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ImportField_serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class PartyImportFieldView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                PartyImportField_data = JSONParser().parse(request)
+                PartyImport_serializer = PartyImportFieldsSerializer(data=PartyImportField_data)
+                if PartyImport_serializer.is_valid():
+                    PartyImport_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'PartyImportFields Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': PartyImport_serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                
+                
         
