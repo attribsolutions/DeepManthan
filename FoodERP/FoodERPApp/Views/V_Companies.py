@@ -142,7 +142,7 @@ class C_CompaniesView(CreateAPIView):
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     "Company": 1,
-                    "EmployeeType": 1,
+                    "EmployeeType": 2,
                     "State": 22,
                     "District": 26,
                     "EmployeeParties": [
