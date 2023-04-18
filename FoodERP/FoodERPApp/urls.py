@@ -111,6 +111,8 @@ from .Views.V_CreditDebit import *
 
 from .Views.V_CommFunction import *
 
+from .Views.V_ImportField import *
+
 
 urlpatterns = [
     
@@ -232,7 +234,7 @@ urlpatterns = [
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
-            url(r'InvoicesList$', InVoiceListView.as_view()),
+            url(r'InvoiceNoList$', InvoiceNoView.as_view()),
             
 
 #Loading Sheet All APIs
@@ -431,7 +433,12 @@ urlpatterns = [
             
 #CreditDebit 
             url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),  
-            url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()),           
+            url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
+
+#ImportField
+            url(r'ImportField$', ImportFieldSaveView.as_view()),    
+            url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
+            url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),      
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
@@ -452,5 +459,6 @@ urlpatterns = [
             url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
+
 
 ]
