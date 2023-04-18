@@ -330,11 +330,10 @@ class InvoiceViewSecond(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
 
-class InVoiceListView(CreateAPIView):
+class InvoiceNoView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
-    
     @transaction.atomic()
 
     def post(self, request, id=0):
@@ -344,14 +343,12 @@ class InVoiceListView(CreateAPIView):
                 Party = InVoice_Data['PartyID']
                 Customer = InVoice_Data['CustomerID']
                 query = T_Invoices.objects.filter(Party=Party,Customer=Customer)
-                
                 if query.exists:
                     Invoice_Serializer = InvoiceSerializerSecond(query,many=True).data
-
                     InvoiceList = list()
                     for a in Invoice_Serializer:
                         InvoiceList.append({
-                            "InvoiceID":a['id'],
+                            "Invoice":a['id'],
                             "FullInvoiceNumber":a['FullInvoiceNumber'],
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
