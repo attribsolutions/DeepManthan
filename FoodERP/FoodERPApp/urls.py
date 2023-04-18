@@ -232,7 +232,7 @@ urlpatterns = [
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
-            url(r'InvoicesList$', InVoiceListView.as_view()),
+            url(r'InvoiceNoList$', InvoiceNoView.as_view()),
             
 
 #Loading Sheet All APIs
