@@ -50,4 +50,117 @@ class AbcView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
         except Exception as e :
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[e]})
+        
+        
+        
+        
+# class MultipleReceiptView(CreateAPIView):
+    
+    # permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    # @transaction.atomic()
+    # def post(self, request):
+    #     try:
+    #         with transaction.atomic():
+    #             Receiptdata = JSONParser().parse(request)
+    #             for aa in  Receiptdata['data']:   
+    #                 Party = aa['Party']
+    #                 Date = aa['ReceiptDate']
+    #                 '''Get Max Receipt Number'''
+    #                 a = GetMaxNumber.GetReceiptNumber(Party,Date)
+    #                 aa['ReceiptNo'] = a
+    #                 '''Get Receipt Prifix '''
+    #                 b = GetPrifix.GetReceiptPrifix(Party)
+    #                 aa['FullReceiptNumber'] = b+""+str(a)
+    #                 Receipt_serializer = ReceiptSerializer(data=aa)
+    #                 if Receipt_serializer.is_valid():
+    #                     Receipt_serializer.save()
+    #             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})    
+    #     except Exception as e:
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+                
+        # JSON BODY Above Code    
+        # {
+        #         "data": [
+        #         {
+        #             "ReceiptDate": "2023-04-13",
+        #             "Description": "",
+        #             "AmountPaid": "32.00",
+        #             "BalanceAmount": "",
+        #             "OpeningBalanceAdjusted": "",
+        #             "DocumentNo": "",
+        #             "AdvancedAmountAjusted": "",
+        #             "Customer": 1,
+        #             "ChequeDate": "",
+        #             "Party": 4,
+        #             "ReceiptMode": 31,
+        #             "ReceiptType": 29,
+        #             "CreatedBy": 5,
+        #             "UpdatedBy": 5,
+        #             "ReceiptInvoices": [
+        #                 {
+        #                     "Invoice": 21,
+        #                     "GrandTotal": "32.00",
+        #                     "PaidAmount": "32",
+        #                     "flag": 0
+        #                 }
+        #             ]
+        #         },
+        #         {
+        #             "ReceiptDate": "2023-04-13",
+        #             "Description": "",
+        #             "AmountPaid": "76.00",
+        #             "BalanceAmount": "",
+        #             "OpeningBalanceAdjusted": "",
+        #             "DocumentNo": "",
+        #             "AdvancedAmountAjusted": "",
+        #             "Customer": 1,
+        #             "ChequeDate": "",
+        #             "Party": 4,
+        #             "ReceiptMode": 31,
+        #             "ReceiptType": 29,
+        #             "CreatedBy": 5,
+        #             "UpdatedBy": 5,
+        #             "ReceiptInvoices": [
+        #                 {
+        #                     "Invoice": 22,
+        #                     "GrandTotal": "276.00",
+        #                     "PaidAmount": "76",
+        #                     "flag": 0
+        #                 }
+        #             ]
+        #         }
+        #     ]
+        # }
+        
+    # @transaction.atomic()
+    # def post(self, request):
+    #         try:
+    #             with transaction.atomic():
+    #                 Receiptdata = JSONParser().parse(request)
+    #                 studentsList=[]
+    #                 for jsonObj in Receiptdata:
+    #                     studentDict = json.loads(jsonObj)
+    #                     studentsList.append(studentDict)
+                    
+    #                 for cc in studentsList: 
+    #                     Party = cc['Party']
+    #                     Date = cc['ReceiptDate']
+    #                     '''Get Max Receipt Number'''
+    #                     a = GetMaxNumber.GetReceiptNumber(Party,Date)
+                       
+    #                     cc['ReceiptNo'] = a
+    #                     '''Get Receipt Prifix '''
+    #                     b = GetPrifix.GetReceiptPrifix(Party)
+                    
+    #                     cc['FullReceiptNumber'] = b+""+str(a)
+                       
+    #                     Receipt_serializer = ReceiptSerializer(data=cc)
+    #                     if Receipt_serializer.is_valid():
+    #                         Receipt_serializer.save()
+    #                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})
+    #                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
+    #         except Exception as e:
+    #             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
          

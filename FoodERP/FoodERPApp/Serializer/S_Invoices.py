@@ -67,12 +67,19 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
         fields = '__all__'
        
        
+class InvoicesReferencesSerializerSecond(serializers.ModelSerializer):
+    Order = OrderserializerforInvoice(read_only=True)
+    class Meta:
+        model = TC_InvoicesReferences
+        fields = '__all__'
+        
+        
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
     Order = OrderserializerforInvoice(read_only=True)
     class Meta:
         model = TC_InvoicesReferences
         # fields = '__all__'
-        fields = ['Order'] 
+        fields = ['Order']         
          
 class InvoiceItemsSerializer(serializers.ModelSerializer):
     
@@ -168,7 +175,30 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
             ret["Vehicle"] = {"id": None, "VehicleNumber": None}
         
         return ret          
+
+
+class InvoiceSerializerThird(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
+    InvoiceItems = InvoiceItemsSerializerSecond(many=True)
+    InvoicesReferences = InvoicesReferencesSerializerSecond(many=True)
+    Driver= M_DriverSerializer(read_only=True)
+    Vehicle = VehiclesSerializer(read_only=True)
+    class Meta:
+        model = T_Invoices
+        fields = '__all__'
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(InvoiceSerializerThird, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Driver", None):
+            ret["Driver"] = {"id": None, "Name": None}
+            
+        if not ret.get("Vehicle", None):
+            ret["Vehicle"] = {"id": None, "VehicleNumber": None}
         
+        return ret         
             
 
 class InvoiceSerializerForDelete(serializers.ModelSerializer):

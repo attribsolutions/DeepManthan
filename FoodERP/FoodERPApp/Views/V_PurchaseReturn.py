@@ -38,4 +38,14 @@ class PurchaseReturnView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 
-
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                PurchaseReturndata = T_PurchaseReturn.objects.get(id=id)
+                PurchaseReturndata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data':[]})
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Return used in another table', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})

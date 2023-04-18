@@ -125,6 +125,7 @@ urlpatterns = [
             url(r'UserList/([0-9]+)$', UserListViewSecond.as_view()),
             url(r'UserList$', UserListView.as_view()),
             #PartyDropdownforloginpage/EmployeeID
+            # url(r'Muiltiple$', MultipleReceiptView.as_view()),
             # This below API used for Dropdown populated when user have multiple role and parties.
             url(r'PartyDropdownforloginpage/([0-9]+)$', UserPartiesForLoginPage.as_view()), 
             url(r'GetEmployeeForUserCreation$',GetEmployeeViewForUserCreation.as_view()),
@@ -231,7 +232,7 @@ urlpatterns = [
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
-            
+            url(r'InvoicesList$', InVoiceListView.as_view()),
             
 
 #Loading Sheet All APIs
@@ -409,15 +410,13 @@ urlpatterns = [
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
             
 # BankMaster
-            # url(r'Bank/([0-9]+)$', BankView.as_view()),
-            # url(r'Bank$', BankView.as_view()),
-            # url(r'BankFilter$', BankListView.as_view()),
+            url(r'Bank/([0-9]+)$', BankView.as_view()),
+            url(r'Bank$', BankView.as_view()),
+            url(r'BankFilter$', BankListView.as_view()),
             
-            url(r'PartyBankFilter$', PartyBanksFilterView.as_view()),
-            url(r'PartyBank$', PartyBanksView.as_view()),
+            url(r'PartyBanksFilter$', PartyBanksFilterView.as_view()),
+            url(r'PartyBankList$', PartyBanksListView.as_view()),
             url(r'PartyBankSave$', PartyBanksSaveView.as_view()),
-            
-            
 
 # Receipt
             url(r'ReceiptInvoices$', ReceiptInvoicesView.as_view()),
@@ -425,14 +424,10 @@ urlpatterns = [
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
             
+            
+            
             # Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
-            
-            
-            
-            
-            
-            
             
 #CreditDebit 
             url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),  

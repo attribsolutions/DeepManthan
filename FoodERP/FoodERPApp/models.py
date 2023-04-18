@@ -1406,6 +1406,7 @@ class T_PurchaseReturn(models.Model):
 
 class TC_PurchaseReturnItems(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Returnitems', on_delete=models.CASCADE)
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='Returnreason', on_delete=models.PROTECT, blank=True, null=True)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
@@ -1436,6 +1437,7 @@ class TC_PurchaseReturnItems(models.Model):
 
 class M_Bank(models.Model):
     Name = models.CharField(max_length=500)
+    Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1451,6 +1453,7 @@ class MC_PartyBanks(models.Model):
     Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
     IFSC = models.CharField(max_length=500,blank=True, null=True)
     BranchName = models.CharField(max_length=500,blank=True, null=True)
+    CustomerBank = models.BooleanField(default=False)
     AccountNo = models.CharField(max_length=500,blank=True, null=True)
     IsSelfDepositoryBank = models.BooleanField(default=False)
     IsDefault = models.BooleanField(default=False)
@@ -1518,9 +1521,14 @@ class TC_ReceiptInvoices(models.Model):
     GrandTotal =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     PaidAmount =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
     AdvanceAmtAdjusted =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
-    flag = models.BooleanField(default=False)
     class Meta:
         db_table = "TC_ReceiptInvoices"
+        
+class TC_PaymentReceipt(models.Model):
+    Receipt = models.ForeignKey(T_Receipts, related_name='PaymentReceipt', on_delete=models.CASCADE,blank=True, null=True)
+    Payment = models.ForeignKey(T_Receipts, on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_PaymentReceipt"        
   
         
 class T_CreditDebitNotes(models.Model):
@@ -1570,7 +1578,23 @@ class TC_CreditDebitNoteItems(models.Model):
     BatchCode = models.CharField(max_length=500)
     
     class Meta:
-        db_table = "TC_CreditDebitNoteItems"                
+        db_table = "TC_CreditDebitNoteItems"  
+        
+class M_ImportField(models.Model):
+    FieldName = models.CharField(max_length=500)
+    FieldDataType = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
+    IsCompulsory = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = "M_ImportFields"
+        
+class MC_PartyImportFields(models.Model):
+    ImportField = models.ForeignKey(M_ImportField, related_name='ImportFields',on_delete=models.DO_NOTHING)
+    Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
+    Value =models.CharField(max_length=500)
+    class Meta:
+        db_table = "MC_PartyImportFields"
+                              
    
         
     
