@@ -1581,18 +1581,4 @@ class TC_CreditDebitNoteItems(models.Model):
         db_table = "TC_CreditDebitNoteItems"  
     
         
-                        
-class M_ImportFields(models.Model):
-    FieldName = models.CharField(max_length=500)
-    FieldDataType = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
-    IsCompulsory = models.BooleanField(default=False)
-    
-    class Meta:
-        db_table = "M_ImportFields"
-        
-class MC_PartyImportFields(models.Model):
-    ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.DO_NOTHING)
-    Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
-    Value =models.CharField(max_length=500)
-    class Meta:
-        db_table = "MC_PartyImportFields"
+ 
