@@ -19,7 +19,8 @@ class PartyImportFieldSerializerList(serializers.Serializer):
     IsCompulsory = serializers.BooleanField(default=False)
     ControlType_id = serializers.IntegerField()
     FieldValidation_id = serializers.IntegerField()
-    Value =serializers.CharField(max_length=500)
+    Value = serializers.CharField(max_length=500)
+    Party_id = serializers.IntegerField()
     ControlTypeName =serializers.CharField(max_length=500)
     FieldValidationName = serializers.CharField(max_length=500)
          
