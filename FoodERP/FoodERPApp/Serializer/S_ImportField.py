@@ -13,7 +13,6 @@ class PartyImportFieldsSerializer(serializers.ModelSerializer):
 
 #Show PartyImportfields Data List serializer
 
-         
 class PartyImportFieldSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     FieldName = serializers.CharField(max_length=500)

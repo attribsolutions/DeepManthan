@@ -437,7 +437,8 @@ urlpatterns = [
 
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),    
-            url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),      
+            url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
+            url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),      
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
