@@ -110,7 +110,8 @@ from .Views.V_Receipts import *
 from .Views.V_CreditDebit import *
 
 from .Views.V_CommFunction import *
-from.Views.V_ImportField import *
+
+from .Views.V_ImportField import *
 
 
 urlpatterns = [
@@ -456,10 +457,6 @@ urlpatterns = [
             url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
-
-#OpeningBalance
-            url(r'OpeningBalance$', OpeningBalanceView.as_view()),
-
 
 
 ]
