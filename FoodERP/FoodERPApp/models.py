@@ -1433,6 +1433,13 @@ class TC_PurchaseReturnItems(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
+        
+class TC_PurchaseReturnItemImages(models.Model):
+    PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnitemsImages', on_delete=models.CASCADE)
+    ImageType= models.ForeignKey(M_ImageTypes, related_name='RImageType', on_delete=models.DO_NOTHING)
+    Item_pic = models.TextField()
+    class Meta:
+        db_table = "TC_PurchaseReturnItemImages"        
 
 
 class M_Bank(models.Model):
@@ -1600,3 +1607,7 @@ class MC_PartyImportFields(models.Model):
     
     class Meta:
         db_table = "MC_PartyImportFields"
+        
+        
+        
+        
