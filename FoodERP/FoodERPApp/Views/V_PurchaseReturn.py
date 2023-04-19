@@ -6,6 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_CreditDebit import *
+from ..Serializer.S_Items import *
 from django.db.models import Sum
 from ..models import *
 
@@ -49,3 +50,101 @@ class PurchaseReturnView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Return used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+        
+        
+        
+class ReturnItemAddView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = M_Items.objects.filter(id=id)
+                if query.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Itemsdata = ItemSerializerSecond(query, many=True).data
+                    # return JsonResponse({'query':  Itemsdata})
+                    ItemData=list()
+                    for a in Itemsdata:
+                        UnitDetails=list()
+                        for d in a['ItemUnitDetails']:
+                            if d['IsDeleted']== 0 :
+                                UnitDetails.append({
+                                    "id": d['id'],
+                                    "UnitID": d['UnitID']['id'],
+                                    "UnitName": d['UnitID']['Name'],
+                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                    "IsBase": d['IsBase'],
+                                    "PODefaultUnit": d['PODefaultUnit'],
+                                    "SODefaultUnit": d['SODefaultUnit'],
+                                
+                                })
+                        
+                        MRPDetails=list()
+                        for g in a['ItemMRPDetails']:
+                            if g['IsDeleted']== 0 :
+                                MRPDetails.append({
+                                    "id": g['id'],
+                                    "EffectiveDate": g['EffectiveDate'],
+                                    "Company": g['Company']['id'],
+                                    "CompanyName": g['Company']['Name'],
+                                    "MRP": g['MRP'],
+                                    "Party": g['Party']['id'],
+                                    "PartyName": g['Party']['Name'],
+                                    "Division":g['Division']['id'],
+                                    "DivisionName":g['Division']['Name'],
+                                    "CreatedBy":g['CreatedBy'],
+                                    "UpdatedBy":g['UpdatedBy'],
+                                    "IsAdd":False
+                                })
+                        
+                        MarginDetails=list()
+                        for h in a['ItemMarginDetails']:
+                            if h['IsDeleted']== 0 :
+                                MarginDetails.append({
+                                    "id": h['id'],
+                                    "EffectiveDate": h['EffectiveDate'],
+                                    "Company": h['Company']['id'],
+                                    "CompanyName": h['Company']['Name'],
+                                    "Party": h['Party']['id'],
+                                    "PartyName": h['Party']['Name'],
+                                    "Margin": h['Margin'],
+                                    "CreatedBy":h['CreatedBy'],
+                                    "UpdatedBy":h['UpdatedBy'],
+                                    "PriceList":h['PriceList']['id'],
+                                    "PriceListName":h['PriceList']['Name'],
+                                    "IsAdd":False   
+                                })
+                        
+                        GSTHSNDetails=list()
+                        for i in a['ItemGSTHSNDetails']:
+                            if i['IsDeleted']== 0 :
+                                GSTHSNDetails.append({
+                                    "id": i['id'],
+                                    "EffectiveDate": i['EffectiveDate'],
+                                    "GSTPercentage": i['GSTPercentage'],
+                                    "HSNCode": i['HSNCode'],
+                                    "Company": i['Company']['id'],
+                                    "CompanyName": i['Company']['Name'],
+                                    "CreatedBy":i['CreatedBy'],
+                                    "UpdatedBy":i['UpdatedBy'],
+                                    "IsAdd":False
+                                })
+                        ItemData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "ItemUnitDetails": UnitDetails, 
+                            "ItemMRPDetails":MRPDetails,
+                            "ItemMarginDetails":MarginDetails, 
+                            "ItemGSTHSNDetails":GSTHSNDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
+        except M_Items.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
