@@ -139,7 +139,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                     
                     GetAllData = list()
 
-                    Employeeparties = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, m_parties.Name FROM mc_employeeparties join m_parties on m_parties.id = mc_employeeparties.Party_id where Employee_id=%s''', ([id]))
+                    Employeeparties = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, m_parties.Name FROM MC_EmployeeParties join m_parties on m_parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
                     EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(Employeeparties, many=True).data
                     
                     EmployeeParties = list()
