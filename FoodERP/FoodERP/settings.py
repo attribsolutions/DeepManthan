@@ -26,7 +26,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145'] 
+ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
 
 
 # Application definition
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
-    # 'activity_log',
+    'activity_log',
 ]
 
 MIDDLEWARE = [
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'activity_log.middleware.ActivityLogMiddleware',
+    'activity_log.middleware.ActivityLogMiddleware',
 ]
 
 ROOT_URLCONF = 'FoodERP.urls'
@@ -68,7 +68,7 @@ TEMPLATES = [
                 # 'django.template.context_processors.debug',
                 # 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                # 'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -77,8 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
-# DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-# DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -86,10 +86,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm20230408',
+        'NAME': 'chitalescm20230310',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
     ,
@@ -98,7 +98,7 @@ DATABASES = {
         'NAME': 'transactionlogdb',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
 }
@@ -107,25 +107,25 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
-# ACTIVITYLOG_AUTOCREATE_DB = True
-# # Log anonymous actions?
-# ACTIVITYLOG_ANONYMOUS = True
-# # Update last activity datetime in user profile. Needs updates for user model.
-# ACTIVITYLOG_LAST_ACTIVITY = True
+ACTIVITYLOG_AUTOCREATE_DB = True
+# Log anonymous actions?
+ACTIVITYLOG_ANONYMOUS = True
+# Update last activity datetime in user profile. Needs updates for user model.
+ACTIVITYLOG_LAST_ACTIVITY = True
 
-# # Only this methods will be logged
-# ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
+# Only this methods will be logged
+ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
 
-# # List of response statuses, which logged. By default - all logged.
-# # Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
-# ACTIVITYLOG_STATUSES = (200, )
+# List of response statuses, which logged. By default - all logged.
+# Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
+ACTIVITYLOG_STATUSES = (200, )
 
-# # List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
-# # ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
+# List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
+# ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
 
-# # URL substrings, which ignores
-# ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
-# ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
+# URL substrings, which ignores
+ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
+ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -249,7 +249,7 @@ SIMPLE_JWT = {
     "JWK_URL": None,
     "LEEWAY": 0,
 
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_TYPES": ("Bearer",), 
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
