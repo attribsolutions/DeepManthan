@@ -113,6 +113,7 @@ from .Views.V_CommFunction import *
 
 from .Views.V_ImportField import *
 
+from .Views.V_PurchaseReturn import *
 
 urlpatterns = [
     
@@ -438,7 +439,11 @@ urlpatterns = [
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),    
             url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
-            url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),      
+            url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),
+            
+# Sales Return
+            url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),  
+
     
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
