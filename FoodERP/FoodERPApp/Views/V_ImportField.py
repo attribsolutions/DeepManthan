@@ -62,6 +62,9 @@ class PartyImportFieldView(CreateAPIView):
                 PartyImportField_data = JSONParser().parse(request)
                 PartyImport_serializer = PartyImportFieldsSerializer(data=PartyImportField_data)
                 if PartyImport_serializer.is_valid():
+                    id = PartyImport_serializer.data[0]['Party']
+                    PartyImortField_data = MC_PartyImportFields.objects.filter(Party=id)
+                    PartyImortField_data.delete()
                     PartyImport_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'PartyImportFields Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': PartyImport_serializer.errors, 'Data': []})
