@@ -442,7 +442,8 @@ urlpatterns = [
             url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),
             
 # Sales Return
-            url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),  
+            url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),
+            url(r'ReturnSave/([0-9]+)$', PurchaseReturnView.as_view()),  
 
     
 # RoleAccess========================================= 
