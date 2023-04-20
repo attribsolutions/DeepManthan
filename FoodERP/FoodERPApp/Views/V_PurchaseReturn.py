@@ -11,6 +11,56 @@ from django.db.models import Sum
 from ..models import *
 
 
+class PurchaseReturnListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Returndata = JSONParser().parse(request)
+                FromDate = Returndata['FromDate']
+                ToDate = Returndata['ToDate']
+                Customer = Returndata['CustomerID']
+                Party = Returndata['PartyID']
+
+                if(Customer == ''):
+                    
+                    query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Party=Party)
+                    
+                else:
+                    
+                    query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Customer=Customer, Party=Party)
+                    
+                if query:
+                    Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
+                    ReturnListData = list()
+                    for a in Return_serializer:
+                        ReturnListData.append({
+                            "id": a['id'],
+                            "ReturnDate": a['ReceiptDate'],
+                            "ReturnNo": a['ReturnNo'],
+                            "FullReceiptNumber": a['FullReceiptNumber'],
+                            "ReturnReason":a['ReturnReason']['id'],
+                            "ReturnReason":a['ReturnReason']['Name'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount'],
+                            "CreatedOn": a['CreatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+    
+    
+    
+    
+
 
 class PurchaseReturnView(CreateAPIView):
     
