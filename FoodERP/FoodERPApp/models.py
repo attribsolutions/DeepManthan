@@ -1602,7 +1602,7 @@ class MC_PartyImportFields(models.Model):
     ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.DO_NOTHING)
     Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
     Value =models.CharField(max_length=500)
-    Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
+    # Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
 
     
     class Meta:

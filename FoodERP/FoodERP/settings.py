@@ -26,7 +26,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145'] 
+ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
 
 
 # Application definition
@@ -66,9 +66,9 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 # 'django.template.context_processors.debug',
-                # 'django.template.context_processors.request',
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                # 'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -86,21 +86,21 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm20230408',
+        'NAME': 'chitalescm20230310',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    ,
-    'logs': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'transactionlogdb',
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
-        'PORT': '3306'
-    }
+    # ,
+    # 'logs': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'transactionlogdb',
+    #     'USER': 'pk',
+    #     'PASSWORD': 'P@ssw0rd',
+    #     'HOST': '192.168.1.114',
+    #     'PORT': '3306'
+    # }
 }
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -249,7 +249,7 @@ SIMPLE_JWT = {
     "JWK_URL": None,
     "LEEWAY": 0,
 
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_TYPES": ("Bearer",), 
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
