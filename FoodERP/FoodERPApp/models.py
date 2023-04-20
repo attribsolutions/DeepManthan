@@ -1590,6 +1590,7 @@ class M_ImportFields(models.Model):
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
+   
     
     class Meta:
         db_table = "M_ImportFields"
@@ -1599,6 +1600,7 @@ class MC_PartyImportFields(models.Model):
     Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
     Value =models.CharField(max_length=500)
     Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
+    
 
     
     class Meta:
