@@ -12,17 +12,32 @@ class PurchaseReturnItemImageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
-    ReturnItemImages = PurchaseReturnItemImageSerializer(read_only=True,many=True)
+    # ReturnItemImages = PurchaseReturnItemImageSerializer(read_only=True,many=True)
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = '__all__'
+        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch']   
         
 
 class PurchaseReturnSerializer(serializers.ModelSerializer):
-    ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
+    ReturnItems = PurchaseReturnItemsSerializer(many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = '__all__'
+        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems']
+        
+        
+    def create(self, validated_data):
+        ReturnItems_data = validated_data.pop('ReturnItems')
+        PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
+        
+        for ReturnItem_data in ReturnItems_data:
+            # ReturnItemImages_data = validated_data.pop('ReturnItemImages')
+            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+            
+            # for ReturnItemImage_data in ReturnItemImages_data:
+            #     ReturnItemImages =TC_PurchaseReturnItems.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
+        
+        return PurchaseReturnID      
+        
         
 
 # Return List serializer
