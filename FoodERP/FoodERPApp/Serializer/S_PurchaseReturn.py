@@ -15,7 +15,7 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     # ReturnItemImages = PurchaseReturnItemImageSerializer(read_only=True,many=True)
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch']   
+        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate']   
         
 
 class PurchaseReturnSerializer(serializers.ModelSerializer):
