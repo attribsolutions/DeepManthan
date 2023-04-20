@@ -1418,9 +1418,6 @@ class TC_PurchaseReturnItems(models.Model):
     GST = models.ForeignKey(M_GSTHSNCode, related_name='ReturnItemGST',null=True,on_delete=models.PROTECT)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
-    DiscountType = models.CharField(max_length=500,blank=True, null=True)
-    Discount = models.DecimalField(max_digits=15, decimal_places=2)
-    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CGST = models.DecimalField(max_digits=15, decimal_places=2)
     SGST = models.DecimalField(max_digits=15, decimal_places=2)
     IGST = models.DecimalField(max_digits=15, decimal_places=2)
@@ -1429,7 +1426,7 @@ class TC_PurchaseReturnItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
