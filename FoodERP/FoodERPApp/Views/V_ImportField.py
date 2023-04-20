@@ -94,7 +94,7 @@ class PartyImportFieldFilterView(CreateAPIView):
                         query, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
                 else:
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data': []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'No Record Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
