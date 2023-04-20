@@ -113,6 +113,7 @@ from .Views.V_CommFunction import *
 
 from .Views.V_ImportField import *
 
+from .Views.V_PurchaseReturn import *
 
 urlpatterns = [
     
@@ -426,8 +427,6 @@ urlpatterns = [
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
             
-            
-            
             # Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
             
@@ -436,10 +435,17 @@ urlpatterns = [
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
 
 #ImportField
-            url(r'ImportField$', ImportFieldSaveView.as_view()),    
-            url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
-            url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),      
-    
+            # url(r'ImportField$', ImportFieldSaveView.as_view()),    
+            # url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
+            # url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),
+            
+# Sales Return
+            url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),
+            url(r'PurchaseReturn/([0-9]+)$', PurchaseReturnView.as_view()),
+            url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
+            url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
+              
+
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
             url(r'RoleAccess/([0-9]+)/([0-9]+)/([0-9]+)$', RoleAccessView.as_view()),
