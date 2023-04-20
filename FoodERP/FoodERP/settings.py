@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['192.168.1.114']
+
+ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
 
 
 # Application definition
@@ -64,7 +65,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+                # 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -91,15 +92,15 @@ DATABASES = {
         'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    ,
-    'logs': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'transactionlogdb',
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',
-        'HOST': '192.168.1.114',
-        'PORT': '3306'
-    }
+    # ,
+    # 'logs': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'transactionlogdb',
+    #     'USER': 'pk',
+    #     'PASSWORD': 'P@ssw0rd',
+    #     'HOST': '192.168.1.114',
+    #     'PORT': '3306'
+    # }
 }
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -248,7 +249,7 @@ SIMPLE_JWT = {
     "JWK_URL": None,
     "LEEWAY": 0,
 
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_TYPES": ("Bearer",), 
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",

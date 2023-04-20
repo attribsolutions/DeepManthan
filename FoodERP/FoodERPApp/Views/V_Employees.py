@@ -55,7 +55,7 @@ where M_Employees.CreatedBy=%s
                     EmployeesData = list()
                     for a in M_Employees_Serializer:
                         ID =a['id']
-                        query2 = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, m_parties.Name FROM mc_employeeparties join m_parties on m_parties.id = mc_employeeparties.Party_id where Employee_id=%s''', [ID])
+                        query2 = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', [ID])
                         EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(query2, many=True).data
                         EmployeeParties = list()
                         for b in EmployeepartiesData_Serializer:
@@ -139,7 +139,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                     
                     GetAllData = list()
 
-                    Employeeparties = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, m_parties.Name FROM mc_employeeparties join m_parties on m_parties.id = mc_employeeparties.Party_id where Employee_id=%s''', ([id]))
+                    Employeeparties = MC_EmployeeParties.objects.raw('''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
                     EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(Employeeparties, many=True).data
                     
                     EmployeeParties = list()
