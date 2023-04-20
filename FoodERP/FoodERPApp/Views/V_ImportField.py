@@ -61,7 +61,7 @@ class PartyImportFieldView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyImportField_data = JSONParser().parse(request)
-                PartyImport_serializer = PartyImportFieldsSerializer(data=PartyImportField_data)
+                PartyImport_serializer = PartyImportFieldsSerializer(data=PartyImportField_data, many=True)
                 if PartyImport_serializer.is_valid():
                     id = PartyImport_serializer.data[0]['Party']
                     PartyImortField_data = MC_PartyImportFields.objects.filter(Party=id)

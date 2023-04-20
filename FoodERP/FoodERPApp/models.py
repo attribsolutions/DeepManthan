@@ -1389,6 +1389,7 @@ class TC_ProductionReIssueItems(models.Model):
                 
 class T_PurchaseReturn(models.Model):
     ReturnDate = models.DateField()
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT, blank=True, null=True)
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
     ReturnNo = models.CharField(max_length=500,blank=True, null=True)
     FullReturnNumber = models.CharField(max_length=500)
@@ -1405,8 +1406,7 @@ class T_PurchaseReturn(models.Model):
         
 
 class TC_PurchaseReturnItems(models.Model):
-    PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Returnitems', on_delete=models.CASCADE)
-    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='Returnreason', on_delete=models.PROTECT, blank=True, null=True)
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='ReturnItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
@@ -1435,7 +1435,7 @@ class TC_PurchaseReturnItems(models.Model):
         db_table = "TC_PurchaseReturnItems"
         
 class TC_PurchaseReturnItemImages(models.Model):
-    PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnitemsImages', on_delete=models.CASCADE)
+    PurchaseReturnItemImage = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnItemImages', on_delete=models.CASCADE,null=True,blank=True)
     Item_pic = models.TextField()
     class Meta:
         db_table = "TC_PurchaseReturnItemImages"        
