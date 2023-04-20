@@ -27,6 +27,49 @@ class ImportFieldSaveView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                ImportField_data = M_ImportFields.objects.get(id=id)
+                ImportField_serializer = ImportFields_Serializer(ImportField_data)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': ImportField_serializer.data})
+        except  M_ImportFields.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'ImportField  Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                ImportField_data = JSONParser().parse(request)
+                ImportField_dataByID = M_ImportFields.objects.get(id=id)
+                ImportField_serializer = ImportFields_Serializer(
+                    ImportField_dataByID, data=ImportField_data)
+                if ImportField_serializer.is_valid():
+                    ImportField_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ImportField Updated Successfully','Data' :[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ImportField_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                ImportField_data = M_ImportFields.objects.get(id=id)
+                ImportField_data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ImportField Deleted Successfully','Data':[]})
+        except M_ImportFields.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'ImportField Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'ImportField used in another table', 'Data': []})
+        
 class PartyImportFieldFilterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

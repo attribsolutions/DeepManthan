@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from activity_log.models import UserMixin
+# from activity_log.models import UserMixin
 
 # Create your models here.
 
-def make_extra_data(request, response):
-    return str(request.META)
+# def make_extra_data(request, response):
+#     return str(request.META)
    
 
  
@@ -290,8 +290,8 @@ class UserManager(BaseUserManager):
         return user
 
 
-class M_Users(AbstractBaseUser, UserMixin):
-# class M_Users(AbstractBaseUser):
+# class M_Users(AbstractBaseUser, UserMixin):
+class M_Users(AbstractBaseUser):
     LoginName = models.CharField(max_length=100, unique=True)
     Employee = models.ForeignKey(
         M_Employees, related_name='UserEmployee', on_delete=models.DO_NOTHING)
