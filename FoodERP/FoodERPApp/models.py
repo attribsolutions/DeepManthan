@@ -1553,7 +1553,7 @@ class T_CreditDebitNotes(models.Model):
         db_table = "T_CreditDebitNotes"
         
 class TC_CreditDebitNoteItems(models.Model):
-    CRDRNote = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNoteItems',on_delete=models.CASCADE)
+    CRDRNote = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNoteItems',on_delete=models.CASCADE,null=True,blank=True)
     Item = models.ForeignKey(M_Items,on_delete=models.PROTECT,blank=True, null=True)
     HSNCode = models.CharField(max_length=500,blank=True, null=True)
     Quantity = models.IntegerField()
