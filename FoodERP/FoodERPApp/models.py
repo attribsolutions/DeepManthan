@@ -1389,7 +1389,7 @@ class TC_ProductionReIssueItems(models.Model):
                 
 class T_PurchaseReturn(models.Model):
     ReturnDate = models.DateField()
-    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT, blank=True, null=True)
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT)
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
     ReturnNo = models.CharField(max_length=500,blank=True, null=True)
     FullReturnNumber = models.CharField(max_length=500)
