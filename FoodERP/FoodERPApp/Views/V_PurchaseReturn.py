@@ -73,7 +73,7 @@ class PurchaseReturnView(CreateAPIView):
             with transaction.atomic():
                 PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
-                Date = PurchaseReturndata['Date']
+                Date = PurchaseReturndata['ReturnDate']
                 a = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 PurchaseReturndata['ReturnNo'] = str(a)
                 b = GetPrifix.GetPurchaseReturnPrifix(Party)
