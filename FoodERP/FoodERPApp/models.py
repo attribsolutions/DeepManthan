@@ -1389,13 +1389,14 @@ class TC_ProductionReIssueItems(models.Model):
                 
 class T_PurchaseReturn(models.Model):
     ReturnDate = models.DateField()
-    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT, blank=True, null=True)
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT)
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
     ReturnNo = models.CharField(max_length=500,blank=True, null=True)
     FullReturnNumber = models.CharField(max_length=500)
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Comment = models.CharField(max_length=500,blank=True, null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1408,6 +1409,7 @@ class T_PurchaseReturn(models.Model):
 class TC_PurchaseReturnItems(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='ReturnItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    ItemComment = models.CharField(max_length=500,blank=True, null=True)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
@@ -1583,35 +1585,7 @@ class TC_CreditDebitNoteItems(models.Model):
         db_table = "TC_CreditDebitNoteItems"  
      
                         
-class M_ImportFields(models.Model):
-    FieldName = models.CharField(max_length=500)
-    ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
-    FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
-    IsCompulsory = models.BooleanField(default=False)
-    Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-   
-    
-    class Meta:
-        db_table = "M_ImportFields"
-        
-class MC_PartyImportFields(models.Model):
-    ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.DO_NOTHING)
-    Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
-    Value =models.CharField(max_length=500)
-    Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    
 
-    
-    class Meta:
-        db_table = "MC_PartyImportFields"
         
         
         
