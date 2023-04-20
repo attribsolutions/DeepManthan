@@ -8,12 +8,23 @@ from ..Serializer.S_PurchaseReturn import *
 
 # Credit Or Debit Save Serializer 
 
-class CreditDebitNoteSerializer(serializers.ModelSerializer):
+class CreditDebitNoteInvoiceSerializer(serializers.ModelSerializer):
+    class Meta :
+        model= TC_ReceiptInvoices
+        fields = '__all__'
+
+class CreditDebitNoteItemSerializer(serializers.ModelSerializer):
     
+    class Meta :
+        model= TC_CreditDebitNoteItems
+        fields = '__all__'
+
+class CreditDebitNoteSerializer(serializers.ModelSerializer):
+    CRDRInvoices = CreditDebitNoteInvoiceSerializer(many=True)
+    CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
     class Meta :
         model= T_CreditDebitNotes
         fields = '__all__'      
-        
         
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
