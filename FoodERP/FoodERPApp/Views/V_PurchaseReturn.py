@@ -26,24 +26,20 @@ class PurchaseReturnListView(CreateAPIView):
                 Party = Returndata['PartyID']
 
                 if(Customer == ''):
-                    
                     query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Party=Party)
-                    
                 else:
-                    
                     query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Customer=Customer, Party=Party)
-                    
                 if query:
                     Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
                     ReturnListData = list()
                     for a in Return_serializer:
                         ReturnListData.append({
                             "id": a['id'],
-                            "ReturnDate": a['ReceiptDate'],
+                            "ReturnDate": a['ReturnDate'],
                             "ReturnNo": a['ReturnNo'],
-                            "FullReceiptNumber": a['FullReceiptNumber'],
-                            "ReturnReason":a['ReturnReason']['id'],
-                            "ReturnReason":a['ReturnReason']['Name'],
+                            "FullReturnNumber": a['FullReturnNumber'],
+                            "ReturnReasonID":a['ReturnReason']['id'],
+                            "ReturnReasonName":a['ReturnReason']['Name'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
