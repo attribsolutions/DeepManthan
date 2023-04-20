@@ -1396,6 +1396,7 @@ class T_PurchaseReturn(models.Model):
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Comment = models.CharField(max_length=500,blank=True, null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1408,6 +1409,7 @@ class T_PurchaseReturn(models.Model):
 class TC_PurchaseReturnItems(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='ReturnItems', on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    ItemComment = models.CharField(max_length=500,blank=True, null=True)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
