@@ -1,10 +1,35 @@
 from rest_framework import serializers
 from ..models import *
 
+
+
+class ControlType_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_ControlTypeMaster
+        fields = ['id','Name']
+
+class FieldValidations_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_FieldValidations
+        fields = ['id','Name']
+
+class ImportField_SerializerSecond(serializers.ModelSerializer):
+    ControlType = ControlType_Serializer(read_only=True)
+    FieldValidation = FieldValidations_Serializer(read_only=True)
+    class Meta:
+        model = M_ImportFields
+        fields = '__all__'
+
+
+
+#Save Importfield Master serializer
+
 class ImportField_Serializer(serializers.ModelSerializer):
     class Meta:
         model = M_ImportFields
         fields = '__all__'
+
+#Save PartyImportfields serializer
 
 class PartyImportFieldsSerializer(serializers.ModelSerializer):
     class Meta:
