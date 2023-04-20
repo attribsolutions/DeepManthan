@@ -442,6 +442,7 @@ urlpatterns = [
 # Sales Return
             url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),
             url(r'ReturnSave/([0-9]+)$', PurchaseReturnView.as_view()),
+            url(r'ReturnSave$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
               
 
