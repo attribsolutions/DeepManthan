@@ -21,11 +21,12 @@ class ImportFieldListView(CreateAPIView):
                 Company = ImportField_data['CompanyID']
                 query = M_ImportFields.objects.filter(Company=Company)
                 if query:
-                    Import_serializer = ImportField_Serializer(query, many=True).data
+                    Import_serializer = ImportFieldSerializerSecond(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Import_serializer})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
 class ImportFieldSaveView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -36,7 +37,7 @@ class ImportFieldSaveView(CreateAPIView):
         try:
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
-                ImportField_serializer = ImportField_Serializer(
+                ImportField_serializer = ImportFieldSerializer(
                     data=ImportField_data)
                 if ImportField_serializer.is_valid():
                     ImportField_serializer.save()
@@ -50,7 +51,7 @@ class ImportFieldSaveView(CreateAPIView):
         try:
             with transaction.atomic():
                 ImportField_data = M_ImportFields.objects.get(id=id)
-                ImportField_serializer = ImportFields_Serializer(
+                ImportField_serializer = ImportFieldSerializerSecond(
                     ImportField_data)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
         except M_ImportFields.DoesNotExist:
@@ -64,7 +65,7 @@ class ImportFieldSaveView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 ImportField_dataByID = M_ImportFields.objects.get(id=id)
-                ImportField_serializer = ImportFields_Serializer(
+                ImportField_serializer = ImportFieldSerializerSecond(
                     ImportField_dataByID, data=ImportField_data)
                 if ImportField_serializer.is_valid():
                     ImportField_serializer.save()
