@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from ..models import *
 
-
-
 class ControlType_Serializer(serializers.ModelSerializer):
     class Meta:
         model = M_ControlTypeMaster
@@ -13,23 +11,17 @@ class FieldValidations_Serializer(serializers.ModelSerializer):
         model = M_FieldValidations
         fields = ['id','Name']
 
-class ImportField_SerializerSecond(serializers.ModelSerializer):
+class ImportField_Serializer(serializers.ModelSerializer):
     ControlType = ControlType_Serializer(read_only=True)
     FieldValidation = FieldValidations_Serializer(read_only=True)
     class Meta:
         model = M_ImportFields
         fields = '__all__'
-
-
-
-#Save Importfield Master serializer
-
-class ImportField_Serializer(serializers.ModelSerializer):
+        
+class ImportFields_Serializer(serializers.ModelSerializer):
     class Meta:
         model = M_ImportFields
         fields = '__all__'
-
-#Save PartyImportfields serializer
 
 class PartyImportFieldsSerializer(serializers.ModelSerializer):
     class Meta:

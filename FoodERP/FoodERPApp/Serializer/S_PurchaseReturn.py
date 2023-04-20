@@ -22,7 +22,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems']
+        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems']
         
         
     def create(self, validated_data):

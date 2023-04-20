@@ -1519,14 +1519,7 @@ class T_Receipts(models.Model):
     class Meta:
         db_table = "T_Receipts"
 
-class TC_ReceiptInvoices(models.Model):
-    Receipt = models.ForeignKey(T_Receipts, related_name='ReceiptInvoices', on_delete=models.CASCADE)
-    Invoice = models.ForeignKey(T_Invoices, related_name='RInvoice', on_delete=models.PROTECT,blank=True, null=True)
-    GrandTotal =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
-    PaidAmount =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
-    AdvanceAmtAdjusted =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
-    class Meta:
-        db_table = "TC_ReceiptInvoices"
+
         
 class TC_PaymentReceipt(models.Model):
     Receipt = models.ForeignKey(T_Receipts, related_name='PaymentReceipt', on_delete=models.CASCADE,blank=True, null=True)
@@ -1560,7 +1553,7 @@ class T_CreditDebitNotes(models.Model):
         db_table = "T_CreditDebitNotes"
         
 class TC_CreditDebitNoteItems(models.Model):
-    Note = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNote',on_delete=models.CASCADE)
+    CRDRNote = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNoteItems',on_delete=models.CASCADE)
     Item = models.ForeignKey(M_Items,on_delete=models.PROTECT,blank=True, null=True)
     HSNCode = models.CharField(max_length=500,blank=True, null=True)
     Quantity = models.IntegerField()
@@ -1583,6 +1576,18 @@ class TC_CreditDebitNoteItems(models.Model):
     
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
+
+
+class TC_ReceiptInvoices(models.Model):
+    Receipt = models.ForeignKey(T_Receipts, related_name='ReceiptInvoices', on_delete=models.CASCADE,null=True)
+    CRDRNote = models.ForeignKey(T_CreditDebitNotes, related_name='CRDRInvoices', on_delete=models.CASCADE,null=True)
+    Invoice = models.ForeignKey(T_Invoices, related_name='RInvoice', on_delete=models.PROTECT,blank=True, null=True)
+    GrandTotal =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
+    PaidAmount =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
+    AdvanceAmtAdjusted =  models.DecimalField(max_digits=15, decimal_places=3,blank=True, null=True)
+    class Meta:
+        db_table = "TC_ReceiptInvoices"
+
      
 class M_ImportFields(models.Model):
     FieldName = models.CharField(max_length=500)

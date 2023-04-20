@@ -435,7 +435,9 @@ urlpatterns = [
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
 
 #ImportField
-            url(r'ImportField$', ImportFieldSaveView.as_view()),    
+            url(r'ImportField$', ImportFieldSaveView.as_view()),  
+            url(r'ImportField/([0-9]+)$', ImportFieldSaveView.as_view()),  
+            url(r'ImportFieldFilter$', ImportFieldListView.as_view()),
             url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
             url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),
             
