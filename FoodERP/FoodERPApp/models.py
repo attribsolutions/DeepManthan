@@ -1584,7 +1584,32 @@ class TC_CreditDebitNoteItems(models.Model):
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
      
-                        
+class M_ImportFields(models.Model):
+    FieldName = models.CharField(max_length=500)
+    ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
+    FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
+    IsCompulsory = models.BooleanField(default=False)
+    Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+   
+    class Meta:
+        db_table = "M_ImportFields"
+        
+class MC_PartyImportFields(models.Model):
+    ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.DO_NOTHING)
+    Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
+    Value =models.CharField(max_length=500)
+    Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "MC_PartyImportFields"                        
 
         
         
