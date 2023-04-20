@@ -9,7 +9,23 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_ImportField import *
 from django.db.models import Q
 
+class ImportFieldListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
 
+    @transaction.atomic()
+    def post(self,request):
+        try:
+            with transaction.atomic():
+                ImportField_data = JSONParser().parse(request)
+                Company = ImportField_data['CompanyID']
+                query = M_ImportFields.objects.filter(Company=Company)
+                if query:
+                    Import_serializer = ImportField_Serializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Import_serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 class ImportFieldSaveView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
