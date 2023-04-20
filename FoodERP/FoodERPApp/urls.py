@@ -439,7 +439,7 @@ urlpatterns = [
             url(r'ImportField/([0-9]+)$', ImportFieldSaveView.as_view()),  
             url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
             url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),
-            # url(r'ImportFieldList$', ImportFieldListView.as_view()),
+            # url(r'ImportFieldFilter$', ImportFieldListView.as_view()),
             
 # Sales Return
             url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),
