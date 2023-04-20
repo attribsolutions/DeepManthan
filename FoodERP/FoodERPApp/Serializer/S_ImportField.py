@@ -11,18 +11,20 @@ class FieldValidations_Serializer(serializers.ModelSerializer):
         model = M_FieldValidations
         fields = ['id','Name']
 
-class ImportField_Serializer(serializers.ModelSerializer):
+class ImportFieldSerializerSecond(serializers.ModelSerializer):
     ControlType = ControlType_Serializer(read_only=True)
     FieldValidation = FieldValidations_Serializer(read_only=True)
     class Meta:
         model = M_ImportFields
         fields = '__all__'
-        
-class ImportFields_Serializer(serializers.ModelSerializer):
+
+#Save  Importfields  serializer        
+class ImportFieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_ImportFields
         fields = '__all__'
 
+#Save  PartyImportfields  serializer
 class PartyImportFieldsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyImportFields
