@@ -157,7 +157,7 @@ class ReturnItemAddView(CreateAPIView):
                             "ItemName": a['Name'],
                             "ItemUnitDetails": ItemUnitDetails, 
                             "ItemMRPDetails":ItemMRPDetails,
-                            "ItemGSTHSNDetails":ItemGSTDetails
+                            "ItemGSTDetails":ItemGSTDetails
                         })
                     
                     Itemlist.append({"InvoiceItems":InvoiceItems})    
