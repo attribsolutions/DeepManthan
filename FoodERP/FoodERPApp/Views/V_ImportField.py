@@ -9,18 +9,20 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_ImportField import *
 from django.db.models import Q
 
+
 class ImportFieldListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def post(self,request):
+    def post(self, request):
         try:
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 Company = ImportField_data['CompanyID']
                 query = M_ImportFields.objects.filter(Company=Company)
                 if query:
+
                     Import_serializer = ImportFieldSerializerSecond(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Import_serializer})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
@@ -52,8 +54,10 @@ class ImportFieldSaveView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = M_ImportFields.objects.get(id=id)
                 ImportField_serializer = ImportFieldSerializerSecond(
+
                     ImportField_data)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
+
         except M_ImportFields.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'ImportField  Not available', 'Data': []})
         except Exception as e:
@@ -65,7 +69,9 @@ class ImportFieldSaveView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 ImportField_dataByID = M_ImportFields.objects.get(id=id)
+
                 ImportField_serializer = ImportFieldSerializerSecond(
+
                     ImportField_dataByID, data=ImportField_data)
                 if ImportField_serializer.is_valid():
                     ImportField_serializer.save()
@@ -83,10 +89,10 @@ class ImportFieldSaveView(CreateAPIView):
                 ImportField_data = M_ImportFields.objects.get(id=id)
                 ImportField_data.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ImportField Deleted Successfully', 'Data': []})
-        except M_ImportFields.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'ImportField Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'ImportField used in another table', 'Data': []})
+
+# Party Import Field   Views
 
 
 class PartyImportFieldFilterView(CreateAPIView):
@@ -111,9 +117,10 @@ class PartyImportFieldFilterView(CreateAPIView):
                         query, many=True)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
                 else:
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'No Record Found', 'Data': []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'No Record Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
 
 class PartyImportFieldView(CreateAPIView):
 

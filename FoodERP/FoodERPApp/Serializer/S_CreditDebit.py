@@ -8,12 +8,37 @@ from ..Serializer.S_PurchaseReturn import *
 
 # Credit Or Debit Save Serializer 
 
-class CreditDebitNoteSerializer(serializers.ModelSerializer):
+class CreditDebitNoteInvoiceSerializer(serializers.ModelSerializer):
+    class Meta :
+        model= TC_ReceiptInvoices
+        fields = '__all__'
+
+class CreditDebitNoteItemSerializer(serializers.ModelSerializer):
     
     class Meta :
+        model= TC_CreditDebitNoteItems
+        fields = ['Quantity', 'Rate', 'BasicAmount', 'TaxType', 'GSTRate', 'GSTAmount', 'Amount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'NOC', 'BatchCode', 'Item', 'MRP', 'Unit', 'CRDRNote']
+
+class CreditDebitNoteSerializer(serializers.ModelSerializer):
+    CRDRInvoices = CreditDebitNoteInvoiceSerializer(many=True)
+    CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
+    class Meta :
         model= T_CreditDebitNotes
-        fields = '__all__'      
+        fields = ['NoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'Comment', 'CreatedBy', 'UpdatedBy', 'Customer', 'Invoice', 'NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
         
+    def create(self, validated_data):
+        CRDRNoteItems_data = validated_data.pop('CRDRNoteItems')
+        CRDRInvoices_data = validated_data.pop('CRDRInvoices')
+        
+        CreditDebitNoteID = T_CreditDebitNotes.objects.create(**validated_data)
+        
+        for CRDRNoteItem_data in CRDRNoteItems_data:
+            CRDRNoteItem =TC_CreditDebitNoteItems.objects.create(CRDRNote=CreditDebitNoteID, **CRDRNoteItem_data)
+       
+        for CRDRInvoice_data in CRDRInvoices_data:
+            CRDRInvoice =TC_ReceiptInvoices.objects.create(CRDRNote=CreditDebitNoteID, **CRDRInvoice_data)    
+            
+        return CreditDebitNoteID          
         
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
