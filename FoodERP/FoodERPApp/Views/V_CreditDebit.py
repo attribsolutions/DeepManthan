@@ -107,7 +107,23 @@ class CreditDebitNoteView(CreateAPIView):
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+        
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                CreditNotedata = T_CreditDebitNotes.objects.get(id=id)
+                CreditNote_Serializer = CreditDebitNoteSerializer(CreditNotedata)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': CreditNote_Serializer.data})
+        except  T_CreditDebitNotes.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'CreditNote Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
+
         
 
 
@@ -201,17 +217,7 @@ class CreditDebitNoteView(CreateAPIView):
     
 
  
-#     @transaction.atomic()
-#     def get(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 CreditNotedata = T_CreditDebitNotes.objects.get(id=id)
-#                 CreditNote_Serializer = CreditNoteSerializer(CreditNotedata)
-#                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': CreditNote_Serializer.data})
-#         except  M_Bank.DoesNotExist:
-#             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'CreditNote Not available', 'Data': []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
         
 #     @transaction.atomic()
 #     def put(self, request, id=0):
