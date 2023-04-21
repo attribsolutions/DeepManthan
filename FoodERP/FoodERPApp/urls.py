@@ -350,11 +350,8 @@ urlpatterns = [
             url(r'SalesmanFilter$', SalesmanListView.as_view()), 
             url(r'Salesman/([0-9]+)$', SalesmanView.as_view()), 
             url(r'Salesman$', SalesmanView.as_view()),             
-
-# Creditlimit 
-            url(r'CreditlimitList$', CreditlimitListView.as_view()), 
-            url(r'Creditlimit$', CreditlimitView.as_view()),                 
-    
+                
+                   
 #Item All APIs======================================================================================
 
             url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
@@ -427,11 +424,12 @@ urlpatterns = [
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
             
-            # Make Receipts of Payment entries
+# Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
             
 #CreditDebit 
-            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),  
+            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()), 
+            url(r'CreditDebitNote/([0-9]+)$', CreditDebitNoteView.as_view()),   
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
 
 #ImportField
@@ -447,6 +445,8 @@ urlpatterns = [
             url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
               
+# Single Invoice details view api for Purchase Return, CreditDebitnot
+            url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),               
 
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID

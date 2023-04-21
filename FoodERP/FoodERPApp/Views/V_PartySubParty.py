@@ -167,60 +167,6 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
                 
-                      
-class CreditlimitListView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication 
-    
-    
-    @transaction.atomic()
-    def post(self, request,id=0):
-        try:
-            with transaction.atomic():
-                PartySubpartydata = JSONParser().parse(request)
-                Party = PartySubpartydata['Party']
-                Route = PartySubpartydata['Route']
-                if(Route == ""):
-                    query = MC_PartySubParty.objects.filter(Party=Party)
-                else:
-                    query = MC_PartySubParty.objects.filter(Party=Party,Route=Route)       
-                if query.exists():
-                    SubPartydata = PartySubPartyCreditlimit(query, many=True).data
-                    SubPartyListData = list()
-                    for a in SubPartydata:
-                        SubPartyListData.append({
-                            "id": a['id'],
-                            "Party": a['Party']['id'],
-                            "SubParty": a['SubParty']['id'],
-                            "SubPartyName": a['SubParty']['Name'],
-                            "Creditlimit":a['Creditlimit']
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Creditlimit  Not available ', 'Data': []})
-        except MC_PartySubParty.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Creditlimit Not available', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-
-
-class CreditlimitView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication 
-    
-    @transaction.atomic()
-    def post(self, request,id=0):
-        try:
-            with transaction.atomic():
-                PartySubPartydata = JSONParser().parse(request)
-                for a in PartySubPartydata['Data']:
-                    if(a['Creditlimit']!= ""):
-                        query = MC_PartySubParty.objects.filter(id=a['id'],Party=a['Party'],SubParty=a['SubParty']).update(Creditlimit=a['Creditlimit']) 
-                    else:
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Creditlimit Not Updated', 'Data': []})     
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Creditlimit Updated Successfully', 'Data': []})  
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
-        
         
 class RetailerandSSDDView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
