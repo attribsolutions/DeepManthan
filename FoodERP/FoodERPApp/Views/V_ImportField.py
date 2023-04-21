@@ -79,7 +79,7 @@ class ImportFieldSaveView(CreateAPIView):
                     "IsCompulsory": ImportField_serializer['IsCompulsory'],
                     "Company": ImportField_serializer['Company']
                 })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_List})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_List[0]})
         except M_ImportFields.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'ImportField  Not available', 'Data': []})
         except Exception as e:
