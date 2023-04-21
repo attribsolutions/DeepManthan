@@ -445,6 +445,8 @@ urlpatterns = [
             url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
               
+# Single Invoice details view api for Purchase Return, CreditDebitnot
+            url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),               
 
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
