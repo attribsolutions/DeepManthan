@@ -42,7 +42,7 @@ class PartyImportFieldSerializerList(serializers.Serializer):
     Party_id = serializers.IntegerField()
     ControlTypeName =serializers.CharField(max_length=500)
     FieldValidationName = serializers.CharField(max_length=500)
-         
+    RegularExpression = serializers.CharField(max_length=500)
         
 
 
