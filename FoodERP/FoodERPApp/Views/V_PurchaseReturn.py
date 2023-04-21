@@ -127,8 +127,8 @@ class ReturnItemAddView(CreateAPIView):
                             for c in Unitdata:
                                 ItemUnitDetails.append({
                                 "Unit": c['id'],
-                                "BaseUnitQuantity": d['BaseUnitQuantity'],
-                                "IsBase": d['IsBase'],
+                                "BaseUnitQuantity": c['BaseUnitQuantity'],
+                                "IsBase": c['IsBase'],
                                 "UnitName": c['BaseUnitConversion'],
                             })
                         
@@ -158,7 +158,7 @@ class ReturnItemAddView(CreateAPIView):
                             "Name": a['Name'],
                             "ItemUnitDetails": ItemUnitDetails, 
                             "ItemMRPDetails":ItemMRPDetails,
-                            "ItemGSTHSNDetails":ItemGSTDetails,
+                            "ItemGSTHSNDetails":ItemGSTDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
