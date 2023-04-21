@@ -75,10 +75,8 @@ class InvoicesReferencesSerializerSecond(serializers.ModelSerializer):
         
         
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
-    Order = OrderserializerforInvoice(read_only=True)
     class Meta:
         model = TC_InvoicesReferences
-        # fields = '__all__'
         fields = ['Order']         
          
 class InvoiceItemsSerializer(serializers.ModelSerializer):
