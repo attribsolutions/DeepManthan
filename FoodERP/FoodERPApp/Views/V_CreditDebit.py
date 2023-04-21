@@ -90,12 +90,24 @@ class CreditDebitNoteView(CreateAPIView):
                 CreditNote_Serializer = CreditDebitNoteSerializer(data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
                     CreditNote_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditdebitNote Save Successfully', 'Data' :[]})
                 else :
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
+        
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                CreditDebitdata = T_CreditDebitNotes.objects.get(id=id)
+                CreditDebitdata.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditdebitNote Deleted Successfully', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
         
 
 

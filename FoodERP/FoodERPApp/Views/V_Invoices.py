@@ -354,5 +354,108 @@ class InvoiceNoView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                               
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+        
+        
+class InvoiceViewThird(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+    
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                InvoiceQuery = T_Invoices.objects.filter(id=id)
+                if InvoiceQuery.exists():
+                    InvoiceSerializedata = InvoiceSerializerSecond(
+                        InvoiceQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
+                    InvoiceData = list()
+                    for a in InvoiceSerializedata:
+                        InvoiceItemDetails = list()
+                        for b in a['InvoiceItems']:
+                            ChildItem= b['Item']['id']
+                            Unitquery = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
+                            # print(query.query)
+                            if Unitquery.exists():
+                                Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
+                                ItemUnitDetails = list()
+                               
+                                for c in Unitdata:
+                                    ItemUnitDetails.append({
+                                    "Unit": c['id'],
+                                    "UnitName": c['BaseUnitConversion'],
+                                })
+                                    
+                            MRPquery = M_MRPMaster.objects.filter(Item_id=ChildItem).order_by('-id')[:3] 
+                            # print(query.query)
+                            if MRPquery.exists():
+                                MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                                ItemMRPDetails = list()
+                               
+                                for d in MRPdata:
+                                    ItemMRPDetails.append({
+                                    "MRP": d['id'],
+                                    "MRPValue": d['MRP'],   
+                                })
+                                    
+                            GSTquery = M_GSTHSNCode.objects.filter(Item_id=ChildItem).order_by('-id')[:3] 
+                            # print(query.query)
+                            if GSTquery.exists():
+                                Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                                ItemGSTDetails = list()
+                                
+                                for e in Gstdata:
+                                    ItemGSTDetails.append({
+                                    "GST": e['id'],
+                                    "GSTPercentage": e['GSTPercentage'],   
+                                })                
+                                    
+                            InvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                                "ItemUnitDetails":ItemUnitDetails,
+                                "ItemMRPDetails":ItemMRPDetails,
+                                "ItemGSTDetails":ItemGSTDetails,
+                                
+                            })
+                            
+                        InvoiceData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "InvoiceNumber": a['InvoiceNumber'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "CreatedOn" : a['CreatedOn'],
+                            "InvoiceItems": InvoiceItemDetails,
+                                               
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                                      
                               
