@@ -99,6 +99,7 @@ class PurchaseReturnView(CreateAPIView):
         
         
         
+##################### Purchase Return Item View ###########################################        
         
 class ReturnItemAddView(CreateAPIView):
     
@@ -116,77 +117,48 @@ class ReturnItemAddView(CreateAPIView):
                     # return JsonResponse({'query':  Itemsdata})
                     ItemData=list()
                     for a in Itemsdata:
-                        UnitDetails=list()
-                        for d in a['ItemUnitDetails']:
-                            if d['IsDeleted']== 0 :
-                                UnitDetails.append({
-                                    "id": d['id'],
-                                    "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['UnitID']['Name'],
-                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
-                                    "IsBase": d['IsBase'],
-                                    "PODefaultUnit": d['PODefaultUnit'],
-                                    "SODefaultUnit": d['SODefaultUnit'],
-                                
-                                })
+                        Item=a['id']
+                        Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
+                            
+                        if Unitquery.exists():
+                            Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
+                            ItemUnitDetails = list()
+                               
+                            for c in Unitdata:
+                                ItemUnitDetails.append({
+                                "Unit": c['id'],
+                                "BaseUnitQuantity": d['BaseUnitQuantity'],
+                                "IsBase": d['IsBase'],
+                                "UnitName": c['BaseUnitConversion'],
+                            })
                         
-                        MRPDetails=list()
-                        for g in a['ItemMRPDetails']:
-                            if g['IsDeleted']== 0 :
-                                MRPDetails.append({
-                                    "id": g['id'],
-                                    "EffectiveDate": g['EffectiveDate'],
-                                    "Company": g['Company']['id'],
-                                    "CompanyName": g['Company']['Name'],
-                                    "MRP": g['MRP'],
-                                    "Party": g['Party']['id'],
-                                    "PartyName": g['Party']['Name'],
-                                    "Division":g['Division']['id'],
-                                    "DivisionName":g['Division']['Name'],
-                                    "CreatedBy":g['CreatedBy'],
-                                    "UpdatedBy":g['UpdatedBy'],
-                                    "IsAdd":False
-                                })
                         
-                        MarginDetails=list()
-                        for h in a['ItemMarginDetails']:
-                            if h['IsDeleted']== 0 :
-                                MarginDetails.append({
-                                    "id": h['id'],
-                                    "EffectiveDate": h['EffectiveDate'],
-                                    "Company": h['Company']['id'],
-                                    "CompanyName": h['Company']['Name'],
-                                    "Party": h['Party']['id'],
-                                    "PartyName": h['Party']['Name'],
-                                    "Margin": h['Margin'],
-                                    "CreatedBy":h['CreatedBy'],
-                                    "UpdatedBy":h['UpdatedBy'],
-                                    "PriceList":h['PriceList']['id'],
-                                    "PriceListName":h['PriceList']['Name'],
-                                    "IsAdd":False   
-                                })
+                        MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                        if MRPquery.exists():
+                            MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                            ItemMRPDetails = list()
+                            
+                            for d in MRPdata:
+                                ItemMRPDetails.append({
+                                "MRP": d['id'],
+                                "MRPValue": d['MRP'],   
+                            })
                         
-                        GSTHSNDetails=list()
-                        for i in a['ItemGSTHSNDetails']:
-                            if i['IsDeleted']== 0 :
-                                GSTHSNDetails.append({
-                                    "id": i['id'],
-                                    "EffectiveDate": i['EffectiveDate'],
-                                    "GSTPercentage": i['GSTPercentage'],
-                                    "HSNCode": i['HSNCode'],
-                                    "Company": i['Company']['id'],
-                                    "CompanyName": i['Company']['Name'],
-                                    "CreatedBy":i['CreatedBy'],
-                                    "UpdatedBy":i['UpdatedBy'],
-                                    "IsAdd":False
-                                })
+                        GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                        if GSTquery.exists():
+                            Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                            ItemGSTDetails = list()
+                            for e in Gstdata:
+                                ItemGSTDetails.append({
+                                "GST": e['id'],
+                                "GSTPercentage": e['GSTPercentage'],   
+                            }) 
                         ItemData.append({
                             "id": a['id'],
                             "Name": a['Name'],
-                            "ItemUnitDetails": UnitDetails, 
-                            "ItemMRPDetails":MRPDetails,
-                            "ItemMarginDetails":MarginDetails, 
-                            "ItemGSTHSNDetails":GSTHSNDetails,
+                            "ItemUnitDetails": ItemUnitDetails, 
+                            "ItemMRPDetails":ItemMRPDetails,
+                            "ItemGSTHSNDetails":ItemGSTDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})

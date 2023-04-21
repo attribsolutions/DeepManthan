@@ -22,26 +22,13 @@ class ImportFieldListView(CreateAPIView):
                 Company = ImportField_data['CompanyID']
                 query = M_ImportFields.objects.filter(Company=Company)
                 if query:
-                    Import_serializer = ImportFieldSerializerSecond(
-                        query, many=True).data
-                    ImportFieldList = list()
-                    for a in Import_serializer:
-                        ImportFieldList.append({
-                            "id": a['id'],
-                            "FieldName": a['FieldName'],
-                            "ControlTypeID": a['ControlType']['id'],
-                            "ControlTypeName": a['ControlType']['Name'],
-                            "FieldValidationID": a['FieldValidation']['id'],
-                            "FieldValidationName": a['FieldValidation']['Name'],
-                            "IsCompulsory": a['IsCompulsory'],
-                            "Company": a['Company']
-                        })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportFieldList})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data': []})
+
+                    Import_serializer = ImportFieldSerializerSecond(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Import_serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
 class ImportFieldSaveView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -67,19 +54,10 @@ class ImportFieldSaveView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = M_ImportFields.objects.get(id=id)
                 ImportField_serializer = ImportFieldSerializerSecond(
-                    ImportField_data).data
-                ImportField_List = list()
-                ImportField_List.append({
-                    "id": ImportField_serializer['id'],
-                    "FieldName": ImportField_serializer['FieldName'],
-                    "ControlTypeID": ImportField_serializer['ControlType']['id'],
-                    "ControlTypeName": ImportField_serializer['ControlType']['Name'],
-                    "FieldValidationID": ImportField_serializer['FieldValidation']['id'],
-                    "FieldValidationName": ImportField_serializer['FieldValidation']['Name'],
-                    "IsCompulsory": ImportField_serializer['IsCompulsory'],
-                    "Company": ImportField_serializer['Company']
-                })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_List})
+
+                    ImportField_data)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
+
         except M_ImportFields.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'ImportField  Not available', 'Data': []})
         except Exception as e:
@@ -91,7 +69,9 @@ class ImportFieldSaveView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 ImportField_dataByID = M_ImportFields.objects.get(id=id)
-                ImportField_serializer = ImportFieldSerializer(
+
+                ImportField_serializer = ImportFieldSerializerSecond(
+
                     ImportField_dataByID, data=ImportField_data)
                 if ImportField_serializer.is_valid():
                     ImportField_serializer.save()
@@ -128,7 +108,7 @@ class PartyImportFieldFilterView(CreateAPIView):
                 Party = PartyImportField_data['PartyID']
                 Company = PartyImportField_data['CompanyID']
                 query = M_ImportFields.objects.raw(
-                    '''SELECT M_ImportFields.id, M_ImportFields.FieldName, M_ImportFields.IsCompulsory,M_ImportFields.ControlType_id, M_ImportFields.FieldValidation_id,MC_PartyImportFields.Value,MC_PartyImportFields.Party_id,M_ControlTypeMaster.Name ControlTypeName,M_FieldValidations.Name FieldValidationName FROM M_ImportFields Left JOIN MC_PartyImportFields ON M_ImportFields.id = MC_PartyImportFields.ImportField_id AND MC_PartyImportFields.Party_id=%s AND MC_PartyImportFields.Company_id=%s   JOIN m_controltypemaster ON m_controltypemaster.id = M_ImportFields.ControlType_id JOIN M_FieldValidations ON M_FieldValidations.id = M_ImportFields.FieldValidation_id''', ([Party], [Company]))
+                    '''SELECT M_ImportFields.id, M_ImportFields.FieldName, M_ImportFields.IsCompulsory,M_ImportFields.ControlType_id, M_ImportFields.FieldValidation_id,MC_PartyImportFields.Value,MC_PartyImportFields.Party_id,M_ControlTypeMaster.Name ControlTypeName,M_FieldValidations.Name FieldValidationName,M_FieldValidations.RegularExpression FROM M_ImportFields Left JOIN MC_PartyImportFields ON M_ImportFields.id = MC_PartyImportFields.ImportField_id AND MC_PartyImportFields.Party_id=%s AND MC_PartyImportFields.Company_id=%s   JOIN m_controltypemaster ON m_controltypemaster.id = M_ImportFields.ControlType_id JOIN M_FieldValidations ON M_FieldValidations.id = M_ImportFields.FieldValidation_id''', ([Party], [Company]))
 
                 # query= M_ImportFields.objects.prefetch_related('ImportFields').filter(Q(ImportFields__Party=Party) and Q(ImportFields__isnull=False) | Q(ImportFields__isnull=True)  ).values('id','FieldName','IsCompulsory','ControlType_id','FieldValidation_id', 'ImportFields__Value','ImportFields__Party_id')
                 # print(str(query.query))
