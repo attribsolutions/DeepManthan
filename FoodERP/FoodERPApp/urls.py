@@ -424,7 +424,7 @@ urlpatterns = [
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
             
-            # Make Receipts of Payment entries
+# Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
             
 #CreditDebit 
