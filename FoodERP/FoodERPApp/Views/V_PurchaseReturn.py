@@ -116,6 +116,7 @@ class ReturnItemAddView(CreateAPIView):
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     Itemsdata = ItemSerializerSecond(query, many=True).data
                     # return JsonResponse({'query':  Itemsdata})
+                    Itemlist = list()
                     InvoiceItems=list()
                     for a in Itemsdata:
                         Item=a['id']
@@ -158,7 +159,9 @@ class ReturnItemAddView(CreateAPIView):
                             "ItemMRPDetails":ItemMRPDetails,
                             "ItemGSTHSNDetails":ItemGSTDetails
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceItems})
+                    
+                    Itemlist.append({"InvoiceItems":InvoiceItems})    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Itemlist[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
