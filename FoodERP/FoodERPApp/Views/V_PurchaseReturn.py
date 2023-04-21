@@ -99,6 +99,7 @@ class PurchaseReturnView(CreateAPIView):
         
         
         
+        
 ##################### Purchase Return Item View ###########################################        
         
 class ReturnItemAddView(CreateAPIView):
@@ -115,15 +116,13 @@ class ReturnItemAddView(CreateAPIView):
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     Itemsdata = ItemSerializerSecond(query, many=True).data
                     # return JsonResponse({'query':  Itemsdata})
-                    ItemData=list()
+                    InvoiceItems=list()
                     for a in Itemsdata:
                         Item=a['id']
                         Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                            
                         if Unitquery.exists():
                             Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
                             ItemUnitDetails = list()
-                               
                             for c in Unitdata:
                                 ItemUnitDetails.append({
                                 "Unit": c['id'],
@@ -131,7 +130,6 @@ class ReturnItemAddView(CreateAPIView):
                                 "IsBase": c['IsBase'],
                                 "UnitName": c['BaseUnitConversion'],
                             })
-                        
                         
                         MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
                         if MRPquery.exists():
@@ -153,14 +151,14 @@ class ReturnItemAddView(CreateAPIView):
                                 "GST": e['id'],
                                 "GSTPercentage": e['GSTPercentage'],   
                             }) 
-                        ItemData.append({
-                            "id": a['id'],
-                            "Name": a['Name'],
+                        InvoiceItems.append({
+                            "Item": a['id'],
+                            "ItemName": a['Name'],
                             "ItemUnitDetails": ItemUnitDetails, 
                             "ItemMRPDetails":ItemMRPDetails,
                             "ItemGSTHSNDetails":ItemGSTDetails
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceItems})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
