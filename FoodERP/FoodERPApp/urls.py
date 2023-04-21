@@ -424,11 +424,12 @@ urlpatterns = [
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
             
-            # Make Receipts of Payment entries
+# Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
             
 #CreditDebit 
-            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()),  
+            url(r'CreditDebitNote$', CreditDebitNoteView.as_view()), 
+            url(r'CreditDebitNote/([0-9]+)$', CreditDebitNoteView.as_view()),   
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
 
 #ImportField

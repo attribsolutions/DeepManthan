@@ -148,24 +148,6 @@ class ReturnItemAddView(CreateAPIView):
                                     "IsAdd":False
                                 })
                         
-                        MarginDetails=list()
-                        for h in a['ItemMarginDetails']:
-                            if h['IsDeleted']== 0 :
-                                MarginDetails.append({
-                                    "id": h['id'],
-                                    "EffectiveDate": h['EffectiveDate'],
-                                    "Company": h['Company']['id'],
-                                    "CompanyName": h['Company']['Name'],
-                                    "Party": h['Party']['id'],
-                                    "PartyName": h['Party']['Name'],
-                                    "Margin": h['Margin'],
-                                    "CreatedBy":h['CreatedBy'],
-                                    "UpdatedBy":h['UpdatedBy'],
-                                    "PriceList":h['PriceList']['id'],
-                                    "PriceListName":h['PriceList']['Name'],
-                                    "IsAdd":False   
-                                })
-                        
                         GSTHSNDetails=list()
                         for i in a['ItemGSTHSNDetails']:
                             if i['IsDeleted']== 0 :
@@ -185,7 +167,6 @@ class ReturnItemAddView(CreateAPIView):
                             "Name": a['Name'],
                             "ItemUnitDetails": UnitDetails, 
                             "ItemMRPDetails":MRPDetails,
-                            "ItemMarginDetails":MarginDetails, 
                             "ItemGSTHSNDetails":GSTHSNDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
