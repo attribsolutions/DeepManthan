@@ -20,7 +20,7 @@ class ImportFieldListView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 Company = ImportField_data['CompanyID']
-                query = M_ImportFields.objects.filter(Company=Company)
+                query = M_ImportFields.objects.all()
                 if query:
                     Import_serializer = ImportFieldSerializerSecond(
                         query, many=True).data
