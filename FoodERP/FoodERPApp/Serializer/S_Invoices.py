@@ -72,7 +72,7 @@ class InvoicesReferencesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = TC_InvoicesReferences
         fields = '__all__'
-        
+    
         
 class InvoicesReferencesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -155,7 +155,7 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
     InvoiceItems = InvoiceItemsSerializerSecond(many=True)
-    InvoicesReferences = InvoicesReferencesSerializer(many=True)
+    InvoicesReferences = InvoicesReferencesSerializerSecond(many=True)
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
     class Meta:
