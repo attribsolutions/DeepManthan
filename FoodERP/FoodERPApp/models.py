@@ -1530,7 +1530,7 @@ class TC_PaymentReceipt(models.Model):
         
 class T_CreditDebitNotes(models.Model):
    
-    NoteDate = models.DateField()
+    CRDRNoteDate = models.DateField()
     NoteNo = models.IntegerField()
     FullNoteNumber = models.CharField(max_length=500)
     NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
