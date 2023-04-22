@@ -125,6 +125,7 @@ class CreditDebitNoteView(CreateAPIView):
                             
                         CreditDebitListData.append({
                             "id": a['id'],
+                            "CRDRNoteDate": a['CRDRNoteDate'],
                             "NoteNo": a['NoteNo'],
                             "FullNoteNumber": a['FullNoteNumber'],
                             "NoteType": a['NoteType']['Name'],
@@ -141,7 +142,7 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRInvoices": CRDRInvoices,
                             "CRDRNoteItems":a['CRDRNoteItems'] 
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
