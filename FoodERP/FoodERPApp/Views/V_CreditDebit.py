@@ -106,28 +106,42 @@ class CreditDebitNoteView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = T_CreditDebitNotes.objects.filter(id=id)
+                print(query)
                 if query:
                     CreditDebitNote_serializer = SingleCreditDebitNoteThirdSerializer(
-                        query).data
-                    # CreditDebitListData = list()
-                    # for a in CreditDebitNote_serializer:
-                    #     CreditDebitListData.append({
-                    #         "id": a['id'],
-                    #         "NoteNo": a['NoteNo'],
-                    #         "FullNoteNumber": a['FullNoteNumber'],
-                    #         "NoteType": a['NoteType']['Name'],
-                    #         "NoteReason": a['NoteReason']['Name'],
-                    #         "GrandTotal": a['GrandTotal'],
-                    #         "RoundOffAmount": a['RoundOffAmount'],
-                    #         "CustomerID": a['Customer']['id'],
-                    #         "Customer": a['Customer']['Name'],
-                    #         "PartyID": a['Party']['id'],
-                    #         "Party": a['Party']['Name'],
-                    #         "Narration": a['Narration'],
-                    #         "Comment": a['Comment'],
-                    #         "CreatedOn": a['CreatedOn']
-                    #     })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitNote_serializer})
+                        query,many=True).data
+                    CreditDebitListData = list()
+                    for a in CreditDebitNote_serializer:
+                        CRDRInvoices = list()
+                        for b in a['CRDRInvoices']:
+                            CRDRInvoices.append({
+                                "id":b['id'],
+                                "GrandTotal": b['GrandTotal'],
+                                "PaidAmount": b['PaidAmount'],
+                                "AdvanceAmtAdjusted":b['AdvanceAmtAdjusted'],
+                                "InvoiceDate": b['Invoice']['InvoiceDate'],
+                                "FullInvoiceNumber": b['Invoice']['FullInvoiceNumber']
+                            }) 
+                            
+                        CreditDebitListData.append({
+                            "id": a['id'],
+                            "NoteNo": a['NoteNo'],
+                            "FullNoteNumber": a['FullNoteNumber'],
+                            "NoteType": a['NoteType']['Name'],
+                            "NoteReason": a['NoteReason']['Name'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "PartyID": a['Party']['id'],
+                            "Party": a['Party']['Name'],
+                            "Narration": a['Narration'],
+                            "Comment": a['Comment'],
+                            "CreatedOn": a['CreatedOn'],
+                            "CRDRInvoices": CRDRInvoices,
+                            "CRDRNoteItems":a['CRDRNoteItems'] 
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
