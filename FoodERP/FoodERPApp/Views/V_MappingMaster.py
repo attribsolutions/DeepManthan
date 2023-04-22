@@ -44,3 +44,40 @@ class PartyCustomerMappingView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Party not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
+class ItemsListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self,request):
+        try:
+            with transaction.atomic():
+                ItemsMappingMaster_data = JSONParser().parse(request)
+                ItemsMapping_Serializer = ItemsMappingSerializer(data=ItemsMappingMaster_data,many=True)
+                if ItemsMapping_Serializer.is_valid():
+                    id = ItemsMapping_Serializer.data[0]['Item']
+                    ItemsMappingdata = M_ItemMappingMaster.objects.filter(Item=id)
+                    ItemsMappingdata.delete()
+                    ItemsMapping_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Items Save Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemsMapping_Serializer.errors, 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = M_Items.objects.raw('''SELECT M_Items.id, M_Items.name, M_ItemMappingMaster.MapItem FROM M_items LEFT JOIN M_ItemMappingMaster ON M_ItemMappingMaster.Item_id = M_Items.id WHERE M_Items.Company_id=%s''',([id]))
+                if query:
+                    ItemsMapping_Serializer = ItemsSerializerSecond(query,many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemsMapping_Serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Party not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+    
