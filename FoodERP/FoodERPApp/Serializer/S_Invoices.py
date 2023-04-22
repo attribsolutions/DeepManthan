@@ -204,4 +204,12 @@ class InvoiceSerializerForDelete(serializers.ModelSerializer):
  
     class Meta:
         model = T_Invoices
-        fields = '__all__'               
+        fields = '__all__'   
+        
+#Invoice Serializer for TC_ReceiptInvoices
+        
+class GlobleInvoiceSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = T_Invoices
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal']                

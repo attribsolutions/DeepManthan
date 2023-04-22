@@ -20,7 +20,7 @@ class ImportFieldListView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 Company = ImportField_data['CompanyID']
-                query = M_ImportFields.objects.filter(Company=Company)
+                query = M_ImportFields.objects.all()
                 if query:
 
                     Import_serializer = ImportFieldSerializerSecond(query, many=True).data
@@ -55,8 +55,19 @@ class ImportFieldSaveView(CreateAPIView):
                 ImportField_data = M_ImportFields.objects.get(id=id)
                 ImportField_serializer = ImportFieldSerializerSecond(
 
-                    ImportField_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
+                    ImportField_data).data
+                ImportField_List = list()
+                ImportField_List.append({
+                    "id": ImportField_serializer['id'],
+                    "FieldName": ImportField_serializer['FieldName'],
+                    "ControlTypeID": ImportField_serializer['ControlType']['id'],
+                    "ControlTypeName": ImportField_serializer['ControlType']['Name'],
+                    "FieldValidationID": ImportField_serializer['FieldValidation']['id'],
+                    "FieldValidationName": ImportField_serializer['FieldValidation']['Name'],
+                    "IsCompulsory": ImportField_serializer['IsCompulsory'],
+                    "Company": ImportField_serializer['Company']
+                })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_List[0]})
 
         except M_ImportFields.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'ImportField  Not available', 'Data': []})

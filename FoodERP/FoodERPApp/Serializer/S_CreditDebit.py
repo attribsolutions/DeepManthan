@@ -17,7 +17,7 @@ class CreditDebitNoteItemSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= TC_CreditDebitNoteItems
-        fields = ['Quantity', 'Rate', 'BasicAmount', 'TaxType', 'GSTRate', 'GSTAmount', 'Amount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'NOC', 'BatchCode', 'Item', 'MRP', 'Unit', 'CRDRNote']
+        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode','LiveBatch']
 
 class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRInvoices = CreditDebitNoteInvoiceSerializer(many=True)
@@ -38,7 +38,11 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
         for CRDRInvoice_data in CRDRInvoices_data:
             CRDRInvoice =TC_ReceiptInvoices.objects.create(CRDRNote=CreditDebitNoteID, **CRDRInvoice_data)    
             
-        return CreditDebitNoteID          
+        return CreditDebitNoteID 
+    
+    
+    
+# CreditDebitNote List Serializer             
         
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
@@ -72,3 +76,29 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
             ret["PurchaseReturn"] = {"id": None, "FullReturnNumber": None}         
                   
         return ret    
+    
+    
+# CreditDebitNote Single get Serializer        
+    
+class CreditDebitNoteThirdSerializer(serializers.ModelSerializer):
+    Customer = PartiesSerializer(read_only=True)
+    Party = PartiesSerializer(read_only=True)
+    NoteReason = GeneralMasterserializer(read_only=True)
+    NoteType = GeneralMasterserializer(read_only=True)
+    class Meta :
+        model= T_CreditDebitNotes
+        fields = ['id', 'NoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'Comment', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer','NoteType', 'Party']
+                
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(CreditDebitNoteThirdSerializer, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("NoteReason", None):
+            ret["NoteReason"] = {"id": None, "Name": None}
+        
+        if not ret.get("NoteType", None):
+            ret["NoteType"] = {"id": None, "Name": None}
+                  
+        return ret    
+    
+    
