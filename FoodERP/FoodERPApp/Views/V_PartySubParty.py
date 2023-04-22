@@ -122,7 +122,9 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                     Query = MC_PartySubParty.objects.filter(SubParty=id,Party__PartyType__in=q0).select_related('Party')
                     
                 elif(Type==2): #Supplier
-                    q0=M_PartyType.objects.filter(Company=Company,IsVendor=0)
+                    q=C_Companies.objects.filter(id=Company).values("CompanyGroup")
+                    q00=C_Companies.objects.filter(CompanyGroup=q[0]["CompanyGroup"])
+                    q0=M_PartyType.objects.filter(Company__in=q00,IsVendor=0)
                     Query = MC_PartySubParty.objects.filter(SubParty=id,Party__PartyType__in=q0).select_related('Party')
                     
                 elif(Type==3):  #Customer
