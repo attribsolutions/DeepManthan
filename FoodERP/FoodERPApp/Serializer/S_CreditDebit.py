@@ -24,7 +24,7 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
     class Meta :
         model= T_CreditDebitNotes
-        fields = ['NoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'Comment', 'CreatedBy', 'UpdatedBy', 'Customer', 'Invoice', 'NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
+        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'Comment', 'CreatedBy', 'UpdatedBy', 'Customer', 'Invoice', 'NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
         
     def create(self, validated_data):
         CRDRNoteItems_data = validated_data.pop('CRDRNoteItems')
@@ -80,25 +80,35 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     
 # CreditDebitNote Single get Serializer        
     
-class CreditDebitNoteThirdSerializer(serializers.ModelSerializer):
+class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
     Party = PartiesSerializer(read_only=True)
     NoteReason = GeneralMasterserializer(read_only=True)
     NoteType = GeneralMasterserializer(read_only=True)
+    Receipt = ReceiptSerializer(read_only=True)
+    Invoice = InvoiceSerializer(read_only=True)
+    PurchaseReturn = PurchaseReturnSerializer(read_only=True)
     class Meta :
         model= T_CreditDebitNotes
-        fields = ['id', 'NoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'Comment', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer','NoteType', 'Party']
+        fields = '__all__'
                 
     def to_representation(self, instance):
         # get representation from ModelSerializer
-        ret = super(CreditDebitNoteThirdSerializer, self).to_representation(instance)
+        ret = super(SingleCreditDebitNoteThirdSerializer, self).to_representation(instance)
         # if parent is None, overwrite
         if not ret.get("NoteReason", None):
             ret["NoteReason"] = {"id": None, "Name": None}
         
         if not ret.get("NoteType", None):
             ret["NoteType"] = {"id": None, "Name": None}
+        
+        if not ret.get("Receipt", None):
+            ret["Receipt"] = {"id": None, "FullReceiptNumber": None}  
+        
+        if not ret.get("Invoice", None):
+            ret["Invoice"] = {"id": None, "FullInvoiceNumber": None} 
+            
+        if not ret.get("PurchaseReturn", None):
+            ret["PurchaseReturn"] = {"id": None, "FullReturnNumber": None}         
                   
-        return ret    
-    
-    
+        return ret

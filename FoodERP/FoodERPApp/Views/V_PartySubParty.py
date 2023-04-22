@@ -193,8 +193,21 @@ class RetailerandSSDDView(CreateAPIView):
                     q2=M_Parties.objects.filter(PartyType__in=q0,id__in=q1)
                 
                 elif Type==3:  #All SS/DD under given Company
-                    q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
-                    q2=M_Parties.objects.filter(PartyType__in=q0)
+                   
+                    q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
+                 
+                    if q[0]['IsSCM'] == 0:
+                       
+                        q2=M_Parties.objects.filter(Company=CompanyID,IsDivision=1)
+                    else:
+                        a=C_Companies.objects.filter(id=CompanyID).values('CompanyGroup')
+                     
+                        a1=C_Companies.objects.filter(CompanyGroup=a[0]['CompanyGroup'],IsSCM=0)
+                       
+                        q0=M_PartyType.objects.filter(Company__in=a1,IsRetailer=0,IsSCM=1)
+                       
+                        q2=M_Parties.objects.filter(PartyType__in=q0)
+                       
                 
                 elif Type==4:  #All Subparties under given Party and Company
                     q1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
