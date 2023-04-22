@@ -22,9 +22,20 @@ class ImportFieldListView(CreateAPIView):
                 Company = ImportField_data['CompanyID']
                 query = M_ImportFields.objects.all()
                 if query:
-
                     Import_serializer = ImportFieldSerializerSecond(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Import_serializer})
+                    ImportField_List = list()
+                    for a in Import_serializer:
+                     ImportField_List.append({
+                    "id": a['id'],
+                    "FieldName": a['FieldName'],
+                    "ControlTypeID": a['ControlType']['id'],
+                    "ControlTypeName": a['ControlType']['Name'],
+                    "FieldValidationID": a['FieldValidation']['id'],
+                    "FieldValidationName": a['FieldValidation']['Name'],
+                    "IsCompulsory": a['IsCompulsory'],
+                    "Company": a['Company']
+                })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ImportField_List})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
