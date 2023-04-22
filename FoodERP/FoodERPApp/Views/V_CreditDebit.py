@@ -31,10 +31,10 @@ class CreditDebitNoteListView(CreateAPIView):
                 if(Customer == ''):
 
                     query = T_CreditDebitNotes.objects.filter(
-                        NoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
+                        CRDRNoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
 
                 else:
-                    query = T_CreditDebitNotes.objects.filter(NoteDate__range=[
+                    query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[
                                                               FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
 
                 if query:
@@ -44,7 +44,7 @@ class CreditDebitNoteListView(CreateAPIView):
                     for a in CreditDebit_serializer:
                         CreditDebitListData.append({
                             "id": a['id'],
-                            "NoteDate": a['NoteDate'],
+                            "CRDRNoteDate": a['CRDRNoteDate'],
                             "NoteNo": a['NoteNo'],
                             "FullNoteNumber": a['FullNoteNumber'],
                             "NoteType": a['NoteType']['Name'],
@@ -79,11 +79,11 @@ class CreditDebitNoteView(CreateAPIView):
             with transaction.atomic():
                 CreditNotedata = JSONParser().parse(request)
                 Party = CreditNotedata['Party']
-                NoteDate = CreditNotedata['NoteDate']
+                CRDRNoteDate = CreditNotedata['CRDRNoteDate']
                 NoteType = CreditNotedata['NoteType']
                 # ==========================Get Max Credit Debit  Number=====================================================
                 a = GetMaxNumber.GetCreditDebitNumber(
-                    Party, NoteType, NoteDate)
+                    Party, NoteType, CRDRNoteDate)
                 CreditNotedata['NoteNo'] = a
                 '''Get  Credit Debit Prifix '''
                 b = GetPrifix.GetCRDRPrifix(Party, NoteType)
@@ -105,14 +105,33 @@ class CreditDebitNoteView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-               query = T_CreditDebitNotes.objects.filter(id=id)
-               if query:
-                   CreditDebitNote_serializer = CreditDebitNoteThirdSerializer(query).data
-                   return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitNote_serializer})
-               return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                query = T_CreditDebitNotes.objects.filter(id=id)
+                if query:
+                    CreditDebitNote_serializer = SingleCreditDebitNoteThirdSerializer(
+                        query).data
+                    # CreditDebitListData = list()
+                    # for a in CreditDebitNote_serializer:
+                    #     CreditDebitListData.append({
+                    #         "id": a['id'],
+                    #         "NoteNo": a['NoteNo'],
+                    #         "FullNoteNumber": a['FullNoteNumber'],
+                    #         "NoteType": a['NoteType']['Name'],
+                    #         "NoteReason": a['NoteReason']['Name'],
+                    #         "GrandTotal": a['GrandTotal'],
+                    #         "RoundOffAmount": a['RoundOffAmount'],
+                    #         "CustomerID": a['Customer']['id'],
+                    #         "Customer": a['Customer']['Name'],
+                    #         "PartyID": a['Party']['id'],
+                    #         "Party": a['Party']['Name'],
+                    #         "Narration": a['Narration'],
+                    #         "Comment": a['Comment'],
+                    #         "CreatedOn": a['CreatedOn']
+                    #     })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitNote_serializer})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
@@ -123,133 +142,5 @@ class CreditDebitNoteView(CreateAPIView):
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-   
-
-
-
-        
-
-
-# class CreditNotesView(CreateAPIView):
-
-    
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def post(self,request):
-#         try:
-#             with transaction.atomic():
-#                 Credit_Notedata = JSONParser().parse(request)
-#                 Party = Credit_Notedata['Party']
-#                 CreditNoteDate = Credit_Notedata['CreditNoteDate']
-#                 query =  T_CreditDebitNotes.objects.filter(Party=Party,CreditNoteDate=CreditNoteDate)
-#                 if query:
-#                     CreditNote_Serializer = CreditNoteSerializer(query,many=True).data
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :CreditNote_Serializer})
-#                 else :
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'CreditNote Not Available', 'Data' : []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-        
-# class CreditNotesViewSecond(CreateAPIView):
-
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-
-
-#     @transaction.atomic()
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 CreditNotedata = JSONParser().parse(request)
-#                 CreditNote_Serializer = CreditNoteSerializer(data=CreditNotedata)
-#                 if CreditNote_Serializer.is_valid():
-#                     CreditNote_Serializer.save()
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
-#                 else :
-#                     transaction.set_rollback(True)
-#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-
-    
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def post(self,request):
-#         try:
-#             with transaction.atomic():
-#                 Credit_Notedata = JSONParser().parse(request)
-#                 Party = Credit_Notedata['Party']
-#                 CreditNoteDate = Credit_Notedata['CreditNoteDate']
-#                 query =  T_CreditDebitNotes.objects.filter(Party=Party,CreditNoteDate=CreditNoteDate)
-#                 if query:
-#                     CreditNote_Serializer = CreditNoteSerializer(query,many=True).data
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :CreditNote_Serializer})
-#                 else :
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'CreditNote Not Available', 'Data' : []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-        
-# class CreditNotesViewSecond(CreateAPIView):
-
-#     permission_classes = (IsAuthenticated,)
-#     authentication_class = JSONWebTokenAuthentication
-
-
-#     @transaction.atomic()
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 CreditNotedata = JSONParser().parse(request)
-#                 CreditNote_Serializer = CreditNoteSerializer(data=CreditNotedata)
-#                 if CreditNote_Serializer.is_valid():
-#                     CreditNote_Serializer.save()
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data' :[]})
-#                 else :
-#                     transaction.set_rollback(True)
-#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' : []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-    
-
- 
-    
-        
-#     @transaction.atomic()
-#     def put(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 Credit_Notedata = JSONParser().parse(request)
-#                 CreditNotedataByID = T_CreditDebitNotes.objects.get(id=id)
-#                 CreditNote_Serializer = CreditNoteSerializer(CreditNotedataByID, data=Credit_Notedata)
-#                 if CreditNote_Serializer.is_valid():
-#                     CreditNote_Serializer.save()
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Updated Successfully','Data' :[]})
-#                 else:
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data' :[]})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-
-
-
-#     @transaction.atomic()
-#     def delete(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 Credit_Notedata = T_CreditDebitNotes.objects.get(id=id)
-#                 Credit_Notedata.delete()
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Deleted Successfully','Data':[]})
-#         except M_Bank.DoesNotExist:
-#             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'CreditNote Not available', 'Data': []})
-#         except IntegrityError:
-#             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'CreditNote used in transaction', 'Data': []})        
