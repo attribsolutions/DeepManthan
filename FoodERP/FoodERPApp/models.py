@@ -1617,8 +1617,37 @@ class MC_PartyImportFields(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     
     class Meta:
-        db_table = "MC_PartyImportFields"                        
+        db_table = "MC_PartyImportFields"
+                                
+class M_PartyCustomerMappingMaster(models.Model):
+    Party = models.ForeignKey(M_Parties,related_name='MappingParty', on_delete=models.PROTECT)
+    Customer = models.ForeignKey(M_Parties,related_name='MappingPartiescustomer', on_delete=models.PROTECT)
+    MapCustomer = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = "M_PartyCustomerMappingMaster"
 
+class M_ItemMappingMaster(models.Model):
+    Item = models.ForeignKey(M_Items,related_name='MappingItem', on_delete=models.PROTECT)
+    MapItem = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = "M_ItemMappingMaster"
+
+class M_ItemUnitMappingMaster(models.Model):
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    UnitID = models.ForeignKey(M_Units, related_name='Unit', on_delete=models.PROTECT)
+    MapUnit = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        db_table = "M_ItemUnitMappingMaster"        
+    
+            
         
         
         
