@@ -446,9 +446,12 @@ urlpatterns = [
             url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
 
-    
+#MappingMaster
             url(r'PartyCustomerMapping$', PartyCustomerMappingView.as_view()),
             url(r'PartyCustomerMapping/([0-9]+)$', PartyCustomerMappingView.as_view()),
+            url(r'ItemsListMapping$', ItemsListView.as_view()),
+            url(r'ItemsMapping/([0-9]+)$', ItemsListView.as_view()),
+
 # Single Invoice details view api for Purchase Return, CreditDebitnot
             url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),               
 
