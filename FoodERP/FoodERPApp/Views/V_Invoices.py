@@ -422,6 +422,7 @@ class InvoiceViewThird(CreateAPIView):
                                 "MRPValue": b['MRP']['MRP'],
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
+                                "UnitName": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "GST": b['GST']['id'],
