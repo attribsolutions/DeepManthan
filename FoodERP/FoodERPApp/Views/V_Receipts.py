@@ -139,7 +139,7 @@ class ReceiptView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
 
     # @transaction.atomic()
     # def post(self, request):
