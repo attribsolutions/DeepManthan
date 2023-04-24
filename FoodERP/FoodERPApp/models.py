@@ -1629,6 +1629,7 @@ class M_PartyCustomerMappingMaster(models.Model):
         db_table = "M_PartyCustomerMappingMaster"
 
 class M_ItemMappingMaster(models.Model):
+    Party = models.ForeignKey(M_Parties,related_name='ItemMappingParty', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items,related_name='MappingItem', on_delete=models.PROTECT)
     MapItem = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
@@ -1636,15 +1637,16 @@ class M_ItemMappingMaster(models.Model):
     class Meta:
         db_table = "M_ItemMappingMaster"
 
-class M_ItemUnitMappingMaster(models.Model):
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    UnitID = models.ForeignKey(M_Units, related_name='Unit', on_delete=models.PROTECT)
+class M_UnitMappingMaster(models.Model):
+    
+    Party = models.ForeignKey(M_Parties,related_name='UnitMappingParty', on_delete=models.PROTECT)
+    Unit = models.ForeignKey(M_Units, related_name='Unit', on_delete=models.PROTECT)
     MapUnit = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
    
     class Meta:
-        db_table = "M_ItemUnitMappingMaster"        
+        db_table = "M_UnitMappingMaster"        
     
             
         
