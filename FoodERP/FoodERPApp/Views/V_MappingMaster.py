@@ -72,12 +72,14 @@ class ItemsListView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT M_Items.id, M_Items.name, M_ItemMappingMaster.MapItem FROM M_items LEFT JOIN M_ItemMappingMaster ON M_ItemMappingMaster.Item_id = M_Items.id WHERE M_Items.Company_id=%s''',([id]))
+                query = M_Items.objects.raw('''SELECT mc_partysubparty.id,m_parties.Name , mc_partysubparty.Party_id,mc_partysubparty.SubParty_id, m_itemmappingmaster.MapItem FROM mc_partysubparty LEFT join m_itemmappingmaster on m_itemmappingmaster.Item_id =  MC_PartySubParty.SubParty_id Join m_parties on M_Parties.id = MC_PartySubParty.SubParty_id AND MC_PartySubParty.Party_id=%s''',([id]))
                 if query:
                     ItemsMapping_Serializer = ItemsSerializerSecond(query,many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemsMapping_Serializer})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Party not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
         
     
