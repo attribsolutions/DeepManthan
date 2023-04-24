@@ -237,6 +237,7 @@ urlpatterns = [
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
+            url(r'BulkInvoices$', BulkInvoiceView.as_view()),
             
 
 #Loading Sheet All APIs
