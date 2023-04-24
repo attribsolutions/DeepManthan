@@ -91,10 +91,7 @@ class ImportFieldSaveView(CreateAPIView):
             with transaction.atomic():
                 ImportField_data = JSONParser().parse(request)
                 ImportField_dataByID = M_ImportFields.objects.get(id=id)
-
-                ImportField_serializer = ImportFieldSerializerSecond(
-
-                    ImportField_dataByID, data=ImportField_data)
+                ImportField_serializer = ImportFieldSerializer(ImportField_dataByID, data=ImportField_data)
                 if ImportField_serializer.is_valid():
                     ImportField_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ImportField Updated Successfully', 'Data': []})

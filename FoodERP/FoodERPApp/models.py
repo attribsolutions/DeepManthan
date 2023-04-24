@@ -1573,9 +1573,7 @@ class TC_CreditDebitNoteItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    
+  
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
 
