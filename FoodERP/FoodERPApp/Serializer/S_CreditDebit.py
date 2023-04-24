@@ -17,7 +17,7 @@ class CreditDebitNoteItemSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= TC_CreditDebitNoteItems
-        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode','LiveBatch']
+        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode']
 
 class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRInvoices = CreditDebitNoteInvoiceSerializer(many=True)
@@ -85,6 +85,33 @@ class CreditDebitNoteInvoiceSerializerSecond(serializers.ModelSerializer):
         model= TC_ReceiptInvoices
         fields = ['id', 'GrandTotal', 'PaidAmount', 'AdvanceAmtAdjusted', 'Invoice']
         
+             
+class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    
+    class Meta :
+        model= TC_CreditDebitNoteItems
+        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode']        
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(CreditDebitNoteItemSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}
+            
+        if not ret.get("Margin", None):
+            ret["Margin"] = {"id": None, "Margin": None} 
+        
+        if not ret.get("GST", None):
+            ret["GST"] = {"id": None, "GSTPercentage ": None}        
+             
+        return ret
+    
+        
 class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
     Party = PartiesSerializer(read_only=True)
@@ -94,7 +121,7 @@ class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
     Invoice = InvoiceSerializer(read_only=True)
     PurchaseReturn = PurchaseReturnSerializer(read_only=True)
     CRDRInvoices = CreditDebitNoteInvoiceSerializerSecond(many=True)
-    CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
+    CRDRNoteItems = CreditDebitNoteItemSerializerSecond(many=True)
     
     class Meta :
         model= T_CreditDebitNotes
