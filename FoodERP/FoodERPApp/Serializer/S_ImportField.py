@@ -12,8 +12,8 @@ class FieldValidations_Serializer(serializers.ModelSerializer):
         fields = ['id','Name']
 
 class ImportFieldSerializerSecond(serializers.ModelSerializer):
-    ControlType = ControlType_Serializer(read_only=True)
-    FieldValidation = FieldValidations_Serializer(read_only=True)
+    ControlType = ControlType_Serializer()
+    FieldValidation = FieldValidations_Serializer()
     class Meta:
         model = M_ImportFields
         fields = '__all__'
