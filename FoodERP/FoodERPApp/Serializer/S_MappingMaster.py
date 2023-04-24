@@ -24,5 +24,10 @@ class ItemsMappingSerializer(serializers.ModelSerializer):
 
 class ItemsSerializerSecond(serializers.Serializer):
     id = serializers.IntegerField()
-    name = serializers.CharField(max_length=200)
+    Party_id = serializers.IntegerField()
+    Customer = serializers.IntegerField()
+    Name = serializers.CharField(max_length=200)
     MapItem = serializers.CharField(max_length= 200)
+
+# For Units Mapping Serializers
+
