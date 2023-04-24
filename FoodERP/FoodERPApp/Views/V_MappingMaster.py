@@ -46,7 +46,7 @@ class PartyCustomerMappingView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
-class ItemsListView(CreateAPIView):
+class PartyItemMappingMasterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
@@ -55,10 +55,10 @@ class ItemsListView(CreateAPIView):
         try:
             with transaction.atomic():
                 ItemsMappingMaster_data = JSONParser().parse(request)
-                ItemsMapping_Serializer = ItemsMappingSerializer(data=ItemsMappingMaster_data,many=True)
+                ItemsMapping_Serializer = ItemMappingMasterSerializer(data=ItemsMappingMaster_data,many=True)
                 if ItemsMapping_Serializer.is_valid():
-                    id = ItemsMapping_Serializer.data[0]['Item']
-                    ItemsMappingdata = M_ItemMappingMaster.objects.filter(Item=id)
+                    id = ItemsMapping_Serializer.data[0]['Party']
+                    ItemsMappingdata = M_ItemMappingMaster.objects.filter(Party=id)
                     ItemsMappingdata.delete()
                     ItemsMapping_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Items Save Successfully', 'Data':[]})
@@ -72,12 +72,51 @@ class ItemsListView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_Items.objects.raw('''SELECT M_Items.id, M_Items.name, M_ItemMappingMaster.MapItem FROM M_items LEFT JOIN M_ItemMappingMaster ON M_ItemMappingMaster.Item_id = M_Items.id WHERE M_Items.Company_id=%s''',([id]))
+                query = MC_PartyItems.objects.raw('''SELECT MC_PartyItems.id, MC_PartyItems.Item_id,MC_PartyItems.Party_id,M_Items.Name,M_ItemMappingMaster.MapItem FROM MC_PartyItems LEFT JOIN M_ItemMappingMaster ON M_ItemMappingMaster.Party_id=MC_PartyItems.Party_id AND MC_PartyItems.Item_id=M_ItemMappingMaster.Item_id JOIN M_Items ON M_Items.id = MC_PartyItems.Item_id Where MC_PartyItems.Party_id=%s''',([id]))
+                print(str(query.query))
                 if query:
-                    ItemsMapping_Serializer = ItemsSerializerSecond(query,many=True).data
+                    ItemsMapping_Serializer = ItemMappingMasterSerializerSecond(query,many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemsMapping_Serializer})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Party not available', 'Data' : []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
+class PartyUnitMappingMasterUnitsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self,request):
+        try:
+            with transaction.atomic():
+                UnitsMappingMaster_data = JSONParser().parse(request)
+                UnitsMapping_Serializer = UnitsMappingSerializer(data= UnitsMappingMaster_data,many=True)
+                if UnitsMapping_Serializer.is_valid():
+                    id = UnitsMapping_Serializer.data[0]['Party']
+                    UnitsMappingdata = M_UnitMappingMaster.objects.filter(Party=id)
+                    UnitsMappingdata.delete()
+                    UnitsMapping_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Units Save Successfully', 'Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  UnitsMapping_Serializer.errors, 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = M_Units.objects.raw('''SELECT M_Units.id,M_Units.Name,M_UnitMappingMaster.MapUnit,M_UnitMappingMaster.Party_id FROM M_Units Left JOIN M_UnitMappingMaster ON M_UnitMappingMaster.Unit_id = M_Units.id AND M_UnitMappingMaster.Party_id=%s''',([id]))
+
+                if query:
+                    UnitsMapping_Serializer = UnitsMappingSerializerSecond(query,many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :UnitsMapping_Serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Unit not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
         
     
