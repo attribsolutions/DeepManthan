@@ -106,21 +106,50 @@ class CreditDebitNoteView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = T_CreditDebitNotes.objects.filter(id=id)
-                print(query)
+               
                 if query:
-                    CreditDebitNote_serializer = SingleCreditDebitNoteThirdSerializer(
-                        query,many=True).data
+                    CreditDebitNote_serializer = SingleCreditDebitNoteThirdSerializer(query,many=True).data
                     CreditDebitListData = list()
+                    # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': CreditDebitNote_serializer})
                     for a in CreditDebitNote_serializer:
+                        CRDRNoteItems = list()
+                        
+                        for b in a['CRDRNoteItems']:
+                            CRDRNoteItems.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                            }) 
+                        
                         CRDRInvoices = list()
-                        for b in a['CRDRInvoices']:
+                        for c in a['CRDRInvoices']:
                             CRDRInvoices.append({
-                                "id":b['id'],
-                                "GrandTotal": b['GrandTotal'],
-                                "PaidAmount": b['PaidAmount'],
-                                "AdvanceAmtAdjusted":b['AdvanceAmtAdjusted'],
-                                "InvoiceDate": b['Invoice']['InvoiceDate'],
-                                "FullInvoiceNumber": b['Invoice']['FullInvoiceNumber']
+                                "id":c['id'],
+                                "GrandTotal": c['GrandTotal'],
+                                "PaidAmount": c['PaidAmount'],
+                                "AdvanceAmtAdjusted":c['AdvanceAmtAdjusted'],
+                                "InvoiceDate": c['Invoice']['InvoiceDate'],
+                                "FullInvoiceNumber": c['Invoice']['FullInvoiceNumber']
                             }) 
                             
                         CreditDebitListData.append({
@@ -139,8 +168,8 @@ class CreditDebitNoteView(CreateAPIView):
                             "Narration": a['Narration'],
                             "Comment": a['Comment'],
                             "CreatedOn": a['CreatedOn'],
-                            "CRDRInvoices": CRDRInvoices,
-                            "CRDRNoteItems":a['CRDRNoteItems'] 
+                            "CRDRNoteItems":CRDRNoteItems,
+                            "CRDRInvoices": CRDRInvoices 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
