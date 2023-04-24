@@ -141,29 +141,6 @@ class ReceiptView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
 
-    # @transaction.atomic()
-    # def post(self, request):
-    #     try:
-    #         with transaction.atomic():
-    #             Receiptdata = JSONParser().parse(request)
-    #             Party = Receiptdata['Party']
-    #             Date = Receiptdata['ReceiptDate']
-    #             '''Get Max Receipt Number'''
-    #             a = GetMaxNumber.GetReceiptNumber(Party,Date)
-    #             # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-    #             Receiptdata['ReceiptNo'] = a
-    #             '''Get Receipt Prifix '''
-    #             b = GetPrifix.GetReceiptPrifix(Party)
-
-    #             Receiptdata['FullReceiptNumber'] = b+""+str(a)
-    #             # return JsonResponse({ 'Data': Orderdata })
-    #             Receipt_serializer = ReceiptSerializer(data=Receiptdata)
-    #             if Receipt_serializer.is_valid():
-    #                 Receipt_serializer.save()
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})
-    #             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):
