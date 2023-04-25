@@ -869,7 +869,6 @@ class T_Invoices(models.Model):
     GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
     Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
-    IsLoadingSheetCreated = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
