@@ -151,6 +151,16 @@ class CreditDebitNoteView(CreateAPIView):
                                 "FullInvoiceNumber": c['Invoice']['FullInvoiceNumber'],
                                 "CreatedOn": c['Invoice']['CreatedOn']
                             }) 
+                        
+                        DefCustomerAddress = ''  
+                        for ad in a['Customer']['PartyAddress']:
+                            if ad['IsDefault'] == True :
+                                DefCustomerAddress = ad['Address']
+                                
+                        DefPartyAddress = ''
+                        for x in a['Party']['PartyAddress']:
+                            if x['IsDefault'] == True :
+                                DefPartyAddress = x['Address']
                             
                         CreditDebitListData.append({
                             "id": a['id'],
@@ -163,8 +173,16 @@ class CreditDebitNoteView(CreateAPIView):
                             "RoundOffAmount": a['RoundOffAmount'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerState": a['Customer']['State']['Name'],
+                            "CustomerAddress": DefCustomerAddress,
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "PartyAddress": DefPartyAddress,                            
                             "Narration": a['Narration'],
                             "CreatedOn": a['CreatedOn'],
                             "CRDRNoteItems":CRDRNoteItems,
