@@ -73,7 +73,7 @@ class ReceiptListView(CreateAPIView):
                 else:
                     query = T_Receipts.objects.filter(ReceiptDate__range=[
                                                       FromDate, ToDate], Customer=Customer, Party=Party, ReceiptType=ReceiptType)
-
+                    print(str(query.query))
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
                     Receipt_serializer = ReceiptSerializerSecond(
@@ -212,13 +212,13 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                
                 if(Customer == ''):
                     query = T_Receipts.objects.raw(''' SELECT T_Receipts.id, T_Receipts.ReceiptDate, T_Receipts.ReceiptNo, T_Receipts.FullReceiptNumber, T_Receipts.Description, T_Receipts.AmountPaid, T_Receipts.BalanceAmount, T_Receipts.OpeningBalanceAdjusted, T_Receipts.ReceiptMode_id, T_Receipts.ReceiptType_id, T_Receipts.ChequeDate, T_Receipts.DocumentNo, T_Receipts.Bank_id, T_Receipts.DepositorBank_id, T_Receipts.Customer_id, T_Receipts.Party_id, T_Receipts.CreatedBy, T_Receipts.CreatedOn, T_Receipts.UpdatedBy, T_Receipts.UpdatedOn FROM T_Receipts WHERE 
-                                                   T_Receipts.Customer_id = %s AND  T_Receipts.ReceiptType_id = %s AND T_Receipts.id Not IN (SELECT Payment_id FROM TC_PaymentReceipt) ''', ([Party], [ReceiptType]))
+                                                   T_Receipts.Customer_id = %s AND  T_Receipts.ReceiptType_id = %s AND  `T_Receipts`.`ReceiptDate` BETWEEN %s AND %s AND T_Receipts.id Not IN (SELECT Payment_id FROM TC_PaymentReceipt) ''', ([Party], [ReceiptType],[FromDate],[ToDate]))
                     # query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, ReceiptType=ReceiptType).filter(subquery)
                 else:
                     # query = T_Receipts.objects.filter(ReceiptDate__range=[FromDate, ToDate], Customer=Party, Party=Customer, ReceiptType=ReceiptType)
                     query = T_Receipts.objects.raw(''' SELECT T_Receipts.id, T_Receipts.ReceiptDate, T_Receipts.ReceiptNo, T_Receipts.FullReceiptNumber, T_Receipts.Description, T_Receipts.AmountPaid, T_Receipts.BalanceAmount, T_Receipts.OpeningBalanceAdjusted, T_Receipts.ReceiptMode_id, T_Receipts.ReceiptType_id, T_Receipts.ChequeDate, T_Receipts.DocumentNo, T_Receipts.Bank_id, T_Receipts.DepositorBank_id, T_Receipts.Customer_id, T_Receipts.Party_id, T_Receipts.CreatedBy, T_Receipts.CreatedOn, T_Receipts.UpdatedBy, T_Receipts.UpdatedOn FROM T_Receipts WHERE 
-                                                    T_Receipts.Customer_id = %s AND T_Receipts.Party_id = %s AND  T_Receipts.ReceiptType_id = %s AND T_Receipts.id Not IN (SELECT Payment_id FROM TC_PaymentReceipt) ''', ([Party], [Customer], [ReceiptType]))
-
+                                                    T_Receipts.Customer_id = %s AND T_Receipts.Party_id = %s AND  T_Receipts.ReceiptType_id = %s  AND `T_Receipts`.`ReceiptDate` BETWEEN %s AND %s AND T_Receipts.id Not IN (SELECT Payment_id FROM TC_PaymentReceipt) ''', ([Party], [Customer], [ReceiptType],[FromDate],[ToDate]))
+                    print(str(query.query))
                 if query:
                     Receipt_serializer = ReceiptSerializerSecond(
                         query, many=True).data
