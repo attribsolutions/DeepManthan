@@ -10,6 +10,7 @@ class ReceiptInvoiceserializer(serializers.Serializer):
     Customer_id=serializers.IntegerField()
     Invoice_ID=serializers.IntegerField()
     InvoiceDate = serializers.DateField()
+    CreatedOn = serializers.DateTimeField() 
     CustomerName=serializers.CharField(max_length=100)
     FullInvoiceNumber=serializers.CharField(max_length=100)
     GrandTotal=serializers.DecimalField(max_digits=10, decimal_places=2)  
