@@ -93,10 +93,6 @@ DATABASES = {
         'PORT': '3306'
     }
     
-    #
-    # This is the test comment to check GIT changes.
-    #
-
     # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
