@@ -237,6 +237,7 @@ urlpatterns = [
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
+            url(r'BulkInvoices$', BulkInvoiceView.as_view()),
             
 
 #Loading Sheet All APIs
@@ -449,8 +450,11 @@ urlpatterns = [
 #MappingMaster
             url(r'PartyCustomerMapping$', PartyCustomerMappingView.as_view()),
             url(r'PartyCustomerMapping/([0-9]+)$', PartyCustomerMappingView.as_view()),
-            url(r'ItemsListMapping$', ItemsListView.as_view()),
-            url(r'ItemsMapping/([0-9]+)$', ItemsListView.as_view()),
+            url(r'ItemsMapping$', PartyItemMappingMasterView.as_view()),
+            url(r'ItemsMapping/([0-9]+)$', PartyItemMappingMasterView.as_view()),
+            url(r'PartyUnitsMapping$', PartyUnitMappingMasterUnitsView.as_view()),
+            url(r'PartyUnitsMapping/([0-9]+)$', PartyUnitMappingMasterUnitsView.as_view()),
+
 
 # Single Invoice details view api for Purchase Return, CreditDebitnot
             url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),               

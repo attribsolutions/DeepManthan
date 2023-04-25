@@ -886,10 +886,12 @@ class TC_InvoiceItems(models.Model):
     Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.PROTECT)
     BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     MRP = models.ForeignKey(M_MRPMaster, related_name='InvoiceItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    MRPValue =  models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
     Rate = models.DecimalField(max_digits=15, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='InvoiceItemGST',null=True,on_delete=models.PROTECT)
+    GSTValue = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
@@ -903,7 +905,7 @@ class TC_InvoiceItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1573,9 +1575,7 @@ class TC_CreditDebitNoteItems(models.Model):
     IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    
+  
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
 
@@ -1629,6 +1629,7 @@ class M_PartyCustomerMappingMaster(models.Model):
         db_table = "M_PartyCustomerMappingMaster"
 
 class M_ItemMappingMaster(models.Model):
+    Party = models.ForeignKey(M_Parties,related_name='ItemMappingParty', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items,related_name='MappingItem', on_delete=models.PROTECT)
     MapItem = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
@@ -1636,15 +1637,16 @@ class M_ItemMappingMaster(models.Model):
     class Meta:
         db_table = "M_ItemMappingMaster"
 
-class M_ItemUnitMappingMaster(models.Model):
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
-    UnitID = models.ForeignKey(M_Units, related_name='Unit', on_delete=models.PROTECT)
+class M_UnitMappingMaster(models.Model):
+    
+    Party = models.ForeignKey(M_Parties,related_name='UnitMappingParty', on_delete=models.PROTECT)
+    Unit = models.ForeignKey(M_Units, related_name='Unit', on_delete=models.PROTECT)
     MapUnit = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
    
     class Meta:
-        db_table = "M_ItemUnitMappingMaster"        
+        db_table = "M_UnitMappingMaster"        
     
             
         
