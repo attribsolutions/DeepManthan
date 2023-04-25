@@ -56,7 +56,6 @@ class CreditDebitNoteListView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
-                            "Comment": a['Comment'],
                             "Receipt": a['Receipt']['FullReceiptNumber'],
                             "Invoice": a['Invoice']['FullInvoiceNumber'],
                             "PurchaseReturn": a['PurchaseReturn']['FullReturnNumber'],
@@ -167,7 +166,6 @@ class CreditDebitNoteView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
-                            "Comment": a['Comment'],
                             "CreatedOn": a['CreatedOn'],
                             "CRDRNoteItems":CRDRNoteItems,
                             "CRDRInvoices": CRDRInvoices 
