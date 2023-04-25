@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'chitalescm20230420_1',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '103.135.203.145',
         'PORT': '3306'
     }
     
