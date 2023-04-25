@@ -150,7 +150,7 @@ class CreditDebitNoteView(CreateAPIView):
                                 "AdvanceAmtAdjusted":c['AdvanceAmtAdjusted'],
                                 "InvoiceDate": c['Invoice']['InvoiceDate'],
                                 "FullInvoiceNumber": c['Invoice']['FullInvoiceNumber'],
-                                "InvoiceCreatedOn": c['Invoice']['CreatedOn']
+                                "CreatedOn": c['Invoice']['CreatedOn']
                             }) 
                             
                         CreditDebitListData.append({
