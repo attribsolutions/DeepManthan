@@ -109,6 +109,10 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                         
                         MC_PageFieldMasterListData = list()
                         for c in MC_PageFieldMaster_data:
+                            
+                            FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
+                            FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
+                           
                             MC_PageFieldMasterListData.append({
                                 
                                 "ControlID":  c['ControlID'],
@@ -125,6 +129,7 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                                 "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
                                 "RegularExpression":c['RegularExpression'],
                                 "InValidMsg":c['InValidMsg'],
+                                "FieldValidationlist":FieldValidations_Serializer
                                 
                             })
                         
@@ -138,6 +143,9 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                             
                             
                             for c in MC_PageFieldMaster_data:
+                                FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
+                                FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
+                                
                                 MC_PageFieldListData.append({
                                     
                                     "ControlID":  c['ControlID'],
@@ -154,6 +162,7 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                                     "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
                                     "RegularExpression":c['RegularExpression'],
                                     "InValidMsg":c['InValidMsg'],
+                                    "FieldValidationlist":FieldValidations_Serializer
                                     
                                 })    
                         

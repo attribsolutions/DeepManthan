@@ -160,6 +160,11 @@ class InvoiceListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     InvoiceListData = list()
                     for a in Invoice_serializer:
+                        Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
+                        if Count == 0:
+                            LoadingSheetCreated = False 
+                        else:
+                            LoadingSheetCreated = True 
                         InvoiceListData.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
@@ -170,7 +175,7 @@ class InvoiceListFilterView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount": a['RoundOffAmount'],
-                            "IsLoadingSheetCreated": a['IsLoadingSheetCreated'], 
+                            "LoadingSheetCreated": LoadingSheetCreated, 
                             "DriverName": a['Driver']['Name'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "Party": a['Party']['Name'],
