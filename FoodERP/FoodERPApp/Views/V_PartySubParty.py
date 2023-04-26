@@ -200,7 +200,9 @@ class RetailerandSSDDView(CreateAPIView):
                  
                     if q[0]['IsSCM'] == 0:
                        
-                        q2=M_Parties.objects.filter(Company=CompanyID,IsDivision=1)
+                        
+                        q2=M_Parties.objects.filter(Company=CompanyID )
+                        
                     else:
                         a=C_Companies.objects.filter(id=CompanyID).values('CompanyGroup')
                      

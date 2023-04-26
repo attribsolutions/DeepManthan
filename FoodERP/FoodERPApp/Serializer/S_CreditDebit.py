@@ -24,7 +24,7 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
     class Meta :
         model= T_CreditDebitNotes
-        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'Comment', 'CreatedBy', 'UpdatedBy', 'Customer', 'Invoice', 'NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
+        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'CreatedBy', 'UpdatedBy', 'Customer', 'Invoice', 'NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
         
     def create(self, validated_data):
         CRDRNoteItems_data = validated_data.pop('CRDRNoteItems')
@@ -113,8 +113,8 @@ class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
     
         
 class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
-    Customer = PartiesSerializer(read_only=True)
-    Party = PartiesSerializer(read_only=True)
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
     NoteReason = GeneralMasterserializer(read_only=True)
     NoteType = GeneralMasterserializer(read_only=True)
     Receipt = ReceiptSerializer(read_only=True)
