@@ -98,9 +98,7 @@ class SendViewMail(RetrieveAPIView):
 class VerifyOTPwithUserData(RetrieveAPIView):
 
     permission_classes = ()
-    authentication_class = ()
-
-
+    # authentication_class = ()
     @transaction.atomic()
     def post(self, request,*args,**kwargs):
         try:
