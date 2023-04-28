@@ -468,61 +468,7 @@ class InvoiceViewThird(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                                      
-                              
-# class BulkInvoiceView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     # authentication__Class = JSONWebTokenAuthentication
-    
-#     @transaction.atomic()
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 Invoicedata = JSONParser().parse(request)
-#                 # Party = Invoicedata['Party']
-#                 # InvoiceDate = Invoicedata['InvoiceDate']
-#                 # # ==========================Get Max Invoice Number=====================================================
-#                 # a = GetMaxNumber.GetInvoiceNumber(Party,InvoiceDate)
-#                 # Invoicedata['InvoiceNumber'] = a
-#                 # b = GetPrifix.GetInvoicePrifix(Party)
-#                 # Invoicedata['FullInvoiceNumber'] = b+""+str(a)
-#                 # #================================================================================================== 
-#                 # InvoiceItems = Invoicedata['InvoiceItems']
-         
-#                 for Invoice in Invoicedata['BulkData']:
-#                     CustomerMapping =""
-#                     CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=Invoice['Customer'],Party=Invoice['Party']).values("Customer")
-#                     if CustomerMapping.exists():
-#                         Invoice['Customer']=CustomerMapping[0]['Customer']
-#                     else:
-#                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
-                    
-#                     for InvoiceItems in Invoice['InvoiceItems']:
-#                         ItemMapping=""
-#                         UnitMapping=""
-#                         ItemMapping=M_ItemMappingMaster.objects.filter(MapItem=InvoiceItems['Item'],Party=Invoice['Party']).values("Item")
-#                         UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=InvoiceItems['Unit'],Party=Invoice['Party']).values("Unit")
-#                         if ItemMapping.exists():
-#                             InvoiceItems['Item'] = ItemMapping[0]["Item"]
-#                         else:
-#                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Item Data Mapping Missing", 'Data':[]})
-#                         if UnitMapping.exists():
-#                             MC_UnitID=MC_ItemUnits.objects.filter(UnitID=UnitMapping[0]["Unit"],Item=ItemMapping[0]["Item"],IsDeleted=0).values("id")
-#                             InvoiceItems['Unit'] = MC_UnitID[0]["id"]
-#                         else:
-#                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
-#                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': '', 'Data':Invoicedata})    
-#                     Invoice_serializer = BulkInvoiceSerializer(data=Invoicedata)
-#                     if Invoice_serializer.is_valid(): 
-#                         Invoice_serializer.save()
-#                     else:
-#                         transaction.set_rollback(True)
-#                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})    
-#                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-               
-
-
+ 
 
 class BulkInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
