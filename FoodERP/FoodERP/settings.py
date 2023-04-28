@@ -25,9 +25,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 
-
 ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
-
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -92,7 +90,6 @@ DATABASES = {
         'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    
     # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
