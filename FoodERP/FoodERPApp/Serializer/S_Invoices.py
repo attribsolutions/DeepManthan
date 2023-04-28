@@ -133,16 +133,12 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
         # fields ='__all__'
     
     def create(self, validated_data):
-        
-        
-        
+
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         InvoiceID = T_Invoices.objects.create(**validated_data)
         
         for InvoiceItem_data in InvoiceItems_data:
             InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
-                
-           
             
         return InvoiceID        
     
