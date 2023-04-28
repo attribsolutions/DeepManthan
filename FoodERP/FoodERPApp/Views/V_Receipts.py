@@ -105,6 +105,7 @@ class ReceiptListView(CreateAPIView):
                             "BankName": a['Bank']['Name'],
                             "DepositorBank": a['DepositorBank']['id'],
                             "DepositorBankName": a['DepositorBank']['Name'],
+                            "CreatedBy":a['CreatedBy'],
                             "CreatedOn": a['CreatedOn']
 
                         })
@@ -176,6 +177,7 @@ class ReceiptView(CreateAPIView):
                             "BankName": a['Bank']['Name'],
                             "DepositorBank": a['DepositorBank']['id'],
                             "DepositorBankName": a['DepositorBank']['Name'],
+                            "CreatedBy":a['CreatedBy'],
                             "CreatedOn": a['CreatedOn']
 
                         })
@@ -247,6 +249,7 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                             "BankName": a['Bank']['Name'],
                             "DepositorBank": a['DepositorBank']['id'],
                             "DepositorBankName": a['DepositorBank']['Name'],
+                            "CreatedBy":a['CreatedBy'],
                             "CreatedOn": a['CreatedOn']
 
                         })
