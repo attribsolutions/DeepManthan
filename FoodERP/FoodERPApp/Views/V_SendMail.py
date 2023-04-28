@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework.generics import RetrieveAPIView
 from django.db import transaction
 from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
 from django.core.mail import send_mail
 
 from ..helpers import send_otp_to_phone
@@ -16,14 +17,17 @@ from ..Serializer.S_SendMail import *
 class SendViewMail(RetrieveAPIView):
 
     permission_classes = ()
-    authentication_class = ()
+    # authentication_class = ()
 
     @transaction.atomic()
     def post(self, request):
-        Email = request.data.get('Email')
-        phone = request.data.get('Phone')
+        Jsondata = JSONParser().parse(request)
+        Email = Jsondata['Email']
+        Phone = Jsondata['Phone']
         if Email:
+         
             Employee = M_Employees.objects.filter(email__exact=str(Email)).count()
+      
             if Employee > 1:
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Duplicate Record...!! A Multiple record with these EmailID already exists.', 'Data': [] })
             Employee = M_Employees.objects.filter(
@@ -57,7 +61,7 @@ class SendViewMail(RetrieveAPIView):
             else: 
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})   
         else:
-            PhoneNo = str(phone)
+            PhoneNo = str(Phone)
             Employee = M_Employees.objects.filter(Mobile__exact=PhoneNo).count()
             if Employee > 1:
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Duplicate Record...!! A Multiple record with these Phone Number already exists.', 'Data': [] })
@@ -94,16 +98,15 @@ class SendViewMail(RetrieveAPIView):
 class VerifyOTPwithUserData(RetrieveAPIView):
 
     permission_classes = ()
-    authentication_class = ()
-
-
+    # authentication_class = ()
     @transaction.atomic()
     def post(self, request,*args,**kwargs):
         try:
             with transaction.atomic():
-                UserID = request.data.get("UserID")
-                verifyOTP = request.data.get('OTP')
-                newpassword = request.data.get("newpassword")
+                Jsondata = JSONParser().parse(request)
+                UserID = Jsondata["UserID"]
+                verifyOTP = Jsondata['OTP']
+                newpassword = Jsondata["newpassword"]
                 if UserID and verifyOTP and newpassword:
                     User = M_Users.objects.filter(id=str(UserID)).filter(
                         OTP__exact=str(verifyOTP)).values('id', 'LoginName','AdminPassword')
