@@ -25,9 +25,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 
-
 ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
-
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -86,13 +84,12 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm20230420_1',
+        'NAME': 'chitalescm20230310',
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',
-        'HOST': '10.1.201.19',
+        'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    
     # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
@@ -172,7 +169,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'hemantwaghmare13@gmail.com'
-EMAIL_HOST_PASSWORD = 'gcvhqnobxhsvzepd'
+EMAIL_HOST_PASSWORD = 'yvpgcmeowtpunvbl'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

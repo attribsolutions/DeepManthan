@@ -136,6 +136,18 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = T_Orders
         fields = '__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(T_OrderSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("BillingAddress", None):
+            ret["BillingAddress"] = {"id": None, "Address": None}
+            
+        if not ret.get("ShippingAddress", None):
+            ret["ShippingAddress"] = {"id": None, "Address": None}    
+        return ret    
+        
 
 class PartiesSerializerThird(serializers.ModelSerializer):
     class Meta:
