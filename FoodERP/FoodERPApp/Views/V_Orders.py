@@ -63,16 +63,17 @@ class OrderListFilterView(CreateAPIView):
                         queryForOpenPO = T_Orders.objects.filter(POFromDate=FromDate, POToDate=ToDate, Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
                         q = query.union(queryForOpenPO)
                 else: #OrderType -2 Sales Order
+                    # Pradnya :  OrderType=2 filter remove form all ORM Query coz parasnath purches order is katraj div sale order 
                     if(Customer == ''):
                        
                         query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, OrderType=2)
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier, OrderType=2)
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier)
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier)
                         q = query.union(queryForOpenPO)
                     else:
                         
-                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier, OrderType=2)
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier)
                         q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(q.query)})
                 if q :
