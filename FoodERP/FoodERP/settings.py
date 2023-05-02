@@ -84,10 +84,14 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+
         'NAME': 'chitalescm20230310',       
+
         'USER': 'pk',
+
         'PASSWORD': 'P@ssw0rd', 
         'HOST': '192.168.1.114',
+
         'PORT': '3306'
     }
     # ,
@@ -169,7 +173,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'hemantwaghmare13@gmail.com'
-EMAIL_HOST_PASSWORD = 'yvpgcmeowtpunvbl'
+EMAIL_HOST_PASSWORD = 'gcvhqnobxhsvzepd'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
