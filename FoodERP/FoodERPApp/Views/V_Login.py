@@ -383,13 +383,13 @@ class GetUserDetailsView(APIView):
         Company = C_Companies.objects.filter(id=EmployeeSerializer[0]['Company'])
         CompanySerializer = C_CompanySerializer(Company, many=True).data
 
-        # request.session['UserID'] = UserId
-        # request.session['UserName'] = UserSerializer[0]["LoginName"]
-        # request.session['EmployeeID'] = UserSerializer[0]["Employee"]
-        # request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
-        # request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
-        # request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
-        # print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
+        request.session['UserID'] = UserId
+        request.session['UserName'] = UserSerializer[0]["LoginName"]
+        request.session['EmployeeID'] = UserSerializer[0]["Employee"]
+        request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
+        request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
+        request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
+        print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
 
         a = list()
         a.append({
