@@ -45,12 +45,13 @@ class GRNListFilterView(CreateAPIView):
                         query, many=True).data
                     GRNListData = list()
                     for a in GRN_serializer:
-                        
+                        print(a)
                         challan = a['GRNReferences'][0]['Challan']
                         if challan != None: 
                             POType= ""
                         else:
-                            POType= a['GRNReferences'][0]['Order']['POType']['id']
+                              POType= ""
+                            # POType= a['GRNReferences'][0]['Order']['POType']['id']
                         GRNListData.append({
                             "id": a['id'],
                             "GRNDate": a['GRNDate'],
