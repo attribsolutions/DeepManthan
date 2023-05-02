@@ -331,7 +331,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                      FROM  MC_UserRoles
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
                      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
-                     join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
+                     left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
                      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
                      WHERE M_Users.Employee_id=%s ''', [id])
                 # print(str(query.query))
