@@ -390,6 +390,7 @@ urlpatterns = [
 # PartyItemList
             url(r'PartyItem/([0-9]+)$',PartyItemsView.as_view()),
             url(r'PartyItem$',PartyItemsView.as_view()),
+            url(r'PartyItemFilter$',PartyItemsFilterView.as_view()),
             url(r'PartyItemList$',PartyItemsListView.as_view()),
     
 # Mrps
