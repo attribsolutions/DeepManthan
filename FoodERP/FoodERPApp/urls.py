@@ -357,8 +357,8 @@ urlpatterns = [
 #Item All APIs======================================================================================
 
             url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
-            url(r'Items$', M_ItemsFilterView.as_view()),
-            url(r'ItemsSave$', M_ItemsView.as_view()),
+            url(r'ItemsFilter$', M_ItemsFilterView.as_view()),
+            url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
            
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
