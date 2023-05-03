@@ -116,6 +116,8 @@ from .Views.V_ImportField import *
 from .Views.V_PurchaseReturn import *
 
 from .Views.V_MappingMaster import *
+
+from .Views.V_Dashboard import *
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -360,7 +362,6 @@ urlpatterns = [
             url(r'ItemsFilter$', M_ItemsFilterView.as_view()),
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
-           
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
@@ -479,6 +480,10 @@ urlpatterns = [
             url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
             url(r'RegenrateToken$', RegenrateToken.as_view()),
+
+#DashBoard
+            url(r'getdashboard/([0-9]+)$', DashBoardView.as_view()),
+
 
 
 ]
