@@ -326,11 +326,12 @@ class UserPartiesForLoginPage(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id
+                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_PartyType.IsSCM
 
                      FROM  MC_UserRoles
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
                      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
+                     left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
                      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
                      WHERE M_Users.Employee_id=%s ''', [id])
                 # print(str(query.query))
@@ -341,8 +342,8 @@ class UserPartiesForLoginPage(CreateAPIView):
                         query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
 

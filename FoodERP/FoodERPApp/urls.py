@@ -357,6 +357,7 @@ urlpatterns = [
 #Item All APIs======================================================================================
 
             url(r'Items/([0-9]+)$', M_ItemsViewSecond.as_view()),
+            url(r'ItemsFilter$', M_ItemsFilterView.as_view()),
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
            
@@ -389,6 +390,7 @@ urlpatterns = [
 # PartyItemList
             url(r'PartyItem/([0-9]+)$',PartyItemsView.as_view()),
             url(r'PartyItem$',PartyItemsView.as_view()),
+            url(r'PartyItemFilter$',PartyItemsFilterView.as_view()),
             url(r'PartyItemList$',PartyItemsListView.as_view()),
     
 # Mrps

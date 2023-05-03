@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
+ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114','127.0.0.1'] 
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -84,16 +84,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-
-
-        'NAME': 'chitalescm20230310',       
-
-
+        'NAME': 'chitalescm20230420_1',       
         'USER': 'pk',
-
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114',
-
+        'HOST': '10.1.201.19',
         'PORT': '3306'
     }
     # ,
