@@ -56,7 +56,7 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         
         
     def create(self, validated_data):
-       
+        PartyType = validated_data.get('PartyType')
         PartyAddress_data = validated_data.pop('PartyAddress')
         PartyPrefix_data = validated_data.pop('PartyPrefix')
         PartySubPartys=validated_data.pop('PartySubParty')
@@ -67,9 +67,18 @@ class M_PartiesSerializer(serializers.ModelSerializer):
 
         for PartyPrefix in PartyPrefix_data:
             Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix) 
-       
-        for PartySubParty in PartySubPartys:
-            PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)         
+        
+        
+        query=M_PartyType.objects.filter(id=PartyType.id).values('IsVendor')
+
+        if query[0]['IsVendor'] == True:
+            for PartySubParty in PartySubPartys:
+                subparty = PartySubParty.pop('Party')
+                PartySubParty=MC_PartySubParty.objects.create(Party=PartyID,SubParty=subparty, **PartySubParty)
+        else:
+            
+            for PartySubParty in PartySubPartys:
+                PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)         
     
         return PartyID
     
