@@ -16,6 +16,9 @@ class ReceiptInvoiceserializer(serializers.Serializer):
     GrandTotal=serializers.DecimalField(max_digits=10, decimal_places=2)  
     PaidAmount=serializers.DecimalField(max_digits=10, decimal_places=2)  
     BalAmt=serializers.DecimalField(max_digits=10, decimal_places=2)  
+
+
+
     
 
 class PaymentReceiptSerializer(serializers.ModelSerializer):
