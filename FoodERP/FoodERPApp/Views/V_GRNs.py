@@ -45,7 +45,7 @@ class GRNListFilterView(CreateAPIView):
                         query, many=True).data
                     GRNListData = list()
                     for a in GRN_serializer:
-                        print(a)
+                       
                         challan = a['GRNReferences'][0]['Challan']
                         if challan != None: 
                             POType= ""

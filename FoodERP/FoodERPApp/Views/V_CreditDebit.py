@@ -28,14 +28,24 @@ class CreditDebitNoteListView(CreateAPIView):
                 Party = CreditDebitdata['PartyID']
                 NoteType = CreditDebitdata['NoteType']
 
-                if(Customer == ''):
+                if NoteType == '':
+                    if(Customer == ''):
 
-                    query = T_CreditDebitNotes.objects.filter(
-                        CRDRNoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
+                        query = T_CreditDebitNotes.objects.filter(
+                            CRDRNoteDate__range=[FromDate, ToDate], Party=Party)
 
+                    else:
+                        query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[
+                                                                FromDate, ToDate], Customer=Customer, Party=Party)
                 else:
-                    query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[
-                                                              FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
+                    if(Customer == ''):
+    
+                        query = T_CreditDebitNotes.objects.filter(
+                            CRDRNoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
+
+                    else:
+                        query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[
+                                                                FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
 
                 if query:
                     CreditDebit_serializer = CreditDebitNoteSecondSerializer(
