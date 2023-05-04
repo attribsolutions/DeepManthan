@@ -131,7 +131,7 @@ class M_Parties(models.Model):
         M_Districts, related_name='PartiesDistrict', on_delete=models.DO_NOTHING)
     Taluka = models.IntegerField()
     City = models.IntegerField()
-    SapPartyCode = models.CharField(max_length=500)
+    SAPPartyCode = models.CharField(max_length=500)
     GSTIN = models.CharField(max_length=500)
     PAN = models.CharField(max_length=500)
     '''IsDivison this Flag depends on Partytypes if PartyTypes's IsDivision Flag is Set M_Parties IsDivision also set '''
