@@ -134,9 +134,16 @@ class M_PartiesSerializer(serializers.ModelSerializer):
 
         for PartyPrefixs_data in validated_data['PartyPrefix']:
             Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)
-            
-        for PartySubParty in validated_data['PartySubParty']:
-            PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
+        
+        query=M_PartyType.objects.filter(id=instance.PartyType).values('IsVendor')
+        if query[0]['IsVendor'] == True:
+            for PartySubParty in validated_data['PartySubParty']:
+                subparty = PartySubParty.pop('Party')
+                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=subparty, **PartySubParty)
+              
+        else:   
+            for PartySubParty in validated_data['PartySubParty']:
+                PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
                  
                   
         return instance
