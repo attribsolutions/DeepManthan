@@ -96,6 +96,8 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             'Taluka', instance.Taluka)
         instance.City = validated_data.get(
             'City', instance.City)
+        instance.SAPPartyCode = validated_data.get(
+            'SAPPartyCode', instance.SAPPartyCode)
         instance.GSTIN = validated_data.get(
             'GSTIN', instance.GSTIN)
         instance.PAN = validated_data.get(
@@ -151,6 +153,7 @@ class M_PartiesSerializer1(serializers.Serializer):
     DistrictName = serializers.CharField(max_length=500)
     Taluka = serializers.IntegerField ()
     City = serializers.IntegerField()
+    SAPPartyCode = serializers.CharField(max_length = 500)
     GSTIN =  serializers.CharField(max_length=500)
     PAN =  serializers.CharField(max_length=500)
     FSSAINo = serializers.CharField(max_length=500)

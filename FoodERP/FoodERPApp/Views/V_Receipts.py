@@ -257,3 +257,31 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+# class ReceiptNoView(CreateAPIView):
+    
+#     permission_classes = (IsAuthenticated,)
+#     # authentication_class = JSONWebTokenAuthentication
+#     @transaction.atomic()
+
+#     def post(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 Receipt_Data = JSONParser().parse(request)  
+#                 Party = Receipt_Data['PartyID']
+#                 Customer = Receipt_Data['CustomerID']
+#                 query = T_Receipts.objects.filter(Party=Party,Customer=Customer)
+#                 if query.exists:
+#                     Receipt_Serializer = ReceiptSerializerSecond(query,many=True).data
+#                     ReceiptList = list()
+#                     for a in Receipt_Serializer:
+#                         ReceiptList.append({
+#                             "Receipt":a['id'],
+#                             "ReceiptDetails":a['FullReceiptNumber']+" -"+ a['AmountPaid']+" -"+ a['ReceiptDate']
+#                         })
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptList})
+#                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+        

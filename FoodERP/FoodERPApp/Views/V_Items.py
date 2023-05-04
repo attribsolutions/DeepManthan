@@ -85,7 +85,7 @@ class M_ItemsFilterView(CreateAPIView):
                     Company=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
                     query = M_Items.objects.filter(IsSCM=1,Company__in=Company).order_by('Sequence')
                 else:
-                    query = M_Items.objects.filter(Company__in=CompanyID).order_by('Sequence')
+                    query = M_Items.objects.filter(Company=CompanyID).order_by('Sequence')
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -326,6 +326,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "BaseUnitID": a['BaseUnitID']['id'],
                             "BaseUnitName": a['BaseUnitID']['Name'],
                             "BarCode": a['BarCode'],
+                            "SAPItemCode":a['SAPItemCode'],
                             "Sequence": a['Sequence'],
                             "isActive":a['isActive'] ,
                             "IsSCM":a['IsSCM'] ,
