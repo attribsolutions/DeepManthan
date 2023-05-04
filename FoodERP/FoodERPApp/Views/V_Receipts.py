@@ -278,7 +278,9 @@ class ReceiptNoView(CreateAPIView):
                     for a in Receipt_Serializer:
                         ReceiptList.append({
                             "Receipt":a['id'],
-                            "ReceiptDetails":a['FullReceiptNumber']+" -"+ a['AmountPaid']+" -"+ a['ReceiptDate']
+                            "FullReceiptNumber":a['FullReceiptNumber'],
+                            "AmountPaid":a['AmountPaid'],
+                            "ReceiptDate":a['ReceiptDate'] 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
