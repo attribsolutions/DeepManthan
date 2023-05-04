@@ -131,6 +131,7 @@ class M_Parties(models.Model):
         M_Districts, related_name='PartiesDistrict', on_delete=models.DO_NOTHING)
     Taluka = models.IntegerField()
     City = models.IntegerField()
+    SAPPartyCode = models.CharField(max_length=500)
     GSTIN = models.CharField(max_length=500)
     PAN = models.CharField(max_length=500)
     '''IsDivison this Flag depends on Partytypes if PartyTypes's IsDivision Flag is Set M_Parties IsDivision also set '''
@@ -620,6 +621,7 @@ class M_Items(models.Model):
     BaseUnitID = models.ForeignKey(
         M_Units, related_name='BaseUnitID', on_delete=models.DO_NOTHING)
     BarCode = models.CharField(max_length=500,null=True,blank=True) 
+    SapItemCode = models.CharField(max_length=255)
     isActive = models.BooleanField(default=False)
     IsSCM = models.BooleanField(default=False)
     CanBeSold = models.BooleanField(default=False)

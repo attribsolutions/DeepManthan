@@ -326,6 +326,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "BaseUnitID": a['BaseUnitID']['id'],
                             "BaseUnitName": a['BaseUnitID']['Name'],
                             "BarCode": a['BarCode'],
+                            "SAPItemCode":a['SAPItemCode'],
                             "Sequence": a['Sequence'],
                             "isActive":a['isActive'] ,
                             "IsSCM":a['IsSCM'] ,
