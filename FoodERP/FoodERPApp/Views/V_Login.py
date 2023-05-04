@@ -312,8 +312,8 @@ class UserPartiesViewSecond(CreateAPIView):
                         query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
-        except Exception:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 class UserPartiesForLoginPage(CreateAPIView):
     

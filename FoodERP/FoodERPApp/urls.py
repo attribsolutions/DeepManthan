@@ -391,6 +391,7 @@ urlpatterns = [
 # PartyItemList
             url(r'PartyItem/([0-9]+)$',PartyItemsView.as_view()),
             url(r'PartyItem$',PartyItemsView.as_view()),
+            url(r'PartyItemFilter$',PartyItemsFilterView.as_view()),
             url(r'PartyItemList$',PartyItemsListView.as_view()),
     
 # Mrps
@@ -427,6 +428,7 @@ urlpatterns = [
             url(r'Receipt/([0-9]+)$', ReceiptView.as_view()),
             url(r'Receipt$', ReceiptView.as_view()),
             url(r'ReceiptFilter$', ReceiptListView.as_view()),
+            # url(r'ReceiptNoList$', ReceiptNoView.as_view()),
             
 # Make Receipts of Payment entries
             url(r'MakeReceiptofPayment$', MakeReceiptOfPaymentListView.as_view()),
