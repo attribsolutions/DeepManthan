@@ -27,26 +27,26 @@ class CreditDebitNoteListView(CreateAPIView):
                 Customer = CreditDebitdata['CustomerID']
                 Party = CreditDebitdata['PartyID']
                 NoteType = CreditDebitdata['NoteType']
-
-                if NoteType == '':
-                    if(Customer == ''):
-
-                        query = T_CreditDebitNotes.objects.filter(
-                            CRDRNoteDate__range=[FromDate, ToDate], Party=Party)
-
+                Note = CreditDebitdata['Note']
+                
+                if Note == "Credit":
+                    if NoteType == '':
+                        P=Q(NoteType_id__in=(37,39))
                     else:
-                        query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[
-                                                                FromDate, ToDate], Customer=Customer, Party=Party)
+                        P=Q(NoteType=NoteType)    
+                        
                 else:
-                    if(Customer == ''):
-    
-                        query = T_CreditDebitNotes.objects.filter(
-                            CRDRNoteDate__range=[FromDate, ToDate], Party=Party, NoteType=NoteType)
-
+                    if NoteType == '':
+                        P=Q(NoteType_id__in=(38,40))
                     else:
-                        query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[
-                                                                FromDate, ToDate], Customer=Customer, Party=Party, NoteType=NoteType)
+                        P=Q(NoteType=NoteType)
+                            
+                if(Customer == ''):
+                    query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[FromDate, ToDate], Party=Party).filter(P)
+                else:
+                    query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[FromDate, ToDate], Customer=Customer, Party=Party).filter(P)
 
+                print(str(query.query))
                 if query:
                     CreditDebit_serializer = CreditDebitNoteSecondSerializer(
                         query, many=True).data
