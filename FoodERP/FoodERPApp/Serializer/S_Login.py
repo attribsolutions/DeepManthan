@@ -226,7 +226,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     Party_id=serializers.IntegerField()
     PartyName=serializers.CharField(max_length=500)
     Employee_id=serializers.IntegerField()
-    IsSCM=serializers.BooleanField()
+    
     
     
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
