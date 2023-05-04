@@ -139,13 +139,11 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         if query[0]['IsVendor'] == True:
             for PartySubParty in validated_data['PartySubParty']:
                 subparty = PartySubParty.pop('Party')
-                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=subparty, **PartySubParty)
-              
+                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=subparty, **PartySubParty)  
         else:   
             for PartySubParty in validated_data['PartySubParty']:
                 PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
-                 
-                  
+                        
         return instance
             
 class M_PartiesSerializer1(serializers.Serializer):
