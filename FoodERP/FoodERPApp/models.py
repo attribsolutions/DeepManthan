@@ -254,7 +254,6 @@ class MC_ManagementParties(models.Model):
     class Meta:
         db_table = "MC_ManagementParties"        
 
-
 class UserManager(BaseUserManager):
     '''
     creating a manager for a custom user model
