@@ -312,7 +312,7 @@ urlpatterns = [
             url(r'Divisions/([0-9]+)$', DivisionsView.as_view()),
             url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
             url(r'PriceList$', PriceListView.as_view()), 
-            url(r'CompanywisePriceList/([0-9]+)$', CompanywisePriceListView.as_view()),        
+            url(r'CompanywisePriceLists/([0-9]+)$', CompanywisePriceListView.as_view()),        
             url(r'ImageTypes$', M_ImageTypesView.as_view()),
             url(r'GetVendorSupplierCustomer$',GetVendorSupplierCustomerListView.as_view()),
             # url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
