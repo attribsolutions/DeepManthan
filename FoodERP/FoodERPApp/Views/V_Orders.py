@@ -608,9 +608,6 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
         
         
-        
-        
-
 class TestOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
