@@ -29,29 +29,13 @@ class DashBoardView(CreateAPIView):
                 query1 = T_GRNs.objects.filter(Party_id = id,GRNDate = date.today()).count()
                 query2 = T_Orders.objects.filter(Supplier_id = id, OrderDate = date.today()).count()
                 Invoice_list = list()
-                if query:
-                    Invoice_list.append({
+               
+                Invoice_list.append({
                         "OrderCount": query2,
                         "GRNsCount": query1,
                         "InvoiceCount": query
-
                     })
-                    
-                    
-
-                    # DashBoard_list = list()
-
-                    # for a in DashBoard_Serializer:
-                    #     Invoice_List = list()
-
-                    #     Invoice_List.append({
-                    #         "Invoice": a['Invoice']['Count']
-                    #     })
-
-                    # DashBoard_list.append({
-                    #     "InvoiceCount": Invoice_List
-                    # })
-
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Invoice_list})
-        except T_Invoices.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GRN Not available', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Invoice_list})
+                
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
