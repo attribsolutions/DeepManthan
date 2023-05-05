@@ -505,7 +505,7 @@ class BulkInvoiceView(CreateAPIView):
                         Invoice_serializer.save()
                     else:
                         transaction.set_rollback(True)
-                        return JsonResponse({'StatusCode': 400, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
