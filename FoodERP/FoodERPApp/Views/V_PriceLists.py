@@ -51,17 +51,16 @@ def getchildnode(ParentID):
     else:
         return []
 
-
-class PriceListView(CreateAPIView):
-
+class CompanywisePriceListView(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,Company=0):
         try:
             with transaction.atomic():
-                query = M_PriceList.objects.all()
+                query = M_PriceList.objects.filter(Company=Company)
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
@@ -88,6 +87,12 @@ class PriceListView(CreateAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+class PriceListView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    
     @transaction.atomic()
     def post(self, request):
         try:

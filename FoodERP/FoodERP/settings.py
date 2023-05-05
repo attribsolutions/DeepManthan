@@ -85,13 +85,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
 
-
         'NAME': 'chitalescm20230310',       
 
-
         'USER': 'pk',
-
         'PASSWORD': 'P@ssw0rd', 
+
         'HOST': '192.168.1.114',
 
         'PORT': '3306'
@@ -109,7 +107,6 @@ DATABASES = {
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
 
 # ACTIVITYLOG_AUTOCREATE_DB = True
 # # Log anonymous actions?
