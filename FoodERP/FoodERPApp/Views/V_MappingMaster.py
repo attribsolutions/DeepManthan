@@ -37,7 +37,8 @@ class PartyCustomerMappingView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,M_Parties.Name as CustomerName ,MC_PartySubParty.Party_id,MC_PartySubParty.SubParty_id as Customer,M_PartyCustomerMappingMaster.MapCustomer From MC_PartySubParty LEFT join M_PartyCustomerMappingMaster ON M_PartyCustomerMappingMaster.Customer_id = MC_PartySubParty.SubParty_id JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id AND MC_PartySubParty.Party_id=%s''', ([id]))
+                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,M_Parties.Name as CustomerName ,MC_PartySubParty.Party_id,MC_PartySubParty.SubParty_id as Customer,M_PartyCustomerMappingMaster.MapCustomer From MC_PartySubParty LEFT join M_PartyCustomerMappingMaster ON M_PartyCustomerMappingMaster.Customer_id = MC_PartySubParty.SubParty_id JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id AND MC_PartySubParty.Party_id=%s JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id AND M_PartyType.IsRetailer=1''', ([id]))
+                # print(str(query.query))
                 if query:
                     Party_Serializer = PartyCustomerMappingSerializerSecond(query,many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Party_Serializer})
@@ -73,7 +74,7 @@ class PartyItemMappingMasterView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_PartyItems.objects.raw('''SELECT MC_PartyItems.id, MC_PartyItems.Item_id,MC_PartyItems.Party_id,M_Items.Name,M_ItemMappingMaster.MapItem FROM MC_PartyItems LEFT JOIN M_ItemMappingMaster ON M_ItemMappingMaster.Party_id=MC_PartyItems.Party_id AND MC_PartyItems.Item_id=M_ItemMappingMaster.Item_id JOIN M_Items ON M_Items.id = MC_PartyItems.Item_id Where MC_PartyItems.Party_id=%s''',([id]))
-                print(str(query.query))
+                
                 if query:
                     ItemsMapping_Serializer = ItemMappingMasterSerializerSecond(query,many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemsMapping_Serializer})
