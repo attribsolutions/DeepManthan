@@ -817,7 +817,7 @@ class TC_OrderItems(models.Model):
     Item = models.ForeignKey(M_Items, related_name='Item', on_delete=models.PROTECT)
     Comment= models.CharField(max_length=300,blank=True,null=True)
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.PROTECT)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='OrderItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     MRPValue = models.DecimalField(max_digits=20, decimal_places=2)
     Rate = models.DecimalField(max_digits=10, decimal_places=2)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.PROTECT)
