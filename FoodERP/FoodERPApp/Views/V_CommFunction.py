@@ -42,12 +42,12 @@ class GetOpeningBalanceView(CreateAPIView):
                 today = date.today()
         
                 query = MC_PartySubPartyOpeningBalance.objects.filter(Party=Party,SubParty=Customer,Year=today.year).values('OpeningBalanceAmount')
-                print(str(query.query))
+               
                 if query:
                     OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
                 else:
                     OpeningBalanceAmt = 0
-                query2 = T_Invoices.objects.raw(''' SELECT '0' id, TransactionDate, InvoiceAmount, ReceiptAmount FROM ( SELECT T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount FROM t_invoices WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id =%s  AND InvoiceDate <= %s  UNION ALL SELECT T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s ) A   Order By TransactionDate ''', ([Party], [Customer], [ReceiptDate ], [Party], [Customer], [ReceiptDate ], [Party], [Customer], [ReceiptDate]))
+                query2 = T_Invoices.objects.raw(''' SELECT '0' id, TransactionDate, InvoiceAmount, ReceiptAmount FROM ( SELECT T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount FROM T_Invoices WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id =%s  AND InvoiceDate <= %s  UNION ALL SELECT T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s ) A   Order By TransactionDate ''', ([Party], [Customer], [ReceiptDate ], [Party], [Customer], [ReceiptDate ], [Party], [Customer], [ReceiptDate]))
                 # print(str(query2.query))
                 query2_serializer = OpeningBalanceSerializer(query2, many=True).data
                 OpeningBalance = 0.000
@@ -152,7 +152,7 @@ class MRPMaster:
         
         EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(Item_id=self.ItemID,EffectiveDate=self.EffectiveDate,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
         # print(str(EffectiveDateItemMRPdata.query))
-        # return str(EffectiveDateItemMRPdata.query)
+        
         if EffectiveDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(EffectiveDateItemMRPdata, many=True).data
             EffectiveDateMRP =   MRP_Serializer[0]['MRP']
@@ -193,7 +193,7 @@ class MarginMaster:
         self.PartyID = PartyID
         self.EffectiveDate = EffectiveDate
 
-
+          
     def GetTodaysDateMargin(self):
     
         if int(self.PartyID)>0:
@@ -207,7 +207,7 @@ class MarginMaster:
            
             P=Q(Party_id__isnull=True)
             ItemMargindata = M_MarginMaster.objects.filter(P).filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,EffectiveDate__lte=self.today,IsDeleted=0).order_by('-EffectiveDate','-id')[:1]
-
+            # print(ItemMargindata.query)
         
         
        
@@ -396,7 +396,7 @@ class RateCalculationFunction:
         self.BatchID    =   BatchID
         self.DivisionID =   DivisionID
         self.today      =   date.today()
-       
+      
         if(BatchID > 0):
             QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST')
             q1=M_MRPMaster.objects.filter(id=QueryForGSTAndMRP[0]['MRP']).values('MRP')
@@ -407,12 +407,13 @@ class RateCalculationFunction:
             self.Gst = q2[0]['GSTPercentage']
 
             q2=M_GSTHSNCode.objects.filter(id=QueryForGSTAndMRP[0]['GST']).values('GSTPercentage')
-            # if(MCItemUnit == 0): 
-            #     a=Q(UnitID=MUnit)
-            # else:
-            #     a=Q(id=MCItemUnit)   
-            # q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQantity')
-            # q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).filter( a ).values('BaseUnitQantity')
+            if(MCItemUnit == 0): 
+                a=Q(UnitID=MUnit)
+            else:
+                a=Q(id=MCItemUnit)   
+            
+            q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQantity')
+            q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).filter( a ).values('BaseUnitQantity')
             
         else:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
@@ -421,15 +422,17 @@ class RateCalculationFunction:
             self.GST=float(Gstfun[0]['GST'])
         
         query =M_Parties.objects.filter(id=PartyID).values('PriceList')
-        query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
-        self.calculationPath=str(query1[0]['CalculationPath']).split(',')
        
+        query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
+
+        self.calculationPath=str(query1[0]['CalculationPath']).split(',')
+        
     def RateWithGST(self):
       
         for i in self.calculationPath:
            
             Margin=MarginMaster(self.ItemID,i,self.PartyID,self.today).GetTodaysDateMargin()
-           
+         
             Margin=float(Margin[0]['TodaysMargin'])
             GSTRate=self.MRP/(100+Margin)*100;
             RatewithoutGST=GSTRate*100/(100+self.GST)
@@ -440,6 +443,9 @@ class RateCalculationFunction:
             "RatewithGST":round(GSTRate,0),
             "RateWithoutGST": round(RatewithoutGST,0),
         })
+        
+        
+        
         
         return RateDetails
 
