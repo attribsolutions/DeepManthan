@@ -16,14 +16,13 @@ def CalculationPathLable(CalculationPathSting):
         CalculationPathdata=[]
     else:    
         w=CalculationPathSting.split(",")
-        query=M_PriceList.objects.filter(id__in=w).values('id','Name')
-    
+       
         CalculationPathdata=list()
-        for p in query:
-            
+        for p in w:
+            query=M_PriceList.objects.filter(id=p).values('id','Name')
             CalculationPathdata.append({
-                "id" :p['id'],
-                "Name" : p['Name']   
+                "id" :query[0]['id'],
+                "Name" : query[0]['Name']   
             })
     
     return CalculationPathdata
@@ -34,6 +33,7 @@ def getchildnode(ParentID):
     cdata=list()
     if Modulesdata.exists():
         Modules_Serializer = PriceListSerializer(Modulesdata, many=True).data
+       
         for z in Modules_Serializer:
         
             cchild=getchildnode(z["id"])
@@ -60,7 +60,9 @@ class CompanywisePriceListView(CreateAPIView):
     def get(self, request,Company=0):
         try:
             with transaction.atomic():
+              
                 query = M_PriceList.objects.filter(Company=Company)
+               
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Data':str(query.query)})
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
@@ -126,7 +128,7 @@ class PriceListViewSecond(CreateAPIView):
                    
                     PriceListData = list()
                     for a in PriceList_Serializer:
-                      
+                       
                         aa=a['id']
                         
                         child=getchildnode(aa)
