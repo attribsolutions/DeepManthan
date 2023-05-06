@@ -893,7 +893,7 @@ class TC_InvoiceItems(models.Model):
     BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='InvoiceItemGST',null=True,on_delete=models.PROTECT)
-    GSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
     Amount = models.DecimalField(max_digits=15, decimal_places=2)
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
