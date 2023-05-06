@@ -69,13 +69,15 @@ class M_PartiesFilterView(CreateAPIView):
                 elif(RoleID == 2 and IsSCMCompany == 0): # Admin
                   
                     q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer = 0)
-                    query=M_Parties.objects.filter(PartyType__in = q1)
+                    query=M_Parties.objects.filter(Company=CompanyID,PartyType__IsRetailer=0).select_related("PartyType")
 
                 elif(RoleID == 2 and IsSCMCompany == 1): # SCM Company Admin
                     
-                    q0=C_Companies.objects.filter(CompanyGroup = CompanyGroupID,IsSCM = 0)
-                    q1=M_PartyType.objects.filter(Company__in=q0,IsRetailer = 0)
+                    q0=C_Companies.objects.filter(CompanyGroup = CompanyGroupID)
+                    
+                    q1=M_PartyType.objects.filter(Company__in=q0,IsRetailer = 0,IsSCM = 1)
                     query=M_Parties.objects.filter(PartyType__in = q1)
+                    
 
                 else:
                    
@@ -92,7 +94,6 @@ class M_PartiesFilterView(CreateAPIView):
                     else:
                         q0 = MC_PartySubParty.objects.filter(Party = PartyID)
                         query = M_Parties.objects.filter(id__in = q0)
-
                 # if PartyID == 0:
 
                 #     if(RoleID == 1 ):
