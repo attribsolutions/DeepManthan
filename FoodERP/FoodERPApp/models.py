@@ -569,6 +569,7 @@ class MC_SubGroup(models.Model):
 
 class M_Units(models.Model):
     Name = models.CharField(max_length=500)
+    SAPUnit =models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
