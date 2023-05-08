@@ -174,7 +174,7 @@ class M_PartiesViewSecond(CreateAPIView):
                                   "PartySubParty":PartySubPartyList})    
                     # # M_Parties_serializer.update({"PartySubParty":list2})
                     # M_Parties_serializer.extend(list2)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'XData':list2[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':list2[0]})
                     
                     
         except Exception as e:
