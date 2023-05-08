@@ -799,8 +799,8 @@ class T_Orders(models.Model):
     OrderType=models.IntegerField()  #1.SalesOrder OR 2.PurchesOrder
     POType=models.ForeignKey(M_POType, related_name='OrderPOType', on_delete=models.DO_NOTHING) #1.OpenOrder OR 2.RegulerOrder
     Division=models.ForeignKey(M_Parties, related_name='OrderDivision', on_delete=models.DO_NOTHING)
-    BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT,null=True,blank=True)
-    ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT,null=True,blank=True)
+    BillingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderBillingAddress', on_delete=models.PROTECT)
+    ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
     POFromDate = models.DateField(null=True,blank=True)
     POToDate = models.DateField(null=True,blank=True)
     CreatedBy = models.IntegerField()
