@@ -233,7 +233,7 @@ class CompanySerializerSecond(serializers.ModelSerializer):
 class UnitSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Units
-        fields = ['id','Name']
+        fields = ['id','Name','SAPUnit']
         
 class ItemGSTHSNSerializerSecond(serializers.ModelSerializer):
     Company = CompanySerializerSecond(read_only=True)
