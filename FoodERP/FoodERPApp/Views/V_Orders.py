@@ -316,15 +316,17 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
+                                    "ItemSAPCode": b['Item']['SAPItemCode'],
                                     "Quantity": b['Quantity'],
                                     "MRP": b['MRP']['id'],
-                                    "MRPValue": b['MRPValue'],
+                                    "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "Unit": b['Unit']['id'],
                                     "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "SAPUnitName": b['Unit']['UnitID']['SAPUnit'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
-                                    "GSTPercentage": b['GSTPercentage'],
+                                    "GSTPercentage": b['GST']['GSTPercentage'],
                                     "HSNCode": b['GST']['HSNCode'],
                                     "Margin": b['Margin']['id'],
                                     "MarginValue": b['Margin']['Margin'],
@@ -357,8 +359,10 @@ class T_OrdersViewSecond(CreateAPIView):
                             "OrderAmount": a['OrderAmount'],
                             "Description": a['Description'],
                             "Customer": a['Customer']['id'],
+                            "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
                             "Supplier": a['Supplier']['id'],
+                            "SupplierSAPCode":a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
                             "BillingAddressID": a['BillingAddress']['id'],
                             "BillingAddress": a['BillingAddress']['Address'],
@@ -433,7 +437,7 @@ class EditOrderView(CreateAPIView):
                 OrderID = request.data['OrderID']
 
                 Itemquery = TC_OrderItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
-M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence 
+M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode
                 from
 ((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
 FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s)) 
@@ -495,14 +499,14 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                     for d in ItemUnitqueryserialize:
                         if (d['PODefaultUnit'] == True):
                             RateMcItemUnit = d['id']
-                        # CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
+                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
                         UnitDetails.append({
                             "UnitID": d['id'],
                             "UnitName": d['BaseUnitConversion'] ,
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],
-                            # "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+                            "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
 
                         })
              
@@ -548,8 +552,10 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                         "OrderAmount": a['OrderAmount'],
                         "Description": a['Description'],
                         "Customer": a['Customer']['id'],
+                        "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                         "CustomerName": a['Customer']['Name'],
                         "Supplier": a['Supplier']['id'],
+                        "SupplierSAPCode":a['Supplier']['SAPPartyCode'],
                         "SupplierName": a['Supplier']['Name'],
                         "BillingAddressID": a['BillingAddress']['id'],
                         "BillingAddress": a['BillingAddress']['Address'],
