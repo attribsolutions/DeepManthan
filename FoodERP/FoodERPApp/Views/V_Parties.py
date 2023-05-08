@@ -69,13 +69,15 @@ class M_PartiesFilterView(CreateAPIView):
                 elif(RoleID == 2 and IsSCMCompany == 0): # Admin
                   
                     q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer = 0)
-                    query=M_Parties.objects.filter(PartyType__in = q1)
+                    query=M_Parties.objects.filter(Company=CompanyID,PartyType__IsRetailer=0).select_related("PartyType")
 
                 elif(RoleID == 2 and IsSCMCompany == 1): # SCM Company Admin
                     
-                    q0=C_Companies.objects.filter(CompanyGroup = CompanyGroupID,IsSCM = 0)
-                    q1=M_PartyType.objects.filter(Company__in=q0,IsRetailer = 0)
+                    q0=C_Companies.objects.filter(CompanyGroup = CompanyGroupID)
+                    
+                    q1=M_PartyType.objects.filter(Company__in=q0,IsRetailer = 0,IsSCM = 1)
                     query=M_Parties.objects.filter(PartyType__in = q1)
+                    
 
                 else:
                    
@@ -92,7 +94,6 @@ class M_PartiesFilterView(CreateAPIView):
                     else:
                         q0 = MC_PartySubParty.objects.filter(Party = PartyID)
                         query = M_Parties.objects.filter(id__in = q0)
-
                 # if PartyID == 0:
 
                 #     if(RoleID == 1 ):
@@ -168,9 +169,12 @@ class M_PartiesViewSecond(CreateAPIView):
                             "Party":a['Party']['id'],
                             "PartyName":a['Party']['Name']
                         })
-                  
-                    M_Parties_serializer.extend(PartySubPartyList)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':M_Parties_serializer[0]})
+                    list2 = list()
+                    list2.append({"Data":M_Parties_serializer[0],
+                                  "PartySubParty":PartySubPartyList})    
+                    # # M_Parties_serializer.update({"PartySubParty":list2})
+                    # M_Parties_serializer.extend(list2)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data':list2[0]})
                     
                     
         except Exception as e:
