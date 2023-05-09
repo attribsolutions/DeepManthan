@@ -332,8 +332,11 @@ class InvoiceViewSecond(CreateAPIView):
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+          
 
 class InvoiceNoView(CreateAPIView):
 
