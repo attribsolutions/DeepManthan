@@ -499,14 +499,14 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                     for d in ItemUnitqueryserialize:
                         if (d['PODefaultUnit'] == True):
                             RateMcItemUnit = d['id']
-                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
+                        # CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
                         UnitDetails.append({
                             "UnitID": d['id'],
                             "UnitName": d['BaseUnitConversion'] ,
                             "BaseUnitQuantity": d['BaseUnitQuantity'],
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],
-                            "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+                            # "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
 
                         })
              
