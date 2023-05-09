@@ -78,12 +78,11 @@ class BankListView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def post(self,request,id=0):
+    def get(self,request,id=0):
         try:
             with transaction.atomic():
                 Bank_data = JSONParser().parse(request)
-                Company = Bank_data['CompanyID']
-                query = M_Bank.objects.filter(Company=Company)
+                query = M_Bank.objects.all()
         
                 if query:
                     bank_serializer = BankSerializer(query, many=True).data
