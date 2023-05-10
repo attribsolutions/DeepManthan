@@ -88,9 +88,9 @@ class OrderListFilterView(CreateAPIView):
 
                         Count = TC_InvoicesReferences.objects.filter(Order = a['id']).count()
                         if Count == 0 :
-                            InvoiceCreated = True
+                            InvoiceCreated = False
                         else:
-                            InvoiceCreated = False 
+                            InvoiceCreated = True 
                         OrderListData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
