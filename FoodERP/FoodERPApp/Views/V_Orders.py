@@ -85,6 +85,12 @@ class OrderListFilterView(CreateAPIView):
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
                                 inward = 1
+
+                        Count = TC_InvoicesReferences.objects.filter(Order = a['id']).count()
+                        if Count == 0 :
+                            InvoiceCreated = True
+                        else:
+                            InvoiceCreated = False 
                         OrderListData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -100,6 +106,7 @@ class OrderListFilterView(CreateAPIView):
                             "POType" : a['POType']['Name'],
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
+                            "InvoiceCreated": InvoiceCreated,
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "Inward": inward
