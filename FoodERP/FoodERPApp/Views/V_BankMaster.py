@@ -81,9 +81,7 @@ class BankListView(CreateAPIView):
     def get(self,request,id=0):
         try:
             with transaction.atomic():
-                Bank_data = JSONParser().parse(request)
                 query = M_Bank.objects.all()
-        
                 if query:
                     bank_serializer = BankSerializer(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
