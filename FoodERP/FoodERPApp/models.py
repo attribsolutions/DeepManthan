@@ -1419,15 +1419,9 @@ class TC_PurchaseReturnItemImages(models.Model):
     class Meta:
         db_table = "TC_PurchaseReturnItemImages"        
 
-
-
-
-
-
-
 class M_Bank(models.Model):
-    
     Name = models.CharField(max_length=500)
+    Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1440,7 +1434,7 @@ class M_Bank(models.Model):
 class MC_PartyBanks(models.Model):
     Bank = models.ForeignKey(M_Bank, related_name='MCPartyBank', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='PartyBank', on_delete=models.PROTECT)
-    Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies, related_name='PartyCompanyBank', on_delete=models.PROTECT)
     IFSC = models.CharField(max_length=500,blank=True, null=True)
     BranchName = models.CharField(max_length=500,blank=True, null=True)
     CustomerBank = models.BooleanField(default=False)
