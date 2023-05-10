@@ -4,11 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix, SystemBatchCodeGeneration
 from ..Serializer.S_CreditDebit import *
 from ..Serializer.S_Items import *
 from django.db.models import Sum
 from ..models import *
+import datetime
 
 
 class PurchaseReturnListView(CreateAPIView):
@@ -74,6 +75,64 @@ class PurchaseReturnView(CreateAPIView):
                 PurchaseReturndata['ReturnNo'] = str(a)
                 b = GetPrifix.GetPurchaseReturnPrifix(Party)
                 PurchaseReturndata['FullReturnNumber'] = b+""+str(a)
+                item = ""
+                query = T_PurchaseReturn.objects.filter(Party=Party).values('id')
+                O_BatchWiseLiveStockList=list()
+                O_LiveBatchesList=list()
+                for a in PurchaseReturndata['ReturnItems']:
+                  
+                    query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(),PurchaseReturn_id__in=query).values('id')
+                    query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                   
+                    if(item == ""):
+                        item = a['Item']
+                        b = query1.count()
+
+                    elif(item == a['Item']):
+                        item = 1
+                        b = b+1
+                    else:
+                        item = a['Item']
+                        b = 0
+
+                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], PurchaseReturndata-+
+                                                                          ['Party'], b)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
+                    BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    
+                    a['SystemBatchCode'] = BatchCode
+                    a['SystemBatchDate'] = date.today()
+                    a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
+                    O_BatchWiseLiveStockList.append({
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Party,
+                    "CreatedBy":PurchaseReturndata['CreatedBy'],
+                    
+                    })
+                    
+                    O_LiveBatchesList.append({
+                    
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "MRP": a['MRP'],
+                    "Rate": a['Rate'],
+                    "GST": a['GST'],
+                    "SystemBatchDate": a['SystemBatchDate'],
+                    "SystemBatchCode": a['SystemBatchCode'],
+                    "BatchDate": a['BatchDate'],
+                    "BatchCode": a['BatchCode'],
+                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    
+                    })
+                    O_BatchWiseLiveStockList=list()
+                    
+                # print(GRNdata)
+                PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList})
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
