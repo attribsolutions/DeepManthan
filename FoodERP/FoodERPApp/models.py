@@ -1359,6 +1359,7 @@ class O_BatchWiseLiveStock(models.Model):
     GRN = models.ForeignKey(T_GRNs, related_name='BatchWiseLiveStockGRNID', on_delete=models.CASCADE,null=True)
     Production = models.ForeignKey(T_Production, related_name='BatchWiseLiveStockProductionID', on_delete=models.CASCADE,null=True)
     InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='BatchWiseLiveStockInterBranchInwardID', on_delete=models.CASCADE,null=True)
+    IsDamagePieces = models.BooleanField(default=False)
     # TransactionType= models.IntegerField()
     # TransactionID =  models.IntegerField()
     CreatedBy = models.IntegerField()
