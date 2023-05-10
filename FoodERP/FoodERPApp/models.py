@@ -1421,7 +1421,7 @@ class TC_PurchaseReturnItemImages(models.Model):
 
 class M_Bank(models.Model):
     Name = models.CharField(max_length=500)
-    # Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
+  
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1647,7 +1647,6 @@ class O_BatchWiseLiveStock(models.Model):
     Production = models.ForeignKey(T_Production, related_name='BatchWiseLiveStockProductionID', on_delete=models.CASCADE,null=True)
     InterBranchInward = models.ForeignKey(T_InterBranchInward, related_name='BatchWiseLiveStockInterBranchInwardID', on_delete=models.CASCADE,null=True)
     IsDamagePieces = models.BooleanField(default=False)
-    PurchaseReturn= models.ForeignKey(T_PurchaseReturn, related_name='LiveStockReturnID', on_delete=models.CASCADE,blank=True, null=True)
     # TransactionType= models.IntegerField()
     # TransactionID =  models.IntegerField()
     CreatedBy = models.IntegerField()
