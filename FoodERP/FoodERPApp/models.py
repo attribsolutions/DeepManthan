@@ -1456,8 +1456,6 @@ class T_Receipts(models.Model):
     ReceiptType = models.ForeignKey(M_GeneralMaster, related_name='ReceiptType', on_delete=models.PROTECT, blank=True, null=True)
     ChequeDate = models.CharField(max_length=500,blank=True, null=True)
     DocumentNo =models.CharField(max_length=500,blank=True, null=True)
-   
-    Customer = models.ForeignKey(M_Parties, related_name='ReceiptCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='ReceiptParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1466,7 +1464,16 @@ class T_Receipts(models.Model):
     
     class Meta:
         db_table = "T_Receipts"
+        
+class M_Bank(models.Model):
+    Name = models.CharField(max_length=500) 
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = "M_Bank"
 
         
 class TC_PaymentReceipt(models.Model):
