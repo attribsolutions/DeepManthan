@@ -1456,7 +1456,20 @@ class M_Bank(models.Model):
         db_table = "M_Bank"
 
 
-
+class MC_PartyBanks(models.Model):
+    IFSC = models.CharField(max_length=500,blank=True, null=True)
+    BranchName = models.CharField(max_length=500,blank=True, null=True)
+    CustomerBank = models.BooleanField(default=False)
+    AccountNo = models.CharField(max_length=500,blank=True, null=True)
+    IsSelfDepositoryBank = models.BooleanField(default=False)
+    IsDefault = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "MC_PartyBanks"
                      
 class T_Receipts(models.Model):
     ReceiptDate = models.DateField()
