@@ -418,6 +418,7 @@ class RateCalculationFunction:
         else:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
             MRPfun = MRPMaster(ItemID,DivisionID,0,self.today).GetTodaysDateMRP()
+            print(MRPfun)
             self.MRP=float(MRPfun[0]['TodaysMRP'])
             self.GST=float(Gstfun[0]['GST'])
         
