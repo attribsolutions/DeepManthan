@@ -54,10 +54,6 @@ class PurchaseReturnListView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
-    
-    
-    
-
 
 class PurchaseReturnView(CreateAPIView):
     
@@ -71,19 +67,25 @@ class PurchaseReturnView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
-                a = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
-                PurchaseReturndata['ReturnNo'] = str(a)
-                b = GetPrifix.GetPurchaseReturnPrifix(Party)
-                PurchaseReturndata['FullReturnNumber'] = b+""+str(a)
+                c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
+                PurchaseReturndata['ReturnNo'] = str(c)
+                d = GetPrifix.GetPurchaseReturnPrifix(Party)
+                PurchaseReturndata['FullReturnNumber'] = d+""+str(c)
+                
                 item = ""
-                query = T_PurchaseReturn.objects.filter(Party=Party).values('id')
+                query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
+              
+                if PurchaseReturndata['ReturnReason'] == 56:
+                    IsDamagePieces =False
+                else:
+                    IsDamagePieces =True    
+                    
                 for a in PurchaseReturndata['ReturnItems']:
-                  
-                    query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(),PurchaseReturn_id__in=query).values('id')
+                    
+                    query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
-                   
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -94,15 +96,15 @@ class PurchaseReturnView(CreateAPIView):
                     else:
                         item = a['Item']
                         b = 0
-
-                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], PurchaseReturndata-+
-                                                                          ['Party'], b)
+                        
+                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],Party, b)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
                     
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
@@ -111,6 +113,7 @@ class PurchaseReturnView(CreateAPIView):
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "Party": Party,
+                    "IsDamagePieces":IsDamagePieces,
                     "CreatedBy":PurchaseReturndata['CreatedBy'],
                     
                     })
@@ -131,9 +134,11 @@ class PurchaseReturnView(CreateAPIView):
                     })
                     O_BatchWiseLiveStockList=list()
                     
+                   
                 # print(GRNdata)
-                PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList})
+                PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
+                # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Purchase Return Save Successfully', 'Data':[]})
