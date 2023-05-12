@@ -1456,9 +1456,7 @@ class M_Bank(models.Model):
         db_table = "M_Bank"
 
 class MC_PartyBanks(models.Model):
-    Bank = models.ForeignKey(M_Bank, related_name='MCPartyBank', on_delete=models.PROTECT)
-    Party = models.ForeignKey(M_Parties, related_name='PartyBank', on_delete=models.PROTECT)
-    Company = models.ForeignKey(C_Companies, related_name='PartyCompanyBank', on_delete=models.PROTECT)
+    
     IFSC = models.CharField(max_length=500,blank=True, null=True)
     BranchName = models.CharField(max_length=500,blank=True, null=True)
     CustomerBank = models.BooleanField(default=False)
