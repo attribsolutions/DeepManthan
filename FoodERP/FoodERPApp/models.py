@@ -1456,6 +1456,7 @@ class M_Bank(models.Model):
         db_table = "M_Bank"
 
 
+
                      
 class T_Receipts(models.Model):
     ReceiptDate = models.DateField()
