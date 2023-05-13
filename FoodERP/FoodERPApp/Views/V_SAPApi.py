@@ -8,7 +8,11 @@ from rest_framework.authentication import BasicAuthentication
 from django.db import transaction
 
 from ..Serializer.S_SAPApi import InvoiceSerializer
+from ..Serializer.S_Orders import *
 from ..models import *
+import requests
+
+
 
 class SAPInvoiceView(CreateAPIView):
     
@@ -112,8 +116,93 @@ class SAPInvoiceView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
+        
+         
+class SAPOrderView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                payload = JSONParser().parse(request)
+                url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
 
 
+                headers = {
+                    'X-Requested-With': 'x',
+                    'Authorization': 'Basic SW50ZXJmYWNlOkFkbWluQDEyMzQ=',
+                    'Content-Type': 'application/json',
+                    'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
+                }
+
+                response = requests.request("POST", url, headers=headers, data=payload)
+              
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Send to SAP Successfully ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+              
+
+              
+    # authentication__Class = JSONWebTokenAuthentication
+
+    # def get(self, request, id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             OrderQuery = T_Orders.objects.filter(id=id)
+    #             if OrderQuery.exists():
+    #                 OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
+    #                 OrderData = list()
+    #                 for a in OrderSerializedata:
+    #                     CustomerMapping=M_Parties.objects.filter(id=a['Customer']['id']).values("SAPPartyCode")
+    #                     PartyMapping=M_Parties.objects.filter(id=a['Supplier']['id']).values("SAPPartyCode")
+    #                     if CustomerMapping.exists:
+    #                         CustomerSAPCode=CustomerMapping
+    #                     else:
+    #                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data':[]})    
+    #                     if PartyMapping.exists:
+    #                         Plant=PartyMapping
+    #                     else:
+    #                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data':[]})
+                        
+    #                     OrderItemSetDetails = list()
+                    
+    #                     for b in a['OrderItem']:
+    #                         ItemMapping = M_Items.objects.filter(id=b['Item']['id']).values('SAPItemCode')
+    #                         if ItemMapping.exists:
+    #                             SAPItemCode = ItemMapping
+    #                         else:
+    #                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
+    #                         MC_UnitID = MC_ItemUnits.objects.filter(id=b['Unit']['id']).values("UnitID")
+    #                         UnitMapping = M_Units.objects.filter(id=MC_UnitID).values("SAPUnit")
+    #                         if UnitMapping.exists:
+    #                             Unit = UnitMapping
+    #                         else:
+    #                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
+
+    #                         OrderItemSetDetails.append({
+    #                             "OrderNo":b['Order_id'],
+    #                             "ItemNo":b['id'] ,
+    #                             "Material":SAPItemCode,
+    #                             "Quantity": b['Quantity'],
+    #                             "Unit": Unit,
+    #                             "Plant": Plant,
+    #                             "Batch": "",
+    #                             "CancelFlag":""  
+    #                         })
+
+    #                     OrderData.append({
+    #                         "Customer": CustomerSAPCode,
+    #                         "DocDate": a['OrderDate'],
+    #                         "Indicator": "F",
+    #                         "OrderNo": a['id'],
+    #                         "Stats": "1",
+    #                         "OrderItemSet": OrderItemSetDetails,
+    #                     })
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                             
+                
 
 
 
