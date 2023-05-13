@@ -1472,7 +1472,8 @@ class MC_PartyBanks(models.Model):
 
     class Meta:
         db_table = "MC_PartyBanks"
-                     
+
+                    
 class T_Receipts(models.Model):
     ReceiptDate = models.DateField()
     ReceiptNo = models.CharField(max_length=500,blank=True, null=True)
