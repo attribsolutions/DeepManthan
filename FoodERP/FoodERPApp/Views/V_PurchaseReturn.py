@@ -148,20 +148,26 @@ class PurchaseReturnView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
-
+    # GRN DELETE API 
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                PurchaseReturndata = T_PurchaseReturn.objects.get(id=id)
-                PurchaseReturndata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data':[]})
-        except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Return used in another table', 'Data': []})
+                O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(PurchaseReturn_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+              
+                for a in O_BatchWiseLiveStockData:
+                    if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
+                        return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Return  Used in another Transaction', 'Data': []})   
+                
+                PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
+                PurchaseReturn_Data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
+        except T_PurchaseReturn.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Return Used in another Transaction', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
 ##################### Purchase Return Item View ###########################################        
