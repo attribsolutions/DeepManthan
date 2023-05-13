@@ -460,7 +460,7 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order By M_Items.Sequence''', ([OrderID], [PartyItem]))
                 
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
-                
+               
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     GSTID = b['GST_id']
@@ -537,7 +537,7 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                 if OrderID != 0:
                     OrderQuery = T_Orders.objects.get(id=OrderID)
                     a = T_OrderSerializerThird(OrderQuery).data
-
+                   
                     OrderTermsAndCondition = list()
                     for b in a['OrderTermsAndConditions']:
                         # print(b['TermsAndCondition']['IsDeleted'])
