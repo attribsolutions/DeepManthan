@@ -182,7 +182,7 @@ class M_PartiesSerializer1(serializers.Serializer):
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
-        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault','fssaidocument'] 
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault'] 
 
 class DistrictSerializerSecond(serializers.ModelSerializer):
     class Meta:
