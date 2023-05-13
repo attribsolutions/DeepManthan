@@ -1,10 +1,11 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Views.V_CommFunction import UnitDropdown
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
@@ -85,6 +86,12 @@ class OrderListFilterView(CreateAPIView):
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
                                 inward = 1
+
+                        Count = TC_InvoicesReferences.objects.filter(Order = a['id']).count()
+                        if Count == 0 :
+                            InvoiceCreated = False
+                        else:
+                            InvoiceCreated = True 
                         OrderListData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -100,6 +107,7 @@ class OrderListFilterView(CreateAPIView):
                             "POType" : a['POType']['Name'],
                             "BillingAddress": a['BillingAddress']['Address'],
                             "ShippingAddress": a['ShippingAddress']['Address'],
+                            "InvoiceCreated": InvoiceCreated,
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "Inward": inward
@@ -456,12 +464,14 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     GSTID = b['GST_id']
+                    # print('**********************',ItemID)
             # =====================GST================================================
                     if GSTID is None:
                         Gst = GSTHsnCodeMaster(
                             ItemID, EffectiveDate).GetTodaysGstHsnCode()
                         b['GST_id'] = Gst[0]['Gstid']
                         b['GSTPercentage'] = Gst[0]['GST']
+                        # print('ttttttGST',Gst[0]['GST'])
             # =====================Stock================================================
 
                     stockquery = O_BatchWiseLiveStock.objects.filter(
@@ -473,10 +483,10 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                         
             # =====================Current MRP================================================
                     TodaysMRP=MRPMaster(ItemID,0,0,EffectiveDate).GetTodaysDateMRP()
-                    print(TodaysMRP)
+                  
                     b['MRP_id'] = TodaysMRP[0]['Mrpid']
                     b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
-                        
+                    # print('ttttttttttMRP',TodaysMRP[0]['TodaysMRP'])   
             # =====================Rate================================================
 
                     ratequery = TC_OrderItems.objects.filter(
@@ -488,33 +498,34 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
 
                     if b['Rate'] is None:
                         b['Rate'] = r
-            # =====================Unit================================================
-                    UnitDetails = list()
-                    ItemUnitquery = MC_ItemUnits.objects.filter(
-                        Item=ItemID, IsDeleted=0)
-                    ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
-                        ItemUnitquery, many=True).data
+            # # =====================Unit================================================
+            #         UnitDetails = list()
+            #         ItemUnitquery = MC_ItemUnits.objects.filter(
+            #             Item=ItemID, IsDeleted=0)
+            #         ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
+            #             ItemUnitquery, many=True).data
                     
-                    RateMcItemUnit = ""    
-                    for d in ItemUnitqueryserialize:
-                        if (d['PODefaultUnit'] == True):
-                            RateMcItemUnit = d['id']
-                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
-                        UnitDetails.append({
-                            "UnitID": d['id'],
-                            "UnitName": d['BaseUnitConversion'] ,
-                            "BaseUnitQuantity": d['BaseUnitQuantity'],
-                            "PODefaultUnit": d['PODefaultUnit'],
-                            "SODefaultUnit": d['SODefaultUnit'],
-                            "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+            #         RateMcItemUnit = ""    
+            #         for d in ItemUnitqueryserialize:
+            #             if (d['PODefaultUnit'] == True):
+            #                 RateMcItemUnit = d['id']
+            #             print(0,ItemID,RateParty,0,0,d['id'])
+            #             CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
+            #             UnitDetails.append({
+            #                 "UnitID": d['id'],
+            #                 "UnitName": d['BaseUnitConversion'] ,
+            #                 "BaseUnitQuantity": d['BaseUnitQuantity'],
+            #                 "PODefaultUnit": d['PODefaultUnit'],
+            #                 "SODefaultUnit": d['SODefaultUnit'],
+            #                 "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
 
-                        })
+            #             })
              
                    
             # =====================IsDefaultTermsAndConditions================================================
 
                     b.update({"StockQuantity": Stock,
-                              "UnitDetails": UnitDetails
+                              "UnitDetails": UnitDropdown(ItemID,RateParty,0)
                               })
                     
                     bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=ItemID,BOM__IsVDCItem=1).select_related('BOM')
