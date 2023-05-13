@@ -1497,9 +1497,7 @@ class T_Receipts(models.Model):
     
     class Meta:
         db_table = "T_Receipts"
-        
-
-                
+                  
 class TC_PaymentReceipt(models.Model):
     Receipt = models.ForeignKey(T_Receipts, related_name='PaymentReceipt', on_delete=models.CASCADE,blank=True, null=True)
     Payment = models.ForeignKey(T_Receipts, on_delete=models.PROTECT)
