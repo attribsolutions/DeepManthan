@@ -1497,9 +1497,7 @@ class T_Receipts(models.Model):
     
     class Meta:
         db_table = "T_Receipts"
-        
-
-                
+                  
 class TC_PaymentReceipt(models.Model):
     Receipt = models.ForeignKey(T_Receipts, related_name='PaymentReceipt', on_delete=models.CASCADE,blank=True, null=True)
     Payment = models.ForeignKey(T_Receipts, on_delete=models.PROTECT)
@@ -1583,7 +1581,7 @@ class M_ImportFields(models.Model):
         db_table = "M_ImportFields"
         
 class MC_PartyImportFields(models.Model):
-    ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.DO_NOTHING)
+    ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.CASCADE)
     Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
     Value =models.CharField(max_length=500)
     Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
