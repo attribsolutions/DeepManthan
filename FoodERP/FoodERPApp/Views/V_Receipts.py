@@ -134,7 +134,6 @@ class ReceiptView(CreateAPIView):
                     b = GetPrifix.GetReceiptPrifix(Party)
                     aa['FullReceiptNumber'] = b+""+str(a)
                     Receipt_serializer = ReceiptSerializer(data=aa)
-                    print(Receipt_serializer)
                     if Receipt_serializer.is_valid():
                         Receipt_serializer.save()
                     else:
