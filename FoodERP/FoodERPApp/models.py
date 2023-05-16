@@ -407,6 +407,7 @@ class MC_PageFieldMaster(models.Model):
     ShowInDownload = models.BooleanField(default=False)
     DownloadDefaultSelect = models.BooleanField(default=False) 
     InValidMsg = models.CharField(max_length=300,null=True,blank=True)
+    Alignment = models.CharField(max_length=300,null=True,blank=True)
     Page = models.ForeignKey(M_Pages, related_name='PageFieldMaster', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
