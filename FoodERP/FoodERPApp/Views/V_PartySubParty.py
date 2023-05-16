@@ -205,9 +205,9 @@ class RetailerandSSDDView(CreateAPIView):
                     else:
                         a=C_Companies.objects.filter(id=CompanyID).values('CompanyGroup')
                      
-                        a1=C_Companies.objects.filter(CompanyGroup=a[0]['CompanyGroup'],IsSCM=0)
+                        a1=C_Companies.objects.filter(CompanyGroup=a[0]['CompanyGroup'])
                        
-                        q0=M_PartyType.objects.filter(Company__in=a1,IsRetailer=0,IsSCM=1)
+                        q0=M_PartyType.objects.filter(Company__in=a1,IsRetailer=0,IsSCM=1,IsDivision=0)
                        
                         q2=M_Parties.objects.filter(PartyType__in=q0)
                        
