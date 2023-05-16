@@ -254,6 +254,7 @@ class OrderEditserializer(serializers.Serializer):
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)  
     Comment=serializers.CharField(max_length=100) 
     SAPItemCode=serializers.CharField(max_length=100)
+    SAPUnitName=serializers.CharField(max_length=100)
     
     
 class TestGRNReferanceSerializer(serializers.ModelSerializer):
