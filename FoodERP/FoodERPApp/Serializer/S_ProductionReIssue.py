@@ -5,13 +5,11 @@ from ..models import *
 from ..Serializer.S_Items import *
 from rest_framework import serializers
 
-
 class ItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = M_Items
         fields = ['id','Name']
-
 
 class MaterialIssueItemsSerializer(serializers.ModelSerializer):
     Item=ItemSerializer(read_only=True)

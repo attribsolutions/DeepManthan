@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from ..models import *
 
-
-
-
 # Post and Put Methods Serializer
 
 class RoutesSerializer(serializers.ModelSerializer):

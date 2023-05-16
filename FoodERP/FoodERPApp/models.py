@@ -5,9 +5,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 # Create your models here.
 
 # def make_extra_data(request, response):
-#     return str(request.META)
-   
-
+#     return str(request.META) 
  
 class C_CompanyGroups(models.Model):
 

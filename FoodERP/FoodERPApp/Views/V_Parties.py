@@ -5,10 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from django.contrib.sessions.backends.db import SessionStore
-
-
 from ..Serializer.S_Parties import *
-
 from ..models import *
 
 

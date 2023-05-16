@@ -2,7 +2,6 @@
 from ..models import *
 from rest_framework import serializers
 
-
 class M_MarginsSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_MarginMaster

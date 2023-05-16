@@ -3,6 +3,7 @@ from ..models import *
 from .S_Items import *
 from .S_Parties import *
 
+
 class MC_PartyItemSerializerSecond(serializers.ModelSerializer):
     Item = ItemSerializerSecond()
     class Meta:

@@ -1,6 +1,7 @@
 from ..models import *
 from rest_framework import serializers
 
+
 class PartiesSerializer(serializers.ModelSerializer):
        
     class Meta:
@@ -178,7 +179,6 @@ class M_PartiesSerializer1(serializers.Serializer):
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
 
-    
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress

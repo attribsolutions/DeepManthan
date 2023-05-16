@@ -4,11 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
-
 from ..Views.V_CommFunction import GetO_BatchWiseLiveStock
-
 from ..Serializer.S_Orders import TC_OrderTermsAndConditionsSerializer
-
 from ..Serializer.S_abc import *
 from ..models import *
 

@@ -9,8 +9,7 @@ from rest_framework.parsers import JSONParser
 from ..Views.V_CommFunction import *
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from ..Serializer.S_Production import *
-from ..models import *
-           
+from ..models import *         
 
 class MaterialIssueDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)

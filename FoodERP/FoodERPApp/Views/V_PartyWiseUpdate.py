@@ -8,6 +8,7 @@ from django.db import transaction
 from rest_framework.parsers import JSONParser
 from django.db.models import Q
 
+
 class PartyWiseUpdateView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)

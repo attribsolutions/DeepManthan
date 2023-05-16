@@ -268,6 +268,7 @@ class SuperAdminView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Employee_Serializer.errors, 'Data': []})
 
 #================================----RoleAccessdata----================================================================================ 
+     
                 
                 RoleAccessdata = [
                     {

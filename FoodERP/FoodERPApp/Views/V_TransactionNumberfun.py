@@ -326,7 +326,6 @@ class GetPrifix:
             a=Prifix[0]['PurchaseReturnprefix']
         return a
     
-    
 class SystemBatchCodeGeneration:
     
     def GetGrnBatchCode(*args):

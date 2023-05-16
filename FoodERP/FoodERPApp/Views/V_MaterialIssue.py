@@ -10,6 +10,7 @@ from ..Serializer.S_MaterialIssue import *
 from ..models import *
 
 
+
 class WorkOrderDetailsView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)

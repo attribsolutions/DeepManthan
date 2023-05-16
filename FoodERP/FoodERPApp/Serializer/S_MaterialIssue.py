@@ -4,7 +4,6 @@ from ..Serializer.S_Items import *
 from ..Serializer.S_Companies import *
 from ..Serializer.S_Parties import * 
 
-
 class LiveBatchSerializer(serializers.ModelSerializer):
     class Meta:
         model =O_LiveBatches

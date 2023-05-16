@@ -6,7 +6,6 @@ from .S_GSTHSNCode import *
 from .S_Margins import * 
 from .S_Mrps import * 
 
-
 class M_TermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta : 
         model = M_TermsAndConditions

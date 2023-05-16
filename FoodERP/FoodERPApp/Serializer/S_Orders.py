@@ -7,7 +7,6 @@ from .S_Margins import *
 from .S_Mrps import * 
 from .S_TermsAndConditions import *
 
-
 class M_POTypeserializer(serializers.ModelSerializer):
     class Meta : 
         model = M_POType
@@ -254,6 +253,7 @@ class OrderEditserializer(serializers.Serializer):
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)  
     Comment=serializers.CharField(max_length=100) 
     SAPItemCode=serializers.CharField(max_length=100)
+    SAPUnitName=serializers.CharField(max_length=100)
     
     
 class TestGRNReferanceSerializer(serializers.ModelSerializer):

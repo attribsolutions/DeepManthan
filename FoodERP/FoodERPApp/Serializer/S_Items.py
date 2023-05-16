@@ -2,8 +2,6 @@ from ..Views.V_CommFunction import *
 from ..models import *
 from rest_framework import serializers
 
-
-
 class M_ItemsSerializer01(serializers.ModelSerializer):
     class Meta:
         model = M_Items

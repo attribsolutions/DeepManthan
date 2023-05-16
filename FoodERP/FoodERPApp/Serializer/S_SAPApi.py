@@ -6,7 +6,6 @@ from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
 
 
-
 class InvoiceItemsSerializer(serializers.ModelSerializer):
     
     class Meta:

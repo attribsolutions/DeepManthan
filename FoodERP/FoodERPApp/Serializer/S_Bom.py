@@ -2,8 +2,6 @@ from rest_framework import serializers
 from ..models import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_Companies import *
-
-
 # Post and Put Methods Serializer
 
 class MC_BOMItemsSerializer(serializers.ModelSerializer):

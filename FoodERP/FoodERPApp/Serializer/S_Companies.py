@@ -1,8 +1,5 @@
 from rest_framework import serializers
-
 from ..models import *
-
-
 
 # Get ALL Method
 class C_CompanyGroupSerializerSecond(serializers.ModelSerializer):

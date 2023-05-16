@@ -5,6 +5,7 @@ from collections import OrderedDict
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from .S_GSTHSNCode import * 
 
+
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties

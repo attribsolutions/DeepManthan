@@ -1,7 +1,5 @@
 from django.http import JsonResponse
-
 from ..Serializer.S_Companies import C_CompanySerializer
-
 from ..Serializer.S_Employees import *
 from ..models import *
 from ..Serializer.S_Login import *
@@ -10,15 +8,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.parsers import JSONParser
-
-
 from rest_framework import status
 from rest_framework.response import Response
 from django.db import transaction
-
 from rest_framework.views import APIView
 import jwt
 
