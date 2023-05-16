@@ -7,7 +7,6 @@ from .S_Margins import *
 from .S_Mrps import * 
 from .S_TermsAndConditions import *
 
-
 class M_POTypeserializer(serializers.ModelSerializer):
     class Meta : 
         model = M_POType

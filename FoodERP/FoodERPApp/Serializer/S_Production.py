@@ -6,7 +6,6 @@ from ..Serializer.S_Companies import *
 from ..Serializer.S_Parties import *
 from ..Serializer.S_Items import *
 
-
 class ProductionMaterialIssueSerializer(serializers.ModelSerializer):
     class Meta:
         model =TC_ProductionMaterialIssue

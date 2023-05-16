@@ -1,9 +1,5 @@
-
-
 from ..models import *
 from rest_framework import serializers
-
-
 
 class RoleEmployeeTypesSerializer(serializers.ModelSerializer):
     class Meta:

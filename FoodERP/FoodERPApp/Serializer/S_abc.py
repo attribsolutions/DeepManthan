@@ -1,7 +1,4 @@
-
 from ..models import *
-
-
 
 # class AbcSerializer(serializers.ModelSerializer):
     

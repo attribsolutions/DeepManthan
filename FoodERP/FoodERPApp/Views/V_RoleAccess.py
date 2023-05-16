@@ -1,12 +1,10 @@
 from django.http import JsonResponse
 from rest_framework.response import Response
-
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-
 from ..Serializer.S_RoleAccess import *
 from ..models import *
 
@@ -27,6 +25,7 @@ def GetRelatedPageID(id):
             return str(b[0]['id']) +','+ b[0]['ActualPagePath']
     else:
         return str(a[0]['RelatedPageID']) +','+ aa[0]['ActualPagePath']
+
 
 
 class RoleAccessView(RetrieveAPIView):

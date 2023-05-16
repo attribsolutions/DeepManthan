@@ -1,8 +1,6 @@
 from rest_framework import serializers
-
 from ..models import *
 
-  
 class C_CompanyGroupSerializer(serializers.ModelSerializer):
     class Meta :
         model= C_CompanyGroups

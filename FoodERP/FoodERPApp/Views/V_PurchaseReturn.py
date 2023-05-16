@@ -11,7 +11,6 @@ from django.db.models import Sum
 from ..models import *
 import datetime
 
-
 class PurchaseReturnListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
@@ -54,6 +53,7 @@ class PurchaseReturnListView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
+
 
 class PurchaseReturnView(CreateAPIView):
     

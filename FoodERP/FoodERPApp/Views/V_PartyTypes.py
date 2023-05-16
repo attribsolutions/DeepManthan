@@ -7,7 +7,6 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyTypes import *
 from ..models import *
 
-
 class PartyTypeListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

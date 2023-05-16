@@ -10,7 +10,6 @@ from django.db.models import Q, Sum
 from datetime import date
 from ..models import *
 
-
 class ReceiptInvoicesView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
