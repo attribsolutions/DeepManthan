@@ -4,15 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-
 from ..Serializer.S_EmployeeTypes import M_EmployeeTypeSerializer
-
 from ..Serializer.S_Companies import *
-
 from ..Serializer.S_Login import UserRegistrationSerializer
-
 from ..Serializer.S_Employees import M_EmployeesSerializer
-
 from ..models import C_Companies
 
 

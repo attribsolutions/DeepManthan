@@ -9,7 +9,6 @@ from ..Serializer.S_Items import *
 from .V_CommFunction import *
 from ..models import *
 
-
 class M_GstHsnCodeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

@@ -9,7 +9,6 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_ImportField import *
 from django.db.models import Q
 
-
 class ImportFieldListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication

@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from ..models import *
-
 # Post and Put Methods Serializer
 
 class SubGroupSerializer(serializers.ModelSerializer):

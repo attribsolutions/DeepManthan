@@ -6,7 +6,6 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_VehicleTypes import *
-
 from ..models import *
 
 

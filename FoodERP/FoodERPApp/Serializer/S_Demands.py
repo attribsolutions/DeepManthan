@@ -8,8 +8,6 @@ from .S_Margins import *
 from .S_Mrps import * 
 from .S_TermsAndConditions import *
 
-
-
 # POST Method
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:

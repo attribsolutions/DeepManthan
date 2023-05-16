@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import *
 
+
 # Post and Put Methods Serializer
 class BankSerializer(serializers.ModelSerializer):
     class Meta:

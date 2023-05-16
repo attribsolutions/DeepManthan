@@ -11,7 +11,6 @@ from ..Serializer.S_Invoices import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
 
-
 class ChallanItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication

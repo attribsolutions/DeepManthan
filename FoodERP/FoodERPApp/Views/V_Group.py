@@ -7,7 +7,6 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_Group import *
 from ..models import *
 
-
 class GroupView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)

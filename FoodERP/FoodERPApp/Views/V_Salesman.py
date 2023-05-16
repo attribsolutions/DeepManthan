@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_Salesman import *
 from ..models import *
 
+
 class SalesmanListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

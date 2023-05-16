@@ -1,12 +1,7 @@
 from rest_framework import serializers
-
 from ..Serializer.S_Pages import *
 from ..Serializer.S_Modules import *
-
 from ..models import *
-
-
-
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """

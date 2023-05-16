@@ -9,7 +9,6 @@ from ..Serializer.S_Parties import *
 from ..models import *
 from django.db.models import F,Q
 
-
 class M_EmployeesFilterView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
