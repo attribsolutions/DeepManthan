@@ -2,11 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 # from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
-
 from  ..models import C_CompanyGroups, M_Employees, M_Parties, M_Roles, M_Users, MC_UserRoles,C_Companies
-
 from rest_framework import serializers
-
 from ..models import M_Users
 from rest_framework_simplejwt.tokens import RefreshToken
 

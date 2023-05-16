@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from ..models import *
 
-
 class PartySerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties

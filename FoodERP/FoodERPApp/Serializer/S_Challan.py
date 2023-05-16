@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .S_Items import *
 from .S_GRNs import *
 
+
 class O_BatchWiseLiveStockSerializerForChallan(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock

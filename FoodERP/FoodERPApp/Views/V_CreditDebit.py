@@ -8,9 +8,7 @@ from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_CreditDebit import *
 from django.db.models import Sum
 from ..models import *
-
 ########## Plain Credit Debit Note ########################################################
-
 
 class CreditDebitNoteListView(CreateAPIView):
 

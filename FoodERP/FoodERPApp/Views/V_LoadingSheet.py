@@ -9,7 +9,6 @@ from ..Serializer.S_Invoices import *
 from ..models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
-
 class LoadingSheetListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

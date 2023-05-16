@@ -5,7 +5,6 @@ from ..Serializer.S_Parties import  *
 from ..Serializer.S_Receipts import  *
 from ..Serializer.S_Invoices import  *
 from ..Serializer.S_PurchaseReturn import *
-
 # Credit Or Debit Save Serializer 
 
 class CreditDebitNoteInvoiceSerializer(serializers.ModelSerializer):

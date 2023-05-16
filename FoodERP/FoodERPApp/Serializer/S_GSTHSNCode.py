@@ -1,8 +1,6 @@
 from ..models import *
 from rest_framework import serializers
 
-
-
 class CompanySerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = C_Companies

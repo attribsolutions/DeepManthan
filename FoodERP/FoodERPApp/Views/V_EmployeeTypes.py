@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_EmployeeTypes import  *
 from ..models import *
 
+
 class M_EmployeeTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

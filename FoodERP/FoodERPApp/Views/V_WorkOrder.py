@@ -133,7 +133,6 @@ class WorkOrderList(CreateAPIView):
 
 
 class WorkOrderView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
 

@@ -3,8 +3,6 @@ from ..models import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_Companies import *
 from ..Serializer.S_Parties import *
-
-
 # Post and Put Methods Serializer
 
 class WorkOrderItemsSerializer(serializers.ModelSerializer):

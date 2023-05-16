@@ -12,6 +12,7 @@ from ..Serializer.S_Bom import *
 from django.db.models import Sum
 from ..models import *
 
+
 class InterBranchDivisionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
