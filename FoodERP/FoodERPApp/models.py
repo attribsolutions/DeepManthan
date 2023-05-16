@@ -1644,13 +1644,13 @@ class O_BatchWiseLiveStock(models.Model):
         db_table = "O_BatchWiseLiveStock"    
         
         
-class MC_RouteSchedule(models.Model):
+class MC_SalesManRoutes(models.Model):
     Salesman = models.ForeignKey(M_Salesman,related_name='Salesman', on_delete=models.PROTECT,blank=True,null=True) 
     Route = models.ForeignKey(M_Routes,related_name='SalesmanRoute', on_delete=models.PROTECT,blank=True,null=True) 
     
 
     class Meta:
-        db_table = "MC_RouteSchedule"             
+        db_table = "MC_SalesManRoutes"             
         
         
         
