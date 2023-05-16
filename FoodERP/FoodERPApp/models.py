@@ -1641,7 +1641,22 @@ class O_BatchWiseLiveStock(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
    
     class Meta:
-        db_table = "O_BatchWiseLiveStock"         
+        db_table = "O_BatchWiseLiveStock"    
+        
+        
+class MC_RouteSchedule(models.Model):
+    Salesman = models.ForeignKey(M_Salesman,related_name='Salesman', on_delete=models.PROTECT,blank=True,null=True) 
+    Route = models.ForeignKey(M_Routes,related_name='SalesmanRoute', on_delete=models.PROTECT,blank=True,null=True) 
+    Sunday = models.BooleanField(default=False,blank=True, null=True)
+    Monday = models.BooleanField(default=False,blank=True, null=True)
+    Tuesday = models.BooleanField(default=False,blank=True, null=True)
+    Wednesday = models.BooleanField(default=False,blank=True, null=True)
+    Thrusday = models.BooleanField(default=False,blank=True, null=True)
+    Friday = models.BooleanField(default=False,blank=True, null=True)
+    Saturday = models.BooleanField(default=False,blank=True, null=True)
+
+    class Meta:
+        db_table = "MC_RouteSchedule"             
         
         
         
