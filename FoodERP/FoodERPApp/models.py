@@ -407,6 +407,7 @@ class MC_PageFieldMaster(models.Model):
     ShowInDownload = models.BooleanField(default=False)
     DownloadDefaultSelect = models.BooleanField(default=False) 
     InValidMsg = models.CharField(max_length=300,null=True,blank=True)
+    Alignment = models.CharField(max_length=300,null=True,blank=True)
     Page = models.ForeignKey(M_Pages, related_name='PageFieldMaster', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
@@ -1640,7 +1641,16 @@ class O_BatchWiseLiveStock(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
    
     class Meta:
-        db_table = "O_BatchWiseLiveStock"         
+        db_table = "O_BatchWiseLiveStock"    
+        
+        
+class MC_RouteSchedule(models.Model):
+    Salesman = models.ForeignKey(M_Salesman,related_name='Salesman', on_delete=models.PROTECT,blank=True,null=True) 
+    Route = models.ForeignKey(M_Routes,related_name='SalesmanRoute', on_delete=models.PROTECT,blank=True,null=True) 
+    
+
+    class Meta:
+        db_table = "MC_RouteSchedule"             
         
         
         
