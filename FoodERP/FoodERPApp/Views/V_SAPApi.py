@@ -142,8 +142,7 @@ class SAPOrderView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
               
-
-              
+          
     # authentication__Class = JSONWebTokenAuthentication
 
     # def get(self, request, id=0):

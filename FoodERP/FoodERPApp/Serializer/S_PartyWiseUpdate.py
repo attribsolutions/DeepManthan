@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from ..models import  *
-
-        
+   
 class FSSAINoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress

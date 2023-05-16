@@ -93,8 +93,7 @@ class SendViewMail(RetrieveAPIView):
                         # recipient_list= [email]
                         # send_mail(subject , message , email_from , recipient_list)
                         # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data' : []})
-
-           
+     
 class VerifyOTPwithUserData(RetrieveAPIView):
 
     permission_classes = ()

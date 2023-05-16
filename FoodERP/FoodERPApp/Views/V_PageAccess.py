@@ -3,9 +3,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
-
 from ..Serializer.S_PageAccess import H_PageAccessSerializer
-
 from ..models import *
 
 

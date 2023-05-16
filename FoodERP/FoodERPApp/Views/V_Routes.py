@@ -8,6 +8,7 @@ from ..Serializer.S_Routes import *
 from ..Serializer.S_PartySubParty import *
 from ..models import *
 
+
 class RouteListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

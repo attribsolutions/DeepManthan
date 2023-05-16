@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_Category import *
 from ..models import *
 
+
 class CategoryView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)

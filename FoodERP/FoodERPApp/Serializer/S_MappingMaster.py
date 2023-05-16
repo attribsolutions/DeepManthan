@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import *
 
+
 #For Party Customer Mapping 
 
 class PartyMasterMappingSerializer(serializers.ModelSerializer):
