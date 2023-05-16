@@ -36,6 +36,7 @@ class MC_PageFieldMasterSerializerSecond(serializers.Serializer):
     DownloadDefaultSelect = serializers.BooleanField(default=False)
     InValidMsg = serializers.CharField(max_length=300) 
     RegularExpression = serializers.CharField(max_length=300)
+    Alignment = serializers.CharField(max_length=300)
     
 
 class M_PagesSerializer(serializers.Serializer):
@@ -73,7 +74,7 @@ class M_PagesSerializer2(serializers.ModelSerializer):
 class MC_PageFieldMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PageFieldMaster
-        fields = ['ControlID','ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect','DefaultSort','InValidMsg']         
+        fields = ['ControlID','ControlType','FieldLabel','IsCompulsory','FieldValidation','ListPageSeq','ShowInListPage','ShowInDownload','DownloadDefaultSelect','DefaultSort','InValidMsg','Alignment']         
 
 class MC_PagePageAccessSerializer1(serializers.ModelSerializer):
     class Meta:
