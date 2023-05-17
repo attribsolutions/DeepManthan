@@ -6,6 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyTypes import *
 from ..models import *
+from django.db.models import Q
 
 class PartyTypeListView(CreateAPIView):
     
@@ -29,7 +30,10 @@ class PartyTypeListView(CreateAPIView):
                     
                     if(IsSCM == 0):
                        
-                        query = M_PartyType.objects.filter(Company=CompanyID)
+                        q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")
+                        q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')
+                        query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))
+                        # print(str(query.query))
                         p=0
                     else:
                        
@@ -37,6 +41,7 @@ class PartyTypeListView(CreateAPIView):
                         print(str(query.query))
                         p=0
                 else:    
+                    
                     
                     query = M_PartyType.objects.filter(id=id)
                     p=1
