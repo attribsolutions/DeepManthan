@@ -85,6 +85,8 @@ DATABASES = {
         'HOST': '10.1.201.19',
         'PORT': '3306'
     }
+    
+    
     # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
@@ -95,6 +97,7 @@ DATABASES = {
     #     'PORT': '3306'
     # }
 }
+
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -152,6 +155,8 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
