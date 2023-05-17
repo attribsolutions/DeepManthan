@@ -31,7 +31,7 @@ class LoadingSheetListView(CreateAPIView):
                             "id": a['id'],
                             "Date": a['Date'],
                             "LoadingSheetNo": a['No'],
-                            "Route Name": a['Route']['Name'],
+                            "RouteName": a['Route']['Name'],
                             "TotalAmount": a['TotalAmount'],
                             "InvoiceCount": a['InvoiceCount'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
