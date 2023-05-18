@@ -22,7 +22,7 @@ class SalesmanListView(CreateAPIView):
                 Party = Salesmandata['PartyID']
                 Salesmanquery = M_Salesman.objects.filter(Party=Party,Company=Company)
                 if Salesmanquery.exists():
-                    Salesmandata_serialiazer = SalemanSerializer(Salesmanquery, many=True).data
+                    Salesmandata_serialiazer = SalesmanSerializer(Salesmanquery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Salesmandata_serialiazer})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
@@ -41,7 +41,7 @@ class SalesmanView(CreateAPIView):
         try:
             with transaction.atomic():
                 Salesman_data = JSONParser().parse(request)
-                Salesman_Serializer = SalemanSerializer(data=Salesman_data)
+                Salesman_Serializer = SalesmanSerializer(data=Salesman_data)
                 if Salesman_Serializer.is_valid():
                     Salesman_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Salesman Save Successfully', 'Data':[]})
@@ -57,7 +57,7 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmanquery = M_Salesman.objects.filter(id=id)
                 if Salesmanquery.exists():
-                    Salesmandata = SalemanSerializer(Salesmanquery, many=True).data
+                    Salesmandata = SalesmanSerializer(Salesmanquery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Salesmandata[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
@@ -72,7 +72,7 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmandata = JSONParser().parse(request)
                 SalesmandatadataByID = M_Salesman.objects.get(id=id)
-                Salesmandata_Serializer = SalemanSerializer(SalesmandatadataByID, data=Salesmandata)
+                Salesmandata_Serializer = SalesmanSerializer(SalesmandatadataByID, data=Salesmandata)
                 if Salesmandata_Serializer.is_valid():
                     Salesmandata_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Salesman Updated Successfully', 'Data':[]})
