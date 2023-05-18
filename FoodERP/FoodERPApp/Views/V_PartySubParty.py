@@ -68,10 +68,13 @@ class PartySubPartyViewSecond(CreateAPIView):
                 query= MC_PartySubParty.objects.filter(Party=id)
                 
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
-
-                query1= MC_PartySubParty.objects.filter(SubParty=id)
+                
+                query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
+                query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
+                query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
+                PartySerializer = PartySubpartySerializerSecond(query3, many=True).data
                
-                PartySerializer = PartySubpartySerializerSecond(query1, many=True).data
+                
                 SubPartyList = list()
                 for a in PartySerializer:
                     SubPartyList.append({
@@ -79,7 +82,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyName": a['SubParty']['Name'],
                         "SubParty": a['Party']['id'],
                         "SubPartyName": a['Party']['Name'],
-                        "PartyType": a['Party']['PartyType'],
+                        "PartyType": a['Party']['PartyType']['id'],
+                        "IsVendor": a['Party']['PartyType']['IsVendor'],
                         "Route": a['Route']['id'],
                         "Creditlimit": a['Creditlimit']
                     }) 
@@ -89,7 +93,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyName": a['Party']['Name'],
                         "SubParty": a['SubParty']['id'],
                         "SubPartyName": a['SubParty']['Name'],
-                        "PartyType": a['SubParty']['PartyType'],
+                        "PartyType": a['SubParty']['PartyType']['id'],
+                        "IsVendor": a['SubParty']['PartyType']['IsVendor'],
                         "Route": a['Route']['id'],
                         "Creditlimit": a['Creditlimit']
                     })
