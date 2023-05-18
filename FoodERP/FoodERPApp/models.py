@@ -1645,7 +1645,7 @@ class O_BatchWiseLiveStock(models.Model):
         
         
 class MC_SalesManRoutes(models.Model):
-    Salesman = models.ForeignKey(M_Salesman,related_name='SalesmanRoute', on_delete=models.PROTECT) 
+    Salesman = models.ForeignKey(M_Salesman,related_name='SalesmanRoute', on_delete=models.CASCADE) 
     Route = models.ForeignKey(M_Routes,related_name='SRoute', on_delete=models.PROTECT) 
     class Meta:
         db_table = "MC_SalesManRoutes"             
