@@ -1,7 +1,13 @@
 from rest_framework import serializers
 from ..models import *
 
+class PartyTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_PartyType
+        fields = '__all__'
+
 class PartySerializer(serializers.ModelSerializer):
+    PartyType=PartyTypeSerializer(read_only=True)
     class Meta:
         model =  M_Parties
         fields = ['id','Name','PartyType']
