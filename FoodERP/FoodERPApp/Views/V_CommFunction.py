@@ -28,25 +28,31 @@ from datetime import date
 '''
 
 def UnitDropdown(ItemID,PartyForRate,BatchID=0):
+    
     UnitDetails = list()
     ItemUnitquery = MC_ItemUnits.objects.filter(
         Item=ItemID, IsDeleted=0)
     ItemUnitqueryserialize = ItemUnitSerializer(
         ItemUnitquery, many=True).data
    
-    RateMcItemUnit = ""    
+    RateMcItemUnit = "" 
+    q= M_Parties.objects.filter(id=PartyForRate).select_related("PartyType").values("PartyType__IsSCM")
+   
     for d in ItemUnitqueryserialize:
         if (d['PODefaultUnit'] == True):
             RateMcItemUnit = d['id']
-        
-        CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,PartyForRate,0,0,d['id']).RateWithGST()
+        if(q[0]['PartyType__IsSCM'] == 1):
+            CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,PartyForRate,0,0,d['id']).RateWithGST()
+            Rate=CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+        else:
+            Rate=0
         UnitDetails.append({
             "UnitID": d['id'],
             "UnitName": d['BaseUnitConversion'] ,
             "BaseUnitQuantity": d['BaseUnitQuantity'],
             "PODefaultUnit": d['PODefaultUnit'],
             "SODefaultUnit": d['SODefaultUnit'],
-            "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+            "Rate" : Rate
 
         })
     return UnitDetails
@@ -453,9 +459,9 @@ class RateCalculationFunction:
         q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).values('BaseUnitQuantity')
             
         query =M_Parties.objects.filter(id=PartyID).values('PriceList')
-       
+        # print(PartyID,query)
         query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
-
+        # print(str(query1.query))
         self.calculationPath=str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit=q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit= q3NoUnit[0]['BaseUnitQuantity']
