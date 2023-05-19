@@ -37,7 +37,7 @@ def UnitDropdown(ItemID,PartyForRate,BatchID=0):
    
     RateMcItemUnit = "" 
     q= M_Parties.objects.filter(id=PartyForRate).select_related("PartyType").values("PartyType__IsSCM")
-    print(q)
+   
     for d in ItemUnitqueryserialize:
         if (d['PODefaultUnit'] == True):
             RateMcItemUnit = d['id']
@@ -459,9 +459,9 @@ class RateCalculationFunction:
         q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).values('BaseUnitQuantity')
             
         query =M_Parties.objects.filter(id=PartyID).values('PriceList')
-        print(PartyID,query)
+        # print(PartyID,query)
         query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
-        print(str(query1.query))
+        # print(str(query1.query))
         self.calculationPath=str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit=q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit= q3NoUnit[0]['BaseUnitQuantity']
