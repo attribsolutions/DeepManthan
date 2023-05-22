@@ -63,7 +63,7 @@ class M_PartiesFilterView(CreateAPIView):
                     q1=M_PartyType.objects.filter(Company=CompanyID)
                     query=M_Parties.objects.filter(PartyType__in = q1)
 
-                elif(RoleID == 2 and IsSCMCompany == 0): # Admin
+                elif(IsSCMCompany == 0): # Admin
                   
                     q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer = 0)
                     query=M_Parties.objects.filter(Company=CompanyID,PartyType__IsRetailer=0).select_related("PartyType")
