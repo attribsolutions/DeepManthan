@@ -493,7 +493,31 @@ class RateCalculationFunction:
 
 
  
+class GetPartyAddressDetails:
+    
+    def __init__(self,PartyID):
+        self.PartyID = PartyID
+            
         
+    def PartyAddress(self):     
+        
+        query = MC_PartyAddress.objects.filter(Party=self.PartyID,IsDefault=1).values('Address','FSSAINo','FSSAIExipry','PIN')
+        Address=query[0]['Address']
+        FSSAINo=query[0]['FSSAINo']
+        FSSAIExipry=query[0]['FSSAIExipry']
+        Pin=query[0]['PIN']
+
+        
+        Details=list()
+        Details.append({
+            "Address":Address,
+            "FSSAINo": FSSAINo,
+            "FSSAIExipry":FSSAIExipry,
+            "Pin":Pin
+        })
+        
+    
+        return Details        
         
         
         

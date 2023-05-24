@@ -354,6 +354,7 @@ class T_OrdersViewSecond(CreateAPIView):
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
                                 inward = 1
+                        Address=GetPartyAddressDetails(a['Supplier']['id']).PartyAddress()
 
                         OrderData.append({
                             "id": a['id'],
@@ -373,6 +374,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "Supplier": a['Supplier']['id'],
                             "SupplierSAPCode":a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
+                            "SupplierFssai":Address[0]['FSSAINo'],
                             "BillingAddressID": a['BillingAddress']['id'],
                             "BillingAddress": a['BillingAddress']['Address'],
                             "BillingFssai": a['BillingAddress']['FSSAINo'],
