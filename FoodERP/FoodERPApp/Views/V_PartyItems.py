@@ -56,7 +56,7 @@ class PartyItemsFilterView(CreateAPIView):
                 
                     Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName from M_Items left JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id where IsSCM=1 and M_Items.Company_id in (select id from C_Companies where CompanyGroup_id=%s ) ''',([PartyID],[CompanyGroupID]))
                 else:
-                    Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName from M_Items left JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id where Company_id =%s ''',([PartyID],[CompanyID]))
+                    Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName from M_Items left JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id where M_Items.Company_id =%s ''',([PartyID],[CompanyID]))
                
                 
                 
