@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
-from ..Views.V_CommFunction import UnitDropdown
+from ..Views.V_CommFunction import *
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_PartyItems import *
@@ -288,7 +288,8 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'Data': []})
+                    OrderID=Order_serializer.data['id']
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully' ,'OrderID':OrderID, 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -325,6 +326,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "ItemName": b['Item']['Name'],
                                     "ItemSAPCode": b['Item']['SAPItemCode'],
                                     "Quantity": b['Quantity'],
+                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,1,0).ConvertintoSelectedUnit(),
                                     "MRP": b['MRP']['id'],
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],

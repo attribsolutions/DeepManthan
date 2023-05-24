@@ -406,7 +406,7 @@ class UnitwiseQuantityConversion:
             
             ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
             self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
-          
+      
     def GetBaseUnitQuantity(self):
         
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
@@ -414,6 +414,7 @@ class UnitwiseQuantityConversion:
         return BaseUnitQuantity   
 
     def ConvertintoSelectedUnit(self):
+        
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
         ConvertedQuantity=   float(BaseUnitQuantity) /  float(self.ConversionUnitBaseQuantity)
         return ConvertedQuantity
@@ -456,8 +457,8 @@ class RateCalculationFunction:
             
         q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQuantity')
        
-        q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=2).values('BaseUnitQuantity')
-            
+        q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=1).values('BaseUnitQuantity')
+        
         query =M_Parties.objects.filter(id=PartyID).values('PriceList')
         # print(PartyID,query)
         query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
