@@ -183,7 +183,7 @@ class M_PartiesViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Partiesdata = JSONParser().parse(request)
                 M_PartiesdataByID = M_Parties.objects.get(id=id)
-                M_Parties_Serializer = M_PartiesSerializer(
+                M_Parties_Serializer = UpdateM_PartiesSerializer(
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
                     M_Parties_Serializer.save()
@@ -192,7 +192,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors,'Data' : []})
         except Exception as e :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__,'Data' : []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e),'Data' : []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
