@@ -147,7 +147,7 @@ class M_Parties(models.Model):
         
 class MC_PartyAddress(models.Model):
     
-    Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE,null=True, blank=True)
+    Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE,null=True,blank=True)
     Address = models.CharField(max_length=500)
     FSSAINo = models.CharField(max_length=500,null=True,blank=True)
     FSSAIExipry = models.DateField(null=True,blank=True)
