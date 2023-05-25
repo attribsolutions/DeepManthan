@@ -22,7 +22,7 @@ class SalesmanListView(CreateAPIView):
                 Party = Salesmandata['PartyID']
                 Salesmanquery = M_Salesman.objects.filter(Party=Party,Company=Company)
                 if Salesmanquery.exists():
-                    Salesmandata_serialiazer = SalesmanSerializer(Salesmanquery, many=True).data
+                    Salesmandata_serialiazer = SalesmanSerializerSecond(Salesmanquery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Salesmandata_serialiazer})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
@@ -57,7 +57,7 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmanquery = M_Salesman.objects.filter(id=id)
                 if Salesmanquery.exists():
-                    Salesmandata = SalesmanSerializer(Salesmanquery, many=True).data
+                    Salesmandata = SalesmanSerializerSecond(Salesmanquery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Salesmandata[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
