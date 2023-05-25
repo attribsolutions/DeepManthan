@@ -1,6 +1,8 @@
+import base64
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -9,12 +11,17 @@ from ..Serializer.S_Orders import TC_OrderTermsAndConditionsSerializer
 from ..Serializer.S_abc import *
 from ..models import *
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import authenticate
+
 
 class AbcView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication
-    parser_classes = (MultiPartParser, FormParser)
+    authentication_classes = [BasicAuthentication]
+    # parser_classes = (MultiPartParser, FormParser)
 
     @transaction.atomic()
     def post(self, request, *args, **kwargs):
@@ -34,21 +41,28 @@ class AbcView(CreateAPIView):
     def get(self, request ):
         try:
             with transaction.atomic():
-                print('aaaaa')
-                Modulesdata = TC_OrderTermsAndConditions.objects.filter(Order=201)
-                print('bbbbb')
-                if Modulesdata.exists():
-                    print('ccccc')
-                    Modules_Serializer = TC_OrderTermsAndConditionsSerializer(
-                    Modulesdata, many=True)
-                    Stock=GetO_BatchWiseLiveStock(44,4)
-                    print(Stock)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': float(Stock),'Data': Modules_Serializer.data })
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
-        except Exception as e :
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data':[e]})
-        
-        
+                auth_header = request.META.get('HTTP_AUTHORIZATION')
+                if auth_header:
+                # Parsing the authorization header
+                    auth_type, auth_string = auth_header.split(' ', 1)
+                if auth_type.lower() == 'basic':
+                    # Decoding the base64-encoded username and password
+                    try:
+                        username, password = base64.b64decode(auth_string).decode().split(':', 1)
+                    except (TypeError, ValueError, UnicodeDecodeError):
+                        return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                    # Authenticating the user
+                    user = authenticate(request, username=username, password=password)
+                    if user is not None:
+                        # Username and password are valid
+                        return Response('Authenticated', status=status.HTTP_200_OK)
+                # Invalid authorization header or authentication failed
+                return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
+
         
         
 # class MultipleReceiptView(CreateAPIView):
