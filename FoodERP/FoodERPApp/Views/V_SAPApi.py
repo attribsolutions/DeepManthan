@@ -139,7 +139,7 @@ class SAPOrderView(CreateAPIView):
 
                 response = requests.request("POST", url, headers=headers, data=payload)
                 print(response)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send to SAP Successfully ', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send to SAP Successfully ', 'Data': response})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
               
