@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate
 from base64 import b64decode
 from django.http import JsonResponse
@@ -126,20 +127,24 @@ class SAPOrderView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                payload = JSONParser().parse(request)
+                data = JSONParser().parse(request)
+               
+                payload = json.dumps(data)
+                
                 url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
-
-
+          
+               
                 headers = {
                     'X-Requested-With': 'x',
                     'Authorization': 'Basic SW50ZXJmYWNlOkFkbWluQDEyMzQ=',
                     'Content-Type': 'application/json',
                     'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
                 }
-
+                
                 response = requests.request("POST", url, headers=headers, data=payload)
-                print(response)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': str(response), 'Data': []})
+                
+                # print(response.text)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send to SAP Successfully ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
               
