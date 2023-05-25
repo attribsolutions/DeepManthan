@@ -1651,4 +1651,27 @@ class MC_SalesManRoutes(models.Model):
         db_table = "MC_SalesManRoutes"             
         
         
-        
+class M_Settings(models.Model):
+    SystemSetting=models.CharField(max_length=500)        
+    class Meta:
+        db_table = "M_Settings"
+
+class MC_SettingsDetails(models.Model):
+    SettingID=models.ForeignKey(M_Settings,related_name='SettingDetails',on_delete=models.CASCADE)         
+    Value=models.CharField(max_length=500)
+    Company = models.ForeignKey(C_Companies,related_name='SettingCompany', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties,related_name='SettingParty', on_delete=models.PROTECT)
+    IsDeleted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table="MC_SettingsDetails"
+
+class MC_SettingDependency(models.Model):
+    Setting=models.ForeignKey(M_Settings,related_name='DependentSettingDetails',on_delete=models.CASCADE)  
+    DependentSetting=models.ForeignKey(M_Settings,related_name='DependentSettingID',on_delete=models.PROTECT) 
+    class Meta:
+        db_table="MC_SettingDependency"
