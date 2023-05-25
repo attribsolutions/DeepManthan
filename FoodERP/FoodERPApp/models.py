@@ -120,7 +120,7 @@ class M_Parties(models.Model):
     PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING,null=True)
     PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.PROTECT,blank=True)
     Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.PROTECT)
-    Email = models.EmailField(max_length=200)
+    Email = models.EmailField(max_length=200,null=True, blank=True)
     MobileNo = models.BigIntegerField()
     AlternateContactNo = models.CharField(max_length=500, null=True, blank=True)
     State = models.ForeignKey(
@@ -130,8 +130,8 @@ class M_Parties(models.Model):
     Taluka = models.IntegerField()
     City = models.IntegerField()
     SAPPartyCode = models.CharField(max_length=500, null=True, blank=True)
-    GSTIN = models.CharField(max_length=500)
-    PAN = models.CharField(max_length=500)
+    GSTIN = models.CharField(max_length=500,null=True, blank=True)
+    PAN = models.CharField(max_length=500,null=True, blank=True)
     '''IsDivison this Flag depends on Partytypes if PartyTypes's IsDivision Flag is Set M_Parties IsDivision also set '''
     IsDivision = models.BooleanField(default=False)
     MkUpMkDn = models.BooleanField(default=False)
@@ -147,7 +147,7 @@ class M_Parties(models.Model):
         
 class MC_PartyAddress(models.Model):
     
-    Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE)
+    Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE,null=True, blank=True)
     Address = models.CharField(max_length=500)
     FSSAINo = models.CharField(max_length=500,null=True,blank=True)
     FSSAIExipry = models.DateField(null=True,blank=True)
