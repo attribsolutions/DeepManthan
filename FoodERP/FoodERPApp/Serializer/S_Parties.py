@@ -17,25 +17,19 @@ class PartySubPartySerializer2(serializers.ModelSerializer):
     Party = DivisionsSerializer()
     class Meta:
         model = MC_PartySubParty
-        fields = ['Party']
+        fields = ['Party','SubParty','Creditlimit','Route_id']
               
     
 class PartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
         fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix']
-
-# class PartyAddressSerializer(serializers.ModelSerializer):
-#     id = serializers.IntegerField()
-#     class Meta:
-#         model = MC_PartyAddress
-#         fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
-
-                     
+        
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
         fields = ['Address', 'FSSAINo', 'PIN', 'IsDefault', 'fssaidocument']  
+        
 class MC_PartySubPartySerializer(serializers.ModelSerializer):
     class Meta:
         model =MC_PartySubParty
@@ -235,7 +229,106 @@ class M_PartiesSerializerFourth(serializers.ModelSerializer):
     PartyType = PartyTypeSerializerSecond()
     class Meta:
         model =  M_Parties
-        fields = '__all__'    
+        fields = '__all__'
+        
+        
+####################################################################################################################     
+        
+        
+        
+class UpdatePartyPrefixsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyPrefixs
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix']
+        
+class UpdatePartyAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
+        
+class UpdateMC_PartySubPartySerializer(serializers.ModelSerializer):
+    class Meta:
+        model =MC_PartySubParty
+        fields =['Party','CreatedBy','UpdatedBy']
+
+
+class UpdateM_PartiesSerializer(serializers.ModelSerializer):
+    PartyAddress = UpdatePartyAddressSerializer(many=True)
+    PartyPrefix = UpdatePartyPrefixsSerializer(many=True)
+    PartySubParty = UpdateMC_PartySubPartySerializer(many=True)
+    class Meta:
+        model =  M_Parties
+        fields = '__all__'
+        
+        
+    def update(self, instance, validated_data):
+        instance.Name = validated_data.get(
+            'Name', instance.Name)
+        instance.PriceList = validated_data.get(
+            'PriceList', instance.PriceList)
+        instance.PartyType = validated_data.get(
+            'PartyType', instance.PartyType)
+        instance.Company = validated_data.get(
+            'Company', instance.Company)
+        instance.Email = validated_data.get(
+            'Email', instance.Email)
+        instance.MobileNo = validated_data.get(
+            'MobileNo', instance.MobileNo)
+        instance.AlternateContactNo = validated_data.get(
+            'AlternateContactNo', instance.AlternateContactNo)
+        instance.State = validated_data.get(
+            'State', instance.State)
+        instance.District = validated_data.get(
+            'District', instance.District)
+        instance.Taluka = validated_data.get(
+            'Taluka', instance.Taluka)
+        instance.City = validated_data.get(
+            'City', instance.City)
+        instance.SAPPartyCode = validated_data.get(
+            'SAPPartyCode', instance.SAPPartyCode)
+        instance.GSTIN = validated_data.get(
+            'GSTIN', instance.GSTIN)
+        instance.PAN = validated_data.get(
+            'PAN', instance.PAN)
+        instance.IsDivision = validated_data.get(
+            'IsDivision', instance.IsDivision)
+        instance.District = validated_data.get(
+            'District', instance.District)
+        instance.isActive = validated_data.get(
+            'isActive', instance.isActive)
+        
+        instance.MkUpMkDn = validated_data.get(
+            'MkUpMkDn', instance.MkUpMkDn)
+            
+        instance.save()   
+        
+        for a in instance.PartyPrefix.all():
+            a.delete() 
+        
+        for PartyPrefixs_data in validated_data['PartyPrefix']:
+            Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)
+             
+        for PartyAddress_updatedata in validated_data['PartyAddress']:
+            Party = MC_PartyAddress.objects.filter(Party=instance).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'],PIN=PartyAddress_updatedata['PIN'],IsDefault=PartyAddress_updatedata['IsDefault'],fssaidocument=PartyAddress_updatedata['fssaidocument'])
+
+        query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
+       
+        if query[0]['IsVendor'] == True:
+            for PartySubParty in validated_data['PartySubParty']:
+                query =MC_PartySubParty.objects.filter(Party=instance,SubParty=PartySubParty['Party']).delete()
+                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=PartySubParty['Party'], **PartySubParty)  
+        else: 
+          
+            for PartySubParty in validated_data['PartySubParty']:
+                query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
+                PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
+                        
+        return instance        
+        
+        
+        
+        
+            
     
     
    
