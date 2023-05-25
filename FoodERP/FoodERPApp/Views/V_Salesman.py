@@ -80,25 +80,28 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmanquery = M_Salesman.objects.filter(id=id)
                 if Salesmanquery.exists():
-                    Salesmandata = SalesmanSerializerSecond(Salesmanquery, many=True).data  
-                    SalesmanRoutelist = list()        
-                    SalesmanRoutelist.append({
-                                "Route":Salesmandata[0]['id'],
-                                "Name":Salesmandata[0]['Name']
+                    Salesmandata_serialiazer = SalesmanSerializerSecond(Salesmanquery, many=True).data  
+                    SalesmanList = list()
+                    for a in Salesmandata_serialiazer:
+                           SalesmanRoutelist = list()
+                           for b in a['SalesmanRoute']:
+                            SalesmanRoutelist.append({
+                                "Route":b['Route']['id'],
+                                "Name":b['Route']['Name']
                             })
-                    SalesmanList = list()       
-                    SalesmanList.append({
-                                "id":Salesmandata[0]['id'],
-                                "Name":Salesmandata[0]['Name'],
-                                "MobileNo":Salesmandata[0]['MobileNo'],
-                                "IsActive":Salesmandata[0]['IsActive'],
-                                "CreatedBy":Salesmandata[0]['CreatedBy'],
-                                "UpdatedBy":Salesmandata[0]['UpdatedBy'],
-                                "Company":Salesmandata[0]['Company'],
-                                "Party":Salesmandata[0]['Party'],
+
+                            SalesmanList.append({
+                                "id":a['id'],
+                                "Name":a['Name'],
+                                "MobileNo":a['MobileNo'],
+                                "IsActive":a['IsActive'],
+                                "CreatedBy":a['CreatedBy'],
+                                "UpdatedBy":a['UpdatedBy'],
+                                "Company":a['Company'],
+                                "Party":a['Party'],
                                 "SalesmanRoute":SalesmanRoutelist
                             })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Salesmandata[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SalesmanList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
