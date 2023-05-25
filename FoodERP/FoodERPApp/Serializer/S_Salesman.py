@@ -8,7 +8,6 @@ class RouteNameSerializer(serializers.ModelSerializer):
         fields = ['id','Name']
 
 class SalesManRouteSerializer(serializers.ModelSerializer):
-    Route = RouteNameSerializer(many = True)
     class Meta:
         model = MC_SalesManRoutes
         fields = ['Route']
@@ -54,4 +53,16 @@ class SalesmanSerializer(serializers.ModelSerializer):
         return instance 
 
 
+
+class SalesManRouteSerializersecond(serializers.ModelSerializer):
+    Route = RouteNameSerializer()
+    class Meta:
+        model = MC_SalesManRoutes
+        fields = ['Route']
+
+class SalesmanSerializerSecond(serializers.ModelSerializer):
+    SalesmanRoute = SalesManRouteSerializersecond(many = True)
+    class Meta:
+        model = M_Salesman
+        fields = ['id', 'Name', 'MobileNo','IsActive', 'CreatedBy', 'UpdatedBy', 'Company', 'Party','SalesmanRoute']
 
