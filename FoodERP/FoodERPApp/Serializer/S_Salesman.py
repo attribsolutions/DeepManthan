@@ -2,8 +2,13 @@ from rest_framework import serializers
 from ..models import *
 
 # Post and Put Methods Serializer
+class RouteNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Routes
+        fields = ['id','Name']
 
 class SalesManRouteSerializer(serializers.ModelSerializer):
+    Route = RouteNameSerializer(many = True)
     class Meta:
         model = MC_SalesManRoutes
         fields = ['Route']

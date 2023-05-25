@@ -406,7 +406,7 @@ class UnitwiseQuantityConversion:
             
             ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
             self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
-        
+      
     def GetBaseUnitQuantity(self):
         
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
@@ -414,7 +414,7 @@ class UnitwiseQuantityConversion:
         return BaseUnitQuantity   
 
     def ConvertintoSelectedUnit(self):
-       
+        
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
         ConvertedQuantity=   float(BaseUnitQuantity) /  float(self.ConversionUnitBaseQuantity)
         return ConvertedQuantity
@@ -458,7 +458,7 @@ class RateCalculationFunction:
         q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQuantity')
        
         q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=1).values('BaseUnitQuantity')
-            
+        
         query =M_Parties.objects.filter(id=PartyID).values('PriceList')
         # print(PartyID,query)
         query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
@@ -493,7 +493,31 @@ class RateCalculationFunction:
 
 
  
+class GetPartyAddressDetails:
+    
+    def __init__(self,PartyID):
+        self.PartyID = PartyID
+            
         
+    def PartyAddress(self):     
+        
+        query = MC_PartyAddress.objects.filter(Party=self.PartyID,IsDefault=1).values('Address','FSSAINo','FSSAIExipry','PIN')
+        Address=query[0]['Address']
+        FSSAINo=query[0]['FSSAINo']
+        FSSAIExipry=query[0]['FSSAIExipry']
+        Pin=query[0]['PIN']
+
+        
+        Details=list()
+        Details.append({
+            "Address":Address,
+            "FSSAINo": FSSAINo,
+            "FSSAIExipry":FSSAIExipry,
+            "Pin":Pin
+        })
+        
+    
+        return Details        
         
         
         
