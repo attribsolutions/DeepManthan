@@ -164,7 +164,10 @@ class M_PartiesViewSecond(CreateAPIView):
                     for a in PartySubParty_Serializer:
                         PartySubPartyList.append({
                             "Party":a['Party']['id'],
-                            "PartyName":a['Party']['Name']
+                            "PartyName":a['Party']['Name'],
+                            "Subparty":a['SubParty'],
+                            "Creditlimit":a['Creditlimit'],
+                            "Route":a['Route_id']
                         })
                     list2 = list()
                     list2.append({"Data":M_Parties_serializer[0],

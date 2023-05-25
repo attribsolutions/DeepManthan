@@ -17,7 +17,7 @@ class PartySubPartySerializer2(serializers.ModelSerializer):
     Party = DivisionsSerializer()
     class Meta:
         model = MC_PartySubParty
-        fields = ['Party']
+        fields = ['Party','SubParty','Creditlimit','Route_id']
               
     
 class PartyPrefixsSerializer(serializers.ModelSerializer):
