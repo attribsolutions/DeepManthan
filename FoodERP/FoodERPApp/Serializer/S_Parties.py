@@ -127,22 +127,22 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         for a in instance.PartyPrefix.all():
             a.delete() 
         
-        for a in instance.PartySubParty.all():
-            a.delete()       
-            
-        for PartyAddress_data in validated_data['PartyAddress']:
-            Party = MC_PartyAddress.objects.filter(id=PartyAddress_data['id'],Party=instance).update(Address=PartyAddress_data['Address'],FSSAINo=PartyAddress_data['FSSAINo'],FSSAIExipry=PartyAddress_data['FSSAIExipry'],PIN=PartyAddress_data['PIN'],IsDefault=PartyAddress_data['IsDefault'],fssaidocument=PartyAddress_data['fssaidocument'])
-
         for PartyPrefixs_data in validated_data['PartyPrefix']:
             Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)
-        
-        query=M_PartyType.objects.filter(id=instance.PartyType).values('IsVendor')
+             
+        for PartyAddress_updatedata in validated_data['PartyAddress']:
+            Party = MC_PartyAddress.objects.filter(Party=instance).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'],PIN=PartyAddress_updatedata['PIN'],IsDefault=PartyAddress_updatedata['IsDefault'],fssaidocument=PartyAddress_updatedata['fssaidocument'])
+
+        query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
+       
         if query[0]['IsVendor'] == True:
             for PartySubParty in validated_data['PartySubParty']:
-                subparty = PartySubParty.pop('Party')
-                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=subparty, **PartySubParty)  
-        else:   
+                query =MC_PartySubParty.objects.filter(Party=instance,SubParty=PartySubParty['Party']).delete()
+                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=PartySubParty['Party'], **PartySubParty)  
+        else: 
+          
             for PartySubParty in validated_data['PartySubParty']:
+                query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
                 PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
                         
         return instance
@@ -182,7 +182,7 @@ class M_PartiesSerializer1(serializers.Serializer):
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
-        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault'] 
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault','fssaidocument'] 
 
 class DistrictSerializerSecond(serializers.ModelSerializer):
     class Meta:
