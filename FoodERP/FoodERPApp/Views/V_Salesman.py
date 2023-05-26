@@ -24,6 +24,7 @@ class SalesmanListView(CreateAPIView):
                 
                 if Salesmanquery.exists():
 
+
                     Salesmandata_serialiazer = SalesmanSerializerSecond(Salesmanquery, many=True).data
                     SalesmanList = list()
                     for a in Salesmandata_serialiazer:
@@ -48,6 +49,7 @@ class SalesmanListView(CreateAPIView):
                            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SalesmanList})
            
+
         except M_Salesman.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
         except Exception as e:
@@ -80,6 +82,7 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmanquery = M_Salesman.objects.filter(id=id)
                 if Salesmanquery.exists():
+
                     Salesmandata_serialiazer = SalesmanSerializerSecond(Salesmanquery, many=True).data  
                     SalesmanList = list()
                     for a in Salesmandata_serialiazer:
@@ -102,6 +105,8 @@ class SalesmanView(CreateAPIView):
                                 "SalesmanRoute":SalesmanRoutelist
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SalesmanList[0]})
+
+                   
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
