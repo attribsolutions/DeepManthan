@@ -309,8 +309,9 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             Party = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)
              
         for PartyAddress_updatedata in validated_data['PartyAddress']:
+            fssaiexpirey=PartyAddress_updatedata['FSSAIExipry']
             Party = MC_PartyAddress.objects.filter(Party=instance).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],PIN=PartyAddress_updatedata['PIN'],IsDefault=PartyAddress_updatedata['IsDefault'],fssaidocument=PartyAddress_updatedata['fssaidocument'])
-            Party2 = MC_PartyAddress.objects.filter(Party=instance).update(FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'])
+            Party2 = MC_PartyAddress.objects.filter(Party=instance).update(FSSAIExipry=fssaiexpirey)
             
         query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
        
