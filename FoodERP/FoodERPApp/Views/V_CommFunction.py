@@ -164,7 +164,7 @@ class MRPMaster:
         else:
             MRPDetails=list()
             MRPDetails.append({
-                "TodaysMRP":"",
+                "TodaysMRP":0,
                 "Date": "",
                 "Mrpid":""
             })
@@ -209,7 +209,7 @@ class MRPMaster:
             MRP_Serializer = M_MRPsSerializer(EffectiveDateItemMRPdata, many=True).data
             EffectiveDateID =   MRP_Serializer[0]['id']
         else:
-            EffectiveDateID = ""
+            EffectiveDateID = 0
         return EffectiveDateID
     
     
@@ -277,7 +277,7 @@ class MarginMaster:
             Margin_Serializer = M_MarginsSerializer(ItemMargindata, many=True).data
             EffectiveDateMargin=   Margin_Serializer[0]['Margin']
         else:
-            EffectiveDateMargin = ""
+            EffectiveDateMargin = 0
                 
         return EffectiveDateMargin
 

@@ -123,7 +123,7 @@ from .Views.V_Dashboard import *
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
-    # url(r'test', AbcView.as_view()),
+    url(r'test', AbcView.as_view()),
     url(r'SAPInvoice', SAPInvoiceView.as_view()),
     url(r'SAPOrder', SAPOrderView.as_view()),
     
@@ -487,7 +487,7 @@ urlpatterns = [
             url(r'showPagesListOnPageType$', showPagesListOnPageType.as_view()),
             url(r'PageMasterForRoleAccess/([0-9]+)$', PagesMasterForRoleAccessView.as_view()),
             url(r'CopyRoleAccessabc$',CopyRoleAccessView.as_view()),
-            url(r'RegenrateToken$', RegenrateToken.as_view()),
+            # url(r'RegenrateToken$', RegenrateToken.as_view()),
 
 #DashBoard
             url(r'getdashboard/([0-9]+)$', DashBoardView.as_view()),
