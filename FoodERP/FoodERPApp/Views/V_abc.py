@@ -15,12 +15,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
+import xml.etree.ElementTree as ET
+import xmltodict
+import json
 
 
 class AbcView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+    # authentication_classes = [BasicAuthentication]
     # parser_classes = (MultiPartParser, FormParser)
 
     @transaction.atomic()
@@ -41,25 +44,100 @@ class AbcView(CreateAPIView):
     def get(self, request ):
         try:
             with transaction.atomic():
-                auth_header = request.META.get('HTTP_AUTHORIZATION')
-                if auth_header:
-                # Parsing the authorization header
-                    auth_type, auth_string = auth_header.split(' ', 1)
-                if auth_type.lower() == 'basic':
-                    # Decoding the base64-encoded username and password
-                    try:
-                        username, password = base64.b64decode(auth_string).decode().split(':', 1)
-                    except (TypeError, ValueError, UnicodeDecodeError):
-                        return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
-                    # Authenticating the user
-                    user = authenticate(request, username=username, password=password)
-                    if user is not None:
-                        # Username and password are valid
-                        return Response('Authenticated', status=status.HTTP_200_OK)
-                # Invalid authorization header or authentication failed
-                return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+            
+                xml_data='''<?xml version="1.0" encoding="utf-8"?>
+<entry xml:base="http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/" xmlns="http://www.w3.org/2005/Atom" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices">
+    <id>http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet('5000011')</id>
+    <title type="text">OrderHeaderSet('5000011')</title>
+    <updated>2023-05-25T07:56:59Z</updated>
+    <category term="ZCBM_OD_SD_CSCMFOODERP_SRV.OrderHeader" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
+    <link href="OrderHeaderSet('5000011')" rel="self" title="OrderHeader"/>
+    <link href="OrderHeaderSet('5000011')/OrderItemSet" rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/OrderItemSet" type="application/atom+xml;type=feed" title="OrderItemSet">
+        <m:inline>
+            <feed xml:base="http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/">
+                <id>http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet('5000011')/OrderItemSet</id>
+                <title type="text">OrderItemSet</title>
+                <updated>2023-05-25T07:56:59Z</updated>
+                <author>
+                    <name/>
+                </author>
+                <link href="OrderHeaderSet('5000011')/OrderItemSet" rel="self" title="OrderItemSet"/>
+                <entry>
+                    <id>http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderItemSet(OrderNo='5000011',ItemNo='32')</id>
+                    <title type="text">OrderItemSet(OrderNo='5000011',ItemNo='32')</title>
+                    <updated>2023-05-25T07:56:59Z</updated>
+                    <category term="ZCBM_OD_SD_CSCMFOODERP_SRV.OrderItem" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
+                    <link href="OrderItemSet(OrderNo='5000011',ItemNo='32')" rel="self" title="OrderItem"/>
+                    <content type="application/xml">
+                        <m:properties>
+                            <d:OrderNo>5000011</d:OrderNo>
+                            <d:ItemNo>32</d:ItemNo>
+                            <d:Material>1200364</d:Material>
+                            <d:Quantity>40</d:Quantity>
+                            <d:Unit>EA</d:Unit>
+                            <d:Plant>IW01</d:Plant>
+                            <d:Batch/>
+                        </m:properties>
+                    </content>
+                </entry>
+            </feed>
+        </m:inline>
+    </link>
+    <content type="application/xml">
+        <m:properties>
+            <d:Customer>500023</d:Customer>
+            <d:DocDate>25.05.2023</d:DocDate>
+            <d:Indicator>C</d:Indicator>
+            <d:OrderNo>5000011</d:OrderNo>
+            <d:CancelFlag/>
+            <d:Stats>S SO 0010088332 has been created</d:Stats>
+        </m:properties>
+    </content>
+</entry>'''
+            # Convert XML to OrderedDict
+            data_dict = xmltodict.parse(xml_data)
+
+            # Convert OrderedDict to JSON string
+            json_data = json.dumps(data_dict)
+
+            # Convert JSON string to Python dictionary
+            data_dict = json.loads(json_data)
+            # print(data_dict['entry']['content'])
+            # responseXml = ET.fromstring(xml_data)
+            # testId = responseXml.find('m')
+            # print(testId)
+            
+            
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['entry']['content']['m:properties']['d:Stats'], 'Data':data_dict})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
+   
+   
+   
+   
+    # @transaction.atomic()
+    # def get(self, request ):
+    #     try:
+    #         with transaction.atomic():
+    #             auth_header = request.META.get('HTTP_AUTHORIZATION')
+    #             if auth_header:
+    #             # Parsing the authorization header
+    #                 auth_type, auth_string = auth_header.split(' ', 1)
+    #             if auth_type.lower() == 'basic':
+    #                 # Decoding the base64-encoded username and password
+    #                 try:
+    #                     username, password = base64.b64decode(auth_string).decode().split(':', 1)
+    #                 except (TypeError, ValueError, UnicodeDecodeError):
+    #                     return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+    #                 # Authenticating the user
+    #                 user = authenticate(request, username=username, password=password)
+    #                 if user is not None:
+    #                     # Username and password are valid
+    #                     return Response('Authenticated', status=status.HTTP_200_OK)
+    #             # Invalid authorization header or authentication failed
+    #             return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+    #     except Exception as e:
+    #         raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
 
