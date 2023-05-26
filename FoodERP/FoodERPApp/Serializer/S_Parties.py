@@ -178,11 +178,13 @@ class UpdatePartyPrefixsSerializer(serializers.ModelSerializer):
         fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix']
         
 class UpdatePartyAddressSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     class Meta:
         model = MC_PartyAddress
         fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
         
 class UpdateMC_PartySubPartySerializer(serializers.ModelSerializer):
+    
     class Meta:
         model =MC_PartySubParty
         fields =['Party','CreatedBy','UpdatedBy']
@@ -245,10 +247,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             Partyprefix = MC_PartyPrefixs.objects.create(Party=instance, **PartyPrefixs_data)
              
         for PartyAddress_updatedata in validated_data['PartyAddress']:
-        
-            # Partyaddress = MC_PartyAddress.objects.filter(id=PartyAddress_updatedata['id']).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'],PIN=PartyAddress_updatedata['PIN'],IsDefault=PartyAddress_updatedata['IsDefault'],fssaidocument=PartyAddress_updatedata['fssaidocument'])
-            Partyaddress = MC_PartyAddress.objects.filter(Party=instance).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'],PIN=PartyAddress_updatedata['PIN'],IsDefault=PartyAddress_updatedata['IsDefault'],fssaidocument=PartyAddress_updatedata['fssaidocument'])
-         
+            Partyaddress = MC_PartyAddress.objects.filter(id=PartyAddress_updatedata['id']).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'],PIN=PartyAddress_updatedata['PIN'],IsDefault=PartyAddress_updatedata['IsDefault'],fssaidocument=PartyAddress_updatedata['fssaidocument'])
+            
         query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
        
         if query[0]['IsVendor'] == True:
