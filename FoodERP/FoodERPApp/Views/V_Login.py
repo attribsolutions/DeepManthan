@@ -236,7 +236,7 @@ class UserLoginView(RetrieveAPIView):
         serializer.is_valid(raise_exception=True)
 
         response = {
-            'Status': 'True',
+            'Status': True,
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
             'token': serializer.data['token'],
