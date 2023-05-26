@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'devchitalescm20230519',     
+        'NAME': 'chitalescm20230519',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114',
+        'HOST': '10.1.201.19',
         'PORT': '3306'
     }
     
@@ -230,7 +230,7 @@ REST_FRAMEWORK = {
 
 # }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=180),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
