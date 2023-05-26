@@ -88,9 +88,11 @@ class UserLoginSerializer(serializers.Serializer):
     LoginName = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
+    refreshtoken = serializers.CharField(max_length=255, read_only=True)
     EmployeeID = serializers.CharField(max_length=255, read_only=True)
     UserID= serializers.CharField(max_length=255, read_only=True)
 
+    
     def validate(self, data):
         LoginName = data.get("LoginName", None)
         password = data.get("password", None)
@@ -104,9 +106,11 @@ class UserLoginSerializer(serializers.Serializer):
                 'A user with this LoginName and password is not found.'
             )
         try:
-            # payload = JWT_PAYLOAD_HANDLER(user)
-            # jwt_token = JWT_ENCODE_HANDLER(payload)
+            
             refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+            
 
             
 
@@ -118,9 +122,9 @@ class UserLoginSerializer(serializers.Serializer):
         return {
             'LoginName': user.LoginName,
             'EmployeeID':user.Employee_id,
-            'token': str(refresh.access_token),
+            'token': access_token,
             'UserID' : user.id,
-            'refresh': str(refresh)
+            'refreshtoken': refresh_token
         }
 
 

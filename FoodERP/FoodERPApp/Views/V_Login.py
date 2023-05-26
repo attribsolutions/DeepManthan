@@ -232,14 +232,16 @@ class UserLoginView(RetrieveAPIView):
             "password": request.data.get('password')
         }
 
-        serializer = self.serializer_class(data=a)
+        serializer = UserLoginSerializer(data=a)
+        
         serializer.is_valid(raise_exception=True)
-
+        
         response = {
-            'Status': 'True',
+            'Status': True,
             'StatusCode': status.HTTP_200_OK,
             'Message': 'User logged in  successfully',
             'token': serializer.data['token'],
+            'refreshtoken': serializer.data['refreshtoken'],
             'UserID': serializer.data['UserID']
 
 
@@ -270,21 +272,21 @@ class ChangePasswordView(RetrieveAPIView):
         return Response(response, status=status_code)
 
 
-class RegenrateToken(APIView):
+# class RegenrateToken(APIView):
 
-    permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
+#     permission_classes = (IsAuthenticated,)
+#     # authentication__Class = JSONWebTokenAuthentication
 
-    def post(self, request):
-        OldToken = request.data['OldToken']
-        Other_Fields = request.data['Other_Fields']
-        Decode = jwt.decode(OldToken, None, None)
-        payload_data = {
-            'Decode': Decode,
-            'Other_Fields': Other_Fields
-        }
-        my_secret = 'my_super_secret'
-        return Response({jwt.encode(payload=payload_data, key=my_secret)})
+#     def post(self, request):
+#         OldToken = request.data['OldToken']
+#         Other_Fields = request.data['Other_Fields']
+#         Decode = jwt.decode(OldToken, None, None)
+#         payload_data = {
+#             'Decode': Decode,
+#             'Other_Fields': Other_Fields
+#         }
+#         my_secret = 'my_super_secret'
+#         return Response({jwt.encode(payload=payload_data, key=my_secret)})
 
 
 class UserPartiesViewSecond(CreateAPIView):
