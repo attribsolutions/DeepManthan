@@ -79,13 +79,12 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'devchitalescm20230519',     
+        'NAME': 'chitalescm20230519',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
         'HOST': '192.168.1.114',
         'PORT': '3306'
     }
-    
     
     # ,
     # 'logs': {
@@ -150,7 +149,6 @@ USE_I18N = True
 
 USE_TZ = False
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -167,7 +165,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'hemantwaghmare13@gmail.com'
-EMAIL_HOST_PASSWORD = 'gcvhqnobxhsvzepd'
+EMAIL_HOST_PASSWORD = 'ecehjykdrcwfrjyy'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -230,7 +228,9 @@ REST_FRAMEWORK = {
 
 # }
 SIMPLE_JWT = {
+
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
