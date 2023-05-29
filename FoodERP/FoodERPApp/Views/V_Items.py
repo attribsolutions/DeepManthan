@@ -411,3 +411,71 @@ class M_ImageTypesView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'ImageTypes Not Available', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+class M_ItemReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                Itemsdata = M_Items.objects.all()
+                if Itemsdata.exists():
+                    Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
+                    ItemsList = list()
+                    for a in Itemsdata_Serializer:
+                        GSTHSNList = list()
+                        for b in a['ItemGSTHSNDetails']:
+                            GSTHSNList.append({
+                            "GSTPercentage":b['GSTPercentage'],
+                            "HSNCode":b['HSNCode']
+                            })
+
+                        MRPList = list()
+                        for c in a['ItemMRPDetails']:
+                            MRPList.append({
+                                "MRP":c['MRP']
+                            })
+
+                        ShelfLifeList = list()
+                        for d in a['ItemShelfLife']:
+                            ShelfLifeList.append({
+                                "Days":d['Days']
+                            })
+
+                        ItemGroupList = list()
+                        for e in a['ItemGroupDetails']:
+                            ItemGroupList.append({
+                                "Group":e['Group']['id'],
+                                "GroupName":e['Group']['Name'],
+                                # "SubGroup":e['SubGroup']['id'],
+                                # "SubGroupName":e['SubGroup']['Name']
+                            })
+                        ItemsList.append({
+                            "Name": a['Name'],
+                            "ShortName":a['ShortName'],
+                            "Sequence":a['Sequence'],
+                            "Company":a['Company'],
+                            "BaseUnitID":a['BaseUnitID'],
+                            "BarCode":a['BarCode'],
+                            "SAPItemCode":a['SAPItemCode'],
+                            "isActive":a['isActive'],
+                            "IsSCM":a['IsSCM'],
+                            "CanBeSold":a['CanBeSold'],
+                            "CanBePurchase":a['CanBePurchase'],
+                            "BrandName":a['BrandName'],
+                            "Tag":a['Tag'],
+                            "CreatedBy":a['CreatedBy'],
+                            "UpdatedBy":a['UpdatedBy'],
+                            "ItemGSTHSNDetails":GSTHSNList,
+                            "ItemMRPDetails":MRPList,
+                            "ItemShelfLife":ShelfLifeList,
+                            "ItemGroupDetails":ItemGroupList
+                            
+
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Not Available', 'Data': []})    
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
