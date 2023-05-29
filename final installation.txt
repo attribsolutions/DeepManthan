@@ -1,0 +1,53 @@
+========================================
+solution for 
+admin1 is not in the sudoers file.  This incident will be reported.
+su
+enter root PassWord
+nano /etc/sudoers
+     add
+	user_name ALL=(ALL)  ALL
+then ctrlx enter
+su admin1   user change 
+==========================================
+mysql server installation
+-sudo yum install mysql-server
+-sudo systemctl start mysqld
+-sudo systemctl enable mysqld   \\\\\You can also configure the MySQL server to start automatically when the system boots up by running the following command
+-sudo systemctl status mysqld
+-sudo mysql –u root –p
+root Password Blank 
+
+mysql> CREATE USER 'pk'@'%' IDENTIFIED BY 'P@ssw0rd';
+mysql> GRANT ALL PRIVILEGES ON * . * TO 'pk'@'%';
+mysql> FLUSH PRIVILEGES;
+mysql> CREATE SCHEMA chitalescm20230408;
+========================================================
+git clone path
+sudo yum install python3-pip python3-dev nginx
+sudo pip3 install virtualenv
+sudo yum install python3-devel mysql-devel    ///For mysqlClient
+sudo yum install mysql-devel
+
+
+virtualenv FoodERPEnv
+source FoodERPEnv/bin/activate
+pip install gunicorn
+pip install Django
+pip install djangorestframework
+pip install mysqlclient
+pip install django-cors-headers
+pip install djangorestframework_simplejwt
+pip install requests
+pip install PyJWT==1.7.1
+pip install xmltodict
+
+cd projectfolder
+python manage.py migrate
+gunicorn --bind 0.0.0.0:8000 FoodERP.wsgi ///--bind 0.0.0.0:8000: This option specifies that Gunicorn should bind to all available network interfaces on port 8000.
+
+
+Error: That port is already in use.
+sudo netstat -tlnp | grep 8000
+sudo kill <PID>
+
+
