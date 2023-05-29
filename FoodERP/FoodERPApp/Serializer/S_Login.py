@@ -193,13 +193,13 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = authenticate(LoginName=LoginName, password=password)
 
         if user is None:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]})
         try:
             user.set_password(newpassword)
             user.AdminPassword = newpassword
             user.save()
         except M_Users.DoesNotExist:
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
         return {
             'LoginName': user.LoginName
             
