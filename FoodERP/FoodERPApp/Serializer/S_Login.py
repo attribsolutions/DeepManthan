@@ -97,15 +97,11 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, data):
         LoginName = data.get("LoginName", None)
         password = data.get("password", None)
-       
         user = authenticate(LoginName=LoginName, password=password)
-       
-        
       
         if user is None:
-            raise serializers.ValidationError(
-                'A user with this LoginName and password is not found.'
-            )
+            
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]})
         try:
             
             refresh = RefreshToken.for_user(user)
@@ -117,9 +113,8 @@ class UserLoginSerializer(serializers.Serializer):
 
             update_last_login(None, user)
         except M_Users.DoesNotExist:
-            raise serializers.ValidationError(
-                'User with given LoginName and password does not exists'
-            )
+            
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
         return {
             'LoginName': user.LoginName,
             'EmployeeID':user.Employee_id,
