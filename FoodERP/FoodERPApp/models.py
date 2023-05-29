@@ -1572,6 +1572,7 @@ class TC_ReceiptInvoices(models.Model):
      
 class M_ImportFields(models.Model):
     FieldName = models.CharField(max_length=500)
+    Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
