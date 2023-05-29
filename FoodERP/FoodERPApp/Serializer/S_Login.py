@@ -173,33 +173,6 @@ class UserListSerializer(serializers.ModelSerializer):
         # fields = ['ID','password','LoginName','last_login','email','AdminPassword','isActive','isSendOTP','EmployeeID','CreatedBy','RoleID']
         
         
-        
- 
-class ChangePasswordSerializer(serializers.Serializer):
-    
-    LoginName = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=128, write_only=True)
-    newpassword = serializers.CharField(max_length=128, write_only=True)
-    
-    def validate(self, data):
-        LoginName = data.get("LoginName", None)
-        password = data.get("password", None)
-        newpassword = data.get("newpassword", None)
-        user = authenticate(LoginName=LoginName, password=password)
-
-        if user is None:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]})
-        try:
-            user.set_password(newpassword)
-            user.AdminPassword = newpassword
-            user.save()
-        except M_Users.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
-        return {
-            'LoginName': user.LoginName
-            
-        }
-
 
 class C_CompanyGroupSerializer(serializers.ModelSerializer):
      class Meta:
