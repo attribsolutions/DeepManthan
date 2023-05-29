@@ -85,7 +85,7 @@ class SendViewMail(RetrieveAPIView):
                         newline = '\n'
                         message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
                         send_otp_to_phone(PhoneNo,message)
-                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Message send Successfully', 'Data': []})
                         # subject = 'Your Account Verification mail'
                         # newline = '\n'
                         # message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
