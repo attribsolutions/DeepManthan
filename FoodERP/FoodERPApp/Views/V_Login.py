@@ -3,6 +3,7 @@ from ..Serializer.S_Companies import C_CompanySerializer
 from ..Serializer.S_Employees import *
 from ..models import *
 from ..Serializer.S_Login import *
+from django.db import IntegrityError, transaction
 # from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework import status
 from rest_framework.response import Response
@@ -254,22 +255,28 @@ class UserLoginView(RetrieveAPIView):
 class ChangePasswordView(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication
-
-    serializer_class = ChangePasswordSerializer
-
+  
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        response = {
-            'Status': True,
-            'StatusCode': status.HTTP_200_OK,
-            'Message': 'Password change successfully',
-            # 'token': serializer.data,
-        }
-        status_code = status.HTTP_200_OK
+        try:
+            with transaction.atomic():
+                Logindata = JSONParser().parse(request)
+                LoginName = Logindata['LoginName']   
+                password=  Logindata['password']  
+                newpassword=Logindata['newpassword']
+                
+                user = authenticate(LoginName=LoginName, password=password)
+                if user is None:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]}) 
+                else:
+                    user.set_password(newpassword)
+                    user.AdminPassword = newpassword
+                    user.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Password change successfully', 'Data':[]}) 
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
 
-        return Response(response, status=status_code)
+        
 
 
 # class RegenrateToken(APIView):
