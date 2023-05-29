@@ -262,7 +262,7 @@ class ChangePasswordView(RetrieveAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         response = {
-            'Status': 'True',
+            'Status': True,
             'StatusCode': status.HTTP_200_OK,
             'Message': 'Password change successfully',
             # 'token': serializer.data,

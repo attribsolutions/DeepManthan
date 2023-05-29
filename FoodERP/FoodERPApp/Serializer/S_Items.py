@@ -2,6 +2,7 @@ from ..Views.V_CommFunction import *
 from ..models import *
 from rest_framework import serializers
 
+
 class M_ItemsSerializer01(serializers.ModelSerializer):
     class Meta:
         model = M_Items
@@ -384,8 +385,54 @@ class ItemSerializerSecond(serializers.ModelSerializer):
         fields='__all__'
     
     
-   
-    
+class ItemGSTHSNSerializerThird(serializers.ModelSerializer):
+    class Meta:
+        model = M_GSTHSNCode
+        fields = ['GSTPercentage','HSNCode']
+
+class ItemMRPSerializerThird(serializers.ModelSerializer):
+    class Meta:
+        model = M_MRPMaster
+        fields = ['MRP']
+
+class ItemShelfLifeSerializerThird(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemShelfLife
+        fields = ['Days']
+
+class ItemGroupNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Group
+        fields = ['id','Name']
+
+class ItemSubGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_SubGroup
+        fields = ['id','Name']
+
+class ItemGroupDetailsSerializerThird(serializers.ModelSerializer):
+    Group = ItemGroupNameSerializer(read_only=True)
+    SubGroup = ItemSubGroupSerializer(read_only=True)
+    class Meta:
+        model = MC_ItemGroupDetails
+        fields = ['Group', 'SubGroup'] 
+
+class ItemReportSerializer(serializers.ModelSerializer):
+      ItemGSTHSNDetails = ItemGSTHSNSerializerThird(many=True)
+      ItemMRPDetails = ItemMRPSerializerThird(many=True)
+      ItemShelfLife = ItemShelfLifeSerializerThird(many=True)
+      ItemGroupDetails = ItemGroupDetailsSerializerThird(many=True)
+
+      class Meta:
+          model = M_Items
+          fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'CreatedBy', 'UpdatedBy','ItemGSTHSNDetails','ItemMRPDetails','ItemShelfLife','ItemGroupDetails']
+
+def to_representation(self, instance):
+        # get representation from ModelSerializer
+        data = super(ItemReportSerializer, self).to_representation(instance)
+        data['SubGroup'] = instance.SubGroup.id
+        data['SubGroupName'] = instance.SubGroup.Name
+        return data
 
 
 
