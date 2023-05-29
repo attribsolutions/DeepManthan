@@ -6,6 +6,7 @@ from  ..models import C_CompanyGroups, M_Employees, M_Parties, M_Roles, M_Users,
 from rest_framework import serializers
 from ..models import M_Users
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import JsonResponse
 
 # JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 # JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -192,21 +193,13 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = authenticate(LoginName=LoginName, password=password)
 
         if user is None:
-            raise serializers.ValidationError(
-                'A user with this LoginName and password is not found.'
-            )
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]})
         try:
-            
-           
             user.set_password(newpassword)
             user.AdminPassword = newpassword
             user.save()
-           
-            
         except M_Users.DoesNotExist:
-            raise serializers.ValidationError(
-                'User with given LoginName and password does not exists'
-            )
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
         return {
             'LoginName': user.LoginName
             
