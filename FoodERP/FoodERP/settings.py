@@ -86,7 +86,6 @@ DATABASES = {
         'PORT': '3306'
     }
     
-    
     # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
@@ -150,7 +149,6 @@ USE_I18N = True
 
 USE_TZ = False
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -167,7 +165,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'hemantwaghmare13@gmail.com'
-EMAIL_HOST_PASSWORD = 'gcvhqnobxhsvzepd'
+EMAIL_HOST_PASSWORD = 'ecehjykdrcwfrjyy'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

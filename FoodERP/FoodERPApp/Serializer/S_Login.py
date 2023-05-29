@@ -199,6 +199,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             
            
             user.set_password(newpassword)
+            user.AdminPassword = newpassword
             user.save()
            
             
@@ -210,7 +211,6 @@ class ChangePasswordSerializer(serializers.Serializer):
             'LoginName': user.LoginName
             
         }
-
 
 
 class C_CompanyGroupSerializer(serializers.ModelSerializer):
