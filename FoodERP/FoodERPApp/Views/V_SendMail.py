@@ -51,15 +51,15 @@ class SendViewMail(RetrieveAPIView):
                    
                     subject = 'Your Account Verification mail'
                     newline = '\n'
-                    message = f'''Your UserID: {UserID} {newline}Your Login Name: {LoginName} {newline} Your OTP: {otp} '''
+                    message = f'''Your Login Name: {LoginName} {newline} Your OTP: {otp} '''
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = [Email]
                     send_mail(subject, message, email_from, recipient_list)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
                 else:
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})
             else: 
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})   
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employee not available', 'Data': []})   
         else:
             PhoneNo = str(Phone)
             Employee = M_Employees.objects.filter(Mobile__exact=PhoneNo).count()
@@ -85,7 +85,7 @@ class SendViewMail(RetrieveAPIView):
                         newline = '\n'
                         message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
                         send_otp_to_phone(PhoneNo,message)
-                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Message send Successfully', 'Data': []})
                         # subject = 'Your Account Verification mail'
                         # newline = '\n'
                         # message = f'''Your Login Name: {LoginName} {newline}Your OTP is {otp} '''
@@ -103,11 +103,11 @@ class VerifyOTPwithUserData(RetrieveAPIView):
         try:
             with transaction.atomic():
                 Jsondata = JSONParser().parse(request)
-                UserID = Jsondata["UserID"]
+                LoginName = Jsondata["LoginName"]
                 verifyOTP = Jsondata['OTP']
                 newpassword = Jsondata["newpassword"]
-                if UserID and verifyOTP and newpassword:
-                    User = M_Users.objects.filter(id=str(UserID)).filter(
+                if LoginName and verifyOTP and newpassword:
+                    User = M_Users.objects.filter(LoginName=LoginName).filter(
                         OTP__exact=str(verifyOTP)).values('id', 'LoginName','AdminPassword')
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'LoginName And  OTP Match Successfully... ', 'Data': []})
                     if User.exists():

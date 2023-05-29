@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114'] 
+ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234'] 
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -86,7 +86,6 @@ DATABASES = {
         'PORT': '3306'
     }
     
-    
     # ,
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
@@ -150,7 +149,6 @@ USE_I18N = True
 
 USE_TZ = False
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -167,7 +165,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'hemantwaghmare13@gmail.com'
-EMAIL_HOST_PASSWORD = 'gcvhqnobxhsvzepd'
+EMAIL_HOST_PASSWORD = 'ecehjykdrcwfrjyy'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -230,7 +228,9 @@ REST_FRAMEWORK = {
 
 # }
 SIMPLE_JWT = {
+
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
