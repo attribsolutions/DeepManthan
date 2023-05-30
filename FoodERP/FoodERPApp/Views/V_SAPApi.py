@@ -1,7 +1,6 @@
 import base64
 import datetime
 import json
-import urllib.parse
 from time import strftime
 from django.contrib.auth import authenticate
 from base64 import b64decode
