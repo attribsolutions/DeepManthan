@@ -47,8 +47,7 @@ class MCUnitDetailsView(CreateAPIView):
                 if Itemsquery.exists():
                     Itemsdata = ItemUnitsSerializerSecond(Itemsquery, many=True).data
                     UnitDetails=list()
-                    for d in Itemsdata:
-                       
+                    for d in Itemsdata:  
                         UnitDetails.append({
                             "id": d['id'],
                             "UnitID": d['UnitID']['id'],
@@ -120,6 +119,11 @@ class M_ItemsFilterView(CreateAPIView):
                             "CanBePurchase":a['CanBePurchase'],
                             "BrandName":a['BrandName'] ,
                             "Tag":a['Tag'],
+                            "Length":a['Length'],
+                            "Breadth":a['Breadth'],
+                            "Height":a['Height'],
+                            "StoringCondition":a['StoringCondition'],
+                            "Grammage":a['Grammage'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
@@ -332,6 +336,11 @@ class M_ItemsViewSecond(CreateAPIView):
                             "CanBePurchase":a['CanBePurchase'],
                             "BrandName":BrandName,
                             "Tag":a['Tag'],
+                            "Length":a['Length'],
+                            "Breadth":a['Breadth'],
+                            "Height":a['Height'],
+                            "StoringCondition":a['StoringCondition'],
+                            "Grammage":a['Grammage'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
@@ -426,7 +435,7 @@ class M_ItemReportView(CreateAPIView):
                     for a in Itemsdata_Serializer:
                         GSTHSNList = list()
                         for b in a['ItemGSTHSNDetails']:
-                            GSTHSNList.append({
+                                GSTHSNList.append({
                             "GSTPercentage":b['GSTPercentage'],
                             "HSNCode":b['HSNCode']
                             })
@@ -436,7 +445,7 @@ class M_ItemReportView(CreateAPIView):
                             MRPList.append({
                                 "MRP":c['MRP']
                             })
-
+                        
                         ShelfLifeList = list()
                         for d in a['ItemShelfLife']:
                             ShelfLifeList.append({
@@ -465,17 +474,20 @@ class M_ItemReportView(CreateAPIView):
                             "CanBePurchase":a['CanBePurchase'],
                             "BrandName":a['BrandName'],
                             "Tag":a['Tag'],
+                            "Length":a['Length'],
+                            "Breadth":a['Breadth'],
+                            "Height":a['Height'],
+                            "StoringCondition":a['StoringCondition'],
+                            "Grammage":a['Grammage'],
                             "CreatedBy":a['CreatedBy'],
                             "UpdatedBy":a['UpdatedBy'],
                             "ItemGSTHSNDetails":GSTHSNList,
                             "ItemMRPDetails":MRPList,
                             "ItemShelfLife":ShelfLifeList,
                             "ItemGroupDetails":ItemGroupList
-                            
-
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Not Available', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 

@@ -425,7 +425,7 @@ class ItemReportSerializer(serializers.ModelSerializer):
 
       class Meta:
           model = M_Items
-          fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'CreatedBy', 'UpdatedBy','ItemGSTHSNDetails','ItemMRPDetails','ItemShelfLife','ItemGroupDetails']
+          fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemGSTHSNDetails','ItemMRPDetails','ItemShelfLife','ItemGroupDetails']
 
 def to_representation(self, instance):
         # get representation from ModelSerializer
