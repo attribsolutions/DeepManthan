@@ -468,7 +468,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "HSNCode":ItemGstHsnCodedata[0]['HSNCode'],
                             "ItemName": a['Name'],
                             "ItemShortName":a['ShortName'],
-                            "isActive":a['isActive'],
+                            "SKUActiveDeactivestatus":a['isActive'],
                             "BoxSize":BoxSize,
                             "StoringCondition":a['StoringCondition'],
                             "MRP":ItemMRPdata[0]['MRP'],
@@ -476,10 +476,10 @@ class ProductAndMarginReportView(CreateAPIView):
                             "CompanyName": a['Company']['Name'],
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUGr":a['Grammage'],
+                            "Product":a['ItemGroupDetails'][0]['Group']['Name'],
+                            "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
+                            "Company": a['Company']['Name'],
                             "ShelfLife":Itemshelfdata[0]['Days'],
-                            "GroupType":a['ItemGroupDetails'][0]['GroupType']['Name'],
-                            "Group":a['ItemGroupDetails'][0]['Group']['Name'],
-                            "SubGroup":a['ItemGroupDetails'][0]['SubGroup']['Name'],
                             "ItemMargins":ItemMargins
                             
                         })
