@@ -47,8 +47,7 @@ class MCUnitDetailsView(CreateAPIView):
                 if Itemsquery.exists():
                     Itemsdata = ItemUnitsSerializerSecond(Itemsquery, many=True).data
                     UnitDetails=list()
-                    for d in Itemsdata:
-                       
+                    for d in Itemsdata:  
                         UnitDetails.append({
                             "id": d['id'],
                             "UnitID": d['UnitID']['id'],
@@ -120,6 +119,11 @@ class M_ItemsFilterView(CreateAPIView):
                             "CanBePurchase":a['CanBePurchase'],
                             "BrandName":a['BrandName'] ,
                             "Tag":a['Tag'],
+                            "Length":a['Length'],
+                            "Breadth":a['Breadth'],
+                            "Height":a['Height'],
+                            "StoringCondition":a['StoringCondition'],
+                            "Grammage":a['Grammage'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
@@ -332,6 +336,11 @@ class M_ItemsViewSecond(CreateAPIView):
                             "CanBePurchase":a['CanBePurchase'],
                             "BrandName":BrandName,
                             "Tag":a['Tag'],
+                            "Length":a['Length'],
+                            "Breadth":a['Breadth'],
+                            "Height":a['Height'],
+                            "StoringCondition":a['StoringCondition'],
+                            "Grammage":a['Grammage'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
@@ -424,58 +433,46 @@ class M_ItemReportView(CreateAPIView):
                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
                     ItemsList = list()
                     for a in Itemsdata_Serializer:
-                        GSTHSNList = list()
-                        for b in a['ItemGSTHSNDetails']:
-                            GSTHSNList.append({
-                            "GSTPercentage":b['GSTPercentage'],
-                            "HSNCode":b['HSNCode']
-                            })
-
-                        MRPList = list()
-                        for c in a['ItemMRPDetails']:
-                            MRPList.append({
-                                "MRP":c['MRP']
-                            })
-
-                        ShelfLifeList = list()
-                        for d in a['ItemShelfLife']:
-                            ShelfLifeList.append({
-                                "Days":d['Days']
-                            })
-
-                        ItemGroupList = list()
-                        for e in a['ItemGroupDetails']:
-                            ItemGroupList.append({
-                                "Group":e['Group']['id'],
-                                "GroupName":e['Group']['Name'],
-                                # "SubGroup":e['SubGroup']['id'],
-                                # "SubGroupName":e['SubGroup']['Name']
-                            })
-                        ItemsList.append({
-                            "Name": a['Name'],
-                            "ShortName":a['ShortName'],
-                            "Sequence":a['Sequence'],
-                            "Company":a['Company'],
-                            "BaseUnitID":a['BaseUnitID'],
-                            "BarCode":a['BarCode'],
-                            "SAPItemCode":a['SAPItemCode'],
-                            "isActive":a['isActive'],
-                            "IsSCM":a['IsSCM'],
-                            "CanBeSold":a['CanBeSold'],
-                            "CanBePurchase":a['CanBePurchase'],
-                            "BrandName":a['BrandName'],
-                            "Tag":a['Tag'],
-                            "CreatedBy":a['CreatedBy'],
-                            "UpdatedBy":a['UpdatedBy'],
-                            "ItemGSTHSNDetails":GSTHSNList,
-                            "ItemMRPDetails":MRPList,
-                            "ItemShelfLife":ShelfLifeList,
-                            "ItemGroupDetails":ItemGroupList
+                        
+                        if a['Length'] is None:
+                            BoxSize=""
                             
-
+                        else:    
+                            BoxSize= a['Length']+" L X "+a['Breadth']+" B X "+a['Height']+" W - MM"
+                        
+                        ItemMargindata = M_MarginMaster.objects.filter(Item=a['id'],IsDeleted=0).values('Margin').order_by('-EffectiveDate','-id')[:1]
+                        ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0).values('MRP').order_by('-id')[:1]
+                        ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
+                        Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
+                    
+                       
+                        ItemsList.append({
+                            "FE2ItemID": a['id'],
+                            "SAPCode":a['SAPItemCode'],
+                            "Barcode":a['BarCode'],
+                            "HSNCode":ItemGstHsnCodedata[0]['HSNCode'],
+                            "ItemName": a['Name'],
+                            "ItemShortName":a['ShortName'],
+                            "isActive":a['isActive'],
+                            "BoxSize":BoxSize,
+                            "StoringCondition":a['StoringCondition'],
+                            "MRP":ItemMRPdata[0]['MRP'],
+                            "GST":ItemGstHsnCodedata[0]['GSTPercentage'],
+                            "CompanyName": a['Company']['Name'],
+                            "BaseUnit": a['BaseUnitID']['Name'],
+                            "SKUGr":a['Grammage'],
+                            # "Length":a['Length'],
+                            # "Breadth":a['Breadth'],
+                            # "Height":a['Height'],
+                            # "Margin":ItemMargindata[0]['Margin'],
+                            "ShelfLife":Itemshelfdata[0]['Days'],
+                            "GroupType":a['ItemGroupDetails'][0]['GroupType']['Name'],
+                            "Group":a['ItemGroupDetails'][0]['Group']['Name'],
+                            "SubGroup":a['ItemGroupDetails'][0]['SubGroup']['Name']
+                            
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Not Available', 'Data': []})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
