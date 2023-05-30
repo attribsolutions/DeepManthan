@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+
+from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
 from ..models import *
@@ -421,7 +423,7 @@ class M_ImageTypesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-class M_ItemReportView(CreateAPIView):
+class ProductAndMarginReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
@@ -444,8 +446,21 @@ class M_ItemReportView(CreateAPIView):
                         ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0).values('MRP').order_by('-id')[:1]
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
-                    
-                       
+
+                        query = M_PriceList.objects.values('id','Name')
+                        ItemMargins=list()
+                        
+                        for x in query:
+                            
+                            Margin=MarginMaster(a['id'],x['id'],0,date.today()).GetTodaysDateMargin()
+                            Rate=RateCalculationFunction(0,a['id'],0,0,1,0,x['id']).RateWithGST()
+                            
+                            ItemMargins.append({
+                                x['Name']+'Margin' : Margin[0]['TodaysMargin'],
+                                x['Name']+'RateWithGST' : Rate[0]['RatewithGST'],
+                                x['Name']+'RateWithOutGST' : Rate[0]['RateWithoutGST']
+                            })
+                        
                         ItemsList.append({
                             "FE2ItemID": a['id'],
                             "SAPCode":a['SAPItemCode'],
@@ -461,14 +476,11 @@ class M_ItemReportView(CreateAPIView):
                             "CompanyName": a['Company']['Name'],
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUGr":a['Grammage'],
-                            # "Length":a['Length'],
-                            # "Breadth":a['Breadth'],
-                            # "Height":a['Height'],
-                            # "Margin":ItemMargindata[0]['Margin'],
                             "ShelfLife":Itemshelfdata[0]['Days'],
                             "GroupType":a['ItemGroupDetails'][0]['GroupType']['Name'],
                             "Group":a['ItemGroupDetails'][0]['Group']['Name'],
-                            "SubGroup":a['ItemGroupDetails'][0]['SubGroup']['Name']
+                            "SubGroup":a['ItemGroupDetails'][0]['SubGroup']['Name'],
+                            "ItemMargins":ItemMargins
                             
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
