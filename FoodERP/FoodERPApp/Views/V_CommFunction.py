@@ -42,17 +42,22 @@ def UnitDropdown(ItemID,PartyForRate,BatchID=0):
         if (d['PODefaultUnit'] == True):
             RateMcItemUnit = d['id']
         if(q[0]['PartyType__IsSCM'] == 1):
-            CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,PartyForRate,0,0,d['id']).RateWithGST()
-            Rate=CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+            CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,PartyForRate,0,0,d['id'],0).RateWithGST()
+            Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
         else:
             Rate=0
+        
+        q0=MC_ItemUnits.objects.filter(Item=ItemID,UnitID=1,IsDeleted=0).values("BaseUnitQuantity")
+        
         UnitDetails.append({
             "UnitID": d['id'],
             "UnitName": d['BaseUnitConversion'] ,
             "BaseUnitQuantity": d['BaseUnitQuantity'],
             "PODefaultUnit": d['PODefaultUnit'],
             "SODefaultUnit": d['SODefaultUnit'],
-            "Rate" : Rate
+            "Rate" : round(Rate,2),
+            "BaseUnitQuantityNoUnit":q0[0]["BaseUnitQuantity"],
+            
 
         })
     return UnitDetails
@@ -423,23 +428,29 @@ class UnitwiseQuantityConversion:
     
 class RateCalculationFunction:
 
-    def __init__(self,BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit):
+    def __init__(self,BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit,PriceList):
         self.ItemID     =   ItemID 
         self.PartyID    =   PartyID 
         self.BatchID    =   BatchID
         self.DivisionID =   DivisionID
         self.today      =   date.today()
-      
+        self.PriceList  =   PriceList
+        
         if(BatchID > 0):
+           
             QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST')
             q1=M_MRPMaster.objects.filter(id=QueryForGSTAndMRP[0]['MRP']).values('MRP')
-            if q1.exists:
-                self.MRP = 0
-            else:
+            
+            
+            if q1.count() > 0:
                 self.MRP = q1[0]['MRP']
+            else:
+                self.MRP = 0
             
             q2=M_GSTHSNCode.objects.filter(id=QueryForGSTAndMRP[0]['GST']).values('GSTPercentage')
-            self.Gst = q2[0]['GSTPercentage']
+           
+            self.GST = q2[0]['GSTPercentage']
+           
         else:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
             MRPfun = MRPMaster(ItemID,DivisionID,0,self.today).GetTodaysDateMRP()
@@ -459,9 +470,14 @@ class RateCalculationFunction:
        
         q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=1).values('BaseUnitQuantity')
         
-        query =M_Parties.objects.filter(id=PartyID).values('PriceList')
-        # print(PartyID,query)
-        query1=M_PriceList.objects.filter(id=query[0]['PriceList']).values('CalculationPath')
+        if self.PriceList > 0 :
+            PriceList=self.PriceList
+        else: 
+            query =M_Parties.objects.filter(id=PartyID).values('PriceList')
+            PriceList= query[0]['PriceList']   
+        
+       
+        query1=M_PriceList.objects.filter(id=PriceList).values('CalculationPath')
         # print(str(query1.query))
         self.calculationPath=str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit=q3SelectedUnit[0]['BaseUnitQuantity']
@@ -469,12 +485,14 @@ class RateCalculationFunction:
     def RateWithGST(self):
       
         for i in self.calculationPath:
-           
+            print()
             Margin=MarginMaster(self.ItemID,i,self.PartyID,self.today).GetTodaysDateMargin()
-            # print('Margin',Margin[0]['TodaysMargin'])
+           
             Margin=float(Margin[0]['TodaysMargin'])
-            GSTRate=self.MRP/(100+Margin)*100;
-            RatewithoutGST=GSTRate*100/(100+self.GST)
+          
+            GSTRate=float(self.MRP)/(100+Margin)*100;
+           
+            RatewithoutGST=float(GSTRate)*100/(100+float(self.GST))
             self.MRP=round(GSTRate,2)
         
         RatewithGST=round((float(self.BaseUnitQantityofselectedunit/self.BaseUnitQantityofNoUnit)* float(GSTRate) ),2)
@@ -484,6 +502,8 @@ class RateCalculationFunction:
         RateDetails.append({
             "RatewithGST":RatewithGST,
             "RateWithoutGST": RateWithoutGST,
+            "NoRatewithGST" :GSTRate,
+            "NoRatewithOutGST" :RatewithoutGST
         })
         
         

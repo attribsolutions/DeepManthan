@@ -435,6 +435,7 @@ class ProductAndMarginReportView(CreateAPIView):
                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
                     ItemsList = list()
                     for a in Itemsdata_Serializer:
+
                         
                         if a['Length'] is None:
                             BoxSize=""
@@ -446,6 +447,8 @@ class ProductAndMarginReportView(CreateAPIView):
                         ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0).values('MRP').order_by('-id')[:1]
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
+
+                        
 
                         query = M_PriceList.objects.values('id','Name')
                         ItemMargins=list()
@@ -462,6 +465,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             })
                         
                         ItemsList.append({
+
                             "FE2ItemID": a['id'],
                             "SAPCode":a['SAPItemCode'],
                             "Barcode":a['BarCode'],
