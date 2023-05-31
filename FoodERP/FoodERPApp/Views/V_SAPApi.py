@@ -174,7 +174,10 @@ class SAPOrderView(CreateAPIView):
                 # Convert JSON string to Python dictionary
                 data_dict = json.loads(json_data)
               
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['entry']['content']['m:properties']['d:Stats'], 'Data':[]})
+                OrderID=int(data['OrderNo'])-5000000
+                aa=T_Orders.objects.filter(id=OrderID).update(SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['entry']['content']['m:properties']['d:Stats'], 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Save Successfully ', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
