@@ -413,26 +413,29 @@ class ItemSubGroupSerializer(serializers.ModelSerializer):
 class ItemGroupDetailsSerializerThird(serializers.ModelSerializer):
     Group = ItemGroupNameSerializer(read_only=True)
     SubGroup = ItemSubGroupSerializer(read_only=True)
+    GroupType = ItemGroupTypeSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemGroupDetails
-        fields = ['Group', 'SubGroup'] 
+        fields = ['Group', 'SubGroup','GroupType']
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(ItemGroupDetailsSerializerThird, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("SubGroup", None):
+            ret["SubGroup"] = {"id": None, "Name": None}
+      
+        return ret
+         
 
 class ItemReportSerializer(serializers.ModelSerializer):
-      ItemGSTHSNDetails = ItemGSTHSNSerializerThird(many=True)
-      ItemMRPDetails = ItemMRPSerializerThird(many=True)
-      ItemShelfLife = ItemShelfLifeSerializerThird(many=True)
-      ItemGroupDetails = ItemGroupDetailsSerializerThird(many=True)
+    ItemGroupDetails = ItemGroupDetailsSerializerThird(many=True)
+    Company=CompanySerializerSecond()
+    BaseUnitID = UnitSerializerSecond()
 
-      class Meta:
-          model = M_Items
-          fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemGSTHSNDetails','ItemMRPDetails','ItemShelfLife','ItemGroupDetails']
+    class Meta:
+        model = M_Items
+        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemGroupDetails']
 
-def to_representation(self, instance):
-        # get representation from ModelSerializer
-        data = super(ItemReportSerializer, self).to_representation(instance)
-        data['SubGroup'] = instance.SubGroup.id
-        data['SubGroupName'] = instance.SubGroup.Name
-        return data
 
 
 

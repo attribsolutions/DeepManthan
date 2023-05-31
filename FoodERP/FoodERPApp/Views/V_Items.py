@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+
+from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
 from ..models import *
@@ -421,7 +423,7 @@ class M_ImageTypesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-class M_ItemReportView(CreateAPIView):
+class ProductAndMarginReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
@@ -433,58 +435,57 @@ class M_ItemReportView(CreateAPIView):
                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
                     ItemsList = list()
                     for a in Itemsdata_Serializer:
-                        GSTHSNList = list()
-                        for b in a['ItemGSTHSNDetails']:
-                                GSTHSNList.append({
-                            "GSTPercentage":b['GSTPercentage'],
-                            "HSNCode":b['HSNCode']
-                            })
 
-                        MRPList = list()
-                        for c in a['ItemMRPDetails']:
-                            MRPList.append({
-                                "MRP":c['MRP']
+                        
+                        if a['Length'] is None:
+                            BoxSize=""
+                            
+                        else:    
+                            BoxSize= a['Length']+" L X "+a['Breadth']+" B X "+a['Height']+" W - MM"
+                        
+                        ItemMargindata = M_MarginMaster.objects.filter(Item=a['id'],IsDeleted=0).values('Margin').order_by('-EffectiveDate','-id')[:1]
+                        ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0).values('MRP').order_by('-id')[:1]
+                        ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
+                        Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
+
+                        
+
+                        query = M_PriceList.objects.values('id','Name')
+                        ItemMargins=list()
+                        
+                        for x in query:
+                            
+                            Margin=MarginMaster(a['id'],x['id'],0,date.today()).GetTodaysDateMargin()
+                            Rate=RateCalculationFunction(0,a['id'],0,0,1,0,x['id']).RateWithGST()
+                            
+                            ItemMargins.append({
+                                x['Name']+'Margin' : Margin[0]['TodaysMargin'],
+                                x['Name']+'RateWithGST' : Rate[0]['RatewithGST'],
+                                x['Name']+'RateWithOutGST' : Rate[0]['RateWithoutGST']
                             })
                         
-                        ShelfLifeList = list()
-                        for d in a['ItemShelfLife']:
-                            ShelfLifeList.append({
-                                "Days":d['Days']
-                            })
-
-                        ItemGroupList = list()
-                        for e in a['ItemGroupDetails']:
-                            ItemGroupList.append({
-                                "Group":e['Group']['id'],
-                                "GroupName":e['Group']['Name'],
-                                # "SubGroup":e['SubGroup']['id'],
-                                # "SubGroupName":e['SubGroup']['Name']
-                            })
                         ItemsList.append({
-                            "Name": a['Name'],
-                            "ShortName":a['ShortName'],
-                            "Sequence":a['Sequence'],
-                            "Company":a['Company'],
-                            "BaseUnitID":a['BaseUnitID'],
-                            "BarCode":a['BarCode'],
-                            "SAPItemCode":a['SAPItemCode'],
-                            "isActive":a['isActive'],
-                            "IsSCM":a['IsSCM'],
-                            "CanBeSold":a['CanBeSold'],
-                            "CanBePurchase":a['CanBePurchase'],
-                            "BrandName":a['BrandName'],
-                            "Tag":a['Tag'],
-                            "Length":a['Length'],
-                            "Breadth":a['Breadth'],
-                            "Height":a['Height'],
+
+                            "FE2ItemID": a['id'],
+                            "SAPCode":a['SAPItemCode'],
+                            "Barcode":a['BarCode'],
+                            "HSNCode":ItemGstHsnCodedata[0]['HSNCode'],
+                            "ItemName": a['Name'],
+                            "ItemShortName":a['ShortName'],
+                            "SKUActiveDeactivestatus":a['isActive'],
+                            "BoxSize":BoxSize,
                             "StoringCondition":a['StoringCondition'],
-                            "Grammage":a['Grammage'],
-                            "CreatedBy":a['CreatedBy'],
-                            "UpdatedBy":a['UpdatedBy'],
-                            "ItemGSTHSNDetails":GSTHSNList,
-                            "ItemMRPDetails":MRPList,
-                            "ItemShelfLife":ShelfLifeList,
-                            "ItemGroupDetails":ItemGroupList
+                            "MRP":ItemMRPdata[0]['MRP'],
+                            "GST":ItemGstHsnCodedata[0]['GSTPercentage'],
+                            "CompanyName": a['Company']['Name'],
+                            "BaseUnit": a['BaseUnitID']['Name'],
+                            "SKUGr":a['Grammage'],
+                            "Product":a['ItemGroupDetails'][0]['Group']['Name'],
+                            "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
+                            "Company": a['Company']['Name'],
+                            "ShelfLife":Itemshelfdata[0]['Days'],
+                            "ItemMargins":ItemMargins
+                            
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    

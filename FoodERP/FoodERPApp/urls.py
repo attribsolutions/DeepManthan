@@ -126,6 +126,7 @@ urlpatterns = [
     url(r'test', AbcView.as_view()),
     url(r'SAPInvoice', SAPInvoiceView.as_view()),
     url(r'SAPOrder', SAPOrderView.as_view()),
+    url(r'SAPLedger',SAPLedgerView.as_view()),
     
 # User 
             path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -369,7 +370,7 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
-            url(r'ItemDetails$',M_ItemReportView.as_view()),
+            url(r'ProductMarginReport$',ProductAndMarginReportView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 
