@@ -807,7 +807,7 @@ class T_Orders(models.Model):
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
     POFromDate = models.DateField(null=True,blank=True)
     POToDate = models.DateField(null=True,blank=True)
-    # SAPResponse =models.CharField(max_length=500 ,null=True)
+    SAPResponse =models.CharField(max_length=500 ,null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
