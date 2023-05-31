@@ -109,6 +109,7 @@ class OrderListFilterView(CreateAPIView):
                             "InvoiceCreated": InvoiceCreated,
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
+                            "SAPResponse": a['SAPResponse'],
                             "Inward": inward
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData}) 
@@ -213,6 +214,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "ShippingAddress": a['ShippingAddress']['Address'],
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
+                        "SAPResponse": a['SAPResponse'],
                         "Inward": inward,
                         "Percentage" : "",
                         
