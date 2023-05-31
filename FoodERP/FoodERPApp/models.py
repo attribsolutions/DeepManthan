@@ -807,7 +807,7 @@ class T_Orders(models.Model):
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
     POFromDate = models.DateField(null=True,blank=True)
     POToDate = models.DateField(null=True,blank=True)
-    SAPResponse =models.CharField(max_length=500 ,null=True,blank=True)
+    # SAPResponse =models.CharField(max_length=500 ,null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1573,7 +1573,7 @@ class TC_ReceiptInvoices(models.Model):
      
 class M_ImportFields(models.Model):
     FieldName = models.CharField(max_length=500)
-    Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
+    # Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
