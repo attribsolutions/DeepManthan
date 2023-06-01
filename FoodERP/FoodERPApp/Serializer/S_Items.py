@@ -90,7 +90,7 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
@@ -163,6 +163,16 @@ class ItemSerializer(serializers.ModelSerializer):
             'BrandName', instance.BrandName)
         instance.Tag = validated_data.get(
             'Tag', instance.Tag)
+        instance.Length = validated_data.get(
+            'Length', instance.Length)
+        instance.Breadth = validated_data.get(
+            'Breadth', instance.Breadth)
+        instance.Height = validated_data.get(
+            'Height', instance.Height)
+        instance.StoringCondition = validated_data.get(
+            'StoringCondition', instance.StoringCondition)
+        instance.Grammage = validated_data.get(
+            'Grammage', instance.Grammage)
             
         instance.save()
         
