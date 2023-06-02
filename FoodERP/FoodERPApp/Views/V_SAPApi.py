@@ -173,11 +173,19 @@ class SAPOrderView(CreateAPIView):
                 json_data = json.dumps(data_dict)
                 # Convert JSON string to Python dictionary
                 data_dict = json.loads(json_data)
-              
-                OrderID=int(data['OrderNo'])-5000000
-                aa=T_Orders.objects.filter(id=OrderID).update(SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['entry']['content']['m:properties']['d:Stats'], 'Data':[]})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Save Successfully ', 'Data':[]})
+                # print(data_dict)
+                a = str(data_dict)
+                index = a.find('entry')
+               
+                if index != -1:
+                    OrderID=int(data['OrderNo'])-5000000
+                    aa=T_Orders.objects.filter(id=OrderID).update(SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Save Successfully ', 'Data':[]})
+                else:
+                    if data_dict['error']!="":
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data':[]}) 
+                    else:
+                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
