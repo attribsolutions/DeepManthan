@@ -1683,3 +1683,15 @@ class MC_SettingDependency(models.Model):
     DependentSetting=models.ForeignKey(M_Settings,related_name='DependentSettingID',on_delete=models.PROTECT) 
     class Meta:
         db_table="MC_SettingDependency"
+        
+        
+class M_Cities(models.Model):
+    Name = models.CharField(max_length=100)
+    District = models.ForeignKey(M_Districts, related_name='CityDistrict', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    class Meta:
+        db_table="M_Cities"
+
+       
