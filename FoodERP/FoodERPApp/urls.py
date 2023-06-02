@@ -327,6 +327,8 @@ urlpatterns = [
 # State and District
             url(r'States$',M_StateView.as_view()),    
             url(r'GetDistrictOnState/([0-9]+)$',M_DistrictView.as_view()),
+            url(r'GetCityOnDistrict/([0-9]+)$',M_CitiesView.as_view()),
+            url(r'Cities$',M_CitiesView.as_view()),
 
 # PartySubParty
             url(r'PartySubParty/([0-9]+)$',PartySubPartyViewSecond.as_view()),
