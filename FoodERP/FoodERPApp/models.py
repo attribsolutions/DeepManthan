@@ -112,7 +112,17 @@ class M_Districts(models.Model):
 
     class Meta:
         db_table = "M_Districts"
+        
 
+class M_Cities(models.Model):
+    Name = models.CharField(max_length=100)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "M_Cities"
     
 class M_Parties(models.Model):
 
