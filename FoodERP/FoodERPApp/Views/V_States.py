@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from ..Serializer.S_States import *
 from ..models import *
+from rest_framework.parsers import JSONParser
 
 class M_StateView(CreateAPIView):
     
@@ -45,4 +46,36 @@ class M_DistrictView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Districts Not available', 'Data': []})    
         except Exception:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
-                          
+
+class M_CitiesView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                Cities_data = M_Cities.objects.filter(District=id)
+                if Cities_data.exists():
+                    Cities_serializer =  CitiesSerializerSecond(Cities_data, many=True)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Cities_serializer.data})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'City Not available', 'Data': []})    
+        except Exception:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
+        
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Cities_data = JSONParser().parse(request)
+                Cities_serializer =  CitiesSerializer(data=Cities_data)
+                if Cities_serializer.is_valid():
+                    Cities_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'City Save Successfully', 'Data': []})
+                else:
+             
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Cities_serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
