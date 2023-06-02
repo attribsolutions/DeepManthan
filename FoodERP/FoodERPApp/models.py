@@ -194,6 +194,8 @@ class M_Employees(models.Model):
         M_States, related_name='EmployeesState', on_delete=models.DO_NOTHING)
     District = models.ForeignKey(
         M_Districts, related_name='EmployeesDistrict', on_delete=models.DO_NOTHING)
+    PIN = models.CharField(max_length=500,null=True,blank=True)
+    City = models.CharField(max_length=500,null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
