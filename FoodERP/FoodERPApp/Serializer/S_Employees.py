@@ -23,6 +23,8 @@ class M_EmployeesSerializer02(serializers.Serializer):
     EmployeeType_id = serializers.IntegerField()
     State_id = serializers.IntegerField()
     District_id =serializers.IntegerField()
+    PIN = serializers.CharField(max_length=500)
+    City = serializers.CharField(max_length=500)
 
 class MC_EmployeePartiesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,7 +67,11 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
         instance.State = validated_data.get(
             'State', instance.State)
         instance.District = validated_data.get(
-            'District', instance.District)                                
+            'District', instance.District) 
+        instance.PIN = validated_data.get(
+            'PIN', instance.PIN)
+        instance.City = validated_data.get(
+            'City', instance.City)                          
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy) 
         instance.UpdatedBy = validated_data.get(
