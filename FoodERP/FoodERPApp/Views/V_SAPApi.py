@@ -182,7 +182,8 @@ class SAPOrderView(CreateAPIView):
                     aa=T_Orders.objects.filter(id=OrderID).update(SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Save Successfully ', 'Data':[]})
                 else:
-                    if data_dict['error']!="":
+                    index = a.find('error')
+                    if index != -1:
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data':[]}) 
                     else:
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
