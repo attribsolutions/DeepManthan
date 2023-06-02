@@ -27,7 +27,7 @@ class M_EmployeesFilterView(CreateAPIView):
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.PIN,M_Employees.City  
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
@@ -38,7 +38,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.PIN,M_Employees.City  
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 
@@ -83,6 +83,8 @@ where M_Employees.CreatedBy=%s
                         'EmployeeType_id':  a['EmployeeType_id'],
                         'State_id': a['State_id'],
                         'District_id' :  a['District_id'],
+                        'PIN':  a['PIN'],
+                        'City': a['City'],
                         'EmployeeParties' : EmployeeParties
                         })    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmployeesData})
@@ -124,7 +126,7 @@ class M_EmployeesViewSecond(RetrieveAPIView):
                 query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id 
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.PIN,M_Employees.City 
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
@@ -169,6 +171,8 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id where M_Employees.id=
                         'EmployeeType_id':  M_Employees_Serializer[0]['EmployeeType_id'],
                         'State_id': M_Employees_Serializer[0]['State_id'],
                         'District_id' :  M_Employees_Serializer[0]['District_id'],
+                        'PIN':  M_Employees_Serializer[0]['PIN'],
+                        'City':  M_Employees_Serializer[0]['City'],
                         'EmployeeParties' : EmployeeParties
                         })
  
