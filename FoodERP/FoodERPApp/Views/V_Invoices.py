@@ -57,11 +57,12 @@ class OrderDetailsForInvoice(CreateAPIView):
                         
                         StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
                         
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':StockQtySerialize_data[0]['LiveBatche']})
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':StockQtySerialize_data})
     
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
-                            
+                            Rate=RateCalculationFunction(d['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
+                            print(Rate)
                             stockDatalist.append({
                                 "id": d['id'],
                                 "Item":d['Item']['id'],
@@ -72,7 +73,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "LiveBatche" : d['LiveBatche']['id'],
                                 "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
                                 "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
-                                "Rate":d['LiveBatche']['Rate'],
+                                "Rate":Rate[0]["NoRatewithOutGST"],
                                 "MRP" : d['LiveBatche']['MRP']['MRP'],
                                 "GST" : d['LiveBatche']['GST']['GSTPercentage'],
                                 "UnitName":d['Unit']['BaseUnitConversion'], 
@@ -121,7 +122,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
-                        "UnitDetails":UnitDetails,
+                        "UnitDetails":UnitDropdown(b['Item']['id'],Customer,0),
                         "StockDetails":stockDatalist
                     })
                 Orderdata.append({
