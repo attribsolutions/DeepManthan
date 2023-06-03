@@ -235,21 +235,20 @@ class UserLoginView(RetrieveAPIView):
 
         serializer = UserLoginSerializer(data=a)
         
-        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
         
-        response = {
-            'Status': True,
-            'StatusCode': status.HTTP_200_OK,
-            'Message': 'User logged in  successfully',
-            'token': serializer.data['token'],
-            'refreshtoken': serializer.data['refreshtoken'],
-            'UserID': serializer.data['UserID']
-
-
-        }
-        status_code = status.HTTP_200_OK
-
-        return Response(response, status=status_code)
+            response = {
+                'Status': True,
+                'StatusCode': status.HTTP_200_OK,
+                'Message': 'User logged in  successfully',
+                'token': serializer.data['token'],
+                'refreshtoken': serializer.data['refreshtoken'],
+                'UserID': serializer.data['UserID']
+            }
+            status_code = status.HTTP_200_OK
+            return Response(response, status=status_code)
+        else:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
 
 
 class ChangePasswordView(RetrieveAPIView):
