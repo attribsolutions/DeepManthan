@@ -166,8 +166,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'sapsupport.l1@chitalegroup.in'
-EMAIL_HOST_PASSWORD = 'oiqnlfyhbtepezsx'
+EMAIL_HOST_USER = 'support.mis@chitalegroup.in'
+EMAIL_HOST_PASSWORD = 'zebydcaqvmsfwujb'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
