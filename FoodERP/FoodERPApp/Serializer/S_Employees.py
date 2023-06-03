@@ -19,12 +19,13 @@ class M_EmployeesSerializer02(serializers.Serializer):
     EmployeeTypeName = serializers.CharField(max_length=100)
     StateName = serializers.CharField(max_length=100)
     DistrictName = serializers.CharField(max_length=100)
+    CityName = serializers.CharField(max_length=100)
     Company_id = serializers.IntegerField()
     EmployeeType_id = serializers.IntegerField()
     State_id = serializers.IntegerField()
     District_id =serializers.IntegerField()
-    PIN = serializers.CharField(max_length=500)
-    City = serializers.CharField(max_length=500)
+    City_id =serializers.IntegerField()
+    PIN = serializers.CharField(max_length=100)
 
 class MC_EmployeePartiesSerializer(serializers.ModelSerializer):
     class Meta:
