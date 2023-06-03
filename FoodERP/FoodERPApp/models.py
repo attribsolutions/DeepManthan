@@ -112,6 +112,15 @@ class M_Districts(models.Model):
 
     class Meta:
         db_table = "M_Districts"
+
+class M_Cities(models.Model):
+    Name = models.CharField(max_length=100)
+    District = models.ForeignKey(M_Districts, related_name='CityDistrict', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    class Meta:
+        db_table="M_Cities"        
         
     
 class M_Parties(models.Model):
@@ -194,8 +203,11 @@ class M_Employees(models.Model):
         M_States, related_name='EmployeesState', on_delete=models.DO_NOTHING)
     District = models.ForeignKey(
         M_Districts, related_name='EmployeesDistrict', on_delete=models.DO_NOTHING)
+    
+    City = models.ForeignKey(M_Cities, related_name='EmployeesCity', on_delete=models.DO_NOTHING)
+    
     PIN = models.CharField(max_length=500,null=True,blank=True)
-    City = models.CharField(max_length=500,null=True,blank=True)
+  
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1685,13 +1697,6 @@ class MC_SettingDependency(models.Model):
         db_table="MC_SettingDependency"
         
         
-class M_Cities(models.Model):
-    Name = models.CharField(max_length=100)
-    District = models.ForeignKey(M_Districts, related_name='CityDistrict', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    class Meta:
-        db_table="M_Cities"
+
 
        
