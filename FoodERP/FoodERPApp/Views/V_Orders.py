@@ -377,6 +377,8 @@ class T_OrdersViewSecond(CreateAPIView):
                             "SupplierSAPCode":a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
                             "SupplierFssai":Address[0]['FSSAINo'],
+                            "SupplierAddress":Address[0]['Address'],
+                            "SupplierPIN":Address[0]['Pin'],
                             "BillingAddressID": a['BillingAddress']['id'],
                             "BillingAddress": a['BillingAddress']['Address'],
                             "BillingFssai": a['BillingAddress']['FSSAINo'],
