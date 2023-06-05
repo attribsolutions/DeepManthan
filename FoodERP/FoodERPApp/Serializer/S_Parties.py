@@ -225,8 +225,7 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'State', instance.State)
         instance.District = validated_data.get(
             'District', instance.District)
-        instance.Taluka = validated_data.get(
-            'Taluka', instance.Taluka)
+        
         instance.City = validated_data.get(
             'City', instance.City)
         instance.SAPPartyCode = validated_data.get(
