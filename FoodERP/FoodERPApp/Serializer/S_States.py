@@ -11,10 +11,17 @@ class DistrictsSerializer(serializers.ModelSerializer):
         model =   M_Districts
         fields = '__all__'
 
+class DistrictsSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =   M_Districts
+        fields = ['id','Name']
+
+
 class CitiesSerializerSecond(serializers.ModelSerializer):
+    District = DistrictsSerializerSecond(read_only=True)
     class Meta:
         model =   M_Cities
-        fields = '__all__'
+        fields = ['id','Name','CreatedBy','CreatedOn','UpdatedBy','District']
 
 class CitiesSerializer(serializers.ModelSerializer):
     class Meta:
