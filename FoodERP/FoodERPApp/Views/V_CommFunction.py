@@ -473,25 +473,33 @@ class RateCalculationFunction:
         if self.PriceList > 0 :
             PriceList=self.PriceList
         else: 
+            
             query =M_Parties.objects.filter(id=PartyID).values('PriceList')
             PriceList= query[0]['PriceList']   
         
        
         query1=M_PriceList.objects.filter(id=PriceList).values('CalculationPath')
-        # print(str(query1.query))
+        # print(query1)
         self.calculationPath=str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit=q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit= q3NoUnit[0]['BaseUnitQuantity']
     def RateWithGST(self):
-      
+       
         for i in self.calculationPath:
-            print()
+            
+            query3=M_PriceList.objects.filter(id=i).values('MkUpMkDn')
+            
+            
             Margin=MarginMaster(self.ItemID,i,self.PartyID,self.today).GetTodaysDateMargin()
            
             Margin=float(Margin[0]['TodaysMargin'])
-          
-            GSTRate=float(self.MRP)/(100+Margin)*100;
            
+
+            if(query3[0]['MkUpMkDn'] == False):
+                GSTRate=float(self.MRP)/(100+Margin)*100
+            else:
+                GSTRate=float(self.MRP)-(float(self.MRP)*(Margin/100))
+
             RatewithoutGST=float(GSTRate)*100/(100+float(self.GST))
             self.MRP=round(GSTRate,2)
         
