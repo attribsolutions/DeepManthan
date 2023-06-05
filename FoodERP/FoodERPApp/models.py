@@ -1601,9 +1601,9 @@ class M_ImportFields(models.Model):
         
 class MC_PartyImportFields(models.Model):
     ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.CASCADE)
-    Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT,blank=True, null=True)
     Value =models.CharField(max_length=500)
-    Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT)
+    Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT,blank=True, null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
