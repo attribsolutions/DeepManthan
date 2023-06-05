@@ -210,4 +210,23 @@ class M_PartiesViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party used in another table', 'Data': []})
 
 
-                
+class BulkRetailerDataView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Retailerdata = JSONParser().parse(request)
+                for aa in Retailerdata['BulkData']:
+                    Retailer_serializer = M_PartiesSerializer(data=aa)
+                    if Retailer_serializer.is_valid():
+                        Retailer_serializer.save()
+                    else:
+                        transaction.set_rollback(True)
+                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors, 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Bulk Data Import Successfully', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []}) 
+        
