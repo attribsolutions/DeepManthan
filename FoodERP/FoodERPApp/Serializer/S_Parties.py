@@ -96,8 +96,8 @@ class M_PartiesSerializer1(serializers.Serializer):
     StateName = serializers.CharField(max_length=500)
     District_id = serializers.IntegerField()
     DistrictName = serializers.CharField(max_length=500)
-    Taluka = serializers.IntegerField ()
-    City = serializers.IntegerField()
+    CityName = serializers.CharField(max_length=500)
+    City_id = serializers.IntegerField()
     SAPPartyCode = serializers.CharField(max_length = 500)
     GSTIN =  serializers.CharField(max_length=500)
     PAN =  serializers.CharField(max_length=500)
@@ -113,10 +113,15 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
         fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault','fssaidocument'] 
-
+        
+class CitiesSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  M_Cities
+        fields = ['id','Name']
+    
 class DistrictSerializerSecond(serializers.ModelSerializer):
     class Meta:
-        model =  M_PriceList
+        model =  M_Districts
         fields = ['id','Name']
         
 class StateSerializerSecond(serializers.ModelSerializer):
@@ -141,6 +146,7 @@ class PriceListSerializerSecond(serializers.ModelSerializer):
     
 class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializerSecond(many=True)
+    City=CitiesSerializerSecond()
     District= DistrictSerializerSecond()
     State= StateSerializerSecond()
     Company = CompanySerializerSecond()
@@ -160,7 +166,8 @@ class M_PartiesSerializerThird(serializers.Serializer):
     
 
 class M_PartiesSerializerFourth(serializers.ModelSerializer):
-   
+    
+    City=CitiesSerializerSecond()
     District= DistrictSerializerSecond()
     State= StateSerializerSecond()
     PartyType = PartyTypeSerializerSecond()
@@ -218,8 +225,7 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'State', instance.State)
         instance.District = validated_data.get(
             'District', instance.District)
-        instance.Taluka = validated_data.get(
-            'Taluka', instance.Taluka)
+        
         instance.City = validated_data.get(
             'City', instance.City)
         instance.SAPPartyCode = validated_data.get(

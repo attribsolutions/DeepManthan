@@ -130,14 +130,14 @@ class M_Parties(models.Model):
     PartyType = models.ForeignKey(M_PartyType, related_name='PartyType', on_delete=models.PROTECT,blank=True)
     Company = models.ForeignKey(C_Companies, related_name='PartiesCompany', on_delete=models.PROTECT)
     Email = models.EmailField(max_length=200,null=True, blank=True)
-    MobileNo = models.BigIntegerField()
+    MobileNo = models.CharField(max_length=100, null=True, blank=True)
     AlternateContactNo = models.CharField(max_length=500, null=True, blank=True)
     State = models.ForeignKey(
         M_States, related_name='PartiesState', on_delete=models.DO_NOTHING)
     District = models.ForeignKey(
         M_Districts, related_name='PartiesDistrict', on_delete=models.DO_NOTHING)
-    Taluka = models.IntegerField()
-    City = models.IntegerField()
+    City = models.ForeignKey(
+        M_Cities, related_name='PartiesCities', on_delete=models.DO_NOTHING)
     SAPPartyCode = models.CharField(max_length=100, null=True, blank=True,unique=True)
     GSTIN = models.CharField(max_length=500,null=True, blank=True)
     PAN = models.CharField(max_length=500,null=True, blank=True)
