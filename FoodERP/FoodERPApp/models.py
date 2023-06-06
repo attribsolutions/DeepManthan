@@ -72,6 +72,16 @@ class M_GeneralMaster(models.Model):
     class Meta:
         db_table = "M_GeneralMaster"
         
+class M_ImportExcelTypes(models.Model):
+    Name = models.CharField(max_length=200)
+    IsPartyRequired= models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "M_ImportExcelTypes"
 
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
