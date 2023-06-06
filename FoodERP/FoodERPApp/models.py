@@ -1602,7 +1602,7 @@ class M_ImportFields(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-   
+    
     class Meta:
         db_table = "M_ImportFields"
         
