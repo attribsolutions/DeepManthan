@@ -72,6 +72,16 @@ class M_GeneralMaster(models.Model):
     class Meta:
         db_table = "M_GeneralMaster"
         
+class M_ImportExcelTypes(models.Model):
+    Name = models.CharField(max_length=200)
+    IsPartyRequired= models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "M_ImportExcelTypes"
 
 class M_PriceList(models.Model):
     Name = models.CharField(max_length=100)
@@ -1584,13 +1594,12 @@ class TC_ReceiptInvoices(models.Model):
     class Meta:
         db_table = "TC_ReceiptInvoices"
 
-     
 class M_ImportFields(models.Model):
     FieldName = models.CharField(max_length=500)
-    # Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
+    ImportExceltype = models.ForeignKey(M_ImportExcelTypes, related_name='ImportFieldExcelTypes', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
