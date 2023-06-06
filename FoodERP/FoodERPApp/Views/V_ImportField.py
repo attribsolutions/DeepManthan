@@ -32,7 +32,9 @@ class ImportFieldListView(CreateAPIView):
                     "FieldValidationID": a['FieldValidation']['id'],
                     "FieldValidationName": a['FieldValidation']['Name'],
                     "IsCompulsory": a['IsCompulsory'],
-                    "Company": a['Company']
+                    "ImportExcelTypeID":a['ImportExceltype']['id'],
+                    "ImportExcelTypeName":a['ImportExceltype']['Name'],
+                    
                 })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ImportField_List})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
@@ -75,7 +77,8 @@ class ImportFieldSaveView(CreateAPIView):
                     "FieldValidationID": ImportField_serializer['FieldValidation']['id'],
                     "FieldValidationName": ImportField_serializer['FieldValidation']['Name'],
                     "IsCompulsory": ImportField_serializer['IsCompulsory'],
-                    "Company": ImportField_serializer['Company']
+                    "ImportExcelTypeID":ImportField_serializer['ImportExceltype']['id'],
+                    "ImportExcelTypeName":ImportField_serializer['ImportExceltype']['Name'],
                 })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_List[0]})
 
