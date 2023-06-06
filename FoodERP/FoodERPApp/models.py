@@ -193,7 +193,6 @@ class M_EmployeeTypes(models.Model):
         db_table = "M_EmployeeTypes"
 
 
-
 class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
     Address = models.CharField(max_length=500)
@@ -1599,12 +1598,11 @@ class M_ImportFields(models.Model):
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
-    ImportExceltype = models.ForeignKey(M_ImportExcelTypes, related_name='ImportFieldExcelTypes', on_delete=models.DO_NOTHING)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-   
+    
     class Meta:
         db_table = "M_ImportFields"
         
