@@ -1594,13 +1594,13 @@ class TC_ReceiptInvoices(models.Model):
     class Meta:
         db_table = "TC_ReceiptInvoices"
 
-     
 class M_ImportFields(models.Model):
     FieldName = models.CharField(max_length=500)
-    # Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     ControlType = models.ForeignKey(M_ControlTypeMaster, related_name='ImportFieldControlType', on_delete=models.DO_NOTHING)
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
+    ImportExceltype = models.ForeignKey(M_ImportExcelTypes, related_name='ImportFieldExcelTypes', on_delete=models.DO_NOTHING)
+    Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
