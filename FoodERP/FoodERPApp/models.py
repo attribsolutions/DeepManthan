@@ -1607,6 +1607,7 @@ class M_ImportFields(models.Model):
     
     class Meta:
         db_table = "M_ImportFields"
+ 
         
 class MC_PartyImportFields(models.Model):
     ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.CASCADE)
