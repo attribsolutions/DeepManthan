@@ -1600,7 +1600,6 @@ class M_ImportFields(models.Model):
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.DO_NOTHING)
     IsCompulsory = models.BooleanField(default=False)
     ImportExceltype = models.ForeignKey(M_ImportExcelTypes, related_name='ImportFieldExcelTypes', on_delete=models.DO_NOTHING)
-    Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
