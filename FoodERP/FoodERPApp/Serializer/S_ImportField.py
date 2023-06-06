@@ -1,7 +1,11 @@
 from rest_framework import serializers
 from ..models import *
 
-
+class ImportExcelTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_ImportExcelTypes
+        fields = ['id','Name']
+    
 class ControlType_Serializer(serializers.ModelSerializer):
     class Meta:
         model = M_ControlTypeMaster
@@ -13,6 +17,7 @@ class FieldValidations_Serializer(serializers.ModelSerializer):
         fields = ['id','Name']
 
 class ImportFieldSerializerSecond(serializers.ModelSerializer):
+    ImportExceltype=ImportExcelTypeSerializer(read_only=True)
     ControlType = ControlType_Serializer(read_only=True)
     FieldValidation = FieldValidations_Serializer(read_only=True)
     class Meta:
