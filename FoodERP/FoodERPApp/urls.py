@@ -455,6 +455,8 @@ urlpatterns = [
             url(r'ImportFieldList$', ImportFieldListView.as_view()),
             url(r'PartyImportFieldFilter$', PartyImportFieldFilterView.as_view()),
             url(r'PartyImportFieldSave$', PartyImportFieldView.as_view()),
+            url(r'ImportExcelTypes$', ImportExcelTypeView.as_view()),
+            url(r'ImportExcelTypesList$', ImportExcelTypeListView.as_view()),
             
 # Sales Return
             url(r'ReturnItemAdd/([0-9]+)$', ReturnItemAddView.as_view()),

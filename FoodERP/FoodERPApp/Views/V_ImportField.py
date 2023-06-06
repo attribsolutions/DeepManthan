@@ -165,3 +165,40 @@ class PartyImportFieldView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': PartyImport_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+
+class ImportExcelTypeView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                ImportExcelType_Data = JSONParser().parse(request)
+                ImportExcelType_Serializer = ImportExcelTypeSerializer(data=ImportExcelType_Data)
+                if ImportExcelType_Serializer.is_valid():
+                    ImportExcelType_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ImportExcelType Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ImportExcelType_Serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+
+class ImportExcelTypeListView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                query = M_ImportExcelTypes.objects.all()
+                if query:
+                    ImportExcelType_Serializer = ImportExcelTypeSerializer(query,many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ImportExcelType_Serializer})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'ImportExcelType Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
