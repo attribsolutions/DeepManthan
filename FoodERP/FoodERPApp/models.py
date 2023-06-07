@@ -197,10 +197,10 @@ class M_Employees(models.Model):
     Name = models.CharField(max_length=100)
     Address = models.CharField(max_length=500)
     Mobile = models.CharField(max_length=100)
-    email = models.EmailField(max_length=255)
-    DOB = models.CharField(max_length=100)
-    PAN = models.CharField(max_length=100)
-    AadharNo = models.CharField(max_length=100)
+    email = models.EmailField(max_length=255,blank=True,null=True)
+    DOB = models.CharField(max_length=100,blank=True,null=True)
+    PAN = models.CharField(max_length=100,blank=True,null=True)
+    AadharNo = models.CharField(max_length=100,blank=True,null=True)
 
 
     Company = models.ForeignKey(
