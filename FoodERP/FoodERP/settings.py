@@ -20,7 +20,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','127.0.0.1'] 
+
+ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','127.0.0.1'] 
+
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -84,7 +86,7 @@ DATABASES = {
         'NAME': 'devfooderp20230607',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114', 
+        'HOST': '10.4.5.65', 
         'PORT': '3306' 
     }
     
