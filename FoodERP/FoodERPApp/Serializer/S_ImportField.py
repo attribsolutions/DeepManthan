@@ -17,7 +17,7 @@ class FieldValidations_Serializer(serializers.ModelSerializer):
         fields = ['id','Name']
 
 class ImportFieldSerializerSecond(serializers.ModelSerializer):
-    ImportExceltype=ImportExcelTypeSerializer(read_only=True)
+    ImportExcelType=ImportExcelTypeSerializer(read_only=True)
     ControlType = ControlType_Serializer(read_only=True)
     FieldValidation = FieldValidations_Serializer(read_only=True)
     class Meta:
