@@ -81,7 +81,9 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chitalescm20230519',     
+
+        'NAME': 'fooderp20230607',     
+
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
         'HOST': '10.1.201.19', 
