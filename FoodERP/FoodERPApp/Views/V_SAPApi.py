@@ -32,6 +32,7 @@ class SAPInvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
+                print(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 if auth_header:
                 # Parsing the authorization header
@@ -44,6 +45,7 @@ class SAPInvoiceView(CreateAPIView):
                         return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                     # Authenticating the user
                     user = authenticate(request, username=username, password=password)
+                    print(user)
                     if user is not None:
                         aa = JSONParser().parse(request)
                         
