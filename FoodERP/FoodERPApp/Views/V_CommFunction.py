@@ -397,9 +397,10 @@ class UnitwiseQuantityConversion:
                 a=Q(id=MCItemUnit)   
             
             BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a ).filter( aaa )
-     
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
-         
+            unitnamequery=M_Units.objects.filter(id =BaseUnitQuantitySerializer[0]['UnitID']).values('Name')
+            self.UnitName  = unitnamequery[0]['Name']
+
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
             
         if(ConversionMCItemUnit !=0) or (ConversionMUnits!=0):
@@ -423,7 +424,16 @@ class UnitwiseQuantityConversion:
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
         ConvertedQuantity=   float(BaseUnitQuantity) /  float(self.ConversionUnitBaseQuantity)
         return ConvertedQuantity
-
+    
+    def GetConvertingBaseUnitQtyBaseUnitName(self):
+        
+        BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
+        baseunitqty=round(float(BaseUnitQuantity), 2)
+        UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('UnitID')
+        BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
+        aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
+        return aaa
+      
 
     
 class RateCalculationFunction:
