@@ -45,7 +45,7 @@ class SAPInvoiceView(CreateAPIView):
                         return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                     # Authenticating the user
                     user = authenticate(request, username=username, password=password)
-                    print(user)
+                    print('aaaaaaaa')
                     if user is not None:
                         aa = JSONParser().parse(request)
                         
