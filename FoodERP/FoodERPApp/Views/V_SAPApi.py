@@ -32,6 +32,7 @@ class SAPInvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
+                print('SapInvoice aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
                 print(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 if auth_header:
