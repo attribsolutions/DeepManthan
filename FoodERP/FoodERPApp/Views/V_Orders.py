@@ -322,6 +322,8 @@ class T_OrdersViewSecond(CreateAPIView):
                         OrderItemDetails = list()
                         for b in a['OrderItem']:
                             if(b['IsDeleted'] == 0):
+                                
+                                aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName(),
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
@@ -333,7 +335,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "Unit": b['Unit']['id'],
-                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "UnitName": aaaa[0],
                                     "SAPUnitName": b['Unit']['UnitID']['SAPUnit'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
