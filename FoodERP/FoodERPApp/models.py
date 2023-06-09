@@ -879,7 +879,7 @@ class T_Invoices(models.Model):
     InvoiceDate = models.DateField()
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -968,7 +968,7 @@ class T_GRNs(models.Model):
     GRNNumber = models.IntegerField()
     FullGRNNumber = models.CharField(max_length=500)
     InvoiceNumber = models.CharField(max_length=300) # This Invoice Number  - Vendors Invoice Number
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
