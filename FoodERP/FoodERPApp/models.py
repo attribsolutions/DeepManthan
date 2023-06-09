@@ -199,7 +199,6 @@ class M_Employees(models.Model):
     DOB = models.CharField(max_length=100,blank=True, null=True)
     PAN = models.CharField(max_length=100,blank=True, null=True)
     AadharNo = models.CharField(max_length=100,blank=True, null=True)
-
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
