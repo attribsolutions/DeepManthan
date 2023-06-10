@@ -15,10 +15,20 @@ class DistrictsSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =   M_Districts
         fields = ['id','Name']
+        
+class StateSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =   M_States
+        fields = ['id','Name'] 
 
-
+class DistrictsSerializerThird(serializers.ModelSerializer):
+    State = StateSerializerSecond(read_only=True)
+    class Meta:
+        model =   M_Districts
+        fields = ['id','Name','State'] 
+        
 class CitiesSerializerSecond(serializers.ModelSerializer):
-    District = DistrictsSerializerSecond(read_only=True)
+    District = DistrictsSerializerThird(read_only=True)
     class Meta:
         model =   M_Cities
         fields = ['id','Name','CreatedBy','CreatedOn','UpdatedBy','District']

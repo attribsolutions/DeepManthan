@@ -68,7 +68,9 @@ class M_CitiesView(CreateAPIView):
                             "CreatedOn":a['CreatedOn'],
                             "UpdatedBy":a['UpdatedBy'],
                             "District":a['District']['id'],
-                            "DistrictName":a['District']['Name']
+                            "DistrictName":a['District']['Name'],
+                            "State":a['District']['State']['id'],
+                            "StateName":a['District']['State']['Name']
                     })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CitiesList})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'City Not available', 'Data': []})    
@@ -85,8 +87,9 @@ class M_CitiesView(CreateAPIView):
                     Cities_serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'City Save Successfully', 'Data': []})
                 else:
-             
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Cities_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
 
