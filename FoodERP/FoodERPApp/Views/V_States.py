@@ -90,3 +90,33 @@ class M_CitiesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+
+
+class CitiesListView(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                Cities_data = M_Cities.objects.all()
+                print('111')
+                if Cities_data.exists():
+                    Cities_serializer =  CitiesSerializerSecond(Cities_data, many=True).data
+                    CitiesList = list()
+                    for a in Cities_serializer:
+                        CitiesList.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "CreatedBy":a['CreatedBy'],
+                            "CreatedOn":a['CreatedOn'],
+                            "UpdatedBy":a['UpdatedBy'],
+                            "DistrictID":a['District']['id'],
+                            "DistrictName":a['District']['Name']
+                            })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CitiesList})
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Records Not available', 'Data': []})    
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
