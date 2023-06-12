@@ -457,7 +457,7 @@ class ProductAndMarginReportView(CreateAPIView):
                         if IsSCM == '0' :
                             query = M_PriceList.objects.values('id','Name')
                         else:
-                            qur1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
+                            qur1=MC_PartySubParty.objects.filter(Q(Party=PartyID)|Q(SubParty=PartyID)).values('SubParty')
                             qur2=M_Parties.objects.filter(id__in=qur1).values('PriceList').distinct()
                             query = M_PriceList.objects.values('id','Name').filter(id__in=qur2)
                         
@@ -496,7 +496,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "StoringCondition":a['StoringCondition'],
                             "MRP":ItemMRPdata[0]['MRP'],
                             "GST":ItemGstHsnCodedata[0]['GSTPercentage'],
-                            "CompanyName": a['Company']['Name'],
+                           
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUGr":a['Grammage'],
                             "Product":a['ItemGroupDetails'][0]['Group']['Name'],
