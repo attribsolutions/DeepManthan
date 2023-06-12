@@ -51,6 +51,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
                   
+                  
+                    
                     if obatchwisestockquery == "":
                         StockQtySerialize_data =[]
                     else:
@@ -206,11 +208,13 @@ class InvoiceView(CreateAPIView):
                 InvoiceItems = Invoicedata['InvoiceItems']
                 
                 O_BatchWiseLiveStockList=list()
+                
                 for InvoiceItem in InvoiceItems:
+                    print(InvoiceItem['Quantity'])
                     O_BatchWiseLiveStockList.append({
                         "Quantity" : InvoiceItem['BatchID'],
                         "Item" : InvoiceItem['Item'],
-                        "BaseUnitQuantity" : InvoiceItem['Quantity']
+                        "BaseUnitQuantity" : InvoiceItem['BaseUnitQuantity']
                     })
                         
                 Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
