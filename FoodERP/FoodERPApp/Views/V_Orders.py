@@ -290,7 +290,14 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
-                    OrderID=Order_serializer.data['id']
+                    # OrderID=Order_serializer.data['id']
+                    PartyID=Order_serializer.data['Supplier_id']
+                    PartyMapping=M_Parties.objects.filter(id=PartyID).values("SAPPartyCode")
+                    if PartyMapping[0]['SAPPartyCode'] is None:
+                        OrderID=0
+                    else:
+                        OrderID=Order_serializer.data['id']
+                        
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully' ,'OrderID':OrderID, 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
@@ -359,7 +366,6 @@ class T_OrdersViewSecond(CreateAPIView):
                             if(c['Inward'] == 1):
                                 inward = 1
                         Address=GetPartyAddressDetails(a['Supplier']['id']).PartyAddress()
-
                         OrderData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
