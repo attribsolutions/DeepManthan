@@ -21,7 +21,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234'] 
+ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.64','cbmdms.cbmlocal.in'] 
 
 
 # Application definition
@@ -83,14 +83,13 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'devfooderp20230612',     
+        'NAME': 'fooderp20230607',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114', 
+        'HOST': '10.1.201.19', 
         'PORT': '3306' 
     }
- 
-    
+
     # , 
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
