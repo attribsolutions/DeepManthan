@@ -291,7 +291,7 @@ class T_OrdersView(CreateAPIView):
                 if Order_serializer.is_valid():
                     Order_serializer.save()
                     # OrderID=Order_serializer.data['id']
-                    PartyID=Order_serializer.data['Supplier_id']
+                    PartyID=Order_serializer.data['Customer_id']
                     PartyMapping=M_Parties.objects.filter(id=PartyID).values("SAPPartyCode")
                     if PartyMapping[0]['SAPPartyCode'] is None:
                         OrderID=0
