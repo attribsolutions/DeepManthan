@@ -83,10 +83,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fooderp20230607',     
+        'NAME': 'devfooderp20230612',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '10.1.201.19', 
+        'HOST': '192.168.1.114', 
         'PORT': '3306' 
     }
 
@@ -157,7 +157,6 @@ USE_TZ = False
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
