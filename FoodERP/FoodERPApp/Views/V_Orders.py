@@ -655,23 +655,6 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
         
-        
-class TestOrdersView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
-
-    def post(self, request, id=0):
-        try:
-            with transaction.atomic():
-                OrderQuery = T_Orders.objects.filter(id=id)
-                if OrderQuery.exists():
-                    OrderSerializedata = TestOrderSerializer(OrderQuery, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata })
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
-              
-
 class ConfirmOrderView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
@@ -686,4 +669,20 @@ class ConfirmOrderView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class TestOrdersView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                OrderQuery = T_Orders.objects.filter(id=id)
+                if OrderQuery.exists():
+                    OrderSerializedata = TestOrderSerializer(OrderQuery, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata })
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})          
+        
     
