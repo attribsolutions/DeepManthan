@@ -817,6 +817,7 @@ class T_Orders(models.Model):
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
     SAPResponse =models.CharField(max_length=500 ,null=True)
+    IsConfirm = models.BooleanField(default=False) 
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
@@ -848,6 +849,9 @@ class TC_OrderItems(models.Model):
     Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.PROTECT,null=True,blank=True)
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.PROTECT)
+    QtyInNo = models.DecimalField(max_digits=20, decimal_places=12)
+    QtyInKg = models.DecimalField(max_digits=20, decimal_places=12)
+    QtyInBox = models.DecimalField(max_digits=20, decimal_places=12)
 
     class Meta:
         db_table = "TC_OrderItems"
