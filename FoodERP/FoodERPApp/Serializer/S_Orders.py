@@ -255,6 +255,25 @@ class OrderEditserializer(serializers.Serializer):
     SAPItemCode=serializers.CharField(max_length=100)
     SAPUnitName=serializers.CharField(max_length=100)
     
+
+
+
+
+class ReportOrderItemSerializer(serializers.ModelSerializer):
+    Item = ItemSerializerSecond(read_only=True)
+    class Meta:
+        model = TC_OrderItems
+        fields = '__all__'
+        
+    
+class SummaryReportOrderSerializer(serializers.ModelSerializer):
+    Customer = PartiesSerializerThird(read_only=True)
+    Supplier = PartiesSerializerThird(read_only=True)
+    OrderItem = ReportOrderItemSerializer(read_only=True,many=True)
+    class Meta:
+        model = T_Orders
+        fields = '__all__'
+
     
 class TestGRNReferanceSerializer(serializers.ModelSerializer):
     class Meta:

@@ -683,30 +683,66 @@ class ConfirmOrderView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
-        
+            
         
 class SummaryReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request, id=0):
         try:
             with transaction.atomic():
+                print('1111')
                 Orderdata = JSONParser().parse(request)
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Company = Orderdata['CompanyID']
-                
+          
                 q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
-                query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=q0)
-                print(query.query)
-               
-                if query.exists():
-                    Order_serializer = T_OrderSerializerSecond(query, many=True).data
-                    
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Order_serializer })
+                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=q0)
+            
+                if OrderQuery.exists():
+                  
+                    OrderSerializedata = SummaryReportOrderSerializer(OrderQuery, many=True).data
+                    OrderData = list()
+                    for a in OrderSerializedata:
+                        OrderItemDetails = list()
+                        for b in a['OrderItem']:
+                            if(b['IsDeleted'] == 0):
+                                OrderItemDetails.append({
+                                    "id": a['id'],
+                                    "OrderDate": a['OrderDate'],
+                                    "FullOrderNumber": a['FullOrderNumber'],
+                                    "OrderAmount": a['OrderAmount'],
+                                    "CreatedOn": a['OrderAmount'],
+                                    "CustomerName": a['Customer']['Name'],
+                                    "SupplierName": a['Supplier']['Name'],
+                                    "id": b['id'],
+                                    "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
+                                    "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
+                                    "Item": b['Item']['id'],
+                                    "ItemName": b['Item']['Name'],
+                                    "QtyInNo": b['QtyInNo'],
+                                    "QtyInKg": b['QtyInKg'],
+                                    "QtyInBox": b['QtyInBox'],
+                                })
+                        # OrderData.append({
+                        #     "id": a['id'],
+                        #     "OrderDate": a['OrderDate'],
+                        #     "FullOrderNumber": a['FullOrderNumber'],
+                        #     "OrderAmount": a['OrderAmount'],
+                        #     "CreatedOn": a['OrderAmount'],
+                        #     "CustomerName": a['Customer']['Name'],
+                        #     "SupplierName": a['Supplier']['Name'],
+                        #     "OrderItem": OrderItemDetails,
+                        # })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
+        
+        
+        
+
         
         
         
