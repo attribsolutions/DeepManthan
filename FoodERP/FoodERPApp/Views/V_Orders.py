@@ -279,9 +279,14 @@ class T_OrdersView(CreateAPIView):
                 for aa in Orderdata['OrderItem']:
                     
                     BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                    
                     aa['BaseUnitQuantity'] =  BaseUnitQuantity 
-                
+                    QtyInNo=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    aa['QtyInNo'] =  QtyInNo
+                    QtyInKg=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    aa['QtyInKg'] =  QtyInKg
+                    QtyInBox=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    aa['QtyInBox'] =  QtyInBox
+
                 Orderdata['OrderNo'] = a
                 '''Get Order Prifix '''
                 b = GetPrifix.GetOrderPrifix(Division)

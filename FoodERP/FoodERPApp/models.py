@@ -849,9 +849,9 @@ class TC_OrderItems(models.Model):
     Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.PROTECT,null=True,blank=True)
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.PROTECT)
-    QtyInNo = models.DecimalField(max_digits=20, decimal_places=12)
-    QtyInKg = models.DecimalField(max_digits=20, decimal_places=12)
-    QtyInBox = models.DecimalField(max_digits=20, decimal_places=12)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "TC_OrderItems"
