@@ -671,9 +671,37 @@ class ConfirmOrderView(CreateAPIView):
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
                 OrderItemQuery=T_Orders.objects.filter(id__in=Order_list).update(IsConfirm=1)
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+class SummaryReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Company = Orderdata['CompanyID']
+                
+                q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
+                query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=q0)
+                print(query.query)
+               
+                if query.exists():
+                    Order_serializer = T_OrderSerializerSecond(query, many=True).data
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Order_serializer })
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        
+        
+        
+        
 
         
 class TestOrdersView(CreateAPIView):
