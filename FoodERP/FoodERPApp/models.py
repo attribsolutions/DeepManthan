@@ -1699,7 +1699,7 @@ class MC_SettingsDetails(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies,related_name='SettingCompany', on_delete=models.PROTECT)
-    Party = models.ForeignKey(M_Parties,related_name='SettingParty', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties,related_name='SettingParty', on_delete=models.PROTECT,blank=True, null=True)
     SettingID=models.ForeignKey(M_Settings,related_name='SettingDetails',on_delete=models.CASCADE)         
 
     class Meta:
