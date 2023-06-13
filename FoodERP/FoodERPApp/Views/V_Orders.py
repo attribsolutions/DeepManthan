@@ -47,6 +47,7 @@ class OrderListFilterView(CreateAPIView):
                 Customer = Orderdata['Customer']
                 Supplier = Orderdata['Supplier']
                 OrderType = Orderdata['OrderType']
+                CustomerType=Orderdata['CustomerType']
                 d = date.today()
                 if(OrderType == 1): #OrderType -1 PO Order
                     if(Supplier == ''):
@@ -64,16 +65,22 @@ class OrderListFilterView(CreateAPIView):
                         q = query.union(queryForOpenPO)
                 else: #OrderType -2 Sales Order
                     # Pradnya :  OrderType=2 filter remove form all ORM Query coz parasnath purches order is katraj div sale order 
+                    if(CustomerType==''):   #all
+                        aaa=Q()
+                    else:
+                        aaa=Q(Customer__PriceList_id__in=CustomerType)
+                    
+                    
                     if(Customer == ''):
                        
                         query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier)
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier)
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter( aaa )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier).select_related('Customer').filter( aaa )
                         q = query.union(queryForOpenPO)
                     else:
                         
-                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier )
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier)
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier ).select_related('Customer').filter( aaa )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).filter( aaa )
                         q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(q.query)})
                 if q :
@@ -110,6 +117,7 @@ class OrderListFilterView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "SAPResponse": a['SAPResponse'],
+                            "IsConfirm": a['IsConfirm'],
                             "Inward": inward
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData}) 
