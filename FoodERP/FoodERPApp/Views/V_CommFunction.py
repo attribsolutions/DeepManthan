@@ -409,10 +409,12 @@ class UnitwiseQuantityConversion:
             else:
                 b=Q(id=ConversionMCItemUnit)
             ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b ).filter( aaa )
-            
-            ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
-            self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
-      
+            if ConversionUnitBaseQuantityQuery.count() > 0:
+                ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
+                self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
+            else:
+                self.ConversionUnitBaseQuantity=0
+    
     def GetBaseUnitQuantity(self):
         
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
@@ -422,7 +424,11 @@ class UnitwiseQuantityConversion:
     def ConvertintoSelectedUnit(self):
         
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
-        ConvertedQuantity=   float(BaseUnitQuantity) /  float(self.ConversionUnitBaseQuantity)
+        if float(self.ConversionUnitBaseQuantity) == 0:
+            ConvertedQuantity=  0 
+        else:
+            ConvertedQuantity=float(BaseUnitQuantity) /  float(self.ConversionUnitBaseQuantity)
+        
         return ConvertedQuantity
     
     def GetConvertingBaseUnitQtyBaseUnitName(self):
