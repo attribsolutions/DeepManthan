@@ -206,6 +206,8 @@ urlpatterns = [
             # url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
+            url(r'OrderConfirms$',ConfirmOrderView.as_view()),
+            
 
 # InterBranch Order All APIs
             url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
