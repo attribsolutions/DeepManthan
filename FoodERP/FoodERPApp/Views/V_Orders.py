@@ -669,6 +669,7 @@ class ConfirmOrderView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
         
 class TestOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
