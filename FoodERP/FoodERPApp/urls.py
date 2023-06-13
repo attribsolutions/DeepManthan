@@ -207,6 +207,7 @@ urlpatterns = [
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
             url(r'OrderConfirms$',ConfirmOrderView.as_view()),
+            url(r'OrderSummaryReport$',SummaryReportView.as_view()),
             
 
 # InterBranch Order All APIs
