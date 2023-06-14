@@ -699,7 +699,9 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
           
                 q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
-                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=q0)
+               
+                pricelist=q0[0]["Value"].split(',')
+                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
             
                 if OrderQuery.count() > 0:
                   
