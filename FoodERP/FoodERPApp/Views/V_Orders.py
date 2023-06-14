@@ -699,7 +699,7 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
           
                 q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
-               
+                
                 pricelist=q0[0]["Value"].split(',')
                 OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
             
@@ -709,24 +709,26 @@ class SummaryReportView(CreateAPIView):
                     OrderData = list()
                     for a in OrderSerializedata:
                         OrderItemDetails = list()
-                        for b in a['OrderItem']:
-                            if(b['IsDeleted'] == 0):
-                                OrderItemDetails.append({
-                                    
-                                    "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
-                                    "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
-                                    "MaterialName": b['Item']['Name'],
-                                    "id": a['id'],
-                                    "FullOrderNumber": a['FullOrderNumber'],
-                                    "OrderDate": a['OrderDate'],
-                                    # "OrderAmount": a['OrderAmount'],
-                                    
-                                    "CustomerName": a['Customer']['Name'],
-                                    "SupplierName": a['Supplier']['Name'],
-                                    "QtyInNo": b['QtyInNo'],
-                                    "QtyInKg": b['QtyInKg'],
-                                    "QtyInBox": b['QtyInBox'],
-                                })
+                        Count = TC_InvoicesReferences.objects.filter(Order = a['id']).count()
+                        if Count == 0 :
+                            for b in a['OrderItem']:
+                                if(b['IsDeleted'] == 0):
+                                    OrderItemDetails.append({
+                                        
+                                        "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
+                                        "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
+                                        "MaterialName": b['Item']['Name'],
+                                        "id": a['id'],
+                                        "FullOrderNumber": a['FullOrderNumber'],
+                                        "OrderDate": a['OrderDate'],
+                                        # "OrderAmount": a['OrderAmount'],
+                                        
+                                        "CustomerName": a['Customer']['Name'],
+                                        "SupplierName": a['Supplier']['Name'],
+                                        "QtyInNo": b['QtyInNo'],
+                                        "QtyInKg": b['QtyInKg'],
+                                        "QtyInBox": b['QtyInBox'],
+                                    })
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
