@@ -82,7 +82,7 @@ class OrderListFilterView(CreateAPIView):
                     else:
                         
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier ).select_related('Customer').filter( aaa )
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).filter( aaa )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter( aaa )
                         q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(q.query)})
                 if q :
@@ -712,32 +712,22 @@ class SummaryReportView(CreateAPIView):
                         for b in a['OrderItem']:
                             if(b['IsDeleted'] == 0):
                                 OrderItemDetails.append({
-                                    "id": a['id'],
-                                    "OrderDate": a['OrderDate'],
-                                    "FullOrderNumber": a['FullOrderNumber'],
-                                    "OrderAmount": a['OrderAmount'],
-                                    "CreatedOn": a['OrderAmount'],
-                                    "CustomerName": a['Customer']['Name'],
-                                    "SupplierName": a['Supplier']['Name'],
-                                    "id": b['id'],
+                                    
                                     "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
                                     "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
-                                    "Item": b['Item']['id'],
-                                    "ItemName": b['Item']['Name'],
+                                    "MaterialName": b['Item']['Name'],
+                                    "id": a['id'],
+                                    "FullOrderNumber": a['FullOrderNumber'],
+                                    "OrderDate": a['OrderDate'],
+                                    # "OrderAmount": a['OrderAmount'],
+                                    
+                                    "CustomerName": a['Customer']['Name'],
+                                    "SupplierName": a['Supplier']['Name'],
                                     "QtyInNo": b['QtyInNo'],
                                     "QtyInKg": b['QtyInKg'],
                                     "QtyInBox": b['QtyInBox'],
                                 })
-                        # OrderData.append({
-                        #     "id": a['id'],
-                        #     "OrderDate": a['OrderDate'],
-                        #     "FullOrderNumber": a['FullOrderNumber'],
-                        #     "OrderAmount": a['OrderAmount'],
-                        #     "CreatedOn": a['OrderAmount'],
-                        #     "CustomerName": a['Customer']['Name'],
-                        #     "SupplierName": a['Supplier']['Name'],
-                        #     "OrderItem": OrderItemDetails,
-                        # })
+                        
                     return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
