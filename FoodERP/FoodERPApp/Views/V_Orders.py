@@ -47,6 +47,7 @@ class OrderListFilterView(CreateAPIView):
                 Customer = Orderdata['Customer']
                 Supplier = Orderdata['Supplier']
                 OrderType = Orderdata['OrderType']
+                CustomerType=Orderdata['CustomerType']
                 d = date.today()
                 if(OrderType == 1): #OrderType -1 PO Order
                     if(Supplier == ''):
@@ -64,16 +65,24 @@ class OrderListFilterView(CreateAPIView):
                         q = query.union(queryForOpenPO)
                 else: #OrderType -2 Sales Order
                     # Pradnya :  OrderType=2 filter remove form all ORM Query coz parasnath purches order is katraj div sale order 
+                    if(CustomerType==''):   #all
+                        aaa=Q()
+                    else:
+                        CustomerType_list = CustomerType.split(",")
+                        aaa=Q(Customer__PriceList_id__in=CustomerType_list)
+                       
+                    
+                    
                     if(Customer == ''):
                        
                         query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier)
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier)
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter( aaa )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier).select_related('Customer').filter( aaa )
                         q = query.union(queryForOpenPO)
                     else:
                         
-                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier )
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier)
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier ).select_related('Customer').filter( aaa )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter( aaa )
                         q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(q.query)})
                 if q :
@@ -110,6 +119,7 @@ class OrderListFilterView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "SAPResponse": a['SAPResponse'],
+                            "IsConfirm": a['IsConfirm'],
                             "Inward": inward
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData}) 
@@ -671,9 +681,67 @@ class ConfirmOrderView(CreateAPIView):
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
                 OrderItemQuery=T_Orders.objects.filter(id__in=Order_list).update(IsConfirm=1)
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+            
+        
+class SummaryReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                print('1111')
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Company = Orderdata['CompanyID']
+          
+                q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
+                
+                pricelist=q0[0]["Value"].split(',')
+                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
+            
+                if OrderQuery.count() > 0:
+                  
+                    OrderSerializedata = SummaryReportOrderSerializer(OrderQuery, many=True).data
+                    OrderData = list()
+                    for a in OrderSerializedata:
+                        OrderItemDetails = list()
+                        Count = TC_InvoicesReferences.objects.filter(Order = a['id']).count()
+                        if Count == 0 :
+                            for b in a['OrderItem']:
+                                if(b['IsDeleted'] == 0):
+                                    OrderItemDetails.append({
+                                        
+                                        "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
+                                        "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
+                                        "MaterialName": b['Item']['Name'],
+                                        "id": a['id'],
+                                        "FullOrderNumber": a['FullOrderNumber'],
+                                        "OrderDate": a['OrderDate'],
+                                        # "OrderAmount": a['OrderAmount'],
+                                        
+                                        "CustomerName": a['Customer']['Name'],
+                                        "SupplierName": a['Supplier']['Name'],
+                                        "QtyInNo": b['QtyInNo'],
+                                        "QtyInKg": b['QtyInKg'],
+                                        "QtyInBox": b['QtyInBox'],
+                                    })
+                        
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        
+        
+        
+        
+
+        
+        
+        
 
         
 class TestOrdersView(CreateAPIView):
