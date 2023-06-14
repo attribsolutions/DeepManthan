@@ -424,7 +424,19 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Orderupdatedata = JSONParser().parse(request)
                 OrderupdateByID = T_Orders.objects.get(id=id)
-
+               
+                for aa in Orderupdatedata['OrderItem']:
+                   
+                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    aa['BaseUnitQuantity'] =  BaseUnitQuantity 
+                    QtyInNo=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    aa['QtyInNo'] =  QtyInNo
+                    QtyInKg=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    aa['QtyInKg'] =  QtyInKg
+                    QtyInBox=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    aa['QtyInBox'] =  QtyInBox
+                   
+                # print(Orderupdatedata)
                 Orderupdate_Serializer = T_OrderSerializer(
                     OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
