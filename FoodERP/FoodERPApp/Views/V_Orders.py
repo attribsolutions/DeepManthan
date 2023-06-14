@@ -107,6 +107,8 @@ class OrderListFilterView(CreateAPIView):
                             "DeliveryDate": a['DeliveryDate'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
+                            "CustomerSAPCode": a['Customer']['SAPPartyCode'],
+                            "SupplierSAPCode":a['Supplier']['SAPPartyCode'],
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
                             "OrderAmount": a['OrderAmount'],
@@ -692,7 +694,7 @@ class SummaryReportView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                print('1111')
+               
                 Orderdata = JSONParser().parse(request)
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
@@ -718,16 +720,15 @@ class SummaryReportView(CreateAPIView):
                                         "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
                                         "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
                                         "MaterialName": b['Item']['Name'],
-                                        "id": a['id'],
-                                        "FullOrderNumber": a['FullOrderNumber'],
+                                        "Orderid": a['id'],
+                                        "OrderNo": a['FullOrderNumber'],
                                         "OrderDate": a['OrderDate'],
-                                        # "OrderAmount": a['OrderAmount'],
-                                        
-                                        "CustomerName": a['Customer']['Name'],
                                         "SupplierName": a['Supplier']['Name'],
+                                        "CustomerName": a['Customer']['Name'],
                                         "QtyInNo": b['QtyInNo'],
                                         "QtyInKg": b['QtyInKg'],
                                         "QtyInBox": b['QtyInBox'],
+                                        "OrderAmount": a['OrderAmount']
                                     })
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
