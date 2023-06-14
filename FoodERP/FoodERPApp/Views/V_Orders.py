@@ -68,7 +68,9 @@ class OrderListFilterView(CreateAPIView):
                     if(CustomerType==''):   #all
                         aaa=Q()
                     else:
-                        aaa=Q(Customer__PriceList_id__in=CustomerType)
+                        CustomerType_list = CustomerType.split(",")
+                        aaa=Q(Customer__PriceList_id__in=CustomerType_list)
+                       
                     
                     
                     if(Customer == ''):
@@ -697,9 +699,11 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
           
                 q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
-                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=q0)
+               
+                pricelist=q0[0]["Value"].split(',')
+                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
             
-                if OrderQuery.exists():
+                if OrderQuery.count() > 0:
                   
                     OrderSerializedata = SummaryReportOrderSerializer(OrderQuery, many=True).data
                     OrderData = list()
@@ -734,7 +738,7 @@ class SummaryReportView(CreateAPIView):
                         #     "SupplierName": a['Supplier']['Name'],
                         #     "OrderItem": OrderItemDetails,
                         # })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails })
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
