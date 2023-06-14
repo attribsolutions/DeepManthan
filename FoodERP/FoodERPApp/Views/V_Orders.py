@@ -82,7 +82,7 @@ class OrderListFilterView(CreateAPIView):
                     else:
                         
                         query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier ).select_related('Customer').filter( aaa )
-                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).filter( aaa )
+                        queryForOpenPO = T_Orders.objects.filter(POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter( aaa )
                         q = query.union(queryForOpenPO)      
                 # return JsonResponse({'query': str(q.query)})
                 if q :
@@ -719,10 +719,10 @@ class SummaryReportView(CreateAPIView):
                                     "CreatedOn": a['OrderAmount'],
                                     "CustomerName": a['Customer']['Name'],
                                     "SupplierName": a['Supplier']['Name'],
-                                    "id": b['id'],
+                                   
                                     "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
                                     "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
-                                    "Item": b['Item']['id'],
+                                
                                     "ItemName": b['Item']['Name'],
                                     "QtyInNo": b['QtyInNo'],
                                     "QtyInKg": b['QtyInKg'],
