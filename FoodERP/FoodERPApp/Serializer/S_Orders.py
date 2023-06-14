@@ -21,7 +21,7 @@ class M_POTypeserializerSecond(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name']
+        fields = ['id','Name','SAPPartyCode']
 
 class TC_OrderItemsSerializer(serializers.ModelSerializer):
     

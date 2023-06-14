@@ -107,6 +107,8 @@ class OrderListFilterView(CreateAPIView):
                             "DeliveryDate": a['DeliveryDate'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
+                            "CustomerSAPCode": a['Customer']['SAPPartyCode'],
+                            "SupplierSAPCode":a['Supplier']['SAPPartyCode'],
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
                             "OrderAmount": a['OrderAmount'],
@@ -422,7 +424,19 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Orderupdatedata = JSONParser().parse(request)
                 OrderupdateByID = T_Orders.objects.get(id=id)
-
+               
+                for aa in Orderupdatedata['OrderItem']:
+                   
+                    BaseUnitQuantity=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    aa['BaseUnitQuantity'] =  BaseUnitQuantity 
+                    QtyInNo=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    aa['QtyInNo'] =  QtyInNo
+                    QtyInKg=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    aa['QtyInKg'] =  QtyInKg
+                    QtyInBox=UnitwiseQuantityConversion(aa['Item'],aa['Quantity'],aa['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    aa['QtyInBox'] =  QtyInBox
+                   
+                # print(Orderupdatedata)
                 Orderupdate_Serializer = T_OrderSerializer(
                     OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
@@ -692,7 +706,7 @@ class SummaryReportView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                print('1111')
+               
                 Orderdata = JSONParser().parse(request)
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
@@ -718,16 +732,15 @@ class SummaryReportView(CreateAPIView):
                                         "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
                                         "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
                                         "MaterialName": b['Item']['Name'],
-                                        "id": a['id'],
-                                        "FullOrderNumber": a['FullOrderNumber'],
+                                        "Orderid": a['id'],
+                                        "OrderNo": a['FullOrderNumber'],
                                         "OrderDate": a['OrderDate'],
-                                        # "OrderAmount": a['OrderAmount'],
-                                        
-                                        "CustomerName": a['Customer']['Name'],
                                         "SupplierName": a['Supplier']['Name'],
+                                        "CustomerName": a['Customer']['Name'],
                                         "QtyInNo": b['QtyInNo'],
                                         "QtyInKg": b['QtyInKg'],
                                         "QtyInBox": b['QtyInBox'],
+                                        "OrderAmount": a['OrderAmount']
                                     })
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
