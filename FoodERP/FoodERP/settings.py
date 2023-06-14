@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.65','cbmdms.cbmlocal.in','10.4.5.64'] 
 
@@ -83,10 +83,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fooderp20230607',     
+        'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '10.1.201.19', 
+        'HOST': '10.4.5.65', 
         'PORT': '3306' 
     }
 
