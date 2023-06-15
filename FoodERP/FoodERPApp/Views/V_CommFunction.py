@@ -433,14 +433,17 @@ class UnitwiseQuantityConversion:
     
     def GetConvertingBaseUnitQtyBaseUnitName(self):
         
-        BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
-        baseunitqty=round(float(BaseUnitQuantity), 2)
-        UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('UnitID')
-        BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
-        aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
-        return aaa
+        MCItemUnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('id')
+        if self.MCItemUnit == MCItemUnitID[0]['id']:
+            return self.UnitName
+        else: 
+            BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
+            baseunitqty=round(float(BaseUnitQuantity), 2)
+            UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('UnitID')
+            BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
+            aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
+            return aaa
       
-
     
 class RateCalculationFunction:
 
