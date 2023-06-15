@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
-    # 'activity_log',
+    'activity_log',
 ]
 
 MIDDLEWARE = [
@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'activity_log.middleware.ActivityLogMiddleware',
+    'activity_log.middleware.ActivityLogMiddleware',
 ]
 
 ROOT_URLCONF = 'FoodERP.urls'
@@ -83,10 +83,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fooderp20230607',     
+        'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '10.1.201.19', 
+        'HOST': '10.4.5.65', 
         'PORT': '3306' 
     }
 
@@ -104,25 +104,25 @@ DATABASES = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# ACTIVITYLOG_AUTOCREATE_DB = True
-# # Log anonymous actions?
-# ACTIVITYLOG_ANONYMOUS = True
-# # Update last activity datetime in user profile. Needs updates for user model.
-# ACTIVITYLOG_LAST_ACTIVITY = True
+ACTIVITYLOG_AUTOCREATE_DB = True
+# Log anonymous actions?
+ACTIVITYLOG_ANONYMOUS = True
+# Update last activity datetime in user profile. Needs updates for user model.
+ACTIVITYLOG_LAST_ACTIVITY = True
 
-# # Only this methods will be logged
-# ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
+# Only this methods will be logged
+ACTIVITYLOG_METHODS = ('POST', 'GET','PUT','DELETE')
 
-# # List of response statuses, which logged. By default - all logged.
-# # Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
-# ACTIVITYLOG_STATUSES = (200, )
+# List of response statuses, which logged. By default - all logged.
+# Don't use with ACTIVITYLOG_EXCLUDE_STATUSES
+ACTIVITYLOG_STATUSES = (200, )
 
-# # List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
-# # ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
+# List of response statuses, which ignores. Don't use with ACTIVITYLOG_STATUSES
+# ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
 
-# # URL substrings, which ignores
-# ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
-# ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
+# URL substrings, which ignores
+#ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
+ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 

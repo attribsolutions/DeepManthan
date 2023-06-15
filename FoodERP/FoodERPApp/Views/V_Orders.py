@@ -712,39 +712,41 @@ class SummaryReportView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Company = Orderdata['CompanyID']
-          
-                q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
+                Party = Orderdata['PartyID']
                 
-                pricelist=q0[0]["Value"].split(',')
-                OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
-            
+                if Party == "":
+                    q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
+                    
+                    pricelist=q0[0]["Value"].split(',')
+                    OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
+                else:
+                    q0=MC_SettingsDetails.objects.filter(SettingID=1,Company=Company).values('Value')
+                    pricelist=q0[0]["Value"].split(',')
+                    OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate],Supplier=Party).select_related('Customer').filter(Customer__PriceList_id__in=pricelist)
+                
                 if OrderQuery.count() > 0:
-                  
                     OrderSerializedata = SummaryReportOrderSerializer(OrderQuery, many=True).data
                     OrderData = list()
+                    OrderItemDetails = list()
                     for a in OrderSerializedata:
-                        OrderItemDetails = list()
-                        Count = TC_InvoicesReferences.objects.filter(Order = a['id']).count()
-                        if Count == 0 :
+                        InvoiceID = TC_InvoicesReferences.objects.filter(Order= a['id']).values('Invoice').count()
+                        if InvoiceID == 0:
                             for b in a['OrderItem']:
-                                if(b['IsDeleted'] == 0):
-                                    OrderItemDetails.append({
-                                        
-                                        "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
-                                        "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
-                                        "MaterialName": b['Item']['Name'],
-                                        "Orderid": a['id'],
-                                        "OrderNo": a['FullOrderNumber'],
-                                        "OrderDate": a['OrderDate'],
-                                        "SupplierName": a['Supplier']['Name'],
-                                        "CustomerName": a['Customer']['Name'],
-                                        "QtyInNo": b['QtyInNo'],
-                                        "QtyInKg": b['QtyInKg'],
-                                        "QtyInBox": b['QtyInBox'],
-                                        "OrderAmount": a['OrderAmount']
-                                    })
-                        
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'aa':str(OrderQuery.query), 'Data': OrderItemDetails })
+                                OrderItemDetails.append({
+                                    "Group":b['Item']['ItemGroupDetails'][0]['Group']['Name'],
+                                    "SubGroup":b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
+                                    "MaterialName": b['Item']['Name'],
+                                    "Orderid": a['id'],
+                                    "OrderNo": a['FullOrderNumber'],
+                                    "OrderDate": a['OrderDate'],
+                                    "SupplierName": a['Supplier']['Name'],
+                                    "CustomerName": a['Customer']['Name'],
+                                    "QtyInNo": b['QtyInNo'],
+                                    "QtyInKg": b['QtyInKg'],
+                                    "QtyInBox": b['QtyInBox'],
+                                    "OrderAmount": a['OrderAmount']
+                                }) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Data': OrderItemDetails })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
