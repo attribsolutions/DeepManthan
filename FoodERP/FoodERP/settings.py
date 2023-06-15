@@ -74,8 +74,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
-# DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-# DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -90,15 +90,15 @@ DATABASES = {
         'PORT': '3306' 
     }
 
-    # , 
-    # 'logs': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'transactionlogdb',
-    #     'USER': 'pk',
-    #     'PASSWORD': 'P@ssw0rd', 
-    #     'HOST': '192.168.1.114',
-    #     'PORT': '3306'
-    # }
+    , 
+    'logs': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'transactionlogdb',
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd', 
+        'HOST': '10.4.5.65',
+        'PORT': '3306'
+    }
 }
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
