@@ -347,7 +347,7 @@ class T_OrdersViewSecond(CreateAPIView):
                         for b in a['OrderItem']:
                             if(b['IsDeleted'] == 0):
                                 
-                                aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName(),
+                                aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
