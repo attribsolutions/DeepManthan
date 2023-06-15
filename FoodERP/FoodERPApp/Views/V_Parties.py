@@ -230,3 +230,19 @@ class BulkRetailerDataView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []}) 
         
+class PartyAddressView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                PartiesAddress = MC_PartyAddress.objects.get(id=id)
+                PartiesAddress.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Address Deleted Successfully', 'Data':[]})
+        except M_Parties.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Address Not available', 'Data': []})    
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Address used in transaction', 'Data': []})        
+        
