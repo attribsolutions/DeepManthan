@@ -90,15 +90,16 @@ DATABASES = {
         'PORT': '3306' 
     }
 
-    # , 
-    # 'logs': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'transactionlogdb',
-    #     'USER': 'pk',
-    #     'PASSWORD': 'P@ssw0rd', 
-    #     'HOST': '192.168.1.114',
-    #     'PORT': '3306'
-    # }
+
+    'logs': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'transactionlogdb',
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd', 
+        'HOST': '192.168.1.114',
+        'PORT': '3306'
+    }
+
 }
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
