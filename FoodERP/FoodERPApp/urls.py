@@ -327,6 +327,8 @@ urlpatterns = [
             url(r'GetVendorSupplierCustomer$',GetVendorSupplierCustomerListView.as_view()),
             # url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
             # url(r'GetCustomer/([0-9]+)$',GetCustomerView.as_view()),
+            url(r'PartyAddressDelete/([0-9]+)$',PartyAddressView.as_view()),
+            
            
 # State and District
             url(r'States$',M_StateView.as_view()),    
