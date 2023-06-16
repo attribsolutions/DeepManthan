@@ -157,26 +157,28 @@ class OrderListFilterViewSecond(CreateAPIView):
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                         InvoiceListData = list()
                         for a in Invoice_serializer:
-                            InvoiceListData.append({
-                                "id": a['id'],
-                                "OrderDate": a['InvoiceDate'],
-                                "FullOrderNumber": a['FullInvoiceNumber'],
-                                "DeliveryDate": "",
-                                "CustomerID": a['Customer']['id'],
-                                "Customer": a['Customer']['Name'],
-                                "SupplierID": a['Party']['id'],
-                                "Supplier": a['Party']['Name'],
-                                "OrderAmount": a['GrandTotal'],
-                                "Description": "",
-                                "OrderType" : "",
-                                "POType" : "",
-                                "BillingAddress": "",
-                                "ShippingAddress": "",
-                                "CreatedBy": a['CreatedBy'],
-                                "CreatedOn": a['CreatedOn'],
-                                "Inward": "",
-                                "Percentage" : "",
-                            })
+                            InvoiceID = TC_GRNReferences.objects.filter(Invoice= a['id']).values('Invoice').count()
+                            if InvoiceID == 0:
+                                InvoiceListData.append({
+                                    "id": a['id'],
+                                    "OrderDate": a['InvoiceDate'],
+                                    "FullOrderNumber": a['FullInvoiceNumber'],
+                                    "DeliveryDate": "",
+                                    "CustomerID": a['Customer']['id'],
+                                    "Customer": a['Customer']['Name'],
+                                    "SupplierID": a['Party']['id'],
+                                    "Supplier": a['Party']['Name'],
+                                    "OrderAmount": a['GrandTotal'],
+                                    "Description": "",
+                                    "OrderType" : "",
+                                    "POType" : "",
+                                    "BillingAddress": "",
+                                    "ShippingAddress": "",
+                                    "CreatedBy": a['CreatedBy'],
+                                    "CreatedOn": a['CreatedOn'],
+                                    "Inward": "",
+                                    "Percentage" : "",
+                                })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
