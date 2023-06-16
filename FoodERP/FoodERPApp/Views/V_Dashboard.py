@@ -25,7 +25,7 @@ class DashBoardView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = T_Invoices.objects.filter(Party_id = id, InvoiceDate = date.today()).count()
-                query1 = T_GRNs.objects.filter(Party_id = id,GRNDate = date.today()).count()
+                query1 = T_GRNs.objects.filter(Customer_id = id,GRNDate = date.today()).count()
                 query2 = T_Orders.objects.filter(Supplier_id = id, OrderDate = date.today()).count()
                 Invoice_list = list() 
                 Invoice_list.append({
