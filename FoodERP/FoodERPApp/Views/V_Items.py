@@ -427,16 +427,22 @@ class ProductAndMarginReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,IsSCM=0,PartyID=0):
         try:
             with transaction.atomic():
-                Itemsdata = M_Items.objects.all()
+                # print(IsSCM)
+                if IsSCM == '0':
+                    Itemsdata = M_Items.objects.all()
+                else:
+                    partyitem=MC_PartyItems.objects.filter(Party=PartyID).values('Item')
+                    Itemsdata = M_Items.objects.filter(id__in=partyitem)
+                
+                # print(Itemsdata.query)
                 if Itemsdata.exists():
                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
                     ItemsList = list()
                     for a in Itemsdata_Serializer:
 
-                        
                         if a['Length'] is None:
                             BoxSize=""
                             
@@ -448,10 +454,17 @@ class ProductAndMarginReportView(CreateAPIView):
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
 
+                        if IsSCM == '0' :
+                            query = M_PriceList.objects.values('id','Name')
+                        else:
+                            qur1=MC_PartySubParty.objects.filter(Q(Party=PartyID)|Q(SubParty=PartyID)).values('SubParty')
+                            qur2=M_Parties.objects.filter(id__in=qur1).values('PriceList').distinct()
+                            query = M_PriceList.objects.values('id','Name').filter(id__in=qur2)
                         
-
-                        query = M_PriceList.objects.values('id','Name')
+                        
+                        
                         ItemMargins=list()
+                        RateList=list()
                         
                         for x in query:
                             
@@ -460,10 +473,16 @@ class ProductAndMarginReportView(CreateAPIView):
                             
                             ItemMargins.append({
                                 x['Name']+'Margin' : Margin[0]['TodaysMargin'],
+                                
+                            })
+                            RateList.append({
+                               
                                 x['Name']+'RateWithGST' : Rate[0]['RatewithGST'],
                                 x['Name']+'RateWithOutGST' : Rate[0]['RateWithoutGST']
                             })
                         
+                        ww=ItemMargins+RateList
+                       
                         ItemsList.append({
 
                             "FE2ItemID": a['id'],
@@ -477,14 +496,14 @@ class ProductAndMarginReportView(CreateAPIView):
                             "StoringCondition":a['StoringCondition'],
                             "MRP":ItemMRPdata[0]['MRP'],
                             "GST":ItemGstHsnCodedata[0]['GSTPercentage'],
-                            "CompanyName": a['Company']['Name'],
+                           
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUGr":a['Grammage'],
                             "Product":a['ItemGroupDetails'][0]['Group']['Name'],
                             "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
                             "Company": a['Company']['Name'],
                             "ShelfLife":Itemshelfdata[0]['Days'],
-                            "ItemMargins":ItemMargins
+                            "ItemMargins":ww
                             
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})

@@ -21,13 +21,13 @@ class M_POTypeserializerSecond(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name']
+        fields = ['id','Name','SAPPartyCode']
 
 class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']
 
 class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -255,6 +255,25 @@ class OrderEditserializer(serializers.Serializer):
     SAPItemCode=serializers.CharField(max_length=100)
     SAPUnitName=serializers.CharField(max_length=100)
     
+
+
+
+
+class ReportOrderItemSerializer(serializers.ModelSerializer):
+    Item = ItemSerializerSecond(read_only=True)
+    class Meta:
+        model = TC_OrderItems
+        fields = '__all__'
+        
+    
+class SummaryReportOrderSerializer(serializers.ModelSerializer):
+    Customer = PartiesSerializerThird(read_only=True)
+    Supplier = PartiesSerializerThird(read_only=True)
+    OrderItem = ReportOrderItemSerializer(read_only=True,many=True)
+    class Meta:
+        model = T_Orders
+        fields = '__all__'
+
     
 class TestGRNReferanceSerializer(serializers.ModelSerializer):
     class Meta:

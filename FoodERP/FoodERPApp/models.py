@@ -817,6 +817,7 @@ class T_Orders(models.Model):
     ShippingAddress=models.ForeignKey(MC_PartyAddress, related_name='OrderShippingAddress', on_delete=models.PROTECT)
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.DO_NOTHING)
     SAPResponse =models.CharField(max_length=500 ,null=True)
+    IsConfirm = models.BooleanField(default=False) 
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
@@ -848,6 +849,9 @@ class TC_OrderItems(models.Model):
     Margin = models.ForeignKey(M_MarginMaster, related_name='OrderItemMargin', on_delete=models.PROTECT,null=True,blank=True)
     Order = models.ForeignKey(T_Orders, related_name='OrderItem', on_delete=models.CASCADE)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='OrderUnitID', on_delete=models.PROTECT)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "TC_OrderItems"
@@ -922,7 +926,9 @@ class TC_InvoiceItems(models.Model):
     LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
     MRP = models.ForeignKey(M_MRPMaster, related_name='InvoiceItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.PROTECT)
-
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "TC_InvoiceItems"
@@ -1695,7 +1701,7 @@ class MC_SettingsDetails(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies,related_name='SettingCompany', on_delete=models.PROTECT)
-    Party = models.ForeignKey(M_Parties,related_name='SettingParty', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties,related_name='SettingParty', on_delete=models.PROTECT,blank=True, null=True)
     SettingID=models.ForeignKey(M_Settings,related_name='SettingDetails',on_delete=models.CASCADE)         
 
     class Meta:

@@ -206,6 +206,9 @@ urlpatterns = [
             # url(r'GetItemsForParty$',GetItemsForOrderView.as_view()),
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
+            url(r'OrderConfirms$',ConfirmOrderView.as_view()),
+            url(r'OrderSummaryReport$',SummaryReportView.as_view()),
+            
 
 # InterBranch Order All APIs
             url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
@@ -324,6 +327,8 @@ urlpatterns = [
             url(r'GetVendorSupplierCustomer$',GetVendorSupplierCustomerListView.as_view()),
             # url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
             # url(r'GetCustomer/([0-9]+)$',GetCustomerView.as_view()),
+            url(r'PartyAddressDelete/([0-9]+)$',PartyAddressView.as_view()),
+            
            
 # State and District
             url(r'States$',M_StateView.as_view()),    
@@ -374,7 +379,7 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
-            url(r'ProductMarginReport$',ProductAndMarginReportView.as_view()),
+            url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 

@@ -19,9 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234'] 
+ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.65','cbmdms.cbmlocal.in','10.4.5.64'] 
 
 
 # Application definition
@@ -83,27 +83,26 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'devfooderp20230607',     
+        'NAME': 'devfooderp20230614',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
         'HOST': '192.168.1.114', 
         'PORT': '3306' 
+    },
+
+    'logs': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'transactionlogdb',
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd', 
+        'HOST': '192.168.1.114',
+        'PORT': '3306'
     }
- 
-    
-    # , 
-    # 'logs': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'transactionlogdb',
-    #     'USER': 'pk',
-    #     'PASSWORD': 'P@ssw0rd', 
-    #     'HOST': '192.168.1.114',
-    #     'PORT': '3306'
-    # }
+
 }
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # ACTIVITYLOG_AUTOCREATE_DB = True
 # # Log anonymous actions?
@@ -122,7 +121,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # # ACTIVITYLOG_EXCLUDE_STATUSES = (302, )
 
 # # URL substrings, which ignores
-# ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
+# #ACTIVITYLOG_EXCLUDE_URLS = ('/admin/activity_log/activitylog', )
 # ACTIVITYLOG_GET_EXTRA_DATA = 'FoodERPApp.models.make_extra_data'
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -147,7 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Calcutta'
 
 USE_I18N = True
 
@@ -158,7 +157,6 @@ USE_TZ = False
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
