@@ -743,9 +743,9 @@ class SummaryReportView(CreateAPIView):
                                     "OrderDate": a['OrderDate'],
                                     "SupplierName": a['Supplier']['Name'],
                                     "CustomerName": a['Customer']['Name'],
-                                    "QtyInNo": round(b['QtyInNo'],3),
-                                    "QtyInKg": round(b['QtyInKg'],3),
-                                    "QtyInBox": round(b['QtyInBox'],3),
+                                    "QtyInNo": round(float(b['QtyInNo']),3),
+                                    "QtyInKg": round(float(b['QtyInKg']),3),
+                                    "QtyInBox": round(float(b['QtyInBox']),3),
                                     "OrderAmount": a['OrderAmount']
                                 }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Data': OrderItemDetails })
