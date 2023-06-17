@@ -167,7 +167,8 @@ class M_PartiesViewSecond(CreateAPIView):
                             "PartyName":a['Party']['Name'],
                             "Subparty":a['SubParty'],
                             "Creditlimit":a['Creditlimit'],
-                            "Route":a['Route_id']
+                            "Route":a['Route_id'],
+                            "Distance":a['Distance']
                         })
                     list2 = list()
                     list2.append({"Data":M_Parties_serializer[0],
