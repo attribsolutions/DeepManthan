@@ -17,7 +17,7 @@ class PartySubPartySerializer2(serializers.ModelSerializer):
     Party = DivisionsSerializer()
     class Meta:
         model = MC_PartySubParty
-        fields = ['Party','SubParty','Creditlimit','Route_id']
+        fields = ['Party','SubParty','Creditlimit','Route_id','Distance']
               
     
 class PartyPrefixsSerializer(serializers.ModelSerializer):
@@ -47,7 +47,6 @@ class M_PartiesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = '__all__'
-        
         
     def create(self, validated_data):
         PartyType = validated_data.get('PartyType')
@@ -153,10 +152,10 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyType = PartyTypeSerializerSecond()
     PriceList=PriceListSerializerSecond()
     PartyPrefix = PartyPrefixsSerializer(many=True)
+
     class Meta:
         model =  M_Parties
         fields = '__all__'
-        
 
 class M_PartiesSerializerThird(serializers.Serializer):
     
