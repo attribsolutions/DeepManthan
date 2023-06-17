@@ -950,6 +950,7 @@ class  MC_PartySubParty(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.CASCADE)
     Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.CASCADE, blank=True,null=True)
     SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
+    Distance = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=2)
 
     class Meta:
         db_table = "MC_PartySubParty"
