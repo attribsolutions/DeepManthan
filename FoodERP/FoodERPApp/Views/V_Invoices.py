@@ -279,7 +279,9 @@ class InvoiceViewSecond(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
-                                "HSNCode":b['GST']['HSNCode']
+                                "HSNCode":b['GST']['HSNCode'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
                             })
                             
                             InvoiceReferenceDetails = list()
