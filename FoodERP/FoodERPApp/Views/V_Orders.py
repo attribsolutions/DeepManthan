@@ -743,10 +743,10 @@ class SummaryReportView(CreateAPIView):
                                     "OrderDate": a['OrderDate'],
                                     "SupplierName": a['Supplier']['Name'],
                                     "CustomerName": a['Customer']['Name'],
-                                    "QtyInNo": b['QtyInNo'],
-                                    "QtyInKg": b['QtyInKg'],
-                                    "QtyInBox": b['QtyInBox'],
-                                    "OrderAmount": a['OrderAmount']
+                                    "QtyInNo": float(b['QtyInNo']),
+                                    "QtyInKg": float(b['QtyInKg']),
+                                    "QtyInBox": float(b['QtyInBox']),
+                                    "OrderAmount": float(a['OrderAmount'])
                                 }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Data': OrderItemDetails })
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
