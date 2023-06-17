@@ -70,7 +70,6 @@ TEMPLATES = [
 ]
 
 
-
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
