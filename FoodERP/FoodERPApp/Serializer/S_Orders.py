@@ -254,6 +254,10 @@ class OrderEditserializer(serializers.Serializer):
     Comment=serializers.CharField(max_length=100) 
     SAPItemCode=serializers.CharField(max_length=100)
     SAPUnitName=serializers.CharField(max_length=100)
+    GroupTypeName=serializers.CharField(max_length=100) 
+    GroupName=serializers.CharField(max_length=100)
+    SubGroupName=serializers.CharField(max_length=100)
+    
     
 
 
