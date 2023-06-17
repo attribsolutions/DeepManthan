@@ -190,6 +190,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     Employee_id=serializers.IntegerField()
     SAPPartyCode=serializers.CharField(max_length=500)
     IsSCMPartyType=serializers.IntegerField()
+    GSTIN=serializers.CharField(max_length=500)
     
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     

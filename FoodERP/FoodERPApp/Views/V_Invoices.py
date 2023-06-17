@@ -248,8 +248,7 @@ class InvoiceViewSecond(CreateAPIView):
             with transaction.atomic():
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
-                    InvoiceSerializedata = InvoiceSerializerSecond(
-                        InvoiceQuery, many=True).data
+                    InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                     InvoiceData = list()
                     for a in InvoiceSerializedata:
@@ -280,6 +279,9 @@ class InvoiceViewSecond(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
+                                "HSNCode":b['GST']['HSNCode'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
                             })
                             
                             InvoiceReferenceDetails = list()
