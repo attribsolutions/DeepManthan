@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 # from activity_log.models import UserMixin
 
@@ -900,7 +901,7 @@ class T_Invoices(models.Model):
 
 class TC_InvoiceItems(models.Model):
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3,validators=[MaxValueValidator(9999999999.999),MinValueValidator(-9999999999.999)])
     MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -990,7 +991,7 @@ class T_GRNs(models.Model):
 
 class TC_GRNItems(models.Model):
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3,validators=[MaxValueValidator(9999999999.999),MinValueValidator(-9999999999.999)])
     MRP = models.DecimalField(max_digits=20, decimal_places=2, null=True)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
