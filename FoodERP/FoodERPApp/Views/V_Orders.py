@@ -683,11 +683,12 @@ group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                         "BillingAddress": a['BillingAddress']['Address'],
                         "ShippingAddressID": a['ShippingAddress']['id'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
-                        "Inward": inward,
                         "BillingAddress": a['BillingAddress']['Address'],
                         "ShippingAddressID": a['ShippingAddress']['id'],
                         "ShippingAddress": a['ShippingAddress']['Address'],
-
+                        "Inward": inward,
+                        "CustomerGSTIN": a['Customer']['GSTIN'],
+                        "SupplierGSTIN": a['Supplier']['GSTIN'],
                         "OrderItems": OrderItemSerializer,
                         "TermsAndConditions": OrderTermsAndCondition
                     })
@@ -726,6 +727,8 @@ group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                         "ShippingAddressID": "",
                         "ShippingAddress": "",
                         "Inward": "",
+                        "CustomerGSTIN": "",
+                        "SupplierGSTIN": "",
                         "OrderItems": OrderItemSerializer,
                         "TermsAndConditions": TermsAndConditions
                     })
