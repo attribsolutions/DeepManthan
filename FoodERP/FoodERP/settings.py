@@ -86,18 +86,18 @@ DATABASES = {
         'NAME': 'devfooderp20230614',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114', 
+        'HOST': '192.168.1.114',  
         'PORT': '3306' 
     },
 
-    'logs': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'transactionlogdb',
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114',
-        'PORT': '3306'
-    }
+    # 'logs': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'transactionlogdb',
+    #     'USER': 'pk',
+    #     'PASSWORD': 'P@ssw0rd', 
+    #     'HOST': '192.168.1.114',
+    #     'PORT': '3306'
+    # }
 
 }
 
