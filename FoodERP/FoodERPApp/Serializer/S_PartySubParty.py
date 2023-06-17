@@ -10,7 +10,7 @@ class PartySerializer(serializers.ModelSerializer):
     PartyType=PartyTypeSerializer(read_only=True)
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType']
+        fields = ['id','Name','PartyType','GSTIN']
         
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
