@@ -70,7 +70,6 @@ TEMPLATES = [
 ]
 
 
-
 WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # For writing log to another DB
 
@@ -83,10 +82,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'devfooderp20230614',     
+        'NAME': 'devfooderp20230619',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114',  
+        'HOST': '10.1.201.19',  
         'PORT': '3306' 
     },
 

@@ -199,7 +199,7 @@ class InvoiceView(CreateAPIView):
                 Invoicedata = JSONParser().parse(request)
                 Party = Invoicedata['Party']
                 InvoiceDate = Invoicedata['InvoiceDate']
-                print('aaaaaaaaaaa')
+             
                 # ==========================Get Max Invoice Number=====================================================
                 a = GetMaxNumber.GetInvoiceNumber(Party,InvoiceDate)
                 Invoicedata['InvoiceNumber'] = a
@@ -211,32 +211,27 @@ class InvoiceView(CreateAPIView):
                 for InvoiceItem in InvoiceItems:
                     # print(InvoiceItem['Quantity'])
                     BaseUnitQuantity=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                    InvoiceItem['BaseUnitQuantity'] =  BaseUnitQuantity 
+                    InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
                     QtyInNo=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
-                    InvoiceItem['QtyInNo'] =  QtyInNo
+                    InvoiceItem['QtyInNo'] =  float(QtyInNo)
                     QtyInKg=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
-                    InvoiceItem['QtyInKg'] =  QtyInKg
+                    InvoiceItem['QtyInKg'] =  float(QtyInKg)
                     QtyInBox=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
-                    InvoiceItem['QtyInBox'] =  QtyInBox
+                    InvoiceItem['QtyInBox'] = float(QtyInBox)
                     
                     O_BatchWiseLiveStockList.append({
                         "Quantity" : InvoiceItem['BatchID'],
                         "Item" : InvoiceItem['Item'],
                         "BaseUnitQuantity" : InvoiceItem['BaseUnitQuantity']
                     })
-                        
                 Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
-                print(Invoicedata)
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
-                print(Invoice_serializer)
                 if Invoice_serializer.is_valid():
-                    print('kkkkkkkkkk')
                     Invoice_serializer.save()
-                    print('pppppp]pppppppppppppppp')
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e.__dict__, 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
