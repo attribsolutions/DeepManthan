@@ -111,15 +111,13 @@ class InvoiceSerializer(serializers.ModelSerializer):
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
             
                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
-                print(OBatchQuantity[0]['BaseUnitQuantity'],O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 else:
-                    
                     raise serializers.ValidationError("Not In Stock ")    
           
         for InvoicesReference_data in InvoicesReferences_data:
-            print(InvoiceID) 
+          
             InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)   
               
         
