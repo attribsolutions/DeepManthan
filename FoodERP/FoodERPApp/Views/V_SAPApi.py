@@ -32,8 +32,8 @@ class SAPInvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                print('SapInvoice aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-                print(request)
+                
+                log_entry = create_transaction_log(request,0, 0,'sapinvoice proces initiat')
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 if auth_header:
                 # Parsing the authorization header
@@ -46,7 +46,7 @@ class SAPInvoiceView(CreateAPIView):
                         return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                     # Authenticating the user
                     user = authenticate(request, username=username, password=password)
-                    print('aaaaaaaa')
+                    
                     if user is not None:
                         aa = JSONParser().parse(request)
                         
@@ -86,6 +86,10 @@ class SAPInvoiceView(CreateAPIView):
                             else:
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data':[]})
                             
+                            BaseUnitQuantity=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,0,0).GetBaseUnitQuantity()
+                            QtyInNo=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,1,0).ConvertintoSelectedUnit()
+                            QtyInKg=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,2,0).ConvertintoSelectedUnit()
+                            QtyInBox=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItems.append({
                                             
                                         "Item": ItemMapping[0]["id"],
@@ -114,6 +118,12 @@ class SAPInvoiceView(CreateAPIView):
                                         "LiveBatch":"",
                                         "Discount":bb['DiscountPercentage'],
                                         "DiscountAmount":bb['DiscountAmount'],
+                                        
+                    'BaseUnitQuantity': round(BaseUnitQuantity,3) ,
+                    
+                    "QtyInNo" :  float(QtyInNo),
+                    "QtyInKg" :  float(QtyInKg),
+                    "QtyInBox" : float(QtyInBox)
                                 })
                             InvoiceData=list()
                             InvoiceData.append({
@@ -135,9 +145,12 @@ class SAPInvoiceView(CreateAPIView):
                             Invoice_serializer = InvoiceSerializer(data=InvoiceData[0])
                             if Invoice_serializer.is_valid():
                                 Invoice_serializer.save()
+                                
                             else:
                                 transaction.set_rollback(True)
+                                log_entry = create_transaction_log(request,0, 0,'SAPinvoice Proccesing Error')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                        log_entry = create_transaction_log(request,0, 0,'SAPinvoice Save')
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                         # Username and password are valid
                         return Response('Authenticated', status=status.HTTP_200_OK)
