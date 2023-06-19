@@ -1724,6 +1724,7 @@ class Transactionlog(models.Model):
     IPaddress = models.CharField(max_length=500)
     PartyID = models.IntegerField()
     TransactionDetails =  models.CharField(max_length=500)
+    JsonData = models.TextField(blank = True)
     
     class Meta:
         db_table="Transactionlog"         
