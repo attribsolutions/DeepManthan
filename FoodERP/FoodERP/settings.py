@@ -86,7 +86,7 @@ DATABASES = {
         'NAME': 'devfooderp20230619',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd', 
-        'HOST': '192.168.1.114',  
+        'HOST': '192.168.1.114' ,  
         'PORT': '3306' 
     },
 
