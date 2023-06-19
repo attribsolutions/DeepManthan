@@ -11,7 +11,7 @@ class PartiesSerializer(serializers.ModelSerializer):
 class DivisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
-        fields = ['id','Name']
+        fields = ['id','Name','GSTIN']
          
 class PartySubPartySerializer2(serializers.ModelSerializer):
     Party = DivisionsSerializer()

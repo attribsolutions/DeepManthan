@@ -150,22 +150,26 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                         if(Type==1): #Vendor
                             ListData.append({
                             "id": a['Party']['id'],
-                            "Name": a['Party']['Name']
+                            "Name": a['Party']['Name'],
+                            "GSTIN": a['Party']['GSTIN']
                             })   
                         elif(Type==2): #Supplier
                             ListData.append({
                             "id": a['Party']['id'],
-                            "Name": a['Party']['Name']
+                            "Name": a['Party']['Name'],
+                            "GSTIN": a['Party']['GSTIN']
                             }) 
                         elif(Type==3):  #Customer
                             ListData.append({
                             "id": a['SubParty']['id'],
-                            "Name": a['SubParty']['Name']
+                            "Name": a['SubParty']['Name'],
+                            "GSTIN": a['Party']['GSTIN']
                             })
                         else:
                             ListData.append({
                             "id": a['id'],
-                            "Name": a['Name']
+                            "Name": a['Name'],
+                            "GSTIN": a['Party']['GSTIN']
                             })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})

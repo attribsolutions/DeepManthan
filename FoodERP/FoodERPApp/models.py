@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 # from activity_log.models import UserMixin
 
@@ -899,24 +900,24 @@ class T_Invoices(models.Model):
 
 
 class TC_InvoiceItems(models.Model):
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRPValue =  models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2)
-    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Quantity = models.DecimalField(max_digits=20, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=5,validators=[MaxValueValidator(9999999999.999),MinValueValidator(-9999999999.999)])
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
     TaxType = models.CharField(max_length=500)
-    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
-    Amount = models.DecimalField(max_digits=15, decimal_places=2)
+    GSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    GSTAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    Amount = models.DecimalField(max_digits=20, decimal_places=2)
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
-    Discount = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
-    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2,blank=True, null=True)
-    CGST = models.DecimalField(max_digits=15, decimal_places=2)
-    SGST = models.DecimalField(max_digits=15, decimal_places=2)
-    IGST = models.DecimalField(max_digits=15, decimal_places=2)
-    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
-    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
-    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    CGST = models.DecimalField(max_digits=20, decimal_places=2)
+    SGST = models.DecimalField(max_digits=20, decimal_places=2)
+    IGST = models.DecimalField(max_digits=20, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -990,7 +991,7 @@ class T_GRNs(models.Model):
 
 class TC_GRNItems(models.Model):
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3,validators=[MaxValueValidator(9999999999.999),MinValueValidator(-9999999999.999)])
     MRP = models.DecimalField(max_digits=20, decimal_places=2, null=True)
     ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
