@@ -927,9 +927,9 @@ class TC_InvoiceItems(models.Model):
     LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
     MRP = models.ForeignKey(M_MRPMaster, related_name='InvoiceItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='InvoiceUnitID', on_delete=models.PROTECT)
-    QtyInNo = models.DecimalField(max_digits=30, decimal_places=3)
-    QtyInKg = models.DecimalField(max_digits=30, decimal_places=3)
-    QtyInBox = models.DecimalField(max_digits=30, decimal_places=3)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "TC_InvoiceItems"
