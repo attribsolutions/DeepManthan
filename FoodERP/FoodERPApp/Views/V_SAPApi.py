@@ -86,6 +86,10 @@ class SAPInvoiceView(CreateAPIView):
                             else:
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data':[]})
                             
+                            BaseUnitQuantity=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,0,0).GetBaseUnitQuantity()
+                            QtyInNo=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,1,0).ConvertintoSelectedUnit()
+                            QtyInKg=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,2,0).ConvertintoSelectedUnit()
+                            QtyInBox=UnitwiseQuantityConversion(ItemMapping[0]["id"],bb['Quantity'],MC_UnitID[0]["id"],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItems.append({
                                             
                                         "Item": ItemMapping[0]["id"],
@@ -114,6 +118,12 @@ class SAPInvoiceView(CreateAPIView):
                                         "LiveBatch":"",
                                         "Discount":bb['DiscountPercentage'],
                                         "DiscountAmount":bb['DiscountAmount'],
+                                        
+                    'BaseUnitQuantity': round(BaseUnitQuantity,3) ,
+                    
+                    "QtyInNo" :  float(QtyInNo),
+                    "QtyInKg" :  float(QtyInKg),
+                    "QtyInBox" : float(QtyInBox)
                                 })
                             InvoiceData=list()
                             InvoiceData.append({
