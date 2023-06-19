@@ -901,7 +901,7 @@ class T_Invoices(models.Model):
 
 class TC_InvoiceItems(models.Model):
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=5,validators=[MaxValueValidator(9999999999.999),MinValueValidator(-9999999999.999)])
+    BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3)
     MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
