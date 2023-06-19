@@ -1718,7 +1718,7 @@ class MC_SettingDependency(models.Model):
         
  
 class Transactionlog(models.Model):
-    TranasactionDate = models.DateTimeField(auto_now_add=True)
+    TranasactionDate =  models.DateField()
     Transactiontime = models.DateTimeField(auto_now_add=True)
     User = models.IntegerField()
     IPaddress = models.CharField(max_length=500)
