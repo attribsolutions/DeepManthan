@@ -40,7 +40,7 @@ def get_client_ip(request):
 
 def create_transaction_log(request,User, PartyID,TransactionDetails):
     log_entry = Transactionlog.objects.create(
-        
+        TranasactionDate=date.today(),
         User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails
     )
     return log_entry
