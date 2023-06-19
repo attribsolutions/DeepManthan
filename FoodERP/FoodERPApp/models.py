@@ -1716,6 +1716,19 @@ class MC_SettingDependency(models.Model):
     class Meta:
         db_table="MC_SettingDependency"
         
+ 
+class Transactionlog(models.Model):
+    TranasactionDate =  models.DateField()
+    Transactiontime = models.DateTimeField(auto_now_add=True)
+    User = models.IntegerField()
+    IPaddress = models.CharField(max_length=500)
+    PartyID = models.IntegerField()
+    TransactionDetails =  models.CharField(max_length=500)
+    JsonData = models.TextField(blank = True)
+    
+    class Meta:
+        db_table="Transactionlog"         
+        
         
 
 

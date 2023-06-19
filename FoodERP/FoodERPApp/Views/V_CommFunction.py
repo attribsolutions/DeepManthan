@@ -27,6 +27,25 @@ from datetime import date
 
 '''
 
+def get_client_ip(request):
+    """
+    Get the client's IP address from the request.
+    """
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+def create_transaction_log(request,User, PartyID,TransactionDetails):
+    log_entry = Transactionlog.objects.create(
+        TranasactionDate=date.today(),
+        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails
+    )
+    return log_entry
+
+
 def UnitDropdown(ItemID,PartyForRate,BatchID=0):
     
     UnitDetails = list()
