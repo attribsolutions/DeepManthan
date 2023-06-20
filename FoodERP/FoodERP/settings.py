@@ -23,7 +23,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.65','cbmfooderp.com','10.4.5.64'] 
 
-
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 INSTALLED_APPS = [
