@@ -223,7 +223,7 @@ class T_OrderSerializerThird(serializers.ModelSerializer):
 class OrderSerializerForGrn(serializers.Serializer):
     id=serializers.IntegerField()
     SupplierName = serializers.CharField(max_length=500)     
-    OrderAmount=serializers.DecimalField(max_digits=10, decimal_places=2) 
+    OrderAmount=serializers.DecimalField(max_digits=20, decimal_places=2) 
     CustomerID =serializers.IntegerField() 
 
 class OrderEditserializer(serializers.Serializer):
