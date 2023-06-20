@@ -120,6 +120,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 Type=Partydata['Type']
                 id=Partydata['PartyID']
                 Company=Partydata['Company']
+                Route = Partydata['Route']
                 
                 if(Type==1): #Vendor
                     q0=M_PartyType.objects.filter(Company=Company,IsVendor=1)
@@ -133,8 +134,13 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                     
                 elif(Type==3):  #Customer
                     q0=M_PartyType.objects.filter(Company=Company,IsVendor=0)
-                    Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0).select_related('Party')
-                
+                    if (Route==""):
+                        Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0).select_related('Party')
+                    else:
+                        Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0,Route=Route).select_related('Party')
+                    
+                    
+
                 elif (Type==4):
                     Query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=id))
                 
