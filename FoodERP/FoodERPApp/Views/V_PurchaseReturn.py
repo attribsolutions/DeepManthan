@@ -70,7 +70,7 @@ class PurchaseReturnView(CreateAPIView):
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 PurchaseReturndata['ReturnNo'] = str(c)
                 d = GetPrifix.GetPurchaseReturnPrifix(Party)
-                PurchaseReturndata['FullReturnNumber'] = d+""+str(c)
+                PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
                 
                 item = ""
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
