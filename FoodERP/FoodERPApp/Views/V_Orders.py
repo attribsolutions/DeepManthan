@@ -690,7 +690,9 @@ group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                         "CustomerGSTIN": a['Customer']['GSTIN'],
                         "SupplierGSTIN": a['Supplier']['GSTIN'],
                         "OrderItems": OrderItemSerializer,
-                        "TermsAndConditions": OrderTermsAndCondition
+                        "TermsAndConditions": OrderTermsAndCondition,
+                        "CreatedBy":a['CreatedBy'],
+                        "CreatedOn":a['CreatedOn']
                     })
                     FinalResult = OrderData[0]
                 else:
@@ -730,7 +732,9 @@ group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                         "CustomerGSTIN": "",
                         "SupplierGSTIN": "",
                         "OrderItems": OrderItemSerializer,
-                        "TermsAndConditions": TermsAndConditions
+                        "TermsAndConditions": TermsAndConditions,
+                        "CreatedBy":"",
+                        "CreatedOn":""
                     })
 
                     FinalResult = NewOrder[0]

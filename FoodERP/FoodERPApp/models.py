@@ -573,6 +573,7 @@ class MC_SubGroup(models.Model):
 class M_Units(models.Model):
     Name = models.CharField(max_length=500)
     SAPUnit =models.CharField(max_length=500)
+    EwayBillUnit =models.CharField(max_length=500,null=True,blank=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1401,8 +1402,8 @@ class T_PurchaseReturn(models.Model):
     ReturnDate = models.DateField()
     ReturnNo = models.CharField(max_length=500,blank=True, null=True)
     FullReturnNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)
+    RoundOffAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Comment = models.CharField(max_length=500,blank=True, null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1418,21 +1419,21 @@ class T_PurchaseReturn(models.Model):
 
 class TC_PurchaseReturnItems(models.Model):
     ItemComment = models.CharField(max_length=500,blank=True, null=True)
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    MRPValue =  models.DecimalField(max_digits=15, decimal_places=2)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2)
-    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    Quantity = models.DecimalField(max_digits=30, decimal_places=3)
+    BaseUnitQuantity = models.DecimalField(max_digits=30, decimal_places=3)
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    BasicAmount = models.DecimalField(max_digits=30, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2)
-    Amount = models.DecimalField(max_digits=15, decimal_places=2)
-    CGST = models.DecimalField(max_digits=15, decimal_places=2)
-    SGST = models.DecimalField(max_digits=15, decimal_places=2)
-    IGST = models.DecimalField(max_digits=15, decimal_places=2)
-    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
-    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
-    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2)
+    GSTAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    Amount = models.DecimalField(max_digits=30, decimal_places=2)
+    CGST = models.DecimalField(max_digits=20, decimal_places=2)
+    SGST = models.DecimalField(max_digits=20, decimal_places=2)
+    IGST = models.DecimalField(max_digits=20, decimal_places=2)
+    CGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    SGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    IGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     BatchDate = models.DateField(blank=True, null=True)
     BatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1727,7 +1728,26 @@ class Transactionlog(models.Model):
     JsonData = models.TextField(blank = True)
     
     class Meta:
-        db_table="Transactionlog"         
+        db_table="Transactionlog"
+        
+        
+class TC_InvoiceUploads(models.Model):
+    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT,blank=True, null=True) 
+    AckNo =  models.CharField(max_length=500)  
+    Irn =  models.CharField(max_length=500)
+    QRCodeUrl =models.CharField(max_length=500)
+    EInvoicePdf = models.CharField(max_length=500)
+    EwayBillUrl = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    CanceledBy = models.IntegerField()
+    CanceledOn = models.DateTimeField(auto_now=True)
+    IsCancel = models.BooleanField(default=False)
+    
+    
+    class Meta:
+        db_table="TC_InvoiceUploads"
+                 
         
         
 

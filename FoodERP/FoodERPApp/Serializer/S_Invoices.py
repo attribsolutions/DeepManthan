@@ -221,8 +221,41 @@ class InvoiceSerializerForDelete(serializers.ModelSerializer):
  
     class Meta:
         model = T_Invoices
-        fields = '__all__'   
+        fields = '__all__'
         
+        
+        
+class ChildInvoiceItemSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=100)
+    Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    MRP_id=serializers.IntegerField() 
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Unit_id=serializers.IntegerField() 
+    UnitName=serializers.CharField(max_length=100)
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GST_id=serializers.IntegerField()
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2) 
+    BatchCode=serializers.CharField(max_length=100) 
+    BatchDate = serializers.DateField()
+    HSNCode=serializers.CharField(max_length=100)
+    Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+   
 #Invoice Serializer for TC_ReceiptInvoices
         
 class GlobleInvoiceSerializer(serializers.ModelSerializer):
