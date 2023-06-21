@@ -1727,7 +1727,25 @@ class Transactionlog(models.Model):
     JsonData = models.TextField(blank = True)
     
     class Meta:
-        db_table="Transactionlog"         
+        db_table="Transactionlog"
+        
+        
+class TC_InvoiceUploads(models.Model):
+    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT,blank=True, null=True)   
+    IRN_ACKNO =  models.CharField(max_length=500)
+    InvoicePdf = models.DateTimeField(auto_now_add=True)
+    QRCodeUrl =models.CharField(max_length=500)
+    EwayBillNo = models.CharField(max_length=500)
+    EwayBillUrl = models.CharField(max_length=500)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    CancelBy = models.IntegerField()
+    CanceledOn = models.DateTimeField(auto_now=True)
+    IsCancel = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table="TC_InvoiceUploads"
+                 
         
         
 
