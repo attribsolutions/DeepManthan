@@ -237,61 +237,151 @@ class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
+#     def get(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 InvoiceQuery = T_Invoices.objects.filter(id=id)
+#                 if InvoiceQuery.exists():
+#                     query = TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,Sum(TC_InvoiceItems.Quantity)Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.TaxType,TC_InvoiceItems.Unit_id,M_Units.Name UnitName,Sum(TC_InvoiceItems.BaseUnitQuantity)BaseUnitQuantity,TC_InvoiceItems.GST_id,TC_InvoiceItems.GSTPercentage,SUM(TC_InvoiceItems.BasicAmount)BasicAmount, SUM(TC_InvoiceItems.GSTAmount)GSTAmount,SUM(TC_InvoiceItems.CGST)CGST, SUM(TC_InvoiceItems.SGST)SGST, SUM(TC_InvoiceItems.IGST)IGST, TC_InvoiceItems.CGSTPercentage, TC_InvoiceItems.SGSTPercentage, TC_InvoiceItems.IGSTPercentage, SUM(TC_InvoiceItems.Amount)Amount,  TC_InvoiceItems.BatchCode,TC_InvoiceItems.BatchDate,M_GSTHSNCode.HSNCode,SUM(TC_InvoiceItems.Discount)Discount, SUM(TC_InvoiceItems.DiscountAmount)DiscountAmount,SUM(TC_InvoiceItems.QtyInBox)QtyInBox, SUM(TC_InvoiceItems.QtyInKg)QtyInKg, SUM(TC_InvoiceItems.QtyInNo)QtyInNo FROM TC_InvoiceItems 
+# JOIN M_Items on M_Items.id=TC_InvoiceItems.Item_id
+# JOIN M_MRPMaster on M_MRPMaster.id=TC_InvoiceItems.MRP_id
+# JOIN MC_ItemUnits on  MC_ItemUnits.id= TC_InvoiceItems.Unit_id
+# JOIN M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+# JOIN M_GSTHSNCode on M_GSTHSNCode.id = TC_InvoiceItems.GST_id
+# JOIN O_LiveBatches on O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
+# where tc_invoiceitems.Invoice_id=%s Group By M_Items.id,TC_InvoiceItems.MRPValue ''',([id]))
+#                     # print(str(query.query))
+#                     InvoiceItemSerializer = ChildInvoiceItemSerializer(query, many=True).data
+#                     InvoiceItemDetails = list()
+#                     for b in InvoiceItemSerializer:
+#                         aaaa=UnitwiseQuantityConversion(b['Item_id'],b['Quantity'],b['Unit_id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+#                         InvoiceItemDetails.append({
+#                             "Item": b['Item_id'],
+#                             "ItemName": b['ItemName'],
+#                             "Quantity": b['Quantity'],
+#                             "MRP": b['MRP_id'],
+#                             "MRPValue": b['MRPValue'],
+#                             "Rate": b['Rate'],
+#                             "UnitName": aaaa,
+#                             "BaseUnitQuantity": b['BaseUnitQuantity'],
+#                             "GST": b['GST_id'],
+#                             "GSTPercentage": b['GSTPercentage'],
+#                             "BasicAmount": b['BasicAmount'],
+#                             "GSTAmount": b['GSTAmount'],
+#                             "CGST": b['CGST'],
+#                             "SGST": b['SGST'],
+#                             "IGST": b['IGST'],
+#                             "CGSTPercentage": b['CGSTPercentage'],
+#                             "SGSTPercentage": b['SGSTPercentage'],
+#                             "IGSTPercentage": b['IGSTPercentage'],
+#                             "Amount": b['Amount'],
+#                             "BatchCode": b['BatchCode'],
+#                             "BatchDate": b['BatchDate'],
+#                             "HSNCode":b['HSNCode'],
+#                             "Discount":b['Discount'],
+#                             "DiscountAmount":b['DiscountAmount']
+#                         })    
+                    
+#                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+#                     InvoiceData = list()
+#                     for a in InvoiceSerializedata:
+#                         InvoiceReferenceDetails = list()
+#                         for d in a['InvoicesReferences']:
+#                             InvoiceReferenceDetails.append({
+#                                 # "Invoice": d['Invoice'],
+#                                 "Order": d['Order']['id'],
+#                                 "FullOrderNumber": d['Order']['FullOrderNumber'],
+#                             })
+                            
+#                         DefCustomerAddress = ''  
+#                         for ad in a['Customer']['PartyAddress']:
+#                             if ad['IsDefault'] == True :
+#                                 DefCustomerAddress = ad['Address']
+                                
+#                         DefPartyAddress = ''
+#                         for x in a['Party']['PartyAddress']:
+#                             if x['IsDefault'] == True :
+#                                 DefPartyAddress = x['Address']
+                    
+#                         InvoiceData.append({
+#                             "id": a['id'],
+#                             "InvoiceDate": a['InvoiceDate'],
+#                             "InvoiceNumber": a['InvoiceNumber'],
+#                             "FullInvoiceNumber": a['FullInvoiceNumber'],
+#                             "GrandTotal": a['GrandTotal'],
+#                             "RoundOffAmount":a['RoundOffAmount'],
+#                             "Customer": a['Customer']['id'],
+#                             "CustomerName": a['Customer']['Name'],
+#                             "CustomerGSTIN": a['Customer']['GSTIN'],
+#                             "Party": a['Party']['id'],
+#                             "PartyName": a['Party']['Name'],
+#                             "PartyGSTIN": a['Party']['GSTIN'],
+#                             "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+#                             "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+#                             "PartyState": a['Party']['State']['Name'],
+#                             "CustomerState": a['Customer']['State']['Name'],
+#                             "PartyAddress": DefPartyAddress,                            
+#                             "CustomerAddress": DefCustomerAddress,
+#                             "DriverName":a['Driver']['Name'],
+#                             "VehicleNo": a['Vehicle']['VehicleNumber'],
+#                             "CreatedOn" : a['CreatedOn'],
+#                             "InvoiceItems": InvoiceItemDetails,
+#                             "InvoicesReferences": InvoiceReferenceDetails,                              
+#                         })
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
+#                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+    
+
     def get(self, request, id=0):
         try:
             with transaction.atomic():
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
-                    query = TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,Sum(TC_InvoiceItems.Quantity)Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.TaxType,TC_InvoiceItems.Unit_id,M_Units.Name UnitName,Sum(TC_InvoiceItems.BaseUnitQuantity)BaseUnitQuantity,TC_InvoiceItems.GST_id,TC_InvoiceItems.GSTPercentage,SUM(TC_InvoiceItems.BasicAmount)BasicAmount, SUM(TC_InvoiceItems.GSTAmount)GSTAmount,SUM(TC_InvoiceItems.CGST)CGST, SUM(TC_InvoiceItems.SGST)SGST, SUM(TC_InvoiceItems.IGST)IGST, TC_InvoiceItems.CGSTPercentage, TC_InvoiceItems.SGSTPercentage, TC_InvoiceItems.IGSTPercentage, SUM(TC_InvoiceItems.Amount)Amount,  TC_InvoiceItems.BatchCode,TC_InvoiceItems.BatchDate,M_GSTHSNCode.HSNCode,SUM(TC_InvoiceItems.Discount)Discount, SUM(TC_InvoiceItems.DiscountAmount)DiscountAmount,SUM(TC_InvoiceItems.QtyInBox)QtyInBox, SUM(TC_InvoiceItems.QtyInKg)QtyInKg, SUM(TC_InvoiceItems.QtyInNo)QtyInNo FROM TC_InvoiceItems 
-JOIN M_Items on M_Items.id=TC_InvoiceItems.Item_id
-JOIN M_MRPMaster on M_MRPMaster.id=TC_InvoiceItems.MRP_id
-JOIN MC_ItemUnits on  MC_ItemUnits.id= TC_InvoiceItems.Unit_id
-JOIN M_Units on M_Units.id=MC_ItemUnits.UnitID_id
-JOIN M_GSTHSNCode on M_GSTHSNCode.id = TC_InvoiceItems.GST_id
-JOIN O_LiveBatches on O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
-where tc_invoiceitems.Invoice_id=%s Group By M_Items.id,TC_InvoiceItems.MRPValue ''',([id]))
-                    # print(str(query.query))
-                    InvoiceItemSerializer = ChildInvoiceItemSerializer(query, many=True).data
-                    InvoiceItemDetails = list()
-                    for b in InvoiceItemSerializer:
-                        aaaa=UnitwiseQuantityConversion(b['Item_id'],b['Quantity'],b['Unit_id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
-                        InvoiceItemDetails.append({
-                            "Item": b['Item_id'],
-                            "ItemName": b['ItemName'],
-                            "Quantity": b['Quantity'],
-                            "MRP": b['MRP_id'],
-                            "MRPValue": b['MRPValue'],
-                            "Rate": b['Rate'],
-                            "UnitName": aaaa,
-                            "BaseUnitQuantity": b['BaseUnitQuantity'],
-                            "GST": b['GST_id'],
-                            "GSTPercentage": b['GSTPercentage'],
-                            "BasicAmount": b['BasicAmount'],
-                            "GSTAmount": b['GSTAmount'],
-                            "CGST": b['CGST'],
-                            "SGST": b['SGST'],
-                            "IGST": b['IGST'],
-                            "CGSTPercentage": b['CGSTPercentage'],
-                            "SGSTPercentage": b['SGSTPercentage'],
-                            "IGSTPercentage": b['IGSTPercentage'],
-                            "Amount": b['Amount'],
-                            "BatchCode": b['BatchCode'],
-                            "BatchDate": b['BatchDate'],
-                            "HSNCode":b['HSNCode'],
-                            "Discount":b['Discount'],
-                            "DiscountAmount":b['DiscountAmount']
-                        })    
-                    
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                     InvoiceData = list()
                     for a in InvoiceSerializedata:
-                        InvoiceReferenceDetails = list()
-                        for d in a['InvoicesReferences']:
-                            InvoiceReferenceDetails.append({
-                                # "Invoice": d['Invoice'],
-                                "Order": d['Order']['id'],
-                                "FullOrderNumber": d['Order']['FullOrderNumber'],
+                        InvoiceItemDetails = list()
+                        for b in a['InvoiceItems']:
+                            aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                            InvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRPValue'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "UnitName": aaaa,
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                                "HSNCode":b['GST']['HSNCode'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
                             })
+                            
+                            InvoiceReferenceDetails = list()
+                            for d in a['InvoicesReferences']:
+                                InvoiceReferenceDetails.append({
+                                    # "Invoice": d['Invoice'],
+                                    "Order": d['Order']['id'],
+                                    "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                })
                             
                         DefCustomerAddress = ''  
                         for ad in a['Customer']['PartyAddress']:
@@ -326,103 +416,13 @@ where tc_invoiceitems.Invoice_id=%s Group By M_Items.id,TC_InvoiceItems.MRPValue
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
-                            "InvoicesReferences": InvoiceReferenceDetails,                              
+                            "InvoicesReferences": InvoiceReferenceDetails,
+                                                        
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
-    
-
-    # def get(self, request, id=0):
-    #     try:
-    #         with transaction.atomic():
-    #             InvoiceQuery = T_Invoices.objects.filter(id=id)
-    #             if InvoiceQuery.exists():
-    #                 InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
-    #                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
-    #                 InvoiceData = list()
-    #                 for a in InvoiceSerializedata:
-    #                     InvoiceItemDetails = list()
-    #                     for b in a['InvoiceItems']:
-    #                         aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
-    #                         InvoiceItemDetails.append({
-    #                             "Item": b['Item']['id'],
-    #                             "ItemName": b['Item']['Name'],
-    #                             "Quantity": b['Quantity'],
-    #                             "MRP": b['MRP']['id'],
-    #                             "MRPValue": b['MRPValue'],
-    #                             "Rate": b['Rate'],
-    #                             "TaxType": b['TaxType'],
-    #                             "UnitName": aaaa,
-    #                             "BaseUnitQuantity": b['BaseUnitQuantity'],
-    #                             "GST": b['GST']['id'],
-    #                             "GSTPercentage": b['GSTPercentage'],
-    #                             "MarginValue": b['Margin']['Margin'],
-    #                             "BasicAmount": b['BasicAmount'],
-    #                             "GSTAmount": b['GSTAmount'],
-    #                             "CGST": b['CGST'],
-    #                             "SGST": b['SGST'],
-    #                             "IGST": b['IGST'],
-    #                             "CGSTPercentage": b['CGSTPercentage'],
-    #                             "SGSTPercentage": b['SGSTPercentage'],
-    #                             "IGSTPercentage": b['IGSTPercentage'],
-    #                             "Amount": b['Amount'],
-    #                             "BatchCode": b['BatchCode'],
-    #                             "BatchDate": b['BatchDate'],
-    #                             "HSNCode":b['GST']['HSNCode'],
-    #                             "Discount":b['Discount'],
-    #                             "DiscountAmount":b['DiscountAmount']
-    #                         })
-                            
-    #                         InvoiceReferenceDetails = list()
-    #                         for d in a['InvoicesReferences']:
-    #                             InvoiceReferenceDetails.append({
-    #                                 # "Invoice": d['Invoice'],
-    #                                 "Order": d['Order']['id'],
-    #                                 "FullOrderNumber": d['Order']['FullOrderNumber'],
-    #                             })
-                            
-    #                     DefCustomerAddress = ''  
-    #                     for ad in a['Customer']['PartyAddress']:
-    #                         if ad['IsDefault'] == True :
-    #                             DefCustomerAddress = ad['Address']
-                                
-    #                     DefPartyAddress = ''
-    #                     for x in a['Party']['PartyAddress']:
-    #                         if x['IsDefault'] == True :
-    #                             DefPartyAddress = x['Address']
-                    
-    #                     InvoiceData.append({
-    #                         "id": a['id'],
-    #                         "InvoiceDate": a['InvoiceDate'],
-    #                         "InvoiceNumber": a['InvoiceNumber'],
-    #                         "FullInvoiceNumber": a['FullInvoiceNumber'],
-    #                         "GrandTotal": a['GrandTotal'],
-    #                         "RoundOffAmount":a['RoundOffAmount'],
-    #                         "Customer": a['Customer']['id'],
-    #                         "CustomerName": a['Customer']['Name'],
-    #                         "CustomerGSTIN": a['Customer']['GSTIN'],
-    #                         "Party": a['Party']['id'],
-    #                         "PartyName": a['Party']['Name'],
-    #                         "PartyGSTIN": a['Party']['GSTIN'],
-    #                         "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
-    #                         "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
-    #                         "PartyState": a['Party']['State']['Name'],
-    #                         "CustomerState": a['Customer']['State']['Name'],
-    #                         "PartyAddress": DefPartyAddress,                            
-    #                         "CustomerAddress": DefCustomerAddress,
-    #                         "DriverName":a['Driver']['Name'],
-    #                         "VehicleNo": a['Vehicle']['VehicleNumber'],
-    #                         "CreatedOn" : a['CreatedOn'],
-    #                         "InvoiceItems": InvoiceItemDetails,
-    #                         "InvoicesReferences": InvoiceReferenceDetails,
-                                                        
-    #                     })
-    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-    #             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
-    #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
