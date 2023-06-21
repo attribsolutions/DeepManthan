@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('FoodERPApp', '0024_auto_20230621_1535'),
     ]
-
     operations = [
         migrations.AddField(
             model_name='m_units',
