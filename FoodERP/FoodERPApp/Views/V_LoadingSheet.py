@@ -256,6 +256,9 @@ class LoadingSheetPrintView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
+                                "DiscountType":b['DiscountType'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
                             })
                         InvoiceParent.append({
                             "id": a['id'],
