@@ -1731,18 +1731,24 @@ class Transactionlog(models.Model):
         
         
 class TC_InvoiceUploads(models.Model):
-    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT,blank=True, null=True) 
-    AckNo =  models.CharField(max_length=500)  
-    Irn =  models.CharField(max_length=500)
-    QRCodeUrl =models.CharField(max_length=500)
-    EInvoicePdf = models.CharField(max_length=500)
-    EwayBillUrl = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    CanceledBy = models.IntegerField()
-    CanceledOn = models.DateTimeField(auto_now=True)
-    IsCancel = models.BooleanField(default=False)
-    
+    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT) 
+    AckNo =  models.CharField(max_length=500,null=True)  
+    Irn =  models.CharField(max_length=500,null=True)
+    QRCodeUrl =models.CharField(max_length=500,null=True)
+    EInvoicePdf = models.CharField(max_length=500,null=True)
+    EwayBillNo = models.CharField(max_length=500,null=True)
+    EwayBillUrl = models.CharField(max_length=500,null=True)
+    EInvoiceCreatedBy = models.IntegerField(null=True)
+    EInvoiceCreatedOn = models.DateTimeField(null=True)
+    EwayBillCreatedBy = models.IntegerField(null=True)
+    EwayBillCreatedOn = models.DateTimeField(null=True)
+    EInvoiceCanceledBy = models.IntegerField(null=True)
+    EInvoiceCanceledOn = models.DateTimeField(null=True)
+    EwayBillCanceledBy = models.IntegerField(null=True)
+    EwayBillCanceledOn = models.DateTimeField(null=True)
+    EInvoiceIsCancel = models.BooleanField(default=False)
+    EwayBillIsCancel = models.BooleanField(default=False)
+    user_gstin = models.CharField(max_length=500)  
     
     class Meta:
         db_table="TC_InvoiceUploads"

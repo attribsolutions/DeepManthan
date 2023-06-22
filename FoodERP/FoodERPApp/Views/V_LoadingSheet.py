@@ -256,6 +256,10 @@ class LoadingSheetPrintView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
+                                "HSNCode":b['GST']['HSNCode'],
+                                "DiscountType":b['DiscountType'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
                             })
                         InvoiceParent.append({
                             "id": a['id'],
@@ -323,8 +327,12 @@ class MultipleInvoicesView(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "HSNCode":b['GST']['HSNCode'],
                                     "BatchCode": b['BatchCode'],
                                     "BatchDate": b['BatchDate'],
+                                    "DiscountType":b['DiscountType'],
+                                    "Discount":b['Discount'],
+                                    "DiscountAmount":b['DiscountAmount']
                                 })
                                 
                                 InvoiceReferenceDetails = list()
