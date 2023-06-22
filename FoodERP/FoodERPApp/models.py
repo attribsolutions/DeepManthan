@@ -1736,13 +1736,13 @@ class TC_InvoiceUploads(models.Model):
     Irn =  models.CharField(max_length=500)
     QRCodeUrl =models.CharField(max_length=500)
     EInvoicePdf = models.CharField(max_length=500)
+    EwayBillNo = models.CharField(max_length=500)
     EwayBillUrl = models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     CanceledBy = models.IntegerField()
     CanceledOn = models.DateTimeField(auto_now=True)
     IsCancel = models.BooleanField(default=False)
-    
     
     class Meta:
         db_table="TC_InvoiceUploads"
