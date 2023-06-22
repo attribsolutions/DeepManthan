@@ -1738,10 +1738,14 @@ class TC_InvoiceUploads(models.Model):
     EInvoicePdf = models.CharField(max_length=500)
     EwayBillNo = models.CharField(max_length=500)
     EwayBillUrl = models.CharField(max_length=500)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    CanceledBy = models.IntegerField()
-    CanceledOn = models.DateTimeField(auto_now=True)
+    EInvoiceCreatedBy = models.IntegerField()
+    EInvoiceCreatedOn = models.DateTimeField(null=True)
+    EwayBillCreatedBy = models.IntegerField()
+    EwayBillCreatedOn = models.DateTimeField(null=True)
+    EInvoiceCanceledBy = models.IntegerField()
+    EInvoiceCanceledOn = models.DateTimeField(null=True)
+    EwayBillCanceledBy = models.IntegerField()
+    EwayBillCanceledOn = models.DateTimeField(null=True)
     IsCancel = models.BooleanField(default=False)
     
     class Meta:
