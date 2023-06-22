@@ -1746,7 +1746,8 @@ class TC_InvoiceUploads(models.Model):
     EInvoiceCanceledOn = models.DateTimeField(null=True)
     EwayBillCanceledBy = models.IntegerField()
     EwayBillCanceledOn = models.DateTimeField(null=True)
-    IsCancel = models.BooleanField(default=False)
+    EInvoiceIsCancel = models.BooleanField(default=False)
+    EwayBillIsCancel = models.BooleanField(default=False)
     
     class Meta:
         db_table="TC_InvoiceUploads"
