@@ -39,9 +39,10 @@ def get_client_ip(request):
     return ip
 
 def create_transaction_log(request,User, PartyID,TransactionDetails):
+    aa = JSONParser().parse(request)
     log_entry = Transactionlog.objects.create(
         TranasactionDate=date.today(),
-        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails
+        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=aa
     )
     return log_entry
 
