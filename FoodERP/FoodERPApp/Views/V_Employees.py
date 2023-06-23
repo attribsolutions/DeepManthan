@@ -248,6 +248,8 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic(): 
+
+                
                 ManagementEmpParties_data = JSONParser().parse(request)
                 EmployeeID = ManagementEmpParties_data['Employee']
                 CompanyID = ManagementEmpParties_data['Company']
