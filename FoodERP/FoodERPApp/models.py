@@ -1692,7 +1692,11 @@ class MC_SalesManRoutes(models.Model):
         
         
 class M_Settings(models.Model):
-    SystemSetting=models.CharField(max_length=500)        
+    SystemSetting=models.CharField(max_length=500)
+    Description=models.CharField(max_length=500)
+    IsActive = models.BooleanField(default=False)
+    IsPartyRelatedSetting = models.BooleanField(default=False)
+            
     class Meta:
         db_table = "M_Settings"
 
