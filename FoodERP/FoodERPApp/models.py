@@ -1692,7 +1692,12 @@ class MC_SalesManRoutes(models.Model):
         
         
 class M_Settings(models.Model):
-    SystemSetting=models.CharField(max_length=500)        
+    SystemSetting=models.CharField(max_length=500)
+    Description=models.CharField(max_length=500)
+    IsActive = models.BooleanField(default=False)
+    IsPartyRelatedSetting = models.BooleanField(default=False)
+    DefaultValue = models.CharField(max_length=500)
+            
     class Meta:
         db_table = "M_Settings"
 
@@ -1758,8 +1763,6 @@ class M_PartySettingsDetails(models.Model):
     Value=models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
     Setting=models.ForeignKey(M_Settings,related_name='Settingid',on_delete=models.CASCADE)  
     Company = models.ForeignKey(C_Companies,related_name='SetCompany', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.PROTECT)
