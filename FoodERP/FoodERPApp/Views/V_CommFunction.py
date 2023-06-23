@@ -38,10 +38,12 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def create_transaction_log(request,User, PartyID,TransactionDetails):
+def create_transaction_log(request,data,User, PartyID,TransactionDetails):
+    
+   
     log_entry = Transactionlog.objects.create(
         TranasactionDate=date.today(),
-        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails
+        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data
     )
     return log_entry
 
