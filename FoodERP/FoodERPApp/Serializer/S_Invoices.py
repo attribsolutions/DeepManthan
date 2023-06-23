@@ -167,7 +167,11 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
             ret["GST"] = {"id": None, "GSTPercentage ": None}        
              
         return ret    
-            
+class InvoiceUploadsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_InvoiceUploads
+        fields=['AckNo','Irn','QRCodeUrl','EInvoicePdf','EwayBillNo','EwayBillUrl','EInvoiceIsCancel','EwayBillIsCancel']           
+
 class InvoiceSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
@@ -175,6 +179,7 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     InvoicesReferences = InvoicesReferencesSerializerSecond(many=True)
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
+    InvoiceUploads=InvoiceUploadsSerializer(many=True)
     class Meta:
         model = T_Invoices
         fields = '__all__'
