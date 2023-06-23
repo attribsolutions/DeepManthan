@@ -281,13 +281,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
                         
         return instance        
         
-        
-        
-        
-            
-    
-    
-   
+                    
+
    
   
 
