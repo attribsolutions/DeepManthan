@@ -53,7 +53,7 @@ class SAPInvoiceView(CreateAPIView):
 
                             DuplicateCheck = T_Invoices.objects.filter(
                                 FullInvoiceNumber=aa["InvoiceNumber"])
-                            if(DuplicateCheck.count() > 0):
+                            if(DuplicateCheck.count() == 0):
                                 CustomerMapping = M_Parties.objects.filter(
                                     SAPPartyCode=aa['CustomerID']).values("id")
                                 PartyMapping = M_Parties.objects.filter(
