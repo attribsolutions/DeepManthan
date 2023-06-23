@@ -32,9 +32,10 @@ class SAPInvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                
-                log_entry = create_transaction_log(request,0, 0,'sapinvoice proces initiat')
+                aa = JSONParser().parse(request)
+                log_entry = create_transaction_log(request,aa,0, 0,'sapinvoice proces initiat')
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
+                
                 if auth_header:
                 # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
@@ -46,13 +47,12 @@ class SAPInvoiceView(CreateAPIView):
                         return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                     # Authenticating the user
                     user = authenticate(request, username=username, password=password)
-                    
+                 
                     if user is not None:
-                        aa = JSONParser().parse(request)
                         
                         CustomerMapping=M_Parties.objects.filter(SAPPartyCode=aa['CustomerID']).values("id")
                         PartyMapping=M_Parties.objects.filter(SAPPartyCode=aa['Plant']).values("id")
-                        print(CustomerMapping,PartyMapping)
+                       
                         if CustomerMapping.exists():
                                 aa['Customer']=CustomerMapping
                         else:
@@ -148,9 +148,9 @@ class SAPInvoiceView(CreateAPIView):
                                 
                             else:
                                 transaction.set_rollback(True)
-                                log_entry = create_transaction_log(request,0, 0,'SAPinvoice Proccesing Error')
+                                # log_entry = create_transaction_log(request,0, 0,'SAPinvoice Proccesing Error')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
-                        log_entry = create_transaction_log(request,0, 0,'SAPinvoice Save')
+                        # log_entry = create_transaction_log(request,0, 0,'SAPinvoice Save')
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                         # Username and password are valid
                         return Response('Authenticated', status=status.HTTP_200_OK)
