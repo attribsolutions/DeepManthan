@@ -199,9 +199,9 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, aa, 0, 0, "")
+                log_entry = create_transaction_log(request, data, 0, 0, "initiat")
                 payload = json.dumps(data)
-
+                print('aaaaaaaa')
                 url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
 
                 headers = {
@@ -210,7 +210,7 @@ class SAPOrderView(CreateAPIView):
                     'Content-Type': 'application/json',
                     'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
                 }
-
+                print('bbbbb')
                 response = requests.request(
                     "POST", url, headers=headers, data=payload)
                 # Convert XML to OrderedDict
