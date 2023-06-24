@@ -1765,7 +1765,7 @@ class M_PartySettingsDetails(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     Setting=models.ForeignKey(M_Settings,related_name='Settingid',on_delete=models.CASCADE)  
     Company = models.ForeignKey(C_Companies,related_name='SetCompany', on_delete=models.PROTECT)
-    Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.CASCADE)
     
     class Meta:
         db_table="M_PartySettingsDetails"        
