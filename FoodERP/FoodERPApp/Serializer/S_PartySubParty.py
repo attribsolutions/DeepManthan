@@ -11,6 +11,17 @@ class Partyaddress(serializers.ModelSerializer):
         model = MC_PartyAddress
         fields = ['FSSAINo','FSSAIExipry','IsDefault']
 
+    def to_representation(self, instance):
+            # get representation from ModelSerializer
+        ret = super(Partyaddress, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("FSSAINo", None):
+            ret["FSSAINo"] = {"FSSAINo": None}
+
+        if not ret.get("FSSAIExipry", None):
+            ret["FSSAIExipry"] = {"FSSAIExipry": None}
+        return ret  
+
 class PartySerializer(serializers.ModelSerializer):
     PartyType=PartyTypeSerializer(read_only=True)
     PartyAddress=Partyaddress(many=True)
@@ -18,6 +29,8 @@ class PartySerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id','Name','PartyType','GSTIN','PartyAddress']
         
+
+
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Routes
@@ -37,6 +50,8 @@ class PartySubpartySerializerSecond(serializers.ModelSerializer):
         # if parent is None, overwrite
         if not ret.get("Route", None):
             ret["Route"] = {"id": None, "Name": None}
+
+        
         return ret          
           
 

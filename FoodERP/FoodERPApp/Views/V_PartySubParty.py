@@ -160,6 +160,9 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
                                 FSSAINo=a['Party']['PartyAddress'][0]['FSSAINo']
                                 FSSAIExipry=a['Party']['PartyAddress'][0]['FSSAIExipry']
+                            else:
+                                FSSAINo= " "
+                                FSSAIExipry = ""    
                             
                             ListData.append({
                             "id": a['Party']['id'],
@@ -172,6 +175,9 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
                                 FSSAINo=a['Party']['PartyAddress'][0]['FSSAINo']
                                 FSSAIExipry=a['Party']['PartyAddress'][0]['FSSAIExipry']
+                            else:
+                                FSSAINo= " "
+                                FSSAIExipry = ""    
                             
                             
                             ListData.append({
@@ -185,11 +191,14 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             if(a['SubParty']['PartyAddress'][0]['IsDefault'] == 1):
                                 FSSAINo=a['SubParty']['PartyAddress'][0]['FSSAINo']
                                 FSSAIExipry=a['SubParty']['PartyAddress'][0]['FSSAIExipry']
+                            else:
+                                FSSAINo= " "
+                                FSSAIExipry = ""
                             
                             ListData.append({
                             "id": a['SubParty']['id'],
                             "Name": a['SubParty']['Name'],
-                            "GSTIN": a['Party']['GSTIN'],
+                            "GSTIN": a['SubParty']['GSTIN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry
                             })
@@ -197,6 +206,9 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
                                 FSSAINo=a['Party']['PartyAddress'][0]['FSSAINo']
                                 FSSAIExipry=a['Party']['PartyAddress'][0]['FSSAIExipry']
+                            else:
+                                FSSAINo= " "
+                                FSSAIExipry = ""    
 
                             ListData.append({
                             "id": a['id'],

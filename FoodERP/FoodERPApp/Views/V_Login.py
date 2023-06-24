@@ -310,7 +310,7 @@ class UserPartiesViewSecond(CreateAPIView):
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = M_UserPartiesSerializer(
+                    M_UserParties_Serializer = M_UserPartiesSerializer1(
                         query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
