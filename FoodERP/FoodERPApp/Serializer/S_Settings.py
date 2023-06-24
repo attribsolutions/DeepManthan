@@ -11,9 +11,9 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     SystemSetting = serializers.CharField(max_length=500)
     Description = serializers.CharField(max_length=500)
-    IsActive = serializers.BooleanField()
     Value = serializers.CharField(max_length=500)
-    Party_id =serializers.IntegerField()
+    DefaultValue = serializers.CharField(max_length=500)
+   
     
 class PartiesSettingSerializer(serializers.ModelSerializer):
     class Meta:
