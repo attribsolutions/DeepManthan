@@ -158,7 +158,7 @@ class InvoiceListFilterView(CreateAPIView):
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
                     Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
                     InvoiceListData = list()
                     for a in Invoice_serializer:
                         Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
@@ -180,7 +180,9 @@ class InvoiceListFilterView(CreateAPIView):
                             "DriverName": a['Driver']['Name'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "Party": a['Party']['Name'],
-                            "CreatedOn": a['CreatedOn'] 
+                            "CreatedOn": a['CreatedOn'],
+                            "InvoiceUploads" : a["InvoiceUploads"]
+                             
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -371,6 +373,7 @@ class InvoiceViewSecond(CreateAPIView):
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
                                 "HSNCode":b['GST']['HSNCode'],
+                                "DiscountType":b['DiscountType'],
                                 "Discount":b['Discount'],
                                 "DiscountAmount":b['DiscountAmount']
                             })
