@@ -1484,8 +1484,6 @@ class M_Bank(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
-
     class Meta:
         db_table = "M_Bank"
 
