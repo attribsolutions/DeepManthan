@@ -47,7 +47,7 @@ class SAPInvoiceView(CreateAPIView):
                             return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                         # Authenticating the user
                     user = authenticate(request, username=username, password=password)
-                    
+                    InvoiceItems = list()
                     if user is not None:
 
                         DuplicateCheck = T_Invoices.objects.filter(
@@ -81,7 +81,7 @@ class SAPInvoiceView(CreateAPIView):
                                 UnitMapping = M_Units.objects.filter(
                                     SAPUnit=bb['BaseUOM']).values("id")
                                 # print(ItemMapping,UnitMapping)
-                                InvoiceItems = list()
+                               
                                 if ItemMapping.exists():
                                     bb['Item'] = ItemMapping
                                 else:
@@ -111,6 +111,7 @@ class SAPInvoiceView(CreateAPIView):
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                 QtyInBox = UnitwiseQuantityConversion(
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                                
                                 InvoiceItems.append({
 
                                     "Item": ItemMapping[0]["id"],
