@@ -122,6 +122,10 @@ from .Views.V_PurchaseReturn import *
 from .Views.V_MappingMaster import *
 
 from .Views.V_Dashboard import *
+
+from .Views.V_StockEntry import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -336,6 +340,8 @@ urlpatterns = [
             url(r'PartyAddressDelete/([0-9]+)$',PartyAddressView.as_view()),
             url(r'PartySettings/([0-9]+)$',PartiesSettingsDetailsView.as_view()),
             url(r'PartySettings$',PartiesSettingsDetailsView.as_view()),
+            url(r'PartyStockEntry$',StockEntryPageView.as_view()),
+            
             
            
 # State and District
