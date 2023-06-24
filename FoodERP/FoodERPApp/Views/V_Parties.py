@@ -295,7 +295,7 @@ class PartiesSettingsDetailsView(CreateAPIView):
                         if a['Value'] is None:
                             Value = a['DefaultValue']
                         else:
-                            Value = a['DefaultValue']
+                            Value = a['Value']
                                 
                         PartySettingslist.append({
                             "id": a['id'],
