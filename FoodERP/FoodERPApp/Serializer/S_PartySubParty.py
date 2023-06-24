@@ -6,17 +6,24 @@ class PartyTypeSerializer(serializers.ModelSerializer):
         model= M_PartyType
         fields = '__all__'
 
+class Partyaddress(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['FSSAINo','FSSAIExipry','IsDefault']
+
 class PartySerializer(serializers.ModelSerializer):
     PartyType=PartyTypeSerializer(read_only=True)
+    PartyAddress=Partyaddress(many=True)
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType','GSTIN']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress']
         
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Routes
         fields = '__all__'        
   
+
 class PartySubpartySerializerSecond(serializers.ModelSerializer):
     SubParty = PartySerializer(read_only=True)
     Party = PartySerializer(read_only=True)

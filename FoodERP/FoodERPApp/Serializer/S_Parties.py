@@ -7,11 +7,24 @@ class PartiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
         fields = ['id','Name','GSTIN','PAN','Email']       
-        
+
+class Partyaddress(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['FSSAINo','FSSAIExipry','IsDefault']        
+
+class PartyTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_PartyType
+        fields = '__all__'
+
+
 class DivisionsSerializer(serializers.ModelSerializer):
+    PartyType=PartyTypeSerializer(read_only=True)
+    PartyAddress=Partyaddress(many=True)
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','GSTIN']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress']
          
 class PartySubPartySerializer2(serializers.ModelSerializer):
     Party = DivisionsSerializer()
