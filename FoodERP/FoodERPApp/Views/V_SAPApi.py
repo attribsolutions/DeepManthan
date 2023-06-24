@@ -169,16 +169,15 @@ class SAPInvoiceView(CreateAPIView):
                                 data=InvoiceData[0])
                             if Invoice_serializer.is_valid():
                                 Invoice_serializer.save()
-                                # pass
+                                log_entry = create_transaction_log(request, aa, 0, 0, aa["InvoiceNumber"]+" Invoice Save Successfully")
+                                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data': []})
 
                             else:
                                 transaction.set_rollback(True)
                                 log_entry = create_transaction_log(
                                     request, aa, 0, 0, Invoice_serializer.errors)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
-                                log_entry = create_transaction_log(
-                            request, aa, 0, 0, aa["InvoiceNumber"]+" Invoice Save Successfully")
-                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data': []})
+                                
                         
                         else:
                             log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice already exist')
