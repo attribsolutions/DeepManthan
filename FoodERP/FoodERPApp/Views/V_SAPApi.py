@@ -34,7 +34,7 @@ class SAPInvoiceView(CreateAPIView):
                 aa = JSONParser().parse(request)
                 
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
-                print(auth_header)
+                # print(auth_header)
                 if auth_header:
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
@@ -148,7 +148,7 @@ class SAPInvoiceView(CreateAPIView):
                                     "QtyInBox": float(QtyInBox)
                                 })
 
-                            print(InvoiceItems)    
+                            # print(InvoiceItems)    
                             InvoiceData = list()
                             InvoiceData.append({
 
@@ -199,7 +199,7 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-
+                log_entry = create_transaction_log(request, aa, 0, 0, "")
                 payload = json.dumps(data)
 
                 url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
@@ -227,12 +227,15 @@ class SAPOrderView(CreateAPIView):
                     OrderID = int(data['OrderNo'])-5000000
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
+                    log_entry = create_transaction_log(request, data, 0, 0, data_dict['entry']['content']['m:properties']['d:Stats'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Save Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
+                        log_entry = create_transaction_log(request, data, 0, 0, data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
+                        log_entry = create_transaction_log(request, data, 0, 0, 'Another exception raised from SAP')
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
