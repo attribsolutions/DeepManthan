@@ -1,3 +1,4 @@
+import json
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -269,7 +270,7 @@ class PartiesSettingsDetailsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_PartySettingsDetails.objects.filter(id=id).count()
+                query = M_PartySettingsDetails.objects.filter(Party=id).count()
                 if query == 0:
                     query = M_Settings.objects.filter(IsActive=1, IsPartyRelatedSetting=1).all()
                     PartiesSetting_Serializer = MasterSettingsSerializer(
@@ -280,26 +281,27 @@ class PartiesSettingsDetailsView(CreateAPIView):
                             "id": a['id'],
                             "SystemSetting": a['SystemSetting'],
                             "Description": a['Description'],
-                            "IsActive": a['IsActive'],
-                            "Value": a['DefaultValue']
+                            "Value": a['DefaultValue'],
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartySettingslist})
                 else:
-                    query = ('''SELECT M_Settings.id,M_Settings.SystemSetting,M_Settings.Description,M_Settings.IsActive,M_PartySettingsDetails.Value 
-FROM M_Settings
-left JOIN M_PartySettingsDetails ON M_PartySettingsDetails.Setting_id=M_Settings.id
-WHERE M_PartySettingsDetails.Party_id=%s'''([id]))
-
+                    query =M_Settings.objects.raw('''SELECT a.Setting id,a.SystemSetting,a.Description,b.SettingID,a.DefaultValue,b.Value FROM (SELECT M_Settings.id As Setting,M_Settings.SystemSetting As SystemSetting,M_Settings.Description As Description,M_Settings.DefaultValue As DefaultValue FROM M_Settings WHERE M_Settings.IsActive=1 AND M_Settings.IsPartyRelatedSetting =1)a LEFT JOIN (SELECT Setting_id SettingID,M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE M_PartySettingsDetails.Party_id=%s)b on  a.Setting = b.SettingID ''',([id]))
+              
                     PartiesSetting_Serializer = PartiesSettingsDetailsListSerializer(
                         query, many=True).data
                     PartySettingslist = list()
                     for a in PartiesSetting_Serializer:
+                        
+                        if a['Value'] is None:
+                            Value = a['DefaultValue']
+                        else:
+                            Value = a['DefaultValue']
+                                
                         PartySettingslist.append({
                             "id": a['id'],
-                            "SystemSetting": a['SystemSetting']['Name'],
+                            "SystemSetting": a['SystemSetting'],
                             "Description": a['Description'],
-                            "IsActive": a['IsActive'],
-                            "Value": a['Value']
+                            "Value":Value
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartySettingslist})
         except Exception as e:
@@ -309,14 +311,14 @@ WHERE M_PartySettingsDetails.Party_id=%s'''([id]))
     def post(self, request):
         try:
             with transaction.atomic():
-                PartiesSettings = JSONParser().parse(request)
-                for a in PartiesSettings:
-                    PartiesSetting_Serializer = PartiesSettingSerializer(data=a)
-                    if PartiesSetting_Serializer.is_valid():
-                        PartiesSetting_Serializer.save()
+                Retailerdata = JSONParser().parse(request)
+                for aa in Retailerdata['BulkData']:
+                    Partysettings_serializer = PartiesSettingSerializer(data=aa)
+                    if Partysettings_serializer.is_valid():
+                        Partysettings_serializer.save()
                     else:
                         transaction.set_rollback(True)
-                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartiesSetting_Serializer.errors, 'Data': []})    
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Settings Save Successfully', 'Data': []})   
+                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Partysettings_serializer.errors, 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Settings data Successfully', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
