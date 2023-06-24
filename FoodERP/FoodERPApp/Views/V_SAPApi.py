@@ -165,8 +165,8 @@ class SAPInvoiceView(CreateAPIView):
                                     Invoice_serializer = InvoiceSerializer(
                                         data=InvoiceData[0])
                                     if Invoice_serializer.is_valid():
-                                        # Invoice_serializer.save()
-                                        pass
+                                        Invoice_serializer.save()
+                                        # pass
 
                                     else:
                                         transaction.set_rollback(True)
