@@ -448,7 +448,7 @@ urlpatterns = [
 # BankMaster
             url(r'Bank/([0-9]+)$', BankView.as_view()),
             url(r'Bank$', BankView.as_view()),
-            url(r'BankFilter/([0-9]+)$', BankListView.as_view()),
+            url(r'BankFilter$', BankListView.as_view()),
             
             url(r'PartyBanksFilter$', PartyBanksFilterView.as_view()),
             url(r'PartyBankList$', PartyBanksListView.as_view()),
