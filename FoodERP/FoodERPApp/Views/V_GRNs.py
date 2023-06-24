@@ -463,7 +463,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
-                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "GSTPercentage": b['GSTPercentage'],
                                     "MarginValue": b['Margin']['Margin'],
                                     "BasicAmount": b['BasicAmount'],
                                     "GSTAmount": b['GSTAmount'],
