@@ -312,6 +312,9 @@ class PartiesSettingsDetailsView(CreateAPIView):
         try:
             with transaction.atomic():
                 Retailerdata = JSONParser().parse(request)
+                Party=Retailerdata['BulkData'][0]['Party']
+                query=M_PartySettingsDetails.objects.filter(Party=Party).all()
+                query.delete()
                 for aa in Retailerdata['BulkData']:
                     Partysettings_serializer = PartiesSettingSerializer(data=aa)
                     if Partysettings_serializer.is_valid():
