@@ -77,7 +77,7 @@ class BankListView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def post(self,request):
+    def get(self,request):
         try:
             with transaction.atomic():
                 query = M_Bank.objects.all()
