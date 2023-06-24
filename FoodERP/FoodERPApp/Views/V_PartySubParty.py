@@ -150,32 +150,60 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                         Supplier_serializer = DivisionsSerializer(Query, many=True).data
                     else:    
                         Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
-                    
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Supplier_serializer})
                     ListData = list()
                     for a in Supplier_serializer: 
+                        
+                        
                         if(Type==1): #Vendor
+                            
+                            if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
+                                FSSAINo=a['Party']['PartyAddress'][0]['FSSAINo']
+                                FSSAIExipry=a['Party']['PartyAddress'][0]['FSSAIExipry']
+                            
                             ListData.append({
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
-                            "GSTIN": a['Party']['GSTIN']
+                            "GSTIN": a['Party']['GSTIN'],
+                            "FSSAINo" : FSSAINo,
+                            "FSSAIExipry" : FSSAIExipry
                             })   
                         elif(Type==2): #Supplier
+                            if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
+                                FSSAINo=a['Party']['PartyAddress'][0]['FSSAINo']
+                                FSSAIExipry=a['Party']['PartyAddress'][0]['FSSAIExipry']
+                            
+                            
                             ListData.append({
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
-                            "GSTIN": a['Party']['GSTIN']
+                            "GSTIN": a['Party']['GSTIN'],
+                            "FSSAINo" : FSSAINo,
+                            "FSSAIExipry" : FSSAIExipry
                             }) 
                         elif(Type==3):  #Customer
+                            if(a['SubParty']['PartyAddress'][0]['IsDefault'] == 1):
+                                FSSAINo=a['SubParty']['PartyAddress'][0]['FSSAINo']
+                                FSSAIExipry=a['SubParty']['PartyAddress'][0]['FSSAIExipry']
+                            
                             ListData.append({
                             "id": a['SubParty']['id'],
                             "Name": a['SubParty']['Name'],
-                            "GSTIN": a['Party']['GSTIN']
+                            "GSTIN": a['Party']['GSTIN'],
+                            "FSSAINo" : FSSAINo,
+                            "FSSAIExipry" : FSSAIExipry
                             })
                         else:
+                            if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
+                                FSSAINo=a['Party']['PartyAddress'][0]['FSSAINo']
+                                FSSAIExipry=a['Party']['PartyAddress'][0]['FSSAIExipry']
+
                             ListData.append({
                             "id": a['id'],
                             "Name": a['Name'],
-                            "GSTIN": a['Party']['GSTIN']
+                            "GSTIN": a['Party']['GSTIN'],
+                            "FSSAINo" : FSSAINo,
+                            "FSSAIExipry" : FSSAIExipry
                             })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})
