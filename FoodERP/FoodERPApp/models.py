@@ -638,7 +638,7 @@ class M_Items(models.Model):
     Grammage = models.CharField(max_length=200,null=True,blank=True)
     Height = models.CharField(max_length=200,null=True,blank=True)
     Length = models.CharField(max_length=200,null=True,blank=True)
-    StoringCondition = models.IntegerField(default=False)
+    StoringCondition = models.CharField(max_length=200,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         
