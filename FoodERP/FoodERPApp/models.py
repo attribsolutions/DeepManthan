@@ -545,6 +545,7 @@ class M_GroupType(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)
     IsReserved = models.BooleanField(default=False)
+    Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     class Meta:
         db_table = "M_GroupType"
 
@@ -555,7 +556,7 @@ class M_Group(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)    
     GroupType = models.ForeignKey(M_GroupType, related_name='GroupType', on_delete=models.DO_NOTHING)
-
+    Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     class Meta:
         db_table = "M_Group"
 
@@ -566,7 +567,7 @@ class MC_SubGroup(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)    
     Group = models.ForeignKey(M_Group, related_name='Group', on_delete=models.DO_NOTHING)
-
+    Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     class Meta:
         db_table = "MC_SubGroup"                             
 
@@ -953,6 +954,7 @@ class  MC_PartySubParty(models.Model):
     Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.CASCADE, blank=True,null=True)
     SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
     Distance = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=2)
+    TCSParty = models.BooleanField(default=False)
 
     class Meta:
         db_table = "MC_PartySubParty"
