@@ -41,14 +41,14 @@ class StockEntryPageView(CreateAPIView):
                     
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
-                    a['BaseUnitQuantity'] = BaseUnitQuantity
+                    a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
                     
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
                     "Unit": a['Unit'],
-                    "BaseUnitQuantity": BaseUnitQuantity,
-                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
+                    "OriginalBaseUnitQuantity": round(BaseUnitQuantity,3),
                     "Party": Party,
                     "CreatedBy":CreatedBy,
                     
@@ -63,7 +63,7 @@ class StockEntryPageView(CreateAPIView):
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
-                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
+                    "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,3),
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })

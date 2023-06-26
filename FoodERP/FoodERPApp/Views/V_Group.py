@@ -31,7 +31,8 @@ class GroupView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "Sequence":a['Sequence']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
@@ -76,7 +77,8 @@ class GroupViewSecond(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "Sequence":a['Sequence']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
@@ -137,7 +139,8 @@ class GetGroupByGroupTypeID(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "Sequence":a['Sequence']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
