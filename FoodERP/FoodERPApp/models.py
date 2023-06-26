@@ -896,6 +896,7 @@ class T_Invoices(models.Model):
     Driver = models.ForeignKey(M_Drivers, related_name='InvoiceDriver',on_delete=models.PROTECT,null=True,blank=True)
     Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
     Vehicle = models.ForeignKey(M_Vehicles, related_name='InvoiceVehicle',on_delete=models.PROTECT,null=True,blank=True)
+    TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         db_table = "T_Invoices"
