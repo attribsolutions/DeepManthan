@@ -310,7 +310,7 @@ class UserPartiesViewSecond(CreateAPIView):
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = M_UserPartiesSerializer(
+                    M_UserParties_Serializer = M_UserPartiesSerializer1(
                         query, many=True).data
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
@@ -328,11 +328,12 @@ class UserPartiesForLoginPage(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN
+                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry
 
                      FROM  MC_UserRoles
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
                      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
+                     left join MC_PartyAddress on MC_PartyAddress.Party_id=M_Parties.id and MC_PartyAddress.IsDefault=1
                      left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
                      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
                      WHERE M_Users.Employee_id=%s ''', [id])
