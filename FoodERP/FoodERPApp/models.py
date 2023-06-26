@@ -1732,8 +1732,7 @@ class Transactionlog(models.Model):
     JsonData = models.TextField(blank = True)
     
     class Meta:
-        db_table="Transactionlog"
-        
+        db_table="Transactionlog"     
         
 class TC_InvoiceUploads(models.Model):
     Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT) 
