@@ -18,8 +18,8 @@ class PartyBanksFilterView(CreateAPIView):
                 Bank_data = JSONParser().parse(request)
                 Party = Bank_data['PartyID']
                 Company = Bank_data['CompanyID']
-                query1 = MC_PartyBanks.objects.raw('''SELECT MC_PartyBanks.id, M_Bank.id AS Bank_id, MC_PartyBanks.IFSC, MC_PartyBanks.BranchName, MC_PartyBanks.AccountNo, MC_PartyBanks.CustomerBank, MC_PartyBanks.IsSelfDepositoryBank, MC_PartyBanks.Company_id, MC_PartyBanks.Party_id, MC_PartyBanks.IsDefault FROM M_Bank LEFT JOIN MC_PartyBanks ON MC_PartyBanks.Bank_id = M_Bank.id AND MC_PartyBanks.Party_id=%s WHERE M_Bank.Company_id=%s''',([Party],[Company]))
-             
+                query1 = MC_PartyBanks.objects.raw('''SELECT MC_PartyBanks.id, M_Bank.id AS Bank_id, MC_PartyBanks.IFSC, MC_PartyBanks.BranchName, MC_PartyBanks.AccountNo, MC_PartyBanks.CustomerBank, MC_PartyBanks.IsSelfDepositoryBank, MC_PartyBanks.Company_id, MC_PartyBanks.Party_id, MC_PartyBanks.IsDefault FROM M_Bank LEFT JOIN MC_PartyBanks ON MC_PartyBanks.Bank_id = M_Bank.id AND MC_PartyBanks.Party_id=%s''',([Party]))
+              
                 if query1:
                     bank_serializer = PartyBanksSerializer(query1, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
@@ -77,10 +77,10 @@ class BankListView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self,request,id=0):
+    def get(self,request):
         try:
             with transaction.atomic():
-                query = M_Bank.objects.filter(Company = id)
+                query = M_Bank.objects.all()
                 if query:
                     bank_serializer = BankSerializer(query, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})

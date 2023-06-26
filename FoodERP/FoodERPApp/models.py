@@ -638,7 +638,7 @@ class M_Items(models.Model):
     Grammage = models.CharField(max_length=200,null=True,blank=True)
     Height = models.CharField(max_length=200,null=True,blank=True)
     Length = models.CharField(max_length=200,null=True,blank=True)
-    StoringCondition = models.IntegerField(default=False)
+    StoringCondition = models.CharField(max_length=200,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         
@@ -1484,8 +1484,6 @@ class M_Bank(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Company = models.ForeignKey(C_Companies, related_name='CompanyBank', on_delete=models.PROTECT)
-
     class Meta:
         db_table = "M_Bank"
 
@@ -1765,7 +1763,7 @@ class M_PartySettingsDetails(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     Setting=models.ForeignKey(M_Settings,related_name='Settingid',on_delete=models.CASCADE)  
     Company = models.ForeignKey(C_Companies,related_name='SetCompany', on_delete=models.PROTECT)
-    Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.CASCADE)
     
     class Meta:
         db_table="M_PartySettingsDetails"        
