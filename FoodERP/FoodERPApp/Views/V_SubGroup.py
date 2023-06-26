@@ -31,7 +31,9 @@ class SubGroupView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "Sequence":a['Sequence']
+
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubGroupList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubGroup Not available ', 'Data': []})
@@ -76,7 +78,9 @@ class SubGroupViewSecond(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "Sequence":a['Sequence']
+
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubGroupList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubGroup Not available ', 'Data': []})
@@ -137,7 +141,9 @@ class GetSubGroupByGroupID(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
+                            "UpdatedOn": a['UpdatedOn'],
+                            "Sequence":a['Sequence']
+
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubGroupList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubGroup Not available ', 'Data': []})
