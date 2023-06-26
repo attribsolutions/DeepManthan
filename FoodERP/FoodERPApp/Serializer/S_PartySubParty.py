@@ -16,10 +16,10 @@ class Partyaddress(serializers.ModelSerializer):
         ret = super(Partyaddress, self).to_representation(instance)
         # if parent is None, overwrite
         if not ret.get("FSSAINo", None):
-            ret["FSSAINo"] = {"FSSAINo": None}
+            ret["FSSAINo"] = None
 
         if not ret.get("FSSAIExipry", None):
-            ret["FSSAIExipry"] = {"FSSAIExipry": None}
+            ret["FSSAIExipry"] = None
         return ret  
 
 class PartySerializer(serializers.ModelSerializer):
