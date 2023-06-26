@@ -88,7 +88,7 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "FSSAIExipry":  FSSAI_Serializer[0]['FSSAIExipry']
                                 })
                             
-                        elif (Type == 'Creditlimit'):
+                        elif (Type == 'Creditlimit' or Type == 'TCSParty' ):
                             SubPartyListData.append({
                                 "id": a['id'],
                                 "PartyID":a['Party']['id'],
@@ -125,16 +125,13 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                 UpdatedData = Partydata['UpdateData']
 
                 for a in UpdatedData:
-                    if (Type == 'Creditlimit'):     
+                    if (Type == 'Creditlimit' or Type == 'TCSParty' ):     
                         Party = Partydata['PartyID']             
                         query = MC_PartySubParty.objects.filter(Party=Party, SubParty=a['SubPartyID']).update(**{Type: a['Value1']})
                     elif (Type == 'FSSAINo'):
                         query = MC_PartyAddress.objects.filter(Party=a['SubPartyID'], IsDefault=1).update(FSSAINo=a['Value1'], FSSAIExipry=a['Value2'])
                     elif (Type == 'State'):
-
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'], District=a['Value2'])
-
-                        # print(str(query.query))
                     else:    
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})
                    
