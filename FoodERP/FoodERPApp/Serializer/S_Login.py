@@ -179,7 +179,18 @@ class C_CompanyGroupSerializer(serializers.ModelSerializer):
         model = C_CompanyGroups
         fields = '__all__'
 
- 
+class M_UserPartiesSerializer1(serializers.Serializer):
+      
+    id = serializers.IntegerField()
+    Role = serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)
+    Party_id=serializers.IntegerField()
+    PartyName=serializers.CharField(max_length=500)
+    Employee_id=serializers.IntegerField()
+    SAPPartyCode=serializers.CharField(max_length=500)
+    IsSCMPartyType=serializers.IntegerField()
+    GSTIN=serializers.CharField(max_length=500) 
+
 class M_UserPartiesSerializer(serializers.Serializer):
   
     id = serializers.IntegerField()
@@ -191,6 +202,8 @@ class M_UserPartiesSerializer(serializers.Serializer):
     SAPPartyCode=serializers.CharField(max_length=500)
     IsSCMPartyType=serializers.IntegerField()
     GSTIN=serializers.CharField(max_length=500)
+    FSSAINo=serializers.CharField(max_length=500)
+    FSSAIExipry=serializers.DateField()
     
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     
