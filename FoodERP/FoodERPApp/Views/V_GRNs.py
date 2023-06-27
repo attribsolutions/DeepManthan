@@ -451,13 +451,24 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             "Unit": c['id'],
                                             "UnitName": c['BaseUnitConversion'],
                                         })
+                                MRPquery = M_MRPMaster.objects.filter(Item_id=b['Item']['id']).order_by('-id')[:3] 
+                                if MRPquery.exists():
+                                    MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                                    ItemMRPDetails = list()
+                                    
+                                    for d in MRPdata:
+                                        ItemMRPDetails.append({
+                                        "MRP": d['id'],
+                                        "MRPValue": d['MRP'],   
+                                    })
+                                
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "Quantity": b['Quantity'],
                                     "QtyInBox": round(float(b['QtyInBox']),2),
                                     
-                                    "MRP": b['MRP']['id'],
+                                    "MRP": ItemMRPDetails,
                                     "MRPValue": b['MRPValue'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
