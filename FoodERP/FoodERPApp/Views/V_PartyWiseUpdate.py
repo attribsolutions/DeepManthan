@@ -88,7 +88,7 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "FSSAIExipry":  FSSAI_Serializer[0]['FSSAIExipry']
                                 })
                             
-                        elif (Type == 'Creditlimit' or Type == 'TCSParty' ):
+                        elif (Type == 'Creditlimit' or Type == 'IsTCSParty' ):
                             SubPartyListData.append({
                                 "id": a['id'],
                                 "PartyID":a['Party']['id'],
