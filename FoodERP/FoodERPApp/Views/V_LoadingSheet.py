@@ -237,6 +237,7 @@ class LoadingSheetPrintView(CreateAPIView):
                                 "ItemName": b['Item']['Name'],
                                 "Quantity": b['Quantity'],
                                 "BoxQuantity": b['QtyInBox'],
+                                "PiecesQuantity": b['QtyInNo'],
                                 "MRP": b['MRP']['id'],
                                 "MRPValue": b['MRP']['MRP'],
                                 "Rate": b['Rate'],
