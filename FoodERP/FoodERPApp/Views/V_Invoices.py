@@ -233,7 +233,7 @@ class InvoiceView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e.__dict__, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Invoice_serializer.errors, 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
