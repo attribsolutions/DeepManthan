@@ -468,8 +468,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "Quantity": b['Quantity'],
                                     "QtyInBox": round(float(b['QtyInBox']),2),
                                     
-                                    "MRP": ItemMRPDetails,
-                                    "MRPValue": b['MRPValue'],
+                                    "MRPDetails": ItemMRPDetails,
+                                    # "MRPValue": b['MRPValue'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
                                     "Unit": b['Unit']['id'],
