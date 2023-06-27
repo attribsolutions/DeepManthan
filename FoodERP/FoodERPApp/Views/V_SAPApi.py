@@ -31,8 +31,9 @@ class SAPInvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                aa = JSONParser().parse(request)
                 
+                aa = JSONParser().parse(request)
+                log_entry = create_transaction_log(request, aa, 0, 0, "initial")
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 # print(auth_header)
                 if auth_header:
@@ -160,6 +161,7 @@ class SAPInvoiceView(CreateAPIView):
                                 "Party": PartyMapping[0]["id"],
                                 "CreatedBy": 30,
                                 "UpdatedBy": 30,
+                                "TCSAmount" : 0, 
                                 "InvoiceDate": InvoiceDate,
                                 "InvoiceItems": InvoiceItems
 
