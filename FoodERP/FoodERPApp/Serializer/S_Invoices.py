@@ -97,7 +97,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
