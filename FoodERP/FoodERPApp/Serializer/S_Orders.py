@@ -21,8 +21,17 @@ class M_POTypeserializerSecond(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode']
-
+        fields = ['id','Name','SAPPartyCode','PAN']
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(PartiesSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("PAN", None):
+            ret["PAN"] = None  
+            
+        return ret 
+    
 class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
