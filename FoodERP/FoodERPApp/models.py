@@ -955,7 +955,7 @@ class  MC_PartySubParty(models.Model):
     Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.CASCADE, blank=True,null=True)
     SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
     Distance = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=2)
-    TCSParty = models.BooleanField(default=False)
+    IsTCSParty = models.BooleanField(default=False)
 
     class Meta:
         db_table = "MC_PartySubParty"

@@ -93,6 +93,7 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
+                        TCSPartyFlag = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
                         inward = 0
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
@@ -126,7 +127,8 @@ class OrderListFilterView(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "SAPResponse": a['SAPResponse'],
                             "IsConfirm": a['IsConfirm'],
-                            "Inward": inward
+                            "Inward": inward,
+                            "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
