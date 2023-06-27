@@ -125,7 +125,7 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                 UpdatedData = Partydata['UpdateData']
 
                 for a in UpdatedData:
-                    if (Type == 'Creditlimit' or Type == 'TCSParty' ):     
+                    if (Type == 'Creditlimit' or Type == 'IsTCSParty' ):     
                         Party = Partydata['PartyID']             
                         query = MC_PartySubParty.objects.filter(Party=Party, SubParty=a['SubPartyID']).update(**{Type: a['Value1']})
                     elif (Type == 'FSSAINo'):
