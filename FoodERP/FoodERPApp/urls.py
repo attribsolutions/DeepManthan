@@ -338,7 +338,7 @@ urlpatterns = [
             # url(r'GetSupplier/([0-9]+)$',GetSupplierListView.as_view()),
             # url(r'GetCustomer/([0-9]+)$',GetCustomerView.as_view()),
             url(r'PartyAddressDelete/([0-9]+)$',PartyAddressView.as_view()),
-            url(r'PartySettings/([0-9]+)$',PartiesSettingsDetailsView.as_view()),
+            url(r'PartySettings/([0-9]+)/([0-9]+)$',PartiesSettingsDetailsView.as_view()),
             url(r'PartySettings$',PartiesSettingsDetailsView.as_view()),
             url(r'PartyStockEntry$',StockEntryPageView.as_view()),
             
