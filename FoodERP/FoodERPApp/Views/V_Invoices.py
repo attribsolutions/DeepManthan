@@ -403,6 +403,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "InvoiceDate": a['InvoiceDate'],
                             "InvoiceNumber": a['InvoiceNumber'],
                             "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "TCSAmount" : a["TCSAmount"], 
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
