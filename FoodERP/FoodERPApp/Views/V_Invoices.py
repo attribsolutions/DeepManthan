@@ -175,7 +175,6 @@ class InvoiceListFilterView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "TCSAmount": a['TCSAmount'],
                             "RoundOffAmount": a['RoundOffAmount'],
                             "LoadingSheetCreated": LoadingSheetCreated, 
                             "DriverName": a['Driver']['Name'],
@@ -231,10 +230,12 @@ class InvoiceView(CreateAPIView):
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
+                    InvoiceID = Invoice_serializer.data['id']
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':InvoiceID, 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e.__dict__, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -403,7 +404,6 @@ class InvoiceViewSecond(CreateAPIView):
                             "InvoiceNumber": a['InvoiceNumber'],
                             "FullInvoiceNumber": a['FullInvoiceNumber'],
                             "GrandTotal": a['GrandTotal'],
-                            "TCSAmount": a['TCSAmount'],
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
@@ -571,7 +571,6 @@ class InvoiceViewThird(CreateAPIView):
                             "InvoiceNumber": a['InvoiceNumber'],
                             "FullInvoiceNumber": a['FullInvoiceNumber'],
                             "GrandTotal": a['GrandTotal'],
-                            "TCSAmount": a['TCSAmount'],
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
