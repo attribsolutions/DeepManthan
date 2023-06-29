@@ -230,16 +230,15 @@ class InvoiceView(CreateAPIView):
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
-                    # print('aaaaaa',Invoice_serializer)
-                    # InvoiceID = Invoice_serializer.data['id']
-                    # print(InvoiceID)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
+                    LastInsertId = (T_Invoices.objects.last()).id
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+    
     # authentication__Class = JSONWebTokenAuthentication
 
 #     def get(self, request, id=0):
