@@ -42,6 +42,7 @@ class GRNListFilterView(CreateAPIView):
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
                         query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
                        
@@ -117,7 +118,7 @@ class T_GRNView(CreateAPIView):
                         b = 0
 
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,1)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     
                     a['SystemBatchCode'] = BatchCode
@@ -141,6 +142,8 @@ class T_GRNView(CreateAPIView):
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],
+                    "GSTPercentage":a["GSTPercentage"],
+                    "MRPValue":a["MRPValue"],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
