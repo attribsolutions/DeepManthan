@@ -338,6 +338,7 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
+                    print(Order_serializer)
                     OrderID = Order_serializer.data['id']
 
                     PartyID = Order_serializer.data['Customer']
@@ -519,6 +520,7 @@ class EditOrderView(CreateAPIView):
                 RateParty = request.data['RateParty']
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
+                OrderType = request.data['OrderType']
                 q1 = M_Parties.objects.filter(id=Customer).values('PartyType')
                 q2 = M_PartyType.objects.filter(
                     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
@@ -589,8 +591,12 @@ group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                         # print('ttttttGST',Gst[0]['GST'])
             # =====================Stock================================================
 
+                    if(OrderType==1):
+                        Stockparty=Party
+                    else:
+                        Stockparty=Customer
                     stockquery = O_BatchWiseLiveStock.objects.filter(
-                        Item=ItemID, Party=Customer).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        Item=ItemID, Party=Stockparty).aggregate(Qty=Sum('BaseUnitQuantity'))
                     if stockquery['Qty'] is None:
                         Stock = 0.0
                     else:
