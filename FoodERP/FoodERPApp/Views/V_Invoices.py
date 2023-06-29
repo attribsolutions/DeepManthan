@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_Invoices import *
 from ..Serializer.S_Orders import *
+from ..Serializer.S_BankMaster import * 
 from ..models import  *
 
 
@@ -397,7 +398,21 @@ class InvoiceViewSecond(CreateAPIView):
                         for x in a['Party']['PartyAddress']:
                             if x['IsDefault'] == True :
                                 DefPartyAddress = x['Address']
-                    
+                        
+                        
+                        query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
+                        BanksSerializer=PartyBanksSerializer(query, many=True).data
+                        BankData=list()
+                        for e in BanksSerializer:
+                            BankData.append({
+                                "BankName": e['BankName'],
+                                "BranchName": e['BranchName'],
+                                "IFSC": e['IFSC'],
+                                "AccountNo": e['AccountNo'],
+                            })
+                            
+                            
+                         
                         InvoiceData.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
@@ -423,6 +438,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
+                            "BankData":BankData
                                                         
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
