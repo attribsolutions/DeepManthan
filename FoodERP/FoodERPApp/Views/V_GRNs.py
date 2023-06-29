@@ -118,12 +118,22 @@ class T_GRNView(CreateAPIView):
                         b = 0
 
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,1)
-                    BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    
+                    
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    a['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                    QtyInNo=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    a['QtyInNo'] =  float(QtyInNo)
+                    QtyInKg=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    a['QtyInKg'] =  float(QtyInKg)
+                    QtyInBox=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    a['QtyInBox'] = float(QtyInBox)
+                    
+                    
                     
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
-                    a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
                     
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
