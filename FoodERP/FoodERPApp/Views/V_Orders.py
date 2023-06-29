@@ -592,9 +592,9 @@ group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
             # =====================Stock================================================
 
                     if(OrderType==1):
-                        Stockparty=Party
-                    else:
                         Stockparty=Customer
+                    else:
+                        Stockparty=Party
                     stockquery = O_BatchWiseLiveStock.objects.filter(
                         Item=ItemID, Party=Stockparty).aggregate(Qty=Sum('BaseUnitQuantity'))
                     if stockquery['Qty'] is None:
