@@ -42,6 +42,7 @@ class GRNListFilterView(CreateAPIView):
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
                         query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
                        
@@ -117,7 +118,7 @@ class T_GRNView(CreateAPIView):
                         b = 0
 
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,1)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     
                     a['SystemBatchCode'] = BatchCode
@@ -141,6 +142,8 @@ class T_GRNView(CreateAPIView):
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],
+                    "GSTPercentage":a["GSTPercentage"],
+                    "MRPValue":a["MRPValue"],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
@@ -451,14 +454,25 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             "Unit": c['id'],
                                             "UnitName": c['BaseUnitConversion'],
                                         })
+                                MRPquery = M_MRPMaster.objects.filter(Item_id=b['Item']['id']).order_by('-id')[:3] 
+                                if MRPquery.exists():
+                                    MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                                    ItemMRPDetails = list()
+                                    
+                                    for d in MRPdata:
+                                        ItemMRPDetails.append({
+                                        "MRP": d['id'],
+                                        "MRPValue": d['MRP'],   
+                                    })
+                                
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "Quantity": b['Quantity'],
-                                    "QtyInBox": round(b['QtyInBox'],2),
+                                    "QtyInBox": round(float(b['QtyInBox']),2),
                                     
-                                    "MRP": b['MRP']['id'],
-                                    "MRPValue": b['MRPValue'],
+                                    "MRPDetails": ItemMRPDetails,
+                                    # "MRPValue": b['MRPValue'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
                                     "Unit": b['Unit']['id'],

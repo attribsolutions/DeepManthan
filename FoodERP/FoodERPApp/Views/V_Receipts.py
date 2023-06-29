@@ -162,6 +162,9 @@ class ReceiptView(CreateAPIView):
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
+                            "MobileNo":a['Party']['MobileNo'],
+                            "Address":a['Address'],
+                            "BillNumber":a['FullInvoiceNumber'],
                             "Description": a['Description'],
                             "ReceiptMode": a['ReceiptMode']['id'],
                             "ReceiptModeName": a['ReceiptMode']['Name'],
@@ -178,7 +181,6 @@ class ReceiptView(CreateAPIView):
                             "DepositorBankName": a['DepositorBank']['Name'],
                             "CreatedBy":a['CreatedBy'],
                             "CreatedOn": a['CreatedOn']
-
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -196,7 +198,6 @@ class ReceiptView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Receipt used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
 
 class MakeReceiptOfPaymentListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
