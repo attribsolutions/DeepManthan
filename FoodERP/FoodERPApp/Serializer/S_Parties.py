@@ -1,12 +1,11 @@
 from ..models import *
 from rest_framework import serializers
 
-
 class PartiesSerializer(serializers.ModelSerializer):
        
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email']       
+        fields = ['id','Name','GSTIN','PAN','Email','MobileNo']       
 
 class Partyaddress(serializers.ModelSerializer):
     class Meta:
@@ -17,7 +16,6 @@ class PartyTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model= M_PartyType
         fields = '__all__'
-
 
 class DivisionsSerializer(serializers.ModelSerializer):
     PartyType=PartyTypeSerializer(read_only=True)

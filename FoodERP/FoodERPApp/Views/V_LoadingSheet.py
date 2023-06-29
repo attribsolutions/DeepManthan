@@ -1,3 +1,4 @@
+import decimal
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -207,7 +208,6 @@ class LoadingSheetPrintView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
-                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
@@ -222,61 +222,57 @@ class LoadingSheetPrintView(CreateAPIView):
                         "DriverName": a['Driver']['Name'],
                         "CreatedOn" : a['CreatedOn']
                     })
-                 
                 q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
                 InvoiceQuery = T_Invoices.objects.filter(id__in=q1)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                     InvoiceParent = list()
-                    InvoiceItemDetails = list()
-                    for a in InvoiceSerializedata:
-                        for b in a['InvoiceItems']:
-                            InvoiceItemDetails.append({
-                                "Item": b['Item']['id'],
-                                "ItemName": b['Item']['Name'],
-                                "Quantity": b['Quantity'],
-                                "BoxQuantity": b['QtyInBox'],
-                                "PiecesQuantity": b['QtyInNo'],
-                                "MRP": b['MRP']['id'],
-                                "MRPValue": b['MRP']['MRP'],
-                                "Rate": b['Rate'],
-                                "TaxType": b['TaxType'],
-                                "UnitName": b['Unit']['BaseUnitConversion'],
-                                "BaseUnitQuantity": b['BaseUnitQuantity'],
-                                "GST": b['GST']['id'],
-                                "GSTPercentage": b['GST']['GSTPercentage'],
-                                "MarginValue": b['Margin']['Margin'],
-                                "BasicAmount": b['BasicAmount'],
-                                "GSTAmount": b['GSTAmount'],
-                                "CGST": b['CGST'],
-                                "SGST": b['SGST'],
-                                "IGST": b['IGST'],
-                                "CGSTPercentage": b['CGSTPercentage'],
-                                "SGSTPercentage": b['SGSTPercentage'],
-                                "IGSTPercentage": b['IGSTPercentage'],
-                                "Amount": b['Amount'],
-                                "BatchCode": b['BatchCode'],
-                                "BatchDate": b['BatchDate'],
-                                "HSNCode":b['GST']['HSNCode'],
-                                "DiscountType":b['DiscountType'],
-                                "Discount":b['Discount'],
-                                "DiscountAmount":b['DiscountAmount']
-                            })
+                    for b in InvoiceSerializedata:
                         InvoiceParent.append({
-                            "id": a['id'],
-                            "InvoiceDate": a['InvoiceDate'],
-                            "InvoiceNumber": a['InvoiceNumber'],
-                            "FullInvoiceNumber": a['FullInvoiceNumber'],
-                            "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount":a['RoundOffAmount'],
-                            "Customer": a['Customer']['id'],
-                            "CustomerName": a['Customer']['Name'],
-                            "CustomerGSTIN": a['Customer']['GSTIN'],
-                            "Party": a['Party']['id'],
-                            "PartyName": a['Party']['Name'],
-                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "id": b['id'],
+                            "InvoiceDate": b['InvoiceDate'],
+                            "InvoiceNumber": b['InvoiceNumber'],
+                            "FullInvoiceNumber": b['FullInvoiceNumber'],
+                            "GrandTotal": b['GrandTotal'],
+                            "RoundOffAmount":b['RoundOffAmount'],
+                            "Customer": b['Customer']['id'],
+                            "CustomerName": b['Customer']['Name'],
+                            "CustomerGSTIN": b['Customer']['GSTIN'],
+                            "Party": b['Party']['id'],
+                            "PartyName": b['Party']['Name'],
+                            "PartyGSTIN": b['Party']['GSTIN'],
                         })
+                    
+                Invoicelist = list()
+                InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                for x in InvoiceSerializedata:
+                    Invoicelist.append(x['id'])
+                InvoiceItemDetails = list()        
+                Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id,TC_InvoiceItems.BatchCode",[Invoicelist])    
+                
+                InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
+                for c in InvoiceItemSerializedata:
+                    
+                    # Box Qty and Pieces Qty  
+                    
+                    QtyInBox = c['QtyInBox']
+                    integer_part, decimal_part = QtyInBox.split(".")
+                    qty= "0."+decimal_part
+                    QtyInNo=UnitwiseQuantityConversion(c['Item_id'],qty,c['Unit_id'],0,0,1,0).ConvertintoSelectedUnit()
+                    integer_part1, decimal_part2 = str(QtyInNo).split(".")
+
+                    InvoiceItemDetails.append({
+                        "id": c['id'],
+                        "id": c['Item_id'],
+                        "ItemName": c['ItemName'],
+                        "Quantity": c['Quantity'],
+                        "MRPValue": c['MRPValue'],
+                        "Amount" : c['Amount'],
+                        "BatchCode": c['BatchCode'],
+                        "BoxQty": integer_part,
+                        "PiecesQty":decimal_part2
+                    })
+                    
                     InvoiceData.append({
                         "PartyDetails":LoadingSheetListData[0],
                         "InvoiceItems":InvoiceItemDetails,

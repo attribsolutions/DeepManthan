@@ -54,6 +54,20 @@ class LoadingSheetInvoicesSerializer(serializers.Serializer):
     CreatedOn = serializers.CharField(max_length=500)
     UpdatedOn = serializers.EmailField(max_length=200)
     Name = serializers.CharField(max_length=500)
-         
+    
+    
+    
+    
+class LoadingSheetPrintSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
+    Unit_id=serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=100)
+    Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BatchCode = serializers.CharField(max_length=100)  
+    QtyInBox = serializers.DecimalField(max_digits=10, decimal_places=3)
+     
         
         
