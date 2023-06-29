@@ -268,45 +268,6 @@ class PartiesSettingsDetailsView(CreateAPIView):
 
     @transaction.atomic()
     def get(self, request, PartyID=0, CompanyID=0):
-        # try:
-        #     with transaction.atomic():
-        #         query = M_PartySettingsDetails.objects.filter(Party=id).count()
-        #         if query == 0:
-        #             query = M_Settings.objects.filter(IsActive=1).all()
-        #             PartiesSetting_Serializer = MasterSettingsSerializer(
-        #                 query, many=True).data
-        #             PartySettingslist = list()
-        #             for a in PartiesSetting_Serializer:
-        #                 PartySettingslist.append({
-        #                     "id": a['id'],
-        #                     "SystemSetting": a['SystemSetting'],
-        #                     "Description": a['Description'],
-        #                     "Value": a['DefaultValue'],
-        #                     "IsPartyRelatedSetting":a['IsPartyRelatedSetting']
-        #                 })
-        #             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartySettingslist})
-        #         else:
-        #             query =M_Settings.objects.raw('''SELECT a.Setting id,a.SystemSetting,a.Description,b.SettingID,a.DefaultValue,b.Value FROM (SELECT M_Settings.id As Setting,M_Settings.SystemSetting As SystemSetting,M_Settings.Description As Description,M_Settings.DefaultValue As DefaultValue FROM M_Settings WHERE M_Settings.IsActive=1 AND M_Settings.IsPartyRelatedSetting =1)a LEFT JOIN (SELECT Setting_id SettingID,M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE M_PartySettingsDetails.Party_id=%s)b on  a.Setting = b.SettingID ''',([id]))
-        #             print(str(query.query))
-        #             PartiesSetting_Serializer = PartiesSettingsDetailsListSerializer(
-        #                 query, many=True).data
-        #             PartySettingslist = list()
-        #             for a in PartiesSetting_Serializer:
-
-        #                 if a['Value'] is None:
-        #                     Value = a['DefaultValue']
-        #                 else:
-        #                     Value = a['Value']
-
-        #                 PartySettingslist.append({
-        #                     "id": a['id'],
-        #                     "SystemSetting": a['SystemSetting'],
-        #                     "Description": a['Description'],
-        #                     "Value":Value
-        #                 })
-        #             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartySettingslist})
-        # except Exception as e:
-        #     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
         try:
             with transaction.atomic():
@@ -338,19 +299,19 @@ FROM
       LEFT JOIN
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
-                
+
                 PartiesSetting_Serializer = PartiesSettingsDetailsListSerializer(
                     query, many=True).data
                 PartySettingslist = list()
                 for a in PartiesSetting_Serializer:
-               
+
                     if a['IsPartyRelatedSetting'] == 1:
                         if a['PartyValue'] is None:
                             Value = a['DefaultValue']
                         else:
                             Value = a['PartyValue']
                     else:
-                        
+
                         if a['CompanyValue'] is None:
                             Value = a['DefaultValue']
                         else:
