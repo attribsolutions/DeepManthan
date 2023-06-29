@@ -540,8 +540,9 @@ class RateCalculationFunction:
             else:
                 GSTRate=float(self.MRP)-(float(self.MRP)*(Margin/100))
 
-            RatewithoutGST=float(GSTRate)*100/(100+float(self.GST))
-            self.MRP=round(GSTRate,2)
+            RoundedGSTRate=round(GSTRate,2)
+            RatewithoutGST=float(RoundedGSTRate)*100/(100+float(self.GST))
+            self.MRP=round(RoundedGSTRate,2)
         
         RatewithGST=round((float(self.BaseUnitQantityofselectedunit/self.BaseUnitQantityofNoUnit)* float(GSTRate) ),2)
         RateWithoutGST=round((float(self.BaseUnitQantityofselectedunit/self.BaseUnitQantityofNoUnit)* float(RatewithoutGST) ),2)
@@ -550,7 +551,7 @@ class RateCalculationFunction:
         RateDetails.append({
             "RatewithGST":RatewithGST,
             "RateWithoutGST": RateWithoutGST,
-            "NoRatewithGST" :GSTRate,
+            "NoRatewithGST" :RoundedGSTRate,
             "NoRatewithOutGST" :RatewithoutGST
         })
         
