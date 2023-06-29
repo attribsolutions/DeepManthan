@@ -467,7 +467,6 @@ class InvoiceViewSecond(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
           
-
 class InvoiceNoView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
