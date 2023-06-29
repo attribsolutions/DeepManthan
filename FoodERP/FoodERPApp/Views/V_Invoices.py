@@ -238,6 +238,7 @@ class InvoiceView(CreateAPIView):
     
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+    
     # authentication__Class = JSONWebTokenAuthentication
 
 #     def get(self, request, id=0):
