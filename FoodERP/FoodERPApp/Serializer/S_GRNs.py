@@ -21,7 +21,7 @@ class O_LiveBatchesSerializer(serializers.ModelSerializer):
     O_BatchWiseLiveStockList = O_BatchWiseLiveStockSerializer(many=True)
     class Meta:
         model = O_LiveBatches
-        fields = ['MRP','GST','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList']
+        fields = ['MRP','GST','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','GSTPercentage','MRPValue']
     
 
 
@@ -35,7 +35,7 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_GRNItems
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
-                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate']
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','GSTPercentage','MRPValue','QtyInBox','QtyInKg','QtyInNo','ActualQuantity']
 
 class T_GRNSerializer(serializers.ModelSerializer):
 
@@ -59,6 +59,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
         grnID = T_GRNs.objects.create(**validated_data)
         
         for GRNItem_data in GRNItems_data :
+            print(grnID)
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
  
         for O_LiveBatchesList_data in O_LiveBatchesLists_data :

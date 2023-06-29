@@ -42,6 +42,7 @@ class GRNListFilterView(CreateAPIView):
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
                         query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
                        
@@ -117,12 +118,22 @@ class T_GRNView(CreateAPIView):
                         b = 0
 
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], GRNdata['Customer'], b)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
-                    BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    
+                    
+                    BaseUnitQuantity=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    a['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                    QtyInNo=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    a['QtyInNo'] =  float(QtyInNo)
+                    QtyInKg=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    a['QtyInKg'] =  float(QtyInKg)
+                    QtyInBox=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    a['QtyInBox'] = float(QtyInBox)
+                    
+                    
                     
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
-                    a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
                     
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
@@ -141,6 +152,8 @@ class T_GRNView(CreateAPIView):
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],
+                    "GSTPercentage":a["GSTPercentage"],
+                    "MRPValue":a["MRPValue"],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
