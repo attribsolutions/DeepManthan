@@ -989,6 +989,8 @@ class T_GRNs(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Customer = models.ForeignKey(M_Parties, related_name='GRNCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
+    Comment = models.CharField(max_length=500 ,null=True,blank=True)
+    Reason = models.ForeignKey(M_GeneralMaster, related_name='GRNReason', on_delete=models.PROTECT)
 
     class Meta:
         db_table = "T_GRNs"
@@ -1020,11 +1022,15 @@ class TC_GRNItems(models.Model):
     SystemBatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     GRN = models.ForeignKey(T_GRNs, related_name='GRNItems', on_delete=models.CASCADE)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='GRNItemGst', on_delete=models.PROTECT)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='GRNItemGst', on_delete=models.PROTECT,null=True,blank=True)
     Item = models.ForeignKey(M_Items, related_name='GItem', on_delete=models.DO_NOTHING)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='GRNUnitID', on_delete=models.PROTECT)
     MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
     GSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3)
 
     class Meta:
         db_table = "TC_GRNItems"
