@@ -4,6 +4,11 @@ from ..Serializer.S_BankMaster import *
 from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
 
+class CustomerAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['Address']
+
 class ReceiptInvoiceserializer(serializers.Serializer):
    
     Receipt_id=serializers.IntegerField()
@@ -61,7 +66,8 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
     DepositorBank = BankSerializer(read_only=True)
     ReceiptInvoices = ReceiptInvoiceSerializer(many=True)
     PaymentReceipt=PaymentReceiptSerializer(read_only=True,many=True)
-    
+    Address=CustomerAddressSerializer(read_only=True)
+    FullInvoiceNumber=ReceiptInvoiceserializer(read_only=True)
     class Meta:
         model = T_Receipts
         fields = '__all__'
@@ -83,6 +89,12 @@ class ReceiptSerializerSecond(serializers.ModelSerializer):
             ret["ReceiptType"] = {"id": None, "Name": None}
         
         if not ret.get("PaymentReceipt", None):
-            ret["PaymentReceipt"] = {"id": None, "Payment": None}          
+            ret["PaymentReceipt"] = {"id": None, "Payment": None} 
+
+        if not ret.get("Address", None):
+            ret["Address"] = None  
+
+        if not ret.get("FullInvoiceNumber", None):
+            ret["FullInvoiceNumber"] = None
                   
         return ret            
