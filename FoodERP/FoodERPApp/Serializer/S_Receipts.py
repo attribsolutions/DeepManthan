@@ -10,7 +10,6 @@ class CustomerAddressSerializer(serializers.ModelSerializer):
         fields = ['Address']
 
 class ReceiptInvoiceserializer(serializers.Serializer):
-   
     Receipt_id=serializers.IntegerField()
     Customer_id=serializers.IntegerField()
     Invoice_ID=serializers.IntegerField()
@@ -55,7 +54,6 @@ class ReceiptSerializer(serializers.ModelSerializer):
             TC_PaymentReceipt.objects.create(Receipt=Receipts, **PaymentReceipt_data)    
 
         return Receipts    
-        
         
 class ReceiptSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
