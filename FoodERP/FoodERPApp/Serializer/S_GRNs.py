@@ -21,7 +21,7 @@ class O_LiveBatchesSerializer(serializers.ModelSerializer):
     O_BatchWiseLiveStockList = O_BatchWiseLiveStockSerializer(many=True)
     class Meta:
         model = O_LiveBatches
-        fields = ['MRP','GST','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','MRPValue','GSTPercentage']
+        fields = ['MRP','GST','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','GSTPercentage','MRPValue']
     
 
 
