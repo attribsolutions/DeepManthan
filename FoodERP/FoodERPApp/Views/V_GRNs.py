@@ -42,7 +42,7 @@ class GRNListFilterView(CreateAPIView):
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
                         query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
                        
