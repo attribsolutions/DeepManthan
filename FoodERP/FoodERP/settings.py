@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'FoodERP',     
 
         'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd', 
+        'PASSWORD': 'P@ssw0rd',  
 
         'HOST': '10.4.5.64' ,   
 
