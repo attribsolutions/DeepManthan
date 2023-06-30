@@ -147,7 +147,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 if Query:
                     
                     if(Type==4):
-                        Supplier_serializer = DivisionsSerializer(Query, many=True).data
+                        Supplier_serializer = PartySerializer(Query, many=True).data
                     else:    
                         Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Supplier_serializer})
@@ -155,8 +155,6 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                     FSSAINo= " "
                     FSSAIExipry = ""
                     for a in Supplier_serializer: 
-                        
-                        
                         if(Type==1): #Vendor
                             
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -167,8 +165,10 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
+                            "PAN":a['Party']['PAN'],
                             "FSSAINo" : FSSAINo,
-                            "FSSAIExipry" : FSSAIExipry
+                            "FSSAIExipry" : FSSAIExipry,
+                            "IsTCSParty":a['IsTCSParty']
                             })   
                         elif(Type==2): #Supplier
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -179,8 +179,11 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
+                            "PAN":a['Party']['PAN'],
                             "FSSAINo" : FSSAINo,
-                            "FSSAIExipry" : FSSAIExipry
+                            "FSSAIExipry" : FSSAIExipry,
+                            "IsTCSParty":a['IsTCSParty']
+
                             }) 
                         elif(Type==3):  #Customer
                             if(a['SubParty']['PartyAddress'][0]['IsDefault'] == 1):
@@ -191,8 +194,10 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['SubParty']['id'],
                             "Name": a['SubParty']['Name'],
                             "GSTIN": a['SubParty']['GSTIN'],
+                            "PAN":a['Party']['PAN'],
                             "FSSAINo" : FSSAINo,
-                            "FSSAIExipry" : FSSAIExipry
+                            "FSSAIExipry" : FSSAIExipry,
+                            "IsTCSParty":a['IsTCSParty']
                             })
                         else:
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -204,8 +209,10 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['id'],
                             "Name": a['Name'],
                             "GSTIN": a['Party']['GSTIN'],
+                            "PAN":a['Party']['PAN'],
                             "FSSAINo" : FSSAINo,
-                            "FSSAIExipry" : FSSAIExipry
+                            "FSSAIExipry" : FSSAIExipry,
+                            "IsTCSParty":a['IsTCSParty']
                             })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})
