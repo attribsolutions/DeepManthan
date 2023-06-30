@@ -66,6 +66,16 @@ class OrderDetailsForInvoice(CreateAPIView):
                         for d in StockQtySerialize_data:
                             Rate=RateCalculationFunction(d['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
                             print(Rate)
+                            if(d['LiveBatche']['MRP']['id'] is None):
+                                MRPValue=d['LiveBatche']['MRPValue']
+                            else:
+                                MRPValue=d['LiveBatche']['MRP']['MRP']
+                            
+                            if(d['LiveBatche']['GST']['id'] is None):
+                                GSTPercentage=d['LiveBatche']['GSTPercentage']
+                            else:
+                                GSTPercentage=d['LiveBatche']['GST']['GSTPercentage']
+                            
                             stockDatalist.append({
                                 "id": d['id'],
                                 "Item":d['Item']['id'],
@@ -77,8 +87,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
                                 "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
                                 "Rate":Rate[0]["NoRatewithOutGST"],
-                                "MRP" : d['LiveBatche']['MRP']['MRP'],
-                                "GST" : d['LiveBatche']['GST']['GSTPercentage'],
+                                "MRP" : MRPValue,
+                                "GST" : GSTPercentage,
                                 "UnitName":d['Unit']['BaseUnitConversion'], 
                                 "BaseUnitQuantity":d['BaseUnitQuantity'],
                                   
