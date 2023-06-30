@@ -7,6 +7,8 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyItems import *
 from ..models import *
 
+
+
 class PartyItemsListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
