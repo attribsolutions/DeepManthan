@@ -45,13 +45,20 @@ class GRNListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
-                       
-                        challan = a['GRNReferences'][0]['Challan']
-                        if challan != None: 
+                        x = a.get('GRNReferences')
+                        challan = None 
+                        if x:
+                            challan = x[0]['Challan']
                             POType= ""
                         else:
-                              POType= ""
-                            # POType= a['GRNReferences'][0]['Order']['POType']['id']
+                            POType= ""
+                       
+                        # challan = a['GRNReferences'][0]['Challan']
+                        # if challan != None: 
+                        #     POType= ""
+                        # else:
+                        #     POType= ""
+                        #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
                         GRNListData.append({
                             "id": a['id'],
                             "GRNDate": a['GRNDate'],
