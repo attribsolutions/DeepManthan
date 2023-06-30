@@ -462,7 +462,8 @@ class UnitwiseQuantityConversion:
             baseunitqty=round(float(BaseUnitQuantity), 2)
             UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('UnitID')
             BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
-            aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
+            # aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
+            aaa= "("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
             return aaa
       
     
