@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from ..models import *
 
+class PartySubPartySerializer(serializers.ModelSerializer):
+    class Meta :
+        model= MC_PartySubParty
+        fields = '__all__'
+
 class PartyTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model= M_PartyType
@@ -25,18 +30,16 @@ class Partyaddress(serializers.ModelSerializer):
 class PartySerializer(serializers.ModelSerializer):
     PartyType=PartyTypeSerializer(read_only=True)
     PartyAddress=Partyaddress(many=True)
+    PartySubParty=PartySubPartySerializer(read_only=True) 
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType','GSTIN','PartyAddress']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress','PartySubParty','PAN']
         
-
-
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Routes
         fields = '__all__'        
   
-
 class PartySubpartySerializerSecond(serializers.ModelSerializer):
     SubParty = PartySerializer(read_only=True)
     Party = PartySerializer(read_only=True)
@@ -54,11 +57,6 @@ class PartySubpartySerializerSecond(serializers.ModelSerializer):
         
         return ret          
           
-
-class PartySubPartySerializer(serializers.ModelSerializer):
-    class Meta :
-        model= MC_PartySubParty
-        fields = '__all__'
 
 class PartySubPartySerializerGETList(serializers.Serializer):
     
