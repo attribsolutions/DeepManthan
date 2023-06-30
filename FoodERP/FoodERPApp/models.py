@@ -1030,7 +1030,7 @@ class TC_GRNItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
-    ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3)
+    ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3,null=True,blank=True)
 
     class Meta:
         db_table = "TC_GRNItems"
