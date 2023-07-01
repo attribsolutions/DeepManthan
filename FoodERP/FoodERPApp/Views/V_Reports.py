@@ -39,7 +39,7 @@ SELECT
             0 AS ReceiptAmt,
             0 AS CashReceiptAmt,
             1 AS Flag 
-            FROM FoodERP.T_Invoices where  InvoiceDate between %s and %s 
+            FROM T_Invoices where  InvoiceDate between %s and %s 
             and Party_id=%s and Customer_id=%s 
 
 UNION
