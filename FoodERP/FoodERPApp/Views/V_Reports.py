@@ -39,7 +39,7 @@ SELECT
             0 AS ReceiptAmt,
             0 AS CashReceiptAmt,
             1 AS Flag 
-            FROM FoodERP.T_Invoices where  InvoiceDate between %s and %s 
+            FROM T_Invoices where  InvoiceDate between %s and %s 
             and Party_id=%s and Customer_id=%s 
 
 UNION
@@ -97,7 +97,7 @@ SELECT
 ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer])
                 # print(query)
                 if not query:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Founddddddddd', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:        
                     PartyLedgerSerializedata = PartyLedgerReportSerializer(
                         query, many=True).data
@@ -142,6 +142,6 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         "Close": Closing,
                         "InvoiceItems" : PartyLedgerItemDetails
                     })    
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

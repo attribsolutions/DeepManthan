@@ -119,7 +119,7 @@ class GetOpeningBalanceView(CreateAPIView):
                 ReceiptDate = OpeningBalancedata['ReceiptDate']
                 today = date.today()
         
-                OpeningBalance=GetOpeningBalance(Party,Customer,ReceiptDate,today)
+                OpeningBalance=GetOpeningBalance(Party,Customer,ReceiptDate)
                 aa = list()
                 aa.append({"OpeningBalanceAmount": OpeningBalance })
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': aa[0]})
