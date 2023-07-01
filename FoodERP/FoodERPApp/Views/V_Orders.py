@@ -545,7 +545,7 @@ FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderIte
 on b.Item_id=c.Item )a
 
 
-join M_Items on M_Items.id=Item_id 
+INNER join M_Items on M_Items.id=Item_id 
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
@@ -555,7 +555,7 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-group by Item_id Order By M_Items.Sequence''', ([PartyItem], [Party], [OrderID]))
+Order By M_Items.Sequence''', ([PartyItem], [Party], [OrderID]))
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
@@ -569,7 +569,7 @@ FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderIte
 on b.Item_id=c.Item )a
 
 
-join M_Items on M_Items.id=Item_id 
+INNER join M_Items on M_Items.id=Item_id 
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
@@ -579,7 +579,7 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
+Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
 
                 OrderItemSerializer = OrderEditserializer(
                     Itemquery, many=True).data

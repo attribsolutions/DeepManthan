@@ -83,8 +83,28 @@ def UnitDropdown(ItemID,PartyForRate,BatchID=0):
         })
     return UnitDetails
 
-
-
+def GetOpeningBalance(Party,Customer,Date):
+    today = date.today()
+    query = MC_PartySubPartyOpeningBalance.objects.filter(Party=Party,SubParty=Customer,Year=today.year).values('OpeningBalanceAmount')
+               
+    if query:
+        OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
+    else:
+        OpeningBalanceAmt = 0
+    query2 = T_Invoices.objects.raw(''' SELECT '0' id, TransactionDate, InvoiceAmount, ReceiptAmount FROM ( SELECT T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount FROM T_Invoices WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id =%s  AND InvoiceDate <= %s  UNION ALL SELECT T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s ) A   Order By TransactionDate ''', ([Party], [Customer], [Date ], [Party], [Customer], [Date ], [Party], [Customer], [Date]))
+    # print(str(query2.query))
+    query2_serializer = OpeningBalanceSerializer(query2, many=True).data
+    OpeningBalance = 0.000
+    InvoiceAmount=0.000
+    ReceiptAmount=0.000
+    
+    for a in query2_serializer:
+        InvoiceAmount = InvoiceAmount + float(a['InvoiceAmount'] or 0)
+        ReceiptAmount = ReceiptAmount + float(a['ReceiptAmount'] or 0)
+    # print(self.OpeningBalanceAmt,InvoiceAmount,ReceiptAmount)
+    
+    OpeningBalance = (float(OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount
+    return OpeningBalance
 
 class GetOpeningBalanceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -99,25 +119,7 @@ class GetOpeningBalanceView(CreateAPIView):
                 ReceiptDate = OpeningBalancedata['ReceiptDate']
                 today = date.today()
         
-                query = MC_PartySubPartyOpeningBalance.objects.filter(Party=Party,SubParty=Customer,Year=today.year).values('OpeningBalanceAmount')
-               
-                if query:
-                    OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
-                else:
-                    OpeningBalanceAmt = 0
-                query2 = T_Invoices.objects.raw(''' SELECT '0' id, TransactionDate, InvoiceAmount, ReceiptAmount FROM ( SELECT T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount FROM T_Invoices WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id =%s  AND InvoiceDate <= %s  UNION ALL SELECT T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s ) A   Order By TransactionDate ''', ([Party], [Customer], [ReceiptDate ], [Party], [Customer], [ReceiptDate ], [Party], [Customer], [ReceiptDate]))
-                # print(str(query2.query))
-                query2_serializer = OpeningBalanceSerializer(query2, many=True).data
-                OpeningBalance = 0.000
-                InvoiceAmount=0.000
-                ReceiptAmount=0.000
-                
-                for a in query2_serializer:
-                    InvoiceAmount = InvoiceAmount + float(a['InvoiceAmount'] or 0)
-                    ReceiptAmount = ReceiptAmount + float(a['ReceiptAmount'] or 0)
-                # print(self.OpeningBalanceAmt,InvoiceAmount,ReceiptAmount)
-                
-                OpeningBalance = (float(OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount
+                OpeningBalance=GetOpeningBalance(Party,Customer,ReceiptDate,today)
                 aa = list()
                 aa.append({"OpeningBalanceAmount": OpeningBalance })
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': aa[0]})
