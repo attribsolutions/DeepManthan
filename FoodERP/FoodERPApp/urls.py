@@ -1,6 +1,8 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
+from .Views.V_Reports import PartyLedgerReportView
+
 from .Views.V_EInvoiceEwayBill import *
 
 from .Views.V_SAPApi import *
@@ -213,7 +215,7 @@ urlpatterns = [
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
             url(r'OrderConfirms$',ConfirmOrderView.as_view()),
-            url(r'OrderSummaryReport$',SummaryReportView.as_view()),
+            
             
 
 # InterBranch Order All APIs
@@ -393,7 +395,7 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
-            url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
+            
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 
@@ -519,6 +521,10 @@ urlpatterns = [
 #DashBoard
             url(r'getdashboard/([0-9]+)$', DashBoardView.as_view()),
 
-
+#Report
+            
+            url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
+            url(r'OrderSummaryReport$',SummaryReportView.as_view()),
+            url(r'PartyLedgerReport$',PartyLedgerReportView.as_view()),
 
 ]
