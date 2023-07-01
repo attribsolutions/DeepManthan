@@ -123,7 +123,8 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         PartyLedgerItemDetails.append({
                             "Date": a['InvoiceDate'],
                             "DocumentNO": a['BillNo'],
-                            "Particular": a['BankName']+' '+a['BranchName']+' '+a['DocumentNo']+' '+a['ReceiptMode'],
+                            # "Particular": a['BankName']+' '+a['BranchName']+' '+a['DocumentNo']+' '+a['ReceiptMode'],
+                            "Particular": '',
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": a['ReceiptAmt'],
                             "Cash": a['CashReceiptAmt'],
