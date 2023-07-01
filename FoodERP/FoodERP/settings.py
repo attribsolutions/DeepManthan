@@ -8,7 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 from datetime import timedelta
-import os
+import os 
 from pathlib import Path
 
 
@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.65','cbmfooderp.com','10.4.5.64','127.0.0.1'] 
 
@@ -95,9 +95,6 @@ DATABASES = {
         },
     },
 
-
-
-
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'transactionlogdb',
@@ -108,6 +105,8 @@ DATABASES = {
     # }
 
 }
+
+
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # SESSION_EXPIRE_AT_BROWSER_CLOSE = True
