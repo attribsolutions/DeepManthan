@@ -481,7 +481,7 @@ class RateCalculationFunction:
         
         if(BatchID > 0):
            
-            QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST')
+            QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST','GSTPercentage','MRPValue')
             q1=M_MRPMaster.objects.filter(id=QueryForGSTAndMRP[0]['MRP']).values('MRP')
             
             
@@ -490,9 +490,14 @@ class RateCalculationFunction:
             else:
                 self.MRP = 0
             
-            q2=M_GSTHSNCode.objects.filter(id=QueryForGSTAndMRP[0]['GST']).values('GSTPercentage')
-           
-            self.GST = q2[0]['GSTPercentage']
+            if(QueryForGSTAndMRP[0]['GST'] is None):
+
+                self.GST= QueryForGSTAndMRP[0]['GSTPercentage']
+                
+            else:
+                q2=M_GSTHSNCode.objects.filter(id=QueryForGSTAndMRP[0]['GST']).values('GSTPercentage')
+            
+                self.GST = q2[0]['GSTPercentage']
            
         else:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
