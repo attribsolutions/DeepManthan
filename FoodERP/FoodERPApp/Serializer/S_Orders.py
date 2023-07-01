@@ -21,7 +21,7 @@ class M_POTypeserializerSecond(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode','PAN']
+        fields = ['id','Name','SAPPartyCode','PAN','GSTIN']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
