@@ -166,8 +166,6 @@ class OrderListFilterViewSecond(CreateAPIView):
                             InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
-                        Grn_references = TC_GRNReferences.objects.filter(Invoice=('id'))
-                        Invoiceswithoutgrn = query.exclude(id__in=Grn_references.values('Invoice'))
                         Invoice_serializer = InvoiceSerializerSecond(
                             query, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
