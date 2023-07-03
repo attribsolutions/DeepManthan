@@ -159,13 +159,15 @@ class OrderListFilterViewSecond(CreateAPIView):
 
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
+                        if (FromDate == '' and ToDate == ''):
+                            query = T_Invoices.objects.filter(Customer_id=Customer)
+                        else:
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer)
                     else:
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
+        
                         Invoice_serializer = InvoiceSerializerSecond(
                             query, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
@@ -443,9 +445,11 @@ class T_OrdersViewSecond(CreateAPIView):
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN":a['Customer']['GSTIN'],
                             "Supplier": a['Supplier']['id'],
                             "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
+                            "SupplierGSTIN":a['Supplier']['GSTIN'],
                             "SupplierFssai": Address[0]['FSSAINo'],
                             "SupplierAddress": Address[0]['Address'],
                             "SupplierPIN": Address[0]['Pin'],
