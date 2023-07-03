@@ -159,21 +159,22 @@ class OrderListFilterViewSecond(CreateAPIView):
 
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
+                        if (FromDate == '' and ToDate == ''):
+                            query = T_Invoices.objects.filter(Customer_id=Customer)
+                        else:
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer)
                     else:
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
+        
                         Invoice_serializer = InvoiceSerializerSecond(
                             query, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                         InvoiceListData = list()
                         for a in Invoice_serializer:
-                            InvoiceID = TC_GRNReferences.objects.filter(Invoice=a['id']).values('Invoice').count()
-
-                                
+                            InvoiceID = TC_GRNReferences.objects.filter(
+                                Invoice=a['id']).values('Invoice').count()
                             if InvoiceID == 0:
                                 InvoiceListData.append({
                                     "id": a['id'],
