@@ -171,8 +171,12 @@ class OrderListFilterViewSecond(CreateAPIView):
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                         InvoiceListData = list()
                         for a in Invoice_serializer:
-                            InvoiceID = TC_GRNReferences.objects.filter(
-                                Invoice=a['id']).values('Invoice').count()
+                            InvoiceID = TC_GRNReferences.objects.filter(Invoice=a['id']).values('Invoice').count()
+                            grn_count = TC_GRNReferences.objects.filter(Invoice=InvoiceID).count()
+            
+                            if grn_count == 0:
+                                InvoiceListData.append(a)
+                                
                             if InvoiceID == 0:
                                 InvoiceListData.append({
                                     "id": a['id'],
