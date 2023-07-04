@@ -485,6 +485,11 @@ urlpatterns = [
             url(r'PurchaseReturn/([0-9]+)$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
+                    
+# Single Invoice details view api for Sales Return, CreditDebitnot
+            url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),
+# Single GRNItem Details for Sales return post body Item and BatchCode
+            url(r'ReturnItemBatchcode$', ReturnItemBatchCodeAddView.as_view()),
 
 #MappingMaster
             url(r'PartyCustomerMapping$', PartyCustomerMappingView.as_view()),
@@ -495,8 +500,10 @@ urlpatterns = [
             url(r'PartyUnitsMapping/([0-9]+)$', PartyUnitMappingMasterUnitsView.as_view()),
 
 
-# Single Invoice details view api for Purchase Return, CreditDebitnot
-            url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),               
+
+            
+
+                           
 
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
