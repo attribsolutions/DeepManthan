@@ -1423,7 +1423,7 @@ class T_PurchaseReturn(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
-    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT)
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT,null=True,blank=True)
 
     class Meta:
         db_table = "T_PurchaseReturn"

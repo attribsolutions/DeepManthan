@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix, SystemBatchCodeGeneration
 from ..Serializer.S_CreditDebit import *
 from ..Serializer.S_Items import *
+from ..Serializer.S_GRNs import *
 from django.db.models import Sum
 from ..models import *
 import datetime
@@ -77,12 +78,16 @@ class PurchaseReturnView(CreateAPIView):
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
               
-                if PurchaseReturndata['ReturnReason'] == 56:
-                    IsDamagePieces =False
-                else:
-                    IsDamagePieces =True    
+                   
                     
                 for a in PurchaseReturndata['ReturnItems']:
+                    
+                    if a['ReturnReason'] == 56:
+                        
+                        IsDamagePieces =False
+                    else:
+                        IsDamagePieces =True 
+                    
                     
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
@@ -232,6 +237,61 @@ class ReturnItemAddView(CreateAPIView):
                     
                     Itemlist.append({"InvoiceItems":InvoiceItems})    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Itemlist[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
+        except M_Items.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+
+
+
+class ReturnItemBatchCodeAddView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                PurchaseReturndata = JSONParser().parse(request)
+                ItemID = PurchaseReturndata['ItemID']
+                BatchCode = PurchaseReturndata['BatchCode']
+                query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]
+                if query.exists():
+                    GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
+                    # return JsonResponse({'query':  Itemsdata})
+                    GRMItems = list()
+                    for a in GRNItemsdata:
+                        GRMItems.append({
+                            "Item": a['Item']['id'],
+                            "ItemName": a['Item']['Name'],
+                            "Quantity": a['Quantity'],
+                            "MRP": a['MRP']['id'],
+                            "MRPValue": a['MRPValue'],
+                            "Rate": a['Rate'],
+                            "TaxType": a['TaxType'],
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['UnitID'],
+                            "BaseUnitQuantity": a['BaseUnitQuantity'],
+                            "GST": a['GST']['id'],
+                            "GSTPercentage": a['GSTPercentage'],
+                            "BasicAmount": a['BasicAmount'],
+                            "GSTAmount": a['GSTAmount'],
+                            "CGST": a['CGST'],
+                            "SGST": a['SGST'],
+                            "IGST": a['IGST'],
+                            "CGSTPercentage": a['CGSTPercentage'],
+                            "SGSTPercentage": a['SGSTPercentage'],
+                            "IGSTPercentage": a['IGSTPercentage'],
+                            "Amount": a['Amount'],
+                            "BatchCode": a['BatchCode'],
+                            "BatchDate": a['BatchDate'],
+                            # "ItemUnitDetails": ItemUnitDetails, 
+                            # "ItemMRPDetails":ItemMRPDetails,
+                            # "ItemGSTDetails":ItemGSTDetails
+                        })   
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})

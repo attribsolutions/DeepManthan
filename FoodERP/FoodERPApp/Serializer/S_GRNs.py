@@ -153,11 +153,23 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
     Item=ItemSerializer(read_only=True)
     Unit=UnitSerializerSecond(read_only=True)
     GST = M_GstHsnCodeSerializer(read_only=True)
+    MRP = M_MRPsSerializer(read_only=True)
     class Meta:
         model = TC_GRNItems
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
-                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate']          
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','MRPValue','GSTPercentage']          
 
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(TC_GRNItemsSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("GST", None):
+            ret["GST"] = {"id": None, "GSTPercentage": None}
+            
+        if not ret.get("MRP", None):
+            ret["MRP"] = {"id": None, "MRP": None}    
+        return ret
 
 class T_GRNSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
