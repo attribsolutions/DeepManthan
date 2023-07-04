@@ -230,7 +230,7 @@ class SAPOrderView(CreateAPIView):
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
                     log_entry = create_transaction_log(request, data, 0, 0, data_dict['entry']['content']['m:properties']['d:Stats'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Save Successfully ', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
