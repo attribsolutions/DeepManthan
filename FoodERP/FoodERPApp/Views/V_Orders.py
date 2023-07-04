@@ -114,8 +114,10 @@ class OrderListFilterView(CreateAPIView):
                             "Customer": a['Customer']['Name'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerPAN" : a['Customer']['PAN'],
+                            "CustomerGSTIN":a['Customer']['GSTIN'],
                             "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
                             "SupplierPAN" : a['Supplier']['PAN'],
+                            "SupplierGSTIN": a['Supplier']['GSTIN'],
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
                             "OrderAmount": a['OrderAmount'],
@@ -157,13 +159,15 @@ class OrderListFilterViewSecond(CreateAPIView):
 
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
+                        if (FromDate == '' and ToDate == ''):
+                            query = T_Invoices.objects.filter(Customer_id=Customer)
+                        else:
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer)
                     else:
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
+        
                         Invoice_serializer = InvoiceSerializerSecond(
                             query, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
@@ -379,20 +383,22 @@ class T_OrdersViewSecond(CreateAPIView):
                         OrderItemDetails = list()
                         for b in a['OrderItem']:
                             if(b['IsDeleted'] == 0):
-
+                                
                                 aaaa = UnitwiseQuantityConversion(
-                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 0).GetConvertingBaseUnitQtyBaseUnitName()
+                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
+                                
                                 if (aaaa == b['Unit']['UnitID']['Name']):
-                                    bb=""
+                                    bb=''
                                 else:
                                     bb=aaaa
+                                
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "ItemSAPCode": b['Item']['SAPItemCode'],
                                     "Quantity": b['Quantity'],
-                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 1, 0).ConvertintoSelectedUnit(),
+                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 1, 1).ConvertintoSelectedUnit(),
                                     "MRP": b['MRP']['id'],
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
@@ -417,6 +423,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "Comment": b['Comment'],
                                 })
+                        
                         inward = 0
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
@@ -438,9 +445,11 @@ class T_OrdersViewSecond(CreateAPIView):
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN":a['Customer']['GSTIN'],
                             "Supplier": a['Supplier']['id'],
                             "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
+                            "SupplierGSTIN":a['Supplier']['GSTIN'],
                             "SupplierFssai": Address[0]['FSSAINo'],
                             "SupplierAddress": Address[0]['Address'],
                             "SupplierPIN": Address[0]['Pin'],
@@ -543,7 +552,7 @@ FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderIte
 on b.Item_id=c.Item )a
 
 
-join M_Items on M_Items.id=Item_id 
+INNER join M_Items on M_Items.id=Item_id 
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
@@ -553,7 +562,7 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-group by Item_id Order By M_Items.Sequence''', ([PartyItem], [Party], [OrderID]))
+Order By M_Items.Sequence''', ([PartyItem], [Party], [OrderID]))
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
@@ -567,7 +576,7 @@ FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderIte
 on b.Item_id=c.Item )a
 
 
-join M_Items on M_Items.id=Item_id 
+INNER join M_Items on M_Items.id=Item_id 
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
@@ -577,7 +586,7 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-group by Item_id Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
+Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
 
                 OrderItemSerializer = OrderEditserializer(
                     Itemquery, many=True).data
