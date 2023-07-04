@@ -78,10 +78,10 @@ class PurchaseReturnView(CreateAPIView):
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 
-                if a['ReturnReason'] == 56:   
-                    IsDamagePieces =False
-                else:
-                    IsDamagePieces =True 
+                # if PurchaseReturndata['ReturnReason'] == 56:   
+                #     IsDamagePieces =False
+                # else:
+                #     IsDamagePieces =True 
                
                 for a in PurchaseReturndata['ReturnItems']:
                     
@@ -130,8 +130,10 @@ class PurchaseReturnView(CreateAPIView):
                     
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
+                    "MRPValue": a['MRPValue'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],
+                    "GSTPercentage": a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
