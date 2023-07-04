@@ -1777,7 +1777,27 @@ class M_PartySettingsDetails(models.Model):
     Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.CASCADE)
     
     class Meta:
-        db_table="M_PartySettingsDetails"        
+        db_table="M_PartySettingsDetails"
+        
+        
+class T_Stock(models.Model):
+    StockDate=models.DateField()
+    Item= models.ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
+    BaseunitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table="T_Stock"
+                
+                
                  
 
 class T_Stock(models.Model):
