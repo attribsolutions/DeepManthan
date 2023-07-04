@@ -59,6 +59,8 @@ class StockEntryPageView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "GST": a['GST'],
+                    "MRPValue" :a["MRPValue"],
+                    "GSTPercentage" : a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],

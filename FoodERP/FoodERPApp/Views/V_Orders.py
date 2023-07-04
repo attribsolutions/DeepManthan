@@ -383,20 +383,22 @@ class T_OrdersViewSecond(CreateAPIView):
                         OrderItemDetails = list()
                         for b in a['OrderItem']:
                             if(b['IsDeleted'] == 0):
-
+                                
                                 aaaa = UnitwiseQuantityConversion(
-                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 0).GetConvertingBaseUnitQtyBaseUnitName()
+                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
+                                
                                 if (aaaa == b['Unit']['UnitID']['Name']):
-                                    bb=""
+                                    bb=''
                                 else:
                                     bb=aaaa
+                                
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "ItemSAPCode": b['Item']['SAPItemCode'],
                                     "Quantity": b['Quantity'],
-                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 1, 0).ConvertintoSelectedUnit(),
+                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 1, 1).ConvertintoSelectedUnit(),
                                     "MRP": b['MRP']['id'],
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
@@ -421,6 +423,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "Comment": b['Comment'],
                                 })
+                        
                         inward = 0
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
