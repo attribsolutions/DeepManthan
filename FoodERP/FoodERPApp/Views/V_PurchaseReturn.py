@@ -77,12 +77,15 @@ class PurchaseReturnView(CreateAPIView):
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
-              
-                   
-                    
+                
+                if a['ReturnReason'] == 56:   
+                    IsDamagePieces =False
+                else:
+                    IsDamagePieces =True 
+               
                 for a in PurchaseReturndata['ReturnItems']:
                     
-                    if a['ReturnReason'] == 56:
+                    if a['ItemReason'] == 56:
                         
                         IsDamagePieces =False
                     else:
