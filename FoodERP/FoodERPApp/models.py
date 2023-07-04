@@ -1423,7 +1423,7 @@ class T_PurchaseReturn(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
-    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT)
+    ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT,null=True,blank=True)
 
     class Meta:
         db_table = "T_PurchaseReturn"
@@ -1454,7 +1454,8 @@ class TC_PurchaseReturnItems(models.Model):
     MRP = models.ForeignKey(M_MRPMaster, related_name='ReturnItemMRP', on_delete=models.PROTECT,null=True,blank=True)
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='ReturnItems', on_delete=models.CASCADE)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
-
+    ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ItemReason",on_delete=models.PROTECT) 
+    Comment = models.CharField(max_length=500,null=True,blank=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
         
@@ -1797,22 +1798,6 @@ class T_Stock(models.Model):
     class Meta:
         db_table="T_Stock"
                 
-                
-                 
-
-class T_Stock(models.Model):
-    StockDate=models.DateField()
-    Item= models.ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
-    BaseunitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
-    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
-    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
-    Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
    
         
 
