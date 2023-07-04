@@ -258,7 +258,6 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 ItemID = PurchaseReturndata['ItemID']
                 BatchCode = PurchaseReturndata['BatchCode']
                 if BatchCode != "":
-               
                     query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]
                 else:
                     query = TC_GRNItems.objects.filter(Item=ItemID).order_by('id')[:1]  
@@ -326,6 +325,9 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                             "Amount": a['Amount'],
                             "BatchCode": a['BatchCode'],
                             "BatchDate": a['BatchDate'],
+                            "DiscountType": a['DiscountType'],
+                            "Discount": a['Discount'],
+                            "DiscountAmount": a['DiscountAmount'],
                             "ItemUnitDetails": ItemUnitDetails, 
                             "ItemMRPDetails":ItemMRPDetails,
                             "ItemGSTDetails":ItemGSTDetails
