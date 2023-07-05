@@ -180,7 +180,8 @@ class M_PartiesViewSecond(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "Subparty": a['SubParty'],
                             "Creditlimit": a['Creditlimit'],
-                            "Route": a['Route_id'],
+                            "Route": a['Route']['id'],
+                            "RouteName": a['Route']['Name'],
                             "Distance": a['Distance']
                         })
                     list2 = list()
