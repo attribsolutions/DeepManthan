@@ -71,3 +71,12 @@ class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
     class Meta :
         model= T_PurchaseReturn
         fields = '__all__'       
+     
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(PurchaseReturnSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("ReturnReason", None):
+            ret["ReturnReason"] = {"id": None, "Name": None}
+              
+        return ret    
