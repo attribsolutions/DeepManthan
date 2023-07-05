@@ -204,6 +204,7 @@ class InvoiceSerializerThird(serializers.ModelSerializer):
     InvoicesReferences = InvoicesReferencesSerializerSecond(many=True)
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
+    InvoiceUploads=InvoiceUploadsSerializer(many=True)
     class Meta:
         model = T_Invoices
         fields = '__all__'
