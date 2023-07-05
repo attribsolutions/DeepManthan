@@ -268,7 +268,6 @@ class LoadingSheetPrintView(CreateAPIView):
                             "id": c['id'],
                             "id": c['Item_id'],
                             "ItemName": c['ItemName'],
-                            "Quantity": c['Quantity'],
                             "MRPValue": c['MRPValue'],
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],
