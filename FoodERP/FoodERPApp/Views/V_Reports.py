@@ -76,11 +76,11 @@ FROM
         InvoiceDate,
             T_Invoices.id,
             FullInvoiceNumber BillNo,
-            0 AS BankName,
-            0 AS BranchName,
-            0 AS ChequeDate,
-            0 AS DocumentNo,
-            0 AS ReceiptMode,
+            "" AS BankName,
+            "" AS BranchName,
+            "" AS ChequeDate,
+            "" AS DocumentNo,
+            "" AS ReceiptMode,
             GrandTotal InvoiceAmount,
             TCSAmount TotalTCS,
             0 AS ReceiptAmt,
@@ -169,11 +169,11 @@ FROM
             SELECT 
         CRDRNoteDate InvoiceDate,
             FullNoteNumber BillNo,
-            0 AS BankName,
-            0 AS BranchName,
-            0 AS ChequeDate,
-            0 AS DocumentNo,
-            0 AS ReceiptMode,
+            "" AS BankName,
+            "" AS BranchName,
+            "" AS ChequeDate,
+            "" AS DocumentNo,
+            "" AS ReceiptMode,
             (CASE
                 WHEN T_CreditDebitNotes.NoteType_id = 38 THEN T_CreditDebitNotes.GrandTotal
                 ELSE 0
@@ -210,7 +210,7 @@ FROM
             AND Party_id = %s
             AND Customer_id = %s) q
 ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer])
-                print(query)
+               
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:        
@@ -254,16 +254,28 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         TotalCreditNote = TotalCreditNote + float(a["CreditNote"])
                         TotalDebitNote = TotalDebitNote + float(a["DebitNote"])
                         TotalTCS = TotalTCS + float(a["TotalTCS"])
+                        if a['BankName'] is None : 
+                            BankName=''
+                        else:
+                            BankName=str(a['BankName'])
+                        if a['BranchName'] is None : 
+                            BranchName=''
+                        else:
+                            BranchName=str(a['BranchName'])
+                        if a['DocumentNo'] is None : 
+                            DocumentNo=''
+                        else:
+                            DocumentNo=str(a['DocumentNo'])
+                        if a['ReceiptMode'] is None : 
+                            ReceiptMode=''
+                        else:
+                            ReceiptMode= str(a['ReceiptMode'])   
                         
-                        
-                        
-                        
-                        
-                        
+                        print(BankName,'')
                         PartyLedgerItemDetails.append({
                             "Date": a['InvoiceDate'],
                             "DocumentNO": a['BillNo'],
-                            "Particular": str(a['BankName'])+' '+str(a['BranchName'])+' '+str(a['DocumentNo'])+' '+str(a['ReceiptMode']),
+                            "Particular": BankName+' '+BranchName+' '+DocumentNo+' '+ReceiptMode,
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": float(a['ReceiptAmt']) + float(a['CashReceiptAmt']),
                             "Cash": 0,
