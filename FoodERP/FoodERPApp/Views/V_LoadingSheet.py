@@ -342,6 +342,7 @@ class MultipleInvoicesView(CreateAPIView):
                                     "Invoice": d['Invoice'],
                                     "Order": d['Order']['id'],
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                    "Description":d['Order']['Description']
                                 })
                             
                             query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
