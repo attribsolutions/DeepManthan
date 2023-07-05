@@ -15,7 +15,7 @@ class O_LiveBatchesReturnSerializer(serializers.ModelSerializer):
     O_BatchWiseLiveStockList = O_BatchWiseLiveStockReturnSerializer(many=True)
     class Meta:
         model = O_LiveBatches
-        fields = ['MRP','GST','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList']
+        fields = ['MRP','MRPValue','GST','GSTPercentage','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList']
     
 
 class PurchaseReturnItemImageSerializer(serializers.ModelSerializer):
@@ -36,7 +36,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= T_PurchaseReturn
-        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems','O_LiveBatchesList','ItemReason']
+        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems','O_LiveBatchesList']
         
         
     def create(self, validated_data):
@@ -71,3 +71,12 @@ class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
     class Meta :
         model= T_PurchaseReturn
         fields = '__all__'       
+     
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(PurchaseReturnSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("ReturnReason", None):
+            ret["ReturnReason"] = {"id": None, "Name": None}
+              
+        return ret    
