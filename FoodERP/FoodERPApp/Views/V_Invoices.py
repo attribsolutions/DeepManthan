@@ -454,6 +454,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "CreatedOn" : a['CreatedOn'],
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
+                            "InvoiceUploads" : a["InvoiceUploads"],
                             "BankData":BankData
                                                         
                         })
