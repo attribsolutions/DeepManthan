@@ -1,5 +1,6 @@
 from ..models import *
 from rest_framework import serializers
+from ..Serializer.S_Routes import  *
 
 class PartiesSerializer(serializers.ModelSerializer):
        
@@ -23,13 +24,25 @@ class DivisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = ['id','Name','PartyType','GSTIN','PartyAddress']
+        
+        
+        
          
 class PartySubPartySerializer2(serializers.ModelSerializer):
     Party = DivisionsSerializer()
+    Route = RoutesSerializer()
     class Meta:
         model = MC_PartySubParty
-        fields = ['Party','SubParty','Creditlimit','Route_id','Distance']
-              
+        fields = ['Party','SubParty','Creditlimit','Route','Distance']
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(PartySubPartySerializer2, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Route", None):
+            ret["Route"] = {"id": None, "Name": None}
+           
+        return ret          
     
 class PartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -167,6 +180,16 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = '__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(M_PartiesSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Latitude", None):
+            ret["Latitude"] = None  
+        if not ret.get("Longitude", None):
+            ret["Longitude"] = None    
+        return ret    
 
 class M_PartiesSerializerThird(serializers.Serializer):
     
@@ -257,9 +280,12 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'District', instance.District)
         instance.isActive = validated_data.get(
             'isActive', instance.isActive)
-        
         instance.MkUpMkDn = validated_data.get(
             'MkUpMkDn', instance.MkUpMkDn)
+        instance.Latitude = validated_data.get(
+            'Latitude', instance.Latitude)
+        instance.Longitude = validated_data.get(
+            'Longitude', instance.Longitude)
             
         instance.save()   
         

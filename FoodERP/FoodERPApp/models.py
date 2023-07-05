@@ -160,6 +160,8 @@ class M_Parties(models.Model):
     PriceList = models.ForeignKey(M_PriceList, related_name='PartyPriceList', on_delete=models.DO_NOTHING,null=True,blank=True)
     State = models.ForeignKey(M_States, related_name='PartiesState', on_delete=models.DO_NOTHING)
     City = models.ForeignKey(M_Cities, related_name='PartiesCities', on_delete=models.DO_NOTHING,null=True,blank=True)
+    Latitude = models.CharField(max_length=500,null=True, blank=True)
+    Longitude = models.CharField(max_length=500,null=True, blank=True)
     class Meta:
         db_table = 'M_Parties'
         
