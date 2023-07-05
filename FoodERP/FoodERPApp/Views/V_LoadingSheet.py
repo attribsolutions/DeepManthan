@@ -263,7 +263,6 @@ class LoadingSheetPrintView(CreateAPIView):
                         integer_part, decimal_part = QtyInBox.split(".")
                         QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
                         PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
-                       
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
@@ -273,7 +272,7 @@ class LoadingSheetPrintView(CreateAPIView):
                             "BatchCode": c['BatchCode'],
                             "BoxQty": integer_part,
                             "PiecesQty":round(PiecesQty),
-                            "QtyInNo": round(c['QtyInNo'],2)
+                            "QtyInNo": round(float(c['QtyInNo']),2)
                         })
                         
                     InvoiceData.append({
