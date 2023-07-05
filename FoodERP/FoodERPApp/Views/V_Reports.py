@@ -226,6 +226,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                     Opening= GetOpeningBalance(Party,Customer,previous_date)
                     Closing= GetOpeningBalance(Party,Customer,ToDate)
                     temp=0
+                    TaxFreeSale=0
                     TotalTaxableSale=0
                     TaxableSale5=0
                     TaxableSale12=0
@@ -265,7 +266,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                             "Particular": str(a['BankName'])+' '+str(a['BranchName'])+' '+str(a['DocumentNo'])+' '+str(a['ReceiptMode']),
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": float(a['ReceiptAmt']) + float(a['CashReceiptAmt']),
-                            # "Cash": a['CashReceiptAmt'],
+                            "Cash": 0,
                             "Balance": float(temp),
                             
                         })
@@ -282,6 +283,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         "CustomerPAN" : q2[0]["PAN"],
                         "Open": Opening,
                         "Close": Closing,
+                        "TaxFreeSale" : TaxFreeSale,
                         "TotalTaxableSale": TotalTaxableSale,
                         "TaxableSale5": TaxableSale5,
                         "TaxableSale12" : TaxableSale12,
