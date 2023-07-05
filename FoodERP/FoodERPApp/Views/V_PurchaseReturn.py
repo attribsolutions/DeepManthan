@@ -262,83 +262,99 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)
                 ItemID = PurchaseReturndata['ItemID']
                 BatchCode = PurchaseReturndata['BatchCode']
+                CustomerID =PurchaseReturndata['Customer']
+                
+                
+                
+                Itemquery = M_Items.objects.filter(Item=ItemID).values("id","Name")
+                Item =Itemquery[0]["id"]
+                Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
+                # if Unitquery.exists():
+                #     Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
+                #     ItemUnitDetails = list()
+                #     for c in Unitdata:
+                #         ItemUnitDetails.append({
+                #         "Unit": c['id'],
+                #         "BaseUnitQuantity": c['BaseUnitQuantity'],
+                #         "IsBase": c['IsBase'],
+                #         "UnitName": c['BaseUnitConversion'],
+                #     })
+                
+                MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                if MRPquery.exists():
+                    MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                    ItemMRPDetails = list()
+                    
+                    for d in MRPdata:
+                        ItemMRPDetails.append({
+                        "MRP": d['id'],
+                        "MRPValue": d['MRP'],   
+                    })
+                
+                GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                if GSTquery.exists():
+                    Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                    ItemGSTDetails = list()
+                    for e in Gstdata:
+                        ItemGSTDetails.append({
+                        "GST": e['id'],
+                        "GSTPercentage": e['GSTPercentage'],   
+                    }) 
+                
+                
+                
+                
                 if BatchCode != "":
+                   
                     query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]
-                else:
-                    query = TC_GRNItems.objects.filter(Item=ItemID).order_by('id')[:1]  
-                if query.exists():
-                    GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
-                    # return JsonResponse({'query':  Itemsdata})
-                    GRMItems = list()
-                    for a in GRNItemsdata:
-                        Item =a['Item']['id']
-                        Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                        if Unitquery.exists():
-                            Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
-                            ItemUnitDetails = list()
-                            for c in Unitdata:
-                                ItemUnitDetails.append({
-                                "Unit": c['id'],
-                                "BaseUnitQuantity": c['BaseUnitQuantity'],
-                                "IsBase": c['IsBase'],
-                                "UnitName": c['BaseUnitConversion'],
-                            })
+                    if query:
+                        GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
+                        Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
+                        for a in GRNItemsdata:
+                            MRP = a['MRP']["id"]
+                            MRPValue= a['MRPValue']
+                            Rate= round(float(Rate[0]["NoRatewithOutGST"]),2)
+                            GST= a['GST']["id"]
+                            GSTPercentage= a['GSTPercentage']
+                            BatchCode= a['BatchCode']
+                            BatchDate= a['BatchDate']
+                            Unit = Unitquery[0]["id"]
+                            UnitName = "No"
+                    else:  
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message' : 'Batch Code is Not Available', 'Data': []})      
+                
+                else: 
                         
-                        MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
-                        if MRPquery.exists():
-                            MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
-                            ItemMRPDetails = list()
-                            
-                            for d in MRPdata:
-                                ItemMRPDetails.append({
-                                "MRP": d['id'],
-                                "MRPValue": d['MRP'],   
-                            })
-                        
-                        GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
-                        if GSTquery.exists():
-                            Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
-                            ItemGSTDetails = list()
-                            for e in Gstdata:
-                                ItemGSTDetails.append({
-                                "GST": e['id'],
-                                "GSTPercentage": e['GSTPercentage'],   
-                            }) 
-                        
-                        
-                        GRMItems.append({
-                            "Item": a['Item']['id'],
-                            "ItemName": a['Item']['Name'],
-                            "Quantity": a['Quantity'],
-                            "MRP": a['MRP']['id'],
-                            "MRPValue": a['MRPValue'],
-                            "Rate": a['Rate'],
-                            "TaxType": a['TaxType'],
-                            "Unit": a['Unit']['id'],
-                            "UnitName": a['Unit']['UnitID'],
-                            "BaseUnitQuantity": a['BaseUnitQuantity'],
-                            "GST": a['GST']['id'],
-                            "GSTPercentage": a['GSTPercentage'],
-                            "BasicAmount": a['BasicAmount'],
-                            "GSTAmount": a['GSTAmount'],
-                            "CGST": a['CGST'],
-                            "SGST": a['SGST'],
-                            "IGST": a['IGST'],
-                            "CGSTPercentage": a['CGSTPercentage'],
-                            "SGSTPercentage": a['SGSTPercentage'],
-                            "IGSTPercentage": a['IGSTPercentage'],
-                            "Amount": a['Amount'],
-                            "BatchCode": a['BatchCode'],
-                            "BatchDate": a['BatchDate'],
-                            "DiscountType": a['DiscountType'],
-                            "Discount": a['Discount'],
-                            "DiscountAmount": a['DiscountAmount'],
-                            "ItemUnitDetails": ItemUnitDetails, 
-                            "ItemMRPDetails":ItemMRPDetails,
-                            "ItemGSTDetails":ItemGSTDetails
-                        })   
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
+                        MRP = ""
+                        MRPValue= ""
+                        Rate= ""
+                        GST= ""
+                        GSTPercentage= ""
+                        BatchCode= ""
+                        BatchDate= ""
+                        Unit = Unitquery[0]["id"]
+                        UnitName = "No"
+                    
+                  
+                GRMItems = list()
+                GRMItems.append({
+                        "Item": Itemquery[0]["id"],
+                        "ItemName": Itemquery[0]["Name"],
+                        "MRP": MRP,
+                        "MRPValue": MRPValue,
+                        "Rate": Rate,
+                        "GST": GST,
+                        "GSTPercentage": GSTPercentage,
+                        "BatchCode": BatchCode,
+                        "BatchDate": BatchDate,
+                        "Unit" : Unitquery[0]["id"],
+                        "UnitName" : "No",
+                        # "ItemUnitDetails": ItemUnitDetails, 
+                        "ItemMRPDetails":ItemMRPDetails,
+                        "ItemGSTDetails":ItemGSTDetails
+                })   
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
+                
         except M_Items.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
