@@ -266,7 +266,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": float(a['ReceiptAmt']) + float(a['CashReceiptAmt']),
                             # "Cash": a['CashReceiptAmt'],
-                            "Balance": temp,
+                            "Balance": float(temp),
                             
                         })
                     q1=M_Parties.objects.filter(id=Party).values("Name","PAN","GSTIN") 
@@ -282,6 +282,16 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         "CustomerPAN" : q2[0]["PAN"],
                         "Open": Opening,
                         "Close": Closing,
+                        "TotalTaxableSale": TotalTaxableSale,
+                        "TaxableSale5": TaxableSale5,
+                        "TaxableSale12" : TaxableSale12,
+                        "TaxableSale18" : TaxableSale18,
+                        "GSTAmount5" : GSTAmount5,
+                        "GSTAmount12" : GSTAmount12,
+                        "GSTAmount18" : GSTAmount18,
+                        "TotalCreditNote" : TotalCreditNote,
+                        "TotalDebitNote": TotalDebitNote,
+                        "TotalTCS" : TotalTCS,
                         "InvoiceItems" : PartyLedgerItemDetails
                     })    
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
