@@ -399,10 +399,13 @@ class InvoiceViewSecond(CreateAPIView):
                             
                             InvoiceReferenceDetails = list()
                             for d in a['InvoicesReferences']:
+                                
+                                
                                 InvoiceReferenceDetails.append({
                                     # "Invoice": d['Invoice'],
                                     "Order": d['Order']['id'],
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                    "Description":d['Order']['Description']
                                 })
                             
                         DefCustomerAddress = ''  
@@ -440,9 +443,11 @@ class InvoiceViewSecond(CreateAPIView):
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
                             "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerMobile": a['Customer']['MobileNo'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyMobile": a['Party']['MobileNo'],
                             "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
                             "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
                             "PartyState": a['Party']['State']['Name'],
