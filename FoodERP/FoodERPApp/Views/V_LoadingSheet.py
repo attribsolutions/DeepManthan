@@ -273,7 +273,8 @@ class LoadingSheetPrintView(CreateAPIView):
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],
                             "BoxQty": integer_part,
-                            "PiecesQty":round(PiecesQty)
+                            "PiecesQty":round(PiecesQty),
+                            "QtyInNo": c['QtyInNo']
                         })
                         
                     InvoiceData.append({
