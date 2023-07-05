@@ -249,19 +249,20 @@ class LoadingSheetPrintView(CreateAPIView):
                     for x in InvoiceSerializedata:
                         Invoicelist.append(x['id'])
                     InvoiceItemDetails = list()        
-                    Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id,TC_InvoiceItems.BatchCode",[Invoicelist])    
+                    Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox,SUM(QtyInNo)QtyInNo FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id,TC_InvoiceItems.BatchCode",[Invoicelist])    
                     
                     InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
                     for c in InvoiceItemSerializedata:
                         
-                        # Box Qty and Pieces Qty  
+                        # Box Qty and Pieces Qty 
+                        
+                        MCItemUnit= MC_ItemUnits.objects.all().filter(Item=c['Item_id'],IsDeleted=0,UnitID=4).values('id')
                         
                         QtyInBox = c['QtyInBox']
                         integer_part, decimal_part = QtyInBox.split(".")
-                        qty= "0."+decimal_part
-                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],qty,c['Unit_id'],0,0,1,0).ConvertintoSelectedUnit()
-                        integer_part1, decimal_part2 = str(QtyInNo).split(".")
-
+                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                        PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
+                       
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
@@ -271,7 +272,7 @@ class LoadingSheetPrintView(CreateAPIView):
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],
                             "BoxQty": integer_part,
-                            "PiecesQty":decimal_part2
+                            "PiecesQty":round(PiecesQty)
                         })
                         
                     InvoiceData.append({
