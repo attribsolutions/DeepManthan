@@ -68,6 +68,7 @@ class LoadingSheetPrintSerializer(serializers.Serializer):
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)
     BatchCode = serializers.CharField(max_length=100)  
     QtyInBox = serializers.DecimalField(max_digits=10, decimal_places=3)
+    QtyInNo = serializers.DecimalField(max_digits=10, decimal_places=3)
      
         
         
