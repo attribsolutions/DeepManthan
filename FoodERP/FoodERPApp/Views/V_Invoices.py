@@ -430,8 +430,6 @@ class InvoiceViewSecond(CreateAPIView):
                                 "AccountNo": e['AccountNo'],
                             })
                             
-                            
-                         
                         InvoiceData.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
