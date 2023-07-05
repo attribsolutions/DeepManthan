@@ -82,12 +82,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
 
+
         'NAME': 'FoodERP',     
 
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
 
         'HOST': '10.4.5.64' ,   
+
 
         'PORT': '3306' ,
         'OPTIONS': { 

@@ -7,6 +7,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
 from ..Serializer.S_Invoices import *
+from ..Serializer.S_BankMaster import *
 from ..models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
@@ -263,17 +264,16 @@ class LoadingSheetPrintView(CreateAPIView):
                         integer_part, decimal_part = QtyInBox.split(".")
                         QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
                         PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
-                       
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
                             "ItemName": c['ItemName'],
-                            "Quantity": c['Quantity'],
                             "MRPValue": c['MRPValue'],
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],
                             "BoxQty": integer_part,
-                            "PiecesQty":round(PiecesQty)
+                            "PiecesQty":round(PiecesQty),
+                            "QtyInNo": round(float(c['QtyInNo']),2)
                         })
                         
                     InvoiceData.append({
@@ -343,7 +343,18 @@ class MultipleInvoicesView(CreateAPIView):
                                     "Order": d['Order']['id'],
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
                                 })
-                                
+                            
+                            query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
+                            BanksSerializer=PartyBanksSerializer(query, many=True).data
+                            BankData=list()
+                            for e in BanksSerializer:
+                                BankData.append({
+                                    "BankName": e['BankName'],
+                                    "BranchName": e['BranchName'],
+                                    "IFSC": e['IFSC'],
+                                    "AccountNo": e['AccountNo'],
+                                })
+                            
                             InvoiceData.append({
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
@@ -354,6 +365,7 @@ class MultipleInvoicesView(CreateAPIView):
                                 "Customer": a['Customer']['id'],
                                 "CustomerName": a['Customer']['Name'],
                                 "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "CustomerMobileNo": a['Customer']['MobileNo'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
                                 "PartyState": a['Party']['State']['Name'],
@@ -363,9 +375,13 @@ class MultipleInvoicesView(CreateAPIView):
                                 "PartyAddress": a['Party']['PartyAddress'],
                                 "CustomerAddress": a['Customer']['PartyAddress'],
                                 "PartyGSTIN": a['Party']['GSTIN'],
+                                "PartyMobileNo": a['Party']['MobileNo'],
                                 "CreatedOn" : a['CreatedOn'],
                                 "InvoiceItems": InvoiceItemDetails,
                                 "InvoicesReferences": InvoiceReferenceDetails,
+                                "InvoiceUploads" : a["InvoiceUploads"],
+                                "BankData":BankData
+                                
                             })
                     InvoiceList.append( InvoiceData[0] )   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
