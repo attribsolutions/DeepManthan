@@ -1483,6 +1483,7 @@ class T_LoadingSheet(models.Model):
     Route =  models.CharField(max_length=500)
     Vehicle = models.ForeignKey(M_Vehicles, related_name='LoadingSheetVehicle',on_delete=models.PROTECT)
    
+   
     class Meta:
         db_table = "T_LoadingSheet"
         
