@@ -87,13 +87,21 @@ class LoadingSheetView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
+                    
+                    RouteID = a['Route']
+                    Route_list = RouteID.split(",")
+                    query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                    routelist = ''
+                    for b in query:
+                        routelist = routelist+ b['Name'] + ','
+                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
                         "Party":a['Party']['Name'],
                         "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
                         "LoadingSheetNo": a['No'],
-                        "RouteName": a['Route']['Name'],
+                        "RouteName":  routelist[:-1],
                         "TotalAmount": a['TotalAmount'],
                         "InvoiceCount": a['InvoiceCount'],
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
