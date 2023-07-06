@@ -304,8 +304,16 @@ class MultipleInvoicesView(CreateAPIView):
                         
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
+                            
                             InvoiceItemDetails = list()
                             for b in a['InvoiceItems']:
+                                aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                                if (aaaa == b['Unit']['UnitID']['Name']):
+                                    bb=""
+                                else:
+                                    bb=aaaa
+                                
+                                
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
@@ -314,7 +322,8 @@ class MultipleInvoicesView(CreateAPIView):
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
-                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "PrimaryUnitName":b['Unit']['UnitID']['Name'],
+                                    "UnitName":bb,
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
                                     "GSTPercentage": b['GST']['GSTPercentage'],
