@@ -8,7 +8,7 @@ from ..Serializer.S_Parties import  *
 
 class LoadingSheetListSerializer(serializers.ModelSerializer):
     Party = M_PartiesSerializerSecond()
-    Route = RouteSerializer()
+    # Route = RouteSerializer()
     Driver = M_DriverSerializer()
     Vehicle = VehiclesSerializerSecond()
     class Meta:
