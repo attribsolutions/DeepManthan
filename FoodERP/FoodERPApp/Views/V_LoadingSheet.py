@@ -250,7 +250,7 @@ class LoadingSheetPrintView(CreateAPIView):
                             "InvoiceDate": b['InvoiceDate'],
                             "InvoiceNumber": b['InvoiceNumber'],
                             "FullInvoiceNumber": b['FullInvoiceNumber'],
-                            "TCSAmount" : a["TCSAmount"],
+                            "TCSAmount" : b["TCSAmount"],
                             "GrandTotal": b['GrandTotal'],
                             "RoundOffAmount":b['RoundOffAmount'],
                             "Customer": b['Customer']['id'],
@@ -274,6 +274,7 @@ class LoadingSheetPrintView(CreateAPIView):
                         # Box Qty and Pieces Qty 
                         
                         MCItemUnit= MC_ItemUnits.objects.all().filter(Item=c['Item_id'],IsDeleted=0,UnitID=4).values('id')
+                        print(MCItemUnit.query)
                         
                         QtyInBox = c['QtyInBox']
                         integer_part, decimal_part = QtyInBox.split(".")
@@ -297,7 +298,7 @@ class LoadingSheetPrintView(CreateAPIView):
                         "InvoiceParent":InvoiceParent,
                     })    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
