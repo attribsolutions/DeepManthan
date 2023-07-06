@@ -7,6 +7,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
 from ..Serializer.S_Invoices import *
+from ..Serializer.S_BankMaster import *
 from ..models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
@@ -168,11 +169,12 @@ class LoadingSheetInvoicesView(CreateAPIView):
                 ToDate = Invoicedata['ToDate']
                 Party = Invoicedata['Party']
                 Route = Invoicedata['Route']
-                
+                Route_list = Route.split(",")
+              
                 if(Route == ''):
                     query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
                 else:
-                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
+                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id  WHERE  MC_PartySubParty.Route_id IN %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route_list,FromDate,ToDate,Party])
                 
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
@@ -249,29 +251,29 @@ class LoadingSheetPrintView(CreateAPIView):
                     for x in InvoiceSerializedata:
                         Invoicelist.append(x['id'])
                     InvoiceItemDetails = list()        
-                    Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id,TC_InvoiceItems.BatchCode",[Invoicelist])    
+                    Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox,SUM(QtyInNo)QtyInNo FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id,TC_InvoiceItems.BatchCode",[Invoicelist])    
                     
                     InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
                     for c in InvoiceItemSerializedata:
                         
-                        # Box Qty and Pieces Qty  
+                        # Box Qty and Pieces Qty 
+                        
+                        MCItemUnit= MC_ItemUnits.objects.all().filter(Item=c['Item_id'],IsDeleted=0,UnitID=4).values('id')
                         
                         QtyInBox = c['QtyInBox']
                         integer_part, decimal_part = QtyInBox.split(".")
-                        qty= "0."+decimal_part
-                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],qty,c['Unit_id'],0,0,1,0).ConvertintoSelectedUnit()
-                        integer_part1, decimal_part2 = str(QtyInNo).split(".")
-
+                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                        PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
                             "ItemName": c['ItemName'],
-                            "Quantity": c['Quantity'],
                             "MRPValue": c['MRPValue'],
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],
                             "BoxQty": integer_part,
-                            "PiecesQty":decimal_part2
+                            "PiecesQty":round(PiecesQty),
+                            "QtyInNo": round(float(c['QtyInNo']),2)
                         })
                         
                     InvoiceData.append({
@@ -340,8 +342,20 @@ class MultipleInvoicesView(CreateAPIView):
                                     "Invoice": d['Invoice'],
                                     "Order": d['Order']['id'],
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                    "Description":d['Order']['Description']
                                 })
-                                
+                            
+                            query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
+                            BanksSerializer=PartyBanksSerializer(query, many=True).data
+                            BankData=list()
+                            for e in BanksSerializer:
+                                BankData.append({
+                                    "BankName": e['BankName'],
+                                    "BranchName": e['BranchName'],
+                                    "IFSC": e['IFSC'],
+                                    "AccountNo": e['AccountNo'],
+                                })
+                            
                             InvoiceData.append({
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
@@ -352,6 +366,7 @@ class MultipleInvoicesView(CreateAPIView):
                                 "Customer": a['Customer']['id'],
                                 "CustomerName": a['Customer']['Name'],
                                 "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "CustomerMobileNo": a['Customer']['MobileNo'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
                                 "PartyState": a['Party']['State']['Name'],
@@ -361,9 +376,13 @@ class MultipleInvoicesView(CreateAPIView):
                                 "PartyAddress": a['Party']['PartyAddress'],
                                 "CustomerAddress": a['Customer']['PartyAddress'],
                                 "PartyGSTIN": a['Party']['GSTIN'],
+                                "PartyMobileNo": a['Party']['MobileNo'],
                                 "CreatedOn" : a['CreatedOn'],
                                 "InvoiceItems": InvoiceItemDetails,
                                 "InvoicesReferences": InvoiceReferenceDetails,
+                                "InvoiceUploads" : a["InvoiceUploads"],
+                                "BankData":BankData
+                                
                             })
                     InvoiceList.append( InvoiceData[0] )   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        

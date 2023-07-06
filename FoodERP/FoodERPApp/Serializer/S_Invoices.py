@@ -22,7 +22,7 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
     State = StateSerializer(read_only=True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State']
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -66,6 +66,15 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
     class Meta:
         model = T_Orders
         fields = '__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(OrderserializerforInvoice, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Description", None):
+            ret["Description"] = None  
+            
+        return ret    
        
        
 class InvoicesReferencesSerializerSecond(serializers.ModelSerializer):
@@ -97,7 +106,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
@@ -204,6 +213,7 @@ class InvoiceSerializerThird(serializers.ModelSerializer):
     InvoicesReferences = InvoicesReferencesSerializerSecond(many=True)
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
+    InvoiceUploads=InvoiceUploadsSerializer(many=True)
     class Meta:
         model = T_Invoices
         fields = '__all__'
