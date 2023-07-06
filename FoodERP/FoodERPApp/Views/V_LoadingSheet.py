@@ -274,12 +274,18 @@ class LoadingSheetPrintView(CreateAPIView):
                         # Box Qty and Pieces Qty 
                         
                         MCItemUnit= MC_ItemUnits.objects.all().filter(Item=c['Item_id'],IsDeleted=0,UnitID=4).values('id')
-                        print(MCItemUnit.query)
+                     
+                        if MCItemUnit:
+                            QtyInBox = c['QtyInBox']
+                            integer_part, decimal_part = QtyInBox.split(".")
+                            QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                            PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
+                        else:
+                            QtyInBox = c['QtyInBox']
+                            integer_part, decimal_part = QtyInBox.split(".")
+                            QtyInNo=0.00
+                            PiecesQty = float(c['QtyInNo']) -float(QtyInNo)
                         
-                        QtyInBox = c['QtyInBox']
-                        integer_part, decimal_part = QtyInBox.split(".")
-                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
-                        PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
