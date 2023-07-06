@@ -1480,7 +1480,7 @@ class T_LoadingSheet(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Driver = models.ForeignKey(M_Drivers, related_name='LoadingSheetDriver',on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='LoadingSheetParty', on_delete=models.PROTECT)
-    Route = models.ForeignKey(M_Routes, related_name='LoadingSheetRoute', on_delete=models.PROTECT)
+    Route =  models.CharField(max_length=500)
     Vehicle = models.ForeignKey(M_Vehicles, related_name='LoadingSheetVehicle',on_delete=models.PROTECT)
    
     class Meta:
