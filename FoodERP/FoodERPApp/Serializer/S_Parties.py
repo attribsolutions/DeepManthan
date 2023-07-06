@@ -234,7 +234,7 @@ class UpdateMC_PartySubPartySerializer(serializers.ModelSerializer):
     
     class Meta:
         model =MC_PartySubParty
-        fields =['Party','CreatedBy','UpdatedBy']
+        fields =['Party','Route','CreatedBy','UpdatedBy']
 
 
 class UpdateM_PartiesSerializer(serializers.ModelSerializer):
