@@ -343,6 +343,7 @@ urlpatterns = [
             url(r'PartySettings/([0-9]+)/([0-9]+)$',PartiesSettingsDetailsView.as_view()),
             url(r'PartySettings$',PartiesSettingsDetailsView.as_view()),
             url(r'PartyStockEntry$',StockEntryPageView.as_view()),
+            url(r'PartyLiveStock$',ShowOBatchWiseLiveStockView.as_view()),
             
             
            
