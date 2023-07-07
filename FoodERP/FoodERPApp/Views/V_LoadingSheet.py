@@ -9,6 +9,7 @@ from ..Serializer.S_LoadingSheet import *
 from ..Serializer.S_Invoices import *
 from ..Serializer.S_BankMaster import *
 from ..models import *
+from django.db.models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
 class LoadingSheetListView(CreateAPIView):
@@ -115,20 +116,29 @@ class LoadingSheetView(CreateAPIView):
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     InvoiceParent = list()
                     for a in InvoiceSerializedata:
-                        InvoiceParent.append({
-                            "id": a['id'],
-                            "InvoiceDate": a['InvoiceDate'],
-                            "InvoiceNumber": a['InvoiceNumber'],
-                            "FullInvoiceNumber": a['FullInvoiceNumber'],
-                            "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount":a['RoundOffAmount'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
-                            "CustomerGSTIN": a['Customer']['GSTIN'],
-                            "Party": a['Party']['id'],
-                            "PartyName": a['Party']['Name'],
-                            "PartyGSTIN": a['Party']['GSTIN'],
-                        })
+                        Amount = TC_ReceiptInvoices.objects.filter(Invoice=a['id']).aggregate(PAmount=Sum('PaidAmount'))
+                        if Amount['PAmount'] is None:
+                            PaidAmount = 0.000
+                        else:
+                            PaidAmount = Amount['PAmount']
+                        
+                        print(float(PaidAmount))
+                        print(float(a['GrandTotal']))
+                        if float(PaidAmount) != float(a['GrandTotal']):
+                            InvoiceParent.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "InvoiceNumber": a['InvoiceNumber'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount":a['RoundOffAmount'],
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "Party": a['Party']['id'],
+                                "PartyName": a['Party']['Name'],
+                                "PartyGSTIN": a['Party']['GSTIN'],
+                            })
                     InvoiceData.append({
                         "PartyDetails":LoadingSheetListData[0],
                         "InvoiceParent":InvoiceParent,
