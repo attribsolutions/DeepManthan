@@ -141,7 +141,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             "ActualQty":round(ActualQty,3),
                             "Unit":Unit 
                         })
-                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message':'Stock Report show Successfully', 'Data': ItemList})     
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
