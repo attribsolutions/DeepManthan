@@ -110,31 +110,34 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in Items_Serializer:
+                        ActualQty='00.00'
                         stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party).aggregate(Qty=Sum('BaseUnitQuantity'))
+                   
                         if stockquery['Qty'] is None:
                             Stock = 0.0
                         else:
                             Stock = stockquery['Qty']
                         
-                        if Unit == 1: # No Qty
+                        if int(Unit) == 1:
                             ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,1,0).ConvertintoSelectedUnit()
-                            Unit = 'No'
-                        elif Unit ==2:  # Kg Qty
+                            StockUnit = 'No'
+                        if int(Unit) == 2:
                             ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,2,0).ConvertintoSelectedUnit()
-                            Unit = 'Kg'
-                        elif Unit == 4: # Box Qty
+                            StockUnit = 'Kg'
+                           
+                        if int(Unit) == 4:
                             ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,4,0).ConvertintoSelectedUnit()
-                            Unit = 'Box'
-                       
-                          
+                            StockUnit = 'Box'
+                           
+                            
                         ItemList.append({
                             "Item": a['id'],
                             "ItemName": a['Name'],
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
-                            "ActualQty":round(ActualQty,3),
-                            "Unit":Unit 
+                            "ActualQty":ActualQty,
+                            "Unit":StockUnit 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
