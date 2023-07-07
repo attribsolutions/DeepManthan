@@ -12,6 +12,7 @@ from ..Serializer.S_Challan import *
 from ..Serializer.S_Invoices import *
 from ..Serializer.S_Bom import *
 from ..Serializer.S_StockEntry import *
+from ..Serializer.S_PartyItems import *
 from ..models import *
 from django.db.models import *
 
@@ -82,6 +83,67 @@ class StockEntryPageView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry data Successfully', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+class ShowOBatchWiseLiveStockView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                StockReportdata = JSONParser().parse(request)
+                FromDate = StockReportdata['FromDate']
+                ToDate = StockReportdata['ToDate']
+                Party = StockReportdata['PartyID']
+                Unit = StockReportdata['Unit']
+                
+                Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where MC_PartyItems.Party_id=%s  order by M_Group.id, MC_SubGroup.id''',([Party]))
+                # print(str(Itemquery.query))
+                if not Itemquery:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
+                else:
+                    Items_Serializer = MC_PartyItemSerializerSingleGet(
+                        Itemquery, many=True).data
+                    ItemList = list()
+                    for a in Items_Serializer:
+                        UnitID = MC_ItemUnits.objects.all().filter(Item=a['id'],IsBase=1,IsDeleted=0).values('UnitID')
+                        BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
+                        stockquery = O_BatchWiseLiveStock.objects.filter(
+                        Item=a['id'], Party=Party).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        if stockquery['Qty'] is None:
+                            Stock = 0.0
+                        else:
+                            Stock = stockquery['Qty']
+                        
+                        if Unit == 1: # No Qty
+                            ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,1,0).ConvertintoSelectedUnit()
+                            Unit = 'No'
+                        elif Unit ==2:  # Kg Qty
+                            ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,2,0).ConvertintoSelectedUnit()
+                            Unit = 'Kg'
+                        elif Unit == 4: # Box Qty
+                            ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,4,0).ConvertintoSelectedUnit()
+                            Unit = 'Box'
+                        else:
+                            ActualQty=Stock
+                            Unit = BaseUnitName[0]['Name']
+                          
+                        ItemList.append({
+                            "Item": a['id'],
+                            "ItemName": a['Name'],
+                            "GroupTypeName": a['GroupTypeName'],
+                            "GroupName": a['GroupName'], 
+                            "SubGroupName": a['SubGroupName'],
+                            "ActualQty":round(ActualQty,3),
+                            "Unit":Unit 
+                        })
+                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message':'Stock Report show Successfully', 'Data': ItemList})     
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 
 
