@@ -110,10 +110,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in Items_Serializer:
-                        UnitID = MC_ItemUnits.objects.all().filter(Item=a['id'],IsBase=1,IsDeleted=0).values('UnitID')
-                        BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
-                        stockquery = O_BatchWiseLiveStock.objects.filter(
-                        Item=a['id'], Party=Party).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party).aggregate(Qty=Sum('BaseUnitQuantity'))
                         if stockquery['Qty'] is None:
                             Stock = 0.0
                         else:
@@ -128,9 +125,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                         elif Unit == 4: # Box Qty
                             ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,4,0).ConvertintoSelectedUnit()
                             Unit = 'Box'
-                        else:
-                            ActualQty=Stock
-                            Unit = BaseUnitName[0]['Name']
+                       
                           
                         ItemList.append({
                             "Item": a['id'],
