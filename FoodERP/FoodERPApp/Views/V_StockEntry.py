@@ -136,7 +136,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
-                            "ActualQty":ActualQty,
+                            "ActualQty":round(ActualQty,3),
                             "Unit":StockUnit 
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
