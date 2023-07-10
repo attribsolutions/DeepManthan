@@ -266,7 +266,8 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
 
 
 
-                Itemquery = M_Items.objects.filter(Item=ItemID).values("id","Name")
+                Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
+                
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
                 # if Unitquery.exists():
@@ -307,6 +308,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 if BatchCode != "":
 
                     query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]
+                    
                     if query:
                         GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
                         Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
