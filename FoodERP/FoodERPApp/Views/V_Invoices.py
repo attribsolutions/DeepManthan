@@ -423,12 +423,14 @@ class InvoiceViewSecond(CreateAPIView):
                         BanksSerializer=PartyBanksSerializer(query, many=True).data
                         BankData=list()
                         for e in BanksSerializer:
-                            BankData.append({
-                                "BankName": e['BankName'],
-                                "BranchName": e['BranchName'],
-                                "IFSC": e['IFSC'],
-                                "AccountNo": e['AccountNo'],
-                            })
+                            if e['IsDefault'] == 1:
+                                BankData.append({
+                                    "BankName": e['BankName'],
+                                    "BranchName": e['BranchName'],
+                                    "IFSC": e['IFSC'],
+                                    "AccountNo": e['AccountNo'],
+                                    "IsDefault" : e['IsDefault']
+                                })
                             
                         InvoiceData.append({
                             "id": a['id'],
