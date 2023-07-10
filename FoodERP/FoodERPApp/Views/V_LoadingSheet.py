@@ -9,6 +9,7 @@ from ..Serializer.S_LoadingSheet import *
 from ..Serializer.S_Invoices import *
 from ..Serializer.S_BankMaster import *
 from ..models import *
+from django.db.models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
 class LoadingSheetListView(CreateAPIView):
@@ -29,11 +30,18 @@ class LoadingSheetListView(CreateAPIView):
                     LoadingSheet_Serializer = LoadingSheetListSerializer(query, many=True).data
                     LoadingSheetListData = list()
                     for a in LoadingSheet_Serializer:
+                        RouteID = a['Route']
+                        Route_list = RouteID.split(",")
+                        query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                        routelist = ''
+                        for b in query:
+                            routelist = routelist+ b['Name'] + ','
+                            
                         LoadingSheetListData.append({
                             "id": a['id'],
                             "Date": a['Date'],
                             "LoadingSheetNo": a['No'],
-                            "RouteName": a['Route']['Name'],
+                            "RouteName": routelist[:-1],
                             "TotalAmount": a['TotalAmount'],
                             "InvoiceCount": a['InvoiceCount'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
@@ -80,13 +88,21 @@ class LoadingSheetView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
+                    
+                    RouteID = a['Route']
+                    Route_list = RouteID.split(",")
+                    query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                    routelist = ''
+                    for b in query:
+                        routelist = routelist+ b['Name'] + ','
+                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
                         "Party":a['Party']['Name'],
                         "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
                         "LoadingSheetNo": a['No'],
-                        "RouteName": a['Route']['Name'],
+                        "RouteName":  routelist[:-1],
                         "TotalAmount": a['TotalAmount'],
                         "InvoiceCount": a['InvoiceCount'],
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
@@ -100,20 +116,29 @@ class LoadingSheetView(CreateAPIView):
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     InvoiceParent = list()
                     for a in InvoiceSerializedata:
-                        InvoiceParent.append({
-                            "id": a['id'],
-                            "InvoiceDate": a['InvoiceDate'],
-                            "InvoiceNumber": a['InvoiceNumber'],
-                            "FullInvoiceNumber": a['FullInvoiceNumber'],
-                            "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount":a['RoundOffAmount'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
-                            "CustomerGSTIN": a['Customer']['GSTIN'],
-                            "Party": a['Party']['id'],
-                            "PartyName": a['Party']['Name'],
-                            "PartyGSTIN": a['Party']['GSTIN'],
-                        })
+                        Amount = TC_ReceiptInvoices.objects.filter(Invoice=a['id']).aggregate(PAmount=Sum('PaidAmount'))
+                        if Amount['PAmount'] is None:
+                            PaidAmount = 0.000
+                        else:
+                            PaidAmount = Amount['PAmount']
+                        
+                        print(float(PaidAmount))
+                        print(float(a['GrandTotal']))
+                        if float(PaidAmount) != float(a['GrandTotal']):
+                            InvoiceParent.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "InvoiceNumber": a['InvoiceNumber'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount":a['RoundOffAmount'],
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "Party": a['Party']['id'],
+                                "PartyName": a['Party']['Name'],
+                                "PartyGSTIN": a['Party']['GSTIN'],
+                            })
                     InvoiceData.append({
                         "PartyDetails":LoadingSheetListData[0],
                         "InvoiceParent":InvoiceParent,
@@ -175,7 +200,6 @@ class LoadingSheetInvoicesView(CreateAPIView):
                     query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
                 else:
                     query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id  WHERE  MC_PartySubParty.Route_id IN %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route_list,FromDate,ToDate,Party])
-                
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
@@ -210,13 +234,21 @@ class LoadingSheetPrintView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
+                    
+                    RouteID = a['Route']
+                    Route_list = RouteID.split(",")
+                    query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                    routelist = ''
+                    for b in query:
+                        routelist = routelist+ b['Name'] + ','
+                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
                         "Party":a['Party']['Name'],
                         "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
                         "LoadingSheetNo": a['No'],
-                        "RouteName": a['Route']['Name'],
+                        "RouteName":  routelist[:-1],
                         "TotalAmount": a['TotalAmount'],
                         "InvoiceCount": a['InvoiceCount'],
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
@@ -236,7 +268,7 @@ class LoadingSheetPrintView(CreateAPIView):
                             "InvoiceDate": b['InvoiceDate'],
                             "InvoiceNumber": b['InvoiceNumber'],
                             "FullInvoiceNumber": b['FullInvoiceNumber'],
-                            "TCSAmount" : a["TCSAmount"],
+                            "TCSAmount" : b["TCSAmount"],
                             "GrandTotal": b['GrandTotal'],
                             "RoundOffAmount":b['RoundOffAmount'],
                             "Customer": b['Customer']['id'],
@@ -260,11 +292,18 @@ class LoadingSheetPrintView(CreateAPIView):
                         # Box Qty and Pieces Qty 
                         
                         MCItemUnit= MC_ItemUnits.objects.all().filter(Item=c['Item_id'],IsDeleted=0,UnitID=4).values('id')
+                     
+                        if MCItemUnit:
+                            QtyInBox = c['QtyInBox']
+                            integer_part, decimal_part = QtyInBox.split(".")
+                            QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                            PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
+                        else:
+                            QtyInBox = c['QtyInBox']
+                            integer_part, decimal_part = QtyInBox.split(".")
+                            QtyInNo=0.00
+                            PiecesQty = float(c['QtyInNo']) -float(QtyInNo)
                         
-                        QtyInBox = c['QtyInBox']
-                        integer_part, decimal_part = QtyInBox.split(".")
-                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
-                        PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
@@ -283,7 +322,7 @@ class LoadingSheetPrintView(CreateAPIView):
                         "InvoiceParent":InvoiceParent,
                     })    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
