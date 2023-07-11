@@ -92,7 +92,7 @@ DATABASES = {
 
         'PORT': '3306' ,
         'OPTIONS': { 
-            'sql_mode': 'STRICT_TRANS_TABLES',
+            'sql_mode': 'STRICT_TRANS_TABLES', 
         },
     },
 
