@@ -125,6 +125,7 @@ class RoutesUpdateListView(CreateAPIView):
                         SubPartyListData.append({
                             "id": a['id'],
                             "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
                             "SubParty": a['SubParty']['id'],
                             "SubPartyName": a['SubParty']['Name'],
                             "Route":a['Route']['id'],
