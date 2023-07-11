@@ -14,6 +14,7 @@ class PartyLedgerReportSerializer(serializers.Serializer):
     BranchName = serializers.CharField(max_length=500)
     DocumentNo = serializers.CharField(max_length=500)
     ReceiptMode = serializers.CharField(max_length=500)
+    Description = serializers.CharField(max_length=500)
     TotalTCS=serializers.DecimalField(max_digits=10, decimal_places=2)
     DebitNote=  serializers.DecimalField(max_digits=10, decimal_places=2)
     CreditNote =  serializers.DecimalField(max_digits=10, decimal_places=2)
