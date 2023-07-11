@@ -182,10 +182,19 @@ class ItemSerializer(serializers.ModelSerializer):
         for b in instance.ItemGroupDetails.all():
             b.delete()
                 
-        for c in instance.ItemUnitDetails.all():
-            # print(c.id)
-            SetFlag=MC_ItemUnits.objects.filter(id=c.id).update(IsDeleted=1)
-            
+        if not validated_data['ItemUnitDetails'] :
+            pass
+        else:
+           
+            for c in instance.ItemUnitDetails.all():
+                # print(c.id)
+                SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
+
+            for ItemUnit_data in validated_data['ItemUnitDetails']:
+                ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)    
+        
+        
+        
         if validated_data['ItemImagesDetails'] != '':    
             for d in instance.ItemImagesDetails.all():
                 d.delete()
@@ -210,8 +219,7 @@ class ItemSerializer(serializers.ModelSerializer):
         for ItemGroup_data in  validated_data['ItemGroupDetails']:
             ItemCategorys = MC_ItemGroupDetails.objects.create(Item=instance, **ItemGroup_data)    
 
-        for ItemUnit_data in validated_data['ItemUnitDetails']:
-            ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)
+        
             
         if validated_data['ItemImagesDetails'] != '':
             for ItemImage_data in validated_data['ItemImagesDetails']:
