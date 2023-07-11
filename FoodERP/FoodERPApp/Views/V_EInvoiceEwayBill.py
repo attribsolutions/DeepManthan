@@ -84,7 +84,7 @@ class Uploaded_EInvoice(CreateAPIView):
                             Total_assessable_value = float(
                                 Total_assessable_value + assessable_value)
                             total_invoice_value = float(
-                                total_invoice_value) + float(a['Amount'])
+                                total_invoice_value) + (float(a['Amount'])-float(a['DiscountAmount']))
                             total_cgst_value = float(
                                 total_cgst_value) + float(a['CGST'])
                             total_sgst_value = float(
@@ -237,6 +237,7 @@ class Uploaded_EInvoice(CreateAPIView):
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
                     
                 else:
+                    
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
