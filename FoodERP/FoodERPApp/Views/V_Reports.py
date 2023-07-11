@@ -275,9 +275,12 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                             ReceiptMode=''
                         else:
                             ReceiptMode= str(a['ReceiptMode'])  
-                        if a['Description'] is None : 
+                       
+                        if a['Description'] is None or not a['Description']: 
+                            
                             Description=''
                         else:
+                            
                             Description= '('+ str(a['Description']) + ')' 
                         
                         print(BankName,'')
