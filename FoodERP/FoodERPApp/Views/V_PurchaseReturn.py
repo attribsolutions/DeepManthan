@@ -26,10 +26,20 @@ class PurchaseReturnListView(CreateAPIView):
                 Customer = Returndata['CustomerID']
                 Party = Returndata['PartyID']
 
+                
                 if(Customer == ''):
-                    query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Party=Party)
+                    cust=Q()
                 else:
-                    query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Customer=Customer, Party=Party)
+                    cust=Q(Customer=Customer) 
+                
+                if(Party == ''):
+                    par=Q()
+                else:
+                    par=Q(Party=Party)
+                
+                query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
+                
+                # print(query.query)
                 if query:
                     Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
                     ReturnListData = list()
