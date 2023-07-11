@@ -287,9 +287,12 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     ItemMRPDetails = list()
 
                     for d in MRPdata:
+                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
+                        Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
                         ItemMRPDetails.append({
                         "MRP": d['id'],
                         "MRPValue": d['MRP'],   
+                        "Rate" : round(Rate,2),
                     })
 
                 GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
