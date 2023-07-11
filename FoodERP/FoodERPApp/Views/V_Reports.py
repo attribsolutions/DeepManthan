@@ -278,13 +278,13 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         if a['Description'] is None : 
                             Description=''
                         else:
-                            Description= str(a['Description']) 
+                            Description= '('+ str(a['Description']) + ')' 
                         
                         print(BankName,'')
                         PartyLedgerItemDetails.append({
                             "Date": a['InvoiceDate'],
                             "DocumentNO": a['BillNo'],
-                            "Particular": BankName+' '+BranchName+' '+DocumentNo+' '+ReceiptMode + '(' + Description + ')',
+                            "Particular": BankName+''+BranchName+''+DocumentNo+''+ReceiptMode + '' + Description ,
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": float(a['ReceiptAmt']) + float(a['CashReceiptAmt']),
                             "Cash": 0,
