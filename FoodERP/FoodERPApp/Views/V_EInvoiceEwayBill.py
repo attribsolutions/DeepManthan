@@ -80,12 +80,11 @@ class Uploaded_EInvoice(CreateAPIView):
                         user_gstin=Invoice['Party']['GSTIN']
                         for a in Invoice['InvoiceItems']:
 
-                            assessable_value = float(
-                                a['Quantity'])*float(a['Rate'])
+                            assessable_value = float(a['BasicAmount'])
                             Total_assessable_value = float(
                                 Total_assessable_value + assessable_value)
                             total_invoice_value = float(
-                                total_invoice_value) + float(a['Amount'])
+                                total_invoice_value) + (float(a['Amount'])-float(a['DiscountAmount']))
                             total_cgst_value = float(
                                 total_cgst_value) + float(a['CGST'])
                             total_sgst_value = float(
@@ -107,14 +106,14 @@ class Uploaded_EInvoice(CreateAPIView):
                                 'quantity': a['Quantity'],
                                 'unit': a['Unit']['UnitID']['EwayBillUnit'],
                                 'unit_price': a['Rate'],
-                                'discount': a['Discount'],
+                                'discount': a['DiscountAmount'],
                                 'igst_amount': a['IGST'],
                                 'cgst_amount': a['CGST'],
                                 'sgst_amount': a['SGST'],
-                                'total_amount':  float(a['Quantity'])*float(a['Rate']),
-                                'assessable_value': a['BasicAmount'],
+                                'total_amount':  round(float(a['Quantity'])*float(a['Rate']),2),
+                                'assessable_value': round((float(a['Quantity'])*float(a['Rate']))-(float(a['DiscountAmount'])),2),
                                 'gst_rate': a['GST']['GSTPercentage'],
-                                'total_item_value': a['Amount'],
+                                'total_item_value': float(a['Amount']),
                                 'batch_details': Batchlist
                             })
 
@@ -211,7 +210,7 @@ class Uploaded_EInvoice(CreateAPIView):
                         "ewaybill_details": ewaybill_details[0],
                         "item_list": InvoiceItemDetails
                     })
-
+                    
                     EInvoice_URL = 'https://pro.mastersindia.co/generateEinvoice'
                     payload1 = json.dumps(InvoiceData[0])
                     # payload = json.loads(payload1)
@@ -221,7 +220,7 @@ class Uploaded_EInvoice(CreateAPIView):
 
                     response = requests.request(
                         "POST", EInvoice_URL, headers=headers, data=payload1)
-
+                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'aa[1]', 'Data': InvoiceData[0]})
                     data_dict = json.loads(response.text)
                     
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
@@ -235,9 +234,10 @@ class Uploaded_EInvoice(CreateAPIView):
                             Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
                     else:
-                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': [] })
+                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
                     
                 else:
+                    
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -250,20 +250,20 @@ class Uploaded_EwayBill(CreateAPIView):
     def get(self, request, id=0,userID=0):
         try:
             with transaction.atomic():
-
+                print('bbbbbbbbbb')
                 access_token = generate_Access_Token()
                 aa=access_token.split('!')
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
 # =======================================================================================
                 
                 if(aa[0] == '1'):
-                    
+                    print('ccccccccccc')
                     access_token=aa[1]
                     ItemQuery = T_Invoices.objects.filter(id=id)
                     InvoiceUploadSerializer = InvoicegovUploadSerializer(
                         ItemQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceUploadSerializer})
-
+                    print('qqqqqqqqqqq')
                     InvoiceData = list()
                     InvoiceItemDetails = list()
                     Total_assessable_value = 0
@@ -274,6 +274,7 @@ class Uploaded_EwayBill(CreateAPIView):
                     total_discount = 0
                     for Invoice in InvoiceUploadSerializer:
                         user_gstin=Invoice['Party']['GSTIN']
+                        print('wwwwwwwwwwwwww')
                         for a in Invoice['InvoiceItems']:
 
                             # assessable_value=float(a['Quantity'])*float(a['Rate'])
@@ -362,19 +363,19 @@ class Uploaded_EwayBill(CreateAPIView):
                             'email' : Invoice['Party']['Email'],
                             'itemList': InvoiceItemDetails
                         })
-
+                        print('ddddddddddddd')
                         E_Way_Bill_URL = 'https://pro.mastersindia.co/ewayBillsGenerate'
                         payload = json.dumps(InvoiceData[0])
                         
                         headers = {
                             'Content-Type': 'application/json',
                         }
-
+                        print('eeeeeeeeeeee')
                         response = requests.request(
                             "POST", E_Way_Bill_URL, headers=headers, data=payload)
 
                         data_dict = json.loads(response.text)
-                        
+                        print('ffffffffffffff')
                         if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                             Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                             
