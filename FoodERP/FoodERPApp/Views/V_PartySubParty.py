@@ -165,7 +165,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
@@ -179,7 +179,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
@@ -194,7 +194,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['SubParty']['id'],
                             "Name": a['SubParty']['Name'],
                             "GSTIN": a['SubParty']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
@@ -209,7 +209,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['id'],
                             "Name": a['Name'],
                             "GSTIN": a['Party']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
