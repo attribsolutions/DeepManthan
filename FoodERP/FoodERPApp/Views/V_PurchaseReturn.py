@@ -26,10 +26,20 @@ class PurchaseReturnListView(CreateAPIView):
                 Customer = Returndata['CustomerID']
                 Party = Returndata['PartyID']
 
+                
                 if(Customer == ''):
-                    query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Party=Party)
+                    cust=Q()
                 else:
-                    query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate], Customer=Customer, Party=Party)
+                    cust=Q(Customer=Customer) 
+                
+                if(Party == ''):
+                    par=Q()
+                else:
+                    par=Q(Party=Party)
+                
+                query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
+                
+                # print(query.query)
                 if query:
                     Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
                     ReturnListData = list()
@@ -287,9 +297,12 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     ItemMRPDetails = list()
 
                     for d in MRPdata:
+                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
+                        Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
                         ItemMRPDetails.append({
                         "MRP": d['id'],
                         "MRPValue": d['MRP'],   
+                        "Rate" : round(Rate,2),
                     })
 
                 GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
