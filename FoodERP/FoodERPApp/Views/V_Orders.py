@@ -49,6 +49,9 @@ class OrderListFilterView(CreateAPIView):
                 OrderType = Orderdata['OrderType']
                 CustomerType = Orderdata['CustomerType']
                 d = date.today()
+                
+                
+                
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
 
@@ -77,14 +80,14 @@ class OrderListFilterView(CreateAPIView):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
                     else:
 
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
                 # return JsonResponse({'query': str(q.query)})
                 if q:
