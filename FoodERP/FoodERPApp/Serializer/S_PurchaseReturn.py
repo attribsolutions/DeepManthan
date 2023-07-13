@@ -80,3 +80,26 @@ class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
             ret["ReturnReason"] = {"id": None, "Name": None}
               
         return ret    
+    
+class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
+
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'
+    
+class PurchaseReturnSerializerThird(serializers.ModelSerializer):
+    ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
+    class Meta :
+        model= T_PurchaseReturn
+        fields = '__all__'
+
+    def create(self, validated_data):
+        ReturnItems_data = validated_data.pop('ReturnItems')
+        PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
+        
+        for a in ReturnItems_data:
+            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **a)
+            
+        return PurchaseReturnID      
+
+
