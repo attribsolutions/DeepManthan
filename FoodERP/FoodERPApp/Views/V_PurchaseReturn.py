@@ -417,7 +417,8 @@ class T_PurchaseReturnView(CreateAPIView):
                                 "MRP":b['MRP'],
                                 "PurchaseReturn":b['PurchaseReturn'],
                                 "Unit":b['Unit'],
-                                "ItemReason":b['ItemReason'],
+                                "ItemReasonID":b['ItemReason']['id'],
+                                "ItemReason":b['ItemReason']['Name'],
                                 "Comment":b['Comment']
                             })
                         
