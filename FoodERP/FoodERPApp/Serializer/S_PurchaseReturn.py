@@ -1,3 +1,5 @@
+from ..Serializer.S_Invoices import Mc_ItemUnitSerializerThird
+from ..Serializer.S_Items import ItemSerializer
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_BankMaster import *
@@ -113,5 +115,15 @@ class PurchaseReturnSerializerThird(serializers.ModelSerializer):
             ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **a)
             
         return PurchaseReturnID      
+    
+
+
+class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
+    Item=ItemSerializer(read_only=True)
+    ItemReason = GeneralMasterserializer(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'    
 
 
