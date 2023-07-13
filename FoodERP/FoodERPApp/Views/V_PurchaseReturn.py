@@ -477,12 +477,14 @@ class T_PurchaseReturnView(CreateAPIView):
                             "BatchCode":b['BatchCode'],
                             "CreatedOn":b['CreatedOn'],
                             "GST":b['GST'],
-                            "Item":b['Item']['Name'],
+                            "Item" : b["Item"]["id"],
+                            "ItemName":b['Item']['Name'],
                             "MRP":b['MRP'],
                             "PurchaseReturn":b['PurchaseReturn'],
                             "Unit":b['Unit']["id"],
                             "UnitName" : b["Unit"]["UnitID"]["Name"],
-                            "ItemReason":b['ItemReason']['Name'],
+                            "ItemReason":b['ItemReason']['id'],
+                            "ItemReasonName":b['ItemReason']['Name'],
                             "Comment":b['Comment']
                         })
                         
