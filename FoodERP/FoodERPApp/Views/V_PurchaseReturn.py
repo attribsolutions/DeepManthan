@@ -459,6 +459,7 @@ class T_PurchaseReturnView(CreateAPIView):
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
+                            "ApprovedQuantity" : b["ApprovedQuantity"],
                             "BaseUnitQuantity":b['BaseUnitQuantity'],
                             "MRPValue":b['MRPValue'],
                             "Rate":b['Rate'],
@@ -477,12 +478,14 @@ class T_PurchaseReturnView(CreateAPIView):
                             "BatchCode":b['BatchCode'],
                             "CreatedOn":b['CreatedOn'],
                             "GST":b['GST'],
-                            "Item":b['Item']['Name'],
+                            "Item" : b["Item"]["id"],
+                            "ItemName":b['Item']['Name'],
                             "MRP":b['MRP'],
                             "PurchaseReturn":b['PurchaseReturn'],
                             "Unit":b['Unit']["id"],
                             "UnitName" : b["Unit"]["UnitID"]["Name"],
-                            "ItemReason":b['ItemReason']['Name'],
+                            "ItemReason":b['ItemReason']['id'],
+                            "ItemReasonName":b['ItemReason']['Name'],
                             "Comment":b['Comment']
                         })
                         
@@ -494,3 +497,21 @@ class T_PurchaseReturnView(CreateAPIView):
 
 
 
+class ReturnItemApproveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def Post(self, request):
+        try:
+            with transaction.atomic():
+                PurchaseReturndata = JSONParser().parse(request)    
+                ReturnID = PurchaseReturndata['ReturnID']
+                ReturnItem = PurchaseReturndata['ReturnItem']
+                for a in ReturnItem:
+                    SetFlag=TC_OrderItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
+                
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
+                
