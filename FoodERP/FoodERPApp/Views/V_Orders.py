@@ -163,11 +163,11 @@ class OrderListFilterViewSecond(CreateAPIView):
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
                         if (FromDate == '' and ToDate == ''):
-                            query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-InvoiceDate')
+                            query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
                         else:
-                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-InvoiceDate')
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-InvoiceDate')
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
         
