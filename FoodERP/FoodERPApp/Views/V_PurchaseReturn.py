@@ -459,6 +459,7 @@ class T_PurchaseReturnView(CreateAPIView):
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
+                            "ApprovedQuantity" : b["ApprovedQuantity"],
                             "BaseUnitQuantity":b['BaseUnitQuantity'],
                             "MRPValue":b['MRPValue'],
                             "Rate":b['Rate'],
