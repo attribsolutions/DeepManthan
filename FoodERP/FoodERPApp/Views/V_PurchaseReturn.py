@@ -71,6 +71,68 @@ class PurchaseReturnView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
     
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Query = T_PurchaseReturn.objects.filter(id=id)
+                if Query.exists():
+                    PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
+                    
+                    PuchaseReturnList=list()
+
+                    for a in PurchaseReturnSerializer:
+                        PurchaseReturnItemList=list()
+                        for b in a['ReturnItems']:
+                            PurchaseReturnItemList.append({
+                                "ItemComment":b['ItemComment'],
+                                "Quantity":b['Quantity'],
+                                "BaseUnitQuantity":b['BaseUnitQuantity'],
+                                "MRPValue":b['MRPValue'],
+                                "Rate":b['Rate'],
+                                "BasicAmount":b['BasicAmount'],
+                                "TaxType":b['TaxType'],
+                                "GSTPercentage":b['GSTPercentage'],
+                                "GSTAmount":b['GSTAmount'],
+                                "Amount":b['Amount'],
+                                "CGST":b['CGST'],
+                                "SGST":b['SGST'],
+                                "IGST":b['IGST'],
+                                "CGSTPercentage":b['CGSTPercentage'],
+                                "SGSTPercentage":b['SGSTPercentage'],
+                                "IGSTPercentage":b['IGSTPercentage'],
+                                "BatchDate":b['BatchDate'],
+                                "BatchCode":b['BatchCode'],
+                                "CreatedOn":b['CreatedOn'],
+                                "GST":b['GST'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'],
+                                "MRP":b['MRP'],
+                                "PurchaseReturn":b['PurchaseReturn'],
+                                "Unit":b['Unit'],
+                                "ItemReasonID":b['ItemReason']['id'],
+                                "ItemReason":b['ItemReason']['Name'],
+                                "Comment":b['Comment']
+                            })
+                        
+                        PuchaseReturnList.append({
+                            "ReturnDate":a['ReturnDate'],
+                            "ReturnNo":a['ReturnNo'],
+                            "FullReturnNumber":a['FullReturnNumber'],
+                            "GrandTotal":a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "Comment":a['Comment'],
+                            "CreatedOn":a['CreatedOn'],
+                            "UpdatedOn":a['UpdatedOn'],
+                            "Customer":a['Customer'],
+                            "Party":a['Party'],
+                            "ReturnReason":a['ReturnReason'],
+                            "ReturnItems":PurchaseReturnItemList
+                        })
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
     @transaction.atomic()
     def post(self, request):
         try:
@@ -379,121 +441,55 @@ class T_PurchaseReturnView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Query = T_PurchaseReturn.objects.filter(id=id)
-                if Query.exists():
-                    PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
-                    
-                    PuchaseReturnList=list()
-
-                    for a in PurchaseReturnSerializer:
-                        PurchaseReturnItemList=list()
-                        for b in a['ReturnItems']:
-                            PurchaseReturnItemList.append({
-                                "ItemComment":b['ItemComment'],
-                                "Quantity":b['Quantity'],
-                                "BaseUnitQuantity":b['BaseUnitQuantity'],
-                                "MRPValue":b['MRPValue'],
-                                "Rate":b['Rate'],
-                                "BasicAmount":b['BasicAmount'],
-                                "TaxType":b['TaxType'],
-                                "GSTPercentage":b['GSTPercentage'],
-                                "GSTAmount":b['GSTAmount'],
-                                "Amount":b['Amount'],
-                                "CGST":b['CGST'],
-                                "SGST":b['SGST'],
-                                "IGST":b['IGST'],
-                                "CGSTPercentage":b['CGSTPercentage'],
-                                "SGSTPercentage":b['SGSTPercentage'],
-                                "IGSTPercentage":b['IGSTPercentage'],
-                                "BatchDate":b['BatchDate'],
-                                "BatchCode":b['BatchCode'],
-                                "CreatedOn":b['CreatedOn'],
-                                "GST":b['GST'],
-                                "Item":b['Item']['id'],
-                                "ItemName":b['Item']['Name'],
-                                "MRP":b['MRP'],
-                                "PurchaseReturn":b['PurchaseReturn'],
-                                "Unit":b['Unit'],
-                                "ItemReasonID":b['ItemReason']['id'],
-                                "ItemReason":b['ItemReason']['Name'],
-                                "Comment":b['Comment']
-                            })
-                        
-                        PuchaseReturnList.append({
-                            "ReturnDate":a['ReturnDate'],
-                            "ReturnNo":a['ReturnNo'],
-                            "FullReturnNumber":a['FullReturnNumber'],
-                            "GrandTotal":a['GrandTotal'],
-                            "RoundOffAmount":a['RoundOffAmount'],
-                            "Comment":a['Comment'],
-                            "CreatedOn":a['CreatedOn'],
-                            "UpdatedOn":a['UpdatedOn'],
-                            "Customer":a['Customer'],
-                            "Party":a['Party'],
-                            "ReturnReason":a['ReturnReason'],
-                            "ReturnItems":PurchaseReturnItemList
-                        })
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-
     def post(self, request, id=0):
         try:
             with transaction.atomic():
                 ReturnItemdata = JSONParser().parse(request)
                 ReturnItemID= ReturnItemdata['ReturnItemID']
-
-                q0= TC_PurchaseReturnItems.objects.filter(PurchaseReturn_id__in=ReturnItemID).values("PurchaseReturn")
-
-                q1 = T_PurchaseReturn.objects.filter(id__in=q0)
-
-                Query = TC_PurchaseReturnItems.objects.filter(PurchaseReturn__in=q1)
+                a=ReturnItemID.split(',')
+                Query = TC_PurchaseReturnItems.objects.filter(PurchaseReturn__id__in=a)
                 if Query.exists():
-                    PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
-                    
+                    PurchaseReturnSerializer = PurchaseReturnItemsSerializer2(Query, many=True).data 
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnSerializer})
                     # PuchaseReturnList=list()
-
-                    for a in PurchaseReturnSerializer:
-                        PurchaseReturnItemList=list()
-                        for b in a['ReturnItems']:
-                            PurchaseReturnItemList.append({
-                                "ItemComment":b['ItemComment'],
-                                "Quantity":b['Quantity'],
-                                "BaseUnitQuantity":b['BaseUnitQuantity'],
-                                "MRPValue":b['MRPValue'],
-                                "Rate":b['Rate'],
-                                "BasicAmount":b['BasicAmount'],
-                                "TaxType":b['TaxType'],
-                                "GSTPercentage":b['GSTPercentage'],
-                                "GSTAmount":b['GSTAmount'],
-                                "Amount":b['Amount'],
-                                "CGST":b['CGST'],
-                                "SGST":b['SGST'],
-                                "IGST":b['IGST'],
-                                "CGSTPercentage":b['CGSTPercentage'],
-                                "SGSTPercentage":b['SGSTPercentage'],
-                                "IGSTPercentage":b['IGSTPercentage'],
-                                "BatchDate":b['BatchDate'],
-                                "BatchCode":b['BatchCode'],
-                                "CreatedOn":b['CreatedOn'],
-                                "GST":b['GST'],
-                                "Item":b['Item'],
-                                "MRP":b['MRP'],
-                                "PurchaseReturn":b['PurchaseReturn'],
-                                "Unit":b['Unit'],
-                                "ItemReason":b['ItemReason'],
-                                "Comment":b['Comment']
-                            })
+                    PurchaseReturnItemList=list()
+                    for b in PurchaseReturnSerializer:
+                       
                         
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnItemList})
+                        PurchaseReturnItemList.append({
+                            "ItemComment":b['ItemComment'],
+                            "Quantity":b['Quantity'],
+                            "BaseUnitQuantity":b['BaseUnitQuantity'],
+                            "MRPValue":b['MRPValue'],
+                            "Rate":b['Rate'],
+                            "BasicAmount":b['BasicAmount'],
+                            "TaxType":b['TaxType'],
+                            "GSTPercentage":b['GSTPercentage'],
+                            "GSTAmount":b['GSTAmount'],
+                            "Amount":b['Amount'],
+                            "CGST":b['CGST'],
+                            "SGST":b['SGST'],
+                            "IGST":b['IGST'],
+                            "CGSTPercentage":b['CGSTPercentage'],
+                            "SGSTPercentage":b['SGSTPercentage'],
+                            "IGSTPercentage":b['IGSTPercentage'],
+                            "BatchDate":b['BatchDate'],
+                            "BatchCode":b['BatchCode'],
+                            "CreatedOn":b['CreatedOn'],
+                            "GST":b['GST'],
+                            "Item":b['Item']['Name'],
+                            "MRP":b['MRP'],
+                            "PurchaseReturn":b['PurchaseReturn'],
+                            "Unit":b['Unit']["id"],
+                            "UnitName" : b["Unit"]["UnitID"]["Name"],
+                            "ItemReason":b['ItemReason']['Name'],
+                            "Comment":b['Comment']
+                        })
+                        
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnItemList})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
         
 
 
