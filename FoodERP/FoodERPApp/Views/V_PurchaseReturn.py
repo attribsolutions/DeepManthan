@@ -440,4 +440,59 @@ class T_PurchaseReturnView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
-    
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                ReturnItemdata = JSONParser().parse(request)
+                ReturnItemID= ReturnItemdata['ReturnItemID']
+
+                q0= TC_PurchaseReturnItems.objects.filter(PurchaseReturn_id__in=ReturnItemID).values("PurchaseReturn")
+
+                q1 = T_PurchaseReturn.objects.filter(id__in=q0)
+
+                Query = TC_PurchaseReturnItems.objects.filter(PurchaseReturn__in=q1)
+                if Query.exists():
+                    PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
+                    
+                    # PuchaseReturnList=list()
+
+                    for a in PurchaseReturnSerializer:
+                        PurchaseReturnItemList=list()
+                        for b in a['ReturnItems']:
+                            PurchaseReturnItemList.append({
+                                "ItemComment":b['ItemComment'],
+                                "Quantity":b['Quantity'],
+                                "BaseUnitQuantity":b['BaseUnitQuantity'],
+                                "MRPValue":b['MRPValue'],
+                                "Rate":b['Rate'],
+                                "BasicAmount":b['BasicAmount'],
+                                "TaxType":b['TaxType'],
+                                "GSTPercentage":b['GSTPercentage'],
+                                "GSTAmount":b['GSTAmount'],
+                                "Amount":b['Amount'],
+                                "CGST":b['CGST'],
+                                "SGST":b['SGST'],
+                                "IGST":b['IGST'],
+                                "CGSTPercentage":b['CGSTPercentage'],
+                                "SGSTPercentage":b['SGSTPercentage'],
+                                "IGSTPercentage":b['IGSTPercentage'],
+                                "BatchDate":b['BatchDate'],
+                                "BatchCode":b['BatchCode'],
+                                "CreatedOn":b['CreatedOn'],
+                                "GST":b['GST'],
+                                "Item":b['Item'],
+                                "MRP":b['MRP'],
+                                "PurchaseReturn":b['PurchaseReturn'],
+                                "Unit":b['Unit'],
+                                "ItemReason":b['ItemReason'],
+                                "Comment":b['Comment']
+                            })
+                        
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnItemList})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
+        
+
+
+
