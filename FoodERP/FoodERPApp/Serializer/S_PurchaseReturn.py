@@ -81,6 +81,10 @@ class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
               
         return ret    
     
+class ItemsReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_GeneralMaster
+        fields= ['id','Name']
 
 class M_ItemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,10 +93,11 @@ class M_ItemsSerializer(serializers.ModelSerializer):
 
 class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     Item = M_ItemsSerializer()
+    ItemReason = ItemsReasonSerializer()
     class Meta :
         model= TC_PurchaseReturnItems
         fields = '__all__'
-        
+
     
 class PurchaseReturnSerializerThird(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
