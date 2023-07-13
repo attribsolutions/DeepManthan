@@ -81,11 +81,18 @@ class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
               
         return ret    
     
-class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
 
+class M_ItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_Items
+        fields= ['id','Name']
+
+class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
+    Item = M_ItemsSerializer()
     class Meta :
         model= TC_PurchaseReturnItems
         fields = '__all__'
+        
     
 class PurchaseReturnSerializerThird(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
