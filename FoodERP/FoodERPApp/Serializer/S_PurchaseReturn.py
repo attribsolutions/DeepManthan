@@ -1,4 +1,5 @@
 from ..Serializer.S_Invoices import Mc_ItemUnitSerializerThird
+from ..Serializer.S_Items import ItemSerializer
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_BankMaster import *
@@ -116,10 +117,7 @@ class PurchaseReturnSerializerThird(serializers.ModelSerializer):
         return PurchaseReturnID      
     
 
-class ItemSerializer(serializers.ModelSerializer):
-    class Meta : 
-        model=M_Items
-        fields =["id","Name"]
+
 class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
     Item=ItemSerializer(read_only=True)
     ItemReason = GeneralMasterserializer(read_only=True)

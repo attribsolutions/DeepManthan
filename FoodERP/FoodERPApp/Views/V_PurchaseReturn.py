@@ -497,3 +497,21 @@ class T_PurchaseReturnView(CreateAPIView):
 
 
 
+class ReturnItemApproveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def Post(self, request):
+        try:
+            with transaction.atomic():
+                PurchaseReturndata = JSONParser().parse(request)    
+                ReturnID = PurchaseReturndata['ReturnID']
+                ReturnItem = PurchaseReturndata['ReturnItem']
+                for a in ReturnItem:
+                    SetFlag=TC_OrderItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
+                
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
+                
