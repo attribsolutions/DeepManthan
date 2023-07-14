@@ -488,7 +488,7 @@ urlpatterns = [
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
             # url(r'PurchaseReturnItem/([0-9]+)$', T_PurchaseReturnView.as_view()),
             url(r'SalesReturnconsolidateItem$', T_PurchaseReturnView.as_view()),
-            url(r'ReturnItemApprove/([0-9]+)$', ReturnItemApproveView.as_view()),
+            url(r'ReturnItemApprove$', ReturnItemApproveView.as_view()),
             
                     
 # Single Invoice details view api for Sales Return, CreditDebitnot
