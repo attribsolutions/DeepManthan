@@ -1,3 +1,5 @@
+from ..Serializer.S_Invoices import Mc_ItemUnitSerializerThird
+
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_BankMaster import *
@@ -80,3 +82,67 @@ class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
             ret["ReturnReason"] = {"id": None, "Name": None}
               
         return ret    
+    
+class ItemsReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_GeneralMaster
+        fields= ['id','Name']
+
+class M_ItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_Items
+        fields= ['id','Name']
+
+class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
+    Item = M_ItemsSerializer()
+    ItemReason = ItemsReasonSerializer()
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'
+
+    
+class PurchaseReturnSerializerThird(serializers.ModelSerializer):
+    ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
+    class Meta :
+        model= T_PurchaseReturn
+        fields = '__all__'
+
+    def create(self, validated_data):
+        ReturnItems_data = validated_data.pop('ReturnItems')
+        PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
+        
+        for a in ReturnItems_data:
+            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **a)
+            
+        return PurchaseReturnID      
+    
+
+
+class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
+    Item=M_ItemsSerializer(read_only=True)
+    ItemReason = GeneralMasterserializer(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'    
+
+
+# class ReturnApproveSerializer(serializers.ModelSerializer):
+    
+#     InvoiceItems = PurchaseReturnItemsSerializer2(many=True)
+    
+#     class Meta:
+#         model = T_PurchaseReturn
+#         # fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems']
+#         fields ='__all__'
+    
+#     def create(self, validated_data):
+
+#         InvoiceItems_data = validated_data.pop('ReturnItem')
+#         InvoiceID = T_Invoices.objects.filter(id=validated_data['RetarnID'])
+        
+#         for a in InvoiceItems_data:
+#            SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=InvoiceID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
+                
+            
+#         return InvoiceID
