@@ -127,3 +127,22 @@ class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
         fields = '__all__'    
 
 
+# class ReturnApproveSerializer(serializers.ModelSerializer):
+    
+#     InvoiceItems = PurchaseReturnItemsSerializer2(many=True)
+    
+#     class Meta:
+#         model = T_PurchaseReturn
+#         # fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems']
+#         fields ='__all__'
+    
+#     def create(self, validated_data):
+
+#         InvoiceItems_data = validated_data.pop('ReturnItem')
+#         InvoiceID = T_Invoices.objects.filter(id=validated_data['RetarnID'])
+        
+#         for a in InvoiceItems_data:
+#            SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=InvoiceID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
+                
+            
+#         return InvoiceID
