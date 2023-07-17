@@ -1464,6 +1464,7 @@ class TC_PurchaseReturnItems(models.Model):
     ApprovedQuantity= models.DecimalField(max_digits=30, decimal_places=3 ,null=True,blank=True)
     ApprovedBy = models.IntegerField(null=True,blank=True)
     ApprovedOn = models.DateTimeField(auto_now_add=True)
+    ApproveComment = models.CharField(max_length=500,null=True,blank=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
         
@@ -1476,8 +1477,9 @@ class TC_PurchaseReturnItemImages(models.Model):
         
         
 class TC_PurchaseReturnReferences(models.Model):
-    PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Return', on_delete=models.CASCADE) 
-    SubReturn = models.ForeignKey(T_PurchaseReturn, related_name='SubReturns',on_delete=models.PROTECT)
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Return', on_delete=models.CASCADE)
+    SubReturn =  models.ForeignKey(T_PurchaseReturn, related_name='SubReturn', on_delete=models.PROTECT)
+
     class Meta:
         db_table = "TC_PurchaseReturnReferences"               
 

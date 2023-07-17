@@ -45,7 +45,7 @@ class PurchaseReturnListView(CreateAPIView):
                     ReturnListData = list()
                     for a in Return_serializer:
                         ReturnListData.append({
-                            "id": a['id'],
+                            "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
                             "ReturnNo": a['ReturnNo'],
                             "FullReturnNumber": a['FullReturnNumber'],
@@ -84,6 +84,7 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturnItemList=list()
                         for b in a['ReturnItems']:
                             PurchaseReturnItemList.append({
+                                "id":b['id'],
                                 "ItemComment":b['ItemComment'],
                                 "Quantity":b['Quantity'],
                                 "BaseUnitQuantity":b['BaseUnitQuantity'],
@@ -507,7 +508,7 @@ class ReturnItemApproveView(CreateAPIView):
                 ReturnID = PurchaseReturndata['ReturnID']
                 ReturnItem = PurchaseReturndata['ReturnItem']
                 for a in ReturnItem:
-                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
+                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"],ApproveComment=a["ApproveComment"])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
