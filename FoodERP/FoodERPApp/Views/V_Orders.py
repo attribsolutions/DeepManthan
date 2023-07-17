@@ -424,6 +424,9 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "DiscountType":b['DiscountType'],
+                                    "Discount":b['Discount'],
+                                    "DiscountAmount":b['DiscountAmount'],
                                     "Comment": b['Comment'],
                                 })
                         
