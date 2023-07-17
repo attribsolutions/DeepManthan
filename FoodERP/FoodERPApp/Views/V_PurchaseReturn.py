@@ -45,7 +45,7 @@ class PurchaseReturnListView(CreateAPIView):
                     ReturnListData = list()
                     for a in Return_serializer:
                         ReturnListData.append({
-                            "id": a['id'],
+                            "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
                             "ReturnNo": a['ReturnNo'],
                             "FullReturnNumber": a['FullReturnNumber'],
