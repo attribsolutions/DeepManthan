@@ -84,6 +84,7 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturnItemList=list()
                         for b in a['ReturnItems']:
                             PurchaseReturnItemList.append({
+                                "id":b['id'],
                                 "ItemComment":b['ItemComment'],
                                 "Quantity":b['Quantity'],
                                 "BaseUnitQuantity":b['BaseUnitQuantity'],
