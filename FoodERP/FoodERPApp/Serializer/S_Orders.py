@@ -266,9 +266,9 @@ class OrderEditserializer(serializers.Serializer):
     GroupTypeName=serializers.CharField(max_length=100) 
     GroupName=serializers.CharField(max_length=100)
     SubGroupName=serializers.CharField(max_length=100)
-    DiscountType = serializers.CharField(max_length=500)
-    Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
-    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     
 
 
