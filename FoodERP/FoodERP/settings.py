@@ -82,6 +82,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
 
+
         'NAME': 'devfooderp20230706',     
 
         'USER': 'pk',
@@ -89,6 +90,7 @@ DATABASES = {
 
 
         'HOST': '192.168.1.114',
+
 
         'PORT': '3306' ,
         'OPTIONS': { 
