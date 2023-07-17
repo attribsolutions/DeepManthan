@@ -112,10 +112,8 @@ class RoutesUpdateListView(CreateAPIView):
                       
                 
                 q0 = MC_PartySubParty.objects.filter(Party = Party).values("SubParty")
-              
-                q1 = M_Parties.objects.filter(id__in = q0,PartyType__IsRetailer=1).select_related("PartyType") 
-               
-                query = MC_PartySubParty.objects.filter(SubParty__in=q1) 
+                    
+                query = MC_PartySubParty.objects.filter(SubParty__in=q0) 
                 
                 if query.exists():
                     SubPartydata = RoutesUpdateListSerializer(query, many=True).data
