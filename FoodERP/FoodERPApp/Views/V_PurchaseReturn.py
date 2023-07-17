@@ -45,7 +45,7 @@ class PurchaseReturnListView(CreateAPIView):
                     ReturnListData = list()
                     for a in Return_serializer:
                         ReturnListData.append({
-                            "id": a['id'],
+                            "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
                             "ReturnNo": a['ReturnNo'],
                             "FullReturnNumber": a['FullReturnNumber'],
@@ -84,6 +84,7 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturnItemList=list()
                         for b in a['ReturnItems']:
                             PurchaseReturnItemList.append({
+                                "id":b['id'],
                                 "ItemComment":b['ItemComment'],
                                 "Quantity":b['Quantity'],
                                 "BaseUnitQuantity":b['BaseUnitQuantity'],
@@ -494,43 +495,20 @@ class T_PurchaseReturnView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
         
-
-
+        
 
 class ReturnItemApproveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
-    @transaction.atomic()
-    def Post(self, request):
+    def post(self, request, id=0):
         try:
             with transaction.atomic():
                 PurchaseReturndata = JSONParser().parse(request)    
                 ReturnID = PurchaseReturndata['ReturnID']
                 ReturnItem = PurchaseReturndata['ReturnItem']
                 for a in ReturnItem:
-                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
-                
-                
+                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
-
-
-
-# def post(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 InVoice_Data = JSONParser().parse(request)  
-#                 if query.exists:
-#                     Invoice_Serializer = InvoiceSerializerSecond(query,many=True).data
-#                     InvoiceList = list()
-#                     for a in Invoice_Serializer:
-#                         InvoiceList.append({
-#                             "Invoice":a['id'],
-#                             "FullInvoiceNumber":a['FullInvoiceNumber'],
-#                         })
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
-#                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
-        
+                

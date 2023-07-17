@@ -857,6 +857,9 @@ class TC_OrderItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
 
     class Meta:
         db_table = "TC_OrderItems"
@@ -1461,6 +1464,7 @@ class TC_PurchaseReturnItems(models.Model):
     ApprovedQuantity= models.DecimalField(max_digits=30, decimal_places=3 ,null=True,blank=True)
     ApprovedBy = models.IntegerField(null=True,blank=True)
     ApprovedOn = models.DateTimeField(auto_now_add=True)
+    ApproveComment = models.CharField(max_length=500,null=True,blank=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
         
@@ -1469,7 +1473,15 @@ class TC_PurchaseReturnItemImages(models.Model):
     PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnItemImages', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
-        db_table = "TC_PurchaseReturnItemImages"        
+        db_table = "TC_PurchaseReturnItemImages"
+        
+        
+class TC_PurchaseReturnReferences(models.Model):
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Return', on_delete=models.CASCADE)
+    SubReturn =  models.ForeignKey(T_PurchaseReturn, related_name='SubReturn', on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "TC_PurchaseReturnReferences"               
 
 
 class T_LoadingSheet(models.Model):

@@ -132,10 +132,8 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                     elif (Type == 'State'):
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'], District=a['Value2'])
                     else:    
-                        query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})
-                   
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Update Successfully', 'Data': []})
-                
+                        query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})  
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully', 'Data': []})  
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
 
