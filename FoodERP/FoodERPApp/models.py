@@ -1464,6 +1464,7 @@ class TC_PurchaseReturnItems(models.Model):
     ApprovedQuantity= models.DecimalField(max_digits=30, decimal_places=3 ,null=True,blank=True)
     ApprovedBy = models.IntegerField(null=True,blank=True)
     ApprovedOn = models.DateTimeField(auto_now_add=True)
+    ApproveComment = models.CharField(max_length=500,null=True,blank=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
         
