@@ -122,23 +122,26 @@ class LoadingSheetView(CreateAPIView):
                         else:
                             PaidAmount = Amount['PAmount']
                         
-                        print(float(PaidAmount))
-                        print(float(a['GrandTotal']))
                         if float(PaidAmount) != float(a['GrandTotal']):
-                            InvoiceParent.append({
-                                "id": a['id'],
-                                "InvoiceDate": a['InvoiceDate'],
-                                "InvoiceNumber": a['InvoiceNumber'],
-                                "FullInvoiceNumber": a['FullInvoiceNumber'],
-                                "GrandTotal": a['GrandTotal'],
-                                "RoundOffAmount":a['RoundOffAmount'],
-                                "CustomerID": a['Customer']['id'],
-                                "Customer": a['Customer']['Name'],
-                                "CustomerGSTIN": a['Customer']['GSTIN'],
-                                "Party": a['Party']['id'],
-                                "PartyName": a['Party']['Name'],
-                                "PartyGSTIN": a['Party']['GSTIN'],
-                            })
+                            Flag = False
+                        else:
+                            Flag = True
+                                
+                        InvoiceParent.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "InvoiceNumber": a['InvoiceNumber'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount":a['RoundOffAmount'],
+                            "CustomerID": a['Customer']['id'],
+                            "Customer": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "ReceiptFlag": Flag
+                        })
                     InvoiceData.append({
                         "PartyDetails":LoadingSheetListData[0],
                         "InvoiceParent":InvoiceParent,
