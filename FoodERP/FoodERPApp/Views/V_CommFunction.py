@@ -471,14 +471,15 @@ class UnitwiseQuantityConversion:
     
 class RateCalculationFunction:
 
-    def __init__(self,BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit,PriceList):
+    def __init__(self,BatchID=0,ItemID=0,PartyID=0,DivisionID=0,MUnit=0,MCItemUnit=0,PriceList=0,selectedMRP=0):
         self.ItemID     =   ItemID 
         self.PartyID    =   PartyID 
         self.BatchID    =   BatchID
         self.DivisionID =   DivisionID
         self.today      =   date.today()
         self.PriceList  =   PriceList
-        
+        self.selectedMRP=   selectedMRP
+
         if(BatchID > 0):
            
             QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST','GSTPercentage','MRPValue')
@@ -505,7 +506,11 @@ class RateCalculationFunction:
             # print('MRPfun',MRPfun[0]['TodaysMRP'])
             # print('Gstfun',Gstfun[0]['GST'])
             # print('unitfun',MCItemUnit)
-            self.MRP=float(MRPfun[0]['TodaysMRP'])
+            if selectedMRP != 0:
+                self.MRP=self.selectedMRP
+            else:
+                self.MRP=float(MRPfun[0]['TodaysMRP'])
+            
             self.GST=float(Gstfun[0]['GST'])
         
         

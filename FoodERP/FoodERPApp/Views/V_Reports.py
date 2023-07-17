@@ -46,7 +46,8 @@ class PartyLedgerReportView(CreateAPIView):
     BA18,
     GA5,
     GA12,
-    GA18
+    GA18,
+    Description
 FROM
     ((SELECT 
         InvoiceDate,
@@ -69,7 +70,8 @@ FROM
             BA18,
             GA5,
             GA12,
-            GA18
+            GA18,
+            Description
             
     FROM
         (SELECT 
@@ -87,7 +89,8 @@ FROM
             0 AS CashReceiptAmt,
             1 AS Flag,
             0 AS DebitNote,
-            0 AS CreditNote
+            0 AS CreditNote,
+            "" AS Description
     FROM
         T_Invoices
     WHERE
@@ -154,7 +157,8 @@ FROM
             0 AS BA18,
             0 AS GA5,
             0 AS GA12,
-            0 AS GA18
+            0 AS GA18,
+            Description
     FROM
         T_Receipts
     LEFT JOIN MC_PartyBanks ON MC_PartyBanks.id = T_Receipts.Bank_id
@@ -202,7 +206,8 @@ FROM
             0 AS BA18,
             0 AS GA5,
             0 AS GA12,
-            0 AS GA18
+            0 AS GA18,
+            "" AS Description
     FROM
         T_CreditDebitNotes
     WHERE
@@ -249,8 +254,8 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         TaxableSale12= TaxableSale12 + float(a["BA12"])
                         TaxableSale18= TaxableSale18 + float(a["BA18"])
                         GSTAmount5= GSTAmount5 + float(a["GA5"])
-                        GSTAmount12= GSTAmount5 + float(a["GA12"])
-                        GSTAmount18= GSTAmount5 + float(a["GA18"])
+                        GSTAmount12= GSTAmount12 + float(a["GA12"])
+                        GSTAmount18= GSTAmount18 + float(a["GA18"])
                         TotalCreditNote = TotalCreditNote + float(a["CreditNote"])
                         TotalDebitNote = TotalDebitNote + float(a["DebitNote"])
                         TotalTCS = TotalTCS + float(a["TotalTCS"])
@@ -269,13 +274,20 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                         if a['ReceiptMode'] is None : 
                             ReceiptMode=''
                         else:
-                            ReceiptMode= str(a['ReceiptMode'])   
+                            ReceiptMode= str(a['ReceiptMode'])  
+                       
+                        if a['Description'] is None or not a['Description']: 
+                            
+                            Description=''
+                        else:
+                            
+                            Description= '('+ str(a['Description']) + ')' 
                         
                         print(BankName,'')
                         PartyLedgerItemDetails.append({
                             "Date": a['InvoiceDate'],
                             "DocumentNO": a['BillNo'],
-                            "Particular": BankName+' '+BranchName+' '+DocumentNo+' '+ReceiptMode,
+                            "Particular": BankName+''+BranchName+''+DocumentNo+''+ReceiptMode + '' + Description ,
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": float(a['ReceiptAmt']) + float(a['CashReceiptAmt']),
                             "Cash": 0,

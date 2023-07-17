@@ -49,6 +49,9 @@ class OrderListFilterView(CreateAPIView):
                 OrderType = Orderdata['OrderType']
                 CustomerType = Orderdata['CustomerType']
                 d = date.today()
+                
+                
+                
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
 
@@ -77,14 +80,14 @@ class OrderListFilterView(CreateAPIView):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
                     else:
 
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
                 # return JsonResponse({'query': str(q.query)})
                 if q:
@@ -160,11 +163,11 @@ class OrderListFilterViewSecond(CreateAPIView):
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
                         if (FromDate == '' and ToDate == ''):
-                            query = T_Invoices.objects.filter(Customer_id=Customer)
+                            query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
                         else:
-                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer)
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
         

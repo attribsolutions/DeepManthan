@@ -1458,6 +1458,9 @@ class TC_PurchaseReturnItems(models.Model):
     Unit = models.ForeignKey(MC_ItemUnits, related_name='ReturnUnitID', on_delete=models.PROTECT)
     ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ItemReason",on_delete=models.PROTECT) 
     Comment = models.CharField(max_length=500,null=True,blank=True)
+    ApprovedQuantity= models.DecimalField(max_digits=30, decimal_places=3 ,null=True,blank=True)
+    ApprovedBy = models.IntegerField(null=True,blank=True)
+    ApprovedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = "TC_PurchaseReturnItems"
         
