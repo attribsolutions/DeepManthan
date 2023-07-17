@@ -508,7 +508,7 @@ class ReturnItemApproveView(CreateAPIView):
                 ReturnID = PurchaseReturndata['ReturnID']
                 ReturnItem = PurchaseReturndata['ReturnItem']
                 for a in ReturnItem:
-                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"])
+                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["ApprovedBy"],ApproveComment=a["ApproveComment"])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
