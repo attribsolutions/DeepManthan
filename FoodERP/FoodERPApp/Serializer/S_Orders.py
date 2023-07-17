@@ -270,9 +270,6 @@ class OrderEditserializer(serializers.Serializer):
     Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     
-    
-
-
 
 
 class ReportOrderItemSerializer(serializers.ModelSerializer):
