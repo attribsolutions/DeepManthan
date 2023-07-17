@@ -1478,7 +1478,7 @@ class TC_PurchaseReturnItemImages(models.Model):
         
 class TC_PurchaseReturnReferences(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='Return', on_delete=models.CASCADE) 
-    SubReturn = models.ForeignKey(T_PurchaseReturn, related_name='SubReturns',on_delete=models.PROTECT)
+
     class Meta:
         db_table = "TC_PurchaseReturnReferences"               
 
