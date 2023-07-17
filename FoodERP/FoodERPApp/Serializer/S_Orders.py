@@ -36,7 +36,7 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','DiscountType','Discount','DiscountAmount']
 
 class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -266,6 +266,9 @@ class OrderEditserializer(serializers.Serializer):
     GroupTypeName=serializers.CharField(max_length=100) 
     GroupName=serializers.CharField(max_length=100)
     SubGroupName=serializers.CharField(max_length=100)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     
     
 
