@@ -5,6 +5,11 @@ from ..Serializer.S_Orders import  *
 from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
 
+class RouteSerializer(serializers.ModelSerializer):
+    Name = serializers.CharField(max_length=500)
+    class Meta:
+        model = M_Routes
+        fields = '__all__'
 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,9 +25,10 @@ class MC_PartyAdressSerializer(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress=MC_PartyAdressSerializer(many=True)
     State = StateSerializer(read_only=True)
+    RParty=RouteSerializer(many=True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo']
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','RParty']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -79,6 +85,7 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
        
 class InvoicesReferencesSerializerSecond(serializers.ModelSerializer):
     Order = OrderserializerforInvoice(read_only=True)
+    
     class Meta:
         model = TC_InvoicesReferences
         fields = '__all__'
@@ -173,7 +180,7 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
             ret["Margin"] = {"id": None, "Margin": None} 
         
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage ": None}        
+            ret["GST"] = {"id": None, "GSTPercentage": None}        
              
         return ret    
 class InvoiceUploadsSerializer(serializers.ModelSerializer):
@@ -189,6 +196,7 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
     InvoiceUploads=InvoiceUploadsSerializer(many=True)
+    
     class Meta:
         model = T_Invoices
         fields = '__all__'
@@ -202,6 +210,9 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
             
         if not ret.get("Vehicle", None):
             ret["Vehicle"] = {"id": None, "VehicleNumber": None}
+
+        if not ret.get("Route", None):
+            ret["Route"] = {"id": None, "Name": None}
         
         return ret          
 
