@@ -109,7 +109,8 @@ class PurchaseReturnView(CreateAPIView):
                                 "ItemName":b['Item']['Name'],
                                 "MRP":b['MRP'],
                                 "PurchaseReturn":b['PurchaseReturn'],
-                                "Unit":b['Unit'],
+                                "Unit":b['Unit']['id'],
+                                "UnitName" : b['Unit']['UnitID']['Name'],
                                 "ItemReasonID":b['ItemReason']['id'],
                                 "ItemReason":b['ItemReason']['Name'],
                                 "Comment":b['Comment']
@@ -127,6 +128,7 @@ class PurchaseReturnView(CreateAPIView):
                             "Customer":a['Customer'],
                             "Party":a['Party'],
                             "ReturnReason":a['ReturnReason'],
+                            "IsApproved" : a["IsApproved"],
                             "ReturnItems":PurchaseReturnItemList
                         })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList})
@@ -506,8 +508,9 @@ class ReturnItemApproveView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)    
                 ReturnID = PurchaseReturndata['ReturnID']
                 ReturnItem = PurchaseReturndata['ReturnItem']
+                aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=1)
                 for a in ReturnItem:
-                    SetFlag=TC_PurchaseReturnItems.objects.filter(PurchaseReturn=ReturnID).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
+                    SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
