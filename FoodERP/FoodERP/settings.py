@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.65',
         'PORT': '3306' ,
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
