@@ -61,9 +61,10 @@ FROM
             TotalTCS,
             ReceiptAmt,
             CashReceiptAmt,
+            Flag,
             DebitNote,
             CreditNote,
-            Flag,
+           
             BasicAmount,
             BA5,
             BA12,
@@ -215,7 +216,7 @@ FROM
             AND Party_id = %s
             AND Customer_id = %s) q
 ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer])
-               
+                
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:        
