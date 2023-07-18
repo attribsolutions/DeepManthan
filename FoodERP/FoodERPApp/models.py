@@ -1830,6 +1830,7 @@ class O_DateWiseLiveStock(models.Model):
     ClosingBalance=models.DecimalField(max_digits=20,decimal_places=10)
     ActualStock = models.DecimalField(max_digits=20,decimal_places=10)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='DStockUnit', on_delete=models.PROTECT) 
+    Party = models.ForeignKey(M_Parties, related_name='DStockParty', on_delete=models.PROTECT)
 
     class Meta:
         db_table="O_DateWiseLiveStock"      
