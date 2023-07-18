@@ -1831,6 +1831,9 @@ class O_DateWiseLiveStock(models.Model):
     ActualStock = models.DecimalField(max_digits=20,decimal_places=10)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='DStockUnit', on_delete=models.PROTECT) 
     Party = models.ForeignKey(M_Parties, related_name='DStockParty', on_delete=models.PROTECT)
+    IsAdjusted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table="O_DateWiseLiveStock"      
