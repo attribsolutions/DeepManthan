@@ -1828,7 +1828,8 @@ class O_DateWiseLiveStock(models.Model):
     PurchaseReturn = models.DecimalField(max_digits=20,decimal_places=10)
     SalesReturn = models.DecimalField(max_digits=20,decimal_places=10)
     ClosingBalance=models.DecimalField(max_digits=20,decimal_places=10)
-    ActualStock = models.DecimalField(max_digits=20,decimal_places=10) 
+    ActualStock = models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='DStockUnit', on_delete=models.PROTECT) 
 
     class Meta:
         db_table="O_DateWiseLiveStock"      
