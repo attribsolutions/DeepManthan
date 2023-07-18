@@ -96,6 +96,7 @@ class M_ItemsSerializer(serializers.ModelSerializer):
 class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     Item = M_ItemsSerializer()
     ItemReason = ItemsReasonSerializer()
+    Unit=Mc_ItemUnitSerializerThird()
     class Meta :
         model= TC_PurchaseReturnItems
         fields = '__all__'
