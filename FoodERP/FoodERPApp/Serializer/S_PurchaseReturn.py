@@ -32,18 +32,24 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
         model= TC_PurchaseReturnItems
         fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment']   
         
+class PurchaseReturnReferences(serializers.ModelSerializer):
+    class Meta :
+        model = TC_PurchaseReturnReferences
+        fields =["SubReturn"]
+
 class PurchaseReturnSerializer(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(many=True)
     O_LiveBatchesList=O_LiveBatchesReturnSerializer(many=True)
-    
+    PurchaseReturnReferences=PurchaseReturnReferences(many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems','O_LiveBatchesList']
+        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems','O_LiveBatchesList','PurchaseReturnReferences']
         
         
     def create(self, validated_data):
         ReturnItems_data = validated_data.pop('ReturnItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
+        PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
         
         for ReturnItem_data in ReturnItems_data:
@@ -52,6 +58,10 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
             
             for ReturnItemImage_data in ReturnItemImages_data:
                 ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
+        
+        if PurchaseReturnReferences_data : 
+            for PurchaseReturnReference_data in PurchaseReturnReferences_data:
+                ReturnReference=TC_PurchaseReturnReferences.objects.create(PurchaseReturn=PurchaseReturnID, **PurchaseReturnReference_data)
         
         for O_LiveBatchesList_data in O_LiveBatchesLists_data :
             O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')

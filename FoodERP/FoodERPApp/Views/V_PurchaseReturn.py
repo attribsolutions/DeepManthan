@@ -44,6 +44,21 @@ class PurchaseReturnListView(CreateAPIView):
                     Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
                     ReturnListData = list()
                     for a in Return_serializer:
+                        q0=TC_PurchaseReturnReferences.objects.filter(SubReturn=a['id'])
+                       
+                        if q0.count() > 0:
+                            IsSendToSS = 1
+                        else:
+                            IsSendToSS = 0
+
+                        if (IsSendToSS == 1):
+                            Status = "Send To Supplier"
+                            
+                        elif a["IsApproved"] == 1: 
+                            
+                            Status = "Approved" 
+                        else:
+                            Status = "Open"    
                         ReturnListData.append({
                             "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
@@ -57,7 +72,9 @@ class PurchaseReturnListView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount": a['RoundOffAmount'],
-                            "CreatedOn": a['CreatedOn']
+                            "CreatedOn": a['CreatedOn'],
+                            "IsApproved" : a["IsApproved"],
+                            "Status" : Status
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
