@@ -1816,6 +1816,22 @@ class T_Stock(models.Model):
     
     class Meta:
         db_table="T_Stock"
+        
+              
+class O_DateWiseLiveStock(models.Model):
+    
+    StockDate=models.DateField()
+    Item= models.ForeignKey(M_Items,related_name='DStockItem', on_delete=models.PROTECT)
+    OpeningBalance=models.DecimalField(max_digits=20,decimal_places=10)
+    GRN = models.DecimalField(max_digits=20,decimal_places=10)
+    Sale=models.DecimalField(max_digits=20,decimal_places=10)
+    PurchaseReturn = models.DecimalField(max_digits=20,decimal_places=10)
+    SalesReturn = models.DecimalField(max_digits=20,decimal_places=10)
+    ClosingBalance=models.DecimalField(max_digits=20,decimal_places=10)
+    ActualStock = models.DecimalField(max_digits=20,decimal_places=10) 
+
+    class Meta:
+        db_table="O_DateWiseLiveStock"      
                 
    
         
