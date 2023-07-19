@@ -30,7 +30,7 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment']   
+        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment','ApprovedQuantity']   
         
 class PurchaseReturnReferences(serializers.ModelSerializer):
     class Meta :
@@ -43,7 +43,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
     PurchaseReturnReferences=PurchaseReturnReferences(many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ReturnItems','O_LiveBatchesList','PurchaseReturnReferences']
+        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','IsApproved', 'ReturnItems','O_LiveBatchesList','PurchaseReturnReferences']
         
         
     def create(self, validated_data):
