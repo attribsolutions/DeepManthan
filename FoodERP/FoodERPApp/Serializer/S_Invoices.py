@@ -5,12 +5,19 @@ from ..Serializer.S_Orders import  *
 from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
 
+
 class RouteSerializer(serializers.ModelSerializer):
     Name = serializers.CharField(max_length=500)
     class Meta:
         model = M_Routes
         fields = '__all__'
 
+class MCPartySubPartySerializer(serializers.ModelSerializer):
+    Route= RouteSerializer()
+    class Meta:
+        model = MC_PartySubParty
+        fields = '__all__'
+        
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_States
@@ -25,10 +32,10 @@ class MC_PartyAdressSerializer(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress=MC_PartyAdressSerializer(many=True)
     State = StateSerializer(read_only=True)
-    RParty=RouteSerializer(many=True)
+    MCSubParty=MCPartySubPartySerializer(many=True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','RParty']
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','MCSubParty']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
