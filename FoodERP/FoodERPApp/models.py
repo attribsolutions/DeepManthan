@@ -959,8 +959,8 @@ class  MC_PartySubParty(models.Model):
     UpdatedBy = models.IntegerField(blank=True, null=True)
     UpdatedOn = models.DateTimeField(auto_now=True)
     Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.CASCADE)
-    Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.CASCADE, blank=True,null=True)
-    SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
+    Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.PROTECT, blank=True,null=True)
+    SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.PROTECT)
     Distance = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=2)
     IsTCSParty = models.BooleanField(default=False)
 
@@ -975,7 +975,7 @@ class  MC_PartySubPartyOpeningBalance(models.Model):
     UpdatedBy = models.IntegerField(blank=True, null=True)
     UpdatedOn = models.DateTimeField(auto_now=True)
     Party = models.ForeignKey(M_Parties, related_name='MParty', on_delete=models.CASCADE)
-    SubParty = models.ForeignKey(M_Parties, related_name='MSubParty', on_delete=models.CASCADE)
+    SubParty = models.ForeignKey(M_Parties, related_name='MSubParty', on_delete=models.PROTECT)
 
     class Meta:
         db_table = "MC_PartySubPartyOpeningBalance"        
@@ -1816,9 +1816,52 @@ class T_Stock(models.Model):
     
     class Meta:
         db_table="T_Stock"
+        
+              
+class O_DateWiseLiveStock(models.Model):
+    
+    StockDate=models.DateField()
+    Item= models.ForeignKey(M_Items,related_name='DStockItem', on_delete=models.PROTECT)
+    OpeningBalance=models.DecimalField(max_digits=20,decimal_places=10)
+    GRN = models.DecimalField(max_digits=20,decimal_places=10)
+    Sale=models.DecimalField(max_digits=20,decimal_places=10)
+    PurchaseReturn = models.DecimalField(max_digits=20,decimal_places=10)
+    SalesReturn = models.DecimalField(max_digits=20,decimal_places=10)
+    ClosingBalance=models.DecimalField(max_digits=20,decimal_places=10)
+    ActualStock = models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='DStockUnit', on_delete=models.PROTECT) 
+    Party = models.ForeignKey(M_Parties, related_name='DStockParty', on_delete=models.PROTECT)
+    IsAdjusted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    MRPValue = models.DecimalField(max_digits=20,decimal_places=10)
+
+    class Meta:
+        db_table="O_DateWiseLiveStock"      
                 
    
+class M_DiscountMaster(models.Model):
+    
+    FromDate=models.DateField()
+    ToDate=models.DateField()
+    DiscountType = models.IntegerField()
+    Discount = models.DecimalField(max_digits=15, decimal_places=2)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now_add=True)
+    PartyType = models.ForeignKey(M_PartyType, related_name='DiscountPartyType', on_delete=models.PROTECT)
+    PriceList =models.ForeignKey(M_PriceList, related_name='DiscountPriceList', on_delete=models.PROTECT)
+    Customer =  models.ForeignKey(M_Parties, related_name='DiscountCustomer', on_delete=models.PROTECT,blank=True, null=True)
+    Party = models.ForeignKey(M_Parties, related_name='DiscountParty', on_delete=models.PROTECT)
+    Item = models.ForeignKey(M_Items,related_name='DiscountItem', on_delete=models.PROTECT)
+
+    class Meta:
+        db_table="M_DiscountMaster" 
+
         
+        
+       
 
 
        
