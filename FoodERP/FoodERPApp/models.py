@@ -1858,7 +1858,10 @@ class M_DiscountMaster(models.Model):
 
     class Meta:
         db_table="M_DiscountMaster" 
+
         
+        
+       
 
 
        
