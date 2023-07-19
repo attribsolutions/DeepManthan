@@ -355,7 +355,6 @@ class InvoiceViewSecond(CreateAPIView):
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
-                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                     InvoiceData = list()
                     for a in InvoiceSerializedata:
@@ -418,6 +417,11 @@ class InvoiceViewSecond(CreateAPIView):
                         for x in a['Party']['PartyAddress']:
                             if x['IsDefault'] == True :
                                 DefPartyAddress = x['Address']
+
+                        DefCustomerRoute = ''
+                        for bb in a['Customer']['MCSubParty']:
+                            # if bb['IsDefault'] == True:
+                                DefCustomerRoute = bb['Route']['Name']
                         
                         
                         query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
@@ -455,7 +459,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "CustomerState": a['Customer']['State']['Name'],
                             "PartyAddress": DefPartyAddress,                            
                             "CustomerAddress": DefCustomerAddress,
-                            "CustomerRoute":a['Customer']['MCSubParty'][0]['Route']['Name'],
+                            "CustomerRoute":DefCustomerRoute,
                             "DriverName":a['Driver']['Name'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "CreatedOn" : a['CreatedOn'],
