@@ -455,5 +455,8 @@ class ItemReportSerializer(serializers.ModelSerializer):
         fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemGroupDetails']
 
 
-
+class DiscountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_DiscountMaster
+        fields = '__all__'
 
