@@ -396,9 +396,12 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
-            
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
+
+#DiscountMaster
+            url(r'DiscountMasterSave$',DiscountMasterSaveView.as_view()),
+            url(r'DiscountMaster/([0-9]+)$',DiscountMasterView.as_view()),
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
@@ -538,5 +541,8 @@ urlpatterns = [
             url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
             url(r'OrderSummaryReport$',SummaryReportView.as_view()),
             url(r'PartyLedgerReport$',PartyLedgerReportView.as_view()),
+
+
+
 
 ]
