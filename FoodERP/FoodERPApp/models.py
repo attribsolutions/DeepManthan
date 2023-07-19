@@ -1834,12 +1834,13 @@ class O_DateWiseLiveStock(models.Model):
     IsAdjusted = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
+   
 
     class Meta:
-        db_table="O_DateWiseLiveStock"      
-                
-   
+        db_table="O_DateWiseLiveStock"
         
+        
+       
 
 
        
