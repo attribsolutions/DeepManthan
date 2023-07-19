@@ -61,6 +61,7 @@ class M_PartiesFilterView(CreateAPIView):
                 # IsSCMCompany = Logindata['IsSCMCompany']
                 CompanyGroupID = Logindata['CompanyGroup']
                 IsSCMCompany = Logindata['IsSCMCompany']
+                IsRetailer = Logindata['IsRetailer']
 
                 if (RoleID == 1):  # SuperAdmin
 
@@ -88,12 +89,13 @@ class M_PartiesFilterView(CreateAPIView):
                     q = M_Roles.objects.filter(id=RoleID).values("isSCMRole")
 
                     if q[0]['isSCMRole'] == 1:
-
-                        q0 = MC_PartySubParty.objects.filter(
-                            Party=PartyID).values("SubParty")
-
-                        query = M_Parties.objects.filter(
-                            id__in=q0, PartyType__IsRetailer=1).select_related("PartyType")
+                        
+                        if IsRetailer == 1:
+                            q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
+                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=1).select_related("PartyType")
+                        else:
+                            q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
+                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=0).select_related("PartyType")    
 
                     else:
                         q0 = MC_PartySubParty.objects.filter(Party=PartyID)
