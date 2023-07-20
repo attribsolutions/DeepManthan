@@ -615,7 +615,7 @@ Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                     else:
                         Stockparty=Party
                     stockquery = O_BatchWiseLiveStock.objects.filter(
-                        Item=ItemID, Party=Stockparty).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        Item=ItemID, Party=Stockparty,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
                     if stockquery['Qty'] is None:
                         Stock = 0.0
                     else:
