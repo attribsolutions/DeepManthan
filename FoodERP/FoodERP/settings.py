@@ -91,7 +91,6 @@ DATABASES = {
         },
     },
 
-
     # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'transactionlogdb',
