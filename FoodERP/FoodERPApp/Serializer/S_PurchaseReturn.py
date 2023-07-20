@@ -43,19 +43,17 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
     PurchaseReturnReferences=PurchaseReturnReferences(many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','IsApproved', 'Comment', 'ReturnItems','O_LiveBatchesList','PurchaseReturnReferences']
+        fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','IsApproved', 'Comment', 'ReturnItems','O_LiveBatchesList','PurchaseReturnReferences','Mode']
         
         
     def create(self, validated_data):
-      
-        Mode = validated_data.pop('Mode')
+        Mode = validated_data.get('Mode')
         ReturnItems_data = validated_data.pop('ReturnItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
         
-        for a in Mode:
-            ReturnMode=a['ReturnMode']
+  
         
         for ReturnItem_data in ReturnItems_data:
             ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
@@ -74,7 +72,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
             for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
                 O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
         
-        if ReturnMode == 3: #  Sales Return Consoldated Item qty minus from O_batchwise when send to supplier
+        if Mode == 3: #  Sales Return Consoldated Item qty minus from O_batchwise when send to supplier
             for O_LiveBatchesList_data in O_LiveBatchesLists_data :
                 O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
                 for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
