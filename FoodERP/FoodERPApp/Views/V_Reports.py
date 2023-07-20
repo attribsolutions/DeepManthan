@@ -5,10 +5,14 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 
+from ..Serializer.S_Parties import M_PartiesSerializerSecond
+
 from ..Views.V_CommFunction import GetOpeningBalance
+from ..Serializer.S_Invoices import InvoiceSerializerSecond
 
 from ..Serializer.S_Reports import PartyLedgerReportSerializer
 from ..models import *
+
 
 
 class PartyLedgerReportView(CreateAPIView):
@@ -324,3 +328,161 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class StockProcessingView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Party = Orderdata['Party']
+
+        
+        
+        
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class GenericSaleView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Genericdata = JSONParser().parse(request)
+                FromDate = Genericdata['FromDate']
+                ToDate = Genericdata['ToDate']
+                Party = Genericdata['Party']
+
+                Genericdataquery= T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], 
+             Party=Party).select_related()
+                print(Genericdataquery.query)
+                if Genericdataquery:
+                    Invoice_serializer = InvoiceSerializerSecond(Genericdataquery, many=True).data
+                    InvoiceListData = list()
+                    for a in Invoice_serializer:
+                        for b in a['InvoiceItems']:
+                            InvoiceListData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "PartyID": a['Party']['id'],
+                                "Party": a['Party']['Name'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount": a['RoundOffAmount'],
+                                "DriverName": a['Driver']['Name'],
+                                "VehicleNo": a['Vehicle']['VehicleNumber'],
+                                "Party": a['Party']['Name'],
+                                "CreatedOn": a['CreatedOn'],
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRPValue'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "PrimaryUnitName":b['Unit']['UnitID']['Name'],
+                                "UnitName":b['Unit']['UnitID']['Name'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                                "HSNCode":b['GST']['HSNCode'],
+                                "DiscountType":b['DiscountType'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
+                                
+                                
+                            })
+                            # df = pd.DataFrame(InvoiceListData)
+                            # file_path = 'example.xlsx'
+                            # df.to_excel(file_path, index=False)
+                            # return file_path
+
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class RetailerDataView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                Party = Orderdata['Party']
+
+                q0 = MC_PartySubParty.objects.filter(Party=Party)
+                query = M_Parties.objects.filter(id__in=q0).select_related()
+                # print(query.query)
+                if query:
+                    PartyData=list()
+                    M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
+                    for a in M_Parties_serializer:
+                       
+                        for addr in a["PartyAddress"]:
+                            if addr["IsDefault"] == 1:
+                                address= addr["Address"]
+                        
+                        PartyData.append({
+                            "id": a['id'],
+                            
+                            "PartyAddress": address,
+                            "City": a["City"]["Name"],
+                            "District": a["District"]["Name"],
+                            "State": a["State"]["Name"],
+                            "Company": a["Company"]["Name"],
+                            "PartyType": a["PartyType"]["Name"],
+                            "PriceList": a["PriceList"]["Name"],
+                            "Name": a["Name"],
+                            "Email": a["Email"],
+                            "MobileNo": a["MobileNo"],
+                            "AlternateContactNo": a["AlternateContactNo"],
+                            "SAPPartyCode": a["SAPPartyCode"],
+                            "GSTIN": a["GSTIN"],
+                            "PAN": a["PAN"],
+                            "isActive": a["isActive"],
+                            "Latitude": a["Latitude"],
+                            "Longitude": a["Longitude"]
+                          })
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyData}) 
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})          
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class StockReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Unit = Orderdata['Unit']
+                Party = Orderdata['Party']
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                                          
