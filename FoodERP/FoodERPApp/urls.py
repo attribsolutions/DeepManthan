@@ -1,13 +1,11 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
-from .Views.V_Reports import PartyLedgerReportView
+from .Views.V_Reports import *
 
 from .Views.V_EInvoiceEwayBill import *
 
 from .Views.V_SAPApi import *
-
-
 
 from .Views.V_ProductionReIssue import *
 
@@ -541,6 +539,11 @@ urlpatterns = [
             url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
             url(r'OrderSummaryReport$',SummaryReportView.as_view()),
             url(r'PartyLedgerReport$',PartyLedgerReportView.as_view()),
+            url(r'StockProcessing$',StockProcessingView.as_view()),
+            url(r'StockReport$',StockReportView.as_view()),
+            url(r'GenericSaleReport$',GenericSaleView.as_view()),
+            url(r'RetailerDataReport$',RetailerDataView.as_view()),
+
 
 
 
