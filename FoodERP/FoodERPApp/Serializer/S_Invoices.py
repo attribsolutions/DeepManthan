@@ -5,18 +5,19 @@ from ..Serializer.S_Orders import  *
 from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
 
+# code by ankita 
+# class RouteSerializer(serializers.ModelSerializer):
+#     Name = serializers.CharField(max_length=500)
+#     class Meta:
+#         model = M_Routes
+#         fields = '__all__'
 
-class RouteSerializer(serializers.ModelSerializer):
-    Name = serializers.CharField(max_length=500)
-    class Meta:
-        model = M_Routes
-        fields = '__all__'
-
-class MCPartySubPartySerializer(serializers.ModelSerializer):
-    Route= RouteSerializer()
-    class Meta:
-        model = MC_PartySubParty
-        fields = '__all__'
+# code by ankita 
+# class MCPartySubPartySerializer(serializers.ModelSerializer):
+#     Route= RouteSerializer()
+#     class Meta:
+#         model = MC_PartySubParty
+#         fields = '__all__'
         
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,10 +33,10 @@ class MC_PartyAdressSerializer(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress=MC_PartyAdressSerializer(many=True)
     State = StateSerializer(read_only=True)
-    MCSubParty=MCPartySubPartySerializer(many=True)
+    # MCSubParty=MCPartySubPartySerializer(many=True) # code by ankita 
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','MCSubParty']
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo'] 
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
