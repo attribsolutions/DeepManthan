@@ -50,7 +50,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 for b in OrderItemSerializedata:
                     
                     Item= b['Item']['id']
-                    obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
+                    obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0,IsDamagePieces=0)
                   
                   
                     

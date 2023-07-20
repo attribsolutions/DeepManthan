@@ -80,7 +80,7 @@ class StockEntryPageView(CreateAPIView):
                     else:
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': StockEntry_OLiveBatchesSerializer.errors, 'Data': []})
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry data Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
