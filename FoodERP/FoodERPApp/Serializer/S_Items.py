@@ -460,13 +460,13 @@ class DiscountSerializer(serializers.ModelSerializer):
         model = M_DiscountMaster
         fields = '__all__'
 
-class ItemSerializer(serializers.ModelSerializer):
+class DiscountItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Items
         fields = ['id','Name']
 
 class DiscountSerializerSecond(serializers.ModelSerializer):
-    Item = ItemSerializer()
+    Item = DiscountItemSerializer()
     class Meta:
         model = M_DiscountMaster
         fields = '__all__'
