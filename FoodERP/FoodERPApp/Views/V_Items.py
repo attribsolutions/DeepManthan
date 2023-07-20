@@ -10,7 +10,10 @@ from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
 from ..models import *
-        
+
+
+
+
 class M_ItemTag(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
@@ -596,7 +599,8 @@ class GetDiscountView(CreateAPIView):
                 PriceList = Discountdata['PriceList']
                 Party = Discountdata['PartyID']
                 Customer = Discountdata['CustomerID']
-                query = M_DiscountMaster.objects.all()
+
+                query = M_DiscountMaster.objects.filter(FromDate__range=[FromDate,ToDate],PartyType=PartyType,PriceList=PriceList)
                 if query:
                     Discount_Serializer = DiscountSerializerSecond(query, many=True).data
                     DiscountList = list()
