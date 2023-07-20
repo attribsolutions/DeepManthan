@@ -615,7 +615,7 @@ Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                     else:
                         Stockparty=Party
                     stockquery = O_BatchWiseLiveStock.objects.filter(
-                        Item=ItemID, Party=Stockparty).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        Item=ItemID, Party=Stockparty,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
                     if stockquery['Qty'] is None:
                         Stock = 0.0
                     else:
@@ -628,6 +628,13 @@ Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                     b['MRP_id'] = TodaysMRP[0]['Mrpid']
                     b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
                     # print('ttttttttttMRP',TodaysMRP[0]['TodaysMRP'])
+            # =====================Current Discount================================================
+                    TodaysDiscount = DiscountMaster(
+                        ItemID, Party, EffectiveDate,Customer).GetTodaysDateDiscount()
+
+                    b['DiscountType'] = TodaysDiscount[0]['DiscountType']
+                    b['Discount'] = TodaysDiscount[0]['TodaysDiscount']
+                    # print('ttttttttttDiscount',TodaysDiscount)
             # =====================Rate================================================
 
                     ratequery = TC_OrderItems.objects.filter(

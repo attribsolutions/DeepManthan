@@ -90,9 +90,6 @@ DATABASES = {
             'sql_mode': 'STRICT_TRANS_TABLES', 
         },
     },
-
-
-    # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'transactionlogdb',
     #     'USER': 'pk',
