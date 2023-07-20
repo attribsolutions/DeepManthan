@@ -215,6 +215,7 @@ class PurchaseReturnView(CreateAPIView):
                     "Party": Party,
                     "IsDamagePieces":IsDamagePieces,
                     "CreatedBy":PurchaseReturndata['CreatedBy'],
+                    "PurchaseReturn":a['PurchaseReturn']
                     
                     })
                     
@@ -465,8 +466,8 @@ class T_PurchaseReturnView(CreateAPIView):
         try:
             with transaction.atomic():
                 ReturnItemdata = JSONParser().parse(request)
-                ReturnItemID= ReturnItemdata['ReturnItemID']
-                a=ReturnItemID.split(',')
+                ReturnID= ReturnItemdata['ReturnItemID']
+                a=ReturnID.split(',')
                 Query = TC_PurchaseReturnItems.objects.filter(PurchaseReturn__id__in=a)
                 if Query.exists():
                     PurchaseReturnSerializer = PurchaseReturnItemsSerializer2(Query, many=True).data 
@@ -474,8 +475,6 @@ class T_PurchaseReturnView(CreateAPIView):
                     # PuchaseReturnList=list()
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
-                       
-                        
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
