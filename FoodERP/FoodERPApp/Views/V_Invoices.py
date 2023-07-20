@@ -418,10 +418,11 @@ class InvoiceViewSecond(CreateAPIView):
                             if x['IsDefault'] == True :
                                 DefPartyAddress = x['Address']
 
-                        DefCustomerRoute = ''
-                        for bb in a['Customer']['MCSubParty']:
-                            # if bb['IsDefault'] == True:
-                                DefCustomerRoute = bb['Route']['Name']
+                        # code by ankita 
+                        # DefCustomerRoute = ''
+                        # for bb in a['Customer']['MCSubParty']:
+                        #     # if bb['IsDefault'] == True:
+                        #         DefCustomerRoute = bb['Route']['Name']
                         
                         
                         query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
@@ -459,7 +460,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "CustomerState": a['Customer']['State']['Name'],
                             "PartyAddress": DefPartyAddress,                            
                             "CustomerAddress": DefCustomerAddress,
-                            "CustomerRoute":DefCustomerRoute,
+                            # "CustomerRoute":DefCustomerRoute,
                             "DriverName":a['Driver']['Name'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "CreatedOn" : a['CreatedOn'],
