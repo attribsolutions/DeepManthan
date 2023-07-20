@@ -47,11 +47,13 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         
         
     def create(self, validated_data):
-        Mode = validated_data.pop('Mode')
+        Mode = validated_data.get('Mode')
         ReturnItems_data = validated_data.pop('ReturnItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
+        
+  
         
         for ReturnItem_data in ReturnItems_data:
             ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
