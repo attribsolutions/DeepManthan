@@ -34,17 +34,19 @@ LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
 AND M_DiscountMaster.Party_id = %s 
 AND FromDate = %s AND ToDate = %s 
-AND PartyType_id = %s and PriceList_id=%s
+AND PartyType_id = %s and PriceList_id=%s 
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 WHERE MC_PartyItems.Item_id IS NOT NULL							
 ORDER BY M_Items.Sequence''', ([Party], [Party], [FromDate], [ToDate], [PartyType], [PriceList]))
-                print(Discountquery.query)
-                Discountdata = DiscountMasterSerializer(
-                    Discountquery, many=True).data
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
+                
+                if Discountquery:
+                    Discountdata = DiscountMasterSerializer(Discountquery, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
+                else:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -70,3 +72,44 @@ class DiscountMasterSaveView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
+class DiscountMasterFilter(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Discountdata = JSONParser().parse(request)
+                FromDate = Discountdata['FromDate']
+                ToDate = Discountdata['ToDate']
+                Party = Discountdata['Party']
+                today = date.today()
+                
+                if FromDate :
+                    
+                    Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id, M_DiscountMaster.FromDate, M_DiscountMaster.ToDate, M_Parties.Name CustomerName, M_Items.name ItemName, M_DiscountMaster.DiscountType, M_DiscountMaster.Discount,M_PartyType.Name Partytype,M_PriceList.Name PriceListName
+FROM M_DiscountMaster 
+
+LEFT JOIN M_Parties ON M_Parties.id = M_DiscountMaster.Customer_id 
+JOIN M_Items ON M_Items.id = M_DiscountMaster.Item_id 
+JOIN M_PartyType ON M_PartyType.id=M_DiscountMaster.PartyType_id
+join M_PriceList on M_PriceList.id=M_DiscountMaster.PriceList_id
+WHERE M_DiscountMaster.Party_id= %s and M_DiscountMaster.FromDate between %s and %s
+ORDER BY M_DiscountMaster.id DESC''', ([Party],[FromDate],[ToDate]))
+                else:
+                    Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id, M_DiscountMaster.FromDate, M_DiscountMaster.ToDate, M_Parties.Name CustomerName, M_Items.name ItemName, M_DiscountMaster.DiscountType, M_DiscountMaster.Discount,M_PartyType.Name Partytype,M_PriceList.Name PriceListName
+FROM M_DiscountMaster 
+
+LEFT JOIN M_Parties ON M_Parties.ID = M_DiscountMaster.Customer_id 
+JOIN M_Items ON M_Items.id = M_DiscountMaster.Item_id 
+JOIN M_PartyType ON M_PartyType.id=M_DiscountMaster.PartyType_id
+join M_PriceList on M_PriceList.id=M_DiscountMaster.PriceList_id
+WHERE M_DiscountMaster.Party_id= %s and %s >= M_DiscountMaster.FromDate and %s <= M_DiscountMaster.ToDate
+ORDER BY M_DiscountMaster.id DESC''', ([Party],[today],[today]))
+                
+                if Discountquery:
+                    Discountdata = DiscountMasterFilterSerializer(Discountquery, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
+                else:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
