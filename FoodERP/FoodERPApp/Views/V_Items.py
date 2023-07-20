@@ -580,4 +580,94 @@ class DiscountMasterView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'DiscountMaster Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
-                 
+
+
+class GetDiscountView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request,id=0):
+        try:
+            with transaction.atomic():
+                Discountdata = JSONParser().parse(request)
+                FromDate = Discountdata['FromDate']
+                ToDate = Discountdata['ToDate']
+                PartyType = Discountdata['PartyType']
+                PriceList = Discountdata['PriceList']
+                Party = Discountdata['PartyID']
+                Customer = Discountdata['CustomerID']
+                query = M_DiscountMaster.objects.all()
+                if query:
+                    Discount_Serializer = DiscountSerializerSecond(query, many=True).data
+                    DiscountList = list()
+                    for a in Discount_Serializer:
+                        
+                        DiscountList.append({
+                            "ItemId":a['Item']['id'],
+                            "ItemName": a['Item']['Name'],
+                            "Discount":a['Discount'],
+                            "DiscountType":a['DiscountType']
+                                 
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class GetDiscountView(CreateAPIView):
+
+#     permission_classes = (IsAuthenticated,)
+#     # authentication_class = JSONWebTokenAuthentication
+
+#     @transaction.atomic()
+#     def post(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 DiscountMaster_data = JSONParser().parse(request)
+#                 FromDate=DiscountMaster_data['FromDate']
+#                 ToDate=DiscountMaster_data['ToDate']
+#                 PartyType=DiscountMaster_data['PartyType']
+#                 PriceList=DiscountMaster_data['PriceList']
+#                 PartyID=DiscountMaster_data['PartyID']
+#                 # CustomerID=DiscountMaster_data['CustomerID'] 
+#                 query = M_DiscountMaster.objects.all()
+
+#                 if query:
+#                     Discount_Serializer = DiscountSerializerSecond(query, many=True).data
+#                     DiscountList = list()
+
+#                     for a in Discount_Serializer:
+#                         DiscountList.append({
+#                             "ItemId":a['Item']['id'],
+#                             "ItemName": a['Item']['Name'],
+#                             "Discount":a['Discount'],
+#                             "DiscountType":a['DiscountType']
+
+#                         })
+#                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
+#         except Exception as e:
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+                   
+
+            
