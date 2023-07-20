@@ -240,7 +240,57 @@ class MRPMaster:
             EffectiveDateID = 0
         return EffectiveDateID
     
+###################################################################################################################
+
+class DiscountMaster:
     
+    today = date.today() 
+    def __init__(self,ItemID,PartyID,EffectiveDate,Customer=0,PriceListID=0):
+        self.ItemID = ItemID
+        self.PriceListID = PriceListID
+        self.PartyID = PartyID
+        self.EffectiveDate = EffectiveDate
+        self.Customer = Customer
+        
+        pricelistquery=M_Parties.objects.filter(id=Customer).values("PriceList") 
+        self.PriceListID = pricelistquery[0]["PriceList"]
+
+
+    def GetTodaysDateDiscount(self):
+    
+        if int(self.Customer)>0:
+            P=Q(Customer=self.Customer)
+        else:
+            P=Q()
+        
+        D = Q(FromDate__lte=self.EffectiveDate) & Q(ToDate__gte=self.EffectiveDate)
+        ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,Party=self.PartyID).filter(D).filter(P).values("DiscountType","Discount").order_by('-id')[:1]
+        
+        if not ItemDiscountdata:
+            
+            ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,Party=self.PartyID).filter(D).values("DiscountType","Discount").order_by('-id')[:1]
+            
+        
+        if ItemDiscountdata:
+            DiscountDetails=list()
+            DiscountDetails.append({
+                "TodaysDiscount":ItemDiscountdata[0]["Discount"],
+                "DiscountType":ItemDiscountdata[0]["DiscountType"],
+                
+            })
+        else:
+            DiscountDetails=list()
+            DiscountDetails.append({
+                "TodaysDiscount":"",
+                "DiscountType":"",
+                
+            })
+
+       
+
+        
+                
+        return DiscountDetails    
     
 ###################################################################################################################
 
