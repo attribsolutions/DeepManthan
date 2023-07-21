@@ -220,13 +220,14 @@ class PurchaseReturnView(CreateAPIView):
                     
                     })
                     
-                    # Sales Returnconsoldated Stock Minus When Send to Supplier
+                    # Sales Returnconsoldated Stock Minus When Send to Supplier AND Self Purchase Return 
                     UpdateO_BatchWiseLiveStockList.append({
+                    "id":a['BatchID'],    
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
-                    "PurchaseReturn":a['PurchaseReturn']
+                    "PurchaseReturn":a['PurchaseReturn'],
                     
                     })
                     
