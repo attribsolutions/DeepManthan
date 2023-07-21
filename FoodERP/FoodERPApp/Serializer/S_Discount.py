@@ -29,3 +29,5 @@ class DiscountMasterFilterSerializer(serializers.Serializer):
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     Partytype = serializers.CharField(max_length=500)  
     PriceListName = serializers.CharField(max_length=500)  
+    CreatedBy = serializers.IntegerField()
+    CreatedOn = serializers.DateTimeField()
