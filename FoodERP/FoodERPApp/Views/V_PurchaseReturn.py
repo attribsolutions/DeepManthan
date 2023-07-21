@@ -72,6 +72,7 @@ class PurchaseReturnListView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount": a['RoundOffAmount'],
+                            "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "IsApproved" : a["IsApproved"],
                             "Status" : Status
