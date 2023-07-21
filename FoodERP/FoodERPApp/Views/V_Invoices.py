@@ -65,7 +65,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
                             Rate=RateCalculationFunction(d['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
-                            print(Rate)
+                           
                             if(d['LiveBatche']['MRP']['id'] is None):
                                 MRPValue=d['LiveBatche']['MRPValue']
                             else:
@@ -107,7 +107,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "Unitlabel": c['UnitID']['Name']
                         })
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                        
+                    # =====================Current Discount================================================
+                    TodaysDiscount = DiscountMaster(
+                        b['Item']['id'], Party, date.today(),Customer).GetTodaysDateDiscount()
+
+                    DiscountType = TodaysDiscount[0]['DiscountType']
+                    Discount = TodaysDiscount[0]['TodaysDiscount']
+
                     OrderItemDetails.append({
                          
                         "id": b['id'],
@@ -135,6 +141,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "SGSTPercentage": b['SGSTPercentage'],
                         "IGSTPercentage": b['IGSTPercentage'],
                         "Amount": b['Amount'],
+                        "DiscountType" : DiscountType,
+                        "Discount" : Discount,
                         "UnitDetails":UnitDropdown(b['Item']['id'],Customer,0),
                         "StockDetails":stockDatalist
                     })

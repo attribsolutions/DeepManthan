@@ -17,6 +17,7 @@ class DiscountMasterSerializer(serializers.Serializer):
     GroupTypeName = serializers.CharField(max_length=500)
     GroupName = serializers.CharField(max_length=500)
     SubGroupName = serializers.CharField(max_length=500)
+    RecordCount = serializers.IntegerField()
 
 
 class DiscountMasterFilterSerializer(serializers.Serializer):
@@ -29,3 +30,5 @@ class DiscountMasterFilterSerializer(serializers.Serializer):
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     Partytype = serializers.CharField(max_length=500)  
     PriceListName = serializers.CharField(max_length=500)  
+    CreatedBy = serializers.IntegerField()
+    CreatedOn = serializers.DateTimeField()
