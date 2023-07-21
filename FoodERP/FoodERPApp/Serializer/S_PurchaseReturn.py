@@ -7,6 +7,14 @@ from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
 
 # Return Save Serializers
+
+# UpdateO_BatchWiseLiveStockReturnSerializer  # Sales Returnconsoldated Stock Minus When Send to Supplier
+class UpdateO_BatchWiseLiveStockReturnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = O_BatchWiseLiveStock
+        fields = ['Item','Quantity','Unit','BaseUnitQuantity','PurchaseReturn']
+
+
 class O_BatchWiseLiveStockReturnSerializer(serializers.ModelSerializer):
     class Meta:
         model = O_BatchWiseLiveStock
@@ -15,9 +23,10 @@ class O_BatchWiseLiveStockReturnSerializer(serializers.ModelSerializer):
 class O_LiveBatchesReturnSerializer(serializers.ModelSerializer):
     
     O_BatchWiseLiveStockList = O_BatchWiseLiveStockReturnSerializer(many=True)
+    UpdateO_BatchWiseLiveStockList = UpdateO_BatchWiseLiveStockReturnSerializer(many=True)
     class Meta:
         model = O_LiveBatches
-        fields = ['MRP','MRPValue','GST','GSTPercentage','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList']
+        fields = ['MRP','MRPValue','GST','GSTPercentage','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','UpdateO_BatchWiseLiveStockList']
     
 
 class PurchaseReturnItemImageSerializer(serializers.ModelSerializer):
@@ -41,6 +50,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(many=True)
     O_LiveBatchesList=O_LiveBatchesReturnSerializer(many=True)
     PurchaseReturnReferences=PurchaseReturnReferences(many=True)
+    
     class Meta :
         model= T_PurchaseReturn
         fields = ['ReturnDate', 'ReturnNo', 'FullReturnNumber', 'GrandTotal', 'RoundOffAmount','ReturnReason', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','IsApproved', 'Comment', 'ReturnItems','O_LiveBatchesList','PurchaseReturnReferences','Mode']
@@ -50,10 +60,9 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         Mode = validated_data.get('Mode')
         ReturnItems_data = validated_data.pop('ReturnItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
+        
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
-        
-  
         
         for ReturnItem_data in ReturnItems_data:
             ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
@@ -66,19 +75,20 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
             for PurchaseReturnReference_data in PurchaseReturnReferences_data:
                 ReturnReference=TC_PurchaseReturnReferences.objects.create(PurchaseReturn=PurchaseReturnID, **PurchaseReturnReference_data)
         
+       
         for O_LiveBatchesList_data in O_LiveBatchesLists_data :
             O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
+            UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
+           
             BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
             for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
                 O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
-        
-        if Mode == 3: #  Sales Return Consoldated Item qty minus from O_batchwise when send to supplier
-            for O_LiveBatchesList_data in O_LiveBatchesLists_data :
-                O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
-                for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
-                    OBatchQuantity=O_BatchWiseLiveStock.objects.filter(Item=O_BatchWiseLiveStockList[0]['Item'],PurchaseReturn=O_BatchWiseLiveStockList[0]['PurchaseReturn'],Unit=O_BatchWiseLiveStockList[0]['Unit']).values('BaseUnitQuantity')
-                    if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockList['BaseUnitQuantity']):
-                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Item=O_BatchWiseLiveStockList[0]['Item'],PurchaseReturn=O_BatchWiseLiveStockList[0]['PurchaseReturn'],Unit=O_BatchWiseLiveStockList[0]['Unit']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockList['BaseUnitQuantity'])
+            
+            if Mode == 3:
+                for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
+                    OBatchQuantity=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).values('BaseUnitQuantity')
+                    if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
+                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
                             
         return PurchaseReturnID      
         
