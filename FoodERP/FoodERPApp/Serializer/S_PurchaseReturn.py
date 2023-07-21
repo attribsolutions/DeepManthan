@@ -84,6 +84,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
             for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
                 O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
+            
             if Mode == 3:
                 for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
                     OBatchQuantity=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).values('BaseUnitQuantity')
