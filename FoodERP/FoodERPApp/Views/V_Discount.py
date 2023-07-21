@@ -33,7 +33,7 @@ class DiscountMastergo(CreateAPIView):
                     Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
 ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 ,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
-and FromDate between %s and %s and ToDate between %s and %s)RecordCount
+and (FromDate between %s and %s or ToDate between %s and %s))RecordCount
 FROM M_Items
 LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
@@ -52,7 +52,7 @@ ORDER BY M_Items.Sequence''', ([Party],[PartyType],[PriceList],[FromDate], [ToDa
                     Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
 ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 ,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id = %s And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
-and FromDate between %s and %s and ToDate between %s and %s)RecordCount
+and (FromDate between %s and %s or ToDate between %s and %s))RecordCount
 FROM M_Items
 LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
