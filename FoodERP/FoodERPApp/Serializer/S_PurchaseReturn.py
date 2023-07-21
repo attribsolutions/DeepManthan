@@ -85,7 +85,6 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                     O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
         
-        
         if Mode ==2: # Purchase Return Save
             for O_LiveBatchesList_data in O_LiveBatchesLists_data :
                 UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
