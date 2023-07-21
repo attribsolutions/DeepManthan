@@ -75,16 +75,20 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
             for PurchaseReturnReference_data in PurchaseReturnReferences_data:
                 ReturnReference=TC_PurchaseReturnReferences.objects.create(PurchaseReturn=PurchaseReturnID, **PurchaseReturnReference_data)
         
-       
-        for O_LiveBatchesList_data in O_LiveBatchesLists_data :
-            O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
-            UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
-           
-            BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
-            for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
-                O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
+        
+        if Mode == 1:  # Sales Return Save
+            for O_LiveBatchesList_data in O_LiveBatchesLists_data :
+                O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
+                UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
+                BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
+                for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
+                    O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
-            if Mode == 3:
+            
+        if Mode == 3: # Sales Returnconsoldated Stock Minus When Send to Supplier
+            for O_LiveBatchesList_data in O_LiveBatchesLists_data :
+                O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
+                UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
                 for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
                     OBatchQuantity=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).values('BaseUnitQuantity')
                     if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
