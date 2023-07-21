@@ -32,37 +32,41 @@ class DiscountMastergo(CreateAPIView):
                     
                     Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
 ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
+and FromDate between %s and %s and ToDate between %s and %s)RecordCount
 FROM M_Items
 LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
 AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id is null
-AND FromDate = %s AND ToDate = %s 
 AND PartyType_id = %s and PriceList_id=%s 
+AND FromDate = %s AND ToDate = %s 
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 WHERE MC_PartyItems.Item_id IS NOT NULL							
-ORDER BY M_Items.Sequence''', ([Party], [Party], [FromDate], [ToDate], [PartyType], [PriceList]))
+ORDER BY M_Items.Sequence''', ([Party],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Party],[PartyType], [PriceList], [FromDate], [ToDate]))
                 
                 else:
                   
                     Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
 ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id = %s And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
+and FromDate between %s and %s and ToDate between %s and %s)RecordCount
 FROM M_Items
 LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
-AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id =%s
-AND FromDate = %s AND ToDate = %s 
+AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id = %s
 AND PartyType_id = %s and PriceList_id=%s 
+AND FromDate = %s AND ToDate = %s 
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 WHERE MC_PartyItems.Item_id IS NOT NULL							
-ORDER BY M_Items.Sequence''', ([Party], [Party],[Customer], [FromDate], [ToDate], [PartyType], [PriceList]))
+ORDER BY M_Items.Sequence''', ([Party],[Customer],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Party],[Customer],[PartyType], [PriceList], [FromDate], [ToDate]))
                 print(Discountquery.query)
-                print(Discountquery)
+                
                 if Discountquery:
                     Discountdata = DiscountMasterSerializer(Discountquery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
