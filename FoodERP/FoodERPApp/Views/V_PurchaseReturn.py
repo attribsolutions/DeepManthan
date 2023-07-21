@@ -413,7 +413,11 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         "GSTPercentage": e['GSTPercentage'],   
                     }) 
 
-
+                stockquery = O_BatchWiseLiveStock.objects.filter(Item=ItemID, Party=CustomerID,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
+                if stockquery['Qty'] is None:
+                    Stock = 0.0
+                else:
+                    Stock = stockquery['Qty']
 
 
                 if BatchCode != "":
@@ -464,7 +468,8 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         "UnitName" : "No",
                         # "ItemUnitDetails": ItemUnitDetails, 
                         "ItemMRPDetails":ItemMRPDetails,
-                        "ItemGSTDetails":ItemGSTDetails
+                        "ItemGSTDetails":ItemGSTDetails,
+                        "Stock":Stock 
                 })   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
         except M_Items.DoesNotExist:
