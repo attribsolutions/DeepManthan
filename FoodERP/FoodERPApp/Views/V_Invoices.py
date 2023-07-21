@@ -65,7 +65,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
                             Rate=RateCalculationFunction(d['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
-                            print(Rate)
+                           
                             if(d['LiveBatche']['MRP']['id'] is None):
                                 MRPValue=d['LiveBatche']['MRPValue']
                             else:
