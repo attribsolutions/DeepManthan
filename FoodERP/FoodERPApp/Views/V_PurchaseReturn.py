@@ -169,6 +169,7 @@ class PurchaseReturnView(CreateAPIView):
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
+                UpdateO_BatchWiseLiveStockList = list()
                 
                 # if PurchaseReturndata['ReturnReason'] == 56:   
                 #     IsDamagePieces =False
@@ -214,10 +215,20 @@ class PurchaseReturnView(CreateAPIView):
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "Party": Party,
                     "IsDamagePieces":IsDamagePieces,
-                    "CreatedBy":PurchaseReturndata['CreatedBy'],
+                    "CreatedBy":PurchaseReturndata['CreatedBy']
+                    
+                    })
+                    
+                    # Sales Returnconsoldated Stock Minus When Send to Supplier
+                    UpdateO_BatchWiseLiveStockList.append({
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
                     "PurchaseReturn":a['PurchaseReturn']
                     
                     })
+                    
                     
                     O_LiveBatchesList.append({
                     
@@ -232,14 +243,18 @@ class PurchaseReturnView(CreateAPIView):
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
                     "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
-                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList,
+                    "UpdateO_BatchWiseLiveStockList":UpdateO_BatchWiseLiveStockList                   
                     
                     })
                     O_BatchWiseLiveStockList=list()
+                    UpdateO_BatchWiseLiveStockList = list()
+                    
                     
                    
                 # print(GRNdata)
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
+               
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
