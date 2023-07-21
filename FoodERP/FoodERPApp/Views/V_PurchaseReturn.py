@@ -252,8 +252,6 @@ class PurchaseReturnView(CreateAPIView):
                     O_BatchWiseLiveStockList=list()
                     UpdateO_BatchWiseLiveStockList = list()
                     
-                    
-                   
                 # print(GRNdata)
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                
