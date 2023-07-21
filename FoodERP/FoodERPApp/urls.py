@@ -1,6 +1,8 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
+from .Views.V_Discount import *
+
 from .Views.V_Reports import *
 
 from .Views.V_EInvoiceEwayBill import *
@@ -399,8 +401,10 @@ urlpatterns = [
 
 #DiscountMaster
             url(r'DiscountMasterSave$',DiscountMasterSaveView.as_view()),
-            url(r'DiscountMaster/([0-9]+)$',DiscountMasterView.as_view()),
-            url(r'GetDiscount$',GetDiscountView.as_view()),
+            # url(r'DiscountMaster/([0-9]+)$',DiscountMasterView.as_view()),
+            # url(r'GetDiscount$',GetDiscountView.as_view()),
+            url(r'DiscountMaster$',DiscountMastergo.as_view()),
+            url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()),
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
