@@ -434,7 +434,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         else:
                             GSTPercentage=ad['LiveBatche']['GST']['GSTPercentage']
                         
-                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],ad['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],ad['Unit']['id'],0,0,1,0).ConvertintoSelectedUnit()
                         stockDatalist.append({
                             "id": ad['id'],
                             "Item":ad['Item']['id'],
