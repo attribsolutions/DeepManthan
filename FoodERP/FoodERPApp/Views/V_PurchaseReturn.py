@@ -434,6 +434,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         else:
                             GSTPercentage=ad['LiveBatche']['GST']['GSTPercentage']
                         
+                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],ad['Unit'],0,0,1,0).ConvertintoSelectedUnit()
                         stockDatalist.append({
                             "id": ad['id'],
                             "Item":ad['Item']['id'],
@@ -447,7 +448,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                             "Rate":round(Rate[0]["NoRatewithOutGST"],2),
                             "MRP" : MRPValue,
                             "GST" : GSTPercentage,
-                            "BaseUnitQuantity":ad['BaseUnitQuantity'],
+                            "BaseUnitQuantity":QtyInNo,
                             })
 
                 if BatchCode != "":
