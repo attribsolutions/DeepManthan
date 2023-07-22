@@ -279,11 +279,18 @@ class PurchaseReturnView(CreateAPIView):
                     
                     PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                     PurchaseReturn_Data.delete()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
                 else:
-                    query = TC_PurchaseReturnReferences.objects.filter(PurchaseReturn=id)
-                    PurchaseReturnSerilaizer = PurchaseReturnReferences(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PurchaseReturnSerilaizer})
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
+                    Query = T_PurchaseReturn.objects.filter(id=id)
+                    if Query.exists():
+                        PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
+                        for a in PurchaseReturnSerializer:
+                            for b in a['ReturnItems']:
+                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('BaseUnitQuantity')
+                                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] + b['BaseUnitQuantity']) 
+                        PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
+                        PurchaseReturn_Data.delete()        
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
         except T_PurchaseReturn.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
