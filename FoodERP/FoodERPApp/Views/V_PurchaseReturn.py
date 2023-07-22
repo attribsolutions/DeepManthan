@@ -272,14 +272,25 @@ class PurchaseReturnView(CreateAPIView):
         try:
             with transaction.atomic():
                 O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(PurchaseReturn_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
-              
-                for a in O_BatchWiseLiveStockData:
-                    if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
-                        return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Return  Used in another Transaction', 'Data': []})   
-                
-                PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
-                PurchaseReturn_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
+                if O_BatchWiseLiveStockData:
+                    for a in O_BatchWiseLiveStockData:
+                        if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
+                            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Return  Used in another Transaction', 'Data': []})   
+                    
+                    PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
+                    PurchaseReturn_Data.delete()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
+                else:
+                    Query = T_PurchaseReturn.objects.filter(id=id)
+                    if Query.exists():
+                        PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
+                        for a in PurchaseReturnSerializer:
+                            for b in a['ReturnItems']:
+                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('BaseUnitQuantity')
+                                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] + b['BaseUnitQuantity']) 
+                        PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
+                        PurchaseReturn_Data.delete()        
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
         except T_PurchaseReturn.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
