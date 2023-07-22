@@ -287,7 +287,10 @@ class PurchaseReturnView(CreateAPIView):
                         for a in PurchaseReturnSerializer:
                             for b in a['ReturnItems']:
                                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('BaseUnitQuantity')
-                                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] + b['BaseUnitQuantity']) 
+                                print(OBatchQuantity[0]['BaseUnitQuantity'])
+                                print(b['BaseUnitQuantity'])
+                                # if(OBatchQuantity[0]['BaseUnitQuantity'] >= float(b['BaseUnitQuantity'])):
+                                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] + float(b['BaseUnitQuantity'])) 
                         PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                         PurchaseReturn_Data.delete()        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
