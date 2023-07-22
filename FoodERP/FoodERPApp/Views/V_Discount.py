@@ -11,6 +11,7 @@ from ..Serializer.S_Discount import *
 from ..Serializer.S_PriceLists import *
 from ..Serializer.S_Items import *
 from ..Serializer.S_GeneralMaster import *
+from ..Serializer.S_Parties import *
 from ..models import *
 
 
@@ -138,5 +139,42 @@ ORDER BY M_DiscountMaster.id DESC''', ([Party],[today],[today]))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
                 else:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+                
+class DiscountPartyTypeView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                q0 = MC_PartySubParty.objects.filter(Party=id).values("SubParty")
+                query = M_Parties.objects.filter(id__in=q0).distinct().values('PartyType')
+                query2 = M_PartyType.objects.filter(id__in=query)
+                if not query2:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:
+                    PartyTypes_Serializer = PartyTypeSerializer(query2, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyTypes_Serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+               
+
+class DiscountCustomerView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    @transaction.atomic()
+    def get(self, request,Party=0,PartyType=0,PriceList=0):
+        try:
+            with transaction.atomic():
+                q0 = MC_PartySubParty.objects.filter(Party=Party).values("SubParty")
+                query = M_Parties.objects.filter(id__in=q0).filter(PartyType=PartyType,PriceList=PriceList)
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:
+                    M_Parties_serializer = PartiesSerializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
