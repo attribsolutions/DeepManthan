@@ -286,11 +286,11 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
                         for a in PurchaseReturnSerializer:
                             for b in a['ReturnItems']:
-                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('BaseUnitQuantity')
-                                print(OBatchQuantity[0]['BaseUnitQuantity'])
-                                print(b['BaseUnitQuantity'])
-                                # if(OBatchQuantity[0]['BaseUnitQuantity'] >= float(b['BaseUnitQuantity'])):
-                                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] + float(b['BaseUnitQuantity'])) 
+                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+                                Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
+                                if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] <= float(Qty)):
+                                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity =  float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity']))
+                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Qty greater than Consolidated return qty', 'Data': []})     
                         PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                         PurchaseReturn_Data.delete()        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
