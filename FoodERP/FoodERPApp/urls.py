@@ -405,6 +405,8 @@ urlpatterns = [
             # url(r'GetDiscount$',GetDiscountView.as_view()),
             url(r'DiscountMaster$',DiscountMastergo.as_view()),
             url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()),
+            url(r'DiscountPartyType/([0-9]+)$',DiscountPartyTypeView.as_view()),
+            url(r'DiscountCustomer/([0-9]+)/([0-9]+)/([0-9]+)$',DiscountCustomerView.as_view()),
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
