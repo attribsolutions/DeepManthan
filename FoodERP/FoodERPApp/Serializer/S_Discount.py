@@ -17,6 +17,7 @@ class DiscountMasterSerializer(serializers.Serializer):
     GroupTypeName = serializers.CharField(max_length=500)
     GroupName = serializers.CharField(max_length=500)
     SubGroupName = serializers.CharField(max_length=500)
+    RecordCount = serializers.IntegerField()
 
 
 class DiscountMasterFilterSerializer(serializers.Serializer):
