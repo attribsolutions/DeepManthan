@@ -175,6 +175,8 @@ class PurchaseReturnPrintItemsSerializer(serializers.ModelSerializer):
         fields = '__all__'        
         
 class PurchaseReturnPrintSerilaizer(serializers.ModelSerializer):
+    Customer = PartiesSerializerSecond(read_only=True)
+    Party = PartiesSerializerSecond(read_only=True)
     class Meta :
         model= T_PurchaseReturn
         fields = '__all__'            
