@@ -63,10 +63,8 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         Mode = validated_data.get('Mode')
         ReturnItems_data = validated_data.pop('ReturnItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
-        
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
-        
         
         
         if Mode == 1:
