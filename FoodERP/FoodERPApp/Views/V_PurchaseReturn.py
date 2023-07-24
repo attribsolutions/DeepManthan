@@ -282,7 +282,7 @@ class PurchaseReturnView(CreateAPIView):
                                 Qty =0.00 
                                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                                 Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
-                                if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] <= float(Qty)):
+                                if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] >= float(Qty)):
                                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) #float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                     Qty =0.00
                                 else:    
