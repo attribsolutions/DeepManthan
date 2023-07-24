@@ -613,6 +613,17 @@ class PurchaseReturnPrintView(CreateAPIView):
                     PuchaseReturnList=list()
                     for a in PurchaseReturnSerializer:
                         PurchaseReturnItemList=list()
+                    
+                        DefCustomerAddress = ''  
+                        for ad in a['Customer']['PartyAddress']:
+                            if ad['IsDefault'] == True :
+                                DefCustomerAddress = ad['Address']
+                                
+                        DefPartyAddress = ''
+                        for x in a['Party']['PartyAddress']:
+                            if x['IsDefault'] == True :
+                                DefPartyAddress = x['Address']
+                        
                         for b in a['ReturnItems']:
                             PurchaseReturnItemList.append({
                                 "id":b['id'],
@@ -649,7 +660,7 @@ class PurchaseReturnPrintView(CreateAPIView):
                                 "Discount":b['Discount'],
                                 "DiscountAmount":b['DiscountAmount']
                             })
-                        
+                
                         PuchaseReturnList.append({
                             "ReturnDate":a['ReturnDate'],
                             "ReturnNo":a['ReturnNo'],
@@ -659,13 +670,25 @@ class PurchaseReturnPrintView(CreateAPIView):
                             "Comment":a['Comment'],
                             "CreatedOn":a['CreatedOn'],
                             "UpdatedOn":a['UpdatedOn'],
-                            "Customer":a['Customer'],
-                            "Party":a['Party'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerMobileNo": a['Customer']['MobileNo'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerState": a['Customer']['State']['Name'],     
+                            "CustomerAddress": DefCustomerAddress,
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyMobileNo": a['Party']['MobileNo'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "PartyAddress": DefPartyAddress,       
                             "ReturnReason":a['ReturnReason'],
                             "IsApproved" : a["IsApproved"],
                             "ReturnItems":PurchaseReturnItemList
                         })
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList[0]})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
