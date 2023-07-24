@@ -626,11 +626,14 @@ class PurchaseReturnPrintView(CreateAPIView):
                         
                         for b in a['ReturnItems']:
                             PurchaseReturnItemList.append({
-                                "id":b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'],
                                 "ItemComment":b['ItemComment'],
+                                "HSNCode":b['GST']['HSNCode'],
                                 "Quantity":b['Quantity'],
                                 "BaseUnitQuantity":b['BaseUnitQuantity'],
-                                "MRPValue":b['MRPValue'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRPValue'],
                                 "Rate":b['Rate'],
                                 "BasicAmount":b['BasicAmount'],
                                 "TaxType":b['TaxType'],
@@ -646,10 +649,6 @@ class PurchaseReturnPrintView(CreateAPIView):
                                 "BatchDate":b['BatchDate'],
                                 "BatchCode":b['BatchCode'],
                                 "CreatedOn":b['CreatedOn'],
-                                "GST":b['GST'],
-                                "Item":b['Item']['id'],
-                                "ItemName":b['Item']['Name'],
-                                "MRP":b['MRP'],
                                 "PurchaseReturn":b['PurchaseReturn'],
                                 "Unit":b['Unit']['id'],
                                 "UnitName" : b['Unit']['UnitID']['Name'],

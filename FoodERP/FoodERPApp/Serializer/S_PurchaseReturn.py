@@ -164,19 +164,41 @@ class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
 
 ###################### Purchase Return Print Serializers ########################################## 
 
+
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_States
+        fields = '__all__'
+        
+class MC_PartyAdressSerializer(serializers.ModelSerializer):
+    Address = serializers.CharField() 
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+
+class PartiesSerializerPrintSecond(serializers.ModelSerializer):
+    PartyAddress=MC_PartyAdressSerializer(many=True)
+    State = StateSerializer(read_only=True)
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo'] 
+
+
 class PurchaseReturnPrintItemsSerializer(serializers.ModelSerializer):
     MRP = M_MRPsSerializer(read_only=True)
     GST = M_GstHsnCodeSerializer(read_only=True)
     # Margin = M_MarginsSerializer(read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
+    ItemReason = GeneralMasterserializer(read_only=True)
     Unit = Mc_ItemUnitSerializerThird(read_only=True)
     class Meta :
         model= TC_PurchaseReturnItems
         fields = '__all__'        
         
 class PurchaseReturnPrintSerilaizer(serializers.ModelSerializer):
-    Customer = PartiesSerializerSecond(read_only=True)
-    Party = PartiesSerializerSecond(read_only=True)
+    Customer = PartiesSerializerPrintSecond(read_only=True)
+    Party = PartiesSerializerPrintSecond(read_only=True)
+    ReturnItems = PurchaseReturnPrintItemsSerializer(read_only=True,many=True)
     class Meta :
         model= T_PurchaseReturn
         fields = '__all__'            
