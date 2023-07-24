@@ -320,7 +320,7 @@ class PurchaseReturnView(CreateAPIView):
                                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=id,Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                                 Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                 if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] >= float(Qty)):
-                                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=id,Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
+                                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=id,Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
                                     Qty =0.00
                                 else:    
                                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Qty greater than Consolidated return qty', 'Data': []})
