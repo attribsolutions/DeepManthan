@@ -571,16 +571,17 @@ class StockReportView(CreateAPIView):
                 Party = Orderdata['Party']
                 PartyNameQ=M_Parties.objects.filter(id=Party).values("Name")
                 UnitName=M_Units.objects.filter(id=Unit).values("Name")
-                StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id, 
+                StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,A.UnitName UnitName ,
 ifnull(OpeningBalance,0)OpeningBalance, GRNInward, Sale, ClosingBalance, ActualStock,A.ItemName,D.QuantityInBaseUnit,PurchaseReturn,SalesReturn
 ,GroupTypeName,GroupName,SubGroupName
 FROM 
 	
-	( SELECT M_Items.id Item_id, M_Items.Name ItemName , SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,
+	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,
     ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 	 FROM O_DateWiseLiveStock
 	
 	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
+        join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
         left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 		left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 		left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
@@ -603,35 +604,35 @@ FROM
 		ON A.Item_id = D.Item_id ''',([FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
                 print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
-                StockDetails=list()
-                for i in serializer:
+                # StockDetails=list()
+                # for i in serializer:
                     
-                    StockDetails.append({
+                #     StockDetails.append({
                             
-                        "Item_id": i['Item_id'],
-                        "Unit_id": UnitName[0]["Name"],
-                        "OpeningBalance": UnitwiseQuantityConversion(i['Item_id'],i['OpeningBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "GRNInward": UnitwiseQuantityConversion(i['Item_id'],i['GRNInward'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "SalesReturn": UnitwiseQuantityConversion(i['Item_id'],i['SalesReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "Sale": UnitwiseQuantityConversion(i['Item_id'],i['Sale'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "PurchaseReturn": UnitwiseQuantityConversion(i['Item_id'],i['PurchaseReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "ClosingBalance": UnitwiseQuantityConversion(i['Item_id'],i['ClosingBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "ActualStock": UnitwiseQuantityConversion(i['Item_id'],i['ActualStock'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                        "ItemName": i["ItemName"],
-                        "GroupTypeName": i["GroupTypeName"],
-                        "GroupName": i["GroupName"],
-                        "SubGroupName": i["SubGroupName"]
+                #         "Item_id": i['Item_id'],
+                #         "Unit_id": UnitName[0]["Name"],
+                #         "OpeningBalance": UnitwiseQuantityConversion(i['Item_id'],i['OpeningBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "GRNInward": UnitwiseQuantityConversion(i['Item_id'],i['GRNInward'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "SalesReturn": UnitwiseQuantityConversion(i['Item_id'],i['SalesReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "Sale": UnitwiseQuantityConversion(i['Item_id'],i['Sale'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "PurchaseReturn": UnitwiseQuantityConversion(i['Item_id'],i['PurchaseReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "ClosingBalance": UnitwiseQuantityConversion(i['Item_id'],i['ClosingBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "ActualStock": UnitwiseQuantityConversion(i['Item_id'],i['ActualStock'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                #         "ItemName": i["ItemName"],
+                #         "GroupTypeName": i["GroupTypeName"],
+                #         "GroupName": i["GroupName"],
+                #         "SubGroupName": i["SubGroupName"]
 
                 
-                    })
+                #     })
                 
                 StockData=list()
                 StockData.append({
                             
                             "FromDate" : FromDate,
-                            "ToDate" : FromDate,
+                            "ToDate" : ToDate,
                             "PartyName": PartyNameQ[0]["Name"],
-                            "StockDetails" : StockDetails
+                            "StockDetails" : serializer
                             
                 })
                 
