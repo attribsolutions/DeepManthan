@@ -10,6 +10,7 @@ from ..Serializer.S_Items import *
 
 # UpdateO_BatchWiseLiveStockReturnSerializer  # Sales Returnconsoldated Stock Minus When Send to Supplier AND Self Purchase Return 
 class UpdateO_BatchWiseLiveStockReturnSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField() 
     class Meta:
         model = O_BatchWiseLiveStock
         fields = ['id','Item','Quantity','Unit','BaseUnitQuantity','PurchaseReturn']
@@ -90,6 +91,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                 UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
                 for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
                     OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).values('BaseUnitQuantity')
+                    print(str(OBatchQuantity.query))
                     if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
                         OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
         
