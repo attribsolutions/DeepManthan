@@ -1468,6 +1468,11 @@ class TC_PurchaseReturnItems(models.Model):
     ApprovedOn = models.DateTimeField(auto_now_add=True)
     ApproveComment = models.CharField(max_length=500,null=True,blank=True)
     SubReturn =  models.CharField(max_length=500,null=True,blank=True)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    BatchID = models.CharField(max_length=500,null=True,blank=True) # O_BatchwiseLiveStock ID
+    
     class Meta:
         db_table = "TC_PurchaseReturnItems"
         
