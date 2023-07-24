@@ -7,12 +7,11 @@ from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Parties import M_PartiesSerializerSecond
 
-from ..Views.V_CommFunction import GetOpeningBalance
+from ..Views.V_CommFunction import GetOpeningBalance, UnitwiseQuantityConversion
 from ..Serializer.S_Invoices import InvoiceSerializerSecond
 
-from ..Serializer.S_Reports import PartyLedgerReportSerializer
+from ..Serializer.S_Reports import *
 from ..models import *
-
 
 
 class PartyLedgerReportView(CreateAPIView):
@@ -28,7 +27,7 @@ class PartyLedgerReportView(CreateAPIView):
                 Customer = Orderdata['Customer']
                 Party = Orderdata['Party']
 
-                query=T_Invoices.objects.raw('''SELECT 
+                query = T_Invoices.objects.raw('''SELECT
     1 id,
     InvoiceDate,
     BillNo,
@@ -53,7 +52,7 @@ class PartyLedgerReportView(CreateAPIView):
     GA18,
     Description
 FROM
-    ((SELECT 
+    ((SELECT
         InvoiceDate,
             BillNo,
             BankName,
@@ -68,7 +67,7 @@ FROM
             Flag,
             DebitNote,
             CreditNote,
-           
+
             BasicAmount,
             BA5,
             BA12,
@@ -77,9 +76,9 @@ FROM
             GA12,
             GA18,
             Description
-            
+
     FROM
-        (SELECT 
+        (SELECT
         InvoiceDate,
             T_Invoices.id,
             FullInvoiceNumber BillNo,
@@ -102,10 +101,10 @@ FROM
         InvoiceDate BETWEEN %s AND %s
             AND Party_id = %s
             AND Customer_id = %s) a
-    LEFT JOIN (SELECT 
+    LEFT JOIN (SELECT
         Invoice_id,
             SUM(BasicAmount) AS BasicAmount,
-            
+
             SUM(CASE
                 WHEN GSTPercentage = 5 THEN BasicAmount
                 ELSE 0
@@ -132,10 +131,10 @@ FROM
             END) AS GA18
     FROM
         TC_InvoiceItems
-    GROUP BY Invoice_id) b ON a.id = b.Invoice_id) 
-    
+    GROUP BY Invoice_id) b ON a.id = b.Invoice_id)
+
     UNION
-    SELECT 
+    SELECT
         ReceiptDate InvoiceDate,
             FullReceiptNumber BillNo,
             M_Bank.Name AS BankName,
@@ -172,10 +171,10 @@ FROM
     WHERE
         ReceiptDate BETWEEN %s AND %s
             AND T_Receipts.Party_id = %s
-            AND T_Receipts.Customer_id = %s 
-            
-            UNION 
-            SELECT 
+            AND T_Receipts.Customer_id = %s
+
+            UNION
+            SELECT
         CRDRNoteDate InvoiceDate,
             FullNoteNumber BillNo,
             "" AS BankName,
@@ -219,11 +218,11 @@ FROM
         T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
             AND Party_id = %s
             AND Customer_id = %s) q
-ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer,FromDate,ToDate,Party,Customer])
-                
+ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
+
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
-                else:        
+                else:
                     PartyLedgerSerializedata = PartyLedgerReportSerializer(
                         query, many=True).data
                     PartyLedgerData = list()
@@ -231,122 +230,113 @@ ORDER BY InvoiceDate , Flag , BillNo ''',[FromDate,ToDate,Party,Customer,FromDat
                     date_format = "%Y-%m-%d"
 
                     # Convert the string to a date object
-                    date_object = datetime.strptime(FromDate, date_format).date()
+                    date_object = datetime.strptime(
+                        FromDate, date_format).date()
                     previous_date = date_object - timedelta(days=1)
-                    Opening= GetOpeningBalance(Party,Customer,previous_date)
-                    Closing= GetOpeningBalance(Party,Customer,ToDate)
-                    temp=0
-                    TaxFreeSale=0
-                    TotalTaxableSale=0
-                    TaxableSale5=0
-                    TaxableSale12=0
-                    TaxableSale18=0
-                    GSTAmount5=0
-                    GSTAmount12=0
-                    GSTAmount18=0
-                    TotalCreditNote=0
-                    TotalDebitNote=0
-                    TotalTCS=0
+                    Opening = GetOpeningBalance(Party, Customer, previous_date)
+                    Closing = GetOpeningBalance(Party, Customer, ToDate)
+                    temp = 0
+                    TaxFreeSale = 0
+                    TotalTaxableSale = 0
+                    TaxableSale5 = 0
+                    TaxableSale12 = 0
+                    TaxableSale18 = 0
+                    GSTAmount5 = 0
+                    GSTAmount12 = 0
+                    GSTAmount18 = 0
+                    TotalCreditNote = 0
+                    TotalDebitNote = 0
+                    TotalTCS = 0
                     for a in PartyLedgerSerializedata:
                         if temp == 0:
-                            temp = (float(Opening) + float(a['InvoiceAmount'])) - (float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
+                            temp = (float(Opening) + float(a['InvoiceAmount'])) - (
+                                float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
                         else:
-                            temp = (temp + float(a['InvoiceAmount'])) - (float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
-                        
-                        TaxFreeSale=0.0
-                        TotalTaxableSale = TotalTaxableSale + float(a["BasicAmount"])
-                        TaxableSale5= TaxableSale5 + float(a["BA5"])
-                        TaxableSale12= TaxableSale12 + float(a["BA12"])
-                        TaxableSale18= TaxableSale18 + float(a["BA18"])
-                        GSTAmount5= GSTAmount5 + float(a["GA5"])
-                        GSTAmount12= GSTAmount12 + float(a["GA12"])
-                        GSTAmount18= GSTAmount18 + float(a["GA18"])
-                        TotalCreditNote = TotalCreditNote + float(a["CreditNote"])
+                            temp = (temp + float(a['InvoiceAmount'])) - \
+                                    (float(a['ReceiptAmt']) +
+                                     float(a['CashReceiptAmt']))
+
+                        TaxFreeSale = 0.0
+                        TotalTaxableSale = TotalTaxableSale + \
+                            float(a["BasicAmount"])
+                        TaxableSale5 = TaxableSale5 + float(a["BA5"])
+                        TaxableSale12 = TaxableSale12 + float(a["BA12"])
+                        TaxableSale18 = TaxableSale18 + float(a["BA18"])
+                        GSTAmount5 = GSTAmount5 + float(a["GA5"])
+                        GSTAmount12 = GSTAmount12 + float(a["GA12"])
+                        GSTAmount18 = GSTAmount18 + float(a["GA18"])
+                        TotalCreditNote = TotalCreditNote + \
+                            float(a["CreditNote"])
                         TotalDebitNote = TotalDebitNote + float(a["DebitNote"])
                         TotalTCS = TotalTCS + float(a["TotalTCS"])
-                        if a['BankName'] is None : 
-                            BankName=''
+                        if a['BankName'] is None:
+                            BankName = ''
                         else:
-                            BankName=str(a['BankName'])
-                        if a['BranchName'] is None : 
-                            BranchName=''
+                            BankName = str(a['BankName'])
+                        if a['BranchName'] is None:
+                            BranchName = ''
                         else:
-                            BranchName=str(a['BranchName'])
-                        if a['DocumentNo'] is None : 
-                            DocumentNo=''
+                            BranchName = str(a['BranchName'])
+                        if a['DocumentNo'] is None:
+                            DocumentNo = ''
                         else:
-                            DocumentNo=str(a['DocumentNo'])
-                        if a['ReceiptMode'] is None : 
-                            ReceiptMode=''
+                            DocumentNo = str(a['DocumentNo'])
+                        if a['ReceiptMode'] is None:
+                            ReceiptMode = ''
                         else:
-                            ReceiptMode= str(a['ReceiptMode'])  
-                       
-                        if a['Description'] is None or not a['Description']: 
-                            
-                            Description=''
+                            ReceiptMode = str(a['ReceiptMode'])
+
+                        if a['Description'] is None or not a['Description']:
+
+                            Description = ''
                         else:
-                            
-                            Description= '('+ str(a['Description']) + ')' 
-                        
-                        print(BankName,'')
+
+                            Description = '(' + str(a['Description']) + ')'
+
+                        print(BankName, '')
                         PartyLedgerItemDetails.append({
                             "Date": a['InvoiceDate'],
                             "DocumentNO": a['BillNo'],
-                            "Particular": BankName+''+BranchName+''+DocumentNo+''+ReceiptMode + '' + Description ,
+                            "Particular": BankName+''+BranchName+''+DocumentNo+''+ReceiptMode + '' + Description,
                             "Amount": a['InvoiceAmount'],
                             "RecieptAmount": float(a['ReceiptAmt']) + float(a['CashReceiptAmt']),
                             "Cash": 0,
                             "Balance": float(temp),
-                            
+
                         })
-                    q1=M_Parties.objects.filter(id=Party).values("Name","PAN","GSTIN") 
-                    q2=M_Parties.objects.filter(id=Customer).values("Name","PAN","GSTIN")    
+                    q1 = M_Parties.objects.filter(
+                        id=Party).values("Name", "PAN", "GSTIN")
+                    q2 = M_Parties.objects.filter(
+                        id=Customer).values("Name", "PAN", "GSTIN")
                     PartyLedgerData.append({
                         "FormDate": FromDate,
-                        "ToDate" : ToDate,
+                        "ToDate": ToDate,
                         "Distributor": q1[0]['Name'],
-                        "DistributorGSTIN" :q1[0]["GSTIN"],
-                        "DistributorPAN" : q1[0]['PAN'],
+                        "DistributorGSTIN": q1[0]["GSTIN"],
+                        "DistributorPAN": q1[0]['PAN'],
                         "CustomerName": q2[0]['Name'],
-                        "CustomerGSTIN" :  q2[0]["GSTIN"],
-                        "CustomerPAN" : q2[0]["PAN"],
+                        "CustomerGSTIN":  q2[0]["GSTIN"],
+                        "CustomerPAN": q2[0]["PAN"],
                         "Open": Opening,
                         "Close": Closing,
-                        "TaxFreeSale" : TaxFreeSale,
+                        "TaxFreeSale": TaxFreeSale,
                         "TotalTaxableSale": TotalTaxableSale,
                         "TaxableSale5": TaxableSale5,
-                        "TaxableSale12" : TaxableSale12,
-                        "TaxableSale18" : TaxableSale18,
-                        "GSTAmount5" : GSTAmount5,
-                        "GSTAmount12" : GSTAmount12,
-                        "GSTAmount18" : GSTAmount18,
-                        "TotalCreditNote" : TotalCreditNote,
+                        "TaxableSale12": TaxableSale12,
+                        "TaxableSale18": TaxableSale18,
+                        "GSTAmount5": GSTAmount5,
+                        "GSTAmount12": GSTAmount12,
+                        "GSTAmount18": GSTAmount18,
+                        "TotalCreditNote": TotalCreditNote,
                         "TotalDebitNote": TotalDebitNote,
-                        "TotalTCS" : TotalTCS,
-                        "InvoiceItems" : PartyLedgerItemDetails
-                    })    
+                        "TotalTCS": TotalTCS,
+                        "InvoiceItems": PartyLedgerItemDetails
+                    })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-class StockProcessingView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
-                FromDate = Orderdata['FromDate']
-                ToDate = Orderdata['ToDate']
-                Party = Orderdata['Party']
-
-        
-        
-        
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
 class GenericSaleView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -358,11 +348,12 @@ class GenericSaleView(CreateAPIView):
                 ToDate = Genericdata['ToDate']
                 Party = Genericdata['Party']
 
-                Genericdataquery= T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], 
+                Genericdataquery = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],
              Party=Party).select_related()
                 print(Genericdataquery.query)
                 if Genericdataquery:
-                    Invoice_serializer = InvoiceSerializerSecond(Genericdataquery, many=True).data
+                    Invoice_serializer = InvoiceSerializerSecond(
+                        Genericdataquery, many=True).data
                     InvoiceListData = list()
                     for a in Invoice_serializer:
                         for b in a['InvoiceItems']:
@@ -387,8 +378,8 @@ class GenericSaleView(CreateAPIView):
                                 "MRPValue": b['MRPValue'],
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
-                                "PrimaryUnitName":b['Unit']['UnitID']['Name'],
-                                "UnitName":b['Unit']['UnitID']['Name'],
+                                "PrimaryUnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": b['Unit']['UnitID']['Name'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "GST": b['GST']['id'],
                                 "GSTPercentage": b['GSTPercentage'],
@@ -404,12 +395,12 @@ class GenericSaleView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
-                                "HSNCode":b['GST']['HSNCode'],
-                                "DiscountType":b['DiscountType'],
-                                "Discount":b['Discount'],
-                                "DiscountAmount":b['DiscountAmount']
-                                
-                                
+                                "HSNCode": b['GST']['HSNCode'],
+                                "DiscountType": b['DiscountType'],
+                                "Discount": b['Discount'],
+                                "DiscountAmount": b['DiscountAmount']
+
+
                             })
                             # df = pd.DataFrame(InvoiceListData)
                             # file_path = 'example.xlsx'
@@ -420,6 +411,7 @@ class GenericSaleView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
 
 class RetailerDataView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -434,17 +426,18 @@ class RetailerDataView(CreateAPIView):
                 query = M_Parties.objects.filter(id__in=q0).select_related()
                 # print(query.query)
                 if query:
-                    PartyData=list()
-                    M_Parties_serializer = M_PartiesSerializerSecond(query, many=True).data
+                    PartyData = list()
+                    M_Parties_serializer = M_PartiesSerializerSecond(
+                        query, many=True).data
                     for a in M_Parties_serializer:
-                       
+
                         for addr in a["PartyAddress"]:
                             if addr["IsDefault"] == 1:
-                                address= addr["Address"]
-                        
+                                address = addr["Address"]
+
                         PartyData.append({
                             "id": a['id'],
-                            
+
                             "PartyAddress": address,
                             "City": a["City"]["Name"],
                             "District": a["District"]["Name"],
@@ -463,12 +456,106 @@ class RetailerDataView(CreateAPIView):
                             "Latitude": a["Latitude"],
                             "Longitude": a["Longitude"]
                           })
-                    
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyData}) 
+
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyData})
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})          
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+# ================================Stock Processing ================================
+
+class StockProcessingView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                start_date_str = Orderdata['FromDate']
+                end_date_str = Orderdata['ToDate']
+                Party = Orderdata['Party']
+
+                start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+                date_range = []
+                current_date = start_date
+                while current_date <= end_date:
+                    Date=current_date.strftime("%Y-%m-%d")
+                    print(Date)
+
+                    StockProcessQuery = T_Stock.objects.raw('''select id,ItemID,UnitID,OpeningBalance,GRNQuantity,SalesReturnQuantity,InvoiveQuantity,PurchesReturnQuantity,
+((OpeningBalance+GRNQuantity+SalesReturnQuantity)-(InvoiveQuantity+PurchesReturnQuantity)) ClosingBalance
+ from
+(select 1 as id,I.Item_id ItemID,I.UnitID,
+CASE WHEN StockQuantity >= 0  THEN IFNULL(StockQuantity,0)  ELSE IFNULL(ClosingBalance,0) END OpeningBalance,
+IFNULL(InvoiveQuantity,0)InvoiveQuantity,IFNULL(GRNQuantity,0)GRNQuantity,IFNULL(SalesReturnQuantity,0)SalesReturnQuantity,IFNULL(PurchesReturnQuantity,0)PurchesReturnQuantity
+
+from
+(Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
+
+left join
+(SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
+					DAY ) AND Party_id =%s GROUP BY ItemID)CB
+                    
+on I.Item_id=CB.ItemID
+left join
+(SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
+FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
+WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
+
+on I.Item_id=GRN.Item_id
+left join
+
+(SELECT Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
+FROM T_Invoices JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
+WHERE InvoiceDate = %s AND Party_id = %s GROUP BY Item_id)Invoice
+
+on I.Item_id=Invoice.Item_id
+left join
+
+(SELECT Item_id,SUM(BaseUnitQuantity) StockQuantity
+FROM T_Stock
+WHERE StockDate = %s AND Party_id = %s GROUP BY Item_id)Stock
+
+on I.Item_id=Stock.Item_id
+left join
+
+(SELECT Item_id,SUM(BaseUnitQuantity) SalesReturnQuantity,sum(Amount) SalesReturnValue
+FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
+WHERE ReturnDate = %s AND Party_id = %s GROUP BY Item_id)SalesReturn
+
+on I.Item_id=SalesReturn.Item_id
+left join
+
+(SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
+FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
+WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
+on I.Item_id=PurchesReturn.Item_id)R
+where 
+OpeningBalance!=0 OR GRNQuantity!=0 OR InvoiveQuantity!=0 OR PurchesReturnQuantity != 0 OR SalesReturnQuantity !=0  ''',
+([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+                    
+                    # print(StockProcessQuery)
+                    serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
+                    # print(serializer)
+                    for a in serializer:
+
+                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRNQuantity"], Sale=a["InvoiveQuantity"], PurchaseReturn=a["PurchesReturnQuantity"], SalesReturn=a["SalesReturnQuantity"], ClosingBalance=a["ClosingBalance"], ActualStock=0, Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        stock.save()
+                    current_date += timedelta(days=1)
+
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': serializer})
+
+                
+
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+# ======================================STOCK REPORT=================================
 
 class StockReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -482,7 +569,157 @@ class StockReportView(CreateAPIView):
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
+                PartyNameQ=M_Parties.objects.filter(id=Party).values("Name")
+                UnitName=M_Units.objects.filter(id=Unit).values("Name")
+                StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id, 
+ifnull(OpeningBalance,0)OpeningBalance, GRNInward, Sale, ClosingBalance, ActualStock,A.ItemName,D.QuantityInBaseUnit,PurchaseReturn,SalesReturn
+,GroupTypeName,GroupName,SubGroupName
+FROM 
+	
+	( SELECT M_Items.id Item_id, M_Items.Name ItemName , SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,
+    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+	 FROM O_DateWiseLiveStock
+	
+	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
+        left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+		left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+		left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+		left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+		 
+		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,M_GroupType.id,M_Group.id,MC_SubGroup.id) A 
+		
+		left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
+		
+		 ON A.Item_id = B.Item_id 
+		
+		 left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM O_DateWiseLiveStock WHERE StockDate = %s AND Party_id=%s) C
+		 
+		  ON A.Item_id = C.Item_id 
+		
+		LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit 
+		FROM T_Stock 
+		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
+		GROUP BY Item_id) D 		
+		ON A.Item_id = D.Item_id ''',([FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
+                print(StockreportQuery)
+                serializer=StockReportSerializer(StockreportQuery, many=True).data
+                StockDetails=list()
+                for i in serializer:
+                    
+                    StockDetails.append({
+                            
+                        "Item_id": i['Item_id'],
+                        "Unit_id": UnitName[0]["Name"],
+                        "OpeningBalance": UnitwiseQuantityConversion(i['Item_id'],i['OpeningBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "GRNInward": UnitwiseQuantityConversion(i['Item_id'],i['GRNInward'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "SalesReturn": UnitwiseQuantityConversion(i['Item_id'],i['SalesReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "Sale": UnitwiseQuantityConversion(i['Item_id'],i['Sale'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "PurchaseReturn": UnitwiseQuantityConversion(i['Item_id'],i['PurchaseReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "ClosingBalance": UnitwiseQuantityConversion(i['Item_id'],i['ClosingBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "ActualStock": UnitwiseQuantityConversion(i['Item_id'],i['ActualStock'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
+                        "ItemName": i["ItemName"],
+                        "GroupTypeName": i["GroupTypeName"],
+                        "GroupName": i["GroupName"],
+                        "SubGroupName": i["SubGroupName"]
 
+                
+                    })
+                
+                StockData=list()
+                StockData.append({
+                            
+                            "FromDate" : FromDate,
+                            "ToDate" : FromDate,
+                            "PartyName": PartyNameQ[0]["Name"],
+                            "StockDetails" : StockDetails
+                            
+                })
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': StockData})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
                                           
+
+
+
+
+
+         
+# select I.Item_id,I.ItemName,InvoiveQuantity,InvoiceMRP,GRNQuantity,GRNMRP,StockQuantity,StockMRP,SalesReturnQuantity,SalesReturnMRP,PurchesReturnQuantity,PurchesReturnMRP from 
+
+# (Select Item_id ,M_Items.Name ItemName from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=14)I
+
+# left join
+# (SELECT 
+#     Item_id,
+#     MRPValue GRNMRP,
+#     SUM(BaseUnitQuantity) GRNQuantity,
+#     SUM(Amount) GRNValue
+# FROM
+#     T_GRNs
+#         JOIN
+#     TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
+# WHERE
+#     GRNDate = '2023-07-21' AND Customer_id = 14
+# GROUP BY Item_id,MRPValue)b
+
+
+# on I.Item_id=b.Item_id
+
+# left join
+# (SELECT 
+#     Item_id,
+#     MRPValue InvoiceMRP,
+#     SUM(BaseUnitQuantity) InvoiveQuantity,
+#     SUM(Amount) SaleValue
+# FROM
+#     T_Invoices
+#         JOIN
+#     TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
+# WHERE
+#     InvoiceDate = '2023-07-21'AND Party_id = 14
+# GROUP BY Item_id,MRPValue)a
+# on I.Item_id=a.Item_id  and b.GRNMRP=a.InvoiceMRP
+# left join
+
+
+# (SELECT 
+#     Item_id,
+#     MRPValue StockMRP,
+#     SUM(BaseUnitQuantity) StockQuantity
+# FROM
+#     T_Stock
+# WHERE
+#     StockDate = '2023-07-21' AND Party_id = 14
+# GROUP BY Item_id,MRPValue)c
+
+# on I.Item_id=c.Item_id and b.GRNMRP=c.StockMRP
+# left join
+
+# (SELECT 
+#     Item_id,
+#     MRPValue SalesReturnMRP,
+#     SUM(BaseUnitQuantity) SalesReturnQuantity,
+#     sum(Amount) SalesReturnValue
+# FROM
+#     T_PurchaseReturn
+#     join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id   
+# WHERE
+#     ReturnDate = '2023-07-21' AND Party_id = 14
+# GROUP BY Item_id,MRPValue)d
+
+# on I.Item_id=d.Item_id and b.GRNMRP=d.SalesReturnMRP
+# left join
+# (SELECT 
+#     Item_id,
+#     MRPValue PurchesReturnMRP,
+#     SUM(BaseUnitQuantity) PurchesReturnQuantity,
+#     sum(Amount) PurchesReturnValue
+# FROM
+#     T_PurchaseReturn
+#     join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id   
+# WHERE
+#     ReturnDate = '2023-07-21' AND Customer_id = 14
+# GROUP BY Item_id,MRPValue)e
+# on I.Item_id=e.Item_id and b.GRNMRP=e.PurchesReturnMRP
+                                 
