@@ -49,6 +49,7 @@ class StockReportSerializer(serializers.Serializer):
     
     Item_id=serializers.IntegerField()
     Unit_id=serializers.IntegerField()
+    UnitName=serializers.CharField(max_length=500)
     OpeningBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
     GRNInward=serializers.DecimalField(max_digits=10, decimal_places=3)
     SalesReturn = serializers.DecimalField(max_digits=10, decimal_places=3)
