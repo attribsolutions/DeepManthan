@@ -292,14 +292,15 @@ class PurchaseReturnView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []}) 
                 else:
              
-                    Query = T_PurchaseReturn.objects.filter(id=id)
-                    if Query.exists():
+                    Query = T_PurchaseReturn.objects.filter(id=id).values('Mode')
+                    if Query[0]['Mode']==2:
+                        Query = T_PurchaseReturn.objects.filter(id=id)
                         PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data
                         for a in PurchaseReturnSerializer:
+                            
                             for b in a['ReturnItems']:
                                 Qty =0.00
                                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=b['BatchID'],Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
-                              
                                 Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                 if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] >= float(Qty)):
                                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=b['BatchID'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
@@ -308,7 +309,24 @@ class PurchaseReturnView(CreateAPIView):
                                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Qty greater than Consolidated return qty', 'Data': []})
                         PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                         PurchaseReturn_Data.delete()    
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})    
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
+                    else:
+                        
+                        Query = T_PurchaseReturn.objects.filter(id=id)
+                        PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data
+                        for a in PurchaseReturnSerializer:
+                            for b in a['ReturnItems']:
+                                Qty =0.00
+                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=id,Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+                                Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
+                                if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] >= float(Qty)):
+                                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=id,Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
+                                    Qty =0.00
+                                else:    
+                                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Qty greater than Consolidated return qty', 'Data': []})
+                        PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
+                        PurchaseReturn_Data.delete() 
+                            
         except T_PurchaseReturn.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
