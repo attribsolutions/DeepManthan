@@ -385,6 +385,7 @@ class ItemCategoryDetailsSerializerSecond(serializers.ModelSerializer):
         model = MC_ItemCategoryDetails
         fields = ['id','CategoryType','Category']
 
+
 class ItemSerializerSecond(serializers.ModelSerializer):
     Company=CompanySerializerSecond()
     BaseUnitID = UnitSerializerSecond()

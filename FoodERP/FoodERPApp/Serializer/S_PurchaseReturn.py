@@ -5,6 +5,7 @@ from ..Serializer.S_BankMaster import *
 from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
 from ..Serializer.S_Items import *
+from ..Serializer.S_Invoices import *
 
 # Return Save Serializers
 
@@ -46,6 +47,7 @@ class PurchaseReturnReferences(serializers.ModelSerializer):
     class Meta :
         model = TC_PurchaseReturnReferences
         fields =["SubReturn"]
+
 
 class PurchaseReturnSerializer(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(many=True)
@@ -91,7 +93,6 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                 UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
                 for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
                     OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item']).values('BaseUnitQuantity')
-                    print(str(OBatchQuantity.query))
                     if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
                         OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
         
@@ -106,9 +107,24 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                         OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
                             
         return PurchaseReturnID      
-        
-        
 
+
+
+
+
+class StockItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Items
+        fields = ['id','Name']        
+class StockQtyserializerForPurchaseReturn(serializers.ModelSerializer):
+    LiveBatche=LiveBatchSerializer(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird()
+    Item = StockItemSerializer()
+    class Meta:
+        model = O_BatchWiseLiveStock
+        fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche','Unit'] 
+
+        
 # Return List serializer
 
 class PurchaseReturnSerializerSecond(serializers.ModelSerializer):

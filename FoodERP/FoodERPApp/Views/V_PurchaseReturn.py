@@ -400,23 +400,9 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 BatchCode = PurchaseReturndata['BatchCode']
                 CustomerID =PurchaseReturndata['Customer']
 
-
-
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
-                
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                # if Unitquery.exists():
-                #     Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
-                #     ItemUnitDetails = list()
-                #     for c in Unitdata:
-                #         ItemUnitDetails.append({
-                #         "Unit": c['id'],
-                #         "BaseUnitQuantity": c['BaseUnitQuantity'],
-                #         "IsBase": c['IsBase'],
-                #         "UnitName": c['BaseUnitConversion'],
-                #     })
-
                 MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
                 if MRPquery.exists():
                     MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
@@ -445,9 +431,10 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 if obatchwisestockquery == "":
                     StockQtySerialize_data =[]
                 else:
+                    StockQtySerialize_data = StockQtyserializerForPurchaseReturn(obatchwisestockquery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': StockQtySerialize_data})
+                    StockDatalist = list()
                     
-                    StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
-                    stockDatalist = list()
                     for ad in StockQtySerialize_data:
                         Rate=RateCalculationFunction(ad['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
                         # print(Rate)
@@ -462,8 +449,9 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         else:
                             GSTPercentage=ad['LiveBatche']['GST']['GSTPercentage']
                         
-                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],ad['Unit']['id'],0,0,1,0).ConvertintoSelectedUnit()
-                        stockDatalist.append({
+                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],0,0,0,1,0).ConvertintoSelectedUnit()
+                        
+                        StockDatalist.append({
                             "id": ad['id'],
                             "Item":ad['Item']['id'],
                             "BatchDate":ad['LiveBatche']['BatchDate'],
@@ -528,7 +516,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         # "ItemUnitDetails": ItemUnitDetails, 
                         "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
-                        "StockDetails":stockDatalist 
+                        "StockDetails":StockDatalist 
                 })   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
         except M_Items.DoesNotExist:
