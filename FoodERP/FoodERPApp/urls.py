@@ -405,6 +405,8 @@ urlpatterns = [
             # url(r'GetDiscount$',GetDiscountView.as_view()),
             url(r'DiscountMaster$',DiscountMastergo.as_view()),
             url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()),
+            url(r'DiscountPartyType/([0-9]+)$',DiscountPartyTypeView.as_view()),
+            url(r'DiscountCustomer/([0-9]+)/([0-9]+)/([0-9]+)$',DiscountCustomerView.as_view()),
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
@@ -495,6 +497,7 @@ urlpatterns = [
             # url(r'PurchaseReturnItem/([0-9]+)$', T_PurchaseReturnView.as_view()),
             url(r'SalesReturnconsolidateItem$', T_PurchaseReturnView.as_view()),
             url(r'ReturnItemApprove$', ReturnItemApproveView.as_view()),
+            url(r'PurchaseReturnPrint/([0-9]+)$', PurchaseReturnPrintView.as_view()),
             
                     
 # Single Invoice details view api for Sales Return, CreditDebitnot
