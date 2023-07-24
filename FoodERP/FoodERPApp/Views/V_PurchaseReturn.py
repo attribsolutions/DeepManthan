@@ -209,6 +209,7 @@ class PurchaseReturnView(CreateAPIView):
                     
                     
                     O_BatchWiseLiveStockList.append({
+                    "id":a['BatchID'],    
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
                     "Unit": a['Unit'],
