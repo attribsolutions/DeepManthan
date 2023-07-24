@@ -31,10 +31,19 @@ class DiscountMastergo(CreateAPIView):
 
                 if not Customer:
                     
-                    Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
+                    Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
+(case WHEN RecordCount =1 then oldDiscountType else  DiscountType end)DiscountType,
+(case WHEN RecordCount =1 then oldDiscount else  Discount end)Discount,
+ GroupTypeName, GroupName,SubGroupName,RecordCount from
+                    
+                    (SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
 ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 ,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
-and FromDate between %s and %s and ToDate between %s and %s)RecordCount
+and (FromDate between %s and %s or ToDate between %s and %s))RecordCount,
+(SELECT DiscountType FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
+and (FromDate between %s and %s or ToDate between %s and %s))oldDiscountType,
+(SELECT Discount FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
+and (FromDate between %s and %s or ToDate between %s and %s))oldDiscount
 FROM M_Items
 LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
@@ -46,14 +55,21 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 WHERE MC_PartyItems.Item_id IS NOT NULL							
-ORDER BY M_Items.Sequence''', ([Party],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Party],[PartyType], [PriceList], [FromDate], [ToDate]))
+ORDER BY M_Items.Sequence)a''', ([Party],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Party],[PartyType], [PriceList], [FromDate], [ToDate]))
                 
                 else:
                   
-                    Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
+                    Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
+(case WHEN RecordCount =1 then oldDiscountType else  DiscountType end)DiscountType,
+(case WHEN RecordCount =1 then oldDiscount else  Discount end)Discount,
+ GroupTypeName, GroupName,SubGroupName,RecordCount from (SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
 ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 ,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id = %s And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
-and FromDate between %s and %s and ToDate between %s and %s)RecordCount
+and (FromDate between %s and %s or ToDate between %s and %s))RecordCount,
+(SELECT DiscountType FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
+and (FromDate between %s and %s or ToDate between %s and %s))oldDiscountType,
+(SELECT Discount FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
+and (FromDate between %s and %s or ToDate between %s and %s))oldDiscount
 FROM M_Items
 LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s
 LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID 
@@ -65,7 +81,7 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 WHERE MC_PartyItems.Item_id IS NOT NULL							
-ORDER BY M_Items.Sequence''', ([Party],[Customer],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Party],[Customer],[PartyType], [PriceList], [FromDate], [ToDate]))
+ORDER BY M_Items.Sequence)''', ([Party],[Customer],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Customer],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Customer],[PartyType],[PriceList],[FromDate], [ToDate],[FromDate], [ToDate],[Party],[Party],[Customer],[PartyType], [PriceList], [FromDate], [ToDate]))
                 print(Discountquery.query)
                 
                 if Discountquery:
