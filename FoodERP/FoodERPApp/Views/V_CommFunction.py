@@ -459,7 +459,7 @@ class UnitwiseQuantityConversion:
         else:
             aaa=Q(IsDeleted=0) 
         if(MCItemUnit == 0 & MUnits==0 ):
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID,IsBase=1).filter( aaa ).select_related().values("BaseUnitQuantity")
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1).filter( aaa ).select_related()
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         else:
@@ -469,7 +469,7 @@ class UnitwiseQuantityConversion:
             else:
                 a=Q(id=MCItemUnit)   
             
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( a ).filter( aaa ).select_related().values("BaseUnitQuantity")
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a ).filter( aaa ).select_related()
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             unitnamequery=M_Units.objects.filter(id =BaseUnitQuantitySerializer[0]['UnitID']).select_related().values('Name')
             self.UnitName  = unitnamequery[0]['Name']
@@ -506,13 +506,13 @@ class UnitwiseQuantityConversion:
     
     def GetConvertingBaseUnitQtyBaseUnitName(self):
         
-        MCItemUnitID = MC_ItemUnits.objects.filter(Item=self.ItemID,IsBase=1,IsDeleted=0).select_related().values('id')
+        MCItemUnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).select_related().values('id')
         if self.MCItemUnit == MCItemUnitID[0]['id']:
             return self.UnitName
         else: 
             BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
             baseunitqty=round(float(BaseUnitQuantity), 2)
-            UnitID = MC_ItemUnits.objects.filter(Item=self.ItemID,IsBase=1,IsDeleted=0).select_related().values('UnitID')
+            UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).select_related().values('UnitID')
             BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).select_related().values('Name')
             # aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
             aaa= "("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
