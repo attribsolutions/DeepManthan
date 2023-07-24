@@ -280,7 +280,7 @@ class PurchaseReturnView(CreateAPIView):
                         for a in PurchaseReturnSerializer:
                             for b in a['ReturnItems']:
                                 Qty =0.00 
-                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                                 Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                 if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] <= float(Qty)):
                                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) #float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
@@ -296,7 +296,7 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data
                         for a in PurchaseReturnSerializer:
                             for b in a['ReturnItems']:
-                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=b['BatchID'],Item=b['Item']['id'],Unit=b['Unit']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+                                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=b['BatchID'],Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                                 Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                 if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] <= float(Qty)):
                                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
