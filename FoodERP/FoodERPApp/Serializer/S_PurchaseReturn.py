@@ -1,10 +1,10 @@
 from ..Serializer.S_Invoices import Mc_ItemUnitSerializerThird
-
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_BankMaster import *
 from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
+from ..Serializer.S_Items import *
 
 # Return Save Serializers
 
@@ -152,16 +152,6 @@ class PurchaseReturnSerializerThird(serializers.ModelSerializer):
         model= T_PurchaseReturn
         fields = '__all__'
 
-    def create(self, validated_data):
-        ReturnItems_data = validated_data.pop('ReturnItems')
-        PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
-        
-        for a in ReturnItems_data:
-            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **a)
-            
-        return PurchaseReturnID      
-    
-
 
 class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
     Item=M_ItemsSerializer(read_only=True)
@@ -169,6 +159,24 @@ class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
     Unit = Mc_ItemUnitSerializerThird(read_only=True)
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = '__all__'    
+        fields = '__all__'
+        
+
+###################### Purchase Return Print Serializers ########################################## 
+
+class PurchaseReturnPrintItemsSerializer(serializers.ModelSerializer):
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    # Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'        
+        
+class PurchaseReturnPrintSerilaizer(serializers.ModelSerializer):
+    class Meta :
+        model= T_PurchaseReturn
+        fields = '__all__'            
 
 
