@@ -574,6 +574,7 @@ class T_PurchaseReturnView(CreateAPIView):
                             "ItemReason":b['ItemReason']['id'],
                             "ItemReasonName":b['ItemReason']['Name'],
                             "Comment":b['Comment']
+                            
                         })
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnItemList})
