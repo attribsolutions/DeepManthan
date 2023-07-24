@@ -291,7 +291,6 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturn_Data.delete()        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []}) 
                 else:
-             
                     Query = T_PurchaseReturn.objects.filter(id=id).values('Mode')
                     if str(Query[0]['Mode'])== '2':
                         Query = T_PurchaseReturn.objects.filter(id=id)
@@ -311,14 +310,9 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturn_Data.delete()    
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
                     else:
-                        
                         PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
-                        PurchaseReturn_Data.delete() 
-                            
-        except T_PurchaseReturn.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
-        except IntegrityError:
-            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Return Used in another Transaction', 'Data': []})
+                        PurchaseReturn_Data.delete()
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []}) 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
