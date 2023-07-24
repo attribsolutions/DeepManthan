@@ -1,15 +1,17 @@
 from ..Serializer.S_Invoices import Mc_ItemUnitSerializerThird
-
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_BankMaster import *
 from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
+from ..Serializer.S_Items import *
+from ..Serializer.S_Invoices import *
 
 # Return Save Serializers
 
 # UpdateO_BatchWiseLiveStockReturnSerializer  # Sales Returnconsoldated Stock Minus When Send to Supplier AND Self Purchase Return 
 class UpdateO_BatchWiseLiveStockReturnSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField() 
     class Meta:
         model = O_BatchWiseLiveStock
         fields = ['id','Item','Quantity','Unit','BaseUnitQuantity','PurchaseReturn']
@@ -39,12 +41,13 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment','ApprovedQuantity','SubReturn']   
+        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment','ApprovedQuantity','SubReturn','BatchID']   
         
 class PurchaseReturnReferences(serializers.ModelSerializer):
     class Meta :
         model = TC_PurchaseReturnReferences
         fields =["SubReturn"]
+
 
 class PurchaseReturnSerializer(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(many=True)
@@ -60,16 +63,26 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         Mode = validated_data.get('Mode')
         ReturnItems_data = validated_data.pop('ReturnItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
-        
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
         
-        for ReturnItem_data in ReturnItems_data:
-            ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
-            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
-            
-            for ReturnItemImage_data in ReturnItemImages_data:
-                ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
+        
+        if Mode == 1:
+            for ReturnItem_data in ReturnItems_data:
+                ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
+                ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+                # update = TC_PurchaseReturnItems.objects.filter(id=ReturnItemID).update(BatchID=None)
+                for ReturnItemImage_data in ReturnItemImages_data:
+                    ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data)
+        
+        else:
+            for ReturnItem_data in ReturnItems_data:
+                ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
+                ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+                
+                for ReturnItemImage_data in ReturnItemImages_data:
+                    ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
+        
         
         if PurchaseReturnReferences_data : 
             for PurchaseReturnReference_data in PurchaseReturnReferences_data:
@@ -85,13 +98,13 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                     O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
         
-        # if Mode ==2: # Purchase Return Save
-        #     for O_LiveBatchesList_data in O_LiveBatchesLists_data :
-        #         UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
-        #         for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
-        #             OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).values('BaseUnitQuantity')
-        #             if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
-        #                 OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
+        if Mode ==2: # Purchase Return Save
+            for O_LiveBatchesList_data in O_LiveBatchesLists_data :
+                UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
+                for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
+                    OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item']).values('BaseUnitQuantity')
+                    if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
+                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=UpdateO_BatchWiseLiveStockList['id'],Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
         
         
         if Mode == 3: # Sales Returnconsoldated Stock Minus When Send to Supplier
@@ -99,14 +112,29 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                 O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
                 UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
                 for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
-                    OBatchQuantity=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).values('BaseUnitQuantity')
+                    OBatchQuantity=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn']).values('BaseUnitQuantity')
                     if(OBatchQuantity[0]['BaseUnitQuantity'] >= UpdateO_BatchWiseLiveStockList['BaseUnitQuantity']):
-                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn'],Unit=UpdateO_BatchWiseLiveStockList['Unit']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
+                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Item=UpdateO_BatchWiseLiveStockList['Item'],PurchaseReturn=UpdateO_BatchWiseLiveStockList['PurchaseReturn']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - UpdateO_BatchWiseLiveStockList['BaseUnitQuantity'])     
                             
         return PurchaseReturnID      
-        
-        
 
+
+
+
+
+class StockItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Items
+        fields = ['id','Name']        
+class StockQtyserializerForPurchaseReturn(serializers.ModelSerializer):
+    LiveBatche=LiveBatchSerializer(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird()
+    Item = StockItemSerializer()
+    class Meta:
+        model = O_BatchWiseLiveStock
+        fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche','Unit'] 
+
+        
 # Return List serializer
 
 class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
@@ -152,16 +180,6 @@ class PurchaseReturnSerializerThird(serializers.ModelSerializer):
         model= T_PurchaseReturn
         fields = '__all__'
 
-    def create(self, validated_data):
-        ReturnItems_data = validated_data.pop('ReturnItems')
-        PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
-        
-        for a in ReturnItems_data:
-            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **a)
-            
-        return PurchaseReturnID      
-    
-
 
 class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
     Item=M_ItemsSerializer(read_only=True)
@@ -169,6 +187,48 @@ class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
     Unit = Mc_ItemUnitSerializerThird(read_only=True)
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = '__all__'    
+        fields = '__all__'
+        
+
+###################### Purchase Return Print Serializers ########################################## 
+
+
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_States
+        fields = '__all__'
+        
+class MC_PartyAdressSerializer(serializers.ModelSerializer):
+    Address = serializers.CharField() 
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+
+class PartiesSerializerPrintSecond(serializers.ModelSerializer):
+    PartyAddress=MC_PartyAdressSerializer(many=True)
+    State = StateSerializer(read_only=True)
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo'] 
+
+
+class PurchaseReturnPrintItemsSerializer(serializers.ModelSerializer):
+    MRP = M_MRPsSerializer(read_only=True)
+    GST = M_GstHsnCodeSerializer(read_only=True)
+    # Margin = M_MarginsSerializer(read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    ItemReason = GeneralMasterserializer(read_only=True)
+    Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'        
+        
+class PurchaseReturnPrintSerilaizer(serializers.ModelSerializer):
+    Customer = PartiesSerializerPrintSecond(read_only=True)
+    Party = PartiesSerializerPrintSecond(read_only=True)
+    ReturnItems = PurchaseReturnPrintItemsSerializer(read_only=True,many=True)
+    class Meta :
+        model= T_PurchaseReturn
+        fields = '__all__'            
 
 
