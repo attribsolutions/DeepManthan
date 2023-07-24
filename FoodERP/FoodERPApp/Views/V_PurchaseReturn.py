@@ -291,27 +291,32 @@ class PurchaseReturnView(CreateAPIView):
                         PurchaseReturn_Data.delete()        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []}) 
                 else:
-                  
-                    Query = T_PurchaseReturn.objects.filter(id=id)
-                    if Query.exists():
+                    Query = T_PurchaseReturn.objects.filter(id=id).values('Mode')
+                    if str(Query[0]['Mode'])== '2':
+                        Query = T_PurchaseReturn.objects.filter(id=id)
                         PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data
                         for a in PurchaseReturnSerializer:
+                            
                             for b in a['ReturnItems']:
                                 Qty =0.00
                                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=b['BatchID'],Item=b['Item']['id']).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
                                 Qty=float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                 if(OBatchQuantity[0]['OriginalBaseUnitQuantity'] >= float(Qty)):
-                                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
+                                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=b['BatchID'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) 
                                     Qty =0.00
                                 else:    
                                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Qty greater than Consolidated return qty', 'Data': []})
                         PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                         PurchaseReturn_Data.delete()    
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})    
-        except T_PurchaseReturn.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
+                    else:
+                        PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
+                        PurchaseReturn_Data.delete()
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []}) 
         except IntegrityError:
-            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Return Used in another Transaction', 'Data': []})
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -400,23 +405,9 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 BatchCode = PurchaseReturndata['BatchCode']
                 CustomerID =PurchaseReturndata['Customer']
 
-
-
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
-                
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                # if Unitquery.exists():
-                #     Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
-                #     ItemUnitDetails = list()
-                #     for c in Unitdata:
-                #         ItemUnitDetails.append({
-                #         "Unit": c['id'],
-                #         "BaseUnitQuantity": c['BaseUnitQuantity'],
-                #         "IsBase": c['IsBase'],
-                #         "UnitName": c['BaseUnitConversion'],
-                #     })
-
                 MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
                 if MRPquery.exists():
                     MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
@@ -445,9 +436,10 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 if obatchwisestockquery == "":
                     StockQtySerialize_data =[]
                 else:
+                    StockQtySerialize_data = StockQtyserializerForPurchaseReturn(obatchwisestockquery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': StockQtySerialize_data})
+                    StockDatalist = list()
                     
-                    StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
-                    stockDatalist = list()
                     for ad in StockQtySerialize_data:
                         Rate=RateCalculationFunction(ad['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
                         # print(Rate)
@@ -462,8 +454,9 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         else:
                             GSTPercentage=ad['LiveBatche']['GST']['GSTPercentage']
                         
-                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],ad['Unit']['id'],0,0,1,0).ConvertintoSelectedUnit()
-                        stockDatalist.append({
+                        QtyInNo=UnitwiseQuantityConversion(ad['Item']['id'],ad['BaseUnitQuantity'],0,0,0,1,0).ConvertintoSelectedUnit()
+                        
+                        StockDatalist.append({
                             "id": ad['id'],
                             "Item":ad['Item']['id'],
                             "BatchDate":ad['LiveBatche']['BatchDate'],
@@ -528,7 +521,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         # "ItemUnitDetails": ItemUnitDetails, 
                         "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
-                        "StockDetails":stockDatalist 
+                        "StockDetails":StockDatalist 
                 })   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
         except M_Items.DoesNotExist:
@@ -585,6 +578,7 @@ class T_PurchaseReturnView(CreateAPIView):
                             "ItemReason":b['ItemReason']['id'],
                             "ItemReasonName":b['ItemReason']['Name'],
                             "Comment":b['Comment']
+                            
                         })
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnItemList})
