@@ -293,7 +293,7 @@ class PurchaseReturnView(CreateAPIView):
                 else:
              
                     Query = T_PurchaseReturn.objects.filter(id=id).values('Mode')
-                    if Query[0]['Mode']==2:
+                    if str(Query[0]['Mode'])== '2':
                         Query = T_PurchaseReturn.objects.filter(id=id)
                         PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data
                         for a in PurchaseReturnSerializer:

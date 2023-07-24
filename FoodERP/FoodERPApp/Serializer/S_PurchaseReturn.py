@@ -67,12 +67,24 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
         
-        for ReturnItem_data in ReturnItems_data:
-            ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
-            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
-            
-            for ReturnItemImage_data in ReturnItemImages_data:
-                ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
+        
+        
+        if Mode == 1:
+            for ReturnItem_data in ReturnItems_data:
+                ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
+                ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+                # update = TC_PurchaseReturnItems.objects.filter(id=ReturnItemID).update(BatchID=None)
+                for ReturnItemImage_data in ReturnItemImages_data:
+                    ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data)
+        
+        else:
+            for ReturnItem_data in ReturnItems_data:
+                ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
+                ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+                
+                for ReturnItemImage_data in ReturnItemImages_data:
+                    ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
+        
         
         if PurchaseReturnReferences_data : 
             for PurchaseReturnReference_data in PurchaseReturnReferences_data:
