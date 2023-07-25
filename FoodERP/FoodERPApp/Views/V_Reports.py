@@ -569,8 +569,8 @@ class StockReportView(CreateAPIView):
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
-                PartyNameQ=M_Parties.objects.filter(id=Party).values("Name")
-                UnitName=M_Units.objects.filter(id=Unit).values("Name")
+                # PartyNameQ=M_Parties.objects.filter(id=Party).values("Name")
+                # UnitName=M_Units.objects.filter(id=Unit).values("Name")
                 StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,A.UnitName UnitName ,
 UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,%s,0)OpeningBalance, 
 UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,%s,0)GRNInward, 
@@ -612,34 +612,14 @@ FROM
 		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
                 print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
-                # StockDetails=list()
-                # for i in serializer:
-                    
-                #     StockDetails.append({
-                            
-                #         "Item_id": i['Item_id'],
-                #         "Unit_id": UnitName[0]["Name"],
-                #         "OpeningBalance": UnitwiseQuantityConversion(i['Item_id'],i['OpeningBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "GRNInward": UnitwiseQuantityConversion(i['Item_id'],i['GRNInward'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "SalesReturn": UnitwiseQuantityConversion(i['Item_id'],i['SalesReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "Sale": UnitwiseQuantityConversion(i['Item_id'],i['Sale'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "PurchaseReturn": UnitwiseQuantityConversion(i['Item_id'],i['PurchaseReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "ClosingBalance": UnitwiseQuantityConversion(i['Item_id'],i['ClosingBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "ActualStock": UnitwiseQuantityConversion(i['Item_id'],i['ActualStock'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "ItemName": i["ItemName"],
-                #         "GroupTypeName": i["GroupTypeName"],
-                #         "GroupName": i["GroupName"],
-                #         "SubGroupName": i["SubGroupName"]
-
                 
-                #     })
                 
                 StockData=list()
                 StockData.append({
                             
                             "FromDate" : FromDate,
                             "ToDate" : ToDate,
-                            "PartyName": PartyNameQ[0]["Name"],
+                            # "PartyName": PartyNameQ[0]["Name"],
                             "StockDetails" : serializer
                             
                 })
