@@ -131,7 +131,10 @@ class PurchaseReturnView(CreateAPIView):
                                 "UnitName" : b['Unit']['UnitID']['Name'],
                                 "ItemReasonID":b['ItemReason']['id'],
                                 "ItemReason":b['ItemReason']['Name'],
-                                "Comment":b['Comment']
+                                "Comment":b['Comment'],
+                                "DiscountType":b['DiscountType'],
+                                "Discount":b['Discount'],
+                                "DiscountAmount":b['DiscountAmount']
                             })
                         
                         PuchaseReturnList.append({
@@ -575,7 +578,8 @@ class T_PurchaseReturnView(CreateAPIView):
         try:
             with transaction.atomic():
                 ReturnItemdata = JSONParser().parse(request)
-                ReturnID= ReturnItemdata['ReturnItemID']
+                Party= ReturnItemdata['PartyID']
+                ReturnID= ReturnItemdata['ReturnID']
                 a=ReturnID.split(',')
                 Query = TC_PurchaseReturnItems.objects.filter(PurchaseReturn__id__in=a)
                 if Query.exists():
@@ -584,13 +588,14 @@ class T_PurchaseReturnView(CreateAPIView):
                     # PuchaseReturnList=list()
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
+                        Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0).RateWithGST()
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
                             "ApprovedQuantity" : b["ApprovedQuantity"],
                             "BaseUnitQuantity":b['BaseUnitQuantity'],
                             "MRPValue":b['MRPValue'],
-                            "Rate":b['Rate'],
+                            "Rate":round(float(Rate[0]["NoRatewithOutGST"]),2),
                             "BasicAmount":b['BasicAmount'],
                             "TaxType":b['TaxType'],
                             "GSTPercentage":b['GSTPercentage'],
@@ -614,7 +619,10 @@ class T_PurchaseReturnView(CreateAPIView):
                             "UnitName" : b["Unit"]["UnitID"]["Name"],
                             "ItemReason":b['ItemReason']['id'],
                             "ItemReasonName":b['ItemReason']['Name'],
-                            "Comment":b['Comment']
+                            "Comment":b['Comment'],
+                            "DiscountType":b['DiscountType'],
+                            "Discount":b['Discount'],
+                            "DiscountAmount":b['DiscountAmount']
                             
                         })
                         
