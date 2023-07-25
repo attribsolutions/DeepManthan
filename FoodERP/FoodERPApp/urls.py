@@ -495,7 +495,7 @@ urlpatterns = [
             url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
             # url(r'PurchaseReturnItem/([0-9]+)$', T_PurchaseReturnView.as_view()),
-            url(r'SalesReturnconsolidateItem$', T_PurchaseReturnView.as_view()),
+            url(r'SalesReturnconsolidateItem$', SalesReturnconsolidatePurchaseReturnView.as_view()),
             url(r'ReturnItemApprove$', ReturnItemApproveView.as_view()),
             url(r'PurchaseReturnPrint/([0-9]+)$', PurchaseReturnPrintView.as_view()),
             
