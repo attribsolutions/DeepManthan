@@ -639,31 +639,33 @@ class ReturnItemApproveView(CreateAPIView):
         try:
             with transaction.atomic():
                 PurchaseReturndata = JSONParser().parse(request)
-                CreatedBy = PurchaseReturndata['UserID']  
                 ReturnID = PurchaseReturndata['ReturnID']
+                CreatedBy = PurchaseReturndata['UserID']  
                 ReturnItem = PurchaseReturndata['ReturnItem']
+                # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'', 'Data':PurchaseReturndata})
                 aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=1)
                 Partyquery = T_PurchaseReturn.objects.filter(id=ReturnID).values('Party')
                 Party = Partyquery[0]["Party"]
+           
                 item = ""
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
-               
+            
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                
-              
                 for a in ReturnItem:
                     SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
                     Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
+                    
                     if a['ItemReason'] == 56:
                         
                         IsDamagePieces =False
                     else:
                         IsDamagePieces =True 
                     
-                    
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                   
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -676,13 +678,12 @@ class ReturnItemApproveView(CreateAPIView):
                         b = 0
                         
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],Party, b)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a["ApprovedQuantity"],a['Unit'],0,0,0,0)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a["ApprovedQuantity"],0,0,0,1,0)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
-                    
+                   
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
-                    
                     
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
@@ -714,10 +715,8 @@ class ReturnItemApproveView(CreateAPIView):
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList            
                     
                     })
-                    O_BatchWiseLiveStockList=list()
-              
+                   
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList})
-                # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'', 'Data':PurchaseReturndata})
                 PurchaseReturn_Serializer = ReturnApproveQtySerializer(data=PurchaseReturndata)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
