@@ -570,7 +570,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 
-class T_PurchaseReturnView(CreateAPIView):
+class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
