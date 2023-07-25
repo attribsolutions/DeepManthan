@@ -574,8 +574,9 @@ class T_PurchaseReturnView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                ReturnItemdata = JSONParser().parse(request)
-                ReturnID= ReturnItemdata['ReturnItemID']
+                Returndata = JSONParser().parse(request)
+                ReturnID= Returndata['ReturnID']
+                Party= Returndata['PartyID']
                 a=ReturnID.split(',')
                 Query = TC_PurchaseReturnItems.objects.filter(PurchaseReturn__id__in=a)
                 if Query.exists():
@@ -584,13 +585,15 @@ class T_PurchaseReturnView(CreateAPIView):
                     # PuchaseReturnList=list()
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
+                        Rate=RateCalculationFunction(0,a['Item']['id'],Party,0,1,0,0).RateWithGST()
                         PurchaseReturnItemList.append({
+                            
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
                             "ApprovedQuantity" : b["ApprovedQuantity"],
                             "BaseUnitQuantity":b['BaseUnitQuantity'],
                             "MRPValue":b['MRPValue'],
-                            "Rate":b['Rate'],
+                            "Rate":Rate,
                             "BasicAmount":b['BasicAmount'],
                             "TaxType":b['TaxType'],
                             "GSTPercentage":b['GSTPercentage'],
@@ -614,7 +617,10 @@ class T_PurchaseReturnView(CreateAPIView):
                             "UnitName" : b["Unit"]["UnitID"]["Name"],
                             "ItemReason":b['ItemReason']['id'],
                             "ItemReasonName":b['ItemReason']['Name'],
-                            "Comment":b['Comment']
+                            "Comment":b['Comment'],
+                            "DiscountType":b['DiscountType'],
+                            "Discount":b['Discount'],
+                            "DiscountAmount":b['DiscountAmount']
                             
                         })
                         
