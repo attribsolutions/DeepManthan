@@ -692,6 +692,7 @@ class ReturnItemApproveView(CreateAPIView):
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "Party": Party,
                     "IsDamagePieces":IsDamagePieces,
+                    "PurchaseReturn":ReturnID,
                     "CreatedBy":CreatedBy
                     
                     })
@@ -716,8 +717,8 @@ class ReturnItemApproveView(CreateAPIView):
                     O_BatchWiseLiveStockList=list()
               
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList})
-                
-                PurchaseReturn_Serializer = SalesReturnApproveQtySerializer(data=PurchaseReturndata)
+                # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'', 'Data':PurchaseReturndata})
+                PurchaseReturn_Serializer = ReturnApproveQtySerializer(data=PurchaseReturndata)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
