@@ -572,7 +572,15 @@ class StockReportView(CreateAPIView):
                 PartyNameQ=M_Parties.objects.filter(id=Party).values("Name")
                 UnitName=M_Units.objects.filter(id=Unit).values("Name")
                 StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,A.UnitName UnitName ,
-ifnull(OpeningBalance,0)OpeningBalance, GRNInward, Sale, ClosingBalance, ActualStock,A.ItemName,D.QuantityInBaseUnit,PurchaseReturn,SalesReturn
+UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,%s,0)OpeningBalance, 
+UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,%s,0)GRNInward, 
+UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,%s,0)Sale, 
+UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,%s,0)ClosingBalance, 
+UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
+A.ItemName,
+D.QuantityInBaseUnit,
+UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
+UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn
 ,GroupTypeName,GroupName,SubGroupName
 FROM 
 	
@@ -601,7 +609,7 @@ FROM
 		FROM T_Stock 
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
-		ON A.Item_id = D.Item_id ''',([FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
+		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
                 print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
                 # StockDetails=list()
