@@ -109,9 +109,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                             
         return PurchaseReturnID      
 
-
-
-
+############################ Purchase Return Stock details Serializer ##################################### 
 
 class StockItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -126,7 +124,7 @@ class StockQtyserializerForPurchaseReturn(serializers.ModelSerializer):
         fields = ['id','Item','Quantity','BaseUnitQuantity','Party','LiveBatche','Unit'] 
 
         
-# Return List serializer
+############################## Return List serializer########################################################################
 
 class PurchaseReturnSerializerSecond(serializers.ModelSerializer):
     ReturnReason = GeneralMasterserializer(read_only=True)
@@ -220,6 +218,34 @@ class PurchaseReturnPrintSerilaizer(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnPrintItemsSerializer(read_only=True,many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = '__all__'            
+        fields = '__all__'
+        
+############## Return Approve Qty Serializer List ####################################################        
 
+class  ReturnApproveQtyO_BatchWiseLiveStockReturnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = O_BatchWiseLiveStock
+        fields = ['Item','Quantity','Unit','OriginalBaseUnitQuantity','BaseUnitQuantity','Party','IsDamagePieces','PurchaseReturn','CreatedBy']
+               
+class ReturnApproveQtyO_LiveBatchesListSerializer(serializers.ModelSerializer):
+    O_BatchWiseLiveStockList = ReturnApproveQtyO_BatchWiseLiveStockReturnSerializer(many=True)
+    class Meta:
+        model = O_LiveBatches
+        fields = ['MRP','MRPValue','GST','GSTPercentage','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList']                    
 
+class ReturnApproveQtySerializer(serializers.ModelSerializer):
+    O_LiveBatchesList=ReturnApproveQtyO_LiveBatchesListSerializer(many=True)
+    class Meta :
+        model= T_PurchaseReturn
+        fields = ['ReturnItem','O_LiveBatchesList']
+    
+    def create(self, validated_data):
+    
+        O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
+        for O_LiveBatchesList_data in O_LiveBatchesLists_data :
+            O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
+            BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
+            for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
+                O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
+
+        return BatchID
