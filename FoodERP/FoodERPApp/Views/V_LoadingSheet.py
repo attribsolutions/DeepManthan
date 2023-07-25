@@ -261,6 +261,7 @@ class LoadingSheetPrintView(CreateAPIView):
                     })
                 q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
                 InvoiceQuery = T_Invoices.objects.filter(id__in=q1)
+                
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
@@ -287,7 +288,17 @@ class LoadingSheetPrintView(CreateAPIView):
                     for x in InvoiceSerializedata:
                         Invoicelist.append(x['id'])
                     InvoiceItemDetails = list()        
-                    Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox,SUM(QtyInNo)QtyInNo FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id",[Invoicelist])    
+                    Itemsquery =TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox,SUM(QtyInNo)QtyInNo 
+                    ,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+                    FROM TC_InvoiceItems 
+                    JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id 
+                    JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id 
+                    JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id
+                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+                    left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+                    left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                    WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence ''',[Invoicelist])    
                     
                     InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
                     for c in InvoiceItemSerializedata:
@@ -311,6 +322,9 @@ class LoadingSheetPrintView(CreateAPIView):
                             "id": c['id'],
                             "id": c['Item_id'],
                             "ItemName": c['ItemName'],
+                            "GroupTypeName" : c["GroupTypeName"],
+                            "GroupName" : c["GroupName"],
+                            "SubGroupName" : c["SubGroupName"],
                             "MRPValue": c['MRPValue'],
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],

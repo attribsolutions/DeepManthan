@@ -66,23 +66,15 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         PurchaseReturnReferences_data=validated_data.pop('PurchaseReturnReferences')
         PurchaseReturnID = T_PurchaseReturn.objects.create(**validated_data)
         
+        for ReturnItem_data in ReturnItems_data:
+            ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
+            ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+            
+            for ReturnItemImage_data in ReturnItemImages_data:
+                ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data)
         
-        if Mode == 1:
-            for ReturnItem_data in ReturnItems_data:
-                ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
-                ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
-                # update = TC_PurchaseReturnItems.objects.filter(id=ReturnItemID).update(BatchID=None)
-                for ReturnItemImage_data in ReturnItemImages_data:
-                    ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data)
-        
-        else:
-            for ReturnItem_data in ReturnItems_data:
-                ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
-                ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
-                
-                for ReturnItemImage_data in ReturnItemImages_data:
-                    ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data) 
-        
+        if (Mode == 1 or Mode ==3): # For Sales Return and Consolidated Sales Return update BatchID Null       
+            update = TC_PurchaseReturnItems.objects.filter(PurchaseReturn =PurchaseReturnID).update(BatchID = None)  
         
         if PurchaseReturnReferences_data : 
             for PurchaseReturnReference_data in PurchaseReturnReferences_data:
@@ -97,8 +89,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
                 for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
                     O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(PurchaseReturn=PurchaseReturnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
             
-        
-        if Mode ==2: # Purchase Return Save
+        if Mode == 2: # Purchase Return Save
             for O_LiveBatchesList_data in O_LiveBatchesLists_data :
                 UpdateO_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('UpdateO_BatchWiseLiveStockList')
                 for UpdateO_BatchWiseLiveStockList in UpdateO_BatchWiseLiveStockLists:
