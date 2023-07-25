@@ -631,7 +631,6 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
         
-        
 
 class ReturnItemApproveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -639,14 +638,92 @@ class ReturnItemApproveView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                PurchaseReturndata = JSONParser().parse(request)    
+                PurchaseReturndata = JSONParser().parse(request)
+                CreatedBy = PurchaseReturndata['UserID']  
                 ReturnID = PurchaseReturndata['ReturnID']
                 ReturnItem = PurchaseReturndata['ReturnItem']
                 aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=1)
+                Partyquery = T_PurchaseReturn.objects.filter(id=ReturnID).values('Party')
+                Party = Partyquery[0]["Party"]
+                item = ""
+                query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
+               
+                O_BatchWiseLiveStockList=list()
+                O_LiveBatchesList=list()
+               
+              
                 for a in ReturnItem:
                     SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
+                    Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
+                    if a['ItemReason'] == 56:
+                        
+                        IsDamagePieces =False
+                    else:
+                        IsDamagePieces =True 
                     
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
+                    
+                    query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
+                    query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                    if(item == ""):
+                        item = a['Item']
+                        b = query1.count()
+
+                    elif(item == a['Item']):
+                        item = 1
+                        b = b+1
+                    else:
+                        item = a['Item']
+                        b = 0
+                        
+                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],Party, b)
+                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a["ApprovedQuantity"],a['Unit'],0,0,0,0)
+                    BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    
+                    a['SystemBatchCode'] = BatchCode
+                    a['SystemBatchDate'] = date.today()
+                    a['BaseUnitQuantity'] = BaseUnitQuantity
+                    
+                    
+                    O_BatchWiseLiveStockList.append({
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": BaseUnitQuantity,
+                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "Party": Party,
+                    "IsDamagePieces":IsDamagePieces,
+                    "CreatedBy":CreatedBy
+                    
+                    })
+                    
+                    
+                    O_LiveBatchesList.append({
+                    
+                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "MRP": a['MRP'],
+                    "MRPValue": a['MRPValue'],
+                    "Rate": round(float(Rate[0]["NoRatewithOutGST"]),2),
+                    "GST": a['GST'],
+                    "GSTPercentage": a['GSTPercentage'],
+                    "SystemBatchDate": a['SystemBatchDate'],
+                    "SystemBatchCode": a['SystemBatchCode'],
+                    "BatchDate": a['BatchDate'],
+                    "BatchCode": a['BatchCode'],
+                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList            
+                    
+                    })
+                    O_BatchWiseLiveStockList=list()
+              
+                PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList})
+                
+                PurchaseReturn_Serializer = SalesReturnApproveQtySerializer(data=PurchaseReturndata)
+                if PurchaseReturn_Serializer.is_valid():
+                    PurchaseReturn_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
                 
