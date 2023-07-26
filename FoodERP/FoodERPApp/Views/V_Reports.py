@@ -485,8 +485,8 @@ class StockProcessingView(CreateAPIView):
                 while current_date <= end_date:
                     Date=current_date.strftime("%Y-%m-%d")
                     print(Date)
-
-                    StockProcessQuery = T_Stock.objects.raw('''select id,ItemID,UnitID,OpeningBalance,GRNQuantity,SalesReturnQuantity,InvoiveQuantity,PurchesReturnQuantity,
+                    StockDeleteQuery  = O_DateWiseLiveStock.objects.raw('''DELETE FROM O_DatewiseStock WHERE StockDate=%s AND PartyID=%s''',([Date],[Party]))
+                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,OpeningBalance,GRNQuantity,SalesReturnQuantity,InvoiveQuantity,PurchesReturnQuantity,
 ((OpeningBalance+GRNQuantity+SalesReturnQuantity)-(InvoiveQuantity+PurchesReturnQuantity)) ClosingBalance
  from
 (select 1 as id,I.Item_id ItemID,I.UnitID,
