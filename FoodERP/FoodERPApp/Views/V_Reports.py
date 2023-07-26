@@ -538,7 +538,7 @@ where
 OpeningBalance!=0 OR GRNQuantity!=0 OR InvoiveQuantity!=0 OR PurchesReturnQuantity != 0 OR SalesReturnQuantity !=0  ''',
 ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
-                    # print(StockProcessQuery)
+                    print(StockProcessQuery)
                     serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # print(serializer)
                     for a in serializer:
