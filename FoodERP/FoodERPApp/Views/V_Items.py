@@ -445,6 +445,8 @@ class ProductAndMarginReportView(CreateAPIView):
                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
                     ItemsList = list()
                     for a in Itemsdata_Serializer:
+                        
+                       
 
                         if a['Length'] is None:
                             BoxSize=""
@@ -497,15 +499,14 @@ class ProductAndMarginReportView(CreateAPIView):
                             "SKUActiveDeactivestatus":a['isActive'],
                             "BoxSize":BoxSize,
                             "StoringCondition":a['StoringCondition'],
-                            "MRP":ItemMRPdata[0]['MRP'],
-                            "GST":ItemGstHsnCodedata[0]['GSTPercentage'],
-                           
+                            "MRP":float(ItemMRPdata[0]['MRP']),
+                            "GST":float(ItemGstHsnCodedata[0]['GSTPercentage']),
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUGr":a['Grammage'],
                             "Product":a['ItemGroupDetails'][0]['Group']['Name'],
                             "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
                             "Company": a['Company']['Name'],
-                            "ShelfLife":Itemshelfdata[0]['Days'],
+                            "ShelfLife":float(Itemshelfdata[0]['Days']),
                             "ItemMargins":ww
                             
                         })
