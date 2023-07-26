@@ -237,7 +237,7 @@ class ReturnApproveQtySerializer(serializers.ModelSerializer):
     O_LiveBatchesList=ReturnApproveQtyO_LiveBatchesListSerializer(many=True)
     class Meta :
         model= T_PurchaseReturn
-        fields = ['ReturnItem','O_LiveBatchesList']
+        fields = ['O_LiveBatchesList']
     
     def create(self, validated_data):
     
