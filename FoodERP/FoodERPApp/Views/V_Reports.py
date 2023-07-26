@@ -348,9 +348,8 @@ class GenericSaleView(CreateAPIView):
                 ToDate = Genericdata['ToDate']
                 Party = Genericdata['Party']
 
-                Genericdataquery = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],
-             Party=Party).select_related()
-                print(Genericdataquery.query)
+                Genericdataquery = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Party=Party).select_related()
+                # print(Genericdataquery.query)
                 if Genericdataquery:
                     Invoice_serializer = InvoiceSerializerSecond(
                         Genericdataquery, many=True).data
@@ -365,40 +364,40 @@ class GenericSaleView(CreateAPIView):
                                 "Customer": a['Customer']['Name'],
                                 "PartyID": a['Party']['id'],
                                 "Party": a['Party']['Name'],
-                                "GrandTotal": a['GrandTotal'],
-                                "RoundOffAmount": a['RoundOffAmount'],
+                                "GrandTotal": float(a['GrandTotal']),
+                                "RoundOffAmount": float(a['RoundOffAmount']),
                                 "DriverName": a['Driver']['Name'],
                                 "VehicleNo": a['Vehicle']['VehicleNumber'],
                                 "Party": a['Party']['Name'],
                                 "CreatedOn": a['CreatedOn'],
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
-                                "Quantity": b['Quantity'],
+                                "Quantity": float(b['Quantity']),
                                 "MRP": b['MRP']['id'],
-                                "MRPValue": b['MRPValue'],
-                                "Rate": b['Rate'],
+                                "MRPValue": float(b['MRPValue']),
+                                "Rate": float(b['Rate']),
                                 "TaxType": b['TaxType'],
                                 "PrimaryUnitName": b['Unit']['UnitID']['Name'],
                                 "UnitName": b['Unit']['UnitID']['Name'],
-                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "BaseUnitQuantity": float(b['BaseUnitQuantity']),
                                 "GST": b['GST']['id'],
-                                "GSTPercentage": b['GSTPercentage'],
-                                "MarginValue": b['Margin']['Margin'],
-                                "BasicAmount": b['BasicAmount'],
-                                "GSTAmount": b['GSTAmount'],
-                                "CGST": b['CGST'],
-                                "SGST": b['SGST'],
-                                "IGST": b['IGST'],
-                                "CGSTPercentage": b['CGSTPercentage'],
-                                "SGSTPercentage": b['SGSTPercentage'],
-                                "IGSTPercentage": b['IGSTPercentage'],
-                                "Amount": b['Amount'],
+                                "GSTPercentage": float(b['GSTPercentage']),
+                                "MarginValue": float(b['Margin']['Margin']),
+                                "BasicAmount": float(b['BasicAmount']),
+                                "GSTAmount": float(b['GSTAmount']) ,
+                                "CGST": float(b['CGST']),
+                                "SGST": float(b['SGST']),
+                                "IGST": float(b['IGST']),
+                                "CGSTPercentage": float(b['CGSTPercentage']),
+                                "SGSTPercentage": float(b['SGSTPercentage']),
+                                "IGSTPercentage": float(b['IGSTPercentage']),
+                                "Amount":float(b['Amount']),
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
                                 "HSNCode": b['GST']['HSNCode'],
-                                "DiscountType": b['DiscountType'],
-                                "Discount": b['Discount'],
-                                "DiscountAmount": b['DiscountAmount']
+                                "DiscountType":float( b['DiscountType']),
+                                "Discount":float( b['Discount']),
+                                "DiscountAmount":float(b['DiscountAmount']) 
 
 
                             })
