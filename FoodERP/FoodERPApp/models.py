@@ -958,9 +958,9 @@ class  MC_PartySubParty(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField(blank=True, null=True)
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.CASCADE)
+    Party = models.ForeignKey(M_Parties, related_name='MCParty', on_delete=models.PROTECT)
     Route = models.ForeignKey(M_Routes, related_name='MCSubPartyRoute', on_delete=models.PROTECT, blank=True,null=True)
-    SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.PROTECT)
+    SubParty = models.ForeignKey(M_Parties, related_name='MCSubParty', on_delete=models.CASCADE)
     Distance = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=2)
     IsTCSParty = models.BooleanField(default=False)
 
