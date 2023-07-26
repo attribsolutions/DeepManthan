@@ -164,9 +164,14 @@ class PurchaseReturnView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
+                Mode = PurchaseReturndata['Mode']
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 PurchaseReturndata['ReturnNo'] = str(c)
-                d = GetPrifix.GetPurchaseReturnPrifix(Party)
+                if Mode == 1: # Sales Return
+                    d= 'SRN'
+                else:
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party)
+                    
                 PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
                 
                 item = ""
