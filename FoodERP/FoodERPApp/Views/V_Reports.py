@@ -476,22 +476,25 @@ class StockProcessingView(CreateAPIView):
                 start_date_str = Orderdata['FromDate']
                 end_date_str = Orderdata['ToDate']
                 Party = Orderdata['Party']
-
+ 
                 start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
                 end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
-
+                
                 date_range = []
                 current_date = start_date
                 while current_date <= end_date:
-                    Date=current_date.strftime("%Y-%m-%d")
+                    Date=current_date.strftime("%Y-%m-%d") 
                     print(Date)
-                    StockDeleteQuery  = O_DateWiseLiveStock.objects.raw('''DELETE FROM O_DatewiseStock WHERE StockDate=%s AND PartyID=%s''',([Date],[Party]))
-                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,OpeningBalance,GRNQuantity,SalesReturnQuantity,InvoiveQuantity,PurchesReturnQuantity,
-((OpeningBalance+GRNQuantity+SalesReturnQuantity)-(InvoiveQuantity+PurchesReturnQuantity)) ClosingBalance
+                    # StockDeleteQuery  = O_DateWiseLiveStock.objects.raw('''DELETE FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s''',([Date],[Party]))
+                    StockDeleteQuery  = O_DateWiseLiveStock.objects.filter(Party_id=Party,StockDate=Date)
+                    StockDeleteQuery.delete()
+                    # print(StockDeleteQuery.query)
+                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3),round(GRN,3),round(SalesReturn,3),round(Sale,3),round(PurchaseReturn,3),
+round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance
  from
 (select 1 as id,I.Item_id ItemID,I.UnitID,
 CASE WHEN StockQuantity >= 0  THEN IFNULL(StockQuantity,0)  ELSE IFNULL(ClosingBalance,0) END OpeningBalance,
-IFNULL(InvoiveQuantity,0)InvoiveQuantity,IFNULL(GRNQuantity,0)GRNQuantity,IFNULL(SalesReturnQuantity,0)SalesReturnQuantity,IFNULL(PurchesReturnQuantity,0)PurchesReturnQuantity
+IFNULL(InvoiveQuantity,0)Sale,IFNULL(GRNQuantity,0)GRN,IFNULL(SalesReturnQuantity,0)SalesReturn,IFNULL(PurchesReturnQuantity,0)PurchaseReturn
 
 from
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
@@ -535,15 +538,15 @@ FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.Purc
 WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id)R
 where 
-OpeningBalance!=0 OR GRNQuantity!=0 OR InvoiveQuantity!=0 OR PurchesReturnQuantity != 0 OR SalesReturnQuantity !=0  ''',
+OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
 ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
-                    print(StockProcessQuery)
+                    # print(StockProcessQuery)
                     serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # print(serializer)
                     for a in serializer:
 
-                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRNQuantity"], Sale=a["InvoiveQuantity"], PurchaseReturn=a["PurchesReturnQuantity"], SalesReturn=a["SalesReturnQuantity"], ClosingBalance=a["ClosingBalance"], ActualStock=0, Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a["ClosingBalance"], ActualStock=0, Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
 
