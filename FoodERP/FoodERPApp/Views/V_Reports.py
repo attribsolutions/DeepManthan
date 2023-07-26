@@ -382,7 +382,7 @@ class GenericSaleView(CreateAPIView):
                                 "BaseUnitQuantity": float(b['BaseUnitQuantity']),
                                 "GST": b['GST']['id'],
                                 "GSTPercentage": float(b['GSTPercentage']),
-                                "MarginValue": float(b['Margin']['Margin']),
+                                "MarginValue": b['Margin']['Margin'],
                                 "BasicAmount": float(b['BasicAmount']),
                                 "GSTAmount": float(b['GSTAmount']) ,
                                 "CGST": float(b['CGST']),
