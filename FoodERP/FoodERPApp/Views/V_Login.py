@@ -377,35 +377,55 @@ class GetUserDetailsView(APIView):
 
     def post(self, request):
         UserId = request.data['UserId']
-        Userdata = M_Users.objects.filter(id=UserId)
-
-        UserSerializer = UserListSerializerforgetdata(Userdata, many=True).data
-
-        Employee = M_Employees.objects.filter(id=UserSerializer[0]['Employee'])
-        EmployeeSerializer = M_EmployeesSerializerforgetdata(Employee, many=True).data
-
-        Company = C_Companies.objects.filter(id=EmployeeSerializer[0]['Company'])
-        CompanySerializer = C_CompanySerializer(Company, many=True).data
-
-        request.session['UserID'] = UserId
-        request.session['UserName'] = UserSerializer[0]["LoginName"]
-        request.session['EmployeeID'] = UserSerializer[0]["Employee"]
-        request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
-        request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
-        request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
-        print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
-
+        
+        '''New code Date 26/07/2023'''
+        
+        user = M_Users.objects.filter(id=UserId).values('Employee','LoginName')
+        employee = M_Employees.objects.filter(id=user[0]['Employee']).values('Company')
+        company = C_Companies.objects.filter(id=employee[0]['Company']).values('Name','IsSCM','CompanyGroup')
         a = list()
         a.append({
             "UserID": UserId,
-            "UserName":UserSerializer[0]["LoginName"],
-            "EmployeeID": UserSerializer[0]["Employee"],
-            "CompanyID": EmployeeSerializer[0]["Company"],
-            "CompanyName": CompanySerializer[0]["Name"],
-            "IsSCMCompany": CompanySerializer[0]["IsSCM"],
-            "CompanyGroup": CompanySerializer[0]["CompanyGroup"]
-
+            "UserName":user[0]["LoginName"],
+            "EmployeeID": user[0]["Employee"],
+            "CompanyID": employee[0]["Company"],
+            "CompanyName": company[0]["Name"],
+            "IsSCMCompany": company[0]["IsSCM"],
+            "CompanyGroup": company[0]["CompanyGroup"]
         })
+        
+        
+        '''Previous  code'''
+        
+        # Userdata = M_Users.objects.filter(id=UserId)
+
+        # UserSerializer = UserListSerializerforgetdata(Userdata, many=True).data
+
+        # Employee = M_Employees.objects.filter(id=UserSerializer[0]['Employee'])
+        # EmployeeSerializer = M_EmployeesSerializerforgetdata(Employee, many=True).data
+
+        # Company = C_Companies.objects.filter(id=EmployeeSerializer[0]['Company'])
+        # CompanySerializer = C_CompanySerializer(Company, many=True).data
+
+        # request.session['UserID'] = UserId
+        # request.session['UserName'] = UserSerializer[0]["LoginName"]
+        # request.session['EmployeeID'] = UserSerializer[0]["Employee"]
+        # request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
+        # request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
+        # request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
+        # print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
+
+        # a = list()
+        # a.append({
+        #     "UserID": UserId,
+        #     "UserName":UserSerializer[0]["LoginName"],
+        #     "EmployeeID": UserSerializer[0]["Employee"],
+        #     "CompanyID": EmployeeSerializer[0]["Company"],
+        #     "CompanyName": CompanySerializer[0]["Name"],
+        #     "IsSCMCompany": CompanySerializer[0]["IsSCM"],
+        #     "CompanyGroup": CompanySerializer[0]["CompanyGroup"]
+
+        # })
 
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
 
