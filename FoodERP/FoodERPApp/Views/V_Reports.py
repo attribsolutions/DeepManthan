@@ -489,7 +489,7 @@ class StockProcessingView(CreateAPIView):
                     StockDeleteQuery  = O_DateWiseLiveStock.objects.filter(Party_id=Party,StockDate=Date)
                     StockDeleteQuery.delete()
                     # print(StockDeleteQuery.query)
-                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3),round(GRN,3),round(SalesReturn,3),round(Sale,3),round(PurchaseReturn,3),
+                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3) OpeningBalance,round(GRN,3) GRN,round(SalesReturn,3) SalesReturn,round(Sale,3) Sale,round(PurchaseReturn,3) PurchaseReturn,
 round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance
  from
 (select 1 as id,I.Item_id ItemID,I.UnitID,
@@ -550,7 +550,7 @@ OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0
                         stock.save()
                     current_date += timedelta(days=1)
 
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': serializer})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': []})
 
                 
 
