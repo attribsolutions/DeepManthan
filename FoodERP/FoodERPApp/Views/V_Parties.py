@@ -281,7 +281,12 @@ class PartiesSettingsDetailsView(CreateAPIView):
 	a.IsPartyRelatedSetting,
     a.DefaultValue,
     b.Value CompanyValue,
-    c.Value PartyValue
+    c.Value PartyValue,
+    (CASE WHEN a.IsPartyRelatedSetting = 1 THEN 
+    (CASE WHEN c.Value is Null THEN a.DefaultValue ELSE c.Value END)
+	ELSE 
+    (CASE WHEN b.Value is Null THEN a.DefaultValue ELSE b.Value END)
+	END) value
 FROM
     (SELECT 
         M_Settings.id AS Setting,
@@ -302,32 +307,11 @@ FROM
       LEFT JOIN
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
-
-                PartiesSetting_Serializer = PartiesSettingsDetailsListSerializer(
+                print(query.query)
+                a = PartiesSettingsDetailsListSerializer(
                     query, many=True).data
-                PartySettingslist = list()
-                for a in PartiesSetting_Serializer:
-
-                    if a['IsPartyRelatedSetting'] == 1:
-                        if a['PartyValue'] is None:
-                            Value = a['DefaultValue']
-                        else:
-                            Value = a['PartyValue']
-                    else:
-
-                        if a['CompanyValue'] is None:
-                            Value = a['DefaultValue']
-                        else:
-                            Value = a['CompanyValue']
-
-                    PartySettingslist.append({
-                        "id": a['id'],
-                        "SystemSetting": a['SystemSetting'],
-                        "Description": a['Description'],
-                        "IsPartyRelatedSetting": a["IsPartyRelatedSetting"],
-                        "Value": Value
-                    })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartySettingslist})
+               
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 

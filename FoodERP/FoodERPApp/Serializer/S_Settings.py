@@ -15,7 +15,7 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
     DefaultValue = serializers.CharField(max_length=500)
     PartyValue = serializers.CharField(max_length=500)
     IsPartyRelatedSetting=serializers.IntegerField()
-   
+    value  = serializers.CharField(max_length=500)
     
 class PartiesSettingSerializer(serializers.ModelSerializer):
     class Meta:
