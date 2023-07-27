@@ -328,7 +328,7 @@ class UserPartiesForLoginPage(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry
+                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType
 
                      FROM  MC_UserRoles
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
