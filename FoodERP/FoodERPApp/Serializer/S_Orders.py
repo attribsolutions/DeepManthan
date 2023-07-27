@@ -269,7 +269,7 @@ class OrderEditserializer(serializers.Serializer):
     DiscountType = serializers.CharField(max_length=500)
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
-    
+    Stock = serializers.DecimalField(max_digits=20, decimal_places=3)
 
 
 class ReportOrderItemSerializer(serializers.ModelSerializer):
