@@ -556,7 +556,7 @@ class EditOrderView(CreateAPIView):
 M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountType,a.Discount,a.DiscountAmount
 ,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
-group by Item_id)Stock                
+group by Item_id)StockQuantity                
                 from
 (select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s AND Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) )b 
 left join
@@ -583,7 +583,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty
 M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountType,a.Discount,a.DiscountAmount
 ,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
-group by Item_id)Stock                
+group by Item_id)StockQuantity                
                 from
 (select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
 left join
@@ -620,18 +620,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty
                         b['GST_id'] = Gst[0]['Gstid']
                         b['GSTPercentage'] = Gst[0]['GST']
                         # print('ttttttGST',Gst[0]['GST'])
-                    # =====================Stock================================================
-
-                    # if(OrderType==1):
-                    #     Stockparty=Customer
-                    # else:
-                    #     Stockparty=Party
-                    # stockquery = O_BatchWiseLiveStock.objects.filter(
-                    #     Item=ItemID, Party=Stockparty,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
-                    # if stockquery['Qty'] is None:
-                    #     Stock = 0.0
-                    # else:
-                    #     Stock = stockquery['Qty']
+                    
 
                     # =====================Current MRP================================================
                     TodaysMRP = MRPMaster(
@@ -690,7 +679,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty
                     # bomquery = MC_BillOfMaterialItems.objects.filter(
                     #     Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
                     # if bomquery.exists():
-                    #     b.update({"Bom": True})
+                    b.update({"Bom": True})
                     # else:
                     #     b.update({"Bom": False})
 
