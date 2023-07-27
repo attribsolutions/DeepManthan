@@ -37,10 +37,10 @@ class StockProcessingReportSerializer(serializers.Serializer):
     ItemID=serializers.IntegerField()
     UnitID=serializers.IntegerField()
     OpeningBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
-    GRNQuantity=serializers.DecimalField(max_digits=10, decimal_places=3)
-    SalesReturnQuantity = serializers.DecimalField(max_digits=10, decimal_places=3)
-    InvoiveQuantity = serializers.DecimalField(max_digits=10, decimal_places=3)
-    PurchesReturnQuantity = serializers.DecimalField(max_digits=10, decimal_places=3)
+    GRN=serializers.DecimalField(max_digits=10, decimal_places=3)
+    SalesReturn = serializers.DecimalField(max_digits=10, decimal_places=3)
+    Sale = serializers.DecimalField(max_digits=10, decimal_places=3)
+    PurchaseReturn = serializers.DecimalField(max_digits=10, decimal_places=3)
     ClosingBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
     
 

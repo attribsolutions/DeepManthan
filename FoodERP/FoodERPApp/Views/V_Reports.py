@@ -475,22 +475,25 @@ class StockProcessingView(CreateAPIView):
                 start_date_str = Orderdata['FromDate']
                 end_date_str = Orderdata['ToDate']
                 Party = Orderdata['Party']
-
+ 
                 start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
                 end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
-
+                
                 date_range = []
                 current_date = start_date
                 while current_date <= end_date:
-                    Date=current_date.strftime("%Y-%m-%d")
+                    Date=current_date.strftime("%Y-%m-%d") 
                     print(Date)
-
-                    StockProcessQuery = T_Stock.objects.raw('''select id,ItemID,UnitID,OpeningBalance,GRNQuantity,SalesReturnQuantity,InvoiveQuantity,PurchesReturnQuantity,
-((OpeningBalance+GRNQuantity+SalesReturnQuantity)-(InvoiveQuantity+PurchesReturnQuantity)) ClosingBalance
+                    # StockDeleteQuery  = O_DateWiseLiveStock.objects.raw('''DELETE FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s''',([Date],[Party]))
+                    StockDeleteQuery  = O_DateWiseLiveStock.objects.filter(Party_id=Party,StockDate=Date)
+                    StockDeleteQuery.delete()
+                    # print(StockDeleteQuery.query)
+                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3) OpeningBalance,round(GRN,3) GRN,round(SalesReturn,3) SalesReturn,round(Sale,3) Sale,round(PurchaseReturn,3) PurchaseReturn,
+round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance
  from
 (select 1 as id,I.Item_id ItemID,I.UnitID,
 CASE WHEN StockQuantity >= 0  THEN IFNULL(StockQuantity,0)  ELSE IFNULL(ClosingBalance,0) END OpeningBalance,
-IFNULL(InvoiveQuantity,0)InvoiveQuantity,IFNULL(GRNQuantity,0)GRNQuantity,IFNULL(SalesReturnQuantity,0)SalesReturnQuantity,IFNULL(PurchesReturnQuantity,0)PurchesReturnQuantity
+IFNULL(InvoiveQuantity,0)Sale,IFNULL(GRNQuantity,0)GRN,IFNULL(SalesReturnQuantity,0)SalesReturn,IFNULL(PurchesReturnQuantity,0)PurchaseReturn
 
 from
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
@@ -534,7 +537,7 @@ FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.Purc
 WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id)R
 where 
-OpeningBalance!=0 OR GRNQuantity!=0 OR InvoiveQuantity!=0 OR PurchesReturnQuantity != 0 OR SalesReturnQuantity !=0  ''',
+OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
 ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
                     # print(StockProcessQuery)
@@ -542,11 +545,11 @@ OpeningBalance!=0 OR GRNQuantity!=0 OR InvoiveQuantity!=0 OR PurchesReturnQuanti
                     # print(serializer)
                     for a in serializer:
 
-                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRNQuantity"], Sale=a["InvoiveQuantity"], PurchaseReturn=a["PurchesReturnQuantity"], SalesReturn=a["SalesReturnQuantity"], ClosingBalance=a["ClosingBalance"], ActualStock=0, Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a["ClosingBalance"], ActualStock=0, Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
 
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': serializer})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': []})
 
                 
 
@@ -570,9 +573,18 @@ class StockReportView(CreateAPIView):
                 Party = Orderdata['Party']
                 PartyNameQ=M_Parties.objects.filter(id=Party).values("Name")
                 UnitName=M_Units.objects.filter(id=Unit).values("Name")
-                StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,A.UnitName UnitName ,
-ifnull(OpeningBalance,0)OpeningBalance, GRNInward, Sale, ClosingBalance, ActualStock,A.ItemName,D.QuantityInBaseUnit,PurchaseReturn,SalesReturn
-,GroupTypeName,GroupName,SubGroupName
+                unitname=UnitName[0]['Name']
+                StockreportQuery=O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,
+UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,%s,0)OpeningBalance, 
+UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,%s,0)GRNInward, 
+UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,%s,0)Sale, 
+UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,%s,0)ClosingBalance, 
+UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
+A.ItemName,
+D.QuantityInBaseUnit,
+UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
+UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn
+,GroupTypeName,GroupName,SubGroupName,%s UnitName
 FROM 
 	
 	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,
@@ -594,36 +606,16 @@ FROM
 		
 		 left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM O_DateWiseLiveStock WHERE StockDate = %s AND Party_id=%s) C
 		 
-		  ON A.Item_id = C.Item_id 
+		  ON A.Item_id = C.Item_id  
 		
 		LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit 
 		FROM T_Stock 
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
-		ON A.Item_id = D.Item_id ''',([FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
+		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[unitname],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
                 print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
-                # StockDetails=list()
-                # for i in serializer:
-                    
-                #     StockDetails.append({
-                            
-                #         "Item_id": i['Item_id'],
-                #         "Unit_id": UnitName[0]["Name"],
-                #         "OpeningBalance": UnitwiseQuantityConversion(i['Item_id'],i['OpeningBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "GRNInward": UnitwiseQuantityConversion(i['Item_id'],i['GRNInward'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "SalesReturn": UnitwiseQuantityConversion(i['Item_id'],i['SalesReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "Sale": UnitwiseQuantityConversion(i['Item_id'],i['Sale'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "PurchaseReturn": UnitwiseQuantityConversion(i['Item_id'],i['PurchaseReturn'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "ClosingBalance": UnitwiseQuantityConversion(i['Item_id'],i['ClosingBalance'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "ActualStock": UnitwiseQuantityConversion(i['Item_id'],i['ActualStock'],0,i['Unit_id'],0,1,0).ConvertintoSelectedUnit(),
-                #         "ItemName": i["ItemName"],
-                #         "GroupTypeName": i["GroupTypeName"],
-                #         "GroupName": i["GroupName"],
-                #         "SubGroupName": i["SubGroupName"]
-
                 
-                #     })
                 
                 StockData=list()
                 StockData.append({
