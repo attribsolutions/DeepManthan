@@ -134,7 +134,8 @@ class PurchaseReturnView(CreateAPIView):
                                 "Comment":b['Comment'],
                                 "DiscountType":b['DiscountType'],
                                 "Discount":b['Discount'],
-                                "DiscountAmount":b['DiscountAmount']
+                                "DiscountAmount":b['DiscountAmount'],
+                                "ApprovedQuantity" : b['ApprovedQuantity']
                             })
                         
                         PuchaseReturnList.append({
