@@ -3,7 +3,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix, SystemBatchCodeGeneration
 from ..Serializer.S_CreditDebit import *
 from ..Serializer.S_Items import *
@@ -11,6 +11,10 @@ from ..Serializer.S_GRNs import *
 from django.db.models import Sum
 from ..models import *
 import datetime
+import base64
+from io import BytesIO
+from PIL import Image
+
 
 class PurchaseReturnListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -87,6 +91,7 @@ class PurchaseReturnListView(CreateAPIView):
 class PurchaseReturnView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
     # authentication_class = JSONWebTokenAuthentication
     
     def get(self, request, id=0):
@@ -158,13 +163,18 @@ class PurchaseReturnView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     @transaction.atomic()
-    def post(self, request):
+    def post(self, request,format=None):
         try:
             with transaction.atomic():
                 PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
                 Mode = PurchaseReturndata['Mode']
+                
+              
+                
+                
+                
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 PurchaseReturndata['ReturnNo'] = str(c)
                 if Mode == 1: # Sales Return
@@ -184,9 +194,10 @@ class PurchaseReturnView(CreateAPIView):
                 #     IsDamagePieces =False
                 # else:
                 #     IsDamagePieces =True 
+                
                
                 for a in PurchaseReturndata['ReturnItems']:
-                    
+
                     if a['ItemReason'] == 56:
                         
                         IsDamagePieces =False
@@ -637,12 +648,13 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
         
 
-class ReturnItemApproveView(CreateAPIView):
+class SalesReturnItemApproveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
         try:
             with transaction.atomic():
+                
                 PurchaseReturndata = JSONParser().parse(request)
                 ReturnID = PurchaseReturndata['ReturnID']
                 CreatedBy = PurchaseReturndata['UserID']  
@@ -651,17 +663,22 @@ class ReturnItemApproveView(CreateAPIView):
                 aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=1)
                 Partyquery = T_PurchaseReturn.objects.filter(id=ReturnID).values('Party')
                 Party = Partyquery[0]["Party"]
-           
                 item = ""
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
-            
+               
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
+                
                
                 for a in ReturnItem:
-                    SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
-                    Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
                     
+                    SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
+                    
+                    # Company Division Pricelist not assign we got error
+                    # Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
+                    
+                    Rate =0.00
+                 
                     if a['ItemReason'] == 56:
                         
                         IsDamagePieces =False
@@ -682,9 +699,14 @@ class ReturnItemApproveView(CreateAPIView):
                         item = a['Item']
                         b = 0
                         
+                   
+                        
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],Party, b)
+                  
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a["ApprovedQuantity"],0,0,0,1,0)
+                   
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                  
                    
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
@@ -709,7 +731,7 @@ class ReturnItemApproveView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "MRPValue": a['MRPValue'],
-                    "Rate": round(float(Rate[0]["NoRatewithOutGST"]),2),
+                    "Rate": Rate,                  '''round(float(Rate[0]["NoRatewithOutGST"]),2)'''
                     "GST": a['GST'],
                     "GSTPercentage": a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
