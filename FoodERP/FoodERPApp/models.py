@@ -1869,7 +1869,26 @@ class M_DiscountMaster(models.Model):
     Item = models.ForeignKey(M_Items,related_name='DiscountItem', on_delete=models.PROTECT)
 
     class Meta:
-        db_table="M_DiscountMaster" 
+        db_table="M_DiscountMaster"
+        
+class M_MasterClaim(models.Model):
+    FromDate=models.DateField()
+    ToDate=models.DateField()
+    PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    SecondaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    ReturnAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    NetSaleValue = models.DecimalField(max_digits=20, decimal_places=2)
+    Budget = models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2)
+    Item = models.ForeignKey(M_Items,related_name='ClaimItem', on_delete=models.PROTECT)
+    Customer =  models.ForeignKey(M_Parties, related_name='ClaimCustomer', on_delete=models.PROTECT,blank=True, null=True)
+    Party = models.ForeignKey(M_Parties, related_name='ClaimParty', on_delete=models.PROTECT)
+    ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ClaimItemReason",on_delete=models.PROTECT)
+   
+    class Meta:
+        db_table="M_MasterClaim" 
+                    
 
         
         
