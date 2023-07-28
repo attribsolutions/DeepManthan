@@ -1884,6 +1884,8 @@ class M_MasterClaim(models.Model):
     Item = models.ForeignKey(M_Items,related_name='ClaimItem', on_delete=models.PROTECT)
     Customer =  models.ForeignKey(M_Parties, related_name='ClaimCustomer', on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties, related_name='ClaimParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
    
     class Meta:
         db_table="M_MasterClaim"
