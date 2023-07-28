@@ -16,6 +16,7 @@ from io import BytesIO
 from PIL import Image
 
 
+
 class PurchaseReturnListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
