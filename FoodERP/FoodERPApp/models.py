@@ -1,12 +1,16 @@
 from django.db import models
 from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.utils.translation import gettext_lazy as _
 # from activity_log.models import UserMixin
 
 # Create your models here.
 
 # def make_extra_data(request, response):
-#     return str(request.META) 
+#     return str(request.META)
+
+def upload_to(instance,filename):
+    return 'post/{filename}'.format(filename=filename) 
  
 class C_CompanyGroups(models.Model):
 
@@ -1478,6 +1482,7 @@ class TC_PurchaseReturnItems(models.Model):
         
 class TC_PurchaseReturnItemImages(models.Model):
     Item_pic = models.TextField()
+    Image = models.ImageField(_("Image"),upload_to=upload_to,blank=True, null=True)
     PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnItemImages', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
