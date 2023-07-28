@@ -141,8 +141,10 @@ class PurchaseReturnView(CreateAPIView):
                                 "DiscountType":b['DiscountType'],
                                 "Discount":b['Discount'],
                                 "DiscountAmount":b['DiscountAmount'],
+
                                 "ApprovedQuantity":b['ApprovedQuantity']
                                 
+
                             })
                         
                         PuchaseReturnList.append({
@@ -676,12 +678,12 @@ class SalesReturnItemApproveView(CreateAPIView):
                 for a in ReturnItem:
                     
                     SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
-                    
+ 
                     # Company Division Pricelist not assign we got error
                     # Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
                     
                     Rate =0.00
-                 
+
                     if a['ItemReason'] == 56:
                         
                         IsDamagePieces =False
@@ -734,7 +736,9 @@ class SalesReturnItemApproveView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "MRPValue": a['MRPValue'],
+
                     "Rate": Rate,                  '''round(float(Rate[0]["NoRatewithOutGST"]),2)'''
+
                     "GST": a['GST'],
                     "GSTPercentage": a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
