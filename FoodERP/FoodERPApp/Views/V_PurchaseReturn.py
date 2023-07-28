@@ -660,8 +660,8 @@ class ReturnItemApproveView(CreateAPIView):
                
                 for a in ReturnItem:
                     SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
-                    Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
-                    
+                    # Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
+                    Rate=0
                     if a['ItemReason'] == 56:
                         
                         IsDamagePieces =False
@@ -709,7 +709,8 @@ class ReturnItemApproveView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "MRPValue": a['MRPValue'],
-                    "Rate": round(float(Rate[0]["NoRatewithOutGST"]),2),
+                    # "Rate": round(float(Rate[0]["NoRatewithOutGST"]),2),
+                    "Rate" : Rate,
                     "GST": a['GST'],
                     "GSTPercentage": a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
