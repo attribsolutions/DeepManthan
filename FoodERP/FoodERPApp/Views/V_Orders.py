@@ -543,12 +543,20 @@ class EditOrderView(CreateAPIView):
                 q1 = M_Parties.objects.filter(id=Customer).values('PartyType')
                 q2 = M_PartyType.objects.filter(
                     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
-
+                if(OrderType==1):
+                        Stockparty=Customer
+                else:
+                        Stockparty=Party
                 # Is Not Retailer but is SSDD Order
                 if (q2[0]['IsRetailer'] == 0 and q2[0]['IsSCM'] == 1):
                     PartyItem = Customer
+                    
+                    
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
 M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountType,a.Discount,a.DiscountAmount
+,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
+and Party_id=%s 
+group by Item_id)StockQuantity                
                 from
 (select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s AND Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) )b 
 left join
@@ -568,11 +576,14 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([PartyItem], [Party], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty],[PartyItem], [Party], [OrderID]))
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
 M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountType,a.Discount,a.DiscountAmount
+,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
+and Party_id=%s 
+group by Item_id)StockQuantity                
                 from
 (select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
 left join
@@ -592,95 +603,85 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([PartyItem], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty],[PartyItem], [OrderID]))
 
                 OrderItemSerializer = OrderEditserializer(
                     Itemquery, many=True).data
-
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     GSTID = b['GST_id']
                     # print('**********************',ItemID)
-            # =====================GST================================================
+                    
+                    # =====================GST================================================
                     if GSTID is None:
                         Gst = GSTHsnCodeMaster(
                             ItemID, EffectiveDate).GetTodaysGstHsnCode()
                         b['GST_id'] = Gst[0]['Gstid']
                         b['GSTPercentage'] = Gst[0]['GST']
                         # print('ttttttGST',Gst[0]['GST'])
-            # =====================Stock================================================
+                    
 
-                    if(OrderType==1):
-                        Stockparty=Customer
-                    else:
-                        Stockparty=Party
-                    stockquery = O_BatchWiseLiveStock.objects.filter(
-                        Item=ItemID, Party=Stockparty,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
-                    if stockquery['Qty'] is None:
-                        Stock = 0.0
-                    else:
-                        Stock = stockquery['Qty']
-
-            # =====================Current MRP================================================
+                    # =====================Current MRP================================================
                     TodaysMRP = MRPMaster(
                         ItemID, 0, 0, EffectiveDate).GetTodaysDateMRP()
 
                     b['MRP_id'] = TodaysMRP[0]['Mrpid']
                     b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
                     # print('ttttttttttMRP',TodaysMRP[0]['TodaysMRP'])
-            # =====================Current Discount================================================
+                    # =====================Current Discount================================================
                     TodaysDiscount = DiscountMaster(
                         ItemID, Party, EffectiveDate,Customer).GetTodaysDateDiscount()
 
                     b['DiscountType'] = TodaysDiscount[0]['DiscountType']
                     b['Discount'] = TodaysDiscount[0]['TodaysDiscount']
                     # print('ttttttttttDiscount',TodaysDiscount)
-            # =====================Rate================================================
+                    # =====================Rate================================================
 
-                    ratequery = TC_OrderItems.objects.filter(
-                        Item_id=ItemID).values('Rate').order_by('-id')[:1]
-                    if not ratequery:
-                        r = 0.00
-                    else:
-                        r = ratequery[0]['Rate']
+                    # ratequery = TC_OrderItems.objects.filter(
+                    #     Item_id=ItemID).values('Rate').order_by('-id')[:1]
+                    # if not ratequery:
+                    #     r = 0.00
+                    # else:
+                    #     r = ratequery[0]['Rate']
 
-                    if b['Rate'] is None:
-                        b['Rate'] = r
-            # # =====================Unit================================================
-            #         UnitDetails = list()
-            #         ItemUnitquery = MC_ItemUnits.objects.filter(
-            #             Item=ItemID, IsDeleted=0)
-            #         ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
-            #             ItemUnitquery, many=True).data
+                    # if b['Rate'] is None:
+                    #     b['Rate'] = r
+                    # =====================Unit================================================
+                    # UnitDetails = list()
+                    # ItemUnitquery = MC_ItemUnits.objects.filter(
+                    #     Item=ItemID, IsDeleted=0)
+                    # ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
+                    #     ItemUnitquery, many=True).data
 
-            #         RateMcItemUnit = ""
-            #         for d in ItemUnitqueryserialize:
-            #             if (d['PODefaultUnit'] == True):
-            #                 RateMcItemUnit = d['id']
-            #             print(0,ItemID,RateParty,0,0,d['id'])
-            #             CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
-            #             UnitDetails.append({
-            #                 "UnitID": d['id'],
-            #                 "UnitName": d['BaseUnitConversion'] ,
-            #                 "BaseUnitQuantity": d['BaseUnitQuantity'],
-            #                 "PODefaultUnit": d['PODefaultUnit'],
-            #                 "SODefaultUnit": d['SODefaultUnit'],
-            #                 "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+                    # RateMcItemUnit = ""
+                    # for d in ItemUnitqueryserialize:
+                    #     if (d['PODefaultUnit'] == True):
+                    #         RateMcItemUnit = d['id']
+                    #     print(0,ItemID,RateParty,0,0,d['id'])
+                    #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
+                    #     UnitDetails.append({
+                    #         "UnitID": d['id'],
+                    #         "UnitName": d['BaseUnitConversion'] ,
+                    #         "BaseUnitQuantity": d['BaseUnitQuantity'],
+                    #         "PODefaultUnit": d['PODefaultUnit'],
+                    #         "SODefaultUnit": d['SODefaultUnit'],
+                    #         "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
 
-            #             })
+                    #     })
 
-            # =====================IsDefaultTermsAndConditions================================================
+                    # =====================IsDefaultTermsAndConditions================================================
 
-                    b.update({"StockQuantity": Stock,
+                    b.update({  #"StockQuantity": Stock,
                               "UnitDetails": UnitDropdown(ItemID, RateParty, 0)
                               })
 
-                    bomquery = MC_BillOfMaterialItems.objects.filter(
-                        Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
-                    if bomquery.exists():
-                        b.update({"Bom": True})
-                    else:
-                        b.update({"Bom": False})
+                    # bomquery = MC_BillOfMaterialItems.objects.filter(
+                    #     Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
+                    # if bomquery.exists():
+                    b.update({"Bom": True})
+                    # else:
+                    #     b.update({"Bom": False})
 
                 if OrderID != 0:
                     OrderQuery = T_Orders.objects.get(id=OrderID)

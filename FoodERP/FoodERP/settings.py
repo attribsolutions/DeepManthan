@@ -81,10 +81,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FoodERP',     
+        'NAME': 'devfooderp20230728',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '192.168.1.114',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -187,6 +187,9 @@ REST_FRAMEWORK = {
      'rest_framework_simplejwt.authentication.JWTAuthentication',
      )
 }
+
+# MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+# MEDIA_URL = '/media/'
 
 # Jwt Authentication
 
