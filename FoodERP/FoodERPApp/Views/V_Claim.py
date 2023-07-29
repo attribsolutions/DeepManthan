@@ -22,7 +22,7 @@ class ClaimSummaryView(CreateAPIView):
                 Party  = Orderdata['Party']
                 Mode =Orderdata['Mode']
 
-                if Mode == 1:
+                if Mode == 2:
                    
                     Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
 from M_Parties 
