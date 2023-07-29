@@ -1906,7 +1906,21 @@ class MC_MasterClaimDetails(models.Model):
     SecondaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
     
     class Meta:
-        db_table="MC_MasterClaimDetails"         
+        db_table="MC_MasterClaimDetails"
+
+
+class ThirdPartyAPITransactionlog(models.Model):
+    TranasactionDate =  models.DateField()
+    Transactiontime = models.DateTimeField(auto_now_add=True)
+    User = models.IntegerField()
+    IPaddress = models.CharField(max_length=500)
+    PartyID = models.IntegerField()
+    TransactionDetails =  models.CharField(max_length=500)
+    JsonData = models.TextField(blank = True)
+    ThirdParytSource =  models.CharField(max_length=500)
+    
+    class Meta:
+        db_table="ThirdPartyAPITransactionlog"                
          
    
        
