@@ -1,7 +1,7 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
-from .Views.V_Claim import ClaimSummaryView
+from .Views.V_Claim import *
 
 from .Views.V_Discount import *
 
@@ -554,7 +554,11 @@ urlpatterns = [
             url(r'GenericSaleReport$',GenericSaleView.as_view()),
             url(r'RetailerDataReport$',RetailerDataView.as_view()),
 # Claim 
+            
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
+            url(r'MasterClaimCreate$',MasterClaimView.as_view()),
+            url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
+
 
 
 

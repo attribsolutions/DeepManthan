@@ -459,7 +459,7 @@ class UnitwiseQuantityConversion:
         else:
             aaa=Q(IsDeleted=0) 
         if(MCItemUnit == 0 & MUnits==0 ):
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1).filter( aaa ).select_related()
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1).select_related()
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         else:

@@ -1701,7 +1701,24 @@ class M_UnitMappingMaster(models.Model):
     Unit = models.ForeignKey(M_Units, related_name='Unit', on_delete=models.PROTECT)
   
     class Meta:
-        db_table = "M_UnitMappingMaster"        
+        db_table = "M_UnitMappingMaster"
+        
+class T_Stock(models.Model):
+    StockDate=models.DateField()
+    Item= models.ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
+    BaseUnitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
+    Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    LiveBatche =  models.IntegerField()
+   
+    class Meta:
+        db_table="T_Stock"        
+                
     
             
 class O_BatchWiseLiveStock(models.Model):
@@ -1720,7 +1737,9 @@ class O_BatchWiseLiveStock(models.Model):
     Production = models.ForeignKey(T_Production, related_name='BatchWiseLiveStockProductionID', on_delete=models.CASCADE,null=True)
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn, related_name='BatchWiseLiveStockPurchaseReturnID', on_delete=models.CASCADE,null=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BatchWiseLiveStockUnitID', on_delete=models.PROTECT)
- 
+
+
+
     class Meta:
         db_table = "O_BatchWiseLiveStock"    
         
@@ -1810,25 +1829,7 @@ class M_PartySettingsDetails(models.Model):
     
     class Meta:
         db_table="M_PartySettingsDetails"
-        
-        
-class T_Stock(models.Model):
-    StockDate=models.DateField()
-    Item= models.ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
-    BaseunitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
-    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
-    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
-    Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table="T_Stock"
-        
+           
               
 class O_DateWiseLiveStock(models.Model):
     
@@ -1890,15 +1891,33 @@ class M_MasterClaim(models.Model):
     class Meta:
         db_table="M_MasterClaim"
 
+class MC_ReturnReasonwiseMasterClaim(models.Model):
+    FromDate=models.DateField()
+    ToDate=models.DateField()
+    PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    SecondaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    ReturnAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    NetSaleValue = models.DecimalField(max_digits=20, decimal_places=2)
+    Budget = models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2)
+    ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ClaimmItemReason",on_delete=models.PROTECT)
+    PartyType = models.IntegerField()
+    Party = models.ForeignKey(M_Parties, related_name='ClaimmParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        db_table="MC_ReturnReasonwiseMasterClaim"
+
+
 class MC_MasterClaimDetails(models.Model):
-    
     
     ReturnAmount = models.DecimalField(max_digits=20, decimal_places=2)
     NetSaleValue = models.DecimalField(max_digits=20, decimal_places=2)
     Budget = models.DecimalField(max_digits=20, decimal_places=2)
     ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2)
     ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2)
-    
     MasterClaim = models.ForeignKey(M_MasterClaim,related_name='MasterClaim', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items,related_name='ClaimmItem', on_delete=models.PROTECT)
     ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ClaimItemReason",on_delete=models.PROTECT)
