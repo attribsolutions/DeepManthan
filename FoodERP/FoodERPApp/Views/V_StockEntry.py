@@ -29,10 +29,11 @@ class StockEntryPageView(CreateAPIView):
                 StockEntrydata = JSONParser().parse(request)
                 Party = StockEntrydata['PartyID']
                 CreatedBy = StockEntrydata['CreatedBy']
-                GRNDate = StockEntrydata['Date']
+                StockDate = StockEntrydata['Date']
               
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
+                T_StockEntryList = list()
                 for a in StockEntrydata['StockItems']:
                   
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
@@ -55,6 +56,18 @@ class StockEntryPageView(CreateAPIView):
                     
                     })
                     
+                    T_StockEntryList.append({
+                    "StockDate":StockDate,    
+                    "Item": a['Item'],
+                    "Quantity": a['Quantity'],
+                    "Unit": a['Unit'],
+                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
+                    "MRPValue" :a["MRPValue"],
+                    "MRP": a['MRP'],
+                    "Party": Party,
+                    "CreatedBy":CreatedBy,
+                    })
+                    
                     O_LiveBatchesList.append({
                     
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
@@ -67,13 +80,18 @@ class StockEntryPageView(CreateAPIView):
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
                     "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,3),
-                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList, 
+                    "T_StockEntryList" :T_StockEntryList                   
                     
                     })
+                    
                     O_BatchWiseLiveStockList=list()
-               
+                    T_StockEntryList=list()
+                
                 StockEntrydata.update({"O_LiveBatchesList":O_LiveBatchesList})
+                
                 for aa in StockEntrydata['O_LiveBatchesList']:
+                
                     StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
                     if StockEntry_OLiveBatchesSerializer.is_valid():
                         StockEntry_OLiveBatchesSerializer.save()
