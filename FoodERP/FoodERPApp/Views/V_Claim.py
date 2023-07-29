@@ -193,14 +193,26 @@ where FromDate=%s and ToDate=%s and Party_id=%s and PartyType=%s
 order by M_GeneralMaster.id
 ''',([FromDate],[ToDate],[Party],[PartyTypeID]))
                     ReasonwiseMasterClaim=ReasonwiseMasterClaimSerializer(printReasonwisequery, many=True).data
-                    ReasonwiseMasterClaimList.append({
-                        PartyTypeName +'Claim' : ReasonwiseMasterClaim
+                    if ReasonwiseMasterClaim:
+                        ReasonwiseMasterClaimList.append({
+                            PartyTypeName +'Claim' : ReasonwiseMasterClaim
 
-                    })
+                        })
                 
                 
                 
-                printProductwisequery=M_MasterClaim.objects.filter(FromDate=FromDate,ToDate=ToDate,Party_id=Party)
+                printProductwisequery=M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PrimaryAmount, sum(SecondaryAmount)SecondaryAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
+sum(Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
+FROM M_MasterClaim
+left join M_Items on M_Items.id=M_MasterClaim.Item_id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+
+
+
+ where FromDate=%s and ToDate=%s and Party_id=%s
+ group by M_Group.id''',([FromDate],[ToDate],[Party]))
                 ProductwiseMasterClaim=ProductwiseMasterClaimSerializer(printProductwisequery, many=True).data
                 MasterClaimData.append({
                         "ReasonwiseMasterClaim": ReasonwiseMasterClaimList,
