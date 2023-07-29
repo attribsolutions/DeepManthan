@@ -286,7 +286,7 @@ class PartiesSettingsDetailsView(CreateAPIView):
     (CASE WHEN c.Value is Null THEN a.DefaultValue ELSE c.Value END)
 	ELSE 
     (CASE WHEN b.Value is Null THEN a.DefaultValue ELSE b.Value END)
-	END) value
+	END) Value
 FROM
     (SELECT 
         M_Settings.id AS Setting,
