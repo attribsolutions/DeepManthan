@@ -30,4 +30,42 @@ class ClaimSummarySerializer(serializers.Serializer):
     DiscountAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
 
 
-        
+class MasterclaimReportSerializer(serializers.Serializer):
+    
+    id= serializers.IntegerField()
+    Item_id = serializers.IntegerField()
+    PrimaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    secondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    NetPurchaseValue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    Budget=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ClaimAgainstNetSale =serializers.DecimalField(max_digits=10, decimal_places=2) 
+
+class MasterclaimReasonReportSerializer(serializers.Serializer):
+    
+    id= serializers.IntegerField()
+    ItemReason_id = serializers.IntegerField()
+    PrimaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    secondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    NetPurchaseValue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    Budget=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ClaimAgainstNetSale =serializers.DecimalField(max_digits=10, decimal_places=2)    
+
+
+class ReasonwiseMasterClaimSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
+    ItemReasonName = serializers.CharField(max_length=500)
+    PrimaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    SecondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    NetSaleValue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    Budget=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ClaimAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ClaimAgainstNetSale =serializers.DecimalField(max_digits=10, decimal_places=2)    
+
+
+class ProductwiseMasterClaimSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_MasterClaim
+        fields = '__all__'           
