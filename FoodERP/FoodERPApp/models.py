@@ -1893,6 +1893,28 @@ class M_MasterClaim(models.Model):
     class Meta:
         db_table="M_MasterClaim"
 
+class MC_ReturnReasonwiseMasterClaim(models.Model):
+    FromDate=models.DateField()
+    ToDate=models.DateField()
+    PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    SecondaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    ReturnAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    NetSaleValue = models.DecimalField(max_digits=20, decimal_places=2)
+    Budget = models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2)
+    ItemReason = models.IntegerField()
+    PartyType = models.IntegerField()
+    Party = models.ForeignKey(M_Parties, related_name='ClaimmParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        db_table="MC_ReturnReasonwiseMasterClaim"
+
+
+
+
 class MC_MasterClaimDetails(models.Model):
     
     
