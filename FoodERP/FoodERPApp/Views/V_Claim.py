@@ -154,7 +154,7 @@ class MasterClaimView(CreateAPIView):
                         # print(serializer)
                         for a in serializer:
                         
-                            stock=MC_ReturnReasonwiseMasterClaim(FromDate=FromDate,ToDate=ToDate,PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a["NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason=a["ItemReason_id"], PartyType=PartyType, Party_id=Party,CreatedBy=0)
+                            stock=MC_ReturnReasonwiseMasterClaim(FromDate=FromDate,ToDate=ToDate,PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a["NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=PartyType, Party_id=Party,CreatedBy=0)
                             stock.save()
                         
                         
