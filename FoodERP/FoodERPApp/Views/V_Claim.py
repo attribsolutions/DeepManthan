@@ -179,14 +179,32 @@ class MasterClaimPrintView(CreateAPIView):
                 ToDate = Orderdata['ToDate']
                 Party  = Orderdata['Party']
                 MasterClaimData=list()
-                printReasonwisequery=MC_ReturnReasonwiseMasterClaim.objects.filter(FromDate=FromDate,ToDate=ToDate,Party_id=Party)
-                ReasonwiseMasterClaim=ReasonwiseMasterClaimSerializer(printReasonwisequery, many=True).data
+                ReasonwiseMasterClaimList=list()
+                q1=M_PartyType.objects.filter(IsSCM=1,Company_id=3).values("id","Name")
+                for i in q1:
+                    PartyTypeID=i["id"]
+                    PartyTypeName=i["Name"]
+                    printReasonwisequery=MC_ReturnReasonwiseMasterClaim.objects.raw(''' SELECT 1 as id, M_GeneralMaster.Name ItemReasonName, PrimaryAmount, SecondaryAmount, ReturnAmount, NetSaleValue, 
+Budget, ClaimAmount, ClaimAgainstNetSale
+ FROM MC_ReturnReasonwiseMasterClaim 
+join M_GeneralMaster on M_GeneralMaster.id=MC_ReturnReasonwiseMasterClaim.ItemReason_id 
+where FromDate=%s and ToDate=%s and Party_id=%s and PartyType=%s
 
+order by M_GeneralMaster.id
+''',([FromDate],[ToDate],[Party],[PartyTypeID]))
+                    ReasonwiseMasterClaim=ReasonwiseMasterClaimSerializer(printReasonwisequery, many=True).data
+                    ReasonwiseMasterClaimList.append({
+                        PartyTypeName +'Claim' : ReasonwiseMasterClaim
+
+                    })
+                
+                
+                
                 printProductwisequery=M_MasterClaim.objects.filter(FromDate=FromDate,ToDate=ToDate,Party_id=Party)
                 ProductwiseMasterClaim=ProductwiseMasterClaimSerializer(printProductwisequery, many=True).data
                 MasterClaimData.append({
-                        "ReasonwiseMasterClaim": ReasonwiseMasterClaim,
-                        "ProductwiseMasterClaim": ProductwiseMasterClaim          
+                        "ReasonwiseMasterClaim": ReasonwiseMasterClaimList,
+                        "ProductwiseBudgetReport": ProductwiseMasterClaim          
                     })
         
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data':MasterClaimData[0]})
