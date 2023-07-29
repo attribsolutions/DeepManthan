@@ -1901,7 +1901,7 @@ class MC_ReturnReasonwiseMasterClaim(models.Model):
     Budget = models.DecimalField(max_digits=20, decimal_places=2)
     ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2)
     ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2)
-    ItemReason = models.IntegerField()
+    ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ClaimmItemReason",on_delete=models.PROTECT)
     PartyType = models.IntegerField()
     Party = models.ForeignKey(M_Parties, related_name='ClaimmParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
