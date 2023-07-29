@@ -1,6 +1,8 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
+from .Views.V_Claim import ClaimSummaryView
+
 from .Views.V_Discount import *
 
 from .Views.V_Reports import *
@@ -496,7 +498,7 @@ urlpatterns = [
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
             # url(r'PurchaseReturnItem/([0-9]+)$', T_PurchaseReturnView.as_view()),
             url(r'SalesReturnconsolidateItem$', SalesReturnconsolidatePurchaseReturnView.as_view()),
-            url(r'ReturnItemApprove$', ReturnItemApproveView.as_view()),
+            url(r'ReturnItemApprove$', SalesReturnItemApproveView.as_view()),
             url(r'PurchaseReturnPrint/([0-9]+)$', PurchaseReturnPrintView.as_view()),
             
                     
@@ -551,7 +553,8 @@ urlpatterns = [
             url(r'StockReport$',StockReportView.as_view()),
             url(r'GenericSaleReport$',GenericSaleView.as_view()),
             url(r'RetailerDataReport$',RetailerDataView.as_view()),
-
+# Claim 
+            url(r'ClaimSummary$',ClaimSummaryView.as_view()),
 
 
 
