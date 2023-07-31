@@ -28,6 +28,7 @@ class ClaimSummarySerializer(serializers.Serializer):
     ApprovedQuantity =  serializers.DecimalField(max_digits=10, decimal_places=2)
     Discount = serializers.DecimalField(max_digits=10, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    TaxableAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
 
 
 class MasterclaimReportSerializer(serializers.Serializer):
@@ -65,7 +66,13 @@ class ReasonwiseMasterClaimSerializer(serializers.Serializer):
     ClaimAgainstNetSale =serializers.DecimalField(max_digits=10, decimal_places=2)    
 
 
-class ProductwiseMasterClaimSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = M_MasterClaim
-        fields = '__all__'           
+class ProductwiseMasterClaimSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
+    Product = serializers.CharField(max_length=500)
+    PrimaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    SecondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    NetSaleValue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    Budget=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ClaimAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ClaimAgainstNetSale =serializers.DecimalField(max_digits=10, decimal_places=2)           

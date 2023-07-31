@@ -20,6 +20,86 @@ class ClaimSummaryView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Party  = Orderdata['Party']
+                Mode =Orderdata['Mode']
+
+                if Mode == 2:
+                   
+                    Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
+from M_Parties 
+join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
+where Party_id = %s''',([Party]))
+                    print(Q1)
+                    q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,T_PurchaseReturn.ReturnDate,T_PurchaseReturn.FullReturnNumber,M_Parties.Name CustomerName,M_Items.Name ItemName,
+MRPValue MRP,Quantity,GSTPercentage GST,Rate,
+ Amount, CGST, SGST, ApprovedQuantity,  ifnull(Discount,0) Discount, ifnull(DiscountAmount,0) DiscountAmount, DiscountType,BasicAmount TaxableAmount
+FROM T_PurchaseReturn
+join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
+
+join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
+
+join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
+
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s Order By GSTPercentage  ''',([FromDate],[ToDate],[Party]))
+                else:
+                    Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
+from M_Parties 
+join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
+where Party_id = %s''',([Party]))
+                    print(Q1)
+                    q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,'' ReturnDate,'' FullReturnNumber,'' CustomerName,ItemName,
+MRP,Quantity,GST,Rate,TaxableAmount,
+ Amount, CGST, SGST, ApprovedQuantity,  Discount, DiscountAmount, DiscountType from
+(SELECT M_Items.id,M_Items.Name ItemName,sum(BasicAmount)TaxableAmount,sum(MRPValue)MRP,sum(Quantity)Quantity,GSTPercentage GST,Rate,
+ sum(Amount)Amount, sum(CGST)CGST,sum(SGST)SGST, sum(ApprovedQuantity)ApprovedQuantity,  ifnull(sum(Discount),0)Discount, ifnull(sum(DiscountAmount),0)DiscountAmount,DiscountType
+
+FROM T_PurchaseReturn
+join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
+
+join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
+
+join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
+
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s group by Item_id,GSTPercentage,Rate Order By GSTPercentage )j ''',([FromDate],[ToDate],[Party]))
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                print(q0.query)
+                if q0:
+                    ClaimSummaryData = list()
+                    M_Parties_serializer =PartyDetailSerializer(Q1,many=True).data
+                    ClaimSummary_serializer = ClaimSummarySerializer(q0, many=True).data
+                    # M_Parties_serializer.append({  
+                    #           "ClaimSummaryItemDetails": ClaimSummary_serializer
+                    #           })
+                    ClaimSummaryData.append({
+                        "PartyDetails": M_Parties_serializer[0],
+                        "ClaimSummaryItemDetails": ClaimSummary_serializer          
+                    })
+                    
+
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimSummaryData[0]})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class ItemWiseClaimSummaryView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Party  = Orderdata['Party']
                 
 
                 
@@ -39,7 +119,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s  ''',([FromDate],[ToDate],[Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s group by TC_PurchaseReturnItems.Item_id  order by GSTPercentage  ''',([FromDate],[ToDate],[Party]))
                 
                 print(q0.query)
                 if q0:
@@ -103,7 +183,7 @@ class MasterClaimView(CreateAPIView):
                         # print(serializer)
                         for a in serializer:
                         
-                            stock=MC_ReturnReasonwiseMasterClaim(FromDate=FromDate,ToDate=ToDate,PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a["NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason=a["ItemReason_id"], PartyType=PartyType, Party_id=Party,CreatedBy=0)
+                            stock=MC_ReturnReasonwiseMasterClaim(FromDate=FromDate,ToDate=ToDate,PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a["NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=PartyType, Party_id=Party,CreatedBy=0)
                             stock.save()
                         
                         
@@ -193,14 +273,26 @@ where FromDate=%s and ToDate=%s and Party_id=%s and PartyType=%s
 order by M_GeneralMaster.id
 ''',([FromDate],[ToDate],[Party],[PartyTypeID]))
                     ReasonwiseMasterClaim=ReasonwiseMasterClaimSerializer(printReasonwisequery, many=True).data
-                    ReasonwiseMasterClaimList.append({
-                        PartyTypeName +'Claim' : ReasonwiseMasterClaim
+                    if ReasonwiseMasterClaim:
+                        ReasonwiseMasterClaimList.append({
+                            PartyTypeName +'Claim' : ReasonwiseMasterClaim
 
-                    })
+                        })
                 
                 
                 
-                printProductwisequery=M_MasterClaim.objects.filter(FromDate=FromDate,ToDate=ToDate,Party_id=Party)
+                printProductwisequery=M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PrimaryAmount, sum(SecondaryAmount)SecondaryAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
+sum(Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
+FROM M_MasterClaim
+left join M_Items on M_Items.id=M_MasterClaim.Item_id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+
+
+
+ where FromDate=%s and ToDate=%s and Party_id=%s
+ group by M_Group.id''',([FromDate],[ToDate],[Party]))
                 ProductwiseMasterClaim=ProductwiseMasterClaimSerializer(printProductwisequery, many=True).data
                 MasterClaimData.append({
                         "ReasonwiseMasterClaim": ReasonwiseMasterClaimList,
