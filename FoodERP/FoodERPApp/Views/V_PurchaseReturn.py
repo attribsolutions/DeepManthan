@@ -498,7 +498,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     StockDatalist = list()
                     
                     for ad in StockQtySerialize_data:
-                        Rate=RateCalculationFunction(ad['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
+                        Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
                         # print(Rate)
 
                         if(ad['LiveBatche']['MRP']['id'] is None):
