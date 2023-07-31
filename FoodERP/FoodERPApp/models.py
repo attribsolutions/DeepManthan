@@ -1481,7 +1481,7 @@ class TC_PurchaseReturnItems(models.Model):
         db_table = "TC_PurchaseReturnItems"
         
 class TC_PurchaseReturnItemImages(models.Model):
-    Item_pic = models.TextField()
+    Item_pic = models.TextField(null=True,blank=True)
     PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnItemImages', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
