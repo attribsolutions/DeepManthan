@@ -192,7 +192,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "IsTCSParty":a['IsTCSParty']
 
                             }) 
-                        elif(Type==3):  #Customer
+                        elif(Type==3 or Type == 5 ):  #Customer
                             if(a['SubParty']['PartyAddress'][0]['IsDefault'] == 1):
                                 FSSAINo=a['SubParty']['PartyAddress'][0]['FSSAINo']
                                 FSSAIExipry=a['SubParty']['PartyAddress'][0]['FSSAIExipry']
