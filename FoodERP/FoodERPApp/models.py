@@ -1714,7 +1714,6 @@ class T_Stock(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    LiveBatche =  models.IntegerField()
    
     class Meta:
         db_table="T_Stock"        
