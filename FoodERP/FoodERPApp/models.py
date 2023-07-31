@@ -1482,7 +1482,6 @@ class TC_PurchaseReturnItems(models.Model):
         
 class TC_PurchaseReturnItemImages(models.Model):
     Item_pic = models.TextField()
-    Image = models.ImageField(_("Image"),upload_to=upload_to,blank=True, null=True)
     PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnItemImages', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
@@ -1714,7 +1713,6 @@ class T_Stock(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    LiveBatche =  models.IntegerField()
    
     class Meta:
         db_table="T_Stock"        
