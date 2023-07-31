@@ -159,6 +159,7 @@ class InvoiceListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
+
     @transaction.atomic()
     def post(self, request, id=0):
         try:
@@ -170,9 +171,9 @@ class InvoiceListFilterView(CreateAPIView):
                 Party = Invoicedata['Party']
                
                 if(Customer == ''):
-                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party)
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
-                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
                    
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:
