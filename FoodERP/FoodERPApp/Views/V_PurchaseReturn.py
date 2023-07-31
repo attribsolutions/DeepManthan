@@ -176,7 +176,6 @@ class PurchaseReturnView(CreateAPIView):
                 Date = PurchaseReturndata['ReturnDate']
                 Mode = PurchaseReturndata['Mode']
                 
-              
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 PurchaseReturndata['ReturnNo'] = str(c)
                 if Mode == 1: # Sales Return
@@ -192,7 +191,12 @@ class PurchaseReturnView(CreateAPIView):
                 O_LiveBatchesList=list()
                 UpdateO_BatchWiseLiveStockList = list()
                 
-    
+                # if PurchaseReturndata['ReturnReason'] == 56:   
+                #     IsDamagePieces =False
+                # else:
+                #     IsDamagePieces =True 
+                
+               
                 for a in PurchaseReturndata['ReturnItems']:
 
                     if a['ItemReason'] == 56:
