@@ -159,6 +159,7 @@ class InvoiceListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
+
     @transaction.atomic()
     def post(self, request, id=0):
         try:
