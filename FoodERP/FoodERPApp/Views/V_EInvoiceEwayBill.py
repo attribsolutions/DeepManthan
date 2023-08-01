@@ -252,7 +252,7 @@ class Uploaded_EwayBill(CreateAPIView):
             with transaction.atomic():
                 Query=T_Invoices.objects.filter(id=id).values('Vehicle')
                 if (Query[0]['Vehicle']) is None:
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Vehicle Number is required', 'Data':'' })
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
                 else:
                     print('bbbbbbbbbb')
                     access_token = generate_Access_Token()

@@ -908,6 +908,8 @@ class T_Invoices(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='InvoicesParty', on_delete=models.PROTECT)
     Vehicle = models.ForeignKey(M_Vehicles, related_name='InvoiceVehicle',on_delete=models.PROTECT,null=True,blank=True)
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    # Hide Flag is temporary 
+    Hide = models.CharField(max_length=500,null=True,blank=True) 
 
     class Meta:
         db_table = "T_Invoices"
