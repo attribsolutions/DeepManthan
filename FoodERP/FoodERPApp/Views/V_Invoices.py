@@ -683,3 +683,18 @@ class BulkInvoiceView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
+        
+        
+        
+class UpdateVehicleInvoiceView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def get(self, request, id=0,vehicle=0):
+        try:
+            with transaction.atomic():
+                VehicleUpdate = T_Invoices.objects.filter(id=id).update(Vehicle=vehicle)
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})         
