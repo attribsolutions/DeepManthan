@@ -24,7 +24,7 @@ class DriverViewList(CreateAPIView):
                 DriverNamedata = M_Drivers.objects.filter(Party=Party,Company=Company)
                 if DriverNamedata.exists():
                     Drivers_Serializer = M_DriverSerializer(DriverNamedata, many=True)
-                    log_entry = create_transaction_log(request,Driverdata,0,Party,'Drivers List')
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Drivers_Serializer.data})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Drivers Not Available', 'Data': []})
         except Exception as e:
@@ -105,6 +105,7 @@ class DriverView(CreateAPIView):
             with transaction.atomic():
                 Driverdata = M_Drivers.objects.get(id=id)
                 Driverdata.delete()
+                log_entry = create_transaction_log(request,Driverdata,0,0,'Drivers Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Driver Deleted Successfully','Data':[]})
         except M_Drivers.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Driver Not available', 'Data': []})

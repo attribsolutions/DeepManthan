@@ -38,7 +38,7 @@ class VehicleViewList(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
-                    log_entry = create_transaction_log(request,Vehicledata,0,Party,'Vehicle List')
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
@@ -117,6 +117,7 @@ class VehicleView(CreateAPIView):
             with transaction.atomic():
                 Vehiclesdata = M_Vehicles.objects.get(id=id)
                 Vehiclesdata.delete()
+                log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
         except M_Vehicles.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Not available', 'Data': []})
