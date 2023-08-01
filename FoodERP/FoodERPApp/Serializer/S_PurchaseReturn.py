@@ -34,7 +34,7 @@ class O_LiveBatchesReturnSerializer(serializers.ModelSerializer):
 class PurchaseReturnItemImageSerializer(serializers.ModelSerializer):
     class Meta :
         model= TC_PurchaseReturnItemImages
-        fields = ['Item_pic','Image']
+        fields = ['Item_pic']
 
 class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     ReturnItemImages = PurchaseReturnItemImageSerializer(many=True)

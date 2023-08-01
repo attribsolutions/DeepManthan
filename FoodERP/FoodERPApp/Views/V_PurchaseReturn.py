@@ -176,10 +176,6 @@ class PurchaseReturnView(CreateAPIView):
                 Date = PurchaseReturndata['ReturnDate']
                 Mode = PurchaseReturndata['Mode']
                 
-              
-                
-                
-                
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 PurchaseReturndata['ReturnNo'] = str(c)
                 if Mode == 1: # Sales Return
@@ -284,7 +280,7 @@ class PurchaseReturnView(CreateAPIView):
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Purchase Return Save Successfully', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
@@ -502,7 +498,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     StockDatalist = list()
                     
                     for ad in StockQtySerialize_data:
-                        Rate=RateCalculationFunction(ad['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
+                        Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
                         # print(Rate)
 
                         if(ad['LiveBatche']['MRP']['id'] is None):

@@ -51,7 +51,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     
                     Item= b['Item']['id']
                     obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0,IsDamagePieces=0)
-                  
+                    # print(obatchwisestockquery.query)
                   
                     
                     if obatchwisestockquery == "":
@@ -64,7 +64,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     
                         stockDatalist = list()
                         for d in StockQtySerialize_data:
-                            Rate=RateCalculationFunction(d['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
+                            Rate=RateCalculationFunction(d['LiveBatche']['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
                            
                             if(d['LiveBatche']['MRP']['id'] is None):
                                 MRPValue=d['LiveBatche']['MRPValue']
@@ -159,6 +159,7 @@ class InvoiceListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
+
     @transaction.atomic()
     def post(self, request, id=0):
         try:
@@ -170,9 +171,9 @@ class InvoiceListFilterView(CreateAPIView):
                 Party = Invoicedata['Party']
                
                 if(Customer == ''):
-                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party)
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
-                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)
+                    query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
                    
                 # return JsonResponse({'query': str(Orderdata.query)})
                 if query:

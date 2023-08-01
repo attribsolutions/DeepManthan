@@ -28,6 +28,7 @@ class ClaimSummarySerializer(serializers.Serializer):
     ApprovedQuantity =  serializers.DecimalField(max_digits=10, decimal_places=2)
     Discount = serializers.DecimalField(max_digits=10, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    TaxableAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
 
 
 class MasterclaimReportSerializer(serializers.Serializer):

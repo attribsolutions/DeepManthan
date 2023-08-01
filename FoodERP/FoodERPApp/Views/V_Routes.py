@@ -26,8 +26,6 @@ class RouteListView(CreateAPIView):
                     Routesdata = RoutesSerializer(Routequery, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Routesdata})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Routes Not available ', 'Data': []})
-        except M_Routes.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Routes Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
      
@@ -93,7 +91,7 @@ class RoutesView(CreateAPIView):
         except M_Routes.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Routes Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Routes used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message':'Routes used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
@@ -131,8 +129,6 @@ class RoutesUpdateListView(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Creditlimit  Not available ', 'Data': []})
-        except MC_PartySubParty.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Creditlimit Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
           
@@ -150,7 +146,7 @@ class RoutesUpdateView(CreateAPIView):
                     if(a['Route']!= ""):
                         query = MC_PartySubParty.objects.filter(id=a['id'],Party=a['Party'],SubParty=a['SubParty']).update(Route=a['Route']) 
                     else:
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Not Updated', 'Data': []})     
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Route Not Updated', 'Data': []})     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Updated Successfully', 'Data': []})  
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})             
