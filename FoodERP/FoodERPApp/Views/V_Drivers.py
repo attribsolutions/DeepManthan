@@ -105,7 +105,7 @@ class DriverView(CreateAPIView):
             with transaction.atomic():
                 Driverdata = M_Drivers.objects.get(id=id)
                 Driverdata.delete()
-                log_entry = create_transaction_log(request,Driverdata,0,0,'Drivers Deleted Successfully')
+                log_entry = create_transaction_log(request,Driverdata,0,0,'Driver Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Driver Deleted Successfully','Data':[]})
         except M_Drivers.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Driver Not available', 'Data': []})
