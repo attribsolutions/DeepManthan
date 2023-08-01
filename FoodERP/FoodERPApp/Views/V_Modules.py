@@ -1,4 +1,3 @@
-
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Modules import *
 from ..models import *
-
+from ..Serializer.S_Orders import *
 
 class H_ModulesView(CreateAPIView):
     
@@ -27,7 +26,6 @@ class H_ModulesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
          
-
     @transaction.atomic()
     def post(self, request):
         try:
@@ -36,6 +34,7 @@ class H_ModulesView(CreateAPIView):
                 Modules_Serializer = H_ModulesSerializer(data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
+                    log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Save Successfully")
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -68,6 +67,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 Modules_Serializer = H_ModulesSerializer(ModulesdataByID, data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
+                    log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Updated Successfully")
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Updated Successfully','Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -81,6 +81,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Modulesdata = H_Modules.objects.get(id=id)
                 Modulesdata.delete()
+                log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Deleted Successfully")
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module  Deleted Successfully', 'Data':[]})
         except H_Modules.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})    

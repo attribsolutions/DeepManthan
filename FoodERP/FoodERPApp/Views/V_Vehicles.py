@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Vehicles import *
 from ..models import *
-
+from ..Serializer.S_Orders import *
 
 class VehicleViewList(CreateAPIView):
     
@@ -38,6 +38,7 @@ class VehicleViewList(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
@@ -57,6 +58,7 @@ class VehicleView(CreateAPIView):
                 Vehicles_Serializer = VehiclesSerializer(data=Vehiclesdata)
             if Vehicles_Serializer.is_valid():
                 Vehicles_Serializer.save()
+                log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Save Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Save Successfully', 'Data': []})
             else:
                 transaction.set_rollback(True)
@@ -86,9 +88,10 @@ class VehicleView(CreateAPIView):
                         "UpdatedBy": a['UpdatedBy'],
                         "UpdatedOn": a['UpdatedOn']
                     })
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
     @transaction.atomic()
     def put(self, request, id=0):
@@ -100,6 +103,7 @@ class VehicleView(CreateAPIView):
                     VehiclesdataByID, data=Vehiclesdata)
                 if Vehicle_Serializer.is_valid():
                     Vehicle_Serializer.save()
+                    log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
@@ -113,6 +117,7 @@ class VehicleView(CreateAPIView):
             with transaction.atomic():
                 Vehiclesdata = M_Vehicles.objects.get(id=id)
                 Vehiclesdata.delete()
+                log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
         except M_Vehicles.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Not available', 'Data': []})
