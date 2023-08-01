@@ -42,7 +42,7 @@ class SalesmanListView(CreateAPIView):
                             "Party":a['Party'],
                             "SalesmanRoute":SalesmanRouteList,
                         }) 
-                    log_entry = create_transaction_log(request,Salesmandata,0,Party,'SalesMan List')    
+                        
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': SalesmanList})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
         except M_Salesman.DoesNotExist:
@@ -135,6 +135,7 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmandata = M_Salesman.objects.get(id=id)
                 Salesmandata.delete()
+                log_entry = create_transaction_log(request,Salesmandata,0,0,'SalesMan Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Salesman Deleted Successfully', 'Data':[]})
         except M_Salesman.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Salesman Not available', 'Data': []})
