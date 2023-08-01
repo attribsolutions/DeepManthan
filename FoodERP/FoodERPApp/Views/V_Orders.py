@@ -165,9 +165,9 @@ class OrderListFilterViewSecond(CreateAPIView):
                         if (FromDate == '' and ToDate == ''):
                             query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
                         else:
-                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer,Hide=0).order_by('-CreatedOn')
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier,Hide=0).order_by('-CreatedOn')
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query:
         
