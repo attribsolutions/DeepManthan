@@ -24,7 +24,7 @@ class RouteListView(CreateAPIView):
                 Routequery = M_Routes.objects.filter(Party=Party,Company=Company)
                 if Routequery.exists():
                     Routesdata = RoutesSerializer(Routequery, many=True).data
-                    log_entry = create_transaction_log(request,Routesdata,0,Party,'Route List')
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Routesdata})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Routes Not available ', 'Data': []})
         except Exception as e:
@@ -92,7 +92,7 @@ class RoutesView(CreateAPIView):
                 Routesdata = M_Routes.objects.get(id=id)
                 Routesdata.delete()
                 
-
+                log_entry = create_transaction_log(request,Routesdata,0,0,'Route Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Routes Deleted Successfully', 'Data':[]})
         except M_Routes.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Routes Not available', 'Data': []})
