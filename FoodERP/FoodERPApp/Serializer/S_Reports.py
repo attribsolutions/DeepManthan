@@ -61,3 +61,32 @@ class StockReportSerializer(serializers.Serializer):
     GroupTypeName = serializers.CharField(max_length=500)
     GroupName = serializers.CharField(max_length=500)
     SubGroupName = serializers.CharField(max_length=500)
+    
+    
+    
+class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
+    TaxableValue = serializers.DecimalField(max_digits=20, decimal_places=2)
+    CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST= serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    TotalValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+   
+       
+class PurchaseGSTReportSerializer(serializers.Serializer):
+    
+    Name = serializers.CharField(max_length=500)
+    FullGRNNumber=serializers.CharField(max_length=500)
+    InvoiceNumber=serializers.CharField(max_length=500)
+    GRNDate = serializers.DateField()
+    GSTRate = serializers.DecimalField(max_digits=10, decimal_places=2)
+    TaxableValue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST= serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    DiscountAmount =serializers.DecimalField(max_digits=10, decimal_places=2)
+    TotalValue=serializers.DecimalField(max_digits=10, decimal_places=2)
