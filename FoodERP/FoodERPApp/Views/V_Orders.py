@@ -347,7 +347,6 @@ class T_OrdersView(CreateAPIView):
                     Order_serializer.save()
                     print(Order_serializer)
                     OrderID = Order_serializer.data['id']
-
                     PartyID = Order_serializer.data['Customer']
                     PartyMapping = M_Parties.objects.filter(
                         id=PartyID).values("SAPPartyCode")
@@ -355,6 +354,8 @@ class T_OrdersView(CreateAPIView):
                         IsSAPCustomer = 0
                     else:
                         IsSAPCustomer = 1
+
+                    log_entry = create_transaction_log(request, Orderdata, 0, 0, 'Order Save Successfully')    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'OrderID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
@@ -501,6 +502,7 @@ class T_OrdersViewSecond(CreateAPIView):
                     OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
                     Orderupdate_Serializer.save()
+                    log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, 'Order Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -514,10 +516,13 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
+                log_entry = create_transaction_log(request, Order_Data, 0, 0, 'Order Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
         except T_Orders.DoesNotExist:
+            log_entry = create_transaction_log(request, Order_Data, 0, 0, 'Record Not available')
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_log(request, Order_Data, 0, 0, 'This Transaction used in another table')
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
