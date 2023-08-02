@@ -555,6 +555,10 @@ urlpatterns = [
             url(r'StockReport$',StockReportView.as_view()),
             url(r'GenericSaleReport$',GenericSaleView.as_view()),
             url(r'RetailerDataReport$',RetailerDataView.as_view()),
+            url(r'PurchaseGSTReport$', PurchaseGSTReportView.as_view()),
+            url(r'InvoiceDataExport$', InvoiceDateExportReportView.as_view()),
+            
+            
 # Claim 
             
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),

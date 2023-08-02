@@ -251,6 +251,7 @@ class InvoiceView(CreateAPIView):
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
                     LastInsertId = (T_Invoices.objects.last()).id
+                    log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
@@ -367,6 +368,7 @@ class InvoiceViewSecond(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                     InvoiceData = list()
                     for a in InvoiceSerializedata:
+            
                         InvoiceItemDetails = list()
                         for b in a['InvoiceItems']:
                             aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
@@ -499,8 +501,10 @@ class InvoiceViewSecond(CreateAPIView):
                   
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
+                log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Delete Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
+            log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'This Transaction used in another table')
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
