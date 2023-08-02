@@ -746,6 +746,8 @@ class PurchaseGSTReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTData[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+  
+  
         
 class InvoiceDateExportReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
