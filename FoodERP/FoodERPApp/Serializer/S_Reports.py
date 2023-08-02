@@ -66,7 +66,6 @@ class StockReportSerializer(serializers.Serializer):
     
 class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
     
-    id=serializers.IntegerField()
     GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
     TaxableValue = serializers.DecimalField(max_digits=20, decimal_places=2)
     CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
