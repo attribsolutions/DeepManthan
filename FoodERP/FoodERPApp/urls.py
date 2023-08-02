@@ -547,7 +547,6 @@ urlpatterns = [
             url(r'getdashboard/([0-9]+)$', DashBoardView.as_view()),
 
 #Report
-            
             url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
             url(r'OrderSummaryReport$',SummaryReportView.as_view()),
             url(r'PartyLedgerReport$',PartyLedgerReportView.as_view()),
@@ -557,7 +556,6 @@ urlpatterns = [
             url(r'RetailerDataReport$',RetailerDataView.as_view()),
             url(r'PurchaseGSTReport$', PurchaseGSTReportView.as_view()),
             url(r'InvoiceDataExport$', InvoiceDateExportReportView.as_view()),
-            
             
 # Claim 
             
