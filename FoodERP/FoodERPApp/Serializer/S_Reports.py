@@ -63,7 +63,6 @@ class StockReportSerializer(serializers.Serializer):
     SubGroupName = serializers.CharField(max_length=500)
     
     
-    
 class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
     
     GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
