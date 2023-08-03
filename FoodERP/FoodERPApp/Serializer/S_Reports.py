@@ -63,10 +63,8 @@ class StockReportSerializer(serializers.Serializer):
     SubGroupName = serializers.CharField(max_length=500)
     
     
-    
 class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
     
-    id=serializers.IntegerField()
     GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
     TaxableValue = serializers.DecimalField(max_digits=20, decimal_places=2)
     CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -90,3 +88,53 @@ class PurchaseGSTReportSerializer(serializers.Serializer):
     GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     DiscountAmount =serializers.DecimalField(max_digits=10, decimal_places=2)
     TotalValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    
+    
+    
+class InvoiceDataExportSerializer(serializers.Serializer):
+    
+    PartyID=serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500)
+    FullInvoiceNumber=serializers.CharField(max_length=500)
+    InvoiceDate = serializers.DateField()
+    CustomerID=serializers.IntegerField()
+    CustomerName = serializers.CharField(max_length=500)
+    ItemID=serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=100)
+    CompanyName=serializers.CharField(max_length=100)
+    HSNCode=serializers.CharField(max_length=100)
+    MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    BasicRate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    WithGSTRate=serializers.DecimalField(max_digits=10, decimal_places=2)  
+    UnitName=serializers.CharField(max_length=100)
+    DiscountType=serializers.IntegerField()
+    Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    TaxableValue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST= serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    TotalValue = serializers.DecimalField(max_digits=10, decimal_places=2) 
+    FullOrderNumber = serializers.CharField(max_length=500)
+    OrderDate= serializers.DateField()
+    TCSAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2) 
+    RouteName = serializers.CharField(max_length=500)
+    StateName = serializers.CharField(max_length=500)
+    GSTIN = serializers.CharField(max_length=500)
+   
+   
+   
+    
+
+    
+   

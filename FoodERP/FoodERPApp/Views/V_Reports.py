@@ -746,5 +746,47 @@ class PurchaseGSTReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTData[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-                                          
+  
+  
+        
+class InvoiceDateExportReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Reportdata = JSONParser().parse(request)
+                FromDate = Reportdata['FromDate']
+                ToDate = Reportdata['ToDate']
+                Party =  Reportdata['Party']
+           
+                
+               
+                query = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName,T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN
+FROM TC_InvoiceItems
+JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
+JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
+JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
+JOIN M_Parties A ON A.id= T_Invoices.Party_id
+JOIN M_Parties B ON B.id = T_Invoices.Customer_id
+JOIN M_States ON M_States.id = B.State_id
+JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id
+JOIN C_Companies ON C_Companies.id = M_Items.Company_id
+JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
+JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
+JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_Invoices.Customer_id AND MC_PartySubParty.Party_id=%s
+JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND  T_Invoices.Party_id=%s ''',([Party],[FromDate],[ToDate],[Party]))
+                # print(str(query.query))
+                InvoiceExportData=list()
+                InvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
+                InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData[0]})
+              
+               
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+    
+    
+                                            
                                  
