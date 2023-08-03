@@ -347,7 +347,6 @@ class T_OrdersView(CreateAPIView):
                     Order_serializer.save()
                     print(Order_serializer)
                     OrderID = Order_serializer.data['id']
-
                     PartyID = Order_serializer.data['Customer']
                     PartyMapping = M_Parties.objects.filter(
                         id=PartyID).values("SAPPartyCode")
@@ -355,6 +354,8 @@ class T_OrdersView(CreateAPIView):
                         IsSAPCustomer = 0
                     else:
                         IsSAPCustomer = 1
+
+                    log_entry = create_transaction_log(request, Orderdata, 0, 0, 'Order Save Successfully')    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'OrderID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
@@ -501,6 +502,7 @@ class T_OrdersViewSecond(CreateAPIView):
                     OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
                     Orderupdate_Serializer.save()
+                    log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, 'Order Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -514,10 +516,13 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
+                log_entry = create_transaction_log(request, Order_Data, 0, 0, 'Order Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
         except T_Orders.DoesNotExist:
+            log_entry = create_transaction_log(request, Order_Data, 0, 0, 'Record Not available')
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_log(request, Order_Data, 0, 0, 'This Transaction used in another table')
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -548,13 +553,23 @@ class EditOrderView(CreateAPIView):
                 else:
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
+                print(Party,Customer)
                 if (q2[0]['IsRetailer'] == 0 and q2[0]['IsSCM'] == 1):
                     PartyItem = Customer
                     
                     
-                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
-M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountType,a.Discount,a.DiscountAmount
-,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
+                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
+                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
+                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
+                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
+
+a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+,
+(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
 group by Item_id)StockQuantity                
                 from
@@ -576,11 +591,19 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty],[PartyItem], [Party], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [Party], [OrderID]))
                 else:
                     PartyItem = Party
-                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
-M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountType,a.Discount,a.DiscountAmount
+                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
+                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
+                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
+                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
+
+a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
 ,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
 group by Item_id)StockQuantity                
@@ -603,10 +626,9 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty],[PartyItem], [OrderID]))
-
-                OrderItemSerializer = OrderEditserializer(
-                    Itemquery, many=True).data
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
+                # print(Itemquery.query)
+                OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
@@ -614,27 +636,27 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([Stockparty
                     # print('**********************',ItemID)
                     
                     # =====================GST================================================
-                    if GSTID is None:
-                        Gst = GSTHsnCodeMaster(
-                            ItemID, EffectiveDate).GetTodaysGstHsnCode()
-                        b['GST_id'] = Gst[0]['Gstid']
-                        b['GSTPercentage'] = Gst[0]['GST']
-                        # print('ttttttGST',Gst[0]['GST'])
+                    # if GSTID is None:
+                    #     Gst = GSTHsnCodeMaster(
+                    #         ItemID, EffectiveDate).GetTodaysGstHsnCode()
+                    #     b['GST_id'] = Gst[0]['Gstid']
+                    #     b['GSTPercentage'] = Gst[0]['GST']
+                    #     # print('ttttttGST',Gst[0]['GST'])
                     
 
                     # =====================Current MRP================================================
-                    TodaysMRP = MRPMaster(
-                        ItemID, 0, 0, EffectiveDate).GetTodaysDateMRP()
+                    # TodaysMRP = MRPMaster(
+                    #     ItemID, 0, 0, EffectiveDate).GetTodaysDateMRP()
 
-                    b['MRP_id'] = TodaysMRP[0]['Mrpid']
-                    b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
+                    # b['MRP_id'] = TodaysMRP[0]['Mrpid']
+                    # b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
                     # print('ttttttttttMRP',TodaysMRP[0]['TodaysMRP'])
                     # =====================Current Discount================================================
-                    TodaysDiscount = DiscountMaster(
-                        ItemID, Party, EffectiveDate,Customer).GetTodaysDateDiscount()
+                    # TodaysDiscount = DiscountMaster(
+                    #     ItemID, Party, EffectiveDate,Customer).GetTodaysDateDiscount()
 
-                    b['DiscountType'] = TodaysDiscount[0]['DiscountType']
-                    b['Discount'] = TodaysDiscount[0]['TodaysDiscount']
+                    # b['DiscountType'] = 0
+                    # b['Discount'] = 0
                     # print('ttttttttttDiscount',TodaysDiscount)
                     # =====================Rate================================================
 
