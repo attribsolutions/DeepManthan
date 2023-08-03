@@ -730,20 +730,23 @@ class PurchaseGSTReportView(CreateAPIView):
                 
                 if GSTRatewise == 1:
                     query = T_GRNs.objects.raw('''SELECT 1 As id, GSTPercentage,  SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id WHERE  T_GRNs.GRNDate  BETWEEN %s AND %s AND T_GRNs.Customer_id= %s GROUP BY TC_GRNItems.GSTPercentage UNION SELECT 1 As id, NULL GSTPercentage, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id WHERE  T_GRNs.GRNDate  BETWEEN %s AND %s AND T_GRNs.Customer_id= %s  ''',([FromDate],[ToDate],[Customer],[FromDate],[ToDate],[Customer]))
-                    # print(str(query.query))
-                    PurchaseGSTRateWiseData=list()
-                    PurchaseGSTRateWiseSerializer=PurchaseGSTRateWiseReportSerializer(query, many=True).data
-                    PurchaseGSTRateWiseData.append({"PurchaseGSTRateWiseDetails" : PurchaseGSTRateWiseSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTRateWiseData[0]})
-              
+                    if query :
+                        PurchaseGSTRateWiseData=list()
+                        PurchaseGSTRateWiseSerializer=PurchaseGSTRateWiseReportSerializer(query, many=True).data
+                        PurchaseGSTRateWiseData.append({"PurchaseGSTRateWiseDetails" : PurchaseGSTRateWiseSerializer})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTRateWiseData[0]})
+                    else:
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
                 else:
                     query=T_GRNs.objects.raw('''SELECT 1 as id, M_Parties.Name, FullGRNNumber,InvoiceNumber, GRNDate,(CGSTPercentage + SGSTPercentage + IGSTPercentage) GSTRate, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(TC_GRNItems.DiscountAmount) DiscountAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id JOIN M_Parties ON T_GRNs.Party_id= M_Parties.id  WHERE  T_GRNs.GRNDate BETWEEN %s AND %s AND T_GRNs.Customer_id=%s GROUP BY  M_Parties.id,T_GRNs.FullGRNNumber,T_GRNs.InvoiceNumber,T_GRNs.GRNDate,TC_GRNItems.GstPercentage  UNION ALL SELECT 1 as id, NULL Name, NULL FullGRNNumber,NULL InvoiceNumber, NULL GRNDate, NULL GSTRate, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(TC_GRNItems.DiscountAmount) DiscountAmount, SUM(Amount)TotalValue FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id JOIN M_Parties ON T_GRNs.Party_id= M_Parties.id WHERE T_GRNs.GRNDate BETWEEN  %s AND %s AND T_GRNs.Customer_id=%s''',([FromDate],[ToDate],[Customer],[FromDate],[ToDate],[Customer]))
-                    # print(str(query.query))
-                    PurchaseGSTSerializer= PurchaseGSTReportSerializer(query, many=True).data
-                    # print(PurchaseGSTSerializer)
-                    PurchaseGSTData=list()
-                    PurchaseGSTData.append({"PurchaseGSTDetails" : PurchaseGSTSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTData[0]})
+                    if query :
+                        PurchaseGSTSerializer= PurchaseGSTReportSerializer(query, many=True).data
+                        # print(PurchaseGSTSerializer)
+                        PurchaseGSTData=list()
+                        PurchaseGSTData.append({"PurchaseGSTDetails" : PurchaseGSTSerializer})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTData[0]})
+                    else:
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
   
@@ -778,15 +781,32 @@ JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_Invoices.Customer_id AND
 JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND  T_Invoices.Party_id=%s ''',([Party],[FromDate],[ToDate],[Party]))
                 # print(str(query.query))
-                InvoiceExportData=list()
-                InvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
-                InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData[0]})
-              
-               
+                if query:
+                    InvoiceExportData=list()
+                    InvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
+                    InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData[0]})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+
+class DamageStockReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
     
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = O_BatchWiseLiveStock.objects.raw('''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.Name UnitName FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''',([id]))
+                if query:
+                    DamageStockData=list()
+                    DamageItemStocktSerializer=DamageStocktSerializer(query, many=True).data
+                    DamageStockData.append({"DamageStockItemDetails" : DamageItemStocktSerializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': DamageStockData[0]}) 
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})          
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
                                             
                                  
