@@ -132,7 +132,11 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     StateName = serializers.CharField(max_length=500)
     GSTIN = serializers.CharField(max_length=500)
    
-   
+class DamageStocktSerializer(serializers.Serializer):
+    ItemName = serializers.CharField(max_length=500) 
+    Qty = serializers.DecimalField(max_digits=10, decimal_places=2)
+    UnitName = serializers.CharField(max_length=500) 
+     
    
     
 
