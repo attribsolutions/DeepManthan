@@ -50,8 +50,6 @@ class OrderListFilterView(CreateAPIView):
                 CustomerType = Orderdata['CustomerType']
                 d = date.today()
                 
-                
-                
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
 
@@ -345,7 +343,6 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
-                    print(Order_serializer)
                     OrderID = Order_serializer.data['id']
                     PartyID = Order_serializer.data['Customer']
                     PartyMapping = M_Parties.objects.filter(
@@ -553,7 +550,7 @@ class EditOrderView(CreateAPIView):
                 else:
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
-                print(Party,Customer)
+               
                 if (q2[0]['IsRetailer'] == 0 and q2[0]['IsSCM'] == 1):
                     PartyItem = Customer
                     
