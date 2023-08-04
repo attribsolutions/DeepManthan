@@ -715,7 +715,6 @@ FROM
 # GROUP BY Item_id,MRPValue)e
 # on I.Item_id=e.Item_id and b.GRNMRP=e.PurchesReturnMRP
 
-
 class PurchaseGSTReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     

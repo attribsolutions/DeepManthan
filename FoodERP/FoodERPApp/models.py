@@ -1939,7 +1939,15 @@ class ThirdPartyAPITransactionlog(models.Model):
     ThirdParytSource =  models.CharField(max_length=500)
     
     class Meta:
-        db_table="ThirdPartyAPITransactionlog"                
+        db_table="ThirdPartyAPITransactionlog"
+        
+        
+class M_TransactionType(models.Model):
+    Name = models.CharField(max_length=500) 
+    
+    class Meta:
+        db_table="M_TransactionType"      
+                        
          
    
        
