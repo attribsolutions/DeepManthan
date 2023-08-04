@@ -728,7 +728,8 @@ class PurchaseGSTReportView(CreateAPIView):
                 GSTRatewise = Reportdata['GSTRatewise']
                 
                 if GSTRatewise == 1:
-                    query = T_GRNs.objects.raw('''SELECT 1 As id, GSTPercentage,  SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id WHERE  T_GRNs.GRNDate  BETWEEN %s AND %s AND T_GRNs.Customer_id= %s GROUP BY TC_GRNItems.GSTPercentage''',([FromDate],[ToDate],[Customer]))
+                   
+                    query = TC_GRNReferences.objects.raw('''SELECT 1 As id, GSTPercentage,  SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue   FROM TC_GRNReferences JOIN T_Invoices ON T_Invoices.id =TC_GRNReferences.Invoice_id JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Customer_id= %s GROUP BY TC_InvoiceItems.GSTPercentage''',([FromDate],[ToDate],[Customer]))
                     if query :
                         PurchaseGSTRateWiseData=list()
                         PurchaseGSTRateWiseSerializer=PurchaseGSTRateWiseReportSerializer(query, many=True).data
@@ -737,7 +738,7 @@ class PurchaseGSTReportView(CreateAPIView):
                     else:
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
                 else:
-                    query=T_GRNs.objects.raw('''SELECT 1 as id, M_Parties.Name, FullGRNNumber,InvoiceNumber, GRNDate,(CGSTPercentage + SGSTPercentage + IGSTPercentage) GSTRate, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(TC_GRNItems.DiscountAmount) DiscountAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id JOIN M_Parties ON T_GRNs.Party_id= M_Parties.id  WHERE  T_GRNs.GRNDate BETWEEN %s AND %s AND T_GRNs.Customer_id=%s GROUP BY  M_Parties.id,T_GRNs.FullGRNNumber,T_GRNs.InvoiceNumber,T_GRNs.GRNDate,TC_GRNItems.GstPercentage''',([FromDate],[ToDate],[Customer]))
+                    query=TC_GRNReferences.objects.raw('''SELECT 1 AS id,M_Parties.Name,InvoiceNumber,FullInvoiceNumber,InvoiceDate,SUM(CGSTPercentage + SGSTPercentage + IGSTPercentage) GSTRate,GSTPercentage,SUM(BasicAmount) TaxableValue,SUM(CGST) CGST,SUM(SGST) SGST,SUM(IGST) IGST,SUM(GSTAmount) GSTAmount,SUM(TC_InvoiceItems.DiscountAmount) DiscountAmount,SUM(Amount) TotalValue FROM TC_GRNReferences JOIN T_Invoices ON T_Invoices.id = TC_GRNReferences.Invoice_id JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id JOIN M_Parties ON T_Invoices.Party_id = M_Parties.id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Customer_id =%s GROUP BY M_Parties.id, T_Invoices.InvoiceNumber, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, TC_InvoiceItems.GSTPercentage''',([FromDate],[ToDate],[Customer]))
                     if query :
                         PurchaseGSTSerializer= PurchaseGSTReportSerializer(query, many=True).data
                         # print(PurchaseGSTSerializer)
