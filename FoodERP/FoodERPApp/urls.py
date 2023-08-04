@@ -275,6 +275,7 @@ urlpatterns = [
             url(r'LoadingSheetPrint/([0-9]+)$',LoadingSheetPrintView.as_view()),
             url(r'MultipleInvoices/([0-9]+)$',MultipleInvoicesView.as_view()),
             
+   
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
