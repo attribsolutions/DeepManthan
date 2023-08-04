@@ -449,8 +449,20 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
                     
                 elif Mode == 3: #Make GRN from Invoice
+                    
+                    Query1 = T_Invoices.objects.filter(id=POOrderIDs).values('Customer')
+                    # print(str(Query1[0]['Customer'])) 
+                    
+                    Query = T_Invoices.objects.filter(id=POOrderIDs).select_related('Party').values('Party__PartyType_id')
+                    # print(str(Query[0]['Party__PartyType_id'])) 
+                    if (Query[0]['Party__PartyType_id']) ==12:
+                        IsDivisionFlag=1
+                    else:
+                        IsDivisionFlag=0
+                            
                    
                     InvoiceQuery = T_Invoices.objects.filter(id=POOrderIDs)
+                    
                     if InvoiceQuery.exists():
                         InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
@@ -460,6 +472,11 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             
                             for b in a['InvoiceItems']:
                                 
+                                if IsDivisionFlag == 1:
+                                    Rate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,c['Unit']["id"],0,0).RateWithGST()
+                                else:
+                                    Rate = b['Rate']
+                                    
                                 Item= b['Item']['id']
                                 query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
                                 # print(query.query)
@@ -490,16 +507,16 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         ItemGSTDetails.append({
                                         "GST": e['id'],
                                         "GSTPercentage": e['GSTPercentage'],   
-                                    }) 
+                                    })
+                                    
+                                         
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "Quantity": b['Quantity'],
                                     "QtyInBox": round(float(b['QtyInBox']),2),
-                                    
                                     "MRPDetails": ItemMRPDetails,
-                                    # "MRPValue": b['MRPValue'],
-                                    "Rate": b['Rate'],
+                                    "Rate": Rate,
                                     "TaxType": b['TaxType'],
                                     "Unit": b['Unit']['id'],
                                     "UnitName": b['Unit']['BaseUnitConversion'],
