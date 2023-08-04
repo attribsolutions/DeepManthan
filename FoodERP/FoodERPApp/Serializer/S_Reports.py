@@ -77,9 +77,9 @@ class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
 class PurchaseGSTReportSerializer(serializers.Serializer):
     
     Name = serializers.CharField(max_length=500)
-    FullGRNNumber=serializers.CharField(max_length=500)
     InvoiceNumber=serializers.CharField(max_length=500)
-    GRNDate = serializers.DateField()
+    FullInvoiceNumber=serializers.CharField(max_length=500)
+    InvoiceDate = serializers.DateField()
     GSTRate = serializers.DecimalField(max_digits=10, decimal_places=2)
     TaxableValue = serializers.DecimalField(max_digits=10, decimal_places=2)
     CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
