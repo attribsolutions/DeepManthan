@@ -81,6 +81,7 @@ class PurchaseGSTReportSerializer(serializers.Serializer):
     FullInvoiceNumber=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
     GSTRate = serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)
     TaxableValue = serializers.DecimalField(max_digits=10, decimal_places=2)
     CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
     SGST = serializers.DecimalField(max_digits=10, decimal_places=2)
