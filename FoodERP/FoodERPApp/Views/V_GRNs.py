@@ -473,7 +473,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             for b in a['InvoiceItems']:
                                 
                                 if IsDivisionFlag == 1:
-                                    Rate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,c['Unit']["id"],0,0).RateWithGST()
+                                    CustRate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,b['Unit']["id"],0,0).RateWithGST()
+                                    Rate=CustRate[0]["RateWithoutGST"]
                                 else:
                                     Rate = b['Rate']
                                     
