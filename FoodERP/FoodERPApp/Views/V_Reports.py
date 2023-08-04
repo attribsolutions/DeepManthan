@@ -715,7 +715,6 @@ FROM
 # GROUP BY Item_id,MRPValue)e
 # on I.Item_id=e.Item_id and b.GRNMRP=e.PurchesReturnMRP
 
-
 class PurchaseGSTReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
@@ -729,7 +728,7 @@ class PurchaseGSTReportView(CreateAPIView):
                 GSTRatewise = Reportdata['GSTRatewise']
                 
                 if GSTRatewise == 1:
-                    query = T_GRNs.objects.raw('''SELECT 1 As id, GSTPercentage,  SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id WHERE  T_GRNs.GRNDate  BETWEEN %s AND %s AND T_GRNs.Customer_id= %s GROUP BY TC_GRNItems.GSTPercentage UNION SELECT 1 As id, NULL GSTPercentage, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id WHERE  T_GRNs.GRNDate  BETWEEN %s AND %s AND T_GRNs.Customer_id= %s  ''',([FromDate],[ToDate],[Customer],[FromDate],[ToDate],[Customer]))
+                    query = T_GRNs.objects.raw('''SELECT 1 As id, GSTPercentage,  SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id WHERE  T_GRNs.GRNDate  BETWEEN %s AND %s AND T_GRNs.Customer_id= %s GROUP BY TC_GRNItems.GSTPercentage''',([FromDate],[ToDate],[Customer]))
                     if query :
                         PurchaseGSTRateWiseData=list()
                         PurchaseGSTRateWiseSerializer=PurchaseGSTRateWiseReportSerializer(query, many=True).data
@@ -738,7 +737,7 @@ class PurchaseGSTReportView(CreateAPIView):
                     else:
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
                 else:
-                    query=T_GRNs.objects.raw('''SELECT 1 as id, M_Parties.Name, FullGRNNumber,InvoiceNumber, GRNDate,(CGSTPercentage + SGSTPercentage + IGSTPercentage) GSTRate, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(TC_GRNItems.DiscountAmount) DiscountAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id JOIN M_Parties ON T_GRNs.Party_id= M_Parties.id  WHERE  T_GRNs.GRNDate BETWEEN %s AND %s AND T_GRNs.Customer_id=%s GROUP BY  M_Parties.id,T_GRNs.FullGRNNumber,T_GRNs.InvoiceNumber,T_GRNs.GRNDate,TC_GRNItems.GstPercentage  UNION ALL SELECT 1 as id, NULL Name, NULL FullGRNNumber,NULL InvoiceNumber, NULL GRNDate, NULL GSTRate, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(TC_GRNItems.DiscountAmount) DiscountAmount, SUM(Amount)TotalValue FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id JOIN M_Parties ON T_GRNs.Party_id= M_Parties.id WHERE T_GRNs.GRNDate BETWEEN  %s AND %s AND T_GRNs.Customer_id=%s''',([FromDate],[ToDate],[Customer],[FromDate],[ToDate],[Customer]))
+                    query=T_GRNs.objects.raw('''SELECT 1 as id, M_Parties.Name, FullGRNNumber,InvoiceNumber, GRNDate,(CGSTPercentage + SGSTPercentage + IGSTPercentage) GSTRate, SUM(BasicAmount) TaxableValue, SUM(CGST) CGST, SUM( SGST) SGST, SUM( IGST) IGST, SUM(GSTAmount) GSTAmount, SUM(TC_GRNItems.DiscountAmount) DiscountAmount, SUM(Amount) TotalValue  FROM TC_GRNItems JOIN T_GRNs ON TC_GRNItems.GRN_id=T_GRNs.id JOIN M_Parties ON T_GRNs.Party_id= M_Parties.id  WHERE  T_GRNs.GRNDate BETWEEN %s AND %s AND T_GRNs.Customer_id=%s GROUP BY  M_Parties.id,T_GRNs.FullGRNNumber,T_GRNs.InvoiceNumber,T_GRNs.GRNDate,TC_GRNItems.GstPercentage''',([FromDate],[ToDate],[Customer]))
                     if query :
                         PurchaseGSTSerializer= PurchaseGSTReportSerializer(query, many=True).data
                         # print(PurchaseGSTSerializer)
