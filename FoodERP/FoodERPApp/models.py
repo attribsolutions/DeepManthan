@@ -1796,7 +1796,7 @@ class Transactionlog(models.Model):
     PartyID = models.IntegerField()
     TransactionDetails =  models.CharField(max_length=500)
     JsonData = models.TextField(blank = True)
-    TransactionType = models.ForeignKey(M_TransactionType,related_name='Transactiontype', on_delete=models.PROTECT) 
+    TransactionType = models.ForeignKey(M_TransactionType,related_name='Transactiontype', on_delete=models.PROTECT,blank=True, null=True) 
     
     class Meta:
         db_table="Transactionlog"     
