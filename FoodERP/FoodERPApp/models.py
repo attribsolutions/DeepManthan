@@ -1781,6 +1781,11 @@ class MC_SettingDependency(models.Model):
   
     class Meta:
         db_table="MC_SettingDependency"
+
+class M_TransactionType(models.Model):
+    Name = models.CharField(max_length=500) 
+    class Meta:
+        db_table="M_TransactionType"           
         
  
 class Transactionlog(models.Model):
@@ -1791,6 +1796,7 @@ class Transactionlog(models.Model):
     PartyID = models.IntegerField()
     TransactionDetails =  models.CharField(max_length=500)
     JsonData = models.TextField(blank = True)
+    TransactionType = models.ForeignKey(M_TransactionType,related_name='Transactiontype', on_delete=models.PROTECT) 
     
     class Meta:
         db_table="Transactionlog"     
@@ -1942,11 +1948,7 @@ class ThirdPartyAPITransactionlog(models.Model):
         db_table="ThirdPartyAPITransactionlog"
         
         
-class M_TransactionType(models.Model):
-    Name = models.CharField(max_length=500) 
-    
-    class Meta:
-        db_table="M_TransactionType"      
+   
                         
          
    
