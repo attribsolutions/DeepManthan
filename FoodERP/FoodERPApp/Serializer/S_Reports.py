@@ -131,6 +131,7 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     RouteName = serializers.CharField(max_length=500)
     StateName = serializers.CharField(max_length=500)
     GSTIN = serializers.CharField(max_length=500)
+
    
 class DamageStocktSerializer(serializers.Serializer):
     ItemName = serializers.CharField(max_length=500) 
