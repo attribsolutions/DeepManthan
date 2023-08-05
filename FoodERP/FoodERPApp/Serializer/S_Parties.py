@@ -23,7 +23,7 @@ class DivisionsSerializer(serializers.ModelSerializer):
     PartyAddress=Partyaddress(many=True)
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType','GSTIN','PartyAddress']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress','SAPPartyCode']
         
         
         
