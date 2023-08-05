@@ -49,6 +49,7 @@ class SendViewMail(RetrieveAPIView):
                     userOTP = M_Users.objects.filter(
                         Employee=Employeedata_Serializer[0]['id']).update(OTP=otp)
                    
+                   
                     subject = 'Your Account Verification mail'
                     newline = '\n'
                     message = f'''Your Login Name: {LoginName} {newline} Your OTP: {otp} '''
