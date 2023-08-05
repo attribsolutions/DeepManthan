@@ -80,6 +80,7 @@ class PurchaseReturnListView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "IsApproved" : a["IsApproved"],
+                            "Comment" : a["Comment"],
                             "Status" : Status
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
