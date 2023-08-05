@@ -54,7 +54,7 @@ class SendViewMail(RetrieveAPIView):
                     message = f'''Your Login Name: {LoginName} {newline} Your OTP: {otp} '''
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = [Email]
-                    cc=['support.mis@chitalegroup.in']
+                    cc=['hemantwaghmare13@gmail.com']
                     send_mail(subject, message, email_from, recipient_list,cc)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
                 else:
