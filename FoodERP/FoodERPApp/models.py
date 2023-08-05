@@ -1797,6 +1797,7 @@ class Transactionlog(models.Model):
     TransactionDetails =  models.CharField(max_length=500)
     JsonData = models.TextField(blank = True)
     TransactionType =  models.IntegerField(default=1)
+    TransactionID =  models.IntegerField(default=1)
     
     class Meta:
         db_table="Transactionlog"     
