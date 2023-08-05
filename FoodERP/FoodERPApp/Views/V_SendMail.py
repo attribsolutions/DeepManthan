@@ -54,7 +54,8 @@ class SendViewMail(RetrieveAPIView):
                     message = f'''Your Login Name: {LoginName} {newline} Your OTP: {otp} '''
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = [Email]
-                    send_mail(subject, message, email_from, recipient_list)
+                    cc=['support.mis@chitalegroup.in']
+                    send_mail(subject, message, email_from, recipient_list,cc)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Mail send Successfully', 'Data': []})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Please check Mail And Phone', 'Data': []})
