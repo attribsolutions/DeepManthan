@@ -38,7 +38,7 @@ class DiscountMastergo(CreateAPIView):
                 ToDate = Discountdata['ToDate']
                 Party = Discountdata['Party']
                 PartyType = Discountdata["PartyType"]
-                PriceList = Discountdata["PriceList"]
+                PriceList = Discountdata["PriceList"] 
                 Customer = Discountdata["Customer"]
                 
                 if not Customer:
