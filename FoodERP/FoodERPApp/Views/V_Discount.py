@@ -40,7 +40,7 @@ class DiscountMastergo(CreateAPIView):
                 PartyType = Discountdata["PartyType"]
                 PriceList = Discountdata["PriceList"]
                 Customer = Discountdata["Customer"]
-                print(len(Customer.split(',')))
+                
                 if not Customer:
                     Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
                     (case WHEN RecordCount =1 then oldDiscountType else  DiscountType end)DiscountType,
