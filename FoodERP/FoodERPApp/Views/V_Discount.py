@@ -61,7 +61,7 @@ class DiscountMastergo(CreateAPIView):
                     AND FromDate = %s AND ToDate = %s 
                     left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id 
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE and IsDeleted=0 and MC_PartyItems.Item_id IS NOT NULL ORDER BY M_Items.Sequence)a''', ([Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [Party], [PartyType], [PriceList], [FromDate], [ToDate]))
+                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE IsDeleted=0 and MC_PartyItems.Item_id IS NOT NULL ORDER BY M_Items.Sequence)a''', ([Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [Party], [PartyType], [PriceList], [FromDate], [ToDate]))
 
                 else:
                     Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
@@ -89,7 +89,7 @@ class DiscountMastergo(CreateAPIView):
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
                     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
                     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                    WHERE and IsDeleted=0 and MC_PartyItems.Item_id IS NOT NULL
+                    WHERE  IsDeleted=0 and MC_PartyItems.Item_id IS NOT NULL
                     ORDER BY M_Items.Sequence)a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate]))
                     # print(Discountquery.query)
                 if Discountquery:
