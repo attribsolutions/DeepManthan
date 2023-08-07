@@ -89,7 +89,7 @@ class DiscountMastergo(CreateAPIView):
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
                     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
                     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                    WHERE and  MC_PartyItems.Item_id IS NOT NULL
+                    WHERE  MC_PartyItems.Item_id IS NOT NULL
                     ORDER BY M_Items.Sequence)a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate]))
                     # print(Discountquery.query)
                 if Discountquery:
