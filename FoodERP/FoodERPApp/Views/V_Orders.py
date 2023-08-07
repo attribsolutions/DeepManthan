@@ -137,12 +137,12 @@ class OrderListFilterView(CreateAPIView):
                             "Inward": inward,
                             "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
                         })
-                    log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order List",28,a['id'])
+                    log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order List",28,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Data Not available",7,a['id'])
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,a['id'])
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -202,9 +202,9 @@ class OrderListFilterViewSecond(CreateAPIView):
                                     "Inward": "",
                                     "Percentage": "",
                                 })
-                        log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order List",28,0)
+                        log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order List",28,id)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
-                    log_entry = create_transaction_log(request, Orderdata, 0, 0, "Record Not Found",29,0)
+                    log_entry = create_transaction_log(request, Orderdata, 0, 0, "Record Not Found",29,id)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
                 elif(OrderType == 1):  # OrderType -1 PO Order
@@ -305,12 +305,12 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "Percentage": Percentage,
 
                     })
-                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order List",28,0)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order List",28,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-            log_entry = create_transaction_log(request, Orderdata, 0, 0, "Data Not available",7,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, "Data Not available",7,id)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0,Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -827,7 +827,7 @@ class ConfirmOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 Orderdata = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, Orderdata, 0, 0, "initial",9,id)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "initial",9,0)
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
                 OrderItemQuery = T_Orders.objects.filter(
@@ -847,8 +847,7 @@ class SummaryReportView(CreateAPIView):
             with transaction.atomic():
 
                 Orderdata = JSONParser().parse(request)
-                LastInsertId = (T_Orders.objects.last()).id
-                log_entry = create_transaction_log(request, Orderdata, 0, 0, "initial",9,LastInsertId)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "initial",9,0)
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Company = Orderdata['CompanyID']
@@ -893,12 +892,12 @@ class SummaryReportView(CreateAPIView):
                                     "OrderAmount": float(a['OrderAmount']),
                                     "CreatedOn": a['CreatedOn']
                                 })
-                    log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order Summary",31,LastInsertId)            
+                    log_entry = create_transaction_log(request, Orderdata, 0, 0, "Order Summary",31,InvoiceID)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
-                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Data Not available",7,LastInsertId)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Data Not available",7,InvoiceID)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,LastInsertId)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,InvoiceID)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
