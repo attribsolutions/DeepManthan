@@ -9,13 +9,11 @@ from ..Serializer.S_Orders import Mc_ItemUnitSerializerThird
 from ..Serializer.S_Items import M_ItemsSerializer01
 from ..models import *
 
-class InvoicegovUploadSerializer(serializers.Serializer):
+class InvoicegovUploadSerializer2(serializers.Serializer):
     
     id = serializers.IntegerField()
-    userGstin=serializers.CharField(max_length=500)
-    supply_type = serializers.CharField(max_length=500)
-    document_type=serializers.CharField(max_length=500)
-    document_number = serializers.CharField(max_length=500)
+    # userGstin=serializers.CharField(max_length=500)
+    # document_number = serializers.CharField(max_length=500)
     document_date = serializers.CharField(max_length=500)
     Seller_gstin = serializers.CharField(max_length=500)
     seller_legal_name = serializers.CharField(max_length=500)
@@ -23,24 +21,42 @@ class InvoicegovUploadSerializer(serializers.Serializer):
     Seller_location =serializers.CharField(max_length=500)
     seller_pincode = serializers.BooleanField(default=False)
     Seller_state_code =  serializers.CharField(max_length=500)
+    seller_State= serializers.CharField(max_length=500)
     
     Buyer_gstin = serializers.CharField(max_length=500)
     Buyer_legal_name =  serializers.CharField(max_length=500)
     Buyer_address1 = serializers.CharField(max_length=500)
     Buyer_location = serializers.CharField(max_length=500)
     buyer_pincode = serializers.CharField(max_length=500)
-    place_of_supply = serializers.CharField(max_length=500)
+    buyer_State= serializers.CharField(max_length=500)
     Buyer_state_code = serializers.CharField(max_length=500)
-    Start_Invoice_Date = serializers.CharField(max_length=500)
-    End_Invoice_Date = serializers.CharField(max_length=500)
-    total_assessable_value = serializers.CharField(max_length=500)
-    total_invoice_value = serializers.CharField(max_length=500)
-    total_cgst_value = serializers.CharField(max_length=500)
-    total_sgst_value = serializers.CharField(max_length=500)
-    total_igst_value = serializers.CharField(max_length=500)
-    transportation_mode = serializers.CharField(max_length=500)
+    
+    Total_assessable_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_invoice_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_cgst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_sgst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_igst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    # transportation_mode = serializers.CharField(max_length=500)
     # transportation_distance = serializers.CharField(max_length=500)
 
+
+class InvoiceItemgovUploadSerializer2(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=500)
+    HSNCode=serializers.CharField(max_length=500)
+    Quantity=serializers.DecimalField(max_digits=20, decimal_places=3)
+    EwayBillUnit=serializers.CharField(max_length=500)
+    Rate=serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount=serializers.DecimalField(max_digits=20, decimal_places=2)
+    CGST=serializers.DecimalField(max_digits=20, decimal_places=2)
+    SGST=serializers.DecimalField(max_digits=20, decimal_places=2)
+    IGST=serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_amount=serializers.DecimalField(max_digits=20, decimal_places=2)
+    assessable_value=serializers.DecimalField(max_digits=20, decimal_places=2)
+    gst_rate=serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_item_value=serializers.DecimalField(max_digits=20, decimal_places=2)
 
 class InvoiceItemgovUploadSerializer(serializers.ModelSerializer):
     Item = M_ItemsSerializer01(read_only=True)
@@ -95,3 +111,5 @@ class InvoicegovUploadSerializer(serializers.ModelSerializer):
         class Meta:
             model = T_Invoices
             fields = '__all__'
+
+        
