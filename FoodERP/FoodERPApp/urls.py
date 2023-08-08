@@ -409,6 +409,7 @@ urlpatterns = [
             # url(r'DiscountMaster/([0-9]+)$',DiscountMasterView.as_view()),
             # url(r'GetDiscount$',GetDiscountView.as_view()),
             url(r'DiscountMaster$',DiscountMastergo.as_view()),
+            url(r'DiscountMasterr/([0-9]+)$',DiscountMastergo.as_view()),
             url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()),
             url(r'DiscountPartyType/([0-9]+)$',DiscountPartyTypeView.as_view()),
             url(r'DiscountCustomer/([0-9]+)/([0-9]+)/([0-9]+)$',DiscountCustomerView.as_view()),
@@ -563,6 +564,7 @@ urlpatterns = [
             
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
+            
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
 
 
