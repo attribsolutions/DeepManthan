@@ -23,8 +23,15 @@ class DivisionsSerializer(serializers.ModelSerializer):
     PartyAddress=Partyaddress(many=True)
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType','GSTIN','PartyAddress']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress','SAPPartyCode']
         
+    # def to_representation(self, instance):
+    #     # get representation from ModelSerializer
+    #     ret = super(DivisionsSerializer, self).to_representation(instance)
+    #     # if parent is None, overwrite
+    #     if not ret.get("SAPPartyCode", None):
+    #         ret["SAPPartyCode"] =instance.SAPPartyCodes
+    #     return ret     
         
         
          
