@@ -348,6 +348,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                         Partylist.append({
                             'id':  a['id'],
                             'Name':  a['Name'],
+                            'SAPPartyCode':a['SAPPartyCode']
                         })
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
