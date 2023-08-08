@@ -38,12 +38,12 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def create_transaction_log(request,data,User, PartyID,TransactionDetails):
+def create_transaction_log(request,data,User, PartyID,TransactionDetails,TransactionType,TransactionID):
     
    
     log_entry = Transactionlog.objects.create(
         TranasactionDate=date.today(),
-        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data
+        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data,TransactionType=TransactionType,TransactionID=TransactionID
     )
     return log_entry
 
@@ -79,7 +79,6 @@ def UnitDropdown(ItemID,PartyForRate,BatchID=0):
             "Rate" : round(Rate,2),
             "BaseUnitQuantityNoUnit":q0[0]["BaseUnitQuantity"],
             
-
         })
     return UnitDetails
 
