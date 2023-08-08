@@ -179,6 +179,44 @@ class GenericSaleReportSerializer(serializers.Serializer):
     RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2)     
      
+     
+     
+     
+class RetailerDataExportSerializer(serializers.Serializer):
+    
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+    isActive=serializers.BooleanField()
+    Email = serializers.CharField(max_length=200)
+    MobileNo=serializers.CharField()
+    AlternateContactNo=serializers.CharField(max_length=500)
+    Address=serializers.CharField(max_length=100)
+    PIN=serializers.CharField(max_length=100)
+    FSSAINo=serializers.CharField(max_length=100)
+    FSSAIExipry=serializers.CharField(max_length=100)
+    GSTIN = serializers.CharField(max_length=500) 
+    PAN = serializers.CharField(max_length=500)
+    StateName = serializers.CharField(max_length=500)
+    DistrictName = serializers.CharField(max_length=500)
+    CityName = serializers.CharField(max_length=500)
+    RouteName = serializers.CharField(max_length=500)
+    CompanyName=serializers.CharField(max_length=100) 
+    PartyTypeName=serializers.CharField(max_length=100) 
+    PriceList=serializers.CharField(max_length=100)
+    Latitude=serializers.CharField(max_length=100)
+    Longitude=serializers.CharField(max_length=100)
+    SAPPartyCode = serializers.CharField(max_length=500)
+    
+   
+    
+   
+   
+    
+    
+
+    
+    
+        
    
     
 
