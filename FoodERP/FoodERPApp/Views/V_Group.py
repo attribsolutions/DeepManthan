@@ -49,7 +49,7 @@ class GroupView(CreateAPIView):
                 Group_Serializer = GroupSerializer(data=Group_data)
                 if Group_Serializer.is_valid():
                     Group_Serializer.save()
-                    log_entry = create_transaction_log(request, Group_data, 0, 0, "Group Save Successfully")
+                    # log_entry = create_transaction_log(request, Group_data, 0, 0, "Group Save Successfully")
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -99,7 +99,7 @@ class GroupViewSecond(CreateAPIView):
                     Group_dataByID, data=Group_data)
                 if Group_Serializer.is_valid():
                     Group_Serializer.save()
-                    log_entry = create_transaction_log(request, Group_data, 0, 0, "Group Updated Successfully")
+                    # log_entry = create_transaction_log(request, Group_data, 0, 0, "Group Updated Successfully")
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -114,7 +114,7 @@ class GroupViewSecond(CreateAPIView):
             with transaction.atomic():
                 Group_data = M_Group.objects.get(id=id)
                 Group_data.delete()
-                log_entry = create_transaction_log(request, Group_data, 0, 0, "Group Deleted Successfully")
+                # log_entry = create_transaction_log(request, Group_data, 0, 0, "Group Deleted Successfully")
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Deleted Successfully', 'Data':[]})
         except M_Group.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Group Not available', 'Data': []})
