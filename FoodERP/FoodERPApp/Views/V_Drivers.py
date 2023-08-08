@@ -45,7 +45,7 @@ class DriverView(CreateAPIView):
                 Driver_Serializer = M_DriverSerializer(data=Driverdata)
             if Driver_Serializer.is_valid():
                 Driver_Serializer.save()
-                log_entry = create_transaction_log(request,Driverdata,0,0 ,'Driver Save Successfully')
+                # log_entry = create_transaction_log(request,Driverdata,0,0 ,'Driver Save Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Driver Save Successfully', 'Data': []})
             else:
                 transaction.set_rollback(True)
@@ -91,7 +91,7 @@ class DriverView(CreateAPIView):
                     DriverdataByID, data=Driverdata)
                 if Driver_Serializer.is_valid():
                     Driver_Serializer.save()
-                    log_entry = create_transaction_log(request,Driverdata,0,0,'Driver Updated Successfully')
+                    # log_entry = create_transaction_log(request,Driverdata,0,0,'Driver Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Driver Updated Successfully','Data' :[]})
                 else:
                     transaction.set_rollback(True)
@@ -105,7 +105,7 @@ class DriverView(CreateAPIView):
             with transaction.atomic():
                 Driverdata = M_Drivers.objects.get(id=id)
                 Driverdata.delete()
-                log_entry = create_transaction_log(request,Driverdata,0,0,'Driver Deleted Successfully')
+                # log_entry = create_transaction_log(request,Driverdata,0,0,'Driver Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Driver Deleted Successfully','Data':[]})
         except M_Drivers.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Driver Not available', 'Data': []})
