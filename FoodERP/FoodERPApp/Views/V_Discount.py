@@ -138,7 +138,7 @@ class DiscountMasterFilter(CreateAPIView):
                 if FromDate:
 
                     Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id, M_DiscountMaster.FromDate, M_DiscountMaster.ToDate, M_Parties.Name CustomerName, M_Items.name ItemName, M_DiscountMaster.DiscountType, M_DiscountMaster.Discount,M_PartyType.Name Partytype,M_PriceList.Name PriceListName,
-M_DiscountMaster.CreatedBy,M_DiscountMaster.CreatedOn,IsDeleted
+M_DiscountMaster.CreatedBy,M_DiscountMaster.CreatedOn,IsDeleted IsRecordDeleted
 FROM M_DiscountMaster 
 
 LEFT JOIN M_Parties ON M_Parties.id = M_DiscountMaster.Customer_id 
@@ -149,7 +149,7 @@ WHERE M_DiscountMaster.Party_id= %s  and M_DiscountMaster.FromDate between %s an
 ORDER BY M_DiscountMaster.id DESC''', ([Party], [FromDate], [ToDate]))
                 else:
                     Discountquery = M_DiscountMaster.objects.raw('''SELECT M_DiscountMaster.id, M_DiscountMaster.FromDate, M_DiscountMaster.ToDate, M_Parties.Name CustomerName, M_Items.name ItemName, M_DiscountMaster.DiscountType, M_DiscountMaster.Discount,M_PartyType.Name Partytype,M_PriceList.Name PriceListName,
-M_DiscountMaster.CreatedBy,M_DiscountMaster.CreatedOn,IsDeleted
+M_DiscountMaster.CreatedBy,M_DiscountMaster.CreatedOn,IsDeleted IsRecordDeleted
 FROM M_DiscountMaster 
 
 LEFT JOIN M_Parties ON M_Parties.ID = M_DiscountMaster.Customer_id 
