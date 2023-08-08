@@ -58,7 +58,7 @@ class VehicleView(CreateAPIView):
                 Vehicles_Serializer = VehiclesSerializer(data=Vehiclesdata)
             if Vehicles_Serializer.is_valid():
                 Vehicles_Serializer.save()
-                log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Save Successfully')
+                # log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Save Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Save Successfully', 'Data': []})
             else:
                 transaction.set_rollback(True)
@@ -103,7 +103,7 @@ class VehicleView(CreateAPIView):
                     VehiclesdataByID, data=Vehiclesdata)
                 if Vehicle_Serializer.is_valid():
                     Vehicle_Serializer.save()
-                    log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Updated Successfully')
+                    # log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Updated Successfully','Data' : []})
                 else:
                     transaction.set_rollback(True)
@@ -117,7 +117,7 @@ class VehicleView(CreateAPIView):
             with transaction.atomic():
                 Vehiclesdata = M_Vehicles.objects.get(id=id)
                 Vehiclesdata.delete()
-                log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Deleted Successfully')
+                # log_entry = create_transaction_log(request,Vehiclesdata,0,0,'Vehicle Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
         except M_Vehicles.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Not available', 'Data': []})

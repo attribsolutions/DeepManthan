@@ -34,7 +34,7 @@ class H_ModulesView(CreateAPIView):
                 Modules_Serializer = H_ModulesSerializer(data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
-                    log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Save Successfully")
+                    # log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Save Successfully")
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -67,7 +67,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 Modules_Serializer = H_ModulesSerializer(ModulesdataByID, data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
-                    log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Updated Successfully")
+                    # log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Updated Successfully")
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Updated Successfully','Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -81,7 +81,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Modulesdata = H_Modules.objects.get(id=id)
                 Modulesdata.delete()
-                log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Deleted Successfully")
+                # log_entry = create_transaction_log(request, Modulesdata, 0, 0, "Module Deleted Successfully")
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module  Deleted Successfully', 'Data':[]})
         except H_Modules.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})    
