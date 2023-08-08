@@ -201,6 +201,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                                     "CreatedOn": a['CreatedOn'],
                                     "Inward": "",
                                     "Percentage": "",
+                                    "Hide":a['Hide'],
                                 })
                         # log_entry = create_transaction_log(request, Orderdata, 0, Customer, "Order List",28,id)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
