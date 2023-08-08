@@ -1950,7 +1950,7 @@ class ThirdPartyAPITransactionlog(models.Model):
     class Meta:
         db_table="ThirdPartyAPITransactionlog"
         
-class DeletedT_Invoices(models.Model):
+class T_DeletedInvoices(models.Model):
     Invoice = models.IntegerField(null=True)
     InvoiceDate = models.DateField()
     InvoiceNumber = models.IntegerField(null=True)
@@ -1971,10 +1971,10 @@ class DeletedT_Invoices(models.Model):
     DeletedOn = models.DateTimeField(auto_now_add=True) 
 
     class Meta:
-        db_table = "DeletedT_Invoices"        
+        db_table = "T_DeletedInvoices"        
         
 
-class DeletedTC_InvoiceItems(models.Model):
+class TC_DeletedInvoiceItems(models.Model):
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
     BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3)
     MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
@@ -2007,10 +2007,10 @@ class DeletedTC_InvoiceItems(models.Model):
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
-        db_table = "DeletedTC_InvoiceItems"
+        db_table = "TC_DeletedInvoiceItems"
         
         
-class DeletedTC_InvoiceUploads(models.Model):
+class TC_DeletedInvoiceUploads(models.Model):
     Invoice = models.IntegerField(null=True)
     AckNo =  models.CharField(max_length=500,null=True)  
     Irn =  models.CharField(max_length=500,null=True)
@@ -2031,14 +2031,14 @@ class DeletedTC_InvoiceUploads(models.Model):
     user_gstin = models.CharField(max_length=500)  
     
     class Meta:
-        db_table="DeletedTC_InvoiceUploads"  
+        db_table="TC_DeletedInvoiceUploads"  
         
          
-class DeletedTC_InvoicesReferences(models.Model):
+class TC_DeletedInvoicesReferences(models.Model):
     Invoice =models.IntegerField(null=True)
     Order = models.IntegerField(null=True)
     class Meta:
-        db_table = "DeletedTC_InvoicesReferences"                      
+        db_table = "TC_DeletedInvoicesReferences"                      
    
                         
          

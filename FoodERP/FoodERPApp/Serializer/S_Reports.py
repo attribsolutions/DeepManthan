@@ -94,14 +94,14 @@ class PurchaseGSTReportSerializer(serializers.Serializer):
     
 class InvoiceDataExportSerializer(serializers.Serializer):
     
-    PartyID=serializers.IntegerField()
-    PartyName = serializers.CharField(max_length=500)
-    FullInvoiceNumber=serializers.CharField(max_length=500)
+    SupplierID=serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)
+    InvoiceNumber=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
     CustomerID=serializers.IntegerField()
     CustomerName = serializers.CharField(max_length=500)
-    ItemID=serializers.IntegerField()
-    ItemName=serializers.CharField(max_length=100)
+    FE2MaterialID=serializers.IntegerField()
+    MaterialName=serializers.CharField(max_length=100)
     CompanyName=serializers.CharField(max_length=100)
     HSNCode=serializers.CharField(max_length=100)
     MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -111,7 +111,7 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     BasicRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     WithGSTRate=serializers.DecimalField(max_digits=10, decimal_places=2)  
     UnitName=serializers.CharField(max_length=100)
-    DiscountType=serializers.IntegerField()
+    DiscountType=serializers.CharField(max_length=100)
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     TaxableValue = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -124,14 +124,25 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     TotalValue = serializers.DecimalField(max_digits=10, decimal_places=2) 
-    FullOrderNumber = serializers.CharField(max_length=500)
-    OrderDate= serializers.DateField()
     TCSAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2) 
     RouteName = serializers.CharField(max_length=500)
     StateName = serializers.CharField(max_length=500)
     GSTIN = serializers.CharField(max_length=500)
+    Irn = serializers.CharField(max_length=500)
+    AckNo = serializers.CharField(max_length=500)
+    EwayBillNo = serializers.CharField(max_length=500)
+
+    def to_representation(self, instance):
+        a = super().to_representation(instance)
+        Discount_Type = a['DiscountType']
+        if Discount_Type == '1':
+            a['DiscountType'] = 'Rs'
+        elif Discount_Type == '2':
+            a['DiscountType'] = '%'
+
+        return a
 
    
 class DamageStocktSerializer(serializers.Serializer):
