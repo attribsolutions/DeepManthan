@@ -251,7 +251,7 @@ class InvoiceView(CreateAPIView):
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
                     LastInsertId = (T_Invoices.objects.last()).id
-                    log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully')
+                    # log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
@@ -259,105 +259,6 @@ class InvoiceView(CreateAPIView):
     
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    
-    # authentication__Class = JSONWebTokenAuthentication
-
-#     def get(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 InvoiceQuery = T_Invoices.objects.filter(id=id)
-#                 if InvoiceQuery.exists():
-#                     query = TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,Sum(TC_InvoiceItems.Quantity)Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.TaxType,TC_InvoiceItems.Unit_id,M_Units.Name UnitName,Sum(TC_InvoiceItems.BaseUnitQuantity)BaseUnitQuantity,TC_InvoiceItems.GST_id,TC_InvoiceItems.GSTPercentage,SUM(TC_InvoiceItems.BasicAmount)BasicAmount, SUM(TC_InvoiceItems.GSTAmount)GSTAmount,SUM(TC_InvoiceItems.CGST)CGST, SUM(TC_InvoiceItems.SGST)SGST, SUM(TC_InvoiceItems.IGST)IGST, TC_InvoiceItems.CGSTPercentage, TC_InvoiceItems.SGSTPercentage, TC_InvoiceItems.IGSTPercentage, SUM(TC_InvoiceItems.Amount)Amount,  TC_InvoiceItems.BatchCode,TC_InvoiceItems.BatchDate,M_GSTHSNCode.HSNCode,SUM(TC_InvoiceItems.Discount)Discount, SUM(TC_InvoiceItems.DiscountAmount)DiscountAmount,SUM(TC_InvoiceItems.QtyInBox)QtyInBox, SUM(TC_InvoiceItems.QtyInKg)QtyInKg, SUM(TC_InvoiceItems.QtyInNo)QtyInNo FROM TC_InvoiceItems 
-# JOIN M_Items on M_Items.id=TC_InvoiceItems.Item_id
-# JOIN M_MRPMaster on M_MRPMaster.id=TC_InvoiceItems.MRP_id
-# JOIN MC_ItemUnits on  MC_ItemUnits.id= TC_InvoiceItems.Unit_id
-# JOIN M_Units on M_Units.id=MC_ItemUnits.UnitID_id
-# JOIN M_GSTHSNCode on M_GSTHSNCode.id = TC_InvoiceItems.GST_id
-# JOIN O_LiveBatches on O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
-# where tc_invoiceitems.Invoice_id=%s Group By M_Items.id,TC_InvoiceItems.MRPValue ''',([id]))
-#                     # print(str(query.query))
-#                     InvoiceItemSerializer = ChildInvoiceItemSerializer(query, many=True).data
-#                     InvoiceItemDetails = list()
-#                     for b in InvoiceItemSerializer:
-#                         aaaa=UnitwiseQuantityConversion(b['Item_id'],b['Quantity'],b['Unit_id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
-#                         InvoiceItemDetails.append({
-#                             "Item": b['Item_id'],
-#                             "ItemName": b['ItemName'],
-#                             "Quantity": b['Quantity'],
-#                             "MRP": b['MRP_id'],
-#                             "MRPValue": b['MRPValue'],
-#                             "Rate": b['Rate'],
-#                             "UnitName": aaaa,
-#                             "BaseUnitQuantity": b['BaseUnitQuantity'],
-#                             "GST": b['GST_id'],
-#                             "GSTPercentage": b['GSTPercentage'],
-#                             "BasicAmount": b['BasicAmount'],
-#                             "GSTAmount": b['GSTAmount'],
-#                             "CGST": b['CGST'],
-#                             "SGST": b['SGST'],
-#                             "IGST": b['IGST'],
-#                             "CGSTPercentage": b['CGSTPercentage'],
-#                             "SGSTPercentage": b['SGSTPercentage'],
-#                             "IGSTPercentage": b['IGSTPercentage'],
-#                             "Amount": b['Amount'],
-#                             "BatchCode": b['BatchCode'],
-#                             "BatchDate": b['BatchDate'],
-#                             "HSNCode":b['HSNCode'],
-#                             "Discount":b['Discount'],
-#                             "DiscountAmount":b['DiscountAmount']
-#                         })    
-                    
-#                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
-#                     InvoiceData = list()
-#                     for a in InvoiceSerializedata:
-#                         InvoiceReferenceDetails = list()
-#                         for d in a['InvoicesReferences']:
-#                             InvoiceReferenceDetails.append({
-#                                 # "Invoice": d['Invoice'],
-#                                 "Order": d['Order']['id'],
-#                                 "FullOrderNumber": d['Order']['FullOrderNumber'],
-#                             })
-                            
-#                         DefCustomerAddress = ''  
-#                         for ad in a['Customer']['PartyAddress']:
-#                             if ad['IsDefault'] == True :
-#                                 DefCustomerAddress = ad['Address']
-                                
-#                         DefPartyAddress = ''
-#                         for x in a['Party']['PartyAddress']:
-#                             if x['IsDefault'] == True :
-#                                 DefPartyAddress = x['Address']
-                    
-#                         InvoiceData.append({
-#                             "id": a['id'],
-#                             "InvoiceDate": a['InvoiceDate'],
-#                             "InvoiceNumber": a['InvoiceNumber'],
-#                             "FullInvoiceNumber": a['FullInvoiceNumber'],
-#                             "GrandTotal": a['GrandTotal'],
-#                             "RoundOffAmount":a['RoundOffAmount'],
-#                             "Customer": a['Customer']['id'],
-#                             "CustomerName": a['Customer']['Name'],
-#                             "CustomerGSTIN": a['Customer']['GSTIN'],
-#                             "Party": a['Party']['id'],
-#                             "PartyName": a['Party']['Name'],
-#                             "PartyGSTIN": a['Party']['GSTIN'],
-#                             "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
-#                             "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
-#                             "PartyState": a['Party']['State']['Name'],
-#                             "CustomerState": a['Customer']['State']['Name'],
-#                             "PartyAddress": DefPartyAddress,                            
-#                             "CustomerAddress": DefCustomerAddress,
-#                             "DriverName":a['Driver']['Name'],
-#                             "VehicleNo": a['Vehicle']['VehicleNumber'],
-#                             "CreatedOn" : a['CreatedOn'],
-#                             "InvoiceItems": InvoiceItemDetails,
-#                             "InvoicesReferences": InvoiceReferenceDetails,                              
-#                         })
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-#                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
-    
 
     def get(self, request, id=0):
         try:
@@ -498,13 +399,39 @@ class InvoiceViewSecond(CreateAPIView):
                     BaseUnitQuantity11=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
                     selectQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).values('BaseUnitQuantity')
                     UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = int(selectQuery[0]['BaseUnitQuantity'] )+int(BaseUnitQuantity11))
-                  
+                
+                
+                
+                row1 = T_Invoices.objects.filter(id=id).values('id','InvoiceDate','InvoiceNumber','FullInvoiceNumber','GrandTotal','RoundOffAmount','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Customer','Driver','Party','Vehicle','TCSAmount','Hide')
+                new_row1 = DeletedT_Invoices(Invoice=row1[0]['id'],InvoiceDate=row1[0]['InvoiceDate'],InvoiceNumber=row1[0]['InvoiceNumber'],FullInvoiceNumber=row1[0]['FullInvoiceNumber'],GrandTotal=row1[0]['GrandTotal'],RoundOffAmount=row1[0]['RoundOffAmount'],CreatedBy=row1[0]['CreatedBy'],CreatedOn=row1[0]['CreatedOn'],UpdatedBy=row1[0]['UpdatedBy'],UpdatedOn=row1[0]['UpdatedOn'],Customer=row1[0]['Customer'],Driver=row1[0]['Driver'],Party=row1[0]['Party'],Vehicle=row1[0]['Vehicle'],TCSAmount=row1[0]['TCSAmount'],Hide=row1[0]['Hide'])
+                new_row1.save()
+                
+                
+                rows_to_move = TC_InvoiceItems.objects.filter(Invoice=id).values('BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','Invoice')
+                # Create a list of instances for Table2 using data from Table1
+                new_rows = [DeletedTC_InvoiceItems(Quantity=row['Quantity'], BaseUnitQuantity=row['BaseUnitQuantity'], MRPValue=row['MRPValue'],Rate =row['Rate'],BasicAmount=row['BasicAmount'],TaxType=row['TaxType'],GSTPercentage=row['GSTPercentage'],GSTAmount=row['GSTAmount'],Amount=row['Amount'],DiscountType=row['DiscountType'],Discount=row['Discount'],DiscountAmount=row['DiscountAmount'],CGST=row['CGST'],SGST=row['SGST'],IGST=row['IGST'],CGSTPercentage=row['CGSTPercentage'],SGSTPercentage=row['SGSTPercentage'],IGSTPercentage=row['IGSTPercentage'],BatchDate=row['BatchDate'],BatchCode=row['BatchCode'],CreatedOn=row['CreatedOn'],GST=row['GST'],Invoice=row['Invoice'],Item=row['Item'],LiveBatch=row['LiveBatch'],MRP=row['MRP'],Unit=row['Unit'],QtyInNo=row['QtyInNo'],QtyInKg=row['QtyInKg'],QtyInBox=row['QtyInBox']) for row in rows_to_move]
+                # Bulk insert the new rows into Table2
+                aaa=DeletedTC_InvoiceItems.objects.bulk_create(new_rows)
+                
+                row2 = TC_InvoiceUploads.objects.filter(Invoice=id).values('Irn', 'EInvoicePdf', 'QRCodeUrl', 'AckNo', 'EwayBillUrl', 'EInvoiceCreatedBy', 'EInvoiceCanceledBy', 'EInvoiceIsCancel', 'Invoice', 'EwayBillNo', 'EInvoiceCanceledOn', 'EInvoiceCreatedOn', 'EwayBillCanceledBy', 'EwayBillCanceledOn', 'EwayBillCreatedBy', 'EwayBillCreatedOn', 'EwayBillIsCancel', 'user_gstin')
+                if row2:
+                    new_row2 = DeletedTC_InvoiceUploads(Irn=row2[0]['Irn'],EInvoicePdf=row2[0]['EInvoicePdf'],QRCodeUrl=row2[0]['QRCodeUrl'],AckNo=row2[0]['AckNo'],EwayBillUrl=row2[0]['EwayBillUrl'],EInvoiceCreatedBy=row2[0]['EInvoiceCreatedBy'],EInvoiceCanceledBy=row2[0]['EInvoiceCanceledBy'],EInvoiceIsCancel=row2[0]['EInvoiceIsCancel'],Invoice=row2[0]['Invoice'],EwayBillNo=row2[0]['EwayBillNo'],EInvoiceCanceledOn=row2[0]['EInvoiceCanceledOn'],EInvoiceCreatedOn=row2[0]['EInvoiceCreatedOn'],EwayBillCanceledBy=row2[0]['EwayBillCanceledBy'],EwayBillCanceledOn=row2[0]['EwayBillCanceledOn'],EwayBillCreatedBy=row2[0]['EwayBillCreatedBy'],EwayBillCreatedOn=row2[0]['EwayBillCreatedOn'],EwayBillIsCancel=row2[0]['EwayBillIsCancel'],user_gstin=row2[0]['user_gstin'])
+                    new_row2.save()
+                else:  
+                    pass
+                
+                
+                row3 = TC_InvoicesReferences.objects.filter(Invoice=id).values('Invoice','Order')   
+                new_row3 = DeletedTC_InvoicesReferences(Invoice=row3[0]['Invoice'],Order=row3[0]['Order'])
+                new_row3.save()                                                                                                                                                                                                                                                           
+                
+                
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
-                log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Delete Successfully')
+                # log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Delete Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
-            log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'This Transaction used in another table')
+            # log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'This Transaction used in another table')
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 

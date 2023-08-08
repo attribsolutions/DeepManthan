@@ -1803,7 +1803,7 @@ class Transactionlog(models.Model):
         db_table="Transactionlog"     
         
 class TC_InvoiceUploads(models.Model):
-    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT) 
+    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.CASCADE) 
     AckNo =  models.CharField(max_length=500,null=True)  
     Irn =  models.CharField(max_length=500,null=True)
     QRCodeUrl =models.CharField(max_length=500,null=True)
