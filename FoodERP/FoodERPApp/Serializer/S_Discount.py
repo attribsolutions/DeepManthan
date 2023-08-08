@@ -32,3 +32,4 @@ class DiscountMasterFilterSerializer(serializers.Serializer):
     PriceListName = serializers.CharField(max_length=500)  
     CreatedBy = serializers.IntegerField()
     CreatedOn = serializers.DateTimeField()
+    IsDeleted= serializers.BooleanField()
