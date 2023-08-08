@@ -46,7 +46,7 @@ class SalesmanListView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': SalesmanList})
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
         except M_Salesman.DoesNotExist:
-            log_entry = create_transaction_log(request,Salesmandata,0,Party,'Salesman Not available')
+            # log_entry = create_transaction_log(request,Salesmandata,0,Party,'Salesman Not available')
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -65,7 +65,7 @@ class SalesmanView(CreateAPIView):
                 Salesman_Serializer = SalesmanSerializer(data=Salesman_data)
                 if Salesman_Serializer.is_valid():
                     Salesman_Serializer.save()
-                    log_entry = create_transaction_log(request,Salesman_data,0,0,'SalesMan Save Successfully')
+                    # log_entry = create_transaction_log(request,Salesman_data,0,0,'SalesMan Save Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Salesman Save Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -102,8 +102,6 @@ class SalesmanView(CreateAPIView):
                                 "SalesmanRoute":SalesmanRoutelist
                             })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SalesmanList[0]})
-
-                   
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Salesman Not available ', 'Data': []})
         except M_Salesman.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Salesman Not available', 'Data': []})
@@ -120,7 +118,7 @@ class SalesmanView(CreateAPIView):
                 Salesmandata_Serializer = SalesmanSerializer(SalesmandatadataByID, data=Salesmandata)
                 if Salesmandata_Serializer.is_valid():
                     Salesmandata_Serializer.save()
-                    log_entry = create_transaction_log(request,Salesmandata,0,0,'SalesMan Updated Successfully')
+                    # log_entry = create_transaction_log(request,Salesmandata,0,0,'SalesMan Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Salesman Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -135,7 +133,7 @@ class SalesmanView(CreateAPIView):
             with transaction.atomic():
                 Salesmandata = M_Salesman.objects.get(id=id)
                 Salesmandata.delete()
-                log_entry = create_transaction_log(request,Salesmandata,0,0,'SalesMan Deleted Successfully')
+                # log_entry = create_transaction_log(request,Salesmandata,0,0,'SalesMan Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Salesman Deleted Successfully', 'Data':[]})
         except M_Salesman.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Salesman Not available', 'Data': []})
