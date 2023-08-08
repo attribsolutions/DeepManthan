@@ -389,7 +389,7 @@ WHERE MC_PartySubParty.Party_id=%s''',[Party])
                     RetailerExportData=list()
                     RetailerExportSerializer=RetailerDataExportSerializer(query, many=True).data
                     RetailerExportData.append({"ReportExportSerializerDetails" : RetailerExportSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': RetailerExportData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': RetailerExportData[0]})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
