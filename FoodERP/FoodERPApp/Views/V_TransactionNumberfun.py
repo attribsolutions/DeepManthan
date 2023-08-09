@@ -101,7 +101,11 @@ class GetMaxNumber:
     def GetInvoiceNumber(*args):
         
         MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
-        DeletedMaxInvoiceNumber=T_DeletedInvoices.objects.filter(Party=args[0]).values('InvoiceNumber').order_by('-id')[:1]
+        # DeletedMaxInvoiceNumber=T_DeletedInvoices.objects.filter(Party=args[0]).values('InvoiceNumber').order_by('-Invoice')[:1]
+        max_number = T_DeletedInvoices.objects.filter(Party=args[0]).aggregate(max_number=Max('InvoiceNumber'))['max_number']
+        
+        # print(MaxInvoiceNumber)
+        # print(max_number)
         
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
@@ -111,15 +115,15 @@ class GetMaxNumber:
             if(b==firstdatefinancial):
                 a = 1
             else:
-                if (not DeletedMaxInvoiceNumber):
+                if (not max_number):
                     a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
                     a=a+1
                 else:
-                    if(int(MaxInvoiceNumber[0]['InvoiceNumber']) > (int(DeletedMaxInvoiceNumber[0]['InvoiceNumber']))):
+                    if(int(MaxInvoiceNumber[0]['InvoiceNumber']) > (int(max_number))):
                         a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
                         a=a+1
                     else:
-                        a=int(DeletedMaxInvoiceNumber[0]['InvoiceNumber'])
+                        a=int(max_number)
                         a=a+1
         return a
 
