@@ -854,6 +854,10 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
                 Party = Orderdata['PartyID']
 
+                q0 = MC_SettingsDetails.objects.filter(
+                        SettingID=1, Company=Company).values('Value')
+                v=q0[0]["Value"]
+                pricelist =v.split(",")
                 if Party == "":
                     
                     # q0 = MC_SettingsDetails.objects.filter(
@@ -873,8 +877,8 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 where  OrderDate between %s and %s
- and c.PriceList_id in(select Value from MC_SettingsDetails where MC_SettingsDetails.SettingID_id  = 1 and MC_SettingsDetails.Company_id=%s) ''',
- ([FromDate],[ToDate],[Company]))
+ and c.PriceList_id in %s ''',
+ ([FromDate,ToDate,pricelist]))
                 
                 else:
                     # q0 = MC_SettingsDetails.objects.filter(
@@ -882,7 +886,10 @@ where  OrderDate between %s and %s
                     # pricelist = q0[0]["Value"].split(',')
                     # OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Supplier=Party).select_related(
                     #     'Customer').filter(Customer__PriceList_id__in=pricelist)
-
+    
+                    # v=q0[0]["Value"]
+                    # pricelist =v.split(",")
+                    
                     OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo	,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,
 TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount  FROM T_Orders
 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
@@ -893,9 +900,10 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 where Supplier_id=%s and OrderDate between %s and %s
- and c.PriceList_id in(select Value from MC_SettingsDetails where MC_SettingsDetails.SettingID_id  = 1 and MC_SettingsDetails.Company_id=%s) ''',
- ([Party],[FromDate],[ToDate],[Company]))
-
+ and c.PriceList_id in %s ''',
+ ([Party,FromDate,ToDate,pricelist]))
+                
+                
                 if OrderQuery:
                     OrderSerializedata = SummaryReportOrderSerializer(
                         OrderQuery, many=True).data
