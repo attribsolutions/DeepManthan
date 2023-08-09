@@ -101,7 +101,7 @@ class GetMaxNumber:
     def GetInvoiceNumber(*args):
         
         MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
-        DeletedMaxInvoiceNumber=T_DeletedInvoices.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
+        DeletedMaxInvoiceNumber=T_DeletedInvoices.objects.filter(Party=args[0]).values('InvoiceNumber').order_by('-id')[:1]
         
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
@@ -114,7 +114,6 @@ class GetMaxNumber:
                 if (not DeletedMaxInvoiceNumber):
                     a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
                     a=a+1
-                    
                 else:
                     if(int(MaxInvoiceNumber[0]['InvoiceNumber']) > (int(DeletedMaxInvoiceNumber[0]['InvoiceNumber']))):
                         a=int(MaxInvoiceNumber[0]['InvoiceNumber'])
