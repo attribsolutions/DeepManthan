@@ -21,6 +21,7 @@ class OrderDetailsForInvoice(CreateAPIView):
             with transaction.atomic():
                
                 Orderdata = JSONParser().parse(request)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "initial",9,0)
                 FromDate = Orderdata['FromDate']
                 Party = Orderdata['Party']
                 Customer = Orderdata['Customer']
@@ -149,9 +150,11 @@ class OrderDetailsForInvoice(CreateAPIView):
                 Orderdata.append({
                     "OrderIDs":Order_list,
                     "OrderItemDetails":OrderItemDetails
-                   })         
+                   })    
+            log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Details for Invoice",32,0)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderdata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -165,6 +168,7 @@ class InvoiceListFilterView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
+                log_entry = create_transaction_log(request, Invoicedata, 0, 0, "initial",9,0)
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
                 Customer = Invoicedata['Customer']
@@ -204,9 +208,12 @@ class InvoiceListFilterView(CreateAPIView):
                             "InvoiceUploads" : a["InvoiceUploads"]
                              
                         })
+                    log_entry = create_transaction_log(request, Invoicedata, 0, Party, "Invoice List",35,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                log_entry = create_transaction_log(request, Invoicedata, 0, Party, "Record Not Found",29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -251,10 +258,12 @@ class InvoiceView(CreateAPIView):
                 if Invoice_serializer.is_valid():
                     Invoice_serializer.save()
                     LastInsertId = (T_Invoices.objects.last()).id
-                    # log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully')
+                    log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully',4,LastInsertId)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
+                log_entry = create_transaction_log(request, Invoicedata, 0, Party, Invoice_serializer.errors,34,LastInsertId)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,LastInsertId)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
@@ -400,12 +409,9 @@ class InvoiceViewSecond(CreateAPIView):
                     selectQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).values('BaseUnitQuantity')
                     UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = int(selectQuery[0]['BaseUnitQuantity'] )+int(BaseUnitQuantity11))
                 
-                
-                
                 row1 = T_Invoices.objects.filter(id=id).values('id','InvoiceDate','InvoiceNumber','FullInvoiceNumber','GrandTotal','RoundOffAmount','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Customer','Driver','Party','Vehicle','TCSAmount','Hide')
                 new_row1 = T_DeletedInvoices(Invoice=row1[0]['id'],InvoiceDate=row1[0]['InvoiceDate'],InvoiceNumber=row1[0]['InvoiceNumber'],FullInvoiceNumber=row1[0]['FullInvoiceNumber'],GrandTotal=row1[0]['GrandTotal'],RoundOffAmount=row1[0]['RoundOffAmount'],CreatedBy=row1[0]['CreatedBy'],CreatedOn=row1[0]['CreatedOn'],UpdatedBy=row1[0]['UpdatedBy'],UpdatedOn=row1[0]['UpdatedOn'],Customer=row1[0]['Customer'],Driver=row1[0]['Driver'],Party=row1[0]['Party'],Vehicle=row1[0]['Vehicle'],TCSAmount=row1[0]['TCSAmount'],Hide=row1[0]['Hide'])
-                new_row1.save()
-                
+                new_row1.save() 
                 
                 rows_to_move = TC_InvoiceItems.objects.filter(Invoice=id).values('BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','Invoice')
                 # Create a list of instances for Table2 using data from Table1
@@ -419,21 +425,20 @@ class InvoiceViewSecond(CreateAPIView):
                     new_row2.save()
                 else:  
                     pass
-                
-                
+                 
                 row3 = TC_InvoicesReferences.objects.filter(Invoice=id).values('Invoice','Order')   
                 new_row3 = TC_DeletedInvoicesReferences(Invoice=row3[0]['Invoice'],Order=row3[0]['Order'])
                 new_row3.save()                                                                                                                                                                                                                                                           
                 
-                
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
-                # log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Delete Successfully')
+                log_entry = create_transaction_log(request, id, 0, 0, 'Invoice Delete Successfully',6,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
-            # log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'This Transaction used in another table')
+            log_entry = create_transaction_log(request, id, 0, 0, 'This Transaction used in another table',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, id, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
           
 class InvoiceNoView(CreateAPIView):
@@ -445,7 +450,8 @@ class InvoiceNoView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                InVoice_Data = JSONParser().parse(request)  
+                InVoice_Data = JSONParser().parse(request) 
+                log_entry = create_transaction_log(request, InVoice_Data, 0, 0, "initial",9,0) 
                 Party = InVoice_Data['PartyID']
                 Customer = InVoice_Data['CustomerID']
                 query = T_Invoices.objects.filter(Party=Party,Customer=Customer)
@@ -457,9 +463,12 @@ class InvoiceNoView(CreateAPIView):
                             "Invoice":a['id'],
                             "FullInvoiceNumber":a['FullInvoiceNumber'],
                         })
+                    log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Invoice No List",36,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
+                log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Record Not Found",29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, InVoice_Data, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
 
@@ -582,12 +591,14 @@ class BulkInvoiceView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
+                log_entry = create_transaction_log(request, Invoicedata, 0, 0, "initial",9,0)
                 for aa in Invoicedata['BulkData']:
                     CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
                    
                     if CustomerMapping.count() > 0:
                         aa['Customer']=CustomerMapping[0]['Customer']
                     else:
+                        log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Customer Data Mapping Missing",37,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
                     # print(aa['Customer'])
                     for bb in aa['InvoiceItems']:
@@ -595,6 +606,7 @@ class BulkInvoiceView(CreateAPIView):
                         if ItemMapping.count() > 0:
                             bb['Item']=ItemMapping[0]['Item']
                         else:
+                            log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Item Data Mapping Missing",38,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Item Data Mapping Missing", 'Data':[]})     
                         UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=bb['Unit'],Party=aa['Party']).values("Unit")
                         if UnitMapping.count() > 0:
@@ -602,17 +614,22 @@ class BulkInvoiceView(CreateAPIView):
                             if MC_UnitID.count() > 0:
                                 bb['Unit']=MC_UnitID[0]['id']
                             else:
+                                log_entry = create_transaction_log(request, Invoicedata, 0, 0, " MC_ItemUnits Data Mapping Missing",39,0)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " MC_ItemUnits Data Mapping Missing", 'Data':[]})            
                         else:
+                            log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Unit Data Mapping Missing",40,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
                     Invoice_serializer = BulkInvoiceSerializer(data=aa)
                     if Invoice_serializer.is_valid():
                         Invoice_serializer.save()
                     else:
                         transaction.set_rollback(True)
+                        log_entry = create_transaction_log(request, Invoicedata, 0, 0, Invoice_serializer.errors,34,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Save Successfully',4,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_log(request, Invoicedata, 0, 0, e, 33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
         
 
