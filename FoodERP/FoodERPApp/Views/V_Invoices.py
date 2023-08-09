@@ -21,7 +21,6 @@ class OrderDetailsForInvoice(CreateAPIView):
             with transaction.atomic():
                
                 Orderdata = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, Orderdata, 0, 0, "initial",9,0)
                 FromDate = Orderdata['FromDate']
                 Party = Orderdata['Party']
                 Customer = Orderdata['Customer']
@@ -168,7 +167,6 @@ class InvoiceListFilterView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, Invoicedata, 0, 0, "initial",9,0)
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
                 Customer = Invoicedata['Customer']
@@ -450,8 +448,7 @@ class InvoiceNoView(CreateAPIView):
     def post(self, request, id=0):
         try:
             with transaction.atomic():
-                InVoice_Data = JSONParser().parse(request) 
-                log_entry = create_transaction_log(request, InVoice_Data, 0, 0, "initial",9,0) 
+                InVoice_Data = JSONParser().parse(request)  
                 Party = InVoice_Data['PartyID']
                 Customer = InVoice_Data['CustomerID']
                 query = T_Invoices.objects.filter(Party=Party,Customer=Customer)
@@ -591,7 +588,6 @@ class BulkInvoiceView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, Invoicedata, 0, 0, "initial",9,0)
                 for aa in Invoicedata['BulkData']:
                     CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
                    
