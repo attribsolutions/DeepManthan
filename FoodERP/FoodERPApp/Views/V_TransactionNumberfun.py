@@ -104,8 +104,8 @@ class GetMaxNumber:
         # DeletedMaxInvoiceNumber=T_DeletedInvoices.objects.filter(Party=args[0]).values('InvoiceNumber').order_by('-Invoice')[:1]
         max_number = T_DeletedInvoices.objects.filter(Party=args[0]).aggregate(max_number=Max('InvoiceNumber'))['max_number']
         
-        print(MaxInvoiceNumber)
-        print(max_number)
+        # print(MaxInvoiceNumber)
+        # print(max_number)
         
         firstdatefinancial = date.today().strftime('%Y-04-01')
         b=args[1]
