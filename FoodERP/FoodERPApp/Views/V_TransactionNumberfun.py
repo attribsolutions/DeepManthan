@@ -101,7 +101,6 @@ class GetMaxNumber:
     def GetInvoiceNumber(*args):
         
         MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
-        # DeletedMaxInvoiceNumber=T_DeletedInvoices.objects.filter(Party=args[0]).values('InvoiceNumber').order_by('-Invoice')[:1]
         max_number = T_DeletedInvoices.objects.filter(Party=args[0]).aggregate(max_number=Max('InvoiceNumber'))['max_number']
         
         # print(MaxInvoiceNumber)
