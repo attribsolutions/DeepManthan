@@ -19,7 +19,7 @@ class InvoicegovUploadSerializer2(serializers.Serializer):
     seller_legal_name = serializers.CharField(max_length=500)
     seller_address1 =  serializers.CharField(max_length=500)
     Seller_location =serializers.CharField(max_length=500)
-    seller_pincode = serializers.BooleanField(default=False)
+    seller_pincode = serializers.CharField(default=False)
     Seller_state_code =  serializers.CharField(max_length=500)
     seller_State= serializers.CharField(max_length=500)
     

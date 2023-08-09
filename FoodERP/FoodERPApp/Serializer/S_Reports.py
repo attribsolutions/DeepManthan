@@ -124,8 +124,6 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     TotalValue = serializers.DecimalField(max_digits=10, decimal_places=2) 
-    FullOrderNumber = serializers.CharField(max_length=500)
-    OrderDate= serializers.DateField()
     TCSAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2) 

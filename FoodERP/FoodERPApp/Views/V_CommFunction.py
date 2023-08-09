@@ -38,7 +38,7 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def create_transaction_log(request,data,User, PartyID,TransactionDetails,TransactionType,TransactionID):
+def create_transaction_log(request,data,User, PartyID,TransactionDetails,TransactionType=0,TransactionID=0):
     
    
     log_entry = Transactionlog.objects.create(
