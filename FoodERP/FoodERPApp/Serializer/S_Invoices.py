@@ -188,7 +188,7 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
             ret["Margin"] = {"id": None, "Margin": None} 
         
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage": None}        
+            ret["GST"] = {"id": None, "GSTPercentage": None, "HSNCode":None }        
              
         return ret    
 class InvoiceUploadsSerializer(serializers.ModelSerializer):
