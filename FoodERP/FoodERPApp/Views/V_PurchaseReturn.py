@@ -82,12 +82,12 @@ class PurchaseReturnListView(CreateAPIView):
                             "Comment" : a["Comment"],
                             "Status" : Status
                         })
-                    # log_entry = create_transaction_log(request, Returndata, 0, Party, 'PurchaseReturn List',51,0)
+                    log_entry = create_transaction_log(request, Returndata, 0, a['Party']['id'], 'PurchaseReturn List',51,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
-                # log_entry = create_transaction_log(request, Returndata, 0, Party, 'Record Not Found',29,0)
+                log_entry = create_transaction_log(request, Returndata, 0, a['Party']['id'], 'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Returndata, 0, Party, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Returndata, 0, a['Party']['id'], Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PurchaseReturnView(CreateAPIView):
