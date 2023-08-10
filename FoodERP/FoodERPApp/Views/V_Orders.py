@@ -854,47 +854,84 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
                 Party = Orderdata['PartyID']
 
+                q0 = MC_SettingsDetails.objects.filter(
+                        SettingID=1, Company=Company).values('Value')
+                v=q0[0]["Value"]
+                pricelist =v.split(",")
                 if Party == "":
-                    q0 = MC_SettingsDetails.objects.filter(
-                        SettingID=1, Company=Company).values('Value')
+                    
+                    # q0 = MC_SettingsDetails.objects.filter(
+                    #     SettingID=1, Company=Company).values('Value')
 
-                    pricelist = q0[0]["Value"].split(',')
-                    OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related(
-                        'Customer').filter(Customer__PriceList_id__in=pricelist)
+                    # pricelist = q0[0]["Value"].split(',')
+                    # OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related(
+                    #     'Customer').filter(Customer__PriceList_id__in=pricelist)
+                    
+                    OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.id  ,T_Orders.FullOrderNumber OrderNo	,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,
+TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders
+join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+join M_Items on M_Items.id=TC_OrderItems.Item_id
+join M_Parties s on T_Orders.Supplier_id=s.id
+join M_Parties c on T_Orders.Customer_id=c.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+where  OrderDate between %s and %s
+ and c.PriceList_id in %s ''',
+ ([FromDate,ToDate,pricelist]))
+                
                 else:
-                    q0 = MC_SettingsDetails.objects.filter(
-                        SettingID=1, Company=Company).values('Value')
-                    pricelist = q0[0]["Value"].split(',')
-                    OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Supplier=Party).select_related(
-                        'Customer').filter(Customer__PriceList_id__in=pricelist)
-
-                if OrderQuery.count() > 0:
+                    # q0 = MC_SettingsDetails.objects.filter(
+                    #     SettingID=1, Company=Company).values('Value')
+                    # pricelist = q0[0]["Value"].split(',')
+                    # OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Supplier=Party).select_related(
+                    #     'Customer').filter(Customer__PriceList_id__in=pricelist)
+    
+                    # v=q0[0]["Value"]
+                    # pricelist =v.split(",")
+                    
+                    OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo	,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,
+TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount  FROM T_Orders
+join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+join M_Items on M_Items.id=TC_OrderItems.Item_id
+join M_Parties s on T_Orders.Supplier_id=s.id
+join M_Parties c on T_Orders.Customer_id=c.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+where Supplier_id=%s and OrderDate between %s and %s
+ and c.PriceList_id in %s ''',
+ ([Party,FromDate,ToDate,pricelist]))
+                
+                
+                if OrderQuery:
                     OrderSerializedata = SummaryReportOrderSerializer(
                         OrderQuery, many=True).data
-                    OrderData = list()
-                    OrderItemDetails = list()
-                    for a in OrderSerializedata:
-                        InvoiceID = TC_InvoicesReferences.objects.filter(
-                            Order=a['id']).values('Invoice').count()
-                        if InvoiceID == 0:
-                            for b in a['OrderItem']:
-                                OrderItemDetails.append({
-                                    "Group": b['Item']['ItemGroupDetails'][0]['Group']['Name'],
-                                    "SubGroup": b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
-                                    "MaterialName": b['Item']['Name'],
-                                    "Orderid": a['id'],
-                                    "OrderNo": a['FullOrderNumber'],
-                                    "OrderDate": a['OrderDate'],
-                                    "SupplierName": a['Supplier']['Name'],
-                                    "CustomerName": a['Customer']['Name'],
-                                    "QtyInNo": float(b['QtyInNo']),
-                                    "QtyInKg": float(b['QtyInKg']),
-                                    "QtyInBox": float(b['QtyInBox']),
-                                    "OrderAmount": float(a['OrderAmount']),
-                                    "CreatedOn": a['CreatedOn']
-                                })
-                    # log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Summary",31,id)            
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
+                    # OrderData = list()
+                    # OrderItemDetails = list()
+                    # for a in OrderSerializedata:
+                    #     InvoiceID = TC_InvoicesReferences.objects.filter(
+                    #         Order=a['id']).values('Invoice').count()
+                    #     if InvoiceID == 0:
+                    #         for b in a['OrderItem']:
+                    #             OrderItemDetails.append({
+                    #                 "Group": b['Item']['ItemGroupDetails'][0]['Group']['Name'],
+                    #                 "SubGroup": b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
+                    #                 "MaterialName": b['Item']['Name'],
+                    #                 "Orderid": a['id'],
+                    #                 "OrderNo": a['FullOrderNumber'],
+                    #                 "OrderDate": a['OrderDate'],
+                    #                 "SupplierName": a['Supplier']['Name'],
+                    #                 "CustomerName": a['Customer']['Name'],
+                    #                 "QtyInNo": float(b['QtyInNo']),
+                    #                 "QtyInKg": float(b['QtyInKg']),
+                    #                 "QtyInBox": float(b['QtyInBox']),
+                    #                 "OrderAmount": float(a['OrderAmount']),
+                    #                 "CreatedOn": a['CreatedOn']
+                    #             })
+                    # # log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Summary",31,id)            
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
                 # log_entry = create_transaction_log(request, Orderdata, 0, Party, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
