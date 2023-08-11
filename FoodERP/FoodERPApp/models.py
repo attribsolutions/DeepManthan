@@ -909,7 +909,7 @@ class T_Invoices(models.Model):
     Vehicle = models.ForeignKey(M_Vehicles, related_name='InvoiceVehicle',on_delete=models.PROTECT,null=True,blank=True)
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
     # Hide Flag is temporary 
-    Hide = models.CharField(max_length=500,default=0) 
+    Hide = models.BooleanField()
 
     class Meta:
         db_table = "T_Invoices"
