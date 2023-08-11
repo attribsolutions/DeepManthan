@@ -871,6 +871,7 @@ class PurchaseReturnPrintView(CreateAPIView):
                             "ReturnReason":a['ReturnReason'],
                             "IsApproved" : a["IsApproved"],
                             "ReturnItems":PurchaseReturnItemList
+                            
                         })
                         log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, a['Party']['id'], 'PurchaseReturnPrint',61,0 )
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList[0]})
