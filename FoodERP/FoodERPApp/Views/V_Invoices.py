@@ -389,6 +389,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
+                    log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, a['Party']['id'], "Invoice",50,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
@@ -430,13 +431,13 @@ class InvoiceViewSecond(CreateAPIView):
                 
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
-                log_entry = create_transaction_log(request, id, 0, 0, 'Invoice Delete Successfully',6,0)
+                log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, 'Invoice Delete Successfully',6,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
-            log_entry = create_transaction_log(request, id, 0, 0, 'This Transaction used in another table',8,0)
+            log_entry = create_transaction_log(request,  {'InvoiceID':id}, 0, 0, 'This Transaction used in another table',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, id, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_log(request,  {'InvoiceID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
           
 class InvoiceNoView(CreateAPIView):
@@ -574,6 +575,7 @@ class InvoiceViewThird(CreateAPIView):
                             "InvoiceItems": InvoiceItemDetails,
                                                
                         })
+                    # log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Invoice No List",36,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
@@ -635,11 +637,15 @@ class InvoiceHideView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def delete(self, request, id=0):
+    def delete(self, request, id=0,Mode=0):
         try:
             with transaction.atomic():
-                InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=1)
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice hide Successfully ', 'Data':[]})
+                if Mode == 0:
+                    InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=0) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Un-Hide Successfully ', 'Data':[]})
+                else:
+                    InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=1)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Hide Successfully ', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
         
