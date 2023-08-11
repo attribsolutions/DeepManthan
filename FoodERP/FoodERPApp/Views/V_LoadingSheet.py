@@ -404,7 +404,7 @@ class MultipleInvoicesView(CreateAPIView):
                                     "UnitName":bb,
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
-                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "GSTPercentage": b['GSTPercentage'],
                                     "MarginValue": b['Margin']['Margin'],
                                     "BasicAmount": b['BasicAmount'],
                                     "GSTAmount": b['GSTAmount'],

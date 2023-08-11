@@ -381,13 +381,14 @@ class GetUserDetailsView(APIView):
         '''New code Date 26/07/2023'''
         
         user = M_Users.objects.filter(id=UserId).values('Employee','LoginName')
-        employee = M_Employees.objects.filter(id=user[0]['Employee']).values('Company')
+        employee = M_Employees.objects.filter(id=user[0]['Employee']).values('Company','Name')
         company = C_Companies.objects.filter(id=employee[0]['Company']).values('Name','IsSCM','CompanyGroup')
         a = list()
         a.append({
             "UserID": UserId,
             "UserName":user[0]["LoginName"],
             "EmployeeID": user[0]["Employee"],
+            "EmployeeName": employee[0]["Name"],
             "CompanyID": employee[0]["Company"],
             "CompanyName": company[0]["Name"],
             "IsSCMCompany": company[0]["IsSCM"],
