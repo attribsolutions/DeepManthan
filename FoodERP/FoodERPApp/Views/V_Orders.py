@@ -187,6 +187,10 @@ class OrderListFilterViewSecond(CreateAPIView):
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                         InvoiceListData = list()
                         for a in Invoice_serializer:
+                            if a['Hide']==1:
+                                Hide = True
+                            else:
+                                Hide = False    
                             InvoiceID = TC_GRNReferences.objects.filter(
                                 Invoice=a['id']).values('Invoice').count()
                             if InvoiceID == 0:
@@ -209,7 +213,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                                     "CreatedOn": a['CreatedOn'],
                                     "Inward": "",
                                     "Percentage": "",
-                                    "IsRecordDeleted":a['Hide'],
+                                    "IsRecordDeleted":Hide,
                                 })
                         log_entry = create_transaction_log(request, Orderdata, 0, x, "Order List",28,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
