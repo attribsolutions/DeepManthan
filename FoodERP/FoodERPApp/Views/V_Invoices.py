@@ -389,10 +389,12 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
-                    log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, a['Party']['id'], "Invoice",50,0)
+                    log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, "Invoice",50,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
+                log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, "Data Not available",7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
