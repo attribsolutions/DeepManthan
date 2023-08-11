@@ -637,11 +637,15 @@ class InvoiceHideView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def delete(self, request, id=0):
+    def delete(self, request, id=0,Mode=0):
         try:
             with transaction.atomic():
-                InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=1)
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice hide Successfully ', 'Data':[]})
+                if Mode == 0:
+                    InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=0) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Un-Hide Successfully ', 'Data':[]})
+                else:
+                    InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=1)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Hide Successfully ', 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
         
