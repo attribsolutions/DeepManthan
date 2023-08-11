@@ -129,6 +129,7 @@ from .Views.V_Dashboard import *
 
 from .Views.V_StockEntry import *
 
+from .Views.V_R1_Reports import *
 
 urlpatterns = [
     
@@ -567,6 +568,7 @@ urlpatterns = [
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
             
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
+            url(r'generate-excel$',ExcelDownloadView.as_view()),
 
 
 
