@@ -167,11 +167,11 @@ class OrderListFilterViewSecond(CreateAPIView):
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
                         if (FromDate == '' and ToDate == ''):
-                            query = T_Invoices.objects.filter(Customer_id=Customer,Hide=0).order_by('-CreatedOn')
+                            query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
                         else:
-                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer,Hide=0).order_by('-CreatedOn')
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier,Hide=0).order_by('-CreatedOn')
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
                     # return JsonResponse({'query': str(Orderdata.query)})
                     if query: 
                         Invoice_serializer = InvoiceSerializerSecond(
@@ -201,7 +201,7 @@ class OrderListFilterViewSecond(CreateAPIView):
                                     "CreatedOn": a['CreatedOn'],
                                     "Inward": "",
                                     "Percentage": "",
-                                    "Hide":a['Hide'],
+                                    "IsRecordDeleted":a['Hide'],
                                 })
                         # log_entry = create_transaction_log(request, Orderdata, 0, Customer, "Order List",28,id)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
