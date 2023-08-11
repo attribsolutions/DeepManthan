@@ -388,7 +388,7 @@ class GetUserDetailsView(APIView):
             "UserID": UserId,
             "UserName":user[0]["LoginName"],
             "EmployeeID": user[0]["Employee"],
-            "EmployeeName": user[0]["Name"],
+            "EmployeeName": employee[0]["Name"],
             "CompanyID": employee[0]["Company"],
             "CompanyName": company[0]["Name"],
             "IsSCMCompany": company[0]["IsSCM"],
