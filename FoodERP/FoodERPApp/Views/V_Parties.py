@@ -307,7 +307,7 @@ FROM
       LEFT JOIN
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
-                print(query.query)
+                
                 a = PartiesSettingsDetailsListSerializer(
                     query, many=True).data
                

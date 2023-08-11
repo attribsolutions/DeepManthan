@@ -53,7 +53,7 @@ class Uploaded_EInvoice(CreateAPIView):
                     
                     access_token=aa[1]
                     ItemQuery = T_Invoices.objects.raw('''select * from (SELECT T_Invoices.id ,T_Invoices.InvoiceDate document_date,
-P.Name seller_legal_name,C.Name Buyer_legal_name,T_Invoices.FullInvoiceNumber document_number
+P.Name seller_legal_name,C.Name Buyer_legal_name,T_Invoices.FullInvoiceNumber document_number,
 PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
 PD.Name Seller_location ,CD.Name Buyer_location,
 P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
