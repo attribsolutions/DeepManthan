@@ -395,6 +395,7 @@ class GetUserDetailsView(APIView):
             "CompanyGroup": company[0]["CompanyGroup"]
         })
         
+        
         '''Previous  code'''
         
         # Userdata = M_Users.objects.filter(id=UserId)
