@@ -1480,6 +1480,7 @@ class TC_PurchaseReturnItems(models.Model):
     BatchID = models.CharField(max_length=500,null=True,blank=True) # O_BatchwiseLiveStock ID
     primarySourceID =models.IntegerField(blank=True, null=True)
     ApprovedByCompany=models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    FinalApprovalDate=models.DateField(null=True)
 
     
     class Meta:
