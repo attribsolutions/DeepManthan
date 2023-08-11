@@ -13,7 +13,7 @@ class InvoicegovUploadSerializer2(serializers.Serializer):
     
     id = serializers.IntegerField()
     # userGstin=serializers.CharField(max_length=500)
-    # document_number = serializers.CharField(max_length=500)
+    document_number = serializers.CharField(max_length=500)
     document_date = serializers.CharField(max_length=500)
     Seller_gstin = serializers.CharField(max_length=500)
     seller_legal_name = serializers.CharField(max_length=500)

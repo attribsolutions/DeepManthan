@@ -1478,6 +1478,9 @@ class TC_PurchaseReturnItems(models.Model):
     Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     BatchID = models.CharField(max_length=500,null=True,blank=True) # O_BatchwiseLiveStock ID
+    primarySourceID =models.IntegerField(blank=True, null=True)
+    ApprovedByCompany=models.DecimalField(max_digits=20, decimal_places=2)
+
     
     class Meta:
         db_table = "TC_PurchaseReturnItems"
@@ -1966,8 +1969,8 @@ class T_DeletedInvoices(models.Model):
     Party = models.IntegerField(null=True)
     Vehicle = models.IntegerField(null=True)
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
-    # Hide Flag is temporary 
-    Hide = models.CharField(max_length=500,default=0)
+
+    Hide = models.BooleanField()
     DeletedOn = models.DateTimeField(auto_now_add=True) 
 
     class Meta:
