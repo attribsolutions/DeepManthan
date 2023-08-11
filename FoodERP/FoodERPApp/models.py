@@ -1632,6 +1632,7 @@ class TC_CreditDebitNoteItems(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     MRP = models.ForeignKey(M_MRPMaster, related_name='CRDRMRP', on_delete=models.PROTECT,null=True,blank=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='CRDRUnit', on_delete=models.PROTECT)
+    GSTPercentage = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
 
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
