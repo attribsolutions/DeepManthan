@@ -15,8 +15,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font,Alignment
 import pandas as pd
 
-class ExcelDownloadView(CreateAPIView):
+class GSTR1ExcelDownloadView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+    # pass
     
 
     def post(self, request):
