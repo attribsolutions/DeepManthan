@@ -519,12 +519,7 @@ urlpatterns = [
             url(r'ItemsMapping/([0-9]+)$', PartyItemMappingMasterView.as_view()),
             url(r'PartyUnitsMapping$', PartyUnitMappingMasterUnitsView.as_view()),
             url(r'PartyUnitsMapping/([0-9]+)$', PartyUnitMappingMasterUnitsView.as_view()),
-
-
-
-            
-
-                           
+     
 
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
@@ -566,7 +561,6 @@ urlpatterns = [
             
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
-            
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
             url(r'generate-excel$',ExcelDownloadView.as_view()),
 
