@@ -640,7 +640,7 @@ class InvoiceHideView(CreateAPIView):
     def delete(self, request, id=0,Mode=0):
         try:
             with transaction.atomic():
-                if Mode == 0:
+                if Mode == '0':
                     InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=0) 
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Un-Hide Successfully ', 'Data':[]})
                 else:
