@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -67,9 +68,7 @@ Group by M_Parties.GSTIN,M_Parties.Name,T_Invoices.id,T_Invoices.InvoiceDate,M_S
         for col_idx, header in enumerate(df.columns, start=1):
             for row_idx, value in enumerate(df[header], start=2):
                 ws.cell(row=row_idx, column=col_idx, value=value)
-                # if isinstance(value, DecimalField):
-                # cell.alignment = Alignment(horizontal='right')
-                
+               
         
 
         # Example data for the second sheet B2CL
@@ -109,7 +108,7 @@ group by T_Invoices.id,T_Invoices.InvoiceDate,M_States.id,M_States.Name, TC_Invo
                 ws2.cell(row=row_idx, column=col_idx, value=value)
                 
                 
-                
+        # Example data for the third sheet B2CS       
         B2CSquery = T_Invoices.objects.raw('''SELECT T_Invoices.id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
 from T_Invoices 
 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
@@ -145,7 +144,7 @@ where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
                 ws3.cell(row=row_idx, column=col_idx, value=value)        
                 
                 
-               
+        # Example data for the four sheet CDNR        
         CDNRSquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id, M_Parties.GSTIN,M_Parties.Name,T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate,(CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteType,CONCAT(M_States.StateCode, '-', M_States.Name) aa,'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,'' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount FROM T_CreditDebitNotes
         JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id = T_CreditDebitNotes.id
         JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
@@ -183,6 +182,7 @@ where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
                 ws4.cell(row=row_idx, column=col_idx, value=value)        
                 
 
+        # Example data for the five sheet CDNUR 
         CDNURquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id,'' URType, T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate, (CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteType, CONCAT(M_States.StateCode, '-', M_States.Name) aa, (T_CreditDebitNotes.GrandTotal) GrandTotal, '' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate, SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue, '' CessAmount
         FROM T_CreditDebitNotes
         JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id = T_CreditDebitNotes.id
@@ -218,7 +218,8 @@ where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
             for row_idx, value in enumerate(df5[header], start=2):
                 ws5.cell(row=row_idx, column=col_idx, value=value) 
                 
-                
+        
+        # Example data for the six sheet CDNUR         
         EXEMPquery = T_Invoices.objects.raw(''' SELECT id, Description ,sum(A.Total) TotalNilRatedSupplies FROM (
 SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total
 FROM T_Invoices
@@ -270,7 +271,8 @@ WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = ''
             for row_idx, value in enumerate(df6[header], start=2):
                 ws6.cell(row=row_idx, column=col_idx, value=value)  
                 
-                
+        
+        # Example data for the seven sheet HSN            
         HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
 FROM T_Invoices 
 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
@@ -306,7 +308,8 @@ WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  Group by id, M
             for row_idx, value in enumerate(df7[header], start=2):
                 ws7.cell(row=row_idx, column=col_idx, value=value)                        
                                          
-                
+        
+        # Example data for the eight sheet Docs         
         Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.FullInvoiceNumber)MINID,max(T_Invoices.FullInvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party_id =97 and T_DeletedInvoices.InvoiceDate BETWEEN '2023-07-01' AND '2023-08-30' ) Cancelledcnt ,'1' b
         FROM T_Invoices  where Party_id =%s and T_Invoices.InvoiceDate BETWEEN %s AND %s
         UNION 
