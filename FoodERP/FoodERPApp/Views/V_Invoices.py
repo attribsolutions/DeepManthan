@@ -150,10 +150,10 @@ class OrderDetailsForInvoice(CreateAPIView):
                     "OrderIDs":Order_list,
                     "OrderItemDetails":OrderItemDetails
                    })    
-            # log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Details for Invoice",32,0)         
+            log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Details for Invoice",32,0)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Orderdata, 0, Party, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -208,10 +208,10 @@ class InvoiceListFilterView(CreateAPIView):
                         })
                     log_entry = create_transaction_log(request, Invoicedata, 0, Party, "Invoice List",35,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
-                # log_entry = create_transaction_log(request, Invoicedata, 0, Party, "Record Not Found",29,0)
+                log_entry = create_transaction_log(request, Invoicedata, 0, Party, "Record Not Found",29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -258,10 +258,10 @@ class InvoiceView(CreateAPIView):
                     LastInsertId = (T_Invoices.objects.last()).id
                     log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully',4,LastInsertId)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
-                # log_entry = create_transaction_log(request, Invoicedata, 0, Party, Invoice_serializer.errors,34,LastInsertId)
+                log_entry = create_transaction_log(request, Invoicedata, 0, Party, Invoice_serializer.errors,34,LastInsertId)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,LastInsertId)
+            log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,LastInsertId)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
@@ -389,12 +389,10 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
-
+                    log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, a['Party']['id'], "Invoice",50,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-                log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, "Data Not available",7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -436,10 +434,10 @@ class InvoiceViewSecond(CreateAPIView):
                 log_entry = create_transaction_log(request, {'InvoiceID':id}, 0, 0, 'Invoice Delete Successfully',6,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
-            # log_entry = create_transaction_log(request,  {'InvoiceID':id}, 0, 0, 'This Transaction used in another table',8,0)
+            log_entry = create_transaction_log(request,  {'InvoiceID':id}, 0, 0, 'This Transaction used in another table',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request,  {'InvoiceID':id}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_log(request,  {'InvoiceID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
           
 class InvoiceNoView(CreateAPIView):
@@ -463,12 +461,12 @@ class InvoiceNoView(CreateAPIView):
                             "Invoice":a['id'],
                             "FullInvoiceNumber":a['FullInvoiceNumber'],
                         })
-                    # log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Invoice No List",36,0)
+                    log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Invoice No List",36,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
-                # log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Record Not Found",29,0)
+                log_entry = create_transaction_log(request, InVoice_Data, 0, Party, "Record Not Found",29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, InVoice_Data, 0, Party, Exception(e),33,0)
+            log_entry = create_transaction_log(request, InVoice_Data, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
 
@@ -606,7 +604,7 @@ class BulkInvoiceView(CreateAPIView):
                         if ItemMapping.count() > 0:
                             bb['Item']=ItemMapping[0]['Item']
                         else:
-                            # log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Item Data Mapping Missing",38,0)
+                            log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Item Data Mapping Missing",38,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Item Data Mapping Missing", 'Data':[]})     
                         UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=bb['Unit'],Party=aa['Party']).values("Unit")
                         if UnitMapping.count() > 0:
@@ -614,22 +612,22 @@ class BulkInvoiceView(CreateAPIView):
                             if MC_UnitID.count() > 0:
                                 bb['Unit']=MC_UnitID[0]['id']
                             else:
-                                # log_entry = create_transaction_log(request, Invoicedata, 0, 0, " MC_ItemUnits Data Mapping Missing",39,0)
+                                log_entry = create_transaction_log(request, Invoicedata, 0, 0, " MC_ItemUnits Data Mapping Missing",39,0)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " MC_ItemUnits Data Mapping Missing", 'Data':[]})            
                         else:
-                            # log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Unit Data Mapping Missing",40,0)
+                            log_entry = create_transaction_log(request, Invoicedata, 0, 0, "Unit Data Mapping Missing",40,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
                     Invoice_serializer = BulkInvoiceSerializer(data=aa)
                     if Invoice_serializer.is_valid():
                         Invoice_serializer.save()
                     else:
                         transaction.set_rollback(True)
-                        # log_entry = create_transaction_log(request, Invoicedata, 0, 0, Invoice_serializer.errors,34,0)
+                        log_entry = create_transaction_log(request, Invoicedata, 0, 0, Invoice_serializer.errors,34,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
-                # log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Save Successfully',4,0)
+                log_entry = create_transaction_log(request, Invoicedata, 0, 0, 'Invoice Save Successfully',4,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Invoicedata, 0, 0, e, 33,0)
+            log_entry = create_transaction_log(request, Invoicedata, 0, 0, e, 33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
         
 
