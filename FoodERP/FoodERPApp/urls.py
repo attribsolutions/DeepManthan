@@ -131,6 +131,8 @@ from .Views.V_StockEntry import *
 
 from .Views.V_R1_Reports import *
 
+from .Views.V_R3B_Reports import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -562,7 +564,8 @@ urlpatterns = [
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
-            url(r'generate-excel$',ExcelDownloadView.as_view()),
+            url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
+            url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
 
 
 
