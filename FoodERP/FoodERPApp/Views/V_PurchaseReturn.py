@@ -143,7 +143,9 @@ class PurchaseReturnView(CreateAPIView):
                                 "Discount":b['Discount'],
                                 "DiscountAmount":b['DiscountAmount'],
 
-                                "ApprovedQuantity":b['ApprovedQuantity']
+                                "ApprovedQuantity":b['ApprovedQuantity'],
+                                "primarySourceID" : b["primarySourceID"],
+                                "ApprovedByCompany" : b["ApprovedByCompany"]
                             })
                         
                         PuchaseReturnList.append({
@@ -654,7 +656,9 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                             "Comment":b['Comment'],
                             "DiscountType":b['DiscountType'],
                             "Discount":b['Discount'],
-                            "DiscountAmount":b['DiscountAmount']
+                            "DiscountAmount":b['DiscountAmount'],
+                            "primarySourceID" : b['primarySourceID'],
+                            "ApprovedByCompany" : b['ApprovedByCompany']
                             
                         })
                     # log_entry = create_transaction_log(request, ReturnItemdata, 0, Party, 'SalesReturnconsolidateItem',59,0 )   
