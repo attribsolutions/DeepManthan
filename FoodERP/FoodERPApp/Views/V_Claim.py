@@ -39,7 +39,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s Order By GSTPercentage  ''',([FromDate],[ToDate],[Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s or (T_PurchaseReturn.Customer_id=%s and Mode=2)) Order By GSTPercentage  ''',([FromDate],[ToDate],[Party],[Party]))
                 else:
                     Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
 from M_Parties 
@@ -59,7 +59,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s group by Item_id,GSTPercentage,Rate Order By GSTPercentage )j ''',([FromDate],[ToDate],[Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s or (T_PurchaseReturn.Customer_id=%s and Mode=2)) group by Item_id,GSTPercentage,Rate Order By GSTPercentage )j ''',([FromDate],[ToDate],[Party],[Party]))
                 
                 
                 
@@ -90,62 +90,33 @@ where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_Purc
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-class ItemWiseClaimSummaryView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
 
-    def post(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
-                FromDate = Orderdata['FromDate']
-                ToDate = Orderdata['ToDate']
-                Party  = Orderdata['Party']
-                
 
-                
-                   
-                Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
-from M_Parties 
-join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
-where Party_id = %s''',([Party]))
-                print(Q1)
-                q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,T_PurchaseReturn.ReturnDate,T_PurchaseReturn.FullReturnNumber,M_Parties.Name CustomerName,M_Items.Name ItemName,
-MRPValue MRP,Quantity,GSTPercentage GST,Rate,
- Amount, CGST, SGST, ApprovedQuantity,  Discount, DiscountAmount, DiscountType
-FROM T_PurchaseReturn
-join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
 
-join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
-join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
-
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Party_id=%s group by TC_PurchaseReturnItems.Item_id  order by GSTPercentage  ''',([FromDate],[ToDate],[Party]))
-                
-                print(q0.query)
-                if q0:
-                    ClaimSummaryData = list()
-                    M_Parties_serializer =PartyDetailSerializer(Q1,many=True).data
-                    ClaimSummary_serializer = ClaimSummarySerializer(q0, many=True).data
-                    # M_Parties_serializer.append({  
-                    #           "ClaimSummaryItemDetails": ClaimSummary_serializer
-                    #           })
-                    ClaimSummaryData.append({
-                        "PartyDetails": M_Parties_serializer[0],
-                        "ClaimSummaryItemDetails": ClaimSummary_serializer          
-                    })
-                    
-
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimSummaryData[0]})
-                else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+  
 
 
 class MasterClaimView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Orderdata = JSONParser().parse(request)
+                
+                FromDate = Orderdata['FromDate']
+                ToDate = Orderdata['ToDate']
+                Party  = Orderdata['Party']
+                print(FromDate,ToDate,Party)
+                q0=MC_ReturnReasonwiseMasterClaim.objects.filter(FromDate=FromDate,ToDate=ToDate,Party_id=Party)
+                q0.delete()
+                q2=M_MasterClaim.objects.filter(FromDate=FromDate,ToDate=ToDate,Party_id=Party)
+                q2.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Deleted Successfully', 'Data':[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                    
     def post(self, request, id=0):
         try:
             with transaction.atomic():
@@ -165,7 +136,7 @@ class MasterClaimView(CreateAPIView):
     (CASE WHEN ItemReason_id=54 THEN ((PA-ReturnAmount)*0.01) ELSE 0 END)Budget,ReturnAmount ClaimAmount,
     (ReturnAmount/(PA-ReturnAmount))ClaimAgainstNetSale
     from
-    (SELECT ItemReason_id,sum(TC_PurchaseReturnItems.Amount)ReturnAmount,
+    (SELECT ItemReason_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)*GSTPercentage/100))ReturnAmount,
     (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
     join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
     where InvoiceDate between %s and %sand Customer_id=%s )PA,
@@ -178,7 +149,7 @@ class MasterClaimView(CreateAPIView):
     where IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %sand Party_id=%s group by ItemReason_id)p ''',
     ([FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party],[PartyType],[FromDate],[ToDate], [Party]))
                     
-                    
+                        print(claimREasonwise.query)
                         serializer=MasterclaimReasonReportSerializer(claimREasonwise, many=True).data
                         # print(serializer)
                         for a in serializer:
@@ -218,7 +189,7 @@ class MasterClaimView(CreateAPIView):
     left join 
 
 
-    (SELECT TC_PurchaseReturnItems.Item_id,sum(TC_PurchaseReturnItems.Amount)ReturnAmount
+    (SELECT TC_PurchaseReturnItems.Item_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)*GSTPercentage/100))ReturnAmount
     FROM T_PurchaseReturn
     join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
     join M_Parties on M_Parties.id=T_PurchaseReturn.Customer_id
@@ -228,7 +199,7 @@ class MasterClaimView(CreateAPIView):
     ''',
     ([Party], [FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party]))
                         
-                    print(StockProcessQuery)
+                    print(StockProcessQuery.query)
                     serializer=MasterclaimReportSerializer(StockProcessQuery, many=True).data
                         # print(serializer)
                     for a in serializer:
