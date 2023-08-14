@@ -92,6 +92,7 @@ class OrderListFilterView(CreateAPIView):
                         queryForOpenPO = T_Orders.objects.filter(
                             POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
+                print(query.query)
                 # return JsonResponse({'query': str(q.query)})
                 if q:
                     Order_serializer = T_OrderSerializerSecond(
@@ -916,30 +917,30 @@ where Supplier_id=%s and OrderDate between %s and %s
                     OrderSerializedata = SummaryReportOrderSerializer(
                         OrderQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-                    OrderData = list()
-                    OrderItemDetails = list()
-                    for a in OrderSerializedata:
-                        InvoiceID = TC_InvoicesReferences.objects.filter(
-                            Order=a['id']).values('Invoice').count()
-                        if InvoiceID == 0:
-                            for b in a['OrderItem']:
-                                OrderItemDetails.append({
-                                    "Group": b['Item']['ItemGroupDetails'][0]['Group']['Name'],
-                                    "SubGroup": b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
-                                    "MaterialName": b['Item']['Name'],
-                                    "Orderid": a['id'],
-                                    "OrderNo": a['FullOrderNumber'],
-                                    "OrderDate": a['OrderDate'],
-                                    "SupplierName": a['Supplier']['Name'],
-                                    "CustomerName": a['Customer']['Name'],
-                                    "QtyInNo": float(b['QtyInNo']),
-                                    "QtyInKg": float(b['QtyInKg']),
-                                    "QtyInBox": float(b['QtyInBox']),
-                                    "OrderAmount": float(a['OrderAmount']),
-                                    "CreatedOn": a['CreatedOn']
-                                })
+                    # OrderData = list()
+                    # OrderItemDetails = list()
+                    # for a in OrderSerializedata:
+                    #     InvoiceID = TC_InvoicesReferences.objects.filter(
+                    #         Order=a['id']).values('Invoice').count()
+                    #     if InvoiceID == 0:
+                    #         for b in a['OrderItem']:
+                    #             OrderItemDetails.append({
+                    #                 "Group": b['Item']['ItemGroupDetails'][0]['Group']['Name'],
+                    #                 "SubGroup": b['Item']['ItemGroupDetails'][0]['SubGroup']['Name'],
+                    #                 "MaterialName": b['Item']['Name'],
+                    #                 "Orderid": a['id'],
+                    #                 "OrderNo": a['FullOrderNumber'],
+                    #                 "OrderDate": a['OrderDate'],
+                    #                 "SupplierName": a['Supplier']['Name'],
+                    #                 "CustomerName": a['Customer']['Name'],
+                    #                 "QtyInNo": float(b['QtyInNo']),
+                    #                 "QtyInKg": float(b['QtyInKg']),
+                    #                 "QtyInBox": float(b['QtyInBox']),
+                    #                 "OrderAmount": float(a['OrderAmount']),
+                    #                 "CreatedOn": a['CreatedOn']
+                    #             })
                     log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Summary",31,id)            
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                 log_entry = create_transaction_log(request, Orderdata, 0, Party, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
