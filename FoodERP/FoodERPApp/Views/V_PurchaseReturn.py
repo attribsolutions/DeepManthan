@@ -41,6 +41,10 @@ class PurchaseReturnListView(CreateAPIView):
                 else:
                     par=Q(Party=Party)
 
+                if (Party == ''):
+                    x = Customer
+                else:
+                    x = Party
                 
                 query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
                 
@@ -83,12 +87,12 @@ class PurchaseReturnListView(CreateAPIView):
                             "Comment" : a["Comment"],
                             "Status" : Status
                         })
-                    # log_entry = create_transaction_log(request, Returndata, 0, Party, 'PurchaseReturn List',51,0)
+                    log_entry = create_transaction_log(request, Returndata, 0, x, 'PurchaseReturn List',51,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
-                # log_entry = create_transaction_log(request, Returndata, 0, Party, 'Record Not Found',29,0)
+                log_entry = create_transaction_log(request, Returndata, 0, x, 'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Returndata, 0, Party, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Returndata, 0, x, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PurchaseReturnView(CreateAPIView):
@@ -145,8 +149,6 @@ class PurchaseReturnView(CreateAPIView):
                                 "DiscountAmount":b['DiscountAmount'],
 
                                 "ApprovedQuantity":b['ApprovedQuantity']
-                                
-
                             })
                         
                         PuchaseReturnList.append({
@@ -189,7 +191,7 @@ class PurchaseReturnView(CreateAPIView):
                     d = GetPrifix.GetPurchaseReturnPrifix(Party)
                     
                 PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
-                
+
                 item = ""
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
@@ -200,8 +202,7 @@ class PurchaseReturnView(CreateAPIView):
                 #     IsDamagePieces =False
                 # else:
                 #     IsDamagePieces =True 
-                
-               
+                 
                 for a in PurchaseReturndata['ReturnItems']:
 
                     if a['ItemReason'] == 56:
@@ -209,8 +210,7 @@ class PurchaseReturnView(CreateAPIView):
                         IsDamagePieces =False
                     else:
                         IsDamagePieces =True 
-                    
-                    
+                        
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     if(item == ""):
@@ -231,8 +231,7 @@ class PurchaseReturnView(CreateAPIView):
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
-                    
-                    
+                       
                     O_BatchWiseLiveStockList.append({
                     "id":a['BatchID'],    
                     "Item": a['Item'],
@@ -254,10 +253,8 @@ class PurchaseReturnView(CreateAPIView):
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "PurchaseReturn":a['PurchaseReturn'],
-                    
                     })
-                    
-                    
+
                     O_LiveBatchesList.append({
                     
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
@@ -305,7 +302,7 @@ class PurchaseReturnView(CreateAPIView):
                 if Mode == '1':   # Sales Return Mode
                     PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                     PurchaseReturn_Data.delete()
-                    log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, 0, 'Return Deleted Successfully',54,0)
+                    # log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, 0, 'Return Deleted Successfully',54,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
                 else:
                     Query2 = T_PurchaseReturn.objects.filter(id=id)
