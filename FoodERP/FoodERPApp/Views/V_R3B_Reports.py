@@ -63,44 +63,69 @@ SELECT 1 as id, '(e) Non-GST Outward supplies' A, 0 Taxablevalue,0 IGST,0 CGST, 
             bold_font = Font(bold=True)
             cell.font = bold_font
             
-
         # Write the data
         for col_idx, header in enumerate(df.columns, start=1):
             for row_idx, value in enumerate(df[header], start=2):
                 ws.cell(row=row_idx, column=col_idx, value=value)
+                
+################################## 4.EligibleITC #############################################################################
+
+        EligibleITCquery = T_Invoices.objects.raw('''SELECT '(A) ITC Available (Whether in full or part)' A,0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(1)   Import of goods ' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(2)   Import of services' A,0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(3)   Inward supplies liable to reverse charge(other than 1 &2 above)' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(4)   Inward supplies from ISD' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(5)   All other ITC' A,IFNULL(SUM(TC_InvoiceItems.IGST),0) IGST,IFNULL(sum(TC_InvoiceItems.CGST),0) CGST, IFNULL(SUM(TC_InvoiceItems.SGST),0) SGST,'0'Cess
+FROM T_Invoices
+JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+WHERE  T_Invoices.Customer_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s
+UNION
+SELECT ' (B) ITC Reversed' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(1)   As per Rule 42 & 43 of SGST/CGST rules ' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(C) Net ITC Available (A)-(B)' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT ' (D) Ineligible ITC' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(1)   As per section 17(5) of CGST//SGST Act' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+UNION
+SELECT '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess''',([Party],[FromDate],[ToDate]))
+        EgibleITCdata = EligibleITCSerializer(EligibleITCquery, many=True).data
+        df2=pd.DataFrame(EgibleITCdata)
+
+        ws2 = wb.create_sheet(title="Eligible ITC")
+        
+        specific_column_names = {
+        'A':'Details', 
+        'IGST':'Integrated Tax',
+        'CGST':'Central Tax',
+        'SGST':'State/UT Tax',
+        'Cess':'Cess',
+        }
+        
+        for col_idx, header in enumerate(df2.columns, start=1):
+            cell = ws2.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            bold_font = Font(bold=True)
+            cell.font = bold_font
+        
+        # Write the data on the second worksheet
+        for col_idx, header in enumerate(df2.columns, start=1):
+            for row_idx, value in enumerate(df2[header], start=2):
+                ws2.cell(row=row_idx, column=col_idx, value=value) 
+        
 
 
-        # EligibleITCquery = T_CreditDebitNotes.objects.raw('''''',([Party],[FromDate],[ToDate]))
-        # EgibleITCdata = EligibleITCSerializer(EligibleITCquery, many=True).data
-        # df2=pd.DataFrame(EgibleITCdata)
-
-        # ws2 = wb.create_sheet(title="Eligible ITC")
-        
-        # specific_column_names = {
-        # 'URType':'URType', 
-        # 'FullNoteNumber':'Note Number',
-        # 'CRDRNoteDate':'Note date',
-        # 'NoteType':'Note Type',
-        # 'aa':'Place Of Supply',
-        # 'GrandTotal':'Note Value',
-        # 'ApplicableofTaxRate':'Applicable %'+'of TaxRate',
-        # 'Rate':'Rate',
-        # 'TaxableValue' :'Taxable Value',
-        # 'CessAmount':'Cess Amount',
-        # }
-        
-        # for col_idx, header in enumerate(df2.columns, start=1):
-        #     cell = ws2.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
-        #     bold_font = Font(bold=True)
-        #     cell.font = bold_font
-        
-        # # Write the data on the second worksheet
-        # for col_idx, header in enumerate(df2.columns, start=1):
-        #     for row_idx, value in enumerate(df2[header], start=2):
-        #         ws2.cell(row=row_idx, column=col_idx, value=value) 
         
         
-        '''3.2 Of the supplies shown in 3.1 (a), details of inter-state supplies made to unregistered persons, composition taxable person and UIN holders'''
+#####################   3.2 Of the supplies shown in 3.1 (a), details of inter-state supplies made to unregistered persons, composition taxable person and UIN holders#################################################
         
         query3 = T_Invoices.objects.raw('''SELECT 1 as id, concat(M_States.StateCode,'-',M_States.Name)states ,sum(TC_InvoiceItems.BasicAmount) Taxablevalue,SUM(TC_InvoiceItems.IGST) IGST
 FROM T_Invoices
