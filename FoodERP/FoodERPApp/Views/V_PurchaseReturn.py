@@ -40,6 +40,11 @@ class PurchaseReturnListView(CreateAPIView):
                     par=Q()
                 else:
                     par=Q(Party=Party)
+
+                if (Party == ''):
+                    x = Customer
+                else:
+                    x = Party
                 
                 query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
                 
@@ -82,12 +87,12 @@ class PurchaseReturnListView(CreateAPIView):
                             "Comment" : a["Comment"],
                             "Status" : Status
                         })
-                    # log_entry = create_transaction_log(request, Returndata, 0, a['Party']['id'], 'PurchaseReturn List',51,0)
+                    log_entry = create_transaction_log(request, Returndata, 0, x, 'PurchaseReturn List',51,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
-                # log_entry = create_transaction_log(request, Returndata, 0, a['Party']['id'], 'Record Not Found',29,0)
+                log_entry = create_transaction_log(request, Returndata, 0, x, 'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, Returndata, 0, a['Party']['id'], Exception(e),33,0)
+            log_entry = create_transaction_log(request, Returndata, 0, x, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PurchaseReturnView(CreateAPIView):
@@ -226,8 +231,7 @@ class PurchaseReturnView(CreateAPIView):
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
-                    
-                    
+                       
                     O_BatchWiseLiveStockList.append({
                     "id":a['BatchID'],    
                     "Item": a['Item'],
@@ -249,9 +253,8 @@ class PurchaseReturnView(CreateAPIView):
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "PurchaseReturn":a['PurchaseReturn'],
-                    
                     })
-                    
+
                     O_LiveBatchesList.append({
                     
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
