@@ -11,17 +11,16 @@ class FloatDecimalField(serializers.Field):
 class DOSAISLTRCSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     A = serializers.CharField(max_length=100)
-    TaxableValue=FloatDecimalField()
+    Taxablevalue=FloatDecimalField()
     IGST=FloatDecimalField()
     CGST=FloatDecimalField()
     SGST=FloatDecimalField()
     Cess=FloatDecimalField()
     
-
+    
 class EligibleITCSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     A = serializers.CharField(max_length=100)
-    TaxableValue=FloatDecimalField()
     IGST=FloatDecimalField()
     CGST=FloatDecimalField()
     SGST=FloatDecimalField()
@@ -31,6 +30,6 @@ class EligibleITCSerializer(serializers.Serializer):
 class Query3Serializer (serializers.Serializer):
     # id = serializers.IntegerField()
     states = serializers.CharField(max_length=100)
-    TaxableValue=FloatDecimalField()
+    Taxablevalue=FloatDecimalField()
     IGST=FloatDecimalField()
      
