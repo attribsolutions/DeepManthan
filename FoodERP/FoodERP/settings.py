@@ -81,21 +81,15 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-
-        'NAME': 'devfooderp20230629',     
-
+        'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-
-        'HOST': '192.168.1.114' ,   
-
-        'PORT': '3306' ,
+        'HOST': '10.4.5.64',
+        'PORT': '3306' , 
         'OPTIONS': { 
-            'sql_mode': 'STRICT_TRANS_TABLES',
+            'sql_mode': 'STRICT_TRANS_TABLES', 
         },
     },
-
-    # 'logs': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'transactionlogdb',
     #     'USER': 'pk',
@@ -194,6 +188,9 @@ REST_FRAMEWORK = {
      )
 }
 
+# MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+# MEDIA_URL = '/media/'
+
 # Jwt Authentication
 
 # JWT_AUTH = {
@@ -238,7 +235,7 @@ REST_FRAMEWORK = {
 # }
 SIMPLE_JWT = {
 
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
 
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,

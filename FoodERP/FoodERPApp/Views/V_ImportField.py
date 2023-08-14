@@ -76,8 +76,8 @@ class ImportFieldSaveView(CreateAPIView):
                     "FieldValidationID": ImportField_serializer['FieldValidation']['id'],
                     "FieldValidationName": ImportField_serializer['FieldValidation']['Name'],
                     "IsCompulsory": ImportField_serializer['IsCompulsory'],
-                    "ImportExcelTypeID":ImportField_serializer['ImportExceltype']['id'],
-                    "ImportExcelTypeName":ImportField_serializer['ImportExceltype']['Name'],
+                    "ImportExcelTypeID":ImportField_serializer['ImportExcelType']['id'],
+                    "ImportExcelTypeName":ImportField_serializer['ImportExcelType']['Name'],
                 })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_List[0]})
 

@@ -48,7 +48,14 @@ class OrderListFilterView(CreateAPIView):
                 Supplier = Orderdata['Supplier']
                 OrderType = Orderdata['OrderType']
                 CustomerType = Orderdata['CustomerType']
-                d = date.today()
+                d = date.today() 
+
+                if OrderType == 1:
+                    x = Customer
+                else:
+                    x = Supplier
+
+
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
 
@@ -58,7 +65,6 @@ class OrderListFilterView(CreateAPIView):
                             POFromDate=FromDate, POToDate=ToDate, Customer_id=Customer, OrderType=1)
                         q = query.union(queryForOpenPO)
                     else:
-
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier, OrderType=1)
                         queryForOpenPO = T_Orders.objects.filter(
@@ -77,14 +83,14 @@ class OrderListFilterView(CreateAPIView):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=d, POToDate__gte=d, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
                     else:
 
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=d, POToDate__gte=d, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
                 # return JsonResponse({'query': str(q.query)})
                 if q:
@@ -105,6 +111,7 @@ class OrderListFilterView(CreateAPIView):
                             InvoiceCreated = False
                         else:
                             InvoiceCreated = True
+                        
                         OrderListData.append({
                             "id": a['id'],
                             "OrderDate": a['OrderDate'],
@@ -134,9 +141,12 @@ class OrderListFilterView(CreateAPIView):
                             "Inward": inward,
                             "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
                         })
+                    log_entry = create_transaction_log(request, Orderdata, 0,x, "Order List",28,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
+                log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -157,23 +167,29 @@ class OrderListFilterViewSecond(CreateAPIView):
 
                 d = date.today()
 
+                if OrderType == 3:
+                    x = Customer
+                else:
+                    x = Supplier
+
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer)
+                        if (FromDate == '' and ToDate == ''):
+                            query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
+                        else:
+                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
                     else:
-                        query = T_Invoices.objects.filter(
-                            InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier)
+                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
                     # return JsonResponse({'query': str(Orderdata.query)})
-                    if query:
+                    if query: 
                         Invoice_serializer = InvoiceSerializerSecond(
                             query, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                         InvoiceListData = list()
                         for a in Invoice_serializer:
-                            InvoiceID = TC_GRNReferences.objects.filter(Invoice=a['id']).values('Invoice').count()
-
-                                
+                             
+                            InvoiceID = TC_GRNReferences.objects.filter(
+                                Invoice=a['id']).values('Invoice').count()
                             if InvoiceID == 0:
                                 InvoiceListData.append({
                                     "id": a['id'],
@@ -194,8 +210,11 @@ class OrderListFilterViewSecond(CreateAPIView):
                                     "CreatedOn": a['CreatedOn'],
                                     "Inward": "",
                                     "Percentage": "",
+                                    "IsRecordDeleted":a['Hide'],
                                 })
+                        log_entry = create_transaction_log(request, Orderdata, 0, x, "Order List",28,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                    log_entry = create_transaction_log(request, Orderdata, 0, x, "Record Not Found",29,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
                 elif(OrderType == 1):  # OrderType -1 PO Order
@@ -296,9 +315,12 @@ class OrderListFilterViewSecond(CreateAPIView):
                         "Percentage": Percentage,
 
                     })
+                log_entry = create_transaction_log(request, Orderdata, 0, x, "Order List",28,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
+            log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderdata, 0, x,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -341,9 +363,7 @@ class T_OrdersView(CreateAPIView):
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     Order_serializer.save()
-                    print(Order_serializer)
                     OrderID = Order_serializer.data['id']
-
                     PartyID = Order_serializer.data['Customer']
                     PartyMapping = M_Parties.objects.filter(
                         id=PartyID).values("SAPPartyCode")
@@ -351,9 +371,13 @@ class T_OrdersView(CreateAPIView):
                         IsSAPCustomer = 0
                     else:
                         IsSAPCustomer = 1
+
+                    log_entry = create_transaction_log(request, Orderdata, 0, Division, 'Order Save Successfully',1,OrderID)    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'OrderID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
+                log_entry = create_transaction_log(request, Orderdata, 0, Division, Order_serializer.errors,34,OrderID)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderdata, 0, Division, Exception(e),33,OrderID)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -382,20 +406,22 @@ class T_OrdersViewSecond(CreateAPIView):
                         OrderItemDetails = list()
                         for b in a['OrderItem']:
                             if(b['IsDeleted'] == 0):
-
+                                
                                 aaaa = UnitwiseQuantityConversion(
-                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 0).GetConvertingBaseUnitQtyBaseUnitName()
+                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
+                                
                                 if (aaaa == b['Unit']['UnitID']['Name']):
-                                    bb=""
+                                    bb=''
                                 else:
                                     bb=aaaa
+                                
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
                                     "ItemSAPCode": b['Item']['SAPItemCode'],
                                     "Quantity": b['Quantity'],
-                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 1, 0).ConvertintoSelectedUnit(),
+                                    "QuantityInNo": UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 1, 1).ConvertintoSelectedUnit(),
                                     "MRP": b['MRP']['id'],
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
@@ -418,8 +444,12 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "DiscountType":b['DiscountType'],
+                                    "Discount":b['Discount'],
+                                    "DiscountAmount":b['DiscountAmount'],
                                     "Comment": b['Comment'],
                                 })
+                        
                         inward = 0
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
@@ -441,9 +471,11 @@ class T_OrdersViewSecond(CreateAPIView):
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN":a['Customer']['GSTIN'],
                             "Supplier": a['Supplier']['id'],
                             "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
+                            "SupplierGSTIN":a['Supplier']['GSTIN'],
                             "SupplierFssai": Address[0]['FSSAINo'],
                             "SupplierAddress": Address[0]['Address'],
                             "SupplierPIN": Address[0]['Pin'],
@@ -458,9 +490,12 @@ class T_OrdersViewSecond(CreateAPIView):
                             "OrderItem": OrderItemDetails,
                             "OrderTermsAndCondition": OrderTermsAndCondition
                         })
+                    log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], 'Order',62,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], 'Data Not available',7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     def put(self, request, id=0):
@@ -489,11 +524,14 @@ class T_OrdersViewSecond(CreateAPIView):
                     OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
                     Orderupdate_Serializer.save()
+                    log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, 'Order Updated Successfully',2,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully', 'Data': []})
                 else:
+                    log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, Orderupdate_Serializer.errors,34,id)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Orderupdate_Serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderupdatedata, 0, 0,Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -502,12 +540,16 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
+                log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'Order Deleted Successfully',3,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
         except T_Orders.DoesNotExist:
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'Record Not available',29,id)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'This Transaction used in another table',8,id)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -531,17 +573,34 @@ class EditOrderView(CreateAPIView):
                 q1 = M_Parties.objects.filter(id=Customer).values('PartyType')
                 q2 = M_PartyType.objects.filter(
                     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
-
+                if(OrderType==1):
+                        Stockparty=Customer
+                else:
+                        Stockparty=Party
                 # Is Not Retailer but is SSDD Order
+               
                 if (q2[0]['IsRetailer'] == 0 and q2[0]['IsSCM'] == 1):
                     PartyItem = Customer
-                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
-M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName 
+                    
+                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
+                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
+                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
+                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
+
+a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+,
+(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
+and Party_id=%s 
+group by Item_id)StockQuantity                
                 from
 (select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s AND Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) )b 
 left join
 
-(SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
+(SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`,DiscountType,Discount,DiscountAmount
 FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s))c
 on b.Item_id=c.Item )a
 
@@ -556,16 +615,27 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-Order By M_Items.Sequence''', ([PartyItem], [Party], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [Party], [OrderID]))
                 else:
                     PartyItem = Party
-                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
-M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName 
+                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
+                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
+                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
+                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
+                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
+
+a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
+and Party_id=%s 
+group by Item_id)StockQuantity                
                 from
 (select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
 left join
 
-(SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`
+(SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`, `Comment`,DiscountType,Discount,DiscountAmount
 FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s))c
 on b.Item_id=c.Item )a
 
@@ -580,88 +650,84 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
-
-                OrderItemSerializer = OrderEditserializer(
-                    Itemquery, many=True).data
-
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
+                # print(Itemquery.query)
+                OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     GSTID = b['GST_id']
                     # print('**********************',ItemID)
-            # =====================GST================================================
-                    if GSTID is None:
-                        Gst = GSTHsnCodeMaster(
-                            ItemID, EffectiveDate).GetTodaysGstHsnCode()
-                        b['GST_id'] = Gst[0]['Gstid']
-                        b['GSTPercentage'] = Gst[0]['GST']
-                        # print('ttttttGST',Gst[0]['GST'])
-            # =====================Stock================================================
+                    
+                    # =====================GST================================================
+                    # if GSTID is None:
+                    #     Gst = GSTHsnCodeMaster(
+                    #         ItemID, EffectiveDate).GetTodaysGstHsnCode()
+                    #     b['GST_id'] = Gst[0]['Gstid']
+                    #     b['GSTPercentage'] = Gst[0]['GST']
+                    #     # print('ttttttGST',Gst[0]['GST'])
+                    
 
-                    if(OrderType==1):
-                        Stockparty=Customer
-                    else:
-                        Stockparty=Party
-                    stockquery = O_BatchWiseLiveStock.objects.filter(
-                        Item=ItemID, Party=Stockparty).aggregate(Qty=Sum('BaseUnitQuantity'))
-                    if stockquery['Qty'] is None:
-                        Stock = 0.0
-                    else:
-                        Stock = stockquery['Qty']
+                    # =====================Current MRP================================================
+                    # TodaysMRP = MRPMaster(
+                    #     ItemID, 0, 0, EffectiveDate).GetTodaysDateMRP()
 
-            # =====================Current MRP================================================
-                    TodaysMRP = MRPMaster(
-                        ItemID, 0, 0, EffectiveDate).GetTodaysDateMRP()
-
-                    b['MRP_id'] = TodaysMRP[0]['Mrpid']
-                    b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
+                    # b['MRP_id'] = TodaysMRP[0]['Mrpid']
+                    # b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
                     # print('ttttttttttMRP',TodaysMRP[0]['TodaysMRP'])
-            # =====================Rate================================================
+                    # =====================Current Discount================================================
+                    # TodaysDiscount = DiscountMaster(
+                    #     ItemID, Party, EffectiveDate,Customer).GetTodaysDateDiscount()
 
-                    ratequery = TC_OrderItems.objects.filter(
-                        Item_id=ItemID).values('Rate').order_by('-id')[:1]
-                    if not ratequery:
-                        r = 0.00
-                    else:
-                        r = ratequery[0]['Rate']
+                    # b['DiscountType'] = 0
+                    # b['Discount'] = 0
+                    # print('ttttttttttDiscount',TodaysDiscount)
+                    # =====================Rate================================================
 
-                    if b['Rate'] is None:
-                        b['Rate'] = r
-            # # =====================Unit================================================
-            #         UnitDetails = list()
-            #         ItemUnitquery = MC_ItemUnits.objects.filter(
-            #             Item=ItemID, IsDeleted=0)
-            #         ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
-            #             ItemUnitquery, many=True).data
+                    # ratequery = TC_OrderItems.objects.filter(
+                    #     Item_id=ItemID).values('Rate').order_by('-id')[:1]
+                    # if not ratequery:
+                    #     r = 0.00
+                    # else:
+                    #     r = ratequery[0]['Rate']
 
-            #         RateMcItemUnit = ""
-            #         for d in ItemUnitqueryserialize:
-            #             if (d['PODefaultUnit'] == True):
-            #                 RateMcItemUnit = d['id']
-            #             print(0,ItemID,RateParty,0,0,d['id'])
-            #             CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
-            #             UnitDetails.append({
-            #                 "UnitID": d['id'],
-            #                 "UnitName": d['BaseUnitConversion'] ,
-            #                 "BaseUnitQuantity": d['BaseUnitQuantity'],
-            #                 "PODefaultUnit": d['PODefaultUnit'],
-            #                 "SODefaultUnit": d['SODefaultUnit'],
-            #                 "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
+                    # if b['Rate'] is None:
+                    #     b['Rate'] = r
+                    # =====================Unit================================================
+                    # UnitDetails = list()
+                    # ItemUnitquery = MC_ItemUnits.objects.filter(
+                    #     Item=ItemID, IsDeleted=0)
+                    # ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
+                    #     ItemUnitquery, many=True).data
 
-            #             })
+                    # RateMcItemUnit = ""
+                    # for d in ItemUnitqueryserialize:
+                    #     if (d['PODefaultUnit'] == True):
+                    #         RateMcItemUnit = d['id']
+                    #     print(0,ItemID,RateParty,0,0,d['id'])
+                    #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
+                    #     UnitDetails.append({
+                    #         "UnitID": d['id'],
+                    #         "UnitName": d['BaseUnitConversion'] ,
+                    #         "BaseUnitQuantity": d['BaseUnitQuantity'],
+                    #         "PODefaultUnit": d['PODefaultUnit'],
+                    #         "SODefaultUnit": d['SODefaultUnit'],
+                    #         "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
 
-            # =====================IsDefaultTermsAndConditions================================================
+                    #     })
 
-                    b.update({"StockQuantity": Stock,
+                    # =====================IsDefaultTermsAndConditions================================================
+
+                    b.update({  #"StockQuantity": Stock,
                               "UnitDetails": UnitDropdown(ItemID, RateParty, 0)
                               })
 
-                    bomquery = MC_BillOfMaterialItems.objects.filter(
-                        Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
-                    if bomquery.exists():
-                        b.update({"Bom": True})
-                    else:
-                        b.update({"Bom": False})
+                    # bomquery = MC_BillOfMaterialItems.objects.filter(
+                    #     Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
+                    # if bomquery.exists():
+                    b.update({"Bom": True})
+                    # else:
+                    #     b.update({"Bom": False})
 
                 if OrderID != 0:
                     OrderQuery = T_Orders.objects.get(id=OrderID)
@@ -713,6 +779,7 @@ Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                         "CreatedOn":a['CreatedOn']
                     })
                     FinalResult = OrderData[0]
+
                 else:
 
                     TermsAndConditions = list()
@@ -756,9 +823,10 @@ Order By M_Items.Sequence''', ([PartyItem], [OrderID]))
                     })
 
                     FinalResult = NewOrder[0]
-
+                log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, Party, "Order Edit",63,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, Party, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -774,8 +842,10 @@ class ConfirmOrderView(CreateAPIView):
                 Order_list = POOrderIDs.split(",")
                 OrderItemQuery = T_Orders.objects.filter(
                     id__in=Order_list).update(IsConfirm=1)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, "Orders Data Confirm Successfully",30,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -792,23 +862,60 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
                 Party = Orderdata['PartyID']
 
+                q0 = MC_SettingsDetails.objects.filter(
+                        SettingID=1, Company=Company).values('Value')
+                v=q0[0]["Value"]
+                pricelist =v.split(",")
                 if Party == "":
-                    q0 = MC_SettingsDetails.objects.filter(
-                        SettingID=1, Company=Company).values('Value')
+                    
+                    # q0 = MC_SettingsDetails.objects.filter(
+                    #     SettingID=1, Company=Company).values('Value')
 
-                    pricelist = q0[0]["Value"].split(',')
-                    OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related(
-                        'Customer').filter(Customer__PriceList_id__in=pricelist)
+                    # pricelist = q0[0]["Value"].split(',')
+                    # OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate]).select_related(
+                    #     'Customer').filter(Customer__PriceList_id__in=pricelist)
+                    
+                    OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.id  ,T_Orders.FullOrderNumber OrderNo	,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,
+TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders
+join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+join M_Items on M_Items.id=TC_OrderItems.Item_id
+join M_Parties s on T_Orders.Supplier_id=s.id
+join M_Parties c on T_Orders.Customer_id=c.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+where  OrderDate between %s and %s
+ and c.PriceList_id in %s ''',
+ ([FromDate,ToDate,pricelist]))
+                
                 else:
-                    q0 = MC_SettingsDetails.objects.filter(
-                        SettingID=1, Company=Company).values('Value')
-                    pricelist = q0[0]["Value"].split(',')
-                    OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Supplier=Party).select_related(
-                        'Customer').filter(Customer__PriceList_id__in=pricelist)
-
-                if OrderQuery.count() > 0:
+                    # q0 = MC_SettingsDetails.objects.filter(
+                    #     SettingID=1, Company=Company).values('Value')
+                    # pricelist = q0[0]["Value"].split(',')
+                    # OrderQuery = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Supplier=Party).select_related(
+                    #     'Customer').filter(Customer__PriceList_id__in=pricelist)
+    
+                    # v=q0[0]["Value"]
+                    # pricelist =v.split(",")
+                    
+                    OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo	,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,
+TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount  FROM T_Orders
+join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+join M_Items on M_Items.id=TC_OrderItems.Item_id
+join M_Parties s on T_Orders.Supplier_id=s.id
+join M_Parties c on T_Orders.Customer_id=c.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+where Supplier_id=%s and OrderDate between %s and %s
+ and c.PriceList_id in %s ''',
+ ([Party,FromDate,ToDate,pricelist]))
+                
+                
+                if OrderQuery:
                     OrderSerializedata = SummaryReportOrderSerializer(
                         OrderQuery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                     OrderData = list()
                     OrderItemDetails = list()
                     for a in OrderSerializedata:
@@ -831,9 +938,12 @@ class SummaryReportView(CreateAPIView):
                                     "OrderAmount": float(a['OrderAmount']),
                                     "CreatedOn": a['CreatedOn']
                                 })
+                    log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Summary",31,id)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+                log_entry = create_transaction_log(request, Orderdata, 0, Party, "Data Not available",7,id)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Orderdata, 0, Party, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 

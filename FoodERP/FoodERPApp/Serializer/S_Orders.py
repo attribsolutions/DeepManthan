@@ -36,7 +36,7 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','DiscountType','Discount','DiscountAmount']
 
 class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -266,11 +266,11 @@ class OrderEditserializer(serializers.Serializer):
     GroupTypeName=serializers.CharField(max_length=100) 
     GroupName=serializers.CharField(max_length=100)
     SubGroupName=serializers.CharField(max_length=100)
-    
-    
-
-
-
+    DiscountType = serializers.CharField(max_length=500)
+    Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    StockQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
+   
 
 class ReportOrderItemSerializer(serializers.ModelSerializer):
     Item = ItemSerializerSecond(read_only=True)
@@ -279,14 +279,30 @@ class ReportOrderItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
     
-class SummaryReportOrderSerializer(serializers.ModelSerializer):
-    Customer = PartiesSerializerThird(read_only=True)
-    Supplier = PartiesSerializerThird(read_only=True)
-    OrderItem = ReportOrderItemSerializer(read_only=True,many=True)
-    class Meta:
-        model = T_Orders
-        fields = '__all__'
+class SummaryReportOrderSerializer(serializers.Serializer):
+    # Customer = PartiesSerializerThird(read_only=True)
+    # Supplier = PartiesSerializerThird(read_only=True)
+    # OrderItem = ReportOrderItemSerializer(read_only=True,many=True)
+    # class Meta:
+    #     model = T_Orders
+    #     fields = '__all__'
 
+    
+    
+    id =serializers.IntegerField()
+    OrderNo	=serializers.CharField(max_length=500)
+    OrderDate = serializers.DateField()
+    SupplierName = serializers.CharField(max_length=500)
+    CustomerName = serializers.CharField(max_length=500)
+    GroupName=serializers.CharField(max_length=500)
+    SubGroup =serializers.CharField(max_length=500)
+    MaterialName=serializers.CharField(max_length=100)
+    QtyInNo = serializers.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = serializers.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = serializers.DecimalField(max_digits=30, decimal_places=20)
+    Amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    OrderAmount = serializers.DecimalField(max_digits=10, decimal_places=2) 
+    CreatedOn = serializers.DateTimeField()
     
 class TestGRNReferanceSerializer(serializers.ModelSerializer):
     class Meta:

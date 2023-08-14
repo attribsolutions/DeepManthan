@@ -204,6 +204,8 @@ class M_UserPartiesSerializer(serializers.Serializer):
     GSTIN=serializers.CharField(max_length=500)
     FSSAINo=serializers.CharField(max_length=500)
     FSSAIExipry=serializers.DateField()
+    PartyTypeID=serializers.IntegerField()
+    PartyType=serializers.CharField(max_length=500)
     
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     

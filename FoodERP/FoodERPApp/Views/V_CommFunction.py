@@ -38,12 +38,12 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def create_transaction_log(request,data,User, PartyID,TransactionDetails):
+def create_transaction_log(request,data,User, PartyID,TransactionDetails,TransactionType=0,TransactionID=0):
     
    
     log_entry = Transactionlog.objects.create(
         TranasactionDate=date.today(),
-        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data
+        User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data,TransactionType=TransactionType,TransactionID=TransactionID
     )
     return log_entry
 
@@ -79,7 +79,6 @@ def UnitDropdown(ItemID,PartyForRate,BatchID=0):
             "Rate" : round(Rate,2),
             "BaseUnitQuantityNoUnit":q0[0]["BaseUnitQuantity"],
             
-
         })
     return UnitDetails
 
@@ -119,7 +118,7 @@ class GetOpeningBalanceView(CreateAPIView):
                 ReceiptDate = OpeningBalancedata['ReceiptDate']
                 today = date.today()
         
-                OpeningBalance=GetOpeningBalance(Party,Customer,ReceiptDate,today)
+                OpeningBalance=GetOpeningBalance(Party,Customer,ReceiptDate)
                 aa = list()
                 aa.append({"OpeningBalanceAmount": OpeningBalance })
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': aa[0]})
@@ -240,7 +239,57 @@ class MRPMaster:
             EffectiveDateID = 0
         return EffectiveDateID
     
+###################################################################################################################
+
+class DiscountMaster:
     
+    today = date.today() 
+    def __init__(self,ItemID,PartyID,EffectiveDate,Customer=0,PriceListID=0):
+        self.ItemID = ItemID
+        self.PriceListID = PriceListID
+        self.PartyID = PartyID
+        self.EffectiveDate = EffectiveDate
+        self.Customer = Customer
+        
+        pricelistquery=M_Parties.objects.filter(id=Customer).values("PriceList") 
+        self.PriceListID = pricelistquery[0]["PriceList"]
+
+
+    def GetTodaysDateDiscount(self):
+    
+        if int(self.Customer)>0:
+            P=Q(Customer=self.Customer)
+        else:
+            P=Q()
+        
+        D = Q(FromDate__lte=self.EffectiveDate) & Q(ToDate__gte=self.EffectiveDate)
+        ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,Party=self.PartyID).filter(D).filter(P).values("DiscountType","Discount").order_by('-id')[:1]
+        
+        if not ItemDiscountdata:
+            
+            ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID,PriceList_id=self.PriceListID,Party=self.PartyID).filter(D).values("DiscountType","Discount").order_by('-id')[:1]
+            
+        
+        if ItemDiscountdata:
+            DiscountDetails=list()
+            DiscountDetails.append({
+                "TodaysDiscount":ItemDiscountdata[0]["Discount"],
+                "DiscountType":ItemDiscountdata[0]["DiscountType"],
+                
+            })
+        else:
+            DiscountDetails=list()
+            DiscountDetails.append({
+                "TodaysDiscount":"",
+                "DiscountType":"",
+                
+            })
+
+       
+
+        
+                
+        return DiscountDetails    
     
 ###################################################################################################################
 
@@ -409,7 +458,7 @@ class UnitwiseQuantityConversion:
         else:
             aaa=Q(IsDeleted=0) 
         if(MCItemUnit == 0 & MUnits==0 ):
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1).filter( aaa )
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID,IsBase=1).select_related()
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
         else:
@@ -419,9 +468,9 @@ class UnitwiseQuantityConversion:
             else:
                 a=Q(id=MCItemUnit)   
             
-            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a ).filter( aaa )
+            BaseUnitQuantityQuery=MC_ItemUnits.objects.all().filter(Item=ItemID).filter( a ).filter( aaa ).select_related()
             BaseUnitQuantitySerializer=ItemUnitsSerializer(BaseUnitQuantityQuery, many=True).data
-            unitnamequery=M_Units.objects.filter(id =BaseUnitQuantitySerializer[0]['UnitID']).values('Name')
+            unitnamequery=M_Units.objects.filter(id =BaseUnitQuantitySerializer[0]['UnitID']).select_related().values('Name')
             self.UnitName  = unitnamequery[0]['Name']
 
             self.BaseUnitQuantity=BaseUnitQuantitySerializer[0]['BaseUnitQuantity']
@@ -431,7 +480,7 @@ class UnitwiseQuantityConversion:
                 b=Q(UnitID=ConversionMUnits)
             else:
                 b=Q(id=ConversionMCItemUnit)
-            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b ).filter( aaa )
+            ConversionUnitBaseQuantityQuery=MC_ItemUnits.objects.filter(Item=ItemID).filter( b ).filter( aaa ).select_related()
             if ConversionUnitBaseQuantityQuery.count() > 0:
                 ConversionUnitBaseQuantitySerializer=ItemUnitsSerializer(ConversionUnitBaseQuantityQuery, many=True).data
                 self.ConversionUnitBaseQuantity=ConversionUnitBaseQuantitySerializer[0]['BaseUnitQuantity']
@@ -445,7 +494,7 @@ class UnitwiseQuantityConversion:
         return BaseUnitQuantity   
 
     def ConvertintoSelectedUnit(self):
-        
+       
         BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
         if float(self.ConversionUnitBaseQuantity) == 0:
             ConvertedQuantity=  0 
@@ -456,14 +505,14 @@ class UnitwiseQuantityConversion:
     
     def GetConvertingBaseUnitQtyBaseUnitName(self):
         
-        MCItemUnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('id')
+        MCItemUnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).select_related().values('id')
         if self.MCItemUnit == MCItemUnitID[0]['id']:
             return self.UnitName
         else: 
             BaseUnitQuantity=float(self.InputQuantity) * float(self.BaseUnitQuantity)
             baseunitqty=round(float(BaseUnitQuantity), 2)
-            UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).values('UnitID')
-            BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).values('Name')
+            UnitID = MC_ItemUnits.objects.all().filter(Item=self.ItemID,IsBase=1,IsDeleted=0).select_related().values('UnitID')
+            BaseUnitName = M_Units.objects.filter(id =UnitID[0]['UnitID']).select_related().values('Name')
             # aaa=  self.UnitName+"("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
             aaa= "("+str(baseunitqty)+" "+BaseUnitName[0]['Name']+")"
             return aaa
@@ -471,14 +520,15 @@ class UnitwiseQuantityConversion:
     
 class RateCalculationFunction:
 
-    def __init__(self,BatchID,ItemID,PartyID,DivisionID,MUnit,MCItemUnit,PriceList):
+    def __init__(self,BatchID=0,ItemID=0,PartyID=0,DivisionID=0,MUnit=0,MCItemUnit=0,PriceList=0,selectedMRP=0):
         self.ItemID     =   ItemID 
         self.PartyID    =   PartyID 
         self.BatchID    =   BatchID
         self.DivisionID =   DivisionID
         self.today      =   date.today()
         self.PriceList  =   PriceList
-        
+        self.selectedMRP=   selectedMRP
+
         if(BatchID > 0):
            
             QueryForGSTAndMRP=O_LiveBatches.objects.filter(id=BatchID).values('MRP','GST','GSTPercentage','MRPValue')
@@ -505,7 +555,11 @@ class RateCalculationFunction:
             # print('MRPfun',MRPfun[0]['TodaysMRP'])
             # print('Gstfun',Gstfun[0]['GST'])
             # print('unitfun',MCItemUnit)
-            self.MRP=float(MRPfun[0]['TodaysMRP'])
+            if selectedMRP != 0:
+                self.MRP=self.selectedMRP
+            else:
+                self.MRP=float(MRPfun[0]['TodaysMRP'])
+            
             self.GST=float(Gstfun[0]['GST'])
         
         

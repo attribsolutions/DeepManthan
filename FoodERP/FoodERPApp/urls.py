@@ -1,13 +1,15 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
-from .Views.V_Reports import PartyLedgerReportView
+from .Views.V_Claim import *
+
+from .Views.V_Discount import *
+
+from .Views.V_Reports import *
 
 from .Views.V_EInvoiceEwayBill import *
 
 from .Views.V_SAPApi import *
-
-
 
 from .Views.V_ProductionReIssue import *
 
@@ -127,6 +129,9 @@ from .Views.V_Dashboard import *
 
 from .Views.V_StockEntry import *
 
+from .Views.V_R1_Reports import *
+
+from .Views.V_R3B_Reports import *
 
 urlpatterns = [
     
@@ -257,12 +262,14 @@ urlpatterns = [
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
             url(r'BulkInvoices$', BulkInvoiceView.as_view()),
+            
             url(r'Uploaded_EInvoicea/([0-9]+)/([0-9]+)$', Uploaded_EInvoice.as_view()),
             url(r'Uploaded_EwayBill/([0-9]+)/([0-9]+)$', Uploaded_EwayBill.as_view()),
             url(r'Cancel_EInvoicea/([0-9]+)/([0-9]+)$', Cancel_EInvoice.as_view()),
             url(r'Cancel_EwayBill/([0-9]+)/([0-9]+)$', Cancel_EwayBill.as_view()),
-            
-
+            url(r'UpdateVehicleInvoice/([0-9]+)/([0-9]+)$',UpdateVehicleInvoiceView.as_view()),
+            url(r'InvoiceHide/([0-9]+)/([0-9]+)$',InvoiceHideView.as_view()),
+                
 #Loading Sheet All APIs
             url(r'LoadingSheet/([0-9]+)$', LoadingSheetView.as_view()),
             url(r'LoadingSheet$', LoadingSheetView.as_view()),
@@ -271,6 +278,7 @@ urlpatterns = [
             url(r'LoadingSheetPrint/([0-9]+)$',LoadingSheetPrintView.as_view()),
             url(r'MultipleInvoices/([0-9]+)$',MultipleInvoicesView.as_view()),
             
+   
     
 # GRN All API's
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
@@ -343,6 +351,7 @@ urlpatterns = [
             url(r'PartySettings/([0-9]+)/([0-9]+)$',PartiesSettingsDetailsView.as_view()),
             url(r'PartySettings$',PartiesSettingsDetailsView.as_view()),
             url(r'PartyStockEntry$',StockEntryPageView.as_view()),
+            url(r'PartyLiveStock$',ShowOBatchWiseLiveStockView.as_view()),
             
             
            
@@ -395,9 +404,18 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
-            
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
+
+#DiscountMaster
+            url(r'DiscountMasterSave$',DiscountMasterSaveView.as_view()),
+            # url(r'DiscountMaster/([0-9]+)$',DiscountMasterView.as_view()),
+            # url(r'GetDiscount$',GetDiscountView.as_view()),
+            url(r'DiscountMaster$',DiscountMastergo.as_view()),
+            url(r'DiscountMasterr/([0-9]+)$',DiscountMastergo.as_view()),
+            url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()),
+            url(r'DiscountPartyType/([0-9]+)$',DiscountPartyTypeView.as_view()),
+            url(r'DiscountCustomer/([0-9]+)/([0-9]+)/([0-9]+)$',DiscountCustomerView.as_view()),
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),
@@ -485,6 +503,16 @@ urlpatterns = [
             url(r'PurchaseReturn/([0-9]+)$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturn$', PurchaseReturnView.as_view()),
             url(r'PurchaseReturnFilter$', PurchaseReturnListView.as_view()),
+            # url(r'PurchaseReturnItem/([0-9]+)$', T_PurchaseReturnView.as_view()),
+            url(r'SalesReturnconsolidateItem$', SalesReturnconsolidatePurchaseReturnView.as_view()),
+            url(r'ReturnItemApprove$', SalesReturnItemApproveView.as_view()),
+            url(r'PurchaseReturnPrint/([0-9]+)$', PurchaseReturnPrintView.as_view()),
+            
+                    
+# Single Invoice details view api for Sales Return, CreditDebitnot
+            url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),
+# Single GRNItem Details for Sales return post body Item and BatchCode
+            url(r'ReturnItemBatchcode$', ReturnItemBatchCodeAddView.as_view()),
 
 #MappingMaster
             url(r'PartyCustomerMapping$', PartyCustomerMappingView.as_view()),
@@ -493,10 +521,7 @@ urlpatterns = [
             url(r'ItemsMapping/([0-9]+)$', PartyItemMappingMasterView.as_view()),
             url(r'PartyUnitsMapping$', PartyUnitMappingMasterUnitsView.as_view()),
             url(r'PartyUnitsMapping/([0-9]+)$', PartyUnitMappingMasterUnitsView.as_view()),
-
-
-# Single Invoice details view api for Purchase Return, CreditDebitnot
-            url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),               
+     
 
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
@@ -522,9 +547,28 @@ urlpatterns = [
             url(r'getdashboard/([0-9]+)$', DashBoardView.as_view()),
 
 #Report
-            
             url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
             url(r'OrderSummaryReport$',SummaryReportView.as_view()),
             url(r'PartyLedgerReport$',PartyLedgerReportView.as_view()),
+            url(r'StockProcessing$',StockProcessingView.as_view()),
+            url(r'StockReport$',StockReportView.as_view()),
+            url(r'GenericSaleReport$',GenericSaleView.as_view()),
+            url(r'RetailerDataReport$',RetailerDataView.as_view()),
+            url(r'PurchaseGSTReport$', PurchaseGSTReportView.as_view()),
+            url(r'InvoiceDataExport$', InvoiceDateExportReportView.as_view()),
+            url(r'DeletedInvoiceData$', DeletedInvoiceDateExportReportView.as_view()),
+            url(r'DamageStockReport/([0-9]+)$', DamageStockReportView.as_view()),
+            
+# Claim 
+            
+            url(r'ClaimSummary$',ClaimSummaryView.as_view()),
+            url(r'MasterClaimCreate$',MasterClaimView.as_view()),
+            url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
+            url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
+            url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
+
+
+
+
 
 ]

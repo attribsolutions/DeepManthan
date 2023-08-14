@@ -8,7 +8,7 @@ from ..Serializer.S_Parties import  *
 
 class LoadingSheetListSerializer(serializers.ModelSerializer):
     Party = M_PartiesSerializerSecond()
-    Route = RouteSerializer()
+    # Route = RouteSerializer()
     Driver = M_DriverSerializer()
     Vehicle = VehiclesSerializerSecond()
     class Meta:
@@ -63,11 +63,15 @@ class LoadingSheetPrintSerializer(serializers.Serializer):
     Item_id=serializers.IntegerField()
     Unit_id=serializers.IntegerField()
     ItemName=serializers.CharField(max_length=100)
+    GroupTypeName=serializers.CharField(max_length=100)
+    GroupName=serializers.CharField(max_length=100)
+    SubGroupName=serializers.CharField(max_length=100)
     Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     Amount=serializers.DecimalField(max_digits=10, decimal_places=2)
     BatchCode = serializers.CharField(max_length=100)  
     QtyInBox = serializers.DecimalField(max_digits=10, decimal_places=3)
+    QtyInNo = serializers.DecimalField(max_digits=10, decimal_places=3)
      
         
         

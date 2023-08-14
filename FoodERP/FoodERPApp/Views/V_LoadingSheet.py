@@ -7,7 +7,9 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_LoadingSheet import *
 from ..Serializer.S_Invoices import *
+from ..Serializer.S_BankMaster import *
 from ..models import *
+from django.db.models import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber
 
 class LoadingSheetListView(CreateAPIView):
@@ -28,11 +30,18 @@ class LoadingSheetListView(CreateAPIView):
                     LoadingSheet_Serializer = LoadingSheetListSerializer(query, many=True).data
                     LoadingSheetListData = list()
                     for a in LoadingSheet_Serializer:
+                        RouteID = a['Route']
+                        Route_list = RouteID.split(",")
+                        query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                        routelist = ''
+                        for b in query:
+                            routelist = routelist+ b['Name'] + ','
+                            
                         LoadingSheetListData.append({
                             "id": a['id'],
                             "Date": a['Date'],
                             "LoadingSheetNo": a['No'],
-                            "RouteName": a['Route']['Name'],
+                            "RouteName": routelist[:-1],
                             "TotalAmount": a['TotalAmount'],
                             "InvoiceCount": a['InvoiceCount'],
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
@@ -40,9 +49,12 @@ class LoadingSheetListView(CreateAPIView):
                             "DriverName": a['Driver']['Name'],
                             "CreatedOn" :a['CreatedOn']
                         })
+                    log_entry = create_transaction_log(request, Loadingsheetdata, 0, Party, 'Loading Sheet List',42,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetListData})
+                log_entry = create_transaction_log(request, Loadingsheetdata, 0, Party, 'Data Not available',7,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_log(request, Loadingsheetdata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -64,11 +76,14 @@ class LoadingSheetView(CreateAPIView):
                 Loadingsheet_Serializer = LoadingSheetSerializer(data=Loadingsheetdata)
                 if Loadingsheet_Serializer.is_valid():
                     Loadingsheet_Serializer.save()
+                    log_entry = create_transaction_log(request, Loadingsheetdata, 0, Party, 'Loading Sheet Save Successfully',43,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_log(request, Loadingsheetdata, 0, Party, Loadingsheet_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Loadingsheet_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_log(request, Loadingsheetdata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     def get(self, request, id=0):
@@ -79,13 +94,21 @@ class LoadingSheetView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
+                    
+                    RouteID = a['Route']
+                    Route_list = RouteID.split(",")
+                    query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                    routelist = ''
+                    for b in query:
+                        routelist = routelist+ b['Name'] + ','
+                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
                         "Party":a['Party']['Name'],
                         "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
                         "LoadingSheetNo": a['No'],
-                        "RouteName": a['Route']['Name'],
+                        "RouteName":  routelist[:-1],
                         "TotalAmount": a['TotalAmount'],
                         "InvoiceCount": a['InvoiceCount'],
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
@@ -99,6 +122,17 @@ class LoadingSheetView(CreateAPIView):
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     InvoiceParent = list()
                     for a in InvoiceSerializedata:
+                        Amount = TC_ReceiptInvoices.objects.filter(Invoice=a['id']).aggregate(PAmount=Sum('PaidAmount'))
+                        if Amount['PAmount'] is None:
+                            PaidAmount = 0.000
+                        else:
+                            PaidAmount = Amount['PAmount']
+                        
+                        if float(PaidAmount) != float(a['GrandTotal']):
+                            Flag = False
+                        else:
+                            Flag = True
+                                
                         InvoiceParent.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
@@ -112,14 +146,18 @@ class LoadingSheetView(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
+                            "ReceiptFlag": Flag
                         })
                     InvoiceData.append({
                         "PartyDetails":LoadingSheetListData[0],
                         "InvoiceParent":InvoiceParent,
                     })    
+                    log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, a['Party']['id'], 'Loadingsheet',49,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
+                log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, a['Party']['id'], 'Data Not available',7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, a['Party']['id'], Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -132,11 +170,14 @@ class LoadingSheetView(CreateAPIView):
                 Loadingsheet_Serializer = LoadingSheetSerializer(LoadingsheetdataByID, data=Loadingsheetdata)
                 if Loadingsheet_Serializer.is_valid():
                     Loadingsheet_Serializer.save()
+                    # log_entry = create_transaction_log(request, Loadingsheetdata, 0, 0, 'Loading Sheet Updated Successfully',44,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Updated Successfully', 'Data':[]})
                 else:
+                    # log_entry = create_transaction_log(request, Loadingsheetdata, 0, 0, Loadingsheet_Serializer.errors,34,id)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Loadingsheet_Serializer.errors, 'Data':[]})
         except Exception as e:
+            # log_entry = create_transaction_log(request, Loadingsheetdata, 0, 0, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -146,15 +187,18 @@ class LoadingSheetView(CreateAPIView):
             with transaction.atomic():
                 Loadingsheetdata = T_LoadingSheet.objects.get(id=id)
                 Loadingsheetdata.delete()
+                log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, 0, 'Loading Sheet Deleted Successfully',45,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Deleted Successfully', 'Data':[]})
         except T_LoadingSheet.DoesNotExist:
+            log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, 0, 'Data Not available',7)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Loading Sheet Not available', 'Data': []})
         except IntegrityError:   
+            log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, 0, 'Loading Sheet used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Loading Sheet used in another table', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request,{'LoadingSheetID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-  
 class LoadingSheetInvoicesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
@@ -168,12 +212,12 @@ class LoadingSheetInvoicesView(CreateAPIView):
                 ToDate = Invoicedata['ToDate']
                 Party = Invoicedata['Party']
                 Route = Invoicedata['Route']
-                
+                Route_list = Route.split(",")
+              
                 if(Route == ''):
                     query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn,  T_Invoices.UpdatedOn, M_Parties.Name FROM T_Invoices join M_Parties on  M_Parties.id=  T_Invoices.Customer_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id = %s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''',[FromDate,ToDate,Party])
                 else:
-                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Route_id =%s WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route,FromDate,ToDate,Party])
-                
+                    query =  T_Invoices.objects.raw('''SELECT T_Invoices.id as id, T_Invoices.InvoiceDate, T_Invoices.Customer_id, T_Invoices.FullInvoiceNumber, T_Invoices.GrandTotal, T_Invoices.Party_id, T_Invoices.CreatedOn, T_Invoices.UpdatedOn,M_Parties.Name FROM T_Invoices join M_Parties on M_Parties.id=  T_Invoices.Customer_id join MC_PartySubParty on MC_PartySubParty.SubParty_id = T_Invoices.Customer_id  WHERE  MC_PartySubParty.Route_id IN %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id=%s AND T_Invoices.id Not in(SELECT  Invoice_id From TC_LoadingSheetDetails) ''', [Route_list,FromDate,ToDate,Party])
                 if query:
                     Invoice_serializer = LoadingSheetInvoicesSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
@@ -189,9 +233,12 @@ class LoadingSheetInvoicesView(CreateAPIView):
                             "GrandTotal": a['GrandTotal'],
                             "CreatedOn": a['CreatedOn'] 
                         })
+                    log_entry = create_transaction_log(request, Invoicedata, 0, Party,'LoadingSheetInVoice',46,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                log_entry = create_transaction_log(request, Invoicedata, 0, Party,'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, Invoicedata, 0, Party,'Exception(e)',33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 ######################################## Loading Sheet Print API ##################################################
@@ -208,13 +255,21 @@ class LoadingSheetPrintView(CreateAPIView):
                 InvoiceData = list()
                 LoadingSheetListData = list()
                 for a in LoadingSheet_Serializer:
+                    
+                    RouteID = a['Route']
+                    Route_list = RouteID.split(",")
+                    query = M_Routes.objects.filter(id__in=Route_list).values('Name')
+                    routelist = ''
+                    for b in query:
+                        routelist = routelist+ b['Name'] + ','
+                    
                     LoadingSheetListData.append({
                         "id": a['id'],
                         "Date": a['Date'],
                         "Party":a['Party']['Name'],
                         "PartyAddress":a['Party']['PartyAddress'][0]['Address'],
                         "LoadingSheetNo": a['No'],
-                        "RouteName": a['Route']['Name'],
+                        "RouteName":  routelist[:-1],
                         "TotalAmount": a['TotalAmount'],
                         "InvoiceCount": a['InvoiceCount'],
                         "VehicleNo": a['Vehicle']['VehicleNumber'],
@@ -224,6 +279,7 @@ class LoadingSheetPrintView(CreateAPIView):
                     })
                 q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
                 InvoiceQuery = T_Invoices.objects.filter(id__in=q1)
+                
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
@@ -234,6 +290,7 @@ class LoadingSheetPrintView(CreateAPIView):
                             "InvoiceDate": b['InvoiceDate'],
                             "InvoiceNumber": b['InvoiceNumber'],
                             "FullInvoiceNumber": b['FullInvoiceNumber'],
+                            "TCSAmount" : b["TCSAmount"],
                             "GrandTotal": b['GrandTotal'],
                             "RoundOffAmount":b['RoundOffAmount'],
                             "Customer": b['Customer']['id'],
@@ -249,29 +306,49 @@ class LoadingSheetPrintView(CreateAPIView):
                     for x in InvoiceSerializedata:
                         Invoicelist.append(x['id'])
                     InvoiceItemDetails = list()        
-                    Itemsquery =TC_InvoiceItems.objects.raw("SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id,TC_InvoiceItems.BatchCode",[Invoicelist])    
+                    Itemsquery =TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,TC_InvoiceItems.Unit_id,M_Items.Name ItemName, SUM(Quantity)Quantity,MRPValue, SUM(Amount) Amount, BatchCode, SUM(QtyInBox)QtyInBox,SUM(QtyInNo)QtyInNo 
+                    ,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+                    FROM TC_InvoiceItems 
+                    JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id 
+                    JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id 
+                    JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id
+                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+                    left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+                    left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                    WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence ''',[Invoicelist])    
                     
                     InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
                     for c in InvoiceItemSerializedata:
                         
-                        # Box Qty and Pieces Qty  
+                        # Box Qty and Pieces Qty 
                         
-                        QtyInBox = c['QtyInBox']
-                        integer_part, decimal_part = QtyInBox.split(".")
-                        qty= "0."+decimal_part
-                        QtyInNo=UnitwiseQuantityConversion(c['Item_id'],qty,c['Unit_id'],0,0,1,0).ConvertintoSelectedUnit()
-                        integer_part1, decimal_part2 = str(QtyInNo).split(".")
-
+                        MCItemUnit= MC_ItemUnits.objects.all().filter(Item=c['Item_id'],IsDeleted=0,UnitID=4).values('id')
+                     
+                        if MCItemUnit:
+                            QtyInBox = c['QtyInBox']
+                            integer_part, decimal_part = QtyInBox.split(".")
+                            QtyInNo=UnitwiseQuantityConversion(c['Item_id'],integer_part,MCItemUnit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                            PiecesQty = float(c['QtyInNo']) -float(QtyInNo) 
+                        else:
+                            QtyInBox = c['QtyInBox']
+                            integer_part, decimal_part = QtyInBox.split(".")
+                            QtyInNo=0.00
+                            PiecesQty = float(c['QtyInNo']) -float(QtyInNo)
+                        
                         InvoiceItemDetails.append({
                             "id": c['id'],
                             "id": c['Item_id'],
                             "ItemName": c['ItemName'],
-                            "Quantity": c['Quantity'],
+                            "GroupTypeName" : c["GroupTypeName"],
+                            "GroupName" : c["GroupName"],
+                            "SubGroupName" : c["SubGroupName"],
                             "MRPValue": c['MRPValue'],
                             "Amount" : c['Amount'],
                             "BatchCode": c['BatchCode'],
                             "BoxQty": integer_part,
-                            "PiecesQty":decimal_part2
+                            "PiecesQty":round(PiecesQty),
+                            "QtyInNo": round(float(c['QtyInNo']),2)
                         })
                         
                     InvoiceData.append({
@@ -279,9 +356,12 @@ class LoadingSheetPrintView(CreateAPIView):
                         "InvoiceItems":InvoiceItemDetails,
                         "InvoiceParent":InvoiceParent,
                     })    
+                    log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, b['Party']['id'],'LoadingSheetPrint',47,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
+                log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, b['Party']['id'],'Data Not available',7,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, b['Party']['id'],Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 ######################################## MultipleInvoice Loading Sheet Print API ##################################################
@@ -302,8 +382,16 @@ class MultipleInvoicesView(CreateAPIView):
                         
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
+                            
                             InvoiceItemDetails = list()
                             for b in a['InvoiceItems']:
+                                aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                                if (aaaa == b['Unit']['UnitID']['Name']):
+                                    bb=""
+                                else:
+                                    bb=aaaa
+                                
+                                
                                 InvoiceItemDetails.append({
                                     "Item": b['Item']['id'],
                                     "ItemName": b['Item']['Name'],
@@ -312,10 +400,11 @@ class MultipleInvoicesView(CreateAPIView):
                                     "MRPValue": b['MRP']['MRP'],
                                     "Rate": b['Rate'],
                                     "TaxType": b['TaxType'],
-                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "PrimaryUnitName":b['Unit']['UnitID']['Name'],
+                                    "UnitName":bb,
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
-                                    "GSTPercentage": b['GST']['GSTPercentage'],
+                                    "GSTPercentage": b['GSTPercentage'],
                                     "MarginValue": b['Margin']['Margin'],
                                     "BasicAmount": b['BasicAmount'],
                                     "GSTAmount": b['GSTAmount'],
@@ -340,18 +429,32 @@ class MultipleInvoicesView(CreateAPIView):
                                     "Invoice": d['Invoice'],
                                     "Order": d['Order']['id'],
                                     "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                    "Description":d['Order']['Description']
                                 })
-                                
+                            
+                            query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
+                            BanksSerializer=PartyBanksSerializer(query, many=True).data
+                            BankData=list()
+                            for e in BanksSerializer:
+                                BankData.append({
+                                    "BankName": e['BankName'],
+                                    "BranchName": e['BranchName'],
+                                    "IFSC": e['IFSC'],
+                                    "AccountNo": e['AccountNo'],
+                                })
+                            
                             InvoiceData.append({
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
                                 "InvoiceNumber": a['InvoiceNumber'],
                                 "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "TCSAmount" : a["TCSAmount"],
                                 "GrandTotal": a['GrandTotal'],
                                 "RoundOffAmount":a['RoundOffAmount'],
                                 "Customer": a['Customer']['id'],
                                 "CustomerName": a['Customer']['Name'],
                                 "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "CustomerMobileNo": a['Customer']['MobileNo'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
                                 "PartyState": a['Party']['State']['Name'],
@@ -361,11 +464,19 @@ class MultipleInvoicesView(CreateAPIView):
                                 "PartyAddress": a['Party']['PartyAddress'],
                                 "CustomerAddress": a['Customer']['PartyAddress'],
                                 "PartyGSTIN": a['Party']['GSTIN'],
+                                "PartyMobileNo": a['Party']['MobileNo'],
                                 "CreatedOn" : a['CreatedOn'],
+                                "DriverName":a['Driver']['Name'],
+                                "VehicleNo": a['Vehicle']['VehicleNumber'],
                                 "InvoiceItems": InvoiceItemDetails,
                                 "InvoicesReferences": InvoiceReferenceDetails,
+                                "InvoiceUploads" : a["InvoiceUploads"],
+                                "BankData":BankData
+                                
                             })
                     InvoiceList.append( InvoiceData[0] )   
+                log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0, a['Party']['id'],'MultipleInvoices',48,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
         except Exception as e:
+            log_entry = create_transaction_log(request, {'LoadingSheetID':id}, 0,a['Party']['id'],Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  

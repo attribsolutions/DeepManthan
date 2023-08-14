@@ -5,7 +5,20 @@ from ..Serializer.S_Orders import  *
 from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
 
+# code by ankita 
+# class RouteSerializer(serializers.ModelSerializer):
+#     Name = serializers.CharField(max_length=500)
+#     class Meta:
+#         model = M_Routes
+#         fields = '__all__'
 
+# code by ankita 
+# class MCPartySubPartySerializer(serializers.ModelSerializer):
+#     Route= RouteSerializer()
+#     class Meta:
+#         model = MC_PartySubParty
+#         fields = '__all__'
+        
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_States
@@ -20,9 +33,10 @@ class MC_PartyAdressSerializer(serializers.ModelSerializer):
 class PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress=MC_PartyAdressSerializer(many=True)
     State = StateSerializer(read_only=True)
+    # MCSubParty=MCPartySubPartySerializer(many=True) # code by ankita 
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State']
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo'] 
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -66,10 +80,20 @@ class OrderserializerforInvoice(serializers.ModelSerializer):
     class Meta:
         model = T_Orders
         fields = '__all__'
+        
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(OrderserializerforInvoice, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Description", None):
+            ret["Description"] = None  
+            
+        return ret    
        
        
 class InvoicesReferencesSerializerSecond(serializers.ModelSerializer):
     Order = OrderserializerforInvoice(read_only=True)
+    
     class Meta:
         model = TC_InvoicesReferences
         fields = '__all__'
@@ -97,7 +121,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
@@ -164,7 +188,7 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
             ret["Margin"] = {"id": None, "Margin": None} 
         
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage ": None}        
+            ret["GST"] = {"id": None, "GSTPercentage": None, "HSNCode":None }        
              
         return ret    
 class InvoiceUploadsSerializer(serializers.ModelSerializer):
@@ -180,6 +204,7 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
     InvoiceUploads=InvoiceUploadsSerializer(many=True)
+    
     class Meta:
         model = T_Invoices
         fields = '__all__'
@@ -193,6 +218,9 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
             
         if not ret.get("Vehicle", None):
             ret["Vehicle"] = {"id": None, "VehicleNumber": None}
+
+        if not ret.get("Route", None):
+            ret["Route"] = {"id": None, "Name": None}
         
         return ret          
 
@@ -204,6 +232,7 @@ class InvoiceSerializerThird(serializers.ModelSerializer):
     InvoicesReferences = InvoicesReferencesSerializerSecond(many=True)
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
+    InvoiceUploads=InvoiceUploadsSerializer(many=True)
     class Meta:
         model = T_Invoices
         fields = '__all__'

@@ -61,6 +61,7 @@ class M_PartiesFilterView(CreateAPIView):
                 # IsSCMCompany = Logindata['IsSCMCompany']
                 CompanyGroupID = Logindata['CompanyGroup']
                 IsSCMCompany = Logindata['IsSCMCompany']
+                IsRetailer = Logindata['IsRetailer']
 
                 if (RoleID == 1):  # SuperAdmin
 
@@ -88,12 +89,13 @@ class M_PartiesFilterView(CreateAPIView):
                     q = M_Roles.objects.filter(id=RoleID).values("isSCMRole")
 
                     if q[0]['isSCMRole'] == 1:
-
-                        q0 = MC_PartySubParty.objects.filter(
-                            Party=PartyID).values("SubParty")
-
-                        query = M_Parties.objects.filter(
-                            id__in=q0, PartyType__IsRetailer=1).select_related("PartyType")
+                        
+                        if IsRetailer == 1:
+                            q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
+                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=1).select_related("PartyType")
+                        else:
+                            q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
+                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=0).select_related("PartyType")    
 
                     else:
                         q0 = MC_PartySubParty.objects.filter(Party=PartyID)
@@ -180,7 +182,8 @@ class M_PartiesViewSecond(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "Subparty": a['SubParty'],
                             "Creditlimit": a['Creditlimit'],
-                            "Route": a['Route_id'],
+                            "Route": a['Route']['id'],
+                            "RouteName": a['Route']['Name'],
                             "Distance": a['Distance']
                         })
                     list2 = list()
@@ -278,7 +281,12 @@ class PartiesSettingsDetailsView(CreateAPIView):
 	a.IsPartyRelatedSetting,
     a.DefaultValue,
     b.Value CompanyValue,
-    c.Value PartyValue
+    c.Value PartyValue,
+    (CASE WHEN a.IsPartyRelatedSetting = 1 THEN 
+    (CASE WHEN c.Value is Null THEN a.DefaultValue ELSE c.Value END)
+	ELSE 
+    (CASE WHEN b.Value is Null THEN a.DefaultValue ELSE b.Value END)
+	END) Value
 FROM
     (SELECT 
         M_Settings.id AS Setting,
@@ -299,32 +307,11 @@ FROM
       LEFT JOIN
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
-
-                PartiesSetting_Serializer = PartiesSettingsDetailsListSerializer(
+                
+                a = PartiesSettingsDetailsListSerializer(
                     query, many=True).data
-                PartySettingslist = list()
-                for a in PartiesSetting_Serializer:
-
-                    if a['IsPartyRelatedSetting'] == 1:
-                        if a['PartyValue'] is None:
-                            Value = a['DefaultValue']
-                        else:
-                            Value = a['PartyValue']
-                    else:
-
-                        if a['CompanyValue'] is None:
-                            Value = a['DefaultValue']
-                        else:
-                            Value = a['CompanyValue']
-
-                    PartySettingslist.append({
-                        "id": a['id'],
-                        "SystemSetting": a['SystemSetting'],
-                        "Description": a['Description'],
-                        "IsPartyRelatedSetting": a["IsPartyRelatedSetting"],
-                        "Value": Value
-                    })
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartySettingslist})
+               
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 

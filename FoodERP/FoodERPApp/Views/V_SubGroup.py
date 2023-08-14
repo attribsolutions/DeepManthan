@@ -6,6 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_SubGroup import *
 from ..models import *
+from ..Serializer.S_Orders import *
 
 class SubGroupView(CreateAPIView):
 
@@ -48,6 +49,7 @@ class SubGroupView(CreateAPIView):
                 SubGroup_Serializer = SubGroupSerializer(data=SubGroup_data)
                 if SubGroup_Serializer.is_valid():
                     SubGroup_Serializer.save()
+                    # log_entry = create_transaction_log(request, SubGroup_data, 0, 0, 'SubGroup Save Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SubGroup Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -98,6 +100,7 @@ class SubGroupViewSecond(CreateAPIView):
                     SubGroup_dataByID, data=SubGroup_data)
                 if SubGroup_Serializer.is_valid():
                     SubGroup_Serializer.save()
+                    # log_entry = create_transaction_log(request, SubGroup_data, 0, 0, 'SubGroup Updated Successfully')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SubGroup Updated Successfully', 'Data':[]})
                 else:
                     transaction.set_rollback(True)
@@ -112,6 +115,7 @@ class SubGroupViewSecond(CreateAPIView):
             with transaction.atomic():
                 SubGroup_data = MC_SubGroup.objects.get(id=id)
                 SubGroup_data.delete()
+                # log_entry = create_transaction_log(request, SubGroup_data, 0, 0, 'SubGroup Deleted Successfully')
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SubGroup Deleted Successfully', 'Data':[]})
         except MC_SubGroup.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'SubGroup Not available', 'Data': []})

@@ -138,7 +138,14 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                         Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0).select_related('Party')
                     else:
                         Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0,Route=Route).select_related('Party')
-                    
+                
+                elif(Type==5):  #Customer without retailer
+                    q0=M_PartyType.objects.filter(Company=Company,IsVendor=0,IsRetailer=0)
+                    if (Route==""):
+                        Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0).select_related('Party')
+                    else:
+                        Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0,Route=Route).select_related('Party')
+                        
                     
 
                 elif (Type==4):
@@ -165,7 +172,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
@@ -179,13 +186,13 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['Party']['id'],
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
 
                             }) 
-                        elif(Type==3):  #Customer
+                        elif(Type==3 or Type == 5 ):  #Customer
                             if(a['SubParty']['PartyAddress'][0]['IsDefault'] == 1):
                                 FSSAINo=a['SubParty']['PartyAddress'][0]['FSSAINo']
                                 FSSAIExipry=a['SubParty']['PartyAddress'][0]['FSSAIExipry']
@@ -194,7 +201,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['SubParty']['id'],
                             "Name": a['SubParty']['Name'],
                             "GSTIN": a['SubParty']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
@@ -209,7 +216,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "id": a['id'],
                             "Name": a['Name'],
                             "GSTIN": a['Party']['GSTIN'],
-                            "PAN":a['Party']['PAN'],
+                            "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty']
