@@ -50,7 +50,7 @@ SELECT 1 as id, '(e) Non-GST Outward supplies' A, 0 Taxablevalue,0 IGST,0 CGST, 
 
         specific_column_names = {
         'A':'Nature of Supplies', 
-        'Taxablevalue':'Total Taxable value',
+        'TaxableValue':'Total Taxable value',
         'IGST':'Integrated Tax',
         'CGST':'Central Tax',
         'SGST':'State/UT Tax',
