@@ -44,7 +44,7 @@ UNION
 SELECT 1 as id, '(d) Inward supplies (liable to reverse charge) ' A, 0 Taxablevalue,0 IGST,0 CGST, 0 SGST,0 Cess
 UNION 
 SELECT 1 as id, '(e) Non-GST Outward supplies' A, 0 Taxablevalue,0 IGST,0 CGST, 0 SGST,0 Cess''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
-        print(str(query.query))
+        
         DOSAISLTRCdata = DOSAISLTRCSerializer(query, many=True).data
         df=pd.DataFrame(DOSAISLTRCdata)
         # print (df)
@@ -92,7 +92,7 @@ SELECT 1 as id, '(1)   As per Rule 42 & 43 of SGST/CGST rules ' A, 0 IGST,0 CGST
 UNION
 SELECT 1 as id, '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess
 UNION
-SELECT '(C) Net ITC Available (A)-(B)' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+SELECT 1 as id, '(C) Net ITC Available (A)-(B)' A, 0 IGST,0 CGST, 0 SGST,0 Cess
 UNION
 SELECT 1 as id, ' (D) Ineligible ITC' A, 0 IGST,0 CGST, 0 SGST,0 Cess
 UNION
