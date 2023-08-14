@@ -862,6 +862,11 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
                 Party = Orderdata['PartyID']
 
+                if Party == '':
+                    x = Company
+                else:
+                    x = Party
+
                 q0 = MC_SettingsDetails.objects.filter(
                         SettingID=1, Company=Company).values('Value')
                 v=q0[0]["Value"]
@@ -938,12 +943,12 @@ where Supplier_id=%s and OrderDate between %s and %s
                                     "OrderAmount": float(a['OrderAmount']),
                                     "CreatedOn": a['CreatedOn']
                                 })
-                    log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Summary",31,id)            
+                    log_entry = create_transaction_log(request, Orderdata, 0, x, "Order Summary",31,id)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
-                log_entry = create_transaction_log(request, Orderdata, 0, Party, "Data Not available",7,id)
+                log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, Party, Exception(e),33,id)
+            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
