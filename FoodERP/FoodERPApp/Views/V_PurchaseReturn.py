@@ -695,7 +695,6 @@ class SalesReturnItemApproveView(CreateAPIView):
                
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
-                
                
                 for a in ReturnItem:
                          
@@ -725,8 +724,6 @@ class SalesReturnItemApproveView(CreateAPIView):
                     else:
                         item = a['Item']
                         b = 0
-                        
-                   
                         
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'],Party, b)
                   
