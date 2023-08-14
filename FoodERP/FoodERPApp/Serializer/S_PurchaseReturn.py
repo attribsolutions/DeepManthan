@@ -6,6 +6,7 @@ from ..Serializer.S_GeneralMaster import  *
 from ..Serializer.S_Parties import  *
 from ..Serializer.S_Items import *
 from ..Serializer.S_Invoices import *
+import re
 
 # Return Save Serializers
 
@@ -41,7 +42,7 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= TC_PurchaseReturnItems
-        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment','ApprovedQuantity','SubReturn','BatchID','DiscountType','Discount','DiscountAmount']   
+        fields = fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount','CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','ReturnItemImages','MRPValue','GSTPercentage','ItemReason','Comment','ApprovedQuantity','SubReturn','BatchID','DiscountType','Discount','DiscountAmount','primarySourceID','ApprovedByCompany']   
         
 class PurchaseReturnReferences(serializers.ModelSerializer):
     class Meta :
@@ -69,6 +70,12 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         for ReturnItem_data in ReturnItems_data:
             ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
             ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
+            if(Mode == 1 or Mode ==2):
+                a=match = re.search(r'\((\d+)\)', str(ReturnItemID))
+                number = match.group(1)
+                print(number) 
+                UpdateReturnItemID=TC_PurchaseReturnItems.objects.filter(id=number).update(primarySourceID=number)
+
             
             for ReturnItemImage_data in ReturnItemImages_data:
                 ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data)
@@ -233,15 +240,31 @@ class ReturnApproveQtyO_LiveBatchesListSerializer(serializers.ModelSerializer):
         model = O_LiveBatches
         fields = ['MRP','MRPValue','GST','GSTPercentage','Rate','BatchDate', 'BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList']                    
 
+class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
+    
+    class Meta :
+        model= TC_PurchaseReturnItems
+        fields = '__all__'
+
+
 class ReturnApproveQtySerializer(serializers.ModelSerializer):
     O_LiveBatchesList=ReturnApproveQtyO_LiveBatchesListSerializer(many=True)
+    ReturnItem = PurchaseReturnItemsSerializer(many=True)
+    
     class Meta :
         model= T_PurchaseReturn
-        fields = ['O_LiveBatchesList']
+        fields = ['O_LiveBatchesList','ReturnItem']
     
     def create(self, validated_data):
-    
+        print(validated_data)
+        
+        ReturnItem_data=validated_data.pop('ReturnItem')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
+        
+        for ReturnItem in ReturnItem_data:
+            print(ReturnItem["primarySourceID"],ReturnItem["ApprovedByCompany"])
+            Approved=TC_PurchaseReturnItems.objects.filter(id=ReturnItem["primarySourceID"]).update(ApprovedByCompany=ReturnItem["ApprovedByCompany"],FinalApprovalDate=ReturnItem["FinalApprovalDate"],primarySourceID=ReturnItem["primarySourceID"])
+            
         for O_LiveBatchesList_data in O_LiveBatchesLists_data :
             O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
             BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
