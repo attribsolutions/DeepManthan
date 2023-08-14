@@ -60,17 +60,49 @@ Group by M_Parties.GSTIN,M_Parties.Name,T_Invoices.id,T_Invoices.InvoiceDate,M_S
         
         # Define which columns header Font bold
         for col_idx, header in enumerate(df.columns, start=1):
-            cell = ws.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            
+            cell = ws.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
             
 
         # Write the data
         for col_idx, header in enumerate(df.columns, start=1):
-            for row_idx, value in enumerate(df[header], start=2):
+            for row_idx, value in enumerate(df[header], start=5):
                 ws.cell(row=row_idx, column=col_idx, value=value)
                
+        max_cols = len(df.columns)
+
+        # Merge cells and add the hardcoded text
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws.cell(row=1, column=1, value="Summary For B2B(4)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
         
+        
+        B2Bquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(DISTINCT Customer_id) NoofRecipients,count(*)NoOfInvoices,sum(T_Invoices.GrandTotal+T_Invoices.TCSAmount) TotalInvoiceValue FROM T_Invoices JOIN M_Parties ON M_Parties.id=T_Invoices.Customer_id WHERE T_Invoices.Party_id=%s AND InvoiceDate BETWEEN %s AND %s and M_Parties.GSTIN !='' ''',([Party],[FromDate],[ToDate]))
+        B2Bdata2 = B2BSerializer2(B2Bquery2, many=True).data
+        B2Bdf2=pd.DataFrame(B2Bdata2)
+        # print(B2Bdf2)
+        
+        specific_column_names = {
+        'NoofRecipients':'NoofRecipients', 
+        'NoOfInvoices':'NoOfInvoices',
+        'TotalInvoiceValue':'TotalInvoiceValue',
+        }
+        
+        for col_idx, header in enumerate(B2Bdf2.columns, start=1):
+            ws.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+            bold_font = Font(bold=True)
+            ws.cell(row=2, column=col_idx).font = bold_font
+
+        for col_idx, header in enumerate(B2Bdf2.columns, start=1):
+            for row_idx, value in enumerate(B2Bdf2[header], start=3):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+                        
+                        
+                        
 
         # Example data for the second sheet B2CL
         B2CLquery = T_Invoices.objects.raw('''SELECT T_Invoices.id,T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,(T_Invoices.GrandTotal)GrandTotal,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
@@ -99,18 +131,50 @@ group by T_Invoices.id,T_Invoices.InvoiceDate,M_States.id,M_States.Name, TC_Invo
         }
         
         for col_idx, header in enumerate(df2.columns, start=1):
-            cell = ws2.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df2.columns, start=1):
-            for row_idx, value in enumerate(df2[header], start=2):
+            for row_idx, value in enumerate(df2[header], start=3):
                 ws2.cell(row=row_idx, column=col_idx, value=value)
-                
+        
+        ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
+        
+        B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue FROM T_Invoices
+JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+JOIN M_Parties a ON a.id=T_Invoices.Party_id
+JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+JOIN M_States ON M_States.id=b.State_id
+WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
+group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
+        B2BCLdata2 = B2BSerializer2(B2CLquery2, many=True).data
+        B2CLdf2=pd.DataFrame(B2BCLdata2)
+        # print(B2Bdf2)
+        
+        specific_column_names = {
+        'NoOfInvoices':'NoOfInvoices',
+        'TotalInvoiceValue':'TotalInvoiceValue',
+        'TaxableValue':'Total Invoice Taxable Value',
+        }
+        
+        for col_idx, header in enumerate(B2CLdf2.columns, start=1):
+            ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+            bold_font = Font(bold=True)
+            ws2.cell(row=2, column=col_idx).font = bold_font
+
+        for col_idx, header in enumerate(B2CLdf2.columns, start=1):
+            for row_idx, value in enumerate(B2CLdf2[header], start=3):
+                ws2.cell(row=row_idx, column=col_idx, value=value)
+               
                 
         # Example data for the third sheet B2CS       
-        B2CSquery = T_Invoices.objects.raw('''SELECT T_Invoices.id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
+        B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
 from T_Invoices 
 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
 JOIN M_Parties a ON a.id=T_Invoices.Party_id
@@ -119,6 +183,7 @@ JOIN M_States ON M_States.id=b.State_id
 where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
  and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))
  group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+       
         B2CSdata = B2CSSerializer(B2CSquery, many=True).data
         df3=pd.DataFrame(B2CSdata)
 
@@ -135,15 +200,49 @@ where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
         }
         
         for col_idx, header in enumerate(df3.columns, start=1):
-            cell = ws3.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws3.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df3.columns, start=1):
-            for row_idx, value in enumerate(df3[header], start=2):
+            for row_idx, value in enumerate(df3[header], start=5):
                 ws3.cell(row=row_idx, column=col_idx, value=value)        
                 
+        ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+        
+      
+        B2CSquery2 = T_Invoices.objects.raw('''SELECT 1 as id,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'' CessAmount
+from T_Invoices
+JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+JOIN M_Parties a ON a.id=T_Invoices.Party_id
+JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+JOIN M_States ON M_States.id=b.State_id
+where Party_id=%s and InvoiceDate BETWEEN  %s AND %s and  b.GSTIN =''
+and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))''',([Party],[FromDate],[ToDate]))
+    
+        B2CSdata2 = B2CSSerializer2(B2CSquery2, many=True).data
+        B2CSdf3=pd.DataFrame(B2CSdata2)
+        
+        
+        specific_column_names = {
+        'TaxableValue':'Total Taxable Value',
+        'CessAmount':' Total Cess',
+        }
+        
+        for col_idx, header in enumerate(B2CSdf3.columns, start=1):
+            ws3.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+            bold_font = Font(bold=True)
+            ws3.cell(row=2, column=col_idx).font = bold_font
+
+        for col_idx, header in enumerate(B2CSdf3.columns, start=1):
+            for row_idx, value in enumerate(B2CSdf3[header], start=3):
+                ws3.cell(row=row_idx, column=col_idx, value=value)
+        
                 
         # Example data for the four sheet CDNR        
         CDNRSquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id, M_Parties.GSTIN,M_Parties.Name,T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate,(CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteType,CONCAT(M_States.StateCode, '-', M_States.Name) aa,'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,'' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount FROM T_CreditDebitNotes
@@ -173,16 +272,22 @@ where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
         }
         
         for col_idx, header in enumerate(df4.columns, start=1):
-            cell = ws4.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws4.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df4.columns, start=1):
-            for row_idx, value in enumerate(df4[header], start=2):
+            for row_idx, value in enumerate(df4[header], start=3):
                 ws4.cell(row=row_idx, column=col_idx, value=value)        
                 
 
+        ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws4.cell(row=1, column=1, value="Summary For CDNR(9B)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+        
         # Example data for the five sheet CDNUR 
         CDNURquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id,'' URType, T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate, (CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteType, CONCAT(M_States.StateCode, '-', M_States.Name) aa, (T_CreditDebitNotes.GrandTotal) GrandTotal, '' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate, SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue, '' CessAmount
         FROM T_CreditDebitNotes
@@ -210,15 +315,21 @@ where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
         }
         
         for col_idx, header in enumerate(df5.columns, start=1):
-            cell = ws5.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws5.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df5.columns, start=1):
-            for row_idx, value in enumerate(df5[header], start=2):
+            for row_idx, value in enumerate(df5[header], start=3):
                 ws5.cell(row=row_idx, column=col_idx, value=value) 
                 
+        ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws5.cell(row=1, column=1, value="Summary For CDNUR(9B)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+        
         
         # Example data for the six sheet CDNUR         
         EXEMPquery = T_Invoices.objects.raw(''' SELECT id, Description ,sum(A.Total) TotalNilRatedSupplies FROM (
@@ -263,15 +374,21 @@ WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = ''
         }
         
         for col_idx, header in enumerate(df6.columns, start=1):
-            cell = ws6.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws6.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df6.columns, start=1):
-            for row_idx, value in enumerate(df6[header], start=2):
+            for row_idx, value in enumerate(df6[header], start=3):
                 ws6.cell(row=row_idx, column=col_idx, value=value)  
                 
+        ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws6.cell(row=1, column=1, value="Summary For Nil rated, exempted and non GST outward supplies (8)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+        
         
         # Example data for the seven sheet HSN            
         HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
@@ -300,14 +417,21 @@ WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  Group by id, M
         }
         
         for col_idx, header in enumerate(df7.columns, start=1):
-            cell = ws7.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws7.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df7.columns, start=1):
-            for row_idx, value in enumerate(df7[header], start=2):
+            for row_idx, value in enumerate(df7[header], start=3):
                 ws7.cell(row=row_idx, column=col_idx, value=value)                        
+        
+        ws7.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws7.cell(row=1, column=1, value="Summary For HSN(12)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+        
                                          
         
         # Example data for the eight sheet Docs         
@@ -336,16 +460,21 @@ WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  Group by id, M
         }
         
         for col_idx, header in enumerate(df8.columns, start=1):
-            cell = ws8.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+            cell = ws8.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
             bold_font = Font(bold=True)
             cell.font = bold_font
         
         # Write the data on the second worksheet
         for col_idx, header in enumerate(df8.columns, start=1):
-            for row_idx, value in enumerate(df8[header], start=2):
+            for row_idx, value in enumerate(df8[header], start=3):
                 ws8.cell(row=row_idx, column=col_idx, value=value)                
                 
-                
+        
+        ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+        merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
+        bold_font = Font(bold=True)
+        merged_cell.font = bold_font
+        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center        
                 
 #         # Populate worksheet with data
 #         # ws['A1'] = 'Header 1'
