@@ -131,6 +131,8 @@ from .Views.V_StockEntry import *
 
 from .Views.V_R1_Reports import *
 
+from .Views.V_R3B_Reports import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -519,12 +521,7 @@ urlpatterns = [
             url(r'ItemsMapping/([0-9]+)$', PartyItemMappingMasterView.as_view()),
             url(r'PartyUnitsMapping$', PartyUnitMappingMasterUnitsView.as_view()),
             url(r'PartyUnitsMapping/([0-9]+)$', PartyUnitMappingMasterUnitsView.as_view()),
-
-
-
-            
-
-                           
+     
 
 # RoleAccess========================================= 
             #SideMenu Partyid/Employeeid/CompanyID
@@ -566,9 +563,9 @@ urlpatterns = [
             
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
-            
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
-            url(r'generate-excel$',ExcelDownloadView.as_view()),
+            url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
+            url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
 
 
 
