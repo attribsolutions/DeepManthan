@@ -104,73 +104,73 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                 
                                 
 
-        #         # Example data for the second sheet B2CL
-        #         B2CLquery = T_Invoices.objects.raw('''SELECT T_Invoices.id,T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,(T_Invoices.GrandTotal)GrandTotal,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
-        # FROM T_Invoices 
-        # JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
-        # JOIN M_Parties a ON a.id=T_Invoices.Party_id
-        # JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-        # JOIN M_States ON M_States.id=b.State_id
-        # where Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
-        # group by T_Invoices.id,T_Invoices.InvoiceDate,M_States.id,M_States.Name, TC_InvoiceItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
-        #         B2CLdata = B2CLSerializer(B2CLquery, many=True).data
-        #         df2=pd.DataFrame(B2CLdata)
+                # Example data for the second sheet B2CL
+                B2CLquery = T_Invoices.objects.raw('''SELECT T_Invoices.id,T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,(T_Invoices.GrandTotal)GrandTotal,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
+        FROM T_Invoices 
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        JOIN M_States ON M_States.id=b.State_id
+        where Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
+        group by T_Invoices.id,T_Invoices.InvoiceDate,M_States.id,M_States.Name, TC_InvoiceItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+                B2CLdata = B2CLSerializer(B2CLquery, many=True).data
+                df2=pd.DataFrame(B2CLdata)
 
-        #         ws2 = wb.create_sheet(title="B2CL")
+                ws2 = wb.create_sheet(title="B2CL")
                 
-        #         specific_column_names = {
-        #         'FullInvoiceNumber':'Invoice Number',
-        #         'InvoiceDate':'Invoice date',
-        #         'GrandTotal':'Invoice Value',
-        #         'aa':'Place Of Supply',
-        #         'ApplicableofTaxRate':'Applicable %'+'of TaxRate',
-        #         'ECommerceGSTIN':'E-Commerce GSTIN',
-        #         'Rate':'Rate',
-        #         'TaxableValue' :'Taxable Value',
-        #         'CessAmount':'Cess Amount',
-        #         }
+                specific_column_names = {
+                'FullInvoiceNumber':'Invoice Number',
+                'InvoiceDate':'Invoice date',
+                'GrandTotal':'Invoice Value',
+                'aa':'Place Of Supply',
+                'ApplicableofTaxRate':'Applicable %'+'of TaxRate',
+                'ECommerceGSTIN':'E-Commerce GSTIN',
+                'Rate':'Rate',
+                'TaxableValue' :'Taxable Value',
+                'CessAmount':'Cess Amount',
+                }
                 
-        #         for col_idx, header in enumerate(df2.columns, start=1):
-        #             cell = ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
-        #             bold_font = Font(bold=True)
-        #             cell.font = bold_font
+                for col_idx, header in enumerate(df2.columns, start=1):
+                    cell = ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    cell.font = bold_font
                 
-        #         # Write the data on the second worksheet
-        #         for col_idx, header in enumerate(df2.columns, start=1):
-        #             for row_idx, value in enumerate(df2[header], start=3):
-        #                 ws2.cell(row=row_idx, column=col_idx, value=value)
+                # Write the data on the second worksheet
+                for col_idx, header in enumerate(df2.columns, start=1):
+                    for row_idx, value in enumerate(df2[header], start=3):
+                        ws2.cell(row=row_idx, column=col_idx, value=value)
                 
-        #         ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-        #         merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
-        #         bold_font = Font(bold=True)
-        #         merged_cell.font = bold_font
-        #         merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
+                ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
+                bold_font = Font(bold=True)
+                merged_cell.font = bold_font
+                merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
                 
-        #         B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue FROM T_Invoices
-        # JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
-        # JOIN M_Parties a ON a.id=T_Invoices.Party_id
-        # JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-        # JOIN M_States ON M_States.id=b.State_id
-        # WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
-        # group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
-        #         B2BCLdata2 = B2BSerializer2(B2CLquery2, many=True).data
-        #         B2CLdf2=pd.DataFrame(B2BCLdata2)
-        #         # print(B2Bdf2)
+                B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue FROM T_Invoices
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        JOIN M_States ON M_States.id=b.State_id
+        WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
+        group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
+                B2BCLdata2 = B2BSerializer2(B2CLquery2, many=True).data
+                B2CLdf2=pd.DataFrame(B2BCLdata2)
+                # print(B2Bdf2)
                 
-        #         specific_column_names = {
-        #         'NoOfInvoices':'No.of Invoices',
-        #         'TotalInvoiceValue':'Total Invoice Value',
-        #         'TaxableValue':'Total Invoice Taxable Value',
-        #         }
+                specific_column_names = {
+                'NoOfInvoices':'No.of Invoices',
+                'TotalInvoiceValue':'Total Invoice Value',
+                'TaxableValue':'Total Invoice Taxable Value',
+                }
                 
-        #         for col_idx, header in enumerate(B2CLdf2.columns, start=1):
-        #             ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
-        #             bold_font = Font(bold=True)
-        #             ws2.cell(row=2, column=col_idx).font = bold_font
+                for col_idx, header in enumerate(B2CLdf2.columns, start=1):
+                    ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    ws2.cell(row=2, column=col_idx).font = bold_font
 
-        #         for col_idx, header in enumerate(B2CLdf2.columns, start=1):
-        #             for row_idx, value in enumerate(B2CLdf2[header], start=3):
-        #                 ws2.cell(row=row_idx, column=col_idx, value=value)
+                for col_idx, header in enumerate(B2CLdf2.columns, start=1):
+                    for row_idx, value in enumerate(B2CLdf2[header], start=3):
+                        ws2.cell(row=row_idx, column=col_idx, value=value)
                     
                         
         #         # Example data for the third sheet B2CS       
