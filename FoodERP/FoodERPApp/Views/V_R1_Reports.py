@@ -250,7 +250,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
                 JOIN M_States ON M_States.id = M_Parties.State_id
                 JOIN M_GeneralMaster ON  M_GeneralMaster.id = T_CreditDebitNotes.NoteType_id
-                WHERE T_CreditDebitNotes.Party_id = 97  AND T_CreditDebitNotes.CRDRNoteDate BETWEEN '2023-08-01' AND '2023-08-16' AND M_Parties.GSTIN != '' 
+                WHERE T_CreditDebitNotes.Party_id = %s  AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN != '' 
                 GROUP BY T_CreditDebitNotes.id, M_Parties.GSTIN , M_Parties.Name , T_CreditDebitNotes.FullNoteNumber , T_CreditDebitNotes.CRDRNoteDate,NoteTypeName, T_CreditDebitNotes.NoteType_id , M_States.id , M_States.Name , TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
              
                 CDNRdata = CDNRSerializer(CDNRquery, many=True).data
@@ -263,7 +263,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 'Name':'Receiver Name',
                 'FullNoteNumber':'Note Number',
                 'CRDRNoteDate':'Note date',
-                'NoteType':'NoteType',
+                'NoteTypeName':'NoteTypeName',
                 'aa':'Place Of Supply',
                 'ReverseCharge':'Reverse Charge',
                 'GrandTotal':'Note Value',
