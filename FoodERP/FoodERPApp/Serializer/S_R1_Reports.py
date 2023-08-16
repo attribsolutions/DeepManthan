@@ -23,6 +23,13 @@ class B2BSerializer(serializers.Serializer):
     TaxableValue=FloatDecimalField()
     CessAmount=FloatDecimalField()
     
+class B2BSerializer2(serializers.Serializer):
+    # id = serializers.IntegerField()
+    NoofRecipients = serializers.IntegerField()
+    NoOfInvoices  = serializers.IntegerField()
+    TotalInvoiceValue =FloatDecimalField()
+
+###########################################################################################################    
     
 class B2CLSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
@@ -36,6 +43,15 @@ class B2CLSerializer(serializers.Serializer):
     TaxableValue=FloatDecimalField()
     CessAmount=FloatDecimalField()
     
+    
+class B2CLSerializer(serializers.Serializer):
+    # id = serializers.IntegerField()
+    NoOfInvoices  = serializers.IntegerField()
+    TotalInvoiceValue =FloatDecimalField() 
+    TotalInvoiceValue =FloatDecimalField()  
+      
+#################################################################################################################    
+
 class B2CSSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     Type=serializers.CharField(max_length=100)
@@ -46,7 +62,13 @@ class B2CSSerializer(serializers.Serializer):
     TaxableValue=FloatDecimalField()
     CessAmount=FloatDecimalField()
     
+class B2CSSerializer2(serializers.Serializer):
+    # id = serializers.IntegerField()
+    TaxableValue =FloatDecimalField() 
+    CessAmount=serializers.CharField(max_length=100)   
     
+################################################################################################################    
+
 class CDNRSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     GSTIN = serializers.CharField(max_length=100)
