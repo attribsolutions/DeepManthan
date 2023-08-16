@@ -6,7 +6,6 @@ class FloatDecimalField(serializers.Field):
     def to_representation(self, value):
         return float(value)
     
-    
 class B2BSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     GSTIN = serializers.CharField(max_length=100)
@@ -85,6 +84,17 @@ class CDNRSerializer(serializers.Serializer):
     TaxableValue=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
     
+class CDNR2Serializer(serializers.Serializer):
+    # id = serializers.IntegerField()
+    NoofRecipients = serializers.IntegerField()
+    NoOfNotes  = serializers.IntegerField()
+    TotalInvoiceValue =FloatDecimalField()
+    TotalTaxableValue =FloatDecimalField()
+    CessAmount=serializers.IntegerField()
+    
+    
+#####################################################################################################################        
+    
     
 class CDNURSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
@@ -99,11 +109,26 @@ class CDNURSerializer(serializers.Serializer):
     TaxableValue=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
     
+
+class CDNUR2Serializer(serializers.Serializer):
+   # id = serializers.IntegerField()
+    NoOfNotes  = serializers.IntegerField()
+    TotalInvoiceValue =FloatDecimalField()
+    TotalTaxableValue =FloatDecimalField()
+    CessAmount=serializers.IntegerField()   
     
+################################################################################################################    
+       
 class EXEMPSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     Description=serializers.CharField(max_length=100)
     Value=serializers.CharField(max_length=100)
+    
+    
+class EXEMP2Serializer(serializers.Serializer):
+    # id = serializers.IntegerField()
+    Description=serializers.CharField(max_length=100)
+    Value=serializers.CharField(max_length=100)    
     
     
     
