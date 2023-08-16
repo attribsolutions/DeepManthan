@@ -271,7 +271,7 @@ class SAPLedgerView(CreateAPIView):
                 # # Convert JSON string to Python dictionary
                 # data_dict = json.loads(json_data)
 
-            if response_json:
+            if (response_json)== '':
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})
             else:
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': "", 'Data': []})
