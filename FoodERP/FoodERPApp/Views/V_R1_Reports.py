@@ -291,33 +291,33 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
                 
-        #         CDNRquery2= T_CreditDebitNotes.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.Customer_id)NoofRecipients,COUNT(A.CRDRNote_id) NoOfNotes,SUM(A.GrandTotal) TotalInvoiceValue,SUM(A.TaxbleAmount) TotalTaxableValue, 0 CessAmount
-        # FROM (
-        # SELECT  T_CreditDebitNotes.Customer_id,TC_CreditDebitNoteItems.CRDRNote_id,T_CreditDebitNotes.GrandTotal,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxbleAmount
-        # FROM TC_CreditDebitNoteItems
-        # JOIN T_CreditDebitNotes ON T_CreditDebitNotes.id= TC_CreditDebitNoteItems.CRDRNote_id
-        # JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
-        # WHERE Party_id=%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN  %s  AND %s AND M_Parties.GSTIN != ''  Group by T_CreditDebitNotes.id)A''',([Party],[FromDate],[ToDate]))
+                CDNRquery2= T_CreditDebitNotes.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.Customer_id)NoofRecipients,COUNT(A.CRDRNote_id) NoOfNotes,SUM(A.GrandTotal) TotalInvoiceValue,SUM(A.TaxbleAmount) TotalTaxableValue, 0 CessAmount
+        FROM (
+        SELECT  T_CreditDebitNotes.Customer_id,TC_CreditDebitNoteItems.CRDRNote_id,T_CreditDebitNotes.GrandTotal,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxbleAmount
+        FROM TC_CreditDebitNoteItems
+        JOIN T_CreditDebitNotes ON T_CreditDebitNotes.id= TC_CreditDebitNoteItems.CRDRNote_id
+        JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
+        WHERE Party_id=%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN  %s  AND %s AND M_Parties.GSTIN != ''  Group by T_CreditDebitNotes.id)A''',([Party],[FromDate],[ToDate]))
                 
-        #         CDNR2data = CDNR2Serializer(CDNRquery2, many=True).data
-        #         CDNRdf4=pd.DataFrame(CDNR2data)
+                CDNR2data = CDNR2Serializer(CDNRquery2, many=True).data
+                CDNRdf4=pd.DataFrame(CDNR2data)
                 
-        #         specific_column_names = {
-        #         'NoofRecipients':'No.of Recipients',
-        #         'NoOfNotes':'No.of Notes',
-        #         'TotalInvoiceValue':' Total Invoice Value',
-        #         'TotalTaxableValue':' Total Taxable Value',
-        #         'CessAmount':'Total Cess',
-        #         }
+                specific_column_names = {
+                'NoofRecipients':'No.of Recipients',
+                'NoOfNotes':'No.of Notes',
+                'TotalInvoiceValue':' Total Invoice Value',
+                'TotalTaxableValue':' Total Taxable Value',
+                'CessAmount':'Total Cess',
+                }
                 
-        #         for col_idx, header in enumerate(CDNRdf4.columns, start=1):
-        #             ws4.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
-        #             bold_font = Font(bold=True)
-        #             ws4.cell(row=2, column=col_idx).font = bold_font
+                for col_idx, header in enumerate(CDNRdf4.columns, start=1):
+                    ws4.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    ws4.cell(row=2, column=col_idx).font = bold_font
 
-        #         for col_idx, header in enumerate(CDNRdf4.columns, start=1):
-        #             for row_idx, value in enumerate(CDNRdf4[header], start=3):
-        #                 ws4.cell(row=row_idx, column=col_idx, value=value)
+                for col_idx, header in enumerate(CDNRdf4.columns, start=1):
+                    for row_idx, value in enumerate(CDNRdf4[header], start=3):
+                        ws4.cell(row=row_idx, column=col_idx, value=value)
                 
                 
                 
