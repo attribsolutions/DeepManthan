@@ -274,13 +274,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 }
                 
                 for col_idx, header in enumerate(df4.columns, start=1):
-                    cell = ws4.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    cell = ws4.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                     bold_font = Font(bold=True)
                     cell.font = bold_font
                 
                 # Write the data on the second worksheet
                 for col_idx, header in enumerate(df4.columns, start=1):
-                    for row_idx, value in enumerate(df4[header], start=3):
+                    for row_idx, value in enumerate(df4[header], start=5):
                         ws4.cell(row=row_idx, column=col_idx, value=value)        
                         
 
@@ -350,13 +350,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 }
                 
                 for col_idx, header in enumerate(df5.columns, start=1):
-                    cell = ws5.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    cell = ws5.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                     bold_font = Font(bold=True)
                     cell.font = bold_font
                 
                 # Write the data on the second worksheet
                 for col_idx, header in enumerate(df5.columns, start=1):
-                    for row_idx, value in enumerate(df5[header], start=3):
+                    for row_idx, value in enumerate(df5[header], start=5):
                         ws5.cell(row=row_idx, column=col_idx, value=value) 
                         
                 ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
