@@ -250,7 +250,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
                 JOIN M_States ON M_States.id = M_Parties.State_id 
                 WHERE T_CreditDebitNotes.Party_id = %s AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN != '' 
-                GROUP BY M_Parties.GSTIN , M_Parties.Name , T_CreditDebitNotes.FullNoteNumber , T_CreditDebitNotes.CRDRNoteDate, T_CreditDebitNotes.NoteType_id , M_States.id , M_States.Name , TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+                GROUP BY T_CreditDebitNotes.id, M_Parties.GSTIN , M_Parties.Name , T_CreditDebitNotes.FullNoteNumber , T_CreditDebitNotes.CRDRNoteDate, T_CreditDebitNotes.NoteType_id , M_States.id , M_States.Name , TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+                print(str(CDNRquery.query))
                 CDNRdata = CDNRSerializer(CDNRquery, many=True).data
                 df4=pd.DataFrame(CDNRdata)
 
