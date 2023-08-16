@@ -6,7 +6,6 @@ class FloatDecimalField(serializers.Field):
     def to_representation(self, value):
         return float(value)
     
-    
 class B2BSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     GSTIN = serializers.CharField(max_length=100)
