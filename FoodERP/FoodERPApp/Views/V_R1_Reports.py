@@ -173,75 +173,75 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         ws2.cell(row=row_idx, column=col_idx, value=value)
                     
                         
-        #         # Example data for the third sheet B2CS       
-        #         B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
-        # from T_Invoices 
-        # JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
-        # JOIN M_Parties a ON a.id=T_Invoices.Party_id
-        # JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-        # JOIN M_States ON M_States.id=b.State_id
-        # where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
-        # and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))
-        # group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+                # Example data for the third sheet B2CS       
+                B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)aa, '' ApplicableofTaxRate ,TC_InvoiceItems.GSTPercentage Rate,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'0' CessAmount,'' ECommerceGSTIN
+        from T_Invoices 
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        JOIN M_States ON M_States.id=b.State_id
+        where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
+        and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))
+        group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
             
-        #         B2CSdata = B2CSSerializer(B2CSquery, many=True).data
-        #         df3=pd.DataFrame(B2CSdata)
+                B2CSdata = B2CSSerializer(B2CSquery, many=True).data
+                df3=pd.DataFrame(B2CSdata)
 
-        #         ws3 = wb.create_sheet(title="B2CS")
+                ws3 = wb.create_sheet(title="B2CS")
                 
-        #         specific_column_names = {
-        #         'Type':'Type',
-        #         'aa':'Place Of Supply',
-        #         'ApplicableofTaxRate':'Applicable %'+'of TaxRate',
-        #         'ECommerceGSTIN':'E-Commerce GSTIN',
-        #         'Rate':'Rate',
-        #         'TaxableValue' :'Taxable Value',
-        #         'CessAmount':'Cess Amount',
-        #         }
+                specific_column_names = {
+                'Type':'Type',
+                'aa':'Place Of Supply',
+                'ApplicableofTaxRate':'Applicable %'+'of TaxRate',
+                'ECommerceGSTIN':'E-Commerce GSTIN',
+                'Rate':'Rate',
+                'TaxableValue' :'Taxable Value',
+                'CessAmount':'Cess Amount',
+                }
                 
-        #         for col_idx, header in enumerate(df3.columns, start=1):
-        #             cell = ws3.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
-        #             bold_font = Font(bold=True)
-        #             cell.font = bold_font
+                for col_idx, header in enumerate(df3.columns, start=1):
+                    cell = ws3.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    cell.font = bold_font
                 
-        #         # Write the data on the second worksheet
-        #         for col_idx, header in enumerate(df3.columns, start=1):
-        #             for row_idx, value in enumerate(df3[header], start=5):
-        #                 ws3.cell(row=row_idx, column=col_idx, value=value)        
+                # Write the data on the second worksheet
+                for col_idx, header in enumerate(df3.columns, start=1):
+                    for row_idx, value in enumerate(df3[header], start=5):
+                        ws3.cell(row=row_idx, column=col_idx, value=value)        
                         
-        #         ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-        #         merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
-        #         bold_font = Font(bold=True)
-        #         merged_cell.font = bold_font
-        #         merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
+                bold_font = Font(bold=True)
+                merged_cell.font = bold_font
+                merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
             
-        #         B2CSquery2 = T_Invoices.objects.raw('''SELECT 1 as id,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'' CessAmount
-        # from T_Invoices
-        # JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
-        # JOIN M_Parties a ON a.id=T_Invoices.Party_id
-        # JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-        # JOIN M_States ON M_States.id=b.State_id
-        # where Party_id=%s and InvoiceDate BETWEEN  %s AND %s and  b.GSTIN =''
-        # and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))''',([Party],[FromDate],[ToDate]))
+                B2CSquery2 = T_Invoices.objects.raw('''SELECT 1 as id,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'' CessAmount
+        from T_Invoices
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        JOIN M_States ON M_States.id=b.State_id
+        where Party_id=%s and InvoiceDate BETWEEN  %s AND %s and  b.GSTIN =''
+        and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))''',([Party],[FromDate],[ToDate]))
             
-        #         B2CSdata2 = B2CSSerializer2(B2CSquery2, many=True).data
-        #         B2CSdf3=pd.DataFrame(B2CSdata2)
+                B2CSdata2 = B2CSSerializer2(B2CSquery2, many=True).data
+                B2CSdf3=pd.DataFrame(B2CSdata2)
                 
                 
-        #         specific_column_names = {
-        #         'TaxableValue':'Total Taxable Value',
-        #         'CessAmount':' Total Cess',
-        #         }
+                specific_column_names = {
+                'TaxableValue':'Total Taxable Value',
+                'CessAmount':' Total Cess',
+                }
                 
-        #         for col_idx, header in enumerate(B2CSdf3.columns, start=1):
-        #             ws3.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
-        #             bold_font = Font(bold=True)
-        #             ws3.cell(row=2, column=col_idx).font = bold_font
+                for col_idx, header in enumerate(B2CSdf3.columns, start=1):
+                    ws3.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    ws3.cell(row=2, column=col_idx).font = bold_font
 
-        #         for col_idx, header in enumerate(B2CSdf3.columns, start=1):
-        #             for row_idx, value in enumerate(B2CSdf3[header], start=3):
-        #                 ws3.cell(row=row_idx, column=col_idx, value=value)
+                for col_idx, header in enumerate(B2CSdf3.columns, start=1):
+                    for row_idx, value in enumerate(B2CSdf3[header], start=3):
+                        ws3.cell(row=row_idx, column=col_idx, value=value)
                 
                         
         #         # Example data for the four sheet CDNR        
