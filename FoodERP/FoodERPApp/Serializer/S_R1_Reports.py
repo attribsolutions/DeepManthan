@@ -153,4 +153,7 @@ class DocsSerializer(serializers.Serializer):
     MAXID=serializers.CharField(max_length=100)
     cnt=FloatDecimalField()
     Cancelledcnt=FloatDecimalField()
+    
+    
+
    
