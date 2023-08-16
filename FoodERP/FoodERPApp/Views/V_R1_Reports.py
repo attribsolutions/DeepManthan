@@ -560,7 +560,6 @@ WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  Group by id, M
             for row_idx, value in enumerate(df8[header], start=3):
                 ws8.cell(row=row_idx, column=col_idx, value=value)                
                 
-        
         ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
         merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
         bold_font = Font(bold=True)
