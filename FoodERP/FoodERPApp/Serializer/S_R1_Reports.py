@@ -155,11 +155,5 @@ class DocsSerializer(serializers.Serializer):
     Cancelledcnt=FloatDecimalField()
     
     
-class Docs2Serializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    # a=serializers.CharField(max_length=100)
-    # MINID=serializers.CharField(max_length=100)
-    # MAXID=serializers.CharField(max_length=100)
-    # cnt=FloatDecimalField()
-    # Cancelledcnt=FloatDecimalField()    
+
    
