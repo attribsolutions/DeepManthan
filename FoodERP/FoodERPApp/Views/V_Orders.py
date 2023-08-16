@@ -945,9 +945,9 @@ where Supplier_id=%s and OrderDate between %s and %s
                     #                 "OrderAmount": float(a['OrderAmount']),
                     #                 "CreatedOn": a['CreatedOn']
                     #             })
-                    log_entry = create_transaction_log(request, Orderdata, 0, Party, "Order Summary",31,id)            
+                    log_entry = create_transaction_log(request, Orderdata, 0, x, "Order Summary",31,id)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-                log_entry = create_transaction_log(request, Orderdata, 0, Party, "Data Not available",7,id)
+                log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
