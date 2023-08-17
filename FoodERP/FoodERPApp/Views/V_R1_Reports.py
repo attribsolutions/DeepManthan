@@ -505,7 +505,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                                 
                 
                 # Example data for the eight sheet Docs         
-                Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.FullInvoiceNumber)MINID,max(T_Invoices.FullInvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party_id =97 and T_DeletedInvoices.InvoiceDate BETWEEN '2023-07-01' AND '2023-08-30' ) Cancelledcnt ,'1' b
+                Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.FullInvoiceNumber)MINID,max(T_Invoices.FullInvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party_id =%s and T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s ) Cancelledcnt ,'1' b
                 FROM T_Invoices  where Party_id =%s and T_Invoices.InvoiceDate BETWEEN %s AND %s
                 UNION 
                 SELECT 1 as id, 'Credit Note' a,MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt ,'2' b
