@@ -514,7 +514,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 UNION 
                 SELECT 1 as id, 'Debit Note' a, MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt,'3' b 
                 FROM T_CreditDebitNotes  
-                WHERE  T_CreditDebitNotes.NoteType_id=38 AND Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                WHERE  T_CreditDebitNotes.NoteType_id=38 AND Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                     
                 Docsdata = DocsSerializer(Docsquery, many=True).data
                 df8=pd.DataFrame(Docsdata)
