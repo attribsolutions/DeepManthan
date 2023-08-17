@@ -776,22 +776,42 @@ WHERE T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s AND  T_DeletedInvoices.Par
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})         
         
 
-class DamageStockReportView(CreateAPIView):
+class StockDamageReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request, id=0):
+
+    def post(self, request):
         try:
             with transaction.atomic():
-                query = O_BatchWiseLiveStock.objects.raw('''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.Name UnitName FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''',([id]))
+                Damagedata = JSONParser().parse(request)
+                FromDate = Damagedata['FromDate']
+                ToDate = Damagedata['ToDate']
+                PartyID = Damagedata['PartyID']
+                ConversionUnit = Damagedata['Unit']
+
+                query1 = M_Units.objects.filter(
+                    id=ConversionUnit).values('Name')
+                query = O_BatchWiseLiveStock.objects.raw(
+                    '''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.id UnitID FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''', ([PartyID]))
                 if query:
-                    DamageStockData=list()
-                    DamageItemStocktSerializer=DamageStocktSerializer(query, many=True).data
-                    DamageStockData.append({"DamageStockItemDetails" : DamageItemStocktSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': DamageStockData[0]}) 
+                    DamageStockData = list()
+                    DamageItemStocktSerializer = DamageStocktSerializer(
+                        query, many=True).data
+                    for a in DamageItemStocktSerializer:
+                        ConversionUnitQty = UnitwiseQuantityConversion(
+                            a['id'], a['Qty'], 0, a['UnitID'], 0, ConversionUnit, 0).ConvertintoSelectedUnit()
+                        DamageStockData.append({
+                            "id": a['id'],
+                            "ItemName": a['ItemName'],
+                            "Quantity": ConversionUnitQty,
+                            "UnitName": query1[0]['Name']
+                        })
+
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DamageStockData})
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})          
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
     
                                             
                                  

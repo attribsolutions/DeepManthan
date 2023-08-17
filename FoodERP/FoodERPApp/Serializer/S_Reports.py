@@ -145,10 +145,13 @@ class InvoiceDataExportSerializer(serializers.Serializer):
         return a
 
    
+
+    
 class DamageStocktSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
     ItemName = serializers.CharField(max_length=500) 
     Qty = serializers.DecimalField(max_digits=10, decimal_places=2)
-    UnitName = serializers.CharField(max_length=500) 
+    UnitID=serializers.IntegerField()        
     
     
     
