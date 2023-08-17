@@ -196,6 +196,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
 class RetailerDataExportSerializer(serializers.Serializer):
     
     id=serializers.IntegerField()
+    SupplierName=serializers.CharField(max_length=500)
     Name = serializers.CharField(max_length=500)
     isActive=serializers.BooleanField()
     Email = serializers.CharField(max_length=200)
@@ -213,7 +214,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     RouteName = serializers.CharField(max_length=500)
     CompanyName=serializers.CharField(max_length=100) 
     PartyTypeName=serializers.CharField(max_length=100) 
-    PriceList=serializers.CharField(max_length=100)
+    PriceListName=serializers.CharField(max_length=100)
     Latitude=serializers.CharField(max_length=100)
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)

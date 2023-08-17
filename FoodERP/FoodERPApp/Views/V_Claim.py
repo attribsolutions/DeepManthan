@@ -132,11 +132,11 @@ class MasterClaimView(CreateAPIView):
                     for i in q1:
                         PartyType=i["id"]
                         print(PartyType)
-                        claimREasonwise=MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,PA PrimaryAmount,SA secondaryAmount,ReturnAmount ,(PA-ReturnAmount)NetPurchaseValue, 
-    (CASE WHEN ItemReason_id=54 THEN ((PA-ReturnAmount)*0.01) ELSE 0 END)Budget,ReturnAmount ClaimAmount,
-    (ReturnAmount/(PA-ReturnAmount))ClaimAgainstNetSale
+                        claimREasonwise=MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
+    (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
+    IFNULL((ReturnAmount/(PA-ReturnAmount)),0)ClaimAgainstNetSale
     from
-    (SELECT ItemReason_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)*GSTPercentage/100))ReturnAmount,
+    (SELECT ItemReason_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)*GSTPercentage/100))ReturnAmount,
     (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
     join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
     where InvoiceDate between %s and %sand Customer_id=%s )PA,
@@ -189,7 +189,7 @@ class MasterClaimView(CreateAPIView):
     left join 
 
 
-    (SELECT TC_PurchaseReturnItems.Item_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*tc_purchasereturnitems.Rate)*GSTPercentage/100))ReturnAmount
+    (SELECT TC_PurchaseReturnItems.Item_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)*GSTPercentage/100))ReturnAmount
     FROM T_PurchaseReturn
     join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
     join M_Parties on M_Parties.id=T_PurchaseReturn.Customer_id
