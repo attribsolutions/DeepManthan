@@ -371,9 +371,24 @@ class RetailerDataView(CreateAPIView):
             with transaction.atomic():
                 Retailerdata = JSONParser().parse(request)
                 Party = Retailerdata['Party']
-                
-                query = M_Parties.objects.raw('''SELECT M_Parties.id, M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
+                if(Party==0):
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
 FROM MC_PartySubParty
+JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
+JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
+JOIN MC_PartyAddress ON MC_PartyAddress.Party_id =M_Parties.id AND  MC_PartyAddress.IsDefault=1
+JOIN M_PartyType ON M_PartyType.id = M_Parties.PartyType_id AND M_PartyType.IsRetailer=1
+JOIN M_States ON M_States.id = M_Parties.State_id
+JOIN M_Districts ON M_Districts.id = M_Parties.District_id
+LEFT JOIN M_Cities ON M_Cities.id=M_Parties.City_id
+LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
+LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
+Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+''')
+                else:
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
+FROM MC_PartySubParty
+JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
 JOIN MC_PartyAddress ON MC_PartyAddress.Party_id =M_Parties.id AND  MC_PartyAddress.IsDefault=1
 JOIN M_PartyType ON M_PartyType.id = M_Parties.PartyType_id AND M_PartyType.IsRetailer=1
@@ -384,6 +399,8 @@ LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
 LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
 Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 WHERE MC_PartySubParty.Party_id=%s''',[Party])
+
+
                
                 if query:
                     RetailerExportData=list()
