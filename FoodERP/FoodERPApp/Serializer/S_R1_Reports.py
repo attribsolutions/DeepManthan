@@ -74,7 +74,8 @@ class CDNRSerializer(serializers.Serializer):
     Name = serializers.CharField(max_length=100)
     FullNoteNumber=serializers.CharField(max_length=100)
     CRDRNoteDate=serializers.CharField(max_length=100)
-    NoteType=serializers.CharField(max_length=100)
+    NoteTypeName=serializers.CharField(max_length=100)
+    NoteType_id=serializers.IntegerField()
     aa=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
     NoteSupplyType=serializers.CharField(max_length=100)
@@ -155,11 +156,5 @@ class DocsSerializer(serializers.Serializer):
     Cancelledcnt=FloatDecimalField()
     
     
-class Docs2Serializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    # a=serializers.CharField(max_length=100)
-    # MINID=serializers.CharField(max_length=100)
-    # MAXID=serializers.CharField(max_length=100)
-    # cnt=FloatDecimalField()
-    # Cancelledcnt=FloatDecimalField()    
+
    

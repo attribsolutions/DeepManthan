@@ -245,12 +245,14 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                         
                 # Example data for the four sheet CDNR        
-                CDNRquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id, M_Parties.GSTIN,M_Parties.Name,T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate,(CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteType,CONCAT(M_States.StateCode, '-', M_States.Name) aa,'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,'' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount FROM T_CreditDebitNotes
+                CDNRquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id, M_Parties.GSTIN,M_Parties.Name,T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate,M_GeneralMaster.Name NoteTypeName,T_CreditDebitNotes.NoteType_id,CONCAT(M_States.StateCode, '-', M_States.Name) aa,'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,'' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount FROM T_CreditDebitNotes
                 JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id = T_CreditDebitNotes.id
                 JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
-                JOIN M_States ON M_States.id = M_Parties.State_id 
-                WHERE T_CreditDebitNotes.Party_id = %s AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN != '' 
-                GROUP BY M_Parties.GSTIN , M_Parties.Name , T_CreditDebitNotes.FullNoteNumber , T_CreditDebitNotes.CRDRNoteDate, T_CreditDebitNotes.NoteType_id , M_States.id , M_States.Name , TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+                JOIN M_States ON M_States.id = M_Parties.State_id
+                JOIN M_GeneralMaster ON  M_GeneralMaster.id = T_CreditDebitNotes.NoteType_id
+                WHERE T_CreditDebitNotes.Party_id = %s  AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN != '' 
+                GROUP BY T_CreditDebitNotes.id, M_Parties.GSTIN , M_Parties.Name , T_CreditDebitNotes.FullNoteNumber , T_CreditDebitNotes.CRDRNoteDate,NoteTypeName, T_CreditDebitNotes.NoteType_id , M_States.id , M_States.Name , TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+             
                 CDNRdata = CDNRSerializer(CDNRquery, many=True).data
                 df4=pd.DataFrame(CDNRdata)
 
@@ -261,7 +263,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 'Name':'Receiver Name',
                 'FullNoteNumber':'Note Number',
                 'CRDRNoteDate':'Note date',
-                'NoteType':'NoteType',
+                'NoteTypeName':'NoteTypeName',
                 'aa':'Place Of Supply',
                 'ReverseCharge':'Reverse Charge',
                 'GrandTotal':'Note Value',
@@ -272,13 +274,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 }
                 
                 for col_idx, header in enumerate(df4.columns, start=1):
-                    cell = ws4.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    cell = ws4.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                     bold_font = Font(bold=True)
                     cell.font = bold_font
                 
                 # Write the data on the second worksheet
                 for col_idx, header in enumerate(df4.columns, start=1):
-                    for row_idx, value in enumerate(df4[header], start=3):
+                    for row_idx, value in enumerate(df4[header], start=5):
                         ws4.cell(row=row_idx, column=col_idx, value=value)        
                         
 
@@ -348,13 +350,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 }
                 
                 for col_idx, header in enumerate(df5.columns, start=1):
-                    cell = ws5.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    cell = ws5.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                     bold_font = Font(bold=True)
                     cell.font = bold_font
                 
                 # Write the data on the second worksheet
                 for col_idx, header in enumerate(df5.columns, start=1):
-                    for row_idx, value in enumerate(df5[header], start=3):
+                    for row_idx, value in enumerate(df5[header], start=5):
                         ws5.cell(row=row_idx, column=col_idx, value=value) 
                         
                 ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
@@ -456,30 +458,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 
                 
-                # EXEMPquery2= T_CreditDebitNotes.objects.raw(''' ''',([Party],[FromDate],[ToDate]))
-                # EXEMP2data = CDNUR2Serializer(EXEMPquery2, many=True).data
-                # EXEMPdf6=pd.DataFrame(EXEMP2data)
-                
-                # specific_column_names = {
-                # 'NoOfNotes':'No.of Notes',
-                # 'TotalInvoiceValue':' Total Note Value',
-                # 'TotalTaxableValue':' Total Taxable Value',
-                # 'CessAmount':'Total Cess',
-                # }
-                
-                # for col_idx, header in enumerate(EXEMPdf6.columns, start=1):
-                #     ws6.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
-                #     bold_font = Font(bold=True)
-                #     ws6.cell(row=2, column=col_idx).font = bold_font
-
-                # for col_idx, header in enumerate(EXEMPdf6.columns, start=1):
-                #     for row_idx, value in enumerate(EXEMPdf6[header], start=3):
-                #         ws6.cell(row=row_idx, column=col_idx, value=value)
-                
-                
-                
-                
-                
+               
                 
                 # Example data for the seven sheet HSN            
                 HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
@@ -526,7 +505,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                                 
                 
                 # Example data for the eight sheet Docs         
-                Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.FullInvoiceNumber)MINID,max(T_Invoices.FullInvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party_id =97 and T_DeletedInvoices.InvoiceDate BETWEEN '2023-07-01' AND '2023-08-30' ) Cancelledcnt ,'1' b
+                Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.InvoiceNumber)MINID,max(T_Invoices.InvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party =%s and T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s ) Cancelledcnt ,'1' b
                 FROM T_Invoices  where Party_id =%s and T_Invoices.InvoiceDate BETWEEN %s AND %s
                 UNION 
                 SELECT 1 as id, 'Credit Note' a,MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt ,'2' b
@@ -535,7 +514,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 UNION 
                 SELECT 1 as id, 'Debit Note' a, MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt,'3' b 
                 FROM T_CreditDebitNotes  
-                WHERE  T_CreditDebitNotes.NoteType_id=38 AND Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                WHERE  T_CreditDebitNotes.NoteType_id=38 AND Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                     
                 Docsdata = DocsSerializer(Docsquery, many=True).data
                 df8=pd.DataFrame(Docsdata)

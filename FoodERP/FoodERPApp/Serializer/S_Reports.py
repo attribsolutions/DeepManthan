@@ -145,10 +145,13 @@ class InvoiceDataExportSerializer(serializers.Serializer):
         return a
 
    
+
+    
 class DamageStocktSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
     ItemName = serializers.CharField(max_length=500) 
     Qty = serializers.DecimalField(max_digits=10, decimal_places=2)
-    UnitName = serializers.CharField(max_length=500) 
+    UnitID=serializers.IntegerField()        
     
     
     
@@ -165,9 +168,9 @@ class GenericSaleReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     HSNCode=serializers.CharField(max_length=100)
     MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
-    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
-    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInNo = serializers.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = serializers.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = serializers.DecimalField(max_digits=30, decimal_places=20)
     BasicRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     WithGSTRate=serializers.DecimalField(max_digits=10, decimal_places=2)  
     UnitName=serializers.CharField(max_length=100)
@@ -196,6 +199,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
 class RetailerDataExportSerializer(serializers.Serializer):
     
     id=serializers.IntegerField()
+    SupplierName=serializers.CharField(max_length=500)
     Name = serializers.CharField(max_length=500)
     isActive=serializers.BooleanField()
     Email = serializers.CharField(max_length=200)
@@ -213,7 +217,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     RouteName = serializers.CharField(max_length=500)
     CompanyName=serializers.CharField(max_length=100) 
     PartyTypeName=serializers.CharField(max_length=100) 
-    PriceList=serializers.CharField(max_length=100)
+    PriceListName=serializers.CharField(max_length=100)
     Latitude=serializers.CharField(max_length=100)
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)

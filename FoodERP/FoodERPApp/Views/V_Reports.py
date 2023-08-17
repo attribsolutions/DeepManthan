@@ -371,9 +371,24 @@ class RetailerDataView(CreateAPIView):
             with transaction.atomic():
                 Retailerdata = JSONParser().parse(request)
                 Party = Retailerdata['Party']
-                
-                query = M_Parties.objects.raw('''SELECT M_Parties.id, M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
+                if(Party==0):
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
 FROM MC_PartySubParty
+JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
+JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
+JOIN MC_PartyAddress ON MC_PartyAddress.Party_id =M_Parties.id AND  MC_PartyAddress.IsDefault=1
+JOIN M_PartyType ON M_PartyType.id = M_Parties.PartyType_id AND M_PartyType.IsRetailer=1
+JOIN M_States ON M_States.id = M_Parties.State_id
+JOIN M_Districts ON M_Districts.id = M_Parties.District_id
+LEFT JOIN M_Cities ON M_Cities.id=M_Parties.City_id
+LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
+LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
+Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+''')
+                else:
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
+FROM MC_PartySubParty
+JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
 JOIN MC_PartyAddress ON MC_PartyAddress.Party_id =M_Parties.id AND  MC_PartyAddress.IsDefault=1
 JOIN M_PartyType ON M_PartyType.id = M_Parties.PartyType_id AND M_PartyType.IsRetailer=1
@@ -384,6 +399,8 @@ LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
 LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
 Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 WHERE MC_PartySubParty.Party_id=%s''',[Party])
+
+
                
                 if query:
                     RetailerExportData=list()
@@ -759,22 +776,42 @@ WHERE T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s AND  T_DeletedInvoices.Par
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})         
         
 
-class DamageStockReportView(CreateAPIView):
+class StockDamageReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request, id=0):
+
+    def post(self, request):
         try:
             with transaction.atomic():
-                query = O_BatchWiseLiveStock.objects.raw('''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.Name UnitName FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''',([id]))
+                Damagedata = JSONParser().parse(request)
+                FromDate = Damagedata['FromDate']
+                ToDate = Damagedata['ToDate']
+                PartyID = Damagedata['PartyID']
+                ConversionUnit = Damagedata['Unit']
+
+                query1 = M_Units.objects.filter(
+                    id=ConversionUnit).values('Name')
+                query = O_BatchWiseLiveStock.objects.raw(
+                    '''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.id UnitID FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''', ([PartyID]))
                 if query:
-                    DamageStockData=list()
-                    DamageItemStocktSerializer=DamageStocktSerializer(query, many=True).data
-                    DamageStockData.append({"DamageStockItemDetails" : DamageItemStocktSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': DamageStockData[0]}) 
+                    DamageStockData = list()
+                    DamageItemStocktSerializer = DamageStocktSerializer(
+                        query, many=True).data
+                    for a in DamageItemStocktSerializer:
+                        ConversionUnitQty = UnitwiseQuantityConversion(
+                            a['id'], a['Qty'], 0, a['UnitID'], 0, ConversionUnit, 0).ConvertintoSelectedUnit()
+                        DamageStockData.append({
+                            "id": a['id'],
+                            "ItemName": a['ItemName'],
+                            "Quantity": ConversionUnitQty,
+                            "UnitName": query1[0]['Name']
+                        })
+
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DamageStockData})
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})          
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
     
                                             
                                  
