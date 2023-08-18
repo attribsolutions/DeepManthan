@@ -157,7 +157,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
             JOIN M_States ON M_States.id=b.State_id
             WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
             group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
-                    B2BCLdata2 = B2BSerializer2(B2CLquery2, many=True).data
+                    B2BCLdata2 = B2CLSerializer2(B2CLquery2, many=True).data
                     B2CLdf2=pd.DataFrame(B2BCLdata2)
                     # print(B2Bdf2)
                     
@@ -308,7 +308,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
             JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
             WHERE Party_id=%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN  %s  AND %s AND M_Parties.GSTIN != ''  Group by T_CreditDebitNotes.id)A''',([Party],[FromDate],[ToDate]))
                     
-                    CDNR2data = CDNR2Serializer(CDNRquery2, many=True).data
+                    CDNR2data = CDNRSerializer2(CDNRquery2, many=True).data
                     CDNRdf4=pd.DataFrame(CDNR2data)
                 
                 
@@ -390,7 +390,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
             WHERE Party_id=%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN
             %s AND  %s AND M_Parties.GSTIN = '' Group by T_CreditDebitNotes.id)A''',([Party],[FromDate],[ToDate]))
                 
-                    CDNUR2data = CDNUR2Serializer(CDNURquery2, many=True).data
+                    CDNUR2data = CDNURSerializer2(CDNURquery2, many=True).data
                     CDNURdf5=pd.DataFrame(CDNUR2data)
                 
                     specific_column_names = {
