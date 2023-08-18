@@ -47,7 +47,7 @@ class B2CLSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
     NoOfInvoices  = serializers.IntegerField()
     TotalInvoiceValue =FloatDecimalField() 
-    TotalInvoiceValue =FloatDecimalField()  
+    TaxableValue =FloatDecimalField()  
       
 #################################################################################################################    
 
