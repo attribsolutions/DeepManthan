@@ -133,13 +133,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     }
                 
                     for col_idx, header in enumerate(df2.columns, start=1):
-                        cell = ws2.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                        cell = ws2.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                         bold_font = Font(bold=True)
                         cell.font = bold_font
                     
                     # Write the data on the second worksheet
                     for col_idx, header in enumerate(df2.columns, start=1):
-                        for row_idx, value in enumerate(df2[header], start=3):
+                        for row_idx, value in enumerate(df2[header], start=5):
                             ws2.cell(row=row_idx, column=col_idx, value=value)
                     
                     max_cols = len(df2.columns)
@@ -456,13 +456,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     }
                     
                     for col_idx, header in enumerate(df6.columns, start=1):
-                        cell = ws6.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                        cell = ws6.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                         bold_font = Font(bold=True)
                         cell.font = bold_font
                     
                     # Write the data on the second worksheet
                     for col_idx, header in enumerate(df6.columns, start=1):
-                        for row_idx, value in enumerate(df6[header], start=3):
+                        for row_idx, value in enumerate(df6[header], start=5):
                             ws6.cell(row=row_idx, column=col_idx, value=value)  
                     
                     max_cols = len(df6.columns)
@@ -505,13 +505,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     }
                 
                     for col_idx, header in enumerate(df7.columns, start=1):
-                        cell = ws7.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                        cell = ws7.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                         bold_font = Font(bold=True)
                         cell.font = bold_font
                     
                     # Write the data on the second worksheet
                     for col_idx, header in enumerate(df7.columns, start=1):
-                        for row_idx, value in enumerate(df7[header], start=3):
+                        for row_idx, value in enumerate(df7[header], start=5):
                             ws7.cell(row=row_idx, column=col_idx, value=value)                        
                 
                     max_cols = len(df7.columns)
@@ -551,13 +551,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     }
                 
                     for col_idx, header in enumerate(df8.columns, start=1):
-                        cell = ws8.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                        cell = ws8.cell(row=4, column=col_idx, value=specific_column_names.get(header, header))
                         bold_font = Font(bold=True)
                         cell.font = bold_font
                     
                     # Write the data on the second worksheet
                     for col_idx, header in enumerate(df8.columns, start=1):
-                        for row_idx, value in enumerate(df8[header], start=3):
+                        for row_idx, value in enumerate(df8[header], start=5):
                             ws8.cell(row=row_idx, column=col_idx, value=value)                
                         
                     max_cols = len(df8.columns)
