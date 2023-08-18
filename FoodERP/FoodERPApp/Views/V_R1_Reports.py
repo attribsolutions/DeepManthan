@@ -4,6 +4,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 
 from ..Serializer.S_R1_Reports import *
  
@@ -529,7 +530,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 SELECT 1 as id, 'Debit Note' a, MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt,'3' b 
                 FROM T_CreditDebitNotes  
                 WHERE  T_CreditDebitNotes.NoteType_id=38 AND Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
-                    
+                   
                 Docsdata = DocsSerializer(Docsquery, many=True).data
                 df8=pd.DataFrame(Docsdata)
                 if not df8.empty:
