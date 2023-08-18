@@ -9,7 +9,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from ..Serializer.S_Parties import *
 from ..Serializer.S_Settings import *
 from ..models import *
-
+from ..Serializer.S_Orders import *
 
 class DivisionsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -21,13 +21,15 @@ class DivisionsView(CreateAPIView):
             with transaction.atomic():
                 Divisiondata = M_PartyType.objects.filter(IsDivision=id)
                 aa = M_Parties.objects.filter(PartyType__in=Divisiondata)
-
                 if aa.exists():
                     Division_serializer = DivisionsSerializer(aa, many=True)
 
+                    log_entry = create_transaction_log(request, {'DivisonID':id}, 0, 0, "Divisons",89,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Division_serializer.data})
+                log_entry = create_transaction_log(request, {'DivisonID':id}, 0, 0, "Data Not available",7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Division Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'DivisonID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 # def get_session(request):
@@ -112,13 +114,16 @@ class M_PartiesFilterView(CreateAPIView):
 
                 # print((query.query))
                 if not query:
+                    log_entry = create_transaction_log(request, Logindata, 0, PartyID, "Data Not available",7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
 
                     M_Parties_serializer = M_PartiesSerializerSecond(
                         query, many=True).data
+                    log_entry = create_transaction_log(request, Logindata, 0, PartyID, "Parties Filter List",90,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
+            log_entry = create_transaction_log(request, Logindata, 0, PartyID, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -133,12 +138,15 @@ class M_PartiesView(CreateAPIView):
             with transaction.atomic():
                 query = M_Parties.objects.all()
                 if not query:
+                    log_entry = create_transaction_log(request, 0, 0, 0, "Data Not available",33,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(
                         query, many=True).data
+                    log_entry = create_transaction_log(request, {'PartyDetails':M_Parties_serializer}, 0, 0, "All Parties List",91,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
+            log_entry = create_transaction_log(request, {'PartyDetails':M_Parties_serializer}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -148,12 +156,16 @@ class M_PartiesView(CreateAPIView):
                 M_Partiesdata = JSONParser().parse(request)
                 M_Parties_Serializer = M_PartiesSerializer(data=M_Partiesdata)
             if M_Parties_Serializer.is_valid():
-                M_Parties_Serializer.save()
+                Parties = M_Parties_Serializer.save()
+                LastInsertID = Parties.id
+                log_entry = create_transaction_log(request, M_Partiesdata, 0, 0, "Party Save Successfully",92,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Save Successfully', 'Data': []})
             else:
+                log_entry = create_transaction_log(request, M_Partiesdata, 0, 0, M_Parties_Serializer.errors,34,LastInsertID)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, M_Partiesdata, 0, 0, Exception(e),33,LastInsertID)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -168,6 +180,7 @@ class M_PartiesViewSecond(CreateAPIView):
                 M_Parties_data = M_Parties.objects.filter(id=id)
                 # print(str( M_Parties_data.query))
                 if not M_Parties_data:
+                    log_entry = create_transaction_log(request, {'PartyID':id}, 0, 0, "Data Not available",7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     M_Parties_serializer = M_PartiesSerializerSecond(
@@ -191,9 +204,10 @@ class M_PartiesViewSecond(CreateAPIView):
                                   "PartySubParty": PartySubPartyList})
                     # # M_Parties_serializer.update({"PartySubParty":list2})
                     # M_Parties_serializer.extend(list2)
+                    log_entry = create_transaction_log(request,{'PartyID':id}, 0, a['Party']['id'], "Party",93,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': list2[0]})
-
         except Exception as e:
+            log_entry = create_transaction_log(request, {'PartyID':id}, 0, a['Party']['id'], Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -206,11 +220,14 @@ class M_PartiesViewSecond(CreateAPIView):
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
                     M_Parties_Serializer.save()
+                    log_entry = create_transaction_log(request,M_Partiesdata, 0, 0, "Party Updated Successfully",94,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully', 'Data': []})
                 else:
+                    log_entry = create_transaction_log(request,M_Partiesdata, 0, 0, M_Parties_Serializer.errors,34,id)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request,M_Partiesdata, 0, 0, Exception(e),33,id)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -219,10 +236,13 @@ class M_PartiesViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Partiesdata = M_Parties.objects.get(id=id)
                 M_Partiesdata.delete()
+                log_entry = create_transaction_log(request,{'PartyID':id}, 0, 0, "Party Deleted Successfully",95,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully', 'Data': []})
         except M_Parties.DoesNotExist:
+            log_entry = create_transaction_log(request,{'PartyID':id}, 0, 0, "Data Not available",7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_log(request,{'PartyID':id}, 0, 0, "Party used in another table",8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party used in another table', 'Data': []})
 
 
@@ -238,12 +258,16 @@ class BulkRetailerDataView(CreateAPIView):
                 for aa in Retailerdata['BulkData']:
                     Retailer_serializer = M_PartiesSerializer(data=aa)
                     if Retailer_serializer.is_valid():
-                        Retailer_serializer.save()
+                        Retailer = Retailer_serializer.save()
+                        LastInsertID = Retailer.id
                     else:
+                        log_entry = create_transaction_log(request,Retailerdata, 0, 0, Retailer_serializer.errors,34,LastInsertID)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors, 'Data': []})
+                log_entry = create_transaction_log(request,Retailerdata, 0, 0, "Retailer Bulk Data Import Successfully",96,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Bulk Data Import Successfully', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request,Retailerdata, 0, 0, Exception(e),33,LastInsertID)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
@@ -257,10 +281,13 @@ class PartyAddressView(CreateAPIView):
             with transaction.atomic():
                 PartiesAddress = MC_PartyAddress.objects.get(id=id)
                 PartiesAddress.delete()
+                log_entry = create_transaction_log(request,{'PartyID':id}, 0, 0, "Party Address Deleted Successfully",97,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Address Deleted Successfully', 'Data': []})
         except M_Parties.DoesNotExist:
+            log_entry = create_transaction_log(request,{'PartyID':id}, 0, 0, 'Data Not available',7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Address Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_log(request,{'PartyID':id}, 0, 0, 'Party Address used in transaction',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Address used in transaction', 'Data': []})
 
 
@@ -310,9 +337,11 @@ FROM
                 
                 a = PartiesSettingsDetailsListSerializer(
                     query, many=True).data
-               
+
+                log_entry = create_transaction_log(request,0, 0, PartyID, 'PartiesSettingsDetails List',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
+            log_entry = create_transaction_log(request,0, 0, PartyID, Exception(e),7,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -328,10 +357,14 @@ FROM
                     Partysettings_serializer = PartiesSettingSerializer(
                         data=aa)
                     if Partysettings_serializer.is_valid():
-                        Partysettings_serializer.save()
+                        PartySettings = Partysettings_serializer.save()
+                        LastInsertID = PartySettings.id
                     else:
+                        log_entry = create_transaction_log(request,Retailerdata, 0, Party,Partysettings_serializer.errors,34,LastInsertID)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Partysettings_serializer.errors, 'Data': []})
+                log_entry = create_transaction_log(request,Retailerdata, 0, Party, "Party Settings data Save Successfully",99,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Settings data Successfully', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request,Retailerdata, 0, Party, Exception(e),33,LastInsertID)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
