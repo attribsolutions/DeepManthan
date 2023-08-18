@@ -47,27 +47,28 @@ SELECT 1 as id, '(e) Non-GST Outward supplies' A, 0 Taxablevalue,0 IGST,0 CGST, 
         
         DOSAISLTRCdata = DOSAISLTRCSerializer(query, many=True).data
         df=pd.DataFrame(DOSAISLTRCdata)
+        if not df.empty:
         # print (df)
 
-        specific_column_names = {
-        'A':'Nature of Supplies', 
-        'Taxablevalue':'Total Taxable value',
-        'IGST':'Integrated Tax',
-        'CGST':'Central Tax',
-        'SGST':'State/UT Tax',
-        'Cess':'Cess',
-        }
+            specific_column_names = {
+            'A':'Nature of Supplies', 
+            'Taxablevalue':'Total Taxable value',
+            'IGST':'Integrated Tax',
+            'CGST':'Central Tax',
+            'SGST':'State/UT Tax',
+            'Cess':'Cess',
+            }
         
-        # Define which columns header Font bold
-        for col_idx, header in enumerate(df.columns, start=1):
-            cell = ws.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
-            bold_font = Font(bold=True)
-            cell.font = bold_font
-            
-        # Write the data
-        for col_idx, header in enumerate(df.columns, start=1):
-            for row_idx, value in enumerate(df[header], start=2):
-                ws.cell(row=row_idx, column=col_idx, value=value)
+            # Define which columns header Font bold
+            for col_idx, header in enumerate(df.columns, start=1):
+                cell = ws.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+                bold_font = Font(bold=True)
+                cell.font = bold_font
+                
+            # Write the data
+            for col_idx, header in enumerate(df.columns, start=1):
+                for row_idx, value in enumerate(df[header], start=2):
+                    ws.cell(row=row_idx, column=col_idx, value=value)
                 
 ################################## 4.EligibleITC #############################################################################
 
@@ -101,26 +102,27 @@ UNION
 SELECT 1 as id, '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess''',([Party],[FromDate],[ToDate]))
         EgibleITCdata = EligibleITCSerializer(EligibleITCquery, many=True).data
         df2=pd.DataFrame(EgibleITCdata)
+        if not df2.empty:
 
-        ws2 = wb.create_sheet(title="Eligible ITC")
+            ws2 = wb.create_sheet(title="Eligible ITC")
+            
+            specific_column_names = {
+            'A':'Details', 
+            'IGST':'Integrated Tax',
+            'CGST':'Central Tax',
+            'SGST':'State/UT Tax',
+            'Cess':'Cess',
+            }
         
-        specific_column_names = {
-        'A':'Details', 
-        'IGST':'Integrated Tax',
-        'CGST':'Central Tax',
-        'SGST':'State/UT Tax',
-        'Cess':'Cess',
-        }
-        
-        for col_idx, header in enumerate(df2.columns, start=1):
-            cell = ws2.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
-            bold_font = Font(bold=True)
-            cell.font = bold_font
-        
-        # Write the data on the second worksheet
-        for col_idx, header in enumerate(df2.columns, start=1):
-            for row_idx, value in enumerate(df2[header], start=2):
-                ws2.cell(row=row_idx, column=col_idx, value=value) 
+            for col_idx, header in enumerate(df2.columns, start=1):
+                cell = ws2.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+                bold_font = Font(bold=True)
+                cell.font = bold_font
+            
+            # Write the data on the second worksheet
+            for col_idx, header in enumerate(df2.columns, start=1):
+                for row_idx, value in enumerate(df2[header], start=2):
+                    ws2.cell(row=row_idx, column=col_idx, value=value) 
         
         
 #####################   3.2 Of the supplies shown in 3.1 (a), details of inter-state supplies made to unregistered persons, composition taxable person and UIN holders#################################################
@@ -133,25 +135,25 @@ JOIN M_States ON M_Parties.State_id=M_States.id
 WHERE  Party_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s   group by M_States.id''',([Party],[FromDate],[ToDate]))
         Query3data = Query3Serializer(query3, many=True).data
         df3=pd.DataFrame(Query3data)
+        if not df3.empty:
 
-        ws3 = wb.create_sheet(title="3.2")
+            ws3 = wb.create_sheet(title="3.2")
+            
+            specific_column_names = {
+            'states':'Place of Supply(State/UT)', 
+            'Taxablevalue' :'Taxable Value',
+            'IGST':'Amount of Integrated Tax',
+            }
         
-        specific_column_names = {
-        'states':'Place of Supply(State/UT)', 
-        'Taxablevalue' :'Taxable Value',
-        'IGST':'Amount of Integrated Tax',
-        }
-        
-        for col_idx, header in enumerate(df3.columns, start=1):
-            cell = ws3.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
-            bold_font = Font(bold=True)
-            cell.font = bold_font
-        
-        # Write the data on the second worksheet
-        for col_idx, header in enumerate(df3.columns, start=1):
-            for row_idx, value in enumerate(df3[header], start=2):
-                ws3.cell(row=row_idx, column=col_idx, value=value) 
-
+            for col_idx, header in enumerate(df3.columns, start=1):
+                cell = ws3.cell(row=1, column=col_idx, value=specific_column_names.get(header, header))
+                bold_font = Font(bold=True)
+                cell.font = bold_font
+            
+            # Write the data on the second worksheet
+            for col_idx, header in enumerate(df3.columns, start=1):
+                for row_idx, value in enumerate(df3[header], start=2):
+                    ws3.cell(row=row_idx, column=col_idx, value=value) 
 
 
         output = io.BytesIO()
