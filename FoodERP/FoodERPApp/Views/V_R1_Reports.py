@@ -76,11 +76,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     max_cols = len(df.columns)
 
                     # Merge cells and add the hardcoded text
-                    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws.cell(row=1, column=1, value="Summary For B2B(4)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                    if not df.empty: 
+                        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws.cell(row=1, column=1, value="Summary For B2B(4)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
                     
                     B2Bquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(DISTINCT Customer_id) NoofRecipients,count(*)NoOfInvoices,sum(T_Invoices.GrandTotal+T_Invoices.TCSAmount) TotalInvoiceValue FROM T_Invoices JOIN M_Parties ON M_Parties.id=T_Invoices.Customer_id WHERE T_Invoices.Party_id=%s AND InvoiceDate BETWEEN %s AND %s and M_Parties.GSTIN !='' ''',([Party],[FromDate],[ToDate]))
@@ -145,12 +146,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     
                     max_cols = len(df2.columns)
                     
-                    ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
-                
+                    if not df2.empty: 
+                        ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
+                    
                     B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue FROM T_Invoices JOIN M_Parties a ON a.id=T_Invoices.Party_id JOIN M_Parties b ON b.id=T_Invoices.Customer_id JOIN M_States ON M_States.id=b.State_id WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000 group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
                     B2BCLdata2 = B2CLSerializer2(B2CLquery2, many=True).data
                     B2CLdf2=pd.DataFrame(B2BCLdata2)
@@ -210,12 +212,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws3.cell(row=row_idx, column=col_idx, value=value)
                     
                     max_cols = len(df3.columns)                
-                        
-                    ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                    
+                    if not df3.empty:     
+                        ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
             
                     B2CSquery2 = T_Invoices.objects.raw('''SELECT 1 as id,sum(TC_InvoiceItems.BasicAmount) TaxableValue ,'' CessAmount
@@ -288,11 +291,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         
                     max_cols = len(df4.columns)
                     
-                    ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws4.cell(row=1, column=1, value="Summary For CDNR(9B)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                    if not df4.empty:      
+                        ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws4.cell(row=1, column=1, value="Summary For CDNR(9B)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
                 
                     CDNRquery2= T_CreditDebitNotes.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.Customer_id)NoofRecipients,COUNT(A.CRDRNote_id) NoOfNotes,SUM(A.GrandTotal) TotalInvoiceValue,SUM(A.TaxbleAmount) TotalTaxableValue, 0 CessAmount
@@ -367,12 +371,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws5.cell(row=row_idx, column=col_idx, value=value) 
                             
                     max_cols = len(df5.columns)
-                    
-                    ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws5.cell(row=1, column=1, value="Summary For CDNUR(9B)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                    if not df5.empty:     
+                        ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws5.cell(row=1, column=1, value="Summary For CDNUR(9B)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
                 
                     
@@ -460,12 +464,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws6.cell(row=row_idx, column=col_idx, value=value)  
                     
                     max_cols = len(df6.columns)
-                            
-                    ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws6.cell(row=1, column=1, value="Summary For Nil rated, exempted and non GST outward supplies (8)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                    
+                    if not df6.empty:             
+                        ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws6.cell(row=1, column=1, value="Summary For Nil rated, exempted and non GST outward supplies (8)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                     
                
                 # Example data for the seven sheet HSN            
@@ -506,12 +511,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws7.cell(row=row_idx, column=col_idx, value=value)                        
                 
                     max_cols = len(df7.columns)
-                    
-                    ws7.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws7.cell(row=1, column=1, value="Summary For HSN(12)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                    if not df7.empty: 
+                        ws7.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws7.cell(row=1, column=1, value="Summary For HSN(12)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                 
                                                 
                 
@@ -552,12 +557,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws8.cell(row=row_idx, column=col_idx, value=value)                
                         
                     max_cols = len(df8.columns)
-                    
-                    ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
-                    merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
-                    bold_font = Font(bold=True)
-                    merged_cell.font = bold_font
-                    merged_cell.alignment = Alignment(horizontal='center')  # Align text to center        
+                    if not df8.empty: 
+                        ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
+                        merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
+                        bold_font = Font(bold=True)
+                        merged_cell.font = bold_font
+                        merged_cell.alignment = Alignment(horizontal='center')  # Align text to center        
                         
         #         # Populate worksheet with data
         #         # ws['A1'] = 'Header 1'
