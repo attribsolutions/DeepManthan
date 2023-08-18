@@ -468,7 +468,6 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                     
                
-                
                 # Example data for the seven sheet HSN            
                 HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
         FROM T_Invoices 
