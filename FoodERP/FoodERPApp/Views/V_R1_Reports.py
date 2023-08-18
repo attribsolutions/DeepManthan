@@ -150,13 +150,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     merged_cell.font = bold_font
                     merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
                 
-                    B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue FROM T_Invoices
-            JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
-            JOIN M_Parties a ON a.id=T_Invoices.Party_id
-            JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-            JOIN M_States ON M_States.id=b.State_id
-            WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000
-            group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
+                    B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue FROM T_Invoices JOIN M_Parties a ON a.id=T_Invoices.Party_id JOIN M_Parties b ON b.id=T_Invoices.Customer_id JOIN M_States ON M_States.id=b.State_id WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000 group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
                     B2BCLdata2 = B2CLSerializer2(B2CLquery2, many=True).data
                     B2CLdf2=pd.DataFrame(B2BCLdata2)
                     # print(B2Bdf2)
@@ -164,7 +158,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     specific_column_names = {
                     'NoOfInvoices':'No.of Invoices',
                     'TotalInvoiceValue':'Total Invoice Value',
-                    'TaxableValue':'Total Invoice Taxable Value',
+                    # 'TaxableValue':'Total Invoice Taxable Value',
                     }
                 
                     for col_idx, header in enumerate(B2CLdf2.columns, start=1):
