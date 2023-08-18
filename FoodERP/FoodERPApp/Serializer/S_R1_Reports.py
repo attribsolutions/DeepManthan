@@ -123,7 +123,7 @@ class CDNURSerializer2(serializers.Serializer):
 class EXEMPSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     Description=serializers.CharField(max_length=100)
-    Value=serializers.CharField(max_length=100)
+    Total=FloatDecimalField()
     
     
 class EXEMP2Serializer(serializers.Serializer):
