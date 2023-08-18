@@ -141,7 +141,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for col_idx, header in enumerate(df2.columns, start=1):
                         for row_idx, value in enumerate(df2[header], start=3):
                             ws2.cell(row=row_idx, column=col_idx, value=value)
-                
+                    
+                    max_cols = len(df2.columns)
+                    
                     ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
                     bold_font = Font(bold=True)
@@ -210,7 +212,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     # Write the data on the second worksheet
                     for col_idx, header in enumerate(df3.columns, start=1):
                         for row_idx, value in enumerate(df3[header], start=5):
-                            ws3.cell(row=row_idx, column=col_idx, value=value)        
+                            ws3.cell(row=row_idx, column=col_idx, value=value)
+                    
+                    max_cols = len(df3.columns)                
                         
                     ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
@@ -287,7 +291,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         for row_idx, value in enumerate(df4[header], start=5):
                             ws4.cell(row=row_idx, column=col_idx, value=value)        
                         
-
+                    max_cols = len(df4.columns)
+                    
                     ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws4.cell(row=1, column=1, value="Summary For CDNR(9B)")
                     bold_font = Font(bold=True)
@@ -366,6 +371,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         for row_idx, value in enumerate(df5[header], start=5):
                             ws5.cell(row=row_idx, column=col_idx, value=value) 
                             
+                    max_cols = len(df5.columns)
+                    
                     ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws5.cell(row=1, column=1, value="Summary For CDNUR(9B)")
                     bold_font = Font(bold=True)
@@ -457,6 +464,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for col_idx, header in enumerate(df6.columns, start=1):
                         for row_idx, value in enumerate(df6[header], start=3):
                             ws6.cell(row=row_idx, column=col_idx, value=value)  
+                    
+                    max_cols = len(df6.columns)
                             
                     ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws6.cell(row=1, column=1, value="Summary For Nil rated, exempted and non GST outward supplies (8)")
@@ -505,6 +514,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         for row_idx, value in enumerate(df7[header], start=3):
                             ws7.cell(row=row_idx, column=col_idx, value=value)                        
                 
+                    max_cols = len(df7.columns)
+                    
                     ws7.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws7.cell(row=1, column=1, value="Summary For HSN(12)")
                     bold_font = Font(bold=True)
@@ -549,6 +560,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         for row_idx, value in enumerate(df8[header], start=3):
                             ws8.cell(row=row_idx, column=col_idx, value=value)                
                         
+                    max_cols = len(df8.columns)
+                    
                     ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
                     bold_font = Font(bold=True)
