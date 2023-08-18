@@ -646,6 +646,7 @@ class M_Items(models.Model):
     Height = models.CharField(max_length=200,null=True,blank=True)
     Length = models.CharField(max_length=200,null=True,blank=True)
     StoringCondition = models.CharField(max_length=200,null=True,blank=True)
+    Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         

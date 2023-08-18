@@ -43,11 +43,11 @@ class B2CLSerializer(serializers.Serializer):
     CessAmount=FloatDecimalField()
     
     
-class B2CLSerializer(serializers.Serializer):
+class B2CLSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
     NoOfInvoices  = serializers.IntegerField()
     TotalInvoiceValue =FloatDecimalField() 
-    TotalInvoiceValue =FloatDecimalField()  
+    TaxableValue =FloatDecimalField()  
       
 #################################################################################################################    
 
@@ -85,7 +85,7 @@ class CDNRSerializer(serializers.Serializer):
     TaxableValue=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
     
-class CDNR2Serializer(serializers.Serializer):
+class CDNRSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
     NoofRecipients = serializers.IntegerField()
     NoOfNotes  = serializers.IntegerField()
@@ -111,7 +111,7 @@ class CDNURSerializer(serializers.Serializer):
     CessAmount=serializers.CharField(max_length=100)
     
 
-class CDNUR2Serializer(serializers.Serializer):
+class CDNURSerializer2(serializers.Serializer):
    # id = serializers.IntegerField()
     NoOfNotes  = serializers.IntegerField()
     TotalInvoiceValue =FloatDecimalField()
@@ -123,7 +123,7 @@ class CDNUR2Serializer(serializers.Serializer):
 class EXEMPSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     Description=serializers.CharField(max_length=100)
-    Value=serializers.CharField(max_length=100)
+    Total=FloatDecimalField()
     
     
 class EXEMP2Serializer(serializers.Serializer):
@@ -150,8 +150,8 @@ class HSNSerializer(serializers.Serializer):
 class DocsSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     a=serializers.CharField(max_length=100)
-    MINID=serializers.CharField(max_length=100)
-    MAXID=serializers.CharField(max_length=100)
+    MINID=serializers.IntegerField()
+    MAXID=serializers.IntegerField()
     cnt=FloatDecimalField()
     Cancelledcnt=FloatDecimalField()
     

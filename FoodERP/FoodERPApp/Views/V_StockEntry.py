@@ -94,12 +94,16 @@ class StockEntryPageView(CreateAPIView):
                 
                     StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
                     if StockEntry_OLiveBatchesSerializer.is_valid():
-                        StockEntry_OLiveBatchesSerializer.save()
+                        Stock = StockEntry_OLiveBatchesSerializer.save()
+                        LastInsertID = Stock.id
                     else:
+                        log_entry = create_transaction_log(request, StockEntrydata, 0, Party, StockEntry_OLiveBatchesSerializer.errors,34,LastInsertID)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': StockEntry_OLiveBatchesSerializer.errors, 'Data': []})
+                log_entry = create_transaction_log(request, StockEntrydata, 0, Party,"Party Stock Entry Save Successfully",87,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_log(request, StockEntrydata, 0, Party,  Exception(e),33,LastInsertID)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -122,6 +126,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where MC_PartyItems.Party_id=%s  order by M_Group.id, MC_SubGroup.id''',([Party]))
                 # print(str(Itemquery.query))
                 if not Itemquery:
+                    log_entry = create_transaction_log(request, StockReportdata, 0, Party, "Data Not available",7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = MC_PartyItemSerializerSingleGet(
@@ -157,8 +162,10 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             "ActualQty":round(ActualQty,3),
                             "Unit":StockUnit 
                         })
+                    log_entry = create_transaction_log(request, StockReportdata, 0, Party, "PartyLiveStock List",88,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
+            log_entry = create_transaction_log(request, StockReportdata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 
