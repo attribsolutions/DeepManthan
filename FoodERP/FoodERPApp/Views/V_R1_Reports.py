@@ -407,8 +407,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 
                 # Example data for the six sheet CDNUR         
-                EXEMPquery = T_Invoices.objects.raw('''SELECT id, Description ,sum(A.Total) TotalNilRatedSupplies FROM (
-        SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total
+                EXEMPquery = T_Invoices.objects.raw('''SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total
         FROM T_Invoices
         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
         JOIN M_Parties a ON a.id=T_Invoices.Party_id
@@ -434,7 +433,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
         JOIN M_Parties a ON a.id=T_Invoices.Party_id
         JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-        WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description) A group by id,Description
+        WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description
         ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 # print(str(EXEMPquery.query))
                 EXEMPdata = EXEMPSerializer(EXEMPquery, many=True).data
@@ -445,7 +444,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     
                     specific_column_names = {
                     'Description':'Description', 
-                    'TotalNilRatedSupplies':'Nil Rated Supplies',
+                    'Total':'NilRatedSupplies',
                     'Exempted(other than nil rated/non GST supply)':'Exempted(other than nil rated/non GST supply)',
                     'Non-GST Supplies':'Non-GST Supplies'
                     }
@@ -468,10 +467,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     merged_cell.font = bold_font
                     merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
                     
-                    
-                    
                
-                
                 # Example data for the seven sheet HSN            
                 HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
         FROM T_Invoices 
