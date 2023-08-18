@@ -49,7 +49,6 @@ SELECT 1 as id, '(e) Non-GST Outward supplies' A, 0 Taxablevalue,0 IGST,0 CGST, 
         df=pd.DataFrame(DOSAISLTRCdata)
         if not df.empty:
         # print (df)
-
             specific_column_names = {
             'A':'Nature of Supplies', 
             'Taxablevalue':'Total Taxable value',
@@ -102,9 +101,8 @@ UNION
 SELECT 1 as id, '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess''',([Party],[FromDate],[ToDate]))
         EgibleITCdata = EligibleITCSerializer(EligibleITCquery, many=True).data
         df2=pd.DataFrame(EgibleITCdata)
+        ws2 = wb.create_sheet(title="Eligible ITC")
         if not df2.empty:
-
-            ws2 = wb.create_sheet(title="Eligible ITC")
             
             specific_column_names = {
             'A':'Details', 
@@ -135,10 +133,9 @@ JOIN M_States ON M_Parties.State_id=M_States.id
 WHERE  Party_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s   group by M_States.id''',([Party],[FromDate],[ToDate]))
         Query3data = Query3Serializer(query3, many=True).data
         df3=pd.DataFrame(Query3data)
+        ws3 = wb.create_sheet(title="3.2")
         if not df3.empty:
 
-            ws3 = wb.create_sheet(title="3.2")
-            
             specific_column_names = {
             'states':'Place of Supply(State/UT)', 
             'Taxablevalue' :'Taxable Value',
