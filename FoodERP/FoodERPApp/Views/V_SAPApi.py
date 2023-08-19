@@ -275,9 +275,9 @@ class SAPLedgerView(CreateAPIView):
                     if ['StatusCode'] == 200:  
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})      
                     else:
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': response_json})           
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': response_json})           
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': '', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': 'Record Not Found', 'Data': []})
                     
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
