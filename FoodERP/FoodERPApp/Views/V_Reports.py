@@ -576,15 +576,16 @@ FROM
                             
                 })
                 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': StockData})
+            if StockData:
+                if ['StatusCode'] == 200:  
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})      
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})           
+            else:
+                return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
                                           
-
-
-
-
-
          
 # select I.Item_id,I.ItemName,InvoiveQuantity,InvoiceMRP,GRNQuantity,GRNMRP,StockQuantity,StockMRP,SalesReturnQuantity,SalesReturnMRP,PurchesReturnQuantity,PurchesReturnMRP from 
 
