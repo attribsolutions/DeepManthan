@@ -76,6 +76,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     max_cols = len(df.columns)
 
                     # Merge cells and add the hardcoded text
+                   
                     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws.cell(row=1, column=1, value="Summary For B2B(4)")
                     bold_font = Font(bold=True)
@@ -117,10 +118,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
         group by T_Invoices.id,T_Invoices.InvoiceDate,M_States.id,M_States.Name, TC_InvoiceItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
                 B2CLdata = B2CLSerializer(B2CLquery, many=True).data
                 df2=pd.DataFrame(B2CLdata)
+                ws2 = wb.create_sheet(title="B2CL")
                 if not df2.empty:
-
-                    ws2 = wb.create_sheet(title="B2CL")
-                    
                     specific_column_names = {
                     'FullInvoiceNumber':'Invoice Number',
                     'InvoiceDate':'Invoice date',
@@ -145,12 +144,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     
                     max_cols = len(df2.columns)
                     
+                   
                     ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws2.cell(row=1, column=1, value="Summary For B2CL(5)")
                     bold_font = Font(bold=True)
                     merged_cell.font = bold_font
                     merged_cell.alignment = Alignment(horizontal='center')  # Align text to center 
-                
+                    
                     B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 as id, count(*)NoOfInvoices,sum(T_Invoices.GrandTotal)TotalInvoiceValue FROM T_Invoices JOIN M_Parties a ON a.id=T_Invoices.Party_id JOIN M_Parties b ON b.id=T_Invoices.Customer_id JOIN M_States ON M_States.id=b.State_id WHERE Party_id=%s and InvoiceDate BETWEEN %s AND %s and b.GSTIN !='' and b.State_id != a.State_id and T_Invoices.GrandTotal > 250000 group by T_Invoices.id''',([Party],[FromDate],[ToDate]))
                     B2BCLdata2 = B2CLSerializer2(B2CLquery2, many=True).data
                     B2CLdf2=pd.DataFrame(B2BCLdata2)
@@ -185,10 +185,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
             
                 B2CSdata = B2CSSerializer(B2CSquery, many=True).data
                 df3=pd.DataFrame(B2CSdata)
+                ws3 = wb.create_sheet(title="B2CS")
                 if not df3.empty:
-
-                    ws3 = wb.create_sheet(title="B2CS")
-                    
                     specific_column_names = {
                     'Type':'Type',
                     'aa':'Place Of Supply',
@@ -210,7 +208,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws3.cell(row=row_idx, column=col_idx, value=value)
                     
                     max_cols = len(df3.columns)                
-                        
+                    
                     ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
                     bold_font = Font(bold=True)
@@ -257,9 +255,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
              
                 CDNRdata = CDNRSerializer(CDNRquery, many=True).data
                 df4=pd.DataFrame(CDNRdata)
+                ws4 = wb.create_sheet(title="CDNR")
                 if not df4.empty:
-
-                    ws4 = wb.create_sheet(title="CDNR")
                     
                     specific_column_names = {
                     'GSTIN':'GSTIN/UIN of Recipient', 
@@ -338,10 +335,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 GROUP BY  M_Parties.Name ,T_CreditDebitNotes.CRDRNoteDate,M_States.id ,M_States.Name ,TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
                 CDNURdata = CDNURSerializer(CDNURquery, many=True).data
                 df5=pd.DataFrame(CDNURdata)
+                ws5 = wb.create_sheet(title="CDNUR")
                 if not df5.empty:
-    
-
-                    ws5 = wb.create_sheet(title="CDNUR")
                     
                     specific_column_names = {
                     'URType':'URType', 
@@ -367,7 +362,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws5.cell(row=row_idx, column=col_idx, value=value) 
                             
                     max_cols = len(df5.columns)
-                    
+                       
                     ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws5.cell(row=1, column=1, value="Summary For CDNUR(9B)")
                     bold_font = Font(bold=True)
@@ -438,10 +433,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 # print(str(EXEMPquery.query))
                 EXEMPdata = EXEMPSerializer(EXEMPquery, many=True).data
                 df6=pd.DataFrame(EXEMPdata)
+                ws6 = wb.create_sheet(title="EXEMP")
                 if not df6.empty:
     
-                    ws6 = wb.create_sheet(title="EXEMP")
-                    
                     specific_column_names = {
                     'Description':'Description', 
                     'Total':'NilRatedSupplies',
@@ -460,7 +454,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws6.cell(row=row_idx, column=col_idx, value=value)  
                     
                     max_cols = len(df6.columns)
-                            
+                    
+                              
                     ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws6.cell(row=1, column=1, value="Summary For Nil rated, exempted and non GST outward supplies (8)")
                     bold_font = Font(bold=True)
@@ -478,10 +473,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
             
                 HSNdata = HSNSerializer(HSNquery, many=True).data
                 df7=pd.DataFrame(HSNdata)
+                ws7 = wb.create_sheet(title="HSN")
                 if not df7.empty:
-
-                    ws7 = wb.create_sheet(title="HSN")
-                    
                     specific_column_names = {
                     'HSNCode':'HSN', 
                     'Description':'Description',
@@ -506,7 +499,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             ws7.cell(row=row_idx, column=col_idx, value=value)                        
                 
                     max_cols = len(df7.columns)
-                    
+                   
                     ws7.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                     merged_cell = ws7.cell(row=1, column=1, value="Summary For HSN(12)")
                     bold_font = Font(bold=True)
@@ -529,9 +522,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                    
                 Docsdata = DocsSerializer(Docsquery, many=True).data
                 df8=pd.DataFrame(Docsdata)
+                ws8 = wb.create_sheet(title="Docs")
                 if not df8.empty:
-
-                    ws8 = wb.create_sheet(title="Docs")
                     
                     specific_column_names = {
                     'a':'Nature of Document', 
