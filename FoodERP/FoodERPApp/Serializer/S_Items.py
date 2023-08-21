@@ -458,7 +458,7 @@ class ItemReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = M_Items
-        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemGroupDetails']
+        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails']
 
 
 class DiscountSerializer(serializers.ModelSerializer):
