@@ -6,155 +6,67 @@ class FloatDecimalField(serializers.Field):
     def to_representation(self, value):
         return float(value)
     
-class B2BSerializer(serializers.Serializer):
+class GSTWiseSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    GSTIN = serializers.CharField(max_length=100)
-    Name = serializers.CharField(max_length=100)
-    FullInvoiceNumber=serializers.CharField(max_length=100)
-    InvoiceDate=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    aa=serializers.CharField(max_length=100)
-    ReverseCharge=serializers.CharField(max_length=100)
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
-    InvoiceType=serializers.CharField(max_length=100)
-    ECommerceGSTIN=serializers.CharField(max_length=100)
-    Rate=FloatDecimalField()
+    GSTPercentage=FloatDecimalField()
     TaxableValue=FloatDecimalField()
-    CessAmount=FloatDecimalField()
-    
-class B2BSerializer2(serializers.Serializer):
-    # id = serializers.IntegerField()
-    NoofRecipients = serializers.IntegerField()
-    NoOfInvoices  = serializers.IntegerField()
-    TotalInvoiceValue =FloatDecimalField()
-
-###########################################################################################################    
-    
-class B2CLSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    FullInvoiceNumber=serializers.CharField(max_length=100)
-    InvoiceDate=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    aa=serializers.CharField(max_length=100)
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
-    ECommerceGSTIN=serializers.CharField(max_length=100)
-    Rate=FloatDecimalField()
-    TaxableValue=FloatDecimalField()
-    CessAmount=FloatDecimalField()
-    
-    
-class B2CLSerializer2(serializers.Serializer):
-    # id = serializers.IntegerField()
-    NoOfInvoices  = serializers.IntegerField()
-    TotalInvoiceValue =FloatDecimalField() 
-    TaxableValue =FloatDecimalField()  
-      
-#################################################################################################################    
-
-class B2CSSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    Type=serializers.CharField(max_length=100)
-    aa=serializers.CharField(max_length=100)
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
-    ECommerceGSTIN=serializers.CharField(max_length=100)
-    Rate=FloatDecimalField()
-    TaxableValue=FloatDecimalField()
-    CessAmount=FloatDecimalField()
-    
-class B2CSSerializer2(serializers.Serializer):
-    # id = serializers.IntegerField()
-    TaxableValue =FloatDecimalField() 
-    CessAmount=serializers.CharField(max_length=100)   
-    
-################################################################################################################    
-
-class CDNRSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    GSTIN = serializers.CharField(max_length=100)
-    Name = serializers.CharField(max_length=100)
-    FullNoteNumber=serializers.CharField(max_length=100)
-    CRDRNoteDate=serializers.CharField(max_length=100)
-    NoteTypeName=serializers.CharField(max_length=100)
-    NoteType_id=serializers.IntegerField()
-    aa=serializers.CharField(max_length=100)
-    ReverseCharge=serializers.CharField(max_length=100)
-    NoteSupplyType=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
-    Rate=FloatDecimalField()
-    TaxableValue=FloatDecimalField()
-    CessAmount=serializers.CharField(max_length=100)
-    
-class CDNRSerializer2(serializers.Serializer):
-    # id = serializers.IntegerField()
-    NoofRecipients = serializers.IntegerField()
-    NoOfNotes  = serializers.IntegerField()
-    TotalInvoiceValue =FloatDecimalField()
-    TotalTaxableValue =FloatDecimalField()
-    CessAmount=serializers.IntegerField()
-    
-    
-#####################################################################################################################        
-    
-    
-class CDNURSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    URType=serializers.CharField(max_length=100)
-    FullNoteNumber=serializers.CharField(max_length=100)
-    CRDRNoteDate=serializers.CharField(max_length=100)
-    NoteType=serializers.CharField(max_length=100)
-    aa=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
-    Rate=FloatDecimalField()
-    TaxableValue=FloatDecimalField()
-    CessAmount=serializers.CharField(max_length=100)
-    
-
-class CDNURSerializer2(serializers.Serializer):
-   # id = serializers.IntegerField()
-    NoOfNotes  = serializers.IntegerField()
-    TotalInvoiceValue =FloatDecimalField()
-    TotalTaxableValue =FloatDecimalField()
-    CessAmount=serializers.IntegerField()   
-    
-################################################################################################################    
-       
-class EXEMPSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    Description=serializers.CharField(max_length=100)
-    Total=FloatDecimalField()
-    
-    
-class EXEMP2Serializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    Description=serializers.CharField(max_length=100)
-    Value=serializers.CharField(max_length=100)    
-    
-    
-    
-class HSNSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    HSNCode=serializers.CharField(max_length=100)
-    Description=serializers.CharField(max_length=100)
-    UQC=serializers.CharField(max_length=100)
-    TotalQuantity=FloatDecimalField()
+    CGST=FloatDecimalField()
+    SGST=FloatDecimalField()
+    IGST=FloatDecimalField()
+    GSTAmount=FloatDecimalField()
     TotalValue=FloatDecimalField()
-    TaxableValue=FloatDecimalField()
-    IntegratedTaxAmount=FloatDecimalField()
-    CentralTaxAmount=FloatDecimalField()
-    StateUTTaxAmount=FloatDecimalField()
-    CessAmount=serializers.CharField(max_length=100)
     
     
-class DocsSerializer(serializers.Serializer):
-    # id = serializers.IntegerField()
-    a=serializers.CharField(max_length=100)
-    MINID=serializers.IntegerField()
-    MAXID=serializers.IntegerField()
-    cnt=FloatDecimalField()
-    Cancelledcnt=FloatDecimalField()
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(GSTWiseSerializer, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("GSTPercentage", 0):
+            ret["GSTPercentage"] = 'TotalTCS'
+        # if not ret.get("TaxableValue", 0):
+        #     ret["TaxableValue"] = None
+        # if not ret.get("CGST", 0):
+        #     ret["CGST"] = None
+        # if not ret.get("SGST", 0):
+        #     ret["SGST"] = None 
+        # if not ret.get("IGST", 0):
+        #     ret["IGST"] = None
+        # if not ret.get("GSTAmount", 0):
+        #     ret["GSTAmount"] = None                
+        # if not ret.get("TotalValue", 0):
+        #     ret["TotalValue"] = None     
+        return ret 
     
     
-
+    
+  
+    
+class GSTWiseSerializer2(serializers.Serializer):
+    id = serializers.CharField(max_length=500)
+    TotalTaxableValue =FloatDecimalField()
+    TotalCGST =FloatDecimalField()
+    TotalSGST =FloatDecimalField()
+    TotalIGST =FloatDecimalField()
+    TotalGSTAmount =FloatDecimalField()
+    GrandTotal =FloatDecimalField()
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(GSTWiseSerializer2, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("TaxableValue", 0):
+            ret["TaxableValue"] = None
+        if not ret.get("TotalCGST", 0):
+            ret["TotalCGST"] = None
+        if not ret.get("TotalSGST", 0):
+            ret["TotalSGST"] = None 
+        if not ret.get("TotalIGST", 0):
+            ret["TotalIGST"] = None
+        if not ret.get("TotalGSTAmount", 0):
+            ret["TotalGSTAmount"] = None                
+        if not ret.get("GrandTotal", 0):
+            ret["GrandTotal"] = None     
+        return ret 
    
+
+###########################################################################################################
