@@ -133,6 +133,8 @@ from .Views.V_R1_Reports import *
 
 from .Views.V_R3B_Reports import *
 
+from .Views.V_GST_Reports import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -352,6 +354,7 @@ urlpatterns = [
             url(r'PartySettings$',PartiesSettingsDetailsView.as_view()),
             url(r'PartyStockEntry$',StockEntryPageView.as_view()),
             url(r'PartyLiveStock$',ShowOBatchWiseLiveStockView.as_view()),
+            url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
             
             
            
@@ -566,6 +569,8 @@ urlpatterns = [
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
             url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
             url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
+            url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
+            
 
 
 
