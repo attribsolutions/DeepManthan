@@ -141,7 +141,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df2[header], start=5):
                         ws2.cell(row=row_idx, column=col_idx, value=value)
                 
-                max_cols = len(df2.columns)
+                max_cols = 9
                 
                 
                 ws2.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
@@ -206,7 +206,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df3[header], start=5):
                         ws3.cell(row=row_idx, column=col_idx, value=value)
                 
-                max_cols = len(df3.columns)                
+                max_cols = 7                
                 
                 ws3.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                 merged_cell = ws3.cell(row=1, column=1, value="Summary For B2CS(7)")
@@ -281,7 +281,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df4[header], start=5):
                         ws4.cell(row=row_idx, column=col_idx, value=value)        
                     
-                max_cols = len(df4.columns)
+                max_cols = 12
                 
                 ws4.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                 merged_cell = ws4.cell(row=1, column=1, value="Summary For CDNR(9B)")
@@ -358,7 +358,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df5[header], start=5):
                         ws5.cell(row=row_idx, column=col_idx, value=value) 
                         
-                max_cols = len(df5.columns)
+                max_cols = 10
                     
                 ws5.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                 merged_cell = ws5.cell(row=1, column=1, value="Summary For CDNUR(9B)")
@@ -449,7 +449,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df6[header], start=5):
                         ws6.cell(row=row_idx, column=col_idx, value=value)  
                 
-                max_cols = len(df6.columns)
+                max_cols = 4
                 
                             
                 ws6.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
@@ -494,7 +494,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df7[header], start=5):
                         ws7.cell(row=row_idx, column=col_idx, value=value)                        
             
-                max_cols = len(df7.columns)
+                max_cols = 10
                 
                 ws7.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                 merged_cell = ws7.cell(row=1, column=1, value="Summary For HSN(12)")
@@ -539,7 +539,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     for row_idx, value in enumerate(df8[header], start=5):
                         ws8.cell(row=row_idx, column=col_idx, value=value)                
                     
-                max_cols = len(df8.columns)
+                max_cols = 5
                 
                 ws8.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_cols)
                 merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
