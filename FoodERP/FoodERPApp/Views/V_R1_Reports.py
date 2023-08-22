@@ -457,7 +457,57 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 bold_font = Font(bold=True)
                 merged_cell.font = bold_font
                 merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
-                    
+                
+                
+                EXEMPquery2= T_Invoices.objects.raw(''' SELECT 1 as id, '' AA,sum(A.Total) TotalNilRatedSupplies,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
+FROM (SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
+        FROM T_Invoices
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id  
+        WHERE Party_id= %s and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN != '' and TC_InvoiceItems.GSTPercentage= 0  and a.State_id != b.State_id group by id,Description
+        UNION
+        SELECT 1 as id, 'Intra-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
+        FROM T_Invoices
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN  %s AND %s  and b.GSTIN != '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description
+        UNION
+        SELECT 1 as id, 'Inter-State supplies to unregistered persons' Description,sum(TC_InvoiceItems.Amount) Total,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
+        FROM T_Invoices
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id != b.State_id group by id,Description
+        UNION
+        SELECT 1 as id, 'Intra-State supplies to unregistered persons' Description,sum(TC_InvoiceItems.Amount) Total,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
+        FROM T_Invoices
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_Parties a ON a.id=T_Invoices.Party_id
+        JOIN M_Parties b ON b.id=T_Invoices.Customer_id
+        WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description)A
+        ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+            
+                EXEMP2data = EXEMP2Serializer2(EXEMPquery2, many=True).data
+                EXEMPdf6=pd.DataFrame(EXEMP2data)
+            
+                specific_column_names = {
+                'AA':'AA',
+                'TotalNilRatedSupplies':'Total NilRated Supplies',
+                'TotalExemptedSupplies':'Total Exempted Supplies',
+                'TotalNon-GSTSupplies':'Total Non-GST Supplies',
+        
+                }
+            
+                for col_idx, header in enumerate(specific_column_names, start=1):
+                    ws6.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    ws6.cell(row=2, column=col_idx).font = bold_font
+
+                for col_idx, header in enumerate(EXEMPdf6.columns, start=1):
+                    for row_idx, value in enumerate(EXEMPdf6[header], start=3):
+                        ws6.cell(row=row_idx, column=col_idx, value=value)    
                
                 # Example data for the seven sheet HSN            
                 HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
