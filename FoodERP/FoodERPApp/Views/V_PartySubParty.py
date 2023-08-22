@@ -140,7 +140,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                         Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0,Route=Route).select_related('Party')
                 
                 elif(Type==5):  #Customer without retailer
-                    q0=M_PartyType.objects.filter(Company=Company,IsVendor=0,IsRetailer=0)
+                    q0=M_PartyType.objects.filter(IsVendor=0,IsRetailer=0)
                     if (Route==""):
                         Query = MC_PartySubParty.objects.filter(Party=id,SubParty__PartyType__in=q0).select_related('Party')
                     else:
