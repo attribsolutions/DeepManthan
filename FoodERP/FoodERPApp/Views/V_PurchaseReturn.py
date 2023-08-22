@@ -631,7 +631,7 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                     # PuchaseReturnList=list()
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
-                        Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0).RateWithGST()
+                        Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],

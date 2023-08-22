@@ -22,7 +22,7 @@ class ClaimSummaryView(CreateAPIView):
                 Party  = Orderdata['Party']
                 Mode =Orderdata['Mode']
 
-                if Mode == 2:
+                if Mode == 2:  # Customer Wise return Summury
                    
                     Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
 from M_Parties 
@@ -30,8 +30,8 @@ join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
 where Party_id = %s''',([Party]))
                     print(Q1)
                     q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,T_PurchaseReturn.ReturnDate,T_PurchaseReturn.FullReturnNumber,M_Parties.Name CustomerName,M_Items.Name ItemName,
-MRPValue MRP,Quantity,GSTPercentage GST,Rate,
- Amount, CGST, SGST, ApprovedQuantity,  ifnull(Discount,0) Discount, ifnull(DiscountAmount,0) DiscountAmount, DiscountType,BasicAmount TaxableAmount
+MRPValue MRP,Quantity,ApprovedGSTPercentage GST,ApprovedRate Rate,
+ ApprovedAmount Amount, ApprovedCGST CGST, ApprovedSGST SGST, ApprovedByCompany ApprovedQuantity,  ifnull(Discount,0) Discount, ifnull(ApprovedDiscountAmount,0) DiscountAmount, DiscountType,ApprovedBasicAmount TaxableAmount
 FROM T_PurchaseReturn
 join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
 
@@ -39,8 +39,8 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s or (T_PurchaseReturn.Customer_id=%s and Mode=2)) Order By GSTPercentage  ''',([FromDate],[ToDate],[Party],[Party]))
-                else:
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s ) Order By GSTPercentage  ''',([FromDate],[ToDate],[Party]))
+                else:   # Return Item Summury 
                     Q1=M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
 from M_Parties 
 join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
@@ -50,8 +50,8 @@ where Party_id = %s''',([Party]))
 MRP,Quantity,GST,Rate,TaxableAmount,
  Amount, CGST, SGST, ApprovedQuantity,  Discount, DiscountAmount, DiscountType 
  from
-(SELECT M_Items.id,M_Items.Name ItemName,sum(BasicAmount)TaxableAmount,(MRPValue)MRP,sum(Quantity)Quantity,GSTPercentage GST,Rate,
- sum(Amount)Amount, sum(CGST)CGST,sum(SGST)SGST, sum(ApprovedQuantity)ApprovedQuantity,  ifnull(Discount,0)Discount, ifnull(sum(DiscountAmount),0)DiscountAmount,DiscountType
+(SELECT M_Items.id,M_Items.Name ItemName,sum(ApprovedBasicAmount)TaxableAmount,(MRPValue)MRP,sum(Quantity)Quantity,ApprovedGSTPercentage GST,ApprovedRate Rate,
+ sum(ApprovedAmount)Amount, sum(ApprovedCGST)CGST,sum(ApprovedSGST)SGST, sum(ApprovedByCompany)ApprovedQuantity,  ifnull(Discount,0)Discount, ifnull(sum(ApprovedDiscountAmount),0)DiscountAmount,DiscountType
 
 FROM T_PurchaseReturn
 join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
@@ -60,7 +60,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s or (T_PurchaseReturn.Customer_id=%s and Mode=2)) group by Item_id,GSTPercentage,Rate,MRP ,Discount,DiscountType Order By GSTPercentage )j ''',([FromDate],[ToDate],[Party],[Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,GSTPercentage,Rate,MRP ,Discount,DiscountType Order By GSTPercentage )j ''',([FromDate],[ToDate],[Party]))
                 
                 
                 
@@ -133,11 +133,12 @@ class MasterClaimView(CreateAPIView):
                     for i in q1:
                         PartyType=i["id"]
                         print(PartyType)
-                        claimREasonwise=MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
+                        claimREasonwise=MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
+                        IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
     (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
     IFNULL((ReturnAmount/(PA-ReturnAmount)),0)ClaimAgainstNetSale
     from
-    (SELECT ItemReason_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)*GSTPercentage/100))ReturnAmount,
+    (SELECT ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
     (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
     join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
     where InvoiceDate between %s and %sand Customer_id=%s )PA,
@@ -147,10 +148,10 @@ class MasterClaimView(CreateAPIView):
     FROM T_PurchaseReturn
     join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
     join M_Parties on M_Parties.id=T_PurchaseReturn.Customer_id
-    where IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %sand Party_id=%s group by ItemReason_id)p ''',
+    where IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %s and Customer_id=%s group by ItemReason_id)p ''',
     ([FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party],[PartyType],[FromDate],[ToDate], [Party]))
                     
-                        print(claimREasonwise.query)
+                        # print(claimREasonwise.query)
                         serializer=MasterclaimReasonReportSerializer(claimREasonwise, many=True).data
                         # print(serializer)
                         for a in serializer:
@@ -190,17 +191,17 @@ class MasterClaimView(CreateAPIView):
     left join 
 
 
-    (SELECT TC_PurchaseReturnItems.Item_id,sum((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)+((TC_PurchaseReturnItems.ApprovedByCompany*TC_PurchaseReturnItems.Rate)*GSTPercentage/100))ReturnAmount
+    (SELECT TC_PurchaseReturnItems.Item_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount
     FROM T_PurchaseReturn
     join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
     join M_Parties on M_Parties.id=T_PurchaseReturn.Customer_id
-    where IsApproved=1  and  T_PurchaseReturn.ReturnDate between %s and %s and Party_id=%s group by Item_id)RA
+    where IsApproved=1  and  T_PurchaseReturn.ReturnDate between %s and %s and Customer_id=%s group by Item_id)RA
 
     on  I.Item_id=RA.Item_id)aaa where PrimaryAmount !=0 OR secondaryAmount !=0 OR ReturnAmount !=0
     ''',
     ([Party], [FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party]))
                         
-                    print(StockProcessQuery.query)
+                    # print(StockProcessQuery.query)
                     serializer=MasterclaimReportSerializer(StockProcessQuery, many=True).data
                         # print(serializer)
                     for a in serializer:
@@ -237,7 +238,7 @@ class MasterClaimPrintView(CreateAPIView):
                     PartyTypeID=i["id"]
                     PartyTypeName=i["Name"]
                     printReasonwisequery=MC_ReturnReasonwiseMasterClaim.objects.raw(''' SELECT 1 as id, M_GeneralMaster.Name ItemReasonName, PrimaryAmount, SecondaryAmount, ReturnAmount, NetSaleValue, 
-Budget, ClaimAmount, ClaimAgainstNetSale
+MC_ReturnReasonwiseMasterClaim.Budget, ClaimAmount, ClaimAgainstNetSale
  FROM MC_ReturnReasonwiseMasterClaim 
 join M_GeneralMaster on M_GeneralMaster.id=MC_ReturnReasonwiseMasterClaim.ItemReason_id 
 where FromDate=%s and ToDate=%s and Party_id=%s and PartyType=%s
@@ -254,7 +255,7 @@ order by M_GeneralMaster.id
                 
                 
                 printProductwisequery=M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PrimaryAmount, sum(SecondaryAmount)SecondaryAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
-sum(Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
+sum(M_MasterClaim.Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
 FROM M_MasterClaim
 left join M_Items on M_Items.id=M_MasterClaim.Item_id
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
