@@ -1482,6 +1482,18 @@ class TC_PurchaseReturnItems(models.Model):
     primarySourceID =models.IntegerField(blank=True, null=True)
     ApprovedByCompany=models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     FinalApprovalDate=models.DateField(null=True)
+    ApprovedRate = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedBasicAmount = models.DecimalField(max_digits=30, decimal_places=2,blank=True, null=True)
+    ApprovedGSTPercentage = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    ApprovedGSTAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedAmount = models.DecimalField(max_digits=30, decimal_places=2,blank=True, null=True)
+    ApprovedCGST = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedSGST = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedIGST = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedCGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedSGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedIGSTPercentage = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    ApprovedDiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
 
     
     class Meta:
