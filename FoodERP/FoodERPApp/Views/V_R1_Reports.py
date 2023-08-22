@@ -546,12 +546,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 bold_font = Font(bold=True)
                 merged_cell.font = bold_font
                 merged_cell.alignment = Alignment(horizontal='center')  # Align text to center        
-                        
-        #         # Populate worksheet with data
-        #         # ws['A1'] = 'Header 1'
-        #         # ws['B1'] = 'Header 2'
-        #         # ws['A2'] = 'Data 1'
-        #         # ws['B2'] = 'Data 2'
+
 
                 output = io.BytesIO()
                 wb.save(output)
