@@ -561,6 +561,7 @@ urlpatterns = [
             url(r'InvoiceDataExport$', InvoiceDateExportReportView.as_view()),
             url(r'DeletedInvoiceData$', DeletedInvoiceDateExportReportView.as_view()),
             url(r'DamageStock$', StockDamageReportView.as_view()),
+            url(r'ReturnReport$', ReturnReportDownloadView.as_view()),
             
 # Claim 
             
