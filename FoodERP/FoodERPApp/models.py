@@ -1899,7 +1899,19 @@ class M_DiscountMaster(models.Model):
     class Meta:
         db_table="M_DiscountMaster"
         
+class M_Claim(models.Model):
+    Date=models.DateField()
+    ClaimNo = models.IntegerField()
+    FullClaimNumber = models.CharField(max_length=500)
+    Customer =  models.ForeignKey(M_Parties, related_name='ClaimCustomer', on_delete=models.PROTECT,blank=True, null=True)
+    Party = models.ForeignKey(M_Parties, related_name='ClaimPParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table="M_Claim"
+
 class M_MasterClaim(models.Model):
+    # Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE) 
     FromDate=models.DateField()
     ToDate=models.DateField()
     PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
@@ -1910,7 +1922,7 @@ class M_MasterClaim(models.Model):
     ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     Item = models.ForeignKey(M_Items,related_name='ClaimItem', on_delete=models.PROTECT)
-    Customer =  models.ForeignKey(M_Parties, related_name='ClaimCustomer', on_delete=models.PROTECT,blank=True, null=True)
+    # Customer =  models.ForeignKey(M_Parties, related_name='ClaimCustomer', on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties, related_name='ClaimParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1919,6 +1931,7 @@ class M_MasterClaim(models.Model):
         db_table="M_MasterClaim"
 
 class MC_ReturnReasonwiseMasterClaim(models.Model):
+    # Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE) 
     FromDate=models.DateField()
     ToDate=models.DateField()
     PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -1938,21 +1951,6 @@ class MC_ReturnReasonwiseMasterClaim(models.Model):
         db_table="MC_ReturnReasonwiseMasterClaim"
 
 
-# class MC_MasterClaimDetails(models.Model):
-    
-#     ReturnAmount = models.DecimalField(max_digits=20, decimal_places=2)
-#     NetSaleValue = models.DecimalField(max_digits=20, decimal_places=2)
-#     Budget = models.DecimalField(max_digits=20, decimal_places=2)
-#     ClaimAmount = models.DecimalField(max_digits=20, decimal_places=2)
-#     ClaimAgainstNetSale = models.DecimalField(max_digits=20, decimal_places=2)
-#     MasterClaim = models.ForeignKey(M_MasterClaim,related_name='MasterClaim', on_delete=models.PROTECT)
-#     Item = models.ForeignKey(M_Items,related_name='ClaimmItem', on_delete=models.PROTECT)
-#     ItemReason = models.ForeignKey(M_GeneralMaster,related_name= "ClaimItemReason",on_delete=models.PROTECT)
-#     PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
-#     SecondaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
-    
-#     class Meta:
-#         db_table="MC_MasterClaimDetails"
 
 
 class ThirdPartyAPITransactionlog(models.Model):
