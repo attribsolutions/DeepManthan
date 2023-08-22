@@ -272,12 +272,15 @@ class ReturnApproveQtySerializer(serializers.ModelSerializer):
                     
                     ApprovedRate  = b["Rate"]
                     ApprovedBasicAmount = round(b["Rate"] * ReturnItem["ApprovedByCompany"],2)
-                    if b['DiscountType'] == 2: 
+                    print(b['DiscountType'],'kkkkkkkkkkkk')
+                    if b['DiscountType'] == '2': 
+                        print('2"""""""2"2"""')
                         disCountAmt = ApprovedBasicAmount - (ApprovedBasicAmount / ((100 + b['Discount']) / 100)) 
                     else:
-                        print(b['Discount'])
+                        print('11!!!!!!!!!!!!!',b['Discount'])
                         disCountAmt =  ReturnItem["ApprovedByCompany"] * b['Discount']
                     
+                    print(disCountAmt)
                     ApprovedDiscountAmount = round(disCountAmt,2)
                     ApprovedBasicAmount= ApprovedBasicAmount-disCountAmt
                     
