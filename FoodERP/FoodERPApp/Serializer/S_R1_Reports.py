@@ -146,7 +146,6 @@ class HSNSerializer(serializers.Serializer):
     StateUTTaxAmount=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
     
-    
 class DocsSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     a=serializers.CharField(max_length=100)
