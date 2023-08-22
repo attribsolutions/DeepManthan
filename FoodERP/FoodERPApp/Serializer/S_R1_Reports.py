@@ -126,10 +126,12 @@ class EXEMPSerializer(serializers.Serializer):
     Total=FloatDecimalField()
     
     
-class EXEMP2Serializer(serializers.Serializer):
+class EXEMP2Serializer2(serializers.Serializer):
     # id = serializers.IntegerField()
-    Description=serializers.CharField(max_length=100)
-    Value=serializers.CharField(max_length=100)    
+    AA=serializers.CharField(max_length=100)
+    TotalNilRatedSupplies=FloatDecimalField()
+    TotalExemptedSupplies=serializers.CharField(max_length=100)
+    TotalNonGSTSupplies=serializers.CharField(max_length=100)  
     
     
     
