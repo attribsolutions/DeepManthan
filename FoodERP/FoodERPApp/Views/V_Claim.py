@@ -138,7 +138,7 @@ class MasterClaimView(CreateAPIView):
     (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
     IFNULL((ReturnAmount/(PA-ReturnAmount)),0)ClaimAgainstNetSale
     from
-    (SELECT ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
+    (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
     (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
     join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
     where InvoiceDate between %s and %sand Customer_id=%s )PA,
@@ -147,11 +147,13 @@ class MasterClaimView(CreateAPIView):
     where InvoiceDate between %s and %sand Party_id=%s )SA
     FROM T_PurchaseReturn
     join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
-    join M_Parties on M_Parties.id=T_PurchaseReturn.Customer_id
-    where IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %s and Customer_id=%s group by ItemReason_id)p ''',
+    join TC_PurchaseReturnItems PRIPS on TC_PurchaseReturnItems.primarySourceID=PRIPS.id
+    join T_PurchaseReturn PRPS on PRPS.id=PRIPS.PurchaseReturn_id
+    join M_Parties on M_Parties.id=PRPS.Customer_id
+    where T_PurchaseReturn.IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s group by TC_PurchaseReturnItems.ItemReason_id)p ''',
     ([FromDate],[ToDate], [Party],[FromDate],[ToDate], [Party],[PartyType],[FromDate],[ToDate], [Party]))
                     
-                        # print(claimREasonwise.query)
+                        print(claimREasonwise.query)
                         serializer=MasterclaimReasonReportSerializer(claimREasonwise, many=True).data
                         # print(serializer)
                         for a in serializer:
