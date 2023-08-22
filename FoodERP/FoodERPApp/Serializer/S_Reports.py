@@ -222,6 +222,48 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
     
+    
+    
+class ReturnReportSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    ReturnDate = serializers.DateField()
+    CustomerName = serializers.CharField(max_length=500)
+    CustomerType = serializers.CharField(max_length=500)
+    CompanyName=serializers.CharField(max_length=100)
+    Product =serializers.CharField(max_length=100)
+    SubProduct =serializers.CharField(max_length=100)
+    MaterialName=serializers.CharField(max_length=100)
+    ReturnQtyNos =serializers.DecimalField(max_digits=20, decimal_places=2)
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    DiscountType=serializers.CharField(max_length=100)
+    Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    BatchDate = serializers.DateField()
+    BatchCode = serializers.CharField(max_length=500)
+    ReasonForReturn = serializers.CharField(max_length=500)
+    ApprovedQuantityInNo=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Address = serializers.CharField(max_length=500)
+    PIN = serializers.CharField(max_length=500)
+    RouteName = serializers.CharField(max_length=500)
+    SupplierName = serializers.CharField(max_length=500)
+    SupplierType = serializers.CharField(max_length=500)
+    FullReturnNumber = serializers.CharField(max_length=500)
+    
+    def to_representation(self, instance):
+        a = super().to_representation(instance)
+        Discount_Type = a['DiscountType']
+        if Discount_Type == '1':
+            a['DiscountType'] = 'Rs'
+        elif Discount_Type == '2':
+            a['DiscountType'] = '%'
+
+        return a        
+    
    
     
    
