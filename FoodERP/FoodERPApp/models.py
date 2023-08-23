@@ -1911,7 +1911,7 @@ class M_Claim(models.Model):
         db_table="M_Claim"
 
 class M_MasterClaim(models.Model):
-    # Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE) 
+    Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE) 
     FromDate=models.DateField()
     ToDate=models.DateField()
     PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
@@ -1931,7 +1931,7 @@ class M_MasterClaim(models.Model):
         db_table="M_MasterClaim"
 
 class MC_ReturnReasonwiseMasterClaim(models.Model):
-    # Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE) 
+    Claim = models.ForeignKey(M_Claim,related_name='RClaim', on_delete=models.CASCADE) 
     FromDate=models.DateField()
     ToDate=models.DateField()
     PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2)
