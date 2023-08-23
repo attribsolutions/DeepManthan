@@ -136,6 +136,7 @@ class M_PageSerializerAddPage(serializers.Serializer):
     id = serializers.IntegerField() 
     RelatedPageID = serializers.IntegerField() 
     PageName = serializers.CharField(max_length=500)
+    PageType = serializers.IntegerField()
     
 class M_PageAccessSerializerAddPage(serializers.Serializer):
     
