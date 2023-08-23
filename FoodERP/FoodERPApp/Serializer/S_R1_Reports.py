@@ -131,9 +131,9 @@ class EXEMP2Serializer2(serializers.Serializer):
     AA=serializers.CharField(max_length=100)
     TotalNilRatedSupplies=FloatDecimalField()
     TotalExemptedSupplies=serializers.CharField(max_length=100)
-    TotalNonGSTSupplies=serializers.CharField(max_length=100)  
+    TotalNonGSTSupplies=serializers.CharField(max_length=100)
     
-    
+#######################################################################################################    
     
 class HSNSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
@@ -148,6 +148,22 @@ class HSNSerializer(serializers.Serializer):
     StateUTTaxAmount=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
     
+    
+class HSN2Serializer2(serializers.Serializer):
+    # id = serializers.IntegerField()
+    NoofHSN=serializers.CharField(max_length=100)
+    a=serializers.CharField(max_length=100)
+    b=serializers.CharField(max_length=100)
+    c=serializers.CharField(max_length=100)
+    TotalValue=FloatDecimalField()
+    TaxableValue=FloatDecimalField()
+    IntegratedTaxAmount=FloatDecimalField()
+    CentralTaxAmount=FloatDecimalField()
+    StateUTTaxAmount=FloatDecimalField()
+    CessAmount=serializers.CharField(max_length=100)    
+    
+#######################################################################################################    
+    
 class DocsSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     a=serializers.CharField(max_length=100)
@@ -155,7 +171,18 @@ class DocsSerializer(serializers.Serializer):
     MAXID=serializers.IntegerField()
     cnt=FloatDecimalField()
     Cancelledcnt=FloatDecimalField()
-    
+
+
+
+class Docs2Serializer2(serializers.Serializer):
+    # id = serializers.IntegerField()
+    AA=serializers.CharField(max_length=100)
+    bb=serializers.CharField(max_length=100)
+    cc=serializers.CharField(max_length=100)
+    cnt=serializers.IntegerField()
+    Cancelledcnt=serializers.IntegerField()
+   
+     
     
 
    
