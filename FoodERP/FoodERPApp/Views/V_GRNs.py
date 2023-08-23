@@ -310,7 +310,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 if Mode == 1:
                     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
                     if not OrderQuery:
-                        log_entry = create_transaction_log(request, 0, 0, 0,"Records Not Found",29,id)
+                        log_entry = create_transaction_log(request, 0, 0, 0,"Records Not Found",29,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                     else:
                         OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
