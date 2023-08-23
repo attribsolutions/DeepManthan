@@ -180,11 +180,11 @@ class T_GRNView(CreateAPIView):
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
                     # return JsonResponse({'Data':GRN_serializer.data})
-                    GRN_serializer.save()
-                    LastInsertId = (T_GRNs.objects.last()).id
+                    GRN = GRN_serializer.save()
+                    LastInsertId = GRN.id
                     log_entry = create_transaction_log(request, GRNdata, 0, Customer,'GRN Save Successfully',69,LastInsertId)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': []})
-                log_entry = create_transaction_log(request, GRNdata, 0,Customer,GRN_serializer.errors,34,LastInsertId)
+                log_entry = create_transaction_log(request, GRNdata, 0,Customer,GRN_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': GRN_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_log(request, GRNdata, 0, Customer,Exception(e),33,0)
@@ -310,7 +310,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 if Mode == 1:
                     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
                     if not OrderQuery:
-                        log_entry = create_transaction_log(request, 0, 0, 0,"Records Not Found",29,id)
+                        log_entry = create_transaction_log(request, 0, 0, 0,"Records Not Found",29,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                     else:
                         OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
