@@ -180,11 +180,11 @@ class T_GRNView(CreateAPIView):
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
                 if GRN_serializer.is_valid():
                     # return JsonResponse({'Data':GRN_serializer.data})
-                    GRN_serializer.save()
-                    LastInsertId = (T_GRNs.objects.last()).id
+                    GRN = GRN_serializer.save()
+                    LastInsertId = GRN.id
                     log_entry = create_transaction_log(request, GRNdata, 0, Customer,'GRN Save Successfully',69,LastInsertId)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': []})
-                log_entry = create_transaction_log(request, GRNdata, 0,Customer,GRN_serializer.errors,34,LastInsertId)
+                log_entry = create_transaction_log(request, GRNdata, 0,Customer,GRN_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': GRN_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_log(request, GRNdata, 0, Customer,Exception(e),33,0)
