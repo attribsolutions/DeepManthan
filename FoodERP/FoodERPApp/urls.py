@@ -562,15 +562,19 @@ urlpatterns = [
             url(r'DeletedInvoiceData$', DeletedInvoiceDateExportReportView.as_view()),
             url(r'DamageStock$', StockDamageReportView.as_view()),
             url(r'ReturnReport$', ReturnReportDownloadView.as_view()),
+            url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
+            url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
+            url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
+            url(r'ItemSaleReport$', ItemSaleReportView.as_view()),
+        
+            
             
 # Claim 
             
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
-            url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
-            url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
-            url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
+            
             
 
 
