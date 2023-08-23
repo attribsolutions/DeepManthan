@@ -1901,8 +1901,8 @@ class M_DiscountMaster(models.Model):
         
 class M_Claim(models.Model):
     Date=models.DateField()
-    ClaimNo = models.IntegerField()
-    FullClaimNumber = models.CharField(max_length=500)
+    FromDate=models.DateField()
+    ToDate=models.DateField()
     Customer =  models.ForeignKey(M_Parties, related_name='ClaimCustomer', on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties, related_name='ClaimPParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
@@ -1911,7 +1911,7 @@ class M_Claim(models.Model):
         db_table="M_Claim"
 
 class M_MasterClaim(models.Model):
-    Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE) 
+    Claim = models.ForeignKey(M_Claim,related_name='Claim', on_delete=models.CASCADE ) 
     FromDate=models.DateField()
     ToDate=models.DateField()
     PrimaryAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
