@@ -97,13 +97,13 @@ class StockEntryPageView(CreateAPIView):
                         Stock = StockEntry_OLiveBatchesSerializer.save()
                         LastInsertID = Stock.id
                     else:
-                        log_entry = create_transaction_log(request, StockEntrydata, 0, Party, StockEntry_OLiveBatchesSerializer.errors,34,LastInsertID)
+                        log_entry = create_transaction_log(request, StockEntrydata, 0, Party, StockEntry_OLiveBatchesSerializer.errors,34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': StockEntry_OLiveBatchesSerializer.errors, 'Data': []})
                 log_entry = create_transaction_log(request, StockEntrydata, 0, Party,"Party Stock Entry Save Successfully",87,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, StockEntrydata, 0, Party,  Exception(e),33,LastInsertID)
+            log_entry = create_transaction_log(request, StockEntrydata, 0, Party,  Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
