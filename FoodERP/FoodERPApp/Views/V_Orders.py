@@ -55,7 +55,6 @@ class OrderListFilterView(CreateAPIView):
                 else:
                     x = Supplier
 
-
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
 
@@ -375,10 +374,10 @@ class T_OrdersView(CreateAPIView):
 
                     log_entry = create_transaction_log(request, Orderdata, 0, Division, 'Order Save Successfully',1,OrderID)    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'OrderID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
-                log_entry = create_transaction_log(request, Orderdata, 0, Division, Order_serializer.errors,34,OrderID)
+                log_entry = create_transaction_log(request, Orderdata, 0, Division, Order_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, Division, Exception(e),33,OrderID)
+            log_entry = create_transaction_log(request, Orderdata, 0, Division, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -528,11 +527,11 @@ class T_OrdersViewSecond(CreateAPIView):
                     log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, 'Order Updated Successfully',2,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, Orderupdate_Serializer.errors,34,id)
+                    log_entry = create_transaction_log(request, Orderupdatedata, 0, 0, Orderupdate_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Orderupdate_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderupdatedata, 0, 0,Exception(e),33,id)
+            log_entry = create_transaction_log(request, Orderupdatedata, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -541,16 +540,16 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Order_Data = T_Orders.objects.get(id=id)
                 Order_Data.delete()
-                log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'Order Deleted Successfully',3,id)
+                log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'Order Deleted Successfully',3,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully', 'Data': []})
         except T_Orders.DoesNotExist:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'Record Not available',29,id)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'Record Not available',29,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'This Transaction used in another table',8,id)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, 'This Transaction used in another table',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, Exception(e),33,id)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -846,7 +845,7 @@ class ConfirmOrderView(CreateAPIView):
                 log_entry = create_transaction_log(request, Orderdata, 0, 0, "Orders Data Confirm Successfully",30,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Orders Data Confirm Successfully ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,id)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -951,7 +950,7 @@ where Supplier_id=%s and OrderDate between %s and %s
 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,id)
+            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
