@@ -253,8 +253,8 @@ class InvoiceView(CreateAPIView):
                 Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
                 Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                 if Invoice_serializer.is_valid():
-                    Invoice_serializer.save()
-                    LastInsertId = (T_Invoices.objects.last()).id
+                    Invoice = Invoice_serializer.save()
+                    LastInsertId = Invoice.id
                     log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully',4,LastInsertId)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
                 log_entry = create_transaction_log(request, Invoicedata, 0, Party, Invoice_serializer.errors,34,0)
