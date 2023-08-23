@@ -565,6 +565,7 @@ urlpatterns = [
             url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
             url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
             url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
+            url(r'ItemSaleReport$', ItemSaleReportView.as_view()),
         
             
             
