@@ -97,6 +97,8 @@ class MasterClaimView(CreateAPIView):
                 ToDate = Orderdata['ToDate']
                 Party = Orderdata['Party']
                 print(FromDate, ToDate, Party)
+                q=M_Claim.objects.filter(FromDate=FromDate, ToDate=ToDate, Customer_id=Party)
+                q.delete()
                 q0 = MC_ReturnReasonwiseMasterClaim.objects.filter(
                     FromDate=FromDate, ToDate=ToDate, Party_id=Party)
                 q0.delete()
@@ -121,7 +123,7 @@ class MasterClaimView(CreateAPIView):
                     FromDate=FromDate, ToDate=ToDate, Party_id=Party)
                 if(q0.count() == 0):
 
-                    Claim = M_Claim(Date=date.today(), ClaimNo=0, FullClaimNumber=0,
+                    Claim = M_Claim(Date=date.today(), FromDate=FromDate, ToDate=ToDate,
                                     Customer_id=Party, Party_id=LoginParty, CreatedBy=0)
                     Claim.save()
                     ClaimID = Claim.id
