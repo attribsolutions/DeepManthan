@@ -257,10 +257,10 @@ class InvoiceView(CreateAPIView):
                     LastInsertId = (T_Invoices.objects.last()).id
                     log_entry = create_transaction_log(request, Invoicedata, 0, Party, 'Invoice Save Successfully',4,LastInsertId)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','InvoiceID':LastInsertId, 'Data':[]})
-                log_entry = create_transaction_log(request, Invoicedata, 0, Party, Invoice_serializer.errors,34,LastInsertId)
+                log_entry = create_transaction_log(request, Invoicedata, 0, Party, Invoice_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,LastInsertId)
+            log_entry = create_transaction_log(request, Invoicedata, 0, Party, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):

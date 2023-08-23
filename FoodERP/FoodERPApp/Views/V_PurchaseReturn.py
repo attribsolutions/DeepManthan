@@ -289,8 +289,9 @@ class PurchaseReturnView(CreateAPIView):
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
-                    PurchaseReturn_Serializer.save()
-                    log_entry = create_transaction_log(request, PurchaseReturndata, 0, Party, 'Return Save Successfully',53,0)
+                    PurchaseReturn = PurchaseReturn_Serializer.save()
+                    LastInsertID = PurchaseReturn.id
+                    log_entry = create_transaction_log(request, PurchaseReturndata, 0, Party, 'Return Save Successfully',53,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'Data':[]})
                 else:
                     log_entry = create_transaction_log(request, PurchaseReturndata, 0, Party,  PurchaseReturn_Serializer.errors,34,0)
