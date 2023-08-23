@@ -105,15 +105,14 @@ class CreditDebitNoteView(CreateAPIView):
                 if CreditNote_Serializer.is_valid():
                     CreditDebit = CreditNote_Serializer.save()
                     LastinsertID = CreditDebit.id
-
                     log_entry = create_transaction_log(request, CreditNotedata, 0, Party,'CreditdebitNote Save Successfully',84,LastinsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditdebitNote Save Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, CreditNotedata, 0, Party,CreditNote_Serializer.errors,34,LastinsertID)
+                    log_entry = create_transaction_log(request, CreditNotedata, 0, Party,CreditNote_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, CreditNotedata, 0, Party,Exception(e),33,LastinsertID)
+            log_entry = create_transaction_log(request, CreditNotedata, 0, Party,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()

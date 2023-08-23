@@ -216,9 +216,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
 
     def get(self, request,Role=0,Division=0 ,Company=0):
         if int(Division) > 0:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName,M_Pages.PageType  FROM M_RoleAccess JOIN M_Pages ON M_Pages.id=M_RoleAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By M_Pages.name ''',([Role],[Division],[Company]))
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleAccess JOIN M_Pages ON M_Pages.id=M_RoleAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id=%s AND Company_id=%s Order By M_Pages.name ''',([Role],[Division],[Company]))
         else:
-            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName,M_Pages.PageType  FROM M_RoleAccess JOIN M_Pages ON M_Pages.id=M_RoleAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By M_Pages.name   ''',([Role],[Company]))            
+            roleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id, H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id pageid,M_Pages.RelatedPageID, M_Pages.name PageName  FROM M_RoleAccess JOIN M_Pages ON M_Pages.id=M_RoleAccess.Pages_id JOIN H_Modules ON H_Modules.id=M_RoleAccess.Modules_id Join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1 AND Role_id=%s AND Division_id is null AND Company_id=%s Order By M_Pages.name   ''',([Role],[Company]))            
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_RoleAccessSerializerNewUpdated(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -268,7 +268,6 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageID": a['pageid'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
-                "PageType": a['PageType'],
                 "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
                 "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
                 "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
@@ -329,7 +328,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, pageid=0):
-        roleaccessquery = M_Pages.objects.raw('''SELECT H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id id,M_Pages.RelatedPageID, M_Pages.name PageName,M_Pages.PageType FROM M_Pages JOIN H_Modules ON H_Modules.id=M_Pages.Module_id WHERE M_Pages.id=%s''',[pageid])
+        roleaccessquery = M_Pages.objects.raw('''SELECT H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id id,M_Pages.RelatedPageID, M_Pages.name PageName FROM M_Pages JOIN H_Modules ON H_Modules.id=M_Pages.Module_id WHERE M_Pages.id=%s''',[pageid])
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_PageSerializerAddPage(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -344,7 +343,6 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "PageID": a['id'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
-                "PageType": a['PageType'],
                 "RoleAccess_IsShowOnMenu": 0,
                 "RoleAccess_IsSave": 0,
                 "RoleAccess_IsView": 0,
@@ -358,6 +356,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RoleAccess_Exceldownload": 0,
                 "RoleAccess_IsCopy": 0,
                 "RoleAccess_IsMultipleInvoicePrint":0,
+                "RoleAccess_IsShowOnMenuForList":0,
+                "RoleAccess_IsShowOnMenuForMaster":0,
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
