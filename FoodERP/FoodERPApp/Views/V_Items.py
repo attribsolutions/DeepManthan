@@ -186,11 +186,11 @@ class M_ItemsView(CreateAPIView):
                     log_entry = create_transaction_log(request, Itemsdata, 0, 0, "Item Save Successfully",103,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
                 else:
-                    log_entry = create_transaction_log(request, Itemsdata, 0, 0, Items_Serializer.errors,34,LastInsertID)
+                    log_entry = create_transaction_log(request, Itemsdata, 0, 0, Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Itemsdata, 0, 0, Exception(e),33,LastInsertID)
+            log_entry = create_transaction_log(request, Itemsdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -414,11 +414,11 @@ class M_ItemsViewSecond(CreateAPIView):
                     log_entry = create_transaction_log(request, M_Itemsdata, 0, 0, "Item Updated Successfully",104,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','Data' : []})
                 else:
-                    log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,M_Items_Serializer.errors,34,id)
+                    log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,M_Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,Exception(e),33,id)
+            log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -604,16 +604,15 @@ class DiscountMasterView(CreateAPIView):
                 Discount_Serializer = DiscountSerializer(
                     DiscountMasterByID, data=DiscountMasterdata)
                 if Discount_Serializer.is_valid():
-                    Discount = Discount_Serializer.save()
-                    LastInsertID = Discount.id
-                    log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,"DiscountMaster Updated Successfully",109,LastInsertID)
+                    Discount_Serializer.save()
+                    log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,"DiscountMaster Updated Successfully",109,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Updated Successfully','Data' :[]})
                 else:
-                    log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Discount_Serializer.errors,34,LastInsertID)
+                    log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Discount_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_Serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Exception(e),33,LastInsertID)
+            log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 
@@ -666,10 +665,10 @@ class GetDiscountView(CreateAPIView):
                             "DiscountType":a['DiscountType']
                                  
                         })
-                    log_entry = create_transaction_log(request,Discountdata, 0, x,"GetDiscount",111,id)
+                    log_entry = create_transaction_log(request,Discountdata, 0, x,"GetDiscount",111,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
         except Exception as e:
-            log_entry = create_transaction_log(request,Discountdata, 0, x,Exception(e),33,id)
+            log_entry = create_transaction_log(request,Discountdata, 0, x,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
