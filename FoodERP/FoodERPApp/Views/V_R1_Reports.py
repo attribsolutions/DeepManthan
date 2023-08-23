@@ -493,19 +493,18 @@ FROM (SELECT 1 as id , 'Inter-State supplies to registered persons' Description,
                 EXEMPdf6=pd.DataFrame(EXEMP2data)
             
                 specific_column_names = {
-                'AA':'AA',
                 'TotalNilRatedSupplies':'Total NilRated Supplies',
                 'TotalExemptedSupplies':'Total Exempted Supplies',
                 'TotalNon-GSTSupplies':'Total Non-GST Supplies',
         
                 }
             
-                for col_idx, header in enumerate(specific_column_names, start=1):
+                for col_idx, header in enumerate(specific_column_names, start=2):
                     ws6.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
                     bold_font = Font(bold=True)
                     ws6.cell(row=2, column=col_idx).font = bold_font
 
-                for col_idx, header in enumerate(EXEMPdf6.columns, start=1):
+                for col_idx, header in enumerate(EXEMPdf6.columns, start=2):
                     for row_idx, value in enumerate(EXEMPdf6[header], start=3):
                         ws6.cell(row=row_idx, column=col_idx, value=value)    
                
@@ -552,8 +551,41 @@ FROM (SELECT 1 as id , 'Inter-State supplies to registered persons' Description,
                 merged_cell.font = bold_font
                 merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
             
-                                            
+                HSNquery2= T_Invoices.objects.raw('''SELECT 1 as id, COUNT(DISTINCT(A.HSNCode))NoofHSN,''a,''b,''c,sum(A.TotalValue) TotalValue,sum(A.TaxableValue) TaxableValue,sum(A.IntegratedTaxAmount) IntegratedTaxAmount,sum(A.CentralTaxAmount) CentralTaxAmount,sum(A.StateUTTaxAmount) StateUTTaxAmount, '' CessAmount
+FROM (SELECT 1 as id, M_GSTHSNCode.HSNCode,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
+        FROM T_Invoices 
+        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+        JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
+        JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id
+        WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN  %s AND  %s  Group by id, M_GSTHSNCode.HSNCode,M_Items.Name)A''',([Party],[FromDate],[ToDate]))
             
+                HSN2data = HSN2Serializer2(HSNquery2, many=True).data
+                HSNdf7=pd.DataFrame(HSN2data)
+            
+                specific_column_names = {
+                'NoofHSN':'No. of HSN', 
+                'a':'', 
+                'b':'', 
+                'c':'', 
+                'TotalValue':'Total Value',
+                'TaxableValue' :'Total Taxable Value',
+                'IntegratedTaxAmount' :'Total Integrated Tax Amount',
+                'CentralTaxAmount' :'Total Central Tax Amount',
+                'StateUTTaxAmount' :'Total State/UT Tax Amount',
+                'CessAmount':'Total Cess Amount',
+                }
+            
+                for col_idx, header in enumerate(specific_column_names, start=1):
+                    ws7.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    ws7.cell(row=2, column=col_idx).font = bold_font
+
+                for col_idx, header in enumerate(HSNdf7.columns, start=1):
+                    for row_idx, value in enumerate(HSNdf7[header], start=3):
+                        ws7.cell(row=row_idx, column=col_idx, value=value)
+                 
+            
+                
                 # Example data for the eight sheet Docs         
                 Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.InvoiceNumber)MINID,max(T_Invoices.InvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party =%s and T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s ) Cancelledcnt ,'1' b
                 FROM T_Invoices  where Party_id =%s and T_Invoices.InvoiceDate BETWEEN %s AND %s
@@ -595,9 +627,41 @@ FROM (SELECT 1 as id , 'Inter-State supplies to registered persons' Description,
                 merged_cell = ws8.cell(row=1, column=1, value="Summary of documents issued during the tax period (13)")
                 bold_font = Font(bold=True)
                 merged_cell.font = bold_font
-                merged_cell.alignment = Alignment(horizontal='center')  # Align text to center        
+                merged_cell.alignment = Alignment(horizontal='center')  # Align text to center
+                
+                
+                Docsquery2 = T_Invoices.objects.raw(''' SELECT 1 as id, '' AA,'' bb, '' cc,sum(A.cnt)cnt ,sum(A.Cancelledcnt)Cancelledcnt
+FROM (SELECT 1 as id, 'Invoices for outward supply' a,MIN(T_Invoices.InvoiceNumber)MINID,max(T_Invoices.InvoiceNumber)MAXID ,count(*)cnt,(SELECT count(*)cnt from T_DeletedInvoices  where Party =%s and T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s ) Cancelledcnt ,'1' b
+                FROM T_Invoices  where Party_id =%s and T_Invoices.InvoiceDate BETWEEN %s AND %s
+                UNION 
+                SELECT 1 as id, 'Credit Note' a,MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt ,'2' b
+                FROM T_CreditDebitNotes 
+                WHERE  T_CreditDebitNotes.NoteType_id=37 and Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
+                UNION 
+                SELECT 1 as id, 'Debit Note' a, MIN(T_CreditDebitNotes.FullNoteNumber)MINID,MAX(T_CreditDebitNotes.FullNoteNumber)MAXID ,count(*)cnt,'0' Cancelledcnt,'3' b 
+                FROM T_CreditDebitNotes  
+                WHERE  T_CreditDebitNotes.NoteType_id=38 AND Party_id =%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s )A ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate])) 
+            
+                Docsdata2 = Docs2Serializer2(Docsquery2, many=True).data
+                Docsdf8=pd.DataFrame(Docsdata2)
+            
+                specific_column_names = {
+                    'AA':'', 
+                    'bb':'', 
+                    'cc':'', 
+                    'cnt':'Total Numbers',
+                    'Cancelledcnt':'Total Cancelled'
+                }
+            
+                for col_idx, header in enumerate(specific_column_names, start=1):
+                    ws8.cell(row=2, column=col_idx, value=specific_column_names.get(header, header))
+                    bold_font = Font(bold=True)
+                    ws8.cell(row=2, column=col_idx).font = bold_font
 
-
+                for col_idx, header in enumerate(Docsdf8.columns, start=1):
+                    for row_idx, value in enumerate(Docsdf8[header], start=3):
+                        ws8.cell(row=row_idx, column=col_idx, value=value)
+                
                 output = io.BytesIO()
                 wb.save(output)
                 output.seek(0)
