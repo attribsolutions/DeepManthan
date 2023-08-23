@@ -355,8 +355,8 @@ class GenericSaleView(CreateAPIView):
                 if Genericdataquery:
                     GenericSaleData=list()
                     GenericSaleSerializer=GenericSaleReportSerializer(Genericdataquery, many=True).data
-                    GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': GenericSaleData[0]})
+                    # GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': GenericSaleSerializer})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
