@@ -135,6 +135,8 @@ from .Views.V_R3B_Reports import *
 
 from .Views.V_GST_Reports import *
 
+from .Views.V_ItemSale import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -565,10 +567,13 @@ urlpatterns = [
             url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
             url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
             url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
+            
+            
+            
+#ItemSaleReport
             url(r'ItemSaleReport$', ItemSaleReportView.as_view()),
-        
-            
-            
+            url(r'ItemSaleSupplier/([0-9]+)/([0-9]+)$',ItemSaleSupplierDropdownView.as_view()),            
+                
 # Claim 
             
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
