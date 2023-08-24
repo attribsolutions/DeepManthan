@@ -311,7 +311,7 @@ class PurchaseReturnView(CreateAPIView):
                 if Mode == '1':   # Sales Return Mode
                     PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                     PurchaseReturn_Data.delete()
-                    # log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, 0, 'Return Deleted Successfully',54,0)
+                    log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, 0, 'Return Deleted Successfully',54,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []})
                 else:
                     Query2 = T_PurchaseReturn.objects.filter(id=id)
