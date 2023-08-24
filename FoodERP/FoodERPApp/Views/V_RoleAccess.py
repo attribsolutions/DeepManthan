@@ -268,6 +268,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageID": a['pageid'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
+                "PageType" : a['PageType'],
                 "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
                 "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
                 "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
@@ -328,7 +329,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, pageid=0):
-        roleaccessquery = M_Pages.objects.raw('''SELECT H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id id,M_Pages.RelatedPageID, M_Pages.name PageName FROM M_Pages JOIN H_Modules ON H_Modules.id=M_Pages.Module_id WHERE M_Pages.id=%s''',[pageid])
+        roleaccessquery = M_Pages.objects.raw('''SELECT H_Modules.id moduleid, H_Modules.Name ModuleName,M_Pages.id id,M_Pages.RelatedPageID, M_Pages.name PageName ,M_Pages.PageType FROM M_Pages JOIN H_Modules ON H_Modules.id=M_Pages.Module_id WHERE M_Pages.id=%s''',[pageid])
         # return JsonResponse({'query':  str(roleaccessquery.query)})
         RoleAccessdata = M_PageSerializerAddPage(roleaccessquery, many=True).data
         # return JsonResponse({'data':  RoleAccessdata})
@@ -343,6 +344,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "PageID": a['id'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
+                "PageType" : a['PageType'],
                 "RoleAccess_IsShowOnMenu": 0,
                 "RoleAccess_IsSave": 0,
                 "RoleAccess_IsView": 0,
