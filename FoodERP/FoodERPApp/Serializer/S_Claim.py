@@ -82,4 +82,7 @@ class ClaimlistSerializer(serializers.Serializer):
     id= serializers.IntegerField()
     PartyID = serializers.IntegerField()
     PartyName= serializers.CharField(max_length=500)
-    PartyType= serializers.CharField(max_length=500)    
+    PartyType= serializers.CharField(max_length=500)  
+    PrimaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    SecondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)

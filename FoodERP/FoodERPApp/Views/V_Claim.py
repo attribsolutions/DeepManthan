@@ -136,7 +136,7 @@ class MasterClaimView(CreateAPIView):
                         claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                         IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
     (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
-    IFNULL((ReturnAmount/(PA-ReturnAmount)),0)ClaimAgainstNetSale
+    IFNULL((ReturnAmount/PA)*100,0)ClaimAgainstNetSale
     from
     (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
     (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
@@ -166,7 +166,8 @@ class MasterClaimView(CreateAPIView):
                     claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                         IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
     (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
-    IFNULL((ReturnAmount/(PA-ReturnAmount)),0)ClaimAgainstNetSale
+    
+    IFNULL((ReturnAmount/PA)*100,0)ClaimAgainstNetSale
     from
     (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
     (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
@@ -186,14 +187,23 @@ class MasterClaimView(CreateAPIView):
                     serializer = MasterclaimReasonReportSerializer(
                         claimREasonwise, many=True).data
                     # print(serializer)
+                    PrimaryAmount= 0.0
+                    SecondaryAmount= 0.0
+                    ReturnAmount= 0.0
                     for a in serializer:
-
+                        
+                        PrimaryAmount= PrimaryAmount + float(a["PrimaryAmount"])
+                        SecondaryAmount= SecondaryAmount +  float(a["secondaryAmount"])
+                        ReturnAmount= ReturnAmount  + float(a["ReturnAmount"])
+                        
                         stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
                                                                "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=0, Party_id=Party, CreatedBy=0)
                         stock.save()
+                    claimupdate=M_Claim.objects.filter(id=ClaimID).update(PrimaryAmount=PrimaryAmount,SecondaryAmount=SecondaryAmount,ReturnAmount=ReturnAmount)
 
                     StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select * from (select 1 as id, I.Item_id,ifnull(PA.PrimaryAmount,0)PrimaryAmount,ifnull(SA.secondaryAmount,0)secondaryAmount,ifnull(RA.ReturnAmount,0)ReturnAmount,
-                        ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,ifnull((RA.ReturnAmount/(PA.PrimaryAmount-RA.ReturnAmount)),0)ClaimAgainstNetSale
+                        ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
+
     from
     (Select Item_id from MC_PartyItems  where Party_id=%s)I
     left join
@@ -222,7 +232,8 @@ class MasterClaimView(CreateAPIView):
     ''',
                                                                         ([Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party]))
 
-                    # print(StockProcessQuery.query)
+                    print('------------------')
+                    print(StockProcessQuery.query)
                     serializer = MasterclaimReportSerializer(
                         StockProcessQuery, many=True).data
                     # print(serializer)
@@ -313,13 +324,13 @@ class ClaimlistView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Party = Orderdata['Party']
-                Claimlistquery = M_Claim.objects.raw('''select id,PartyID,PartyName,PartyType from (SELECT M_Parties.id PartyID,M_Parties.Name PartyName,M_PartyType.id M_PartyTypeID,M_PartyType.Name PartyType 
+                Claimlistquery = M_Claim.objects.raw('''select id,PartyID,PartyName,PartyType, PrimaryAmount, ReturnAmount, SecondaryAmount from (SELECT M_Parties.id PartyID,M_Parties.Name PartyName,M_PartyType.id M_PartyTypeID,M_PartyType.Name PartyType 
                 FROM M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
 join M_PartyType on M_PartyType.id=M_Parties.PartyType_id 
 where MC_PartySubParty.Party_id=%s and M_PartyType.IsVendor=0 and M_PartyType.IsRetailer=0)a
 left join 
-(select id ,Customer_id from M_Claim where FromDate=%s and ToDate=%s )b
+(select id ,Customer_id, PrimaryAmount, ReturnAmount, SecondaryAmount from M_Claim where FromDate=%s and ToDate=%s )b
 on a.PartyID=b.Customer_id''',([Party],[FromDate],[ToDate]))
                 print(Claimlistquery.query)
                 if Claimlistquery:
