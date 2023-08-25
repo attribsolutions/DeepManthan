@@ -175,43 +175,67 @@ class OrderListFilterViewSecond(CreateAPIView):
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
                         if (FromDate == '' and ToDate == ''):
-                            query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
+                            # query = T_Invoices.objects.filter(Customer_id=Customer).order_by('-CreatedOn')
+                            query = T_Invoices.objects.raw('''select  T_Invoices.id,InvoiceDate,FullInvoiceNumber,supl.id SupplierID,supl.Name SupplierName,cust.id CustomerID,cust.Name CustomerName,GrandTotal,T_Invoices.CreatedBy,T_Invoices.CreatedOn,Hide 
+,TC_GRNReferences.Invoice_id
+from T_Invoices
+join M_Parties supl on supl.id=T_Invoices.Party_id
+join M_Parties cust on cust.id=T_Invoices.Customer_id
+left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
+where  Customer_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',[Customer])
                         else:
-                            query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
+                            # query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Customer_id=Customer).order_by('-CreatedOn')
+                            query = T_Invoices.objects.raw('''select  T_Invoices.id,InvoiceDate,FullInvoiceNumber,supl.id SupplierID,supl.Name SupplierName,cust.id CustomerID,cust.Name CustomerName,GrandTotal,T_Invoices.CreatedBy,T_Invoices.CreatedOn,Hide 
+,TC_GRNReferences.Invoice_id
+from T_Invoices
+join M_Parties supl on supl.id=T_Invoices.Party_id
+join M_Parties cust on cust.id=T_Invoices.Customer_id
+left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
+where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer]))
+
                     else:
-                        query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
+                        # query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
+                        query = T_Invoices.objects.raw('''select  T_Invoices.id,InvoiceDate,FullInvoiceNumber,supl.id SupplierID,supl.Name SupplierName,cust.id CustomerID,cust.Name CustomerName,GrandTotal,T_Invoices.CreatedBy,T_Invoices.CreatedOn,Hide 
+,TC_GRNReferences.Invoice_id
+from T_Invoices
+join M_Parties supl on supl.id=T_Invoices.Party_id
+join M_Parties cust on cust.id=T_Invoices.Customer_id
+left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
+where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and and Party_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer],[Supplier]))
                     # return JsonResponse({'query': str(Orderdata.query)})
+                    
                     if query: 
-                        Invoice_serializer = InvoiceSerializerSecond(
-                            query, many=True).data
+                        # Invoice_serializer = InvoiceSerializerSecond(
+                        #     query, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                         InvoiceListData = list()
-                        for a in Invoice_serializer:
+                        for a in query:
+
                              
-                            InvoiceID = TC_GRNReferences.objects.filter(
-                                Invoice=a['id']).values('Invoice').count()
-                            if InvoiceID == 0:
-                                InvoiceListData.append({
-                                    "id": a['id'],
-                                    "OrderDate": a['InvoiceDate'],
-                                    "FullOrderNumber": a['FullInvoiceNumber'],
-                                    "DeliveryDate": "",
-                                    "CustomerID": a['Customer']['id'],
-                                    "Customer": a['Customer']['Name'],
-                                    "SupplierID": a['Party']['id'],
-                                    "Supplier": a['Party']['Name'],
-                                    "OrderAmount": a['GrandTotal'],
-                                    "Description": "",
-                                    "OrderType": "",
-                                    "POType": "",
-                                    "BillingAddress": "",
-                                    "ShippingAddress": "",
-                                    "CreatedBy": a['CreatedBy'],
-                                    "CreatedOn": a['CreatedOn'],
-                                    "Inward": "",
-                                    "Percentage": "",
-                                    "IsRecordDeleted":a['Hide'],
-                                })
+                            # InvoiceID = TC_GRNReferences.objects.filter(
+                            #     Invoice=a['id']).values('Invoice').count()
+                            # if InvoiceID == 0:
+                            InvoiceListData.append({
+                                "id": a.id,
+                                "OrderDate": a.InvoiceDate,
+                                "FullOrderNumber": a.FullInvoiceNumber,
+                                "DeliveryDate": "",
+                                "CustomerID": a.CustomerID,
+                                "Customer": a.CustomerName,
+                                "SupplierID": a.SupplierID,
+                                "Supplier": a.SupplierName,
+                                "OrderAmount": a.GrandTotal,
+                                "Description": "",
+                                "OrderType": "",
+                                "POType": "",
+                                "BillingAddress": "",
+                                "ShippingAddress": "",
+                                "CreatedBy": a.CreatedBy,
+                                "CreatedOn": a.CreatedOn,
+                                "Inward": "",
+                                "Percentage": "",
+                                "IsRecordDeleted":a.Hide,
+                            })
                         log_entry = create_transaction_log(request, Orderdata, 0, x, "Order List",28,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                     log_entry = create_transaction_log(request, Orderdata, 0, x, "Record Not Found",29,0)
