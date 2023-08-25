@@ -98,7 +98,7 @@ class PurchaseReturnListView(CreateAPIView):
 def primarySourceNAme(ID):
     q1=TC_PurchaseReturnItems.objects.filter(id=ID).values('PurchaseReturn_id')
     b=q1[0]['PurchaseReturn_id']
-    q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat(supl.Name,'-',cust.Name) PrimartSource
+    q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat(supl.Name,'-(',cust.Name,')') PrimartSource
 FROM T_PurchaseReturn 
 join M_Parties cust on cust.id=T_PurchaseReturn.Customer_id
 join M_Parties supl on supl.id=T_PurchaseReturn.Party_id
