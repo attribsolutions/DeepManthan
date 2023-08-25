@@ -317,8 +317,8 @@ class LoadingSheetPrintView(CreateAPIView):
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
                     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                    WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRP_id Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence ''',[Invoicelist])    
-                    
+                    WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRPValue Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence ''',[Invoicelist])    
+                    # print(Itemsquery.query)
                     InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
                     for c in InvoiceItemSerializedata:
                         

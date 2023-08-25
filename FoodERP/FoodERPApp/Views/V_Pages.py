@@ -108,8 +108,8 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                         MC_PageFieldMasterListData = list()
                         for c in MC_PageFieldMaster_data:
                             
-                            FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
-                            FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
+                            # FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
+                            # FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
                            
                             MC_PageFieldMasterListData.append({
                                 
@@ -128,7 +128,7 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                                 "RegularExpression":c['RegularExpression'],
                                 "InValidMsg":c['InValidMsg'],
                                 "Alignment":c['Alignment'],
-                                "FieldValidationlist":FieldValidations_Serializer
+                                # "FieldValidationlist":FieldValidations_Serializer
                                 
                             })
                         
