@@ -829,5 +829,71 @@ class ReturnReportDownloadView(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+class MaterialRegisterDownloadView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Reportdata = JSONParser().parse(request)
+                FromDate = Reportdata['FromDate']
+                ToDate = Reportdata['ToDate']
+                Party =  Reportdata['Party']
+                Item =  Reportdata['Item']
+                q1 = M_Items.objects.filter(id=Item).values('BaseUnitID_id')
+                BaseUnitID = q1[0]['BaseUnitID_id']
+                print(BaseUnitID)
+                q2 = M_Settings.objects.filter(id=14).values('DefaultValue')
+                DefaultValues = q2[0]['DefaultValue']
+                print(DefaultValues)
+                
+                query = T_PurchaseReturn.objects.raw('''SELECT 1 as id,a.* from (SELECT 1 A, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
+JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
+JOIN M_Parties ON M_Parties.id = T_GRNs.Party_id
+WHERE GRNDate Between %s AND %s AND Customer_id=%s and TC_GRNItems.Item_id=%s
+
+UNION ALL
+
+SELECT 2 A, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn ,T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,UnitwiseQuantityConversion(%s,Quantity,0,1,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,Quantity,0,1,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,Quantity,0,1,0,1,0)QtyInNo   FROM T_PurchaseReturn 
+JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
+JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Customer_id
+WHERE ReturnDate Between %s AND  %s AND Party_id=%s AND TC_PurchaseReturnItems.Item_id=%s AND TC_PurchaseReturnItems.ItemReason_id IN (%s)
+
+UNION ALL
+
+SELECT 3 A, StockDate TransactionDate,CreatedOn, FullReturnNumber TransactionNumber, Name, UnitwiseQuantityConversion(%s,QStock,0,%s,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,QStock,0,%s,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,QStock,0,%s,0,1,0)QtyInNo 
+FROM (SELECT 3 A,T_Stock.StockDate,T_Stock.CreatedOn ,'STOCK' FullReturnNumber,M_Parties.Name, '' QtyInBox,'' QtyInKg,''QtyInNo, SUM(T_Stock.BaseUnitQuantity) QStock 
+From T_Stock
+ JOIN M_Parties ON M_Parties.id=T_Stock.Party_id  
+ WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name, QtyInBox, QtyInKg,QtyInNo)AA
+
+UNION ALL
+
+SELECT 4 A, T_Invoices.InvoiceDate TransactionDate,T_Invoices.CreatedOn,T_Invoices.FullInvoiceNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_Invoices 
+JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
+WHERE InvoiceDate Between %s AND %s AND Party_id=%s AND  TC_InvoiceItems.Item_id=%s
+
+UNION ALL
+
+SELECT 5 A, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn,T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,UnitwiseQuantityConversion(%s,Quantity,0,1,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,Quantity,0,1,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,Quantity,0,1,0,1,0)QtyInNo  FROM T_PurchaseReturn 
+JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
+JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Party_id
+WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s)a order by CreatedOn ''',([FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item,DefaultValues, Item,BaseUnitID,Item,BaseUnitID,Item,BaseUnitID,FromDate,ToDate,Party,Item, FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item]))
+                
+                if query:
+                    MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': MaterialRegisterList})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
+        except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        
+        
+        
+        
+                
 
