@@ -71,20 +71,24 @@ class ItemSaleItemDropdownView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request,Group=0,SubGroup=0):
+    def post(self, request,id=0,):
         try:
             with transaction.atomic():
-                if Group >0:
+                Itemdata = JSONParser().parse(request)
+                Group = Itemdata['Group']
+                SubGroup = Itemdata['SubGroup']
+                
+                if (Group !=''):
                     query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id=M_Items.id JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id WHERE MC_ItemGroupDetails.Group_id=%s ''',(Group))
-                elif SubGroup >0:     
+                elif (SubGroup !=''):
                     query = M_Items.objects.raw('''SELECT M_Items.id, M_Items.Name FROM M_Items JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE MC_ItemGroupDetails.SubGroup_id = %s''',(SubGroup))
                 else:
                     query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items''')
                     
-                if query.exists():
+                if query:
                     Item_serializer = ItemSaleItemSerializer(query, many=True).data
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Item_serializer})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
