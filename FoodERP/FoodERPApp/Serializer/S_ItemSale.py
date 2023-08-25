@@ -27,3 +27,25 @@ class ItemSaleReportSerializer(serializers.Serializer):
     RoundOffAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     TCSAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     FullGRNNumber = serializers.CharField(max_length=500)
+    
+class PartyTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= M_PartyType
+        fields = '__all__'    
+    
+class ItemSaleSupplierSerializer(serializers.ModelSerializer):
+    PartyType=PartyTypeSerializer(read_only=True)
+
+    class Meta:
+        model =  M_Parties
+        fields = ['id','Name','PartyType']
+        
+        
+class ItemSaleItemSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    Name = serializers.CharField(max_length=500)
+  
+
+           
+    
+    

@@ -53,8 +53,7 @@ class ItemSaleSupplierDropdownView(CreateAPIView):
                     Employee=id).values('Party')
                 if query.exists():
                     q2 = M_Parties.objects.filter(id__in=query,PartyType=PartyType)
-                    Parties_serializer = DivisionsSerializer(
-                        q2, many=True).data
+                    Parties_serializer = ItemSaleSupplierSerializer(q2, many=True).data
                     Partylist = list()
                     for a in Parties_serializer:
                         Partylist.append({
@@ -65,3 +64,31 @@ class ItemSaleSupplierDropdownView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+class ItemSaleItemDropdownView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request,Group=0,SubGroup=0):
+        try:
+            with transaction.atomic():
+                if Group >0:
+                    query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id=M_Items.id JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id WHERE MC_ItemGroupDetails.Group_id=%s ''',(Group))
+                elif SubGroup >0:     
+                    query = M_Items.objects.raw('''SELECT M_Items.id, M_Items.Name FROM M_Items JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE MC_ItemGroupDetails.SubGroup_id = %s''',(SubGroup))
+                else:
+                    query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items''')
+                    
+                if query.exists():
+                    Item_serializer = ItemSaleItemSerializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Item_serializer})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        
+        
+        
+        
+        
