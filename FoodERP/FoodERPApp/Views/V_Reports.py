@@ -886,6 +886,7 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                 
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
+                    MaterialRegisterList.append({"OpeningBlance":100})
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': MaterialRegisterList})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
