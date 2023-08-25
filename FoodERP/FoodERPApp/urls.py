@@ -567,13 +567,14 @@ urlpatterns = [
             url(r'GSTR1Excel$',GSTR1ExcelDownloadView.as_view()),
             url(r'GSTR3BExcel$',GSTR3BDownloadView.as_view()),
             url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
+            url(r'MaterialRegister$', MaterialRegisterDownloadView.as_view()),
             
             
             
 #ItemSaleReport
             url(r'ItemSaleReport$', ItemSaleReportView.as_view()),
             url(r'ItemSaleSupplier/([0-9]+)/([0-9]+)$',ItemSaleSupplierDropdownView.as_view()),
-            url(r'ItemSaleItemList/([0-9]+)/([0-9]+)$',ItemSaleItemDropdownView.as_view()),            
+            url(r'ItemSaleItemList$',ItemSaleItemDropdownView.as_view()),            
                 
 # Claim 
             

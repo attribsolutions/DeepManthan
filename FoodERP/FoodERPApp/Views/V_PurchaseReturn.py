@@ -95,6 +95,20 @@ class PurchaseReturnListView(CreateAPIView):
             log_entry = create_transaction_log(request, Returndata, 0, x, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+def primarySourceNAme(ID):
+    q1=TC_PurchaseReturnItems.objects.filter(id=ID).values('PurchaseReturn_id')
+    b=q1[0]['PurchaseReturn_id']
+    q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat(supl.Name,'-(',cust.Name,')') PrimartSource
+FROM T_PurchaseReturn 
+join M_Parties cust on cust.id=T_PurchaseReturn.Customer_id
+join M_Parties supl on supl.id=T_PurchaseReturn.Party_id
+where T_PurchaseReturn.id=%s''',[b])
+    
+    for row in q2:
+        PrimartSource = row.PrimartSource
+
+    return PrimartSource
+
 class PurchaseReturnView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -148,10 +162,10 @@ class PurchaseReturnView(CreateAPIView):
                                 "DiscountType":b['DiscountType'],
                                 "Discount":b['Discount'],
                                 "DiscountAmount":b['DiscountAmount'],
-
                                 "ApprovedQuantity":b['ApprovedQuantity'],
                                 "primarySourceID" : b["primarySourceID"],
-                                "ApprovedByCompany" : b["ApprovedByCompany"]
+                                "ApprovedByCompany" : b["ApprovedByCompany"],
+                                "primarySource" : primarySourceNAme(b["primarySourceID"])
                             })
                         
                         PuchaseReturnList.append({
