@@ -845,10 +845,9 @@ class MaterialRegisterDownloadView(CreateAPIView):
                 Item =  Reportdata['Item']
                 q1 = M_Items.objects.filter(id=Item).values('BaseUnitID_id')
                 BaseUnitID = q1[0]['BaseUnitID_id']
-                print(BaseUnitID)
                 q2 = M_Settings.objects.filter(id=14).values('DefaultValue')
                 DefaultValues = q2[0]['DefaultValue']
-                print(DefaultValues)
+                
                 
                 query = T_PurchaseReturn.objects.raw('''SELECT 1 as id,a.* from (SELECT 1 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
 JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
@@ -886,7 +885,7 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                 
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
-                    MaterialRegisterList.append({"OpeningBalance":100})
+                    MaterialRegisterList.append({"OpeningBalance":100,"ClosingBalance":100})
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': MaterialRegisterList})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
