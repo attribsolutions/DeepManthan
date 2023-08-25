@@ -581,6 +581,7 @@ urlpatterns = [
             url(r'ClaimSummary$',ClaimSummaryView.as_view()),
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
+            url(r'Claimlist$',ClaimlistView.as_view()),
             
             
 

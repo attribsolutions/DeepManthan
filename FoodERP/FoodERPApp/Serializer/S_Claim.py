@@ -76,3 +76,14 @@ class ProductwiseMasterClaimSerializer(serializers.Serializer):
     Budget=serializers.DecimalField(max_digits=10, decimal_places=2)
     ClaimAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     ClaimAgainstNetSale =serializers.DecimalField(max_digits=10, decimal_places=2)           
+
+
+class ClaimlistSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
+    PartyID = serializers.IntegerField()
+    PartyName= serializers.CharField(max_length=500)
+    PartyType= serializers.CharField(max_length=500)  
+    PrimaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    SecondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    returncnt = serializers.CharField(max_length=500)
