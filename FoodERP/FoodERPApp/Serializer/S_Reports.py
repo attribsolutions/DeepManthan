@@ -281,6 +281,7 @@ class ReturnReportSerializer(serializers.Serializer):
 
 class MaterialRegisterSerializerView(serializers.Serializer):
     # id=serializers.IntegerField()
+    A=serializers.IntegerField()
     TransactionDate = serializers.DateField()
     CreatedOn = serializers.DateTimeField()
     TransactionNumber = serializers.CharField(max_length=500)
