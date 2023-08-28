@@ -47,8 +47,8 @@ class M_MarginsView(CreateAPIView):
                     additionaldata.append(b)     
                 M_Margins_Serializer = M_MarginsSerializer(data=additionaldata,many=True)
             if M_Margins_Serializer.is_valid():
-                Margin = M_Margins_Serializer.save()
-                LastInsertID = Margin.id
+                M_Margins_Serializer.save()
+                # LastInsertID = Margin.id
                 # log_entry = create_transaction_log(request, M_Marginsdata, 0, 0, "Margins Save Successfully",115,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margins Save Successfully','Data' :[]})
             else:
