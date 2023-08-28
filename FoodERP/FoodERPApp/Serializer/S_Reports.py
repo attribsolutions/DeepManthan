@@ -42,6 +42,7 @@ class StockProcessingReportSerializer(serializers.Serializer):
     Sale = serializers.DecimalField(max_digits=10, decimal_places=3)
     PurchaseReturn = serializers.DecimalField(max_digits=10, decimal_places=3)
     ClosingBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
+    ActualStock=serializers.DecimalField(max_digits=10, decimal_places=3)
     
 
 class StockReportSerializer(serializers.Serializer):
