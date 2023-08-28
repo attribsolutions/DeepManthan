@@ -52,11 +52,11 @@ class M_MRPsView(CreateAPIView):
                 log_entry = create_transaction_log(request, M_Mrpsdata, 0, 0, "MRP Save Successfully",120,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully','Data' :[]})
             else:
-                log_entry = create_transaction_log(request, M_Mrpsdata, 0, 0, M_Mrps_Serializer.errors,34,LastInsertID)
+                log_entry = create_transaction_log(request, M_Mrpsdata, 0, 0, M_Mrps_Serializer.errors,34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Mrps_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_log(request, M_Mrpsdata, 0, 0, Exception(e),33,LastInsertID)
+            log_entry = create_transaction_log(request, M_Mrpsdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 

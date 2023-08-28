@@ -96,17 +96,23 @@ class PurchaseReturnListView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 def primarySourceNAme(ID):
-    q1=TC_PurchaseReturnItems.objects.filter(id=ID).values('PurchaseReturn_id')
-    b=q1[0]['PurchaseReturn_id']
-    q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat(supl.Name,'-(',cust.Name,')') PrimartSource
-FROM T_PurchaseReturn 
-join M_Parties cust on cust.id=T_PurchaseReturn.Customer_id
-join M_Parties supl on supl.id=T_PurchaseReturn.Party_id
-where T_PurchaseReturn.id=%s''',[b])
-    
-    for row in q2:
-        PrimartSource = row.PrimartSource
-
+    if ID is None:
+        PrimartSource =''
+    else:    
+        
+        q1=TC_PurchaseReturnItems.objects.filter(id=ID).values('PurchaseReturn_id')
+        
+        b=q1[0]['PurchaseReturn_id']
+       
+        q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat(supl.Name,'-(',cust.Name,')') PrimartSource
+    FROM T_PurchaseReturn 
+    join M_Parties cust on cust.id=T_PurchaseReturn.Customer_id
+    join M_Parties supl on supl.id=T_PurchaseReturn.Party_id
+    where T_PurchaseReturn.id=%s''',[b])
+        
+        for row in q2:
+            PrimartSource = row.PrimartSource
+        
     return PrimartSource
 
 class PurchaseReturnView(CreateAPIView):
@@ -193,7 +199,7 @@ class PurchaseReturnView(CreateAPIView):
                 log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, x, 'Data not available',7,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, x, Exception(e),33,0)
+            # log_entry = create_transaction_log(request, {'PurchaseReturnID':id}, 0, x, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     @transaction.atomic()
