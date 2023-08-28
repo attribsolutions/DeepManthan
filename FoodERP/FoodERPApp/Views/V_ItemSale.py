@@ -10,9 +10,6 @@ from ..Serializer.S_ItemSale import *
 from ..models import *
 from django.db.models import F, Q
 
-
-
-
 class ItemSaleReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request, id=0):
@@ -60,7 +57,7 @@ class ItemSaleSupplierDropdownView(CreateAPIView):
                             'id':  a['id'],
                             'Name':  a['Name']
                         })
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Partylist})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
