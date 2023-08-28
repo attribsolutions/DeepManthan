@@ -438,7 +438,7 @@ class StockProcessingView(CreateAPIView):
                     StockDeleteQuery.delete()
                     # print(StockDeleteQuery.query)
                     StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3) OpeningBalance,round(GRN,3) GRN,round(SalesReturn,3) SalesReturn,round(Sale,3) Sale,round(PurchaseReturn,3) PurchaseReturn,
-round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance
+round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance,ActualStock
  from
 (select 1 as id,I.Item_id ItemID,I.UnitID,
 CASE WHEN StockQuantity >= 0  THEN IFNULL(StockQuantity,0)  ELSE IFNULL(ClosingBalance,0) END OpeningBalance,
@@ -493,7 +493,7 @@ where
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
 ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
-                    # print(StockProcessQuery)
+                    print(StockProcessQuery)
                     serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # print(serializer)
                     for a in serializer:
