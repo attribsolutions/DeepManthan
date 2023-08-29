@@ -484,11 +484,11 @@ left join
 (SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
 WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
-on I.Item_id=PurchesReturn.Item_id)R
-LEFT JOIN 
+on I.Item_id=PurchesReturn.Item_id
+LEFT JOIN
 
-(Select Item_id,SUM(QuantityInBaseUnit) Quantity from T_Stock where StockDate = %s AND PartyID= %s GROUP BY ItemID)ActualStock
-on I.Item_id=ActualStock.Item_id
+(Select Item_id,SUM(BaseUnitQuantity) ActualStock from T_Stock where StockDate = %s AND Party_id= %s GROUP BY Item_id)ActualStock
+on I.Item_id=ActualStock.Item_id)R
 where 
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
 ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
