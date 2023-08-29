@@ -1,5 +1,6 @@
 import base64
 import datetime
+from datetime import datetime
 import json
 from time import strftime
 from django.contrib.auth import authenticate
@@ -295,36 +296,40 @@ class InvoiceToSCMView(CreateAPIView):
                 if query:
                    
                     InvoiceSCMSerializer=InvoiceToSCMSerializer(query, many=True).data
+                    Invoicedate = datetime.strptime(InvoiceSCMSerializer[0]['InvoiceDate'], "%Y-%m-%d")
+                    Invoiceformatted_date = Invoicedate.strftime("%d.%m.%Y")
                     InvoiceData = list()
                     InvoiceItemData = list()
                     for a in InvoiceSCMSerializer:
-                            InvoiceItemData.append({
-                                "InvoiceNumber":a['id'],
-                                "MaterialCode":a['MaterialCode'],
-                                "BatchCode":a['BatchCode'],
-                                "BatchDate":a['BatchDate'],
-                                "Quantity":a['QtyInNo'],
-                                "BaseUOM":"EA",
-                                "LandedPerUnitRate":a['LandedPerUnitRate'],
-                                "MRP":a['MRP'],
-                                "TaxableAmount":a['TaxableAmount'],
-                                "CGST":a['CGST'],
-                                "SGST":a['SGST'],
-                                "IGST":a['IGST'],
-                                "UGST":"0.00",
-                                "CGSTPercentage":a['CGSTPercentage'],
-                                "SGSTPercentage":a['SGSTPercentage'],
-                                "IGSTPercentage":a['IGSTPercentage'],
-                                "UGSTPercentage":"0",
-                                "DiscountAmount":a['DiscountAmount'],
-                                "DiscountPercentage":a['DiscountPercentage'],
-                                "TotalValue":a['TotalValue'],
-                            })
+                        parsed_date = datetime.strptime(a['BatchDate'], "%Y-%m-%d")
+                        formatted_date = parsed_date.strftime("%d.%m.%Y")
+                        InvoiceItemData.append({
+                            "InvoiceNumber":a['id'],
+                            "MaterialCode":a['MaterialCode'],
+                            "BatchCode":a['BatchCode'],
+                            "BatchDate":formatted_date,
+                            "Quantity":a['QtyInNo'],
+                            "BaseUOM":"EA",
+                            "LandedPerUnitRate":a['LandedPerUnitRate'],
+                            "MRP":a['MRP'],
+                            "TaxableAmount":a['TaxableAmount'],
+                            "CGST":a['CGST'],
+                            "SGST":a['SGST'],
+                            "IGST":a['IGST'],
+                            "UGST":"0.00",
+                            "CGSTPercentage":a['CGSTPercentage'],
+                            "SGSTPercentage":a['SGSTPercentage'],
+                            "IGSTPercentage":a['IGSTPercentage'],
+                            "UGSTPercentage":"0",
+                            "DiscountAmount":a['DiscountAmount'],
+                            "DiscountPercentage":a['DiscountPercentage'],
+                            "TotalValue":a['TotalValue'],
+                        })
                    
                     InvoiceData.append({
                             "Reference":"",
                             "InvoiceNumber":InvoiceSCMSerializer[0]['id'],
-                            "InvoiceDate":InvoiceSCMSerializer[0]['InvoiceDate'],
+                            "InvoiceDate":Invoiceformatted_date,
                             "OrderNumber":InvoiceSCMSerializer[0]['id'],
                             "CustomerID":InvoiceSCMSerializer[0]['CustomerID'],
                             "DriverName":"",
@@ -340,17 +345,18 @@ class InvoiceToSCMView(CreateAPIView):
                             
                             })
                                      
-                    url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
+                    # url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
 
-                    payload = json.dumps(InvoiceData)
-                    headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
-                    }
+                    # payload = json.dumps(InvoiceData)
+                    # headers = {
+                    # 'Content-Type': 'application/json',
+                    # 'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
+                    # }
 
-                    response = requests.request("POST", url, headers=headers, data=payload)
-                    response_json = json.loads(response.text)
-                     
+                    # response = requests.request("POST", url, headers=headers, data=payload)
+                    # response_json = json.loads(response.text)
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceData}) 
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Invoice Send Successfully', 'Data': []})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': []})  
