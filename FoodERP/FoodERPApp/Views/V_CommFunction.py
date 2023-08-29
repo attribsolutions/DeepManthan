@@ -613,8 +613,8 @@ class RateCalculationFunction:
         RateDetails.append({
             "RatewithGST":RatewithGST,
             "RateWithoutGST": RateWithoutGST,
-            "NoRatewithGST" :RoundedGSTRate,
-            "NoRatewithOutGST" :RatewithoutGST
+            "NoRatewithGST" :round(RoundedGSTRate,2),
+            "NoRatewithOutGST" :round(RatewithoutGST,2)
         })
         
         
