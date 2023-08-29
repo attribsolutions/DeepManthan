@@ -280,7 +280,6 @@ class SAPLedgerView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
-        
 class InvoiceToSCMView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request, id=0):
