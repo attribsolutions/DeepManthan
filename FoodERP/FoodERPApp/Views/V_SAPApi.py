@@ -280,7 +280,6 @@ class SAPLedgerView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
-        
 class InvoiceToSCMView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request, id=0):
@@ -345,18 +344,18 @@ class InvoiceToSCMView(CreateAPIView):
                             
                             })
                                      
-                    url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
+                    # url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
 
-                    payload = json.dumps(InvoiceData)
-                    headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
-                    }
+                    # payload = json.dumps(InvoiceData)
+                    # headers = {
+                    # 'Content-Type': 'application/json',
+                    # 'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
+                    # }
 
-                    response = requests.request("POST", url, headers=headers, data=payload)
-                    response_json = json.loads(response.text)
+                    # response = requests.request("POST", url, headers=headers, data=payload)
+                    # response_json = json.loads(response.text)
                     
-                    # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceData}) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceData}) 
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Invoice Send Successfully', 'Data': response_json})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': []})  
