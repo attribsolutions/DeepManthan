@@ -191,7 +191,7 @@ from T_Invoices
 join M_Parties supl on supl.id=T_Invoices.Party_id
 join M_Parties cust on cust.id=T_Invoices.Customer_id
 left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
-where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer]))
+where T_Invoices.InvoiceDate between %s and %s and Customer_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer]))
 
                     else:
                         # query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
@@ -201,9 +201,10 @@ from T_Invoices
 join M_Parties supl on supl.id=T_Invoices.Party_id
 join M_Parties cust on cust.id=T_Invoices.Customer_id
 left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
-where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and and Party_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer],[Supplier]))
+where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer],[Supplier]))
                     # return JsonResponse({'query': str(Orderdata.query)})
                     
+                   
                     if query: 
                         # Invoice_serializer = InvoiceSerializerSecond(
                         #     query, many=True).data
