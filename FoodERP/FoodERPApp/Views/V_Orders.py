@@ -146,7 +146,7 @@ class OrderListFilterView(CreateAPIView):
                 log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,id)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -345,7 +345,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
             log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x,Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -399,10 +399,10 @@ class T_OrdersView(CreateAPIView):
 
                     log_entry = create_transaction_log(request, Orderdata, 0, Division, 'Order Save Successfully',1,OrderID)    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'OrderID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
-                log_entry = create_transaction_log(request, Orderdata, 0, Division, Order_serializer.errors,34,0)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, Division, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -520,7 +520,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], 'Data Not available',7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], Exception(e),33,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     def put(self, request, id=0):
@@ -851,7 +851,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                 log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, Party, "Order Edit",63,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, Party, e,33,0)
+            log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, 0, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -975,7 +975,7 @@ where Supplier_id=%s and OrderDate between %s and %s
 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
