@@ -47,3 +47,39 @@ class InvoiceSerializer(serializers.ModelSerializer):
               
         
         return InvoiceID 
+    
+    
+    
+class InvoiceToSCMSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    InvoiceDate = serializers.DateField()
+    OrderNumber = serializers.CharField(max_length=500)
+    CustomerID = serializers.CharField(max_length=500)
+    DriverName=serializers.CharField(max_length=100)
+    VehicleNo =serializers.CharField(max_length=100)
+    GSTIN =serializers.CharField(max_length=100)
+    Plant=serializers.CharField(max_length=100)
+    GrossAmount =serializers.DecimalField(max_digits=20, decimal_places=2)
+    refInvoiceNo =serializers.CharField(max_length=100)
+    refInvoiceType =serializers.CharField(max_length=100)
+    refInvoiceDate =serializers.CharField(max_length=100)
+    LineItemsQuantity=serializers.CharField(max_length=100)
+    MaterialCode=serializers.CharField(max_length=100)
+    BatchCode = serializers.CharField(max_length=500)
+    BatchDate = serializers.DateField()
+    QtyInNo = serializers.DecimalField(max_digits=10, decimal_places=2)
+    BaseUOM = serializers.CharField(max_length=500)
+    LandedPerUnitRate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
+    TaxableAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST = serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST= serializers.DecimalField(max_digits=10, decimal_places=2)
+    UGST= serializers.CharField(max_length=500)
+    CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    UGSTPercentage=serializers.CharField(max_length=500)
+    DiscountPercentage = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    TotalValue = serializers.DecimalField(max_digits=10, decimal_places=2)     
