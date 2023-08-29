@@ -357,6 +357,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "SGSTPercentage": b['SGSTPercentage'],
                                     "IGSTPercentage": b['IGSTPercentage'],
                                     "Amount": b['Amount'],
+                                    "DiscountType": b['DiscountType'],
+                                    "Discount": b['Discount'],
+                                    "DiscountAmount": b['DiscountAmount'],
                                     "UnitDetails":UnitDetails
                                 })     
                         OrderData.append({
@@ -552,6 +555,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "Amount": b['Amount'],
                                     "BatchCode": b['BatchCode'],
                                     "BatchDate": b['BatchDate'],
+                                    "DiscountType": b['DiscountType'],
+                                    "Discount": b['Discount'],
+                                    "DiscountAmount": b['DiscountAmount'],
                                     "UnitDetails":UnitDetails 
                                 })
                                 
