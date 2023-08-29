@@ -391,7 +391,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        # log_entry = create_transaction_log(request, {'RoleAccessID':a['id']},0,0,"RoleAccessAddPage",132,0)
+        log_entry = create_transaction_log(request, {'RoleAccessID':a['id']},0,0,"RoleAccessAddPage",132,0)
         return Response(response)    
 
 class RoleAccessGetPagesOnModule(RetrieveAPIView):
@@ -410,6 +410,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
                     query = M_Pages.objects.raw('''Select M_Pages.id,M_Pages.Name FROM M_Pages join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1  and M_Pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
                    
                 if not query:
+                    log_entry = create_transaction_log(request,0,0,0,"Data Not Found",7,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     PageSerializer = M_PageSerializerNewUpdated(
