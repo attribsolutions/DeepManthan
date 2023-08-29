@@ -357,7 +357,7 @@ class InvoiceToSCMView(CreateAPIView):
                     # response_json = json.loads(response.text)
                     
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceData}) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Invoice Send Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Invoice Send Successfully', 'Data': response_json})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': []})  
         except Exception as e:
