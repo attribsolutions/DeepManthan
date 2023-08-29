@@ -1,5 +1,6 @@
 import base64
 import datetime
+from datetime import datetime
 import json
 from time import strftime
 from django.contrib.auth import authenticate
@@ -11,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
 from django.db import transaction
 
-from ..Serializer.S_SAPApi import InvoiceSerializer
+from ..Serializer.S_SAPApi import InvoiceSerializer,InvoiceToSCMSerializer
 from ..Serializer.S_Orders import *
 from ..models import *
 from rest_framework.response import Response
@@ -277,3 +278,87 @@ class SAPLedgerView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+class InvoiceToSCMView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Reportdata = JSONParser().parse(request)
+                InvoiceID = Reportdata['Invoice']
+               
+                q1 = TC_InvoiceItems.objects.filter(Invoice =InvoiceID)
+                LineItemsQuantity=q1.count()
+          
+                query = T_Invoices.objects.raw('''SELECT  T_Invoices.id,T_Invoices.InvoiceDate,TC_InvoicesReferences.Order_id as OrderNumber,b.SAPPartyCode AS CustomerID,'' DriverName,'' VehicleNo,b.GSTIN,a.SAPPartyCode as Plant,T_Invoices.GrandTotal GrossAmount,'' refInvoiceNo,'' refInvoiceType, '' refInvoiceDate,'' AS LineItemsQuantity,M_Items.SAPItemCode AS MaterialCode,BatchCode,BatchDate,TC_InvoiceItems.QtyInNo,'' BaseUOM, Rate as LandedPerUnitRate,MRPValue as MRP, BasicAmount as TaxableAmount,CGST,SGST,IGST,'' UGST,CGSTPercentage, SGSTPercentage, IGSTPercentage, '' UGSTPercentage,Discount as DiscountPercentage, DiscountAmount,Amount as TotalValue FROM T_Invoices LEFT JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id JOIN M_Parties a ON a.id=T_Invoices.Party_id JOIN M_Parties b ON b.id=T_Invoices.Customer_id  JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id  Where T_Invoices.id=%s ''',[InvoiceID])
+                if query:
+                   
+                    InvoiceSCMSerializer=InvoiceToSCMSerializer(query, many=True).data
+                    Invoicedate = datetime.strptime(InvoiceSCMSerializer[0]['InvoiceDate'], "%Y-%m-%d")
+                    Invoiceformatted_date = Invoicedate.strftime("%d.%m.%Y")
+                    InvoiceData = list()
+                    InvoiceItemData = list()
+                    for a in InvoiceSCMSerializer:
+                        parsed_date = datetime.strptime(a['BatchDate'], "%Y-%m-%d")
+                        formatted_date = parsed_date.strftime("%d.%m.%Y")
+                        InvoiceItemData.append({
+                            "InvoiceNumber":a['id'],
+                            "MaterialCode":a['MaterialCode'],
+                            "BatchCode":a['BatchCode'],
+                            "BatchDate":formatted_date,
+                            "Quantity":a['QtyInNo'],
+                            "BaseUOM":"EA",
+                            "LandedPerUnitRate":a['LandedPerUnitRate'],
+                            "MRP":a['MRP'],
+                            "TaxableAmount":a['TaxableAmount'],
+                            "CGST":a['CGST'],
+                            "SGST":a['SGST'],
+                            "IGST":a['IGST'],
+                            "UGST":"0.00",
+                            "CGSTPercentage":a['CGSTPercentage'],
+                            "SGSTPercentage":a['SGSTPercentage'],
+                            "IGSTPercentage":a['IGSTPercentage'],
+                            "UGSTPercentage":"0",
+                            "DiscountAmount":a['DiscountAmount'],
+                            "DiscountPercentage":a['DiscountPercentage'],
+                            "TotalValue":a['TotalValue'],
+                        })
+                   
+                    InvoiceData.append({
+                            "Reference":"",
+                            "InvoiceNumber":InvoiceSCMSerializer[0]['id'],
+                            "InvoiceDate":Invoiceformatted_date,
+                            "OrderNumber":InvoiceSCMSerializer[0]['id'],
+                            "CustomerID":InvoiceSCMSerializer[0]['CustomerID'],
+                            "DriverName":"",
+                            "VehicleNo":"",
+                            "GSTIN":InvoiceSCMSerializer[0]['GSTIN'],
+                            "Plant":InvoiceSCMSerializer[0]['Plant'],
+                            "GrossAmount":InvoiceSCMSerializer[0]['GrossAmount'],
+                            "refInvoiceNo":InvoiceSCMSerializer[0]['refInvoiceNo'],
+                            "refInvoiceType":InvoiceSCMSerializer[0]['refInvoiceType'],
+                            "refInvoiceDate":InvoiceSCMSerializer[0]['refInvoiceDate'],
+                            "LineItemsQuantity":LineItemsQuantity,
+                            "InvoiceItems":InvoiceItemData
+                            
+                            })
+                                     
+                    # url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
+
+                    # payload = json.dumps(InvoiceData)
+                    # headers = {
+                    # 'Content-Type': 'application/json',
+                    # 'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
+                    # }
+
+                    # response = requests.request("POST", url, headers=headers, data=payload)
+                    # response_json = json.loads(response.text)
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceData}) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Invoice Send Successfully', 'Data': []})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': []})  
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        

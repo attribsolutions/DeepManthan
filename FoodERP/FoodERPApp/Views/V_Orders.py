@@ -146,7 +146,7 @@ class OrderListFilterView(CreateAPIView):
                 log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,id)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -191,7 +191,7 @@ from T_Invoices
 join M_Parties supl on supl.id=T_Invoices.Party_id
 join M_Parties cust on cust.id=T_Invoices.Customer_id
 left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
-where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer]))
+where T_Invoices.InvoiceDate between %s and %s and Customer_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer]))
 
                     else:
                         # query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Supplier).order_by('-CreatedOn')
@@ -201,9 +201,10 @@ from T_Invoices
 join M_Parties supl on supl.id=T_Invoices.Party_id
 join M_Parties cust on cust.id=T_Invoices.Customer_id
 left join TC_GRNReferences on T_Invoices.id=TC_GRNReferences.Invoice_id 
-where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and and Party_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer],[Supplier]))
+where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=%s and TC_GRNReferences.Invoice_id is null order by CreatedOn desc ''',([FromDate],[ToDate],[Customer],[Supplier]))
                     # return JsonResponse({'query': str(Orderdata.query)})
                     
+                   
                     if query: 
                         # Invoice_serializer = InvoiceSerializerSecond(
                         #     query, many=True).data
@@ -344,7 +345,7 @@ where T_Invoices.InvoiceDate between %s and %s Customer_id=%s and and Party_id=%
             log_entry = create_transaction_log(request, Orderdata, 0, x, "Data Not available",7,id)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x,Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -398,10 +399,10 @@ class T_OrdersView(CreateAPIView):
 
                     log_entry = create_transaction_log(request, Orderdata, 0, Division, 'Order Save Successfully',1,OrderID)    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'OrderID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
-                log_entry = create_transaction_log(request, Orderdata, 0, Division, Order_serializer.errors,34,0)
+                log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, Division, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -519,7 +520,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], 'Data Not available',7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, a['Supplier']['id'], Exception(e),33,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     def put(self, request, id=0):
@@ -850,7 +851,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                 log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, Party, "Order Edit",63,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, Party, e,33,0)
+            log_entry = create_transaction_log(request, {'OrderID':OrderID}, 0, 0, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -974,7 +975,7 @@ where Supplier_id=%s and OrderDate between %s and %s
 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Orderdata, 0, x, Exception(e),33,0)
+            log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
