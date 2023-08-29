@@ -202,16 +202,16 @@ class RoleAccessViewList(RetrieveAPIView):
 
                 
                 if not query:
-                    # log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'Data Not Found',7,0)
+                    log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'Data Not Found',7,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     M_Items_Serializer = M_RoleAccessSerializerGETList(
                         query, many=True).data
-                    # log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'RoleAccess List',129,0)
+                    log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'RoleAccess List',129,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
-            # log_entry = create_transaction_log(request, Logindata,0,0, e,33,0)
+            log_entry = create_transaction_log(request, Logindata,0,0, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -311,7 +311,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        # log_entry = create_transaction_log(request, 0,Division,Company,"RoleAccessNewUpdated",130,0)
+        log_entry = create_transaction_log(request, 0,Division,Company,"RoleAccessNewUpdated",130,0)
         return Response(response)
     
     @transaction.atomic()
@@ -326,10 +326,10 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                     RoleAccessID = a['id']
                     RoleAccessDeletedata = M_RoleAccess.objects.get(id=RoleAccessID)
                     RoleAccessDeletedata.delete()
-                # log_entry = create_transaction_log(request,0,Division,Company,"RoleAccess Deleted Successfully",131,0)
+                log_entry = create_transaction_log(request,0,Division,Company,"RoleAccess Deleted Successfully",131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
-            # log_entry = create_transaction_log(request, 0,0,0,Exception(e),33,0)
+            log_entry = create_transaction_log(request, 0,0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
 
 class RoleAccessViewAddPage(RetrieveAPIView):
