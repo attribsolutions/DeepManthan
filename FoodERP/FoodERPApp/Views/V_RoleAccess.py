@@ -144,7 +144,7 @@ class RoleAccessView(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_log(request, {'RoleAccessID':id}, Division,CompanyID, "Role Access",127,0)
+        # log_entry = create_transaction_log(request, {'RoleAccessID':id}, Division,CompanyID, "Role Access",127,0)
         return Response(response)
 
     # Role Access POST Method first delete record on role,company,division and then Insert data
@@ -166,12 +166,12 @@ class RoleAccessView(RetrieveAPIView):
                     RoleAccessSerialize_data.save()
                     Party=RoleAccessSerialize_data.data[0]['Company']
 
-                    log_entry = create_transaction_log(request, {'RoleAccessDetails':RoleAccessSerialize_data},0,Party, "Role Access Save Successfully",128,0)
+                    # log_entry = create_transaction_log(request, {'RoleAccessDetails':RoleAccessSerialize_data},0,Party, "Role Access Save Successfully",128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_log(request, {'RoleAccessDetails':RoleAccessSerialize_data}, 0,0, RoleAccessSerialize_data.errors,34,0)
+                # log_entry = create_transaction_log(request, {'RoleAccessDetails':RoleAccessSerialize_data}, 0,0, RoleAccessSerialize_data.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
-            log_entry = create_transaction_log(request, {'RoleAccessDetails':RoleAccessSerialize_data},0,0, e,33,0)
+            # log_entry = create_transaction_log(request, {'RoleAccessDetails':RoleAccessSerialize_data},0,0, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   e, 'Data': []})
 
 
@@ -204,16 +204,16 @@ class RoleAccessViewList(RetrieveAPIView):
 
                 
                 if not query:
-                    log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'Data Not Found',7,0)
+                    # log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'Data Not Found',7,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     M_Items_Serializer = M_RoleAccessSerializerGETList(
                         query, many=True).data
-                    log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'RoleAccess List',129,0)
+                    # log_entry = create_transaction_log(request, Logindata,UserID,CompanyID, 'RoleAccess List',129,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
-            log_entry = create_transaction_log(request, Logindata,0,0, e,33,0)
+            # log_entry = create_transaction_log(request, Logindata,0,0, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
