@@ -7,7 +7,7 @@ from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Parties import M_PartiesSerializerSecond
 
-from ..Views.V_CommFunction import GetOpeningBalance, UnitwiseQuantityConversion
+from ..Views.V_CommFunction import GetOpeningBalance, UnitwiseQuantityConversion,RateCalculationFunction
 from ..Serializer.S_Invoices import InvoiceSerializerSecond
 
 from ..Serializer.S_Reports import *
@@ -734,8 +734,58 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND  T_Invoices.Party_id=%s ''',(
                 if query:
                     InvoiceExportData=list()
                     InvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
-                    InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData[0]})
+                    for b in InvoiceExportSerializer:
+                        
+                        qur2=M_Parties.objects.filter(id=b['CustomerID']).values('PriceList').distinct()
+                        query = M_PriceList.objects.values('id').filter(id__in=qur2)
+                        
+                        Rate=RateCalculationFunction(0,b['FE2MaterialID'],0,0,1,0,query[0]['id']).RateWithGST()
+                        NoRate=float(Rate[0]['NoRatewithOutGST'])
+                        InvoiceExportData.append({
+                            
+                            "SupplierID":b['SupplierID'],
+                            "SupplierName":b['SupplierName'],
+                            "InvoiceNumber":b['InvoiceNumber'],
+                            "InvoiceDate":b['InvoiceDate'],
+                            "CustomerID":b['CustomerID'],
+                            "CustomerName":b['CustomerName'],
+                            "FE2MaterialID":b['FE2MaterialID'],
+                            "MaterialName":b['MaterialName'],
+                            "CompanyName":b['CompanyName'],
+                            "HSNCode":b['HSNCode'],
+                            "MRP":b['MRP'],
+                            "QtyInNo":b['QtyInNo'],
+                            "QtyInKg":b['QtyInKg'],
+                            "QtyInBox":b['QtyInBox'],
+                            "BasicRate":b['BasicRate'],
+                            "WithGSTRate":b['WithGSTRate'],
+                            "NoRate":NoRate,
+                            "UnitName":b['UnitName'],
+                            "DiscountType":b['DiscountType'],
+                            "Discount":b['Discount'],
+                            "DiscountAmount":b['DiscountAmount'],
+                            "TaxableValue":b['TaxableValue'],
+                            "CGST":b['CGST'],
+                            "CGSTPercentage":b['CGSTPercentage'],
+                            "SGST":b['SGST'],
+                            "SGSTPercentage":b['SGSTPercentage'],
+                            "IGST":b['IGST'],
+                            "IGSTPercentage":b['IGSTPercentage'],
+                            "GSTPercentage":b['GSTPercentage'],
+                            "GSTAmount":b['GSTAmount'],
+                            "TotalValue":b['TotalValue'],
+                            "TCSAmount":b['TCSAmount'],
+                            "RoundOffAmount":b['RoundOffAmount'],
+                            "GrandTotal":b['GrandTotal'],
+                            "RouteName":b['RouteName'],
+                            "StateName":b['StateName'],
+                            "GSTIN":b['GSTIN'],
+                            "Irn":b['Irn'],
+                            "AckNo":b['AckNo'],
+                            "EwayBillNo":b['EwayBillNo'],
+                        })
+                    # InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
