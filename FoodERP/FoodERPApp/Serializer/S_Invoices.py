@@ -36,7 +36,7 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
     # MCSubParty=MCPartySubPartySerializer(many=True) # code by ankita 
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo'] 
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','PartyType_id'] 
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
