@@ -202,7 +202,8 @@ class InvoiceListFilterView(CreateAPIView):
                             "VehicleNo": a['Vehicle']['VehicleNumber'],
                             "Party": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
-                            "InvoiceUploads" : a["InvoiceUploads"]
+                            "InvoiceUploads" : a["InvoiceUploads"],
+                            "CustomerPartyType":a['Customer']['PartyType_id']
                              
                         })
                     log_entry = create_transaction_log(request, Invoicedata, 0, Party, "Invoice List",35,0)
