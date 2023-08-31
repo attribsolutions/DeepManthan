@@ -83,9 +83,10 @@ class PurchaseReturnListView(CreateAPIView):
                             "RoundOffAmount": a['RoundOffAmount'],
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
-                            "IsApproved" : a["IsApproved"],
-                            "Comment" : a["Comment"],
-                            "Status" : Status
+                            "IsApproved" :a["IsApproved"],
+                            "Comment" :a["Comment"],
+                            "Status" :Status,
+                            "Mode":a["Mode"]
                         })
                     log_entry = create_transaction_log(request, Returndata, 0, x, 'PurchaseReturn List',51,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
