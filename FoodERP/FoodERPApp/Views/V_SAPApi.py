@@ -74,7 +74,7 @@ class SAPInvoiceView(CreateAPIView):
                                 log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
 
-                            InvoiceDate = datetime.datetime.strptime(
+                            InvoiceDate = datetime.strptime(
                                 aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
                             for bb in aa['InvoiceItems']:
 
