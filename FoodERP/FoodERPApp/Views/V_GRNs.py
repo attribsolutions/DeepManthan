@@ -559,7 +559,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "DiscountType": b['DiscountType'],
                                     "Discount": b['Discount'],
                                     "DiscountAmount": b['DiscountAmount'],
-                                    "UnitDetails":UnitDetails 
+                                    "UnitDetails":UnitDetails,
+                                    "MRP":b['MRP']['id'],
+                                    "MRPValue":b['MRPValue'] 
                                 })
                                 
                             InvoiceData.append({
