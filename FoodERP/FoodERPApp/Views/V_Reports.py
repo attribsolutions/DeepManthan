@@ -951,7 +951,7 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                     else:
                         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
                  
-                    query3 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
+                    query3 = O_DateWiseLiveStock.objects.filter(StockDate=ToDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
                     if query3:
                         if int(query3[0]['ClosingBalance'])>0:
                             ClosingBalance=UnitwiseQuantityConversion(Item,query3[0]['ClosingBalance'],0,query3[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
