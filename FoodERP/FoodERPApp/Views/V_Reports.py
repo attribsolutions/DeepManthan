@@ -942,16 +942,21 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                 
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
-                    query2 = O_DateWiseLiveStock.objects.raw('''SELECT OpeningBalance,Unit_id FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s AND Item_id=%s ''',([FromDate,Party,Item]))
+                    query2 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('OpeningBalance','Unit_id')
+                    print(str(query2.query))
+                    # query2 = O_DateWiseLiveStock.objects.raw('''SELECT id, OpeningBalance,Unit_id FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s AND Item_id=%s ''',([FromDate,Party,Item]))
                     if query2:
-                        if int(query2[0]['OpeningBalance'])>0:
+                        
+                        if int(query2[0]['OpeningBalance']) > 0:
                             OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],query2[0]['Unit_id'],0,0,Unit,0).ConvertintoSelectedUnit()
                         else:
                             OpeningBalance=0.00      
                     else:
                         OpeningBalance = 'Stock processing needed'
-                         
-                    query3 = O_DateWiseLiveStock.objects.raw('''SELECT ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s AND Item_id=%s ''',([ToDate,Party,Item]))
+                    
+                    query3 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
+                    print(str(query3.query))
+                    # query3 = O_DateWiseLiveStock.objects.raw('''SELECT id, ClosingBalance,Unit_id FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s AND Item_id=%s ''',([ToDate,Party,Item]))
                     if query3:
                         if int(query3[0]['ClosingBalance'])>0:
                             ClosingBalance=UnitwiseQuantityConversion(Item,query3[0]['ClosingBalance'],query3[0]['Unit_id'],0,0,Unit,0).ConvertintoSelectedUnit()
