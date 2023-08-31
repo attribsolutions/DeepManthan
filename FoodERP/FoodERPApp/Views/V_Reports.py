@@ -469,7 +469,8 @@ left join
 
 (SELECT Item_id,SUM(BaseUnitQuantity) StockQuantity
 FROM T_Stock
-WHERE StockDate = %s AND Party_id = %s GROUP BY Item_id)Stock
+WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
+					DAY ) AND Party_id = %s GROUP BY Item_id)Stock
 
 on I.Item_id=Stock.Item_id
 left join
