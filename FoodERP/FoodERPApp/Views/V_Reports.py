@@ -945,7 +945,7 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                     query2 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('OpeningBalance','Unit_id')
                     if query2:
                         if int(query2[0]['OpeningBalance']) > 0:
-                            OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],query2[0]['Unit_id'],0,0,Unit,0).ConvertintoSelectedUnit()
+                            OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
                         else:
                             OpeningBalance=0.00      
                     else:
@@ -954,7 +954,7 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                     query3 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
                     if query3:
                         if int(query3[0]['ClosingBalance'])>0:
-                            ClosingBalance=UnitwiseQuantityConversion(Item,query3[0]['ClosingBalance'],query3[0]['Unit_id'],0,0,Unit,0).ConvertintoSelectedUnit()
+                            ClosingBalance=UnitwiseQuantityConversion(Item,query3[0]['ClosingBalance'],0,query3[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
                         else:
                             ClosingBalance=0.00
                     else:
