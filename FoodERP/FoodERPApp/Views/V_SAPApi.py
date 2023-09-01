@@ -361,11 +361,11 @@ class InvoiceToSCMView(CreateAPIView):
                     
                     if (response_json[0]['Status']== False):
                         Msg = response_json[0]['Messag']
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':Msg, 'Data': []})  
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':Msg, 'Data':payload })  
                     else:
                         Msg = response_json[0]['Messag']
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Msg, 'Data': []})    
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Msg, 'Data': payload})    
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': []})  
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': payload})  
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':payload})        
