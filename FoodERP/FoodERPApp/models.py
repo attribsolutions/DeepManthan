@@ -1816,6 +1816,9 @@ class Transactionlog(models.Model):
     JsonData = models.TextField(blank = True)
     TransactionType =  models.IntegerField(default=1)
     TransactionID =  models.IntegerField(default=1)
+    FromDate = models.DateField(blank=True, null=True)
+    ToDate = models.DateField(blank=True, null=True)
+    CustomerID = models.IntegerField(default=1)
     
     class Meta:
         db_table="Transactionlog"     
