@@ -898,6 +898,8 @@ class MaterialRegisterDownloadView(CreateAPIView):
                 ToDate = Reportdata['ToDate']
                 Party =  Reportdata['Party']
                 Item =  Reportdata['Item']
+                Unit =  Reportdata['Unit']
+                
                 q1 = M_Items.objects.filter(id=Item).values('BaseUnitID_id')
                 BaseUnitID = q1[0]['BaseUnitID_id']
                 q2 = M_Settings.objects.filter(id=14).values('DefaultValue')
@@ -940,7 +942,25 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                 
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
-                    MaterialRegisterList.append({"OpeningBalance":100,"ClosingBalance":100})
+                    query2 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('OpeningBalance','Unit_id')
+                    if query2:
+                        if int(query2[0]['OpeningBalance']) > 0:
+                            OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
+                        else:
+                            OpeningBalance=0.00      
+                    else:
+                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
+                 
+                    query3 = O_DateWiseLiveStock.objects.filter(StockDate=ToDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
+                    if query3:
+                        if int(query3[0]['ClosingBalance'])>0:
+                            ClosingBalance=UnitwiseQuantityConversion(Item,query3[0]['ClosingBalance'],0,query3[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
+                        else:
+                            ClosingBalance=0.00
+                    else:
+                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
+                    
+                    MaterialRegisterList.append({"OpeningBalance":OpeningBalance,"ClosingBalance":ClosingBalance})
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': MaterialRegisterList})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
