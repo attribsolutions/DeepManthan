@@ -343,20 +343,27 @@ class InvoiceToSCMView(CreateAPIView):
                             "InvoiceItems":InvoiceItemData
                             
                             })
-                                     
+                    
+                    # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData})              
                     url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
-
                     payload = json.dumps(InvoiceData)
                     headers = {
                     'Content-Type': 'application/json',
                     'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
                     }
-
+                   
                     response = requests.request("POST", url, headers=headers, data=payload)
-                    response_json = json.loads(response.text)
+                    corrected_response_text = '[' + response.text.replace('Array', '') + ']'
+                    response_json = json.loads(corrected_response_text)
+                    print(response_json[0]['Status'])
+                    print(response_json[0]['Messag'])
                     
-                    # return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceData}) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Invoice Send Successfully', 'Data': response_json})
+                    if (response_json[0]['Status']== False):
+                        Msg = response_json[0]['Messag']
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':Msg, 'Data': []})  
+                    else:
+                        Msg = response_json[0]['Messag']
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Msg +' Send Successfully' , 'Data': []})    
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': []})  
         except Exception as e:
