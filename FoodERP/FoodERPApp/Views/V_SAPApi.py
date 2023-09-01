@@ -302,8 +302,9 @@ class InvoiceToSCMView(CreateAPIView):
                     for a in InvoiceSCMSerializer:
                         parsed_date = datetime.strptime(a['BatchDate'], "%Y-%m-%d")
                         formatted_date = parsed_date.strftime("%d.%m.%Y")
+                       
                         InvoiceItemData.append({
-                            "InvoiceNumber":a['id'],
+                            "InvoiceNumber":'80000'+str(a['id']),
                             "MaterialCode":a['MaterialCode'],
                             "BatchCode":a['BatchCode'],
                             "BatchDate":formatted_date,
@@ -327,9 +328,9 @@ class InvoiceToSCMView(CreateAPIView):
                    
                     InvoiceData.append({
                             "Reference":"",
-                            "InvoiceNumber":InvoiceSCMSerializer[0]['id'],
+                            "InvoiceNumber":'80000'+str(InvoiceSCMSerializer[0]['id']),
                             "InvoiceDate":Invoiceformatted_date,
-                            "OrderNumber":InvoiceSCMSerializer[0]['id'],
+                            "OrderNumber":'80000'+str(InvoiceSCMSerializer[0]['id']),
                             "CustomerID":InvoiceSCMSerializer[0]['CustomerID'],
                             "DriverName":"",
                             "VehicleNo":"",
@@ -344,7 +345,7 @@ class InvoiceToSCMView(CreateAPIView):
                             
                             })
                     
-                    # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData})              
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData[0]})              
                     url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
                     payload = json.dumps(InvoiceData[0])
                     headers = {
