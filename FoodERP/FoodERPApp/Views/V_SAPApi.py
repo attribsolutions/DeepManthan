@@ -346,7 +346,7 @@ class InvoiceToSCMView(CreateAPIView):
                     
                     # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData})              
                     url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
-                    payload = json.dumps(InvoiceData)
+                    payload = json.dumps(InvoiceData[0])
                     headers = {
                     'Content-Type': 'application/json',
                     'Authorization': 'Basic YXR0cmliOkF0dHJpYkA5OTk='
@@ -355,12 +355,12 @@ class InvoiceToSCMView(CreateAPIView):
                     response = requests.request("POST", url, headers=headers, data=payload)
                     corrected_response_text = '[' + response.text.replace('Array', '') + ']'
                     response_json = json.loads(corrected_response_text)
-                    print(response_json[0]['Status'])
-                    print(response_json[0]['Messag'])
+                    # print(response_json[0]['Status'])
+                    # print(response_json[0]['Messag'])
                     
                     if (response_json[0]['Status']== False):
                         Msg = response_json[0]['Messag']
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':Msg, 'Data': []})  
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':Msg, 'Data': []})  
                     else:
                         Msg = response_json[0]['Messag']
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Msg +' Send Successfully' , 'Data': []})    
