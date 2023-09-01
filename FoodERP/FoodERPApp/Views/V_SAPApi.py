@@ -345,7 +345,7 @@ class InvoiceToSCMView(CreateAPIView):
                             
                             })
                     
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData[0]})              
+                    # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData[0]})              
                     url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
                     payload = json.dumps(InvoiceData[0])
                     headers = {
