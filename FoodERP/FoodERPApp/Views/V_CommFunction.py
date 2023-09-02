@@ -538,7 +538,7 @@ class RateCalculationFunction:
             if q1.count() > 0:
                 self.MRP = q1[0]['MRP']
             else:
-                self.MRP = 0
+                self.MRP = QueryForGSTAndMRP[0]['MRPValue']
             
             if(QueryForGSTAndMRP[0]['GST'] is None):
 
