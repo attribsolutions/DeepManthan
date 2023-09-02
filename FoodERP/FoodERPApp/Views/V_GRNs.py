@@ -267,7 +267,7 @@ class T_GRNViewSecond(CreateAPIView):
                 log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],'GRN',70,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],Exception(e),33,0)
+            # log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
  
 # GRN DELETE API 
