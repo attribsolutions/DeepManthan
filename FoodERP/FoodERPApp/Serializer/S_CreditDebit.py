@@ -23,7 +23,7 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
     class Meta :
         model= T_CreditDebitNotes
-        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'CreatedBy', 'UpdatedBy', 'Customer', 'Invoice', 'NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
+        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'CreatedBy', 'UpdatedBy', 'Customer','NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
         
     def create(self, validated_data):
         CRDRNoteItems_data = validated_data.pop('CRDRNoteItems')
@@ -42,20 +42,18 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     
     
 # CreditDebitNote List Serializer 
-class  CreditNoteInvoiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = T_Invoices
-        fields = ['FullInvoiceNumber']
-      
+
+
+
+
+            
         
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
     Party = PartiesSerializer(read_only=True)
     NoteReason = GeneralMasterserializer(read_only=True)
     NoteType = GeneralMasterserializer(read_only=True)
-    Receipt = ReceiptSerializer(read_only=True)
-    Invoice = CreditNoteInvoiceSerializer(read_only=True)
-    PurchaseReturn = PurchaseReturnSerializer(read_only=True)
+    
     class Meta :
         model= T_CreditDebitNotes
         fields = '__all__'
@@ -70,14 +68,14 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
         if not ret.get("NoteType", None):
             ret["NoteType"] = {"id": None, "Name": None}
         
-        if not ret.get("Receipt", None):
-            ret["Receipt"] = {"id": None, "FullReceiptNumber": None}  
+        # if not ret.get("Receipt", None):
+        #     ret["Receipt"] = {"id": None, "FullReceiptNumber": None}  
         
-        if not ret.get("Invoice", None):
-            ret["Invoice"] = {"id": None, "FullInvoiceNumber": None} 
+        # if not ret.get("Invoice", None):
+        #     ret["Invoice"] = {"id": None, "FullInvoiceNumber": None} 
             
-        if not ret.get("PurchaseReturn", None):
-            ret["PurchaseReturn"] = {"id": None, "FullReturnNumber": None}         
+        # if not ret.get("PurchaseReturn", None):
+        #     ret["PurchaseReturn"] = {"id": None, "FullReturnNumber": None}         
                   
         return ret    
     
