@@ -61,7 +61,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc )j ''', ([FromDate], [ToDate], [Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc ,Item_id desc )j ''', ([FromDate], [ToDate], [Party]))
 
              
                 if q0:
