@@ -42,12 +42,6 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     
     
 # CreditDebitNote List Serializer 
-
-
-
-
-            
-        
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
     Party = PartiesSerializer(read_only=True)
@@ -81,8 +75,15 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     
     
 # CreditDebitNote Single get Serializer
+
+class SingleCreditNoteInvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_Invoices
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'CreatedOn'] 
+
+
 class CreditDebitNoteInvoiceSerializerSecond(serializers.ModelSerializer):
-    Invoice = GlobleInvoiceSerializer()
+    Invoice = SingleCreditNoteInvoiceSerializer()
     class Meta :
         model= TC_ReceiptInvoices
         fields = ['id', 'GrandTotal', 'PaidAmount', 'AdvanceAmtAdjusted', 'Invoice']
@@ -119,8 +120,6 @@ class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
     Party = PartiesSerializerSecond(read_only=True)
     NoteReason = GeneralMasterserializer(read_only=True)
     NoteType = GeneralMasterserializer(read_only=True)
-    Receipt = ReceiptSerializer(read_only=True)
-    Invoice = InvoiceSerializer(read_only=True)
     PurchaseReturn = PurchaseReturnSerializer(read_only=True)
     CRDRInvoices = CreditDebitNoteInvoiceSerializerSecond(many=True)
     CRDRNoteItems = CreditDebitNoteItemSerializerSecond(many=True)
