@@ -220,12 +220,12 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRNoteItems":CRDRNoteItems,
                             "CRDRInvoices": CRDRInvoices 
                         })
-                    log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'CreditdebitNote',85,0)
+                    # log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'CreditdebitNote',85,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
-                log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'Record Not Found',29,0)
+                # log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'], Exception(e),33,0)
+            # log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'], Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
