@@ -400,7 +400,9 @@ class Uploaded_EwayBill(CreateAPIView):
 
                             data_dict = json.loads(response.text)
                             print('ffffffffffffff')
+                            print(data_dict)
                             if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
+                                print('ggggggg')
                                 Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                                 
                                 if(Query.count() > 0):
@@ -412,7 +414,8 @@ class Uploaded_EwayBill(CreateAPIView):
                                     Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
                                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': [] })
                             else:
-                                return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': [] })
+                                print('hhhhhhh')
+                                return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': data_dict['results']['status'], 'Message': data_dict['results'], 'Data': [] })
                     else:
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
