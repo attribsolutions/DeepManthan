@@ -63,9 +63,6 @@ class CreditDebitNoteListView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
-                            "Receipt": a['Receipt']['FullReceiptNumber'],
-                            "Invoice": a['Invoice']['FullInvoiceNumber'],
-                            "PurchaseReturn": a['PurchaseReturn']['FullReturnNumber'],
                             "CreatedOn": a['CreatedOn']
                         })
                     log_entry = create_transaction_log(request, CreditDebitdata, 0, Party,'CreditDebitNote List',83,0)
@@ -223,12 +220,12 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRNoteItems":CRDRNoteItems,
                             "CRDRInvoices": CRDRInvoices 
                         })
-                    log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'CreditdebitNote',85,0)
+                    # log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'CreditdebitNote',85,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
-                log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'Record Not Found',29,0)
+                # log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'],'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'], Exception(e),33,0)
+            # log_entry = create_transaction_log(request, {'CreditDebitNoteID':id}, 0, a['Party']['id'], Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
