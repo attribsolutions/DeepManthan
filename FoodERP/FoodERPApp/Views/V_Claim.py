@@ -176,7 +176,7 @@ class MasterClaimView(CreateAPIView):
                                 stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
                                                                     "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=PartyType, Party_id=Party, CreatedBy=0)
                                 stock.save()
-
+                        # for all partyType
                         claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                             IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
         (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
@@ -206,8 +206,8 @@ class MasterClaimView(CreateAPIView):
                         ReturnAmount= 0.0
                         for a in serializer:
                             
-                            PrimaryAmount= PrimaryAmount + float(a["PrimaryAmount"])
-                            SecondaryAmount= SecondaryAmount +  float(a["secondaryAmount"])
+                            PrimaryAmount= float(a["PrimaryAmount"])
+                            SecondaryAmount= float(a["secondaryAmount"])
                             ReturnAmount= ReturnAmount  + float(a["ReturnAmount"])
                             
                             stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
