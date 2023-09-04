@@ -47,6 +47,22 @@ def create_transaction_log(request,data,User, PartyID,TransactionDetails,Transac
     )
     return log_entry
 
+def create_transaction_logNew(request,data,PartyID,TransactionDetails,TransactionType=0,TransactionID=0, FromDate=0,ToDate=0,CustomerID=0):
+    Authenticated_User = request.user
+    User = Authenticated_User.id
+    if FromDate == 0:
+        log_entry = Transactionlog.objects.create(
+            TranasactionDate=date.today(),
+            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID
+        )
+    else:
+        log_entry = Transactionlog.objects.create(
+            TranasactionDate=date.today(),
+            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID
+        )
+
+    return log_entry
+
 
 def UnitDropdown(ItemID,PartyForRate,BatchID=0):
     

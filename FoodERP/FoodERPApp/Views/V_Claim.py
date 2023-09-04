@@ -61,7 +61,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,GSTPercentage,Rate,MRP ,Discount,DiscountType Order By GSTPercentage )j ''', ([FromDate], [ToDate], [Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc )j ''', ([FromDate], [ToDate], [Party]))
 
              
                 if q0:
@@ -166,8 +166,8 @@ class MasterClaimView(CreateAPIView):
         join M_Parties on M_Parties.id=PRPS.Customer_id
         where T_PurchaseReturn.IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s group by TC_PurchaseReturnItems.ItemReason_id)p ''',
                                                                                         ([FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [PartyType], [FromDate], [ToDate], [Party]))
-
-                            # print(claimREasonwise.query)
+                            print('==============================================')
+                            print(PartyType ,claimREasonwise.query)
                             serializer = MasterclaimReasonReportSerializer(
                                 claimREasonwise, many=True).data
                         
@@ -286,7 +286,7 @@ class MasterClaimPrintView(CreateAPIView):
                 for i in sorted_data_list:
                     PartyTypeID = i["id"]
                     PartyTypeName = i["Name"]
-                    printReasonwisequery = MC_ReturnReasonwiseMasterClaim.objects.raw(''' SELECT 1 as id, M_GeneralMaster.Name ItemReasonName, PrimaryAmount, SecondaryAmount, ReturnAmount, NetSaleValue, 
+                    printReasonwisequery = MC_ReturnReasonwiseMasterClaim.objects.raw(''' SELECT 1 as id, M_GeneralMaster.Name ItemReasonName, PrimaryAmount PurchaseAmount, SecondaryAmount SaleAmount, ReturnAmount, NetSaleValue, 
 MC_ReturnReasonwiseMasterClaim.Budget, ClaimAmount, ClaimAgainstNetSale
  FROM MC_ReturnReasonwiseMasterClaim 
 join M_GeneralMaster on M_GeneralMaster.id=MC_ReturnReasonwiseMasterClaim.ItemReason_id 
@@ -302,7 +302,7 @@ order by M_GeneralMaster.id
 
                         })
 
-                printProductwisequery = M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PrimaryAmount, sum(SecondaryAmount)SecondaryAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
+                printProductwisequery = M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
 sum(M_MasterClaim.Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
 FROM M_MasterClaim
 left join M_Items on M_Items.id=M_MasterClaim.Item_id

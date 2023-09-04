@@ -340,7 +340,7 @@ class InvoiceToSCMView(CreateAPIView):
                             "refInvoiceNo":InvoiceSCMSerializer[0]['refInvoiceNo'],
                             "refInvoiceType":InvoiceSCMSerializer[0]['refInvoiceType'],
                             "refInvoiceDate":InvoiceSCMSerializer[0]['refInvoiceDate'],
-                            "LineItemsQuantity":LineItemsQuantity,
+                            "LineItems":LineItemsQuantity,
                             "InvoiceItems":InvoiceItemData
                             
                             })
