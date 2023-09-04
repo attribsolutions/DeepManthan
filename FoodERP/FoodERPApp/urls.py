@@ -1,6 +1,8 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
+from .Views.V_MobileAppOrder import T_MobileAppOrdersView
+
 from .Views.V_Claim import *
 
 from .Views.V_Discount import *
@@ -145,6 +147,7 @@ urlpatterns = [
     url(r'SAPOrder', SAPOrderView.as_view()),
     url(r'SAPLedger',SAPLedgerView.as_view()),
     url(r'InvoicetoSCM',InvoiceToSCMView.as_view()),
+    url(r'MobileAppOrder$',T_MobileAppOrdersView.as_view()),
     
 # User 
             path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
