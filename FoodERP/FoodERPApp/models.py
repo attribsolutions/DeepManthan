@@ -1646,6 +1646,13 @@ class TC_CreditDebitNoteItems(models.Model):
     MRP = models.ForeignKey(M_MRPMaster, related_name='CRDRMRP', on_delete=models.PROTECT,null=True,blank=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='CRDRUnit', on_delete=models.PROTECT)
     GSTPercentage = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
 
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
