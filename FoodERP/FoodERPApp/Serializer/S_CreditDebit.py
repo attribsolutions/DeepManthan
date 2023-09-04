@@ -41,7 +41,12 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     
     
     
-# CreditDebitNote List Serializer             
+# CreditDebitNote List Serializer 
+class  CreditNoteInvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_Invoices
+        fields = ['FullInvoiceNumber']
+      
         
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
@@ -49,7 +54,7 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     NoteReason = GeneralMasterserializer(read_only=True)
     NoteType = GeneralMasterserializer(read_only=True)
     Receipt = ReceiptSerializer(read_only=True)
-    Invoice = InvoiceSerializer(read_only=True)
+    Invoice = CreditNoteInvoiceSerializer(read_only=True)
     PurchaseReturn = PurchaseReturnSerializer(read_only=True)
     class Meta :
         model= T_CreditDebitNotes
