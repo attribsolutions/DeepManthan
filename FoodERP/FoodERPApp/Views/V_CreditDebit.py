@@ -44,7 +44,6 @@ class CreditDebitNoteListView(CreateAPIView):
                 else:
                     query = T_CreditDebitNotes.objects.filter(CRDRNoteDate__range=[FromDate, ToDate], Customer=Customer, Party=Party).filter(P)
 
-                print(str(query.query))
                 if query:
                     CreditDebit_serializer = CreditDebitNoteSecondSerializer(
                         query, many=True).data
@@ -99,7 +98,18 @@ class CreditDebitNoteView(CreateAPIView):
                 b = GetPrifix.GetCRDRPrifix(Party, NoteType)
                 CreditNotedata['FullNoteNumber'] = str(b)+""+str(a)
                 # ==================================================================================================
-
+                CRDRNoteItems = CreditNotedata['CRDRNoteItems']
+                for CRDRNoteItem in CRDRNoteItems:
+                       
+                    BaseUnitQuantity=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    CRDRNoteItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                    QtyInNo=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    CRDRNoteItem['QtyInNo'] =  float(QtyInNo)
+                    QtyInKg=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    CRDRNoteItem['QtyInKg'] =  float(QtyInKg)
+                    QtyInBox=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    CRDRNoteItem['QtyInBox'] = float(QtyInBox)
+                
                 CreditNote_Serializer = CreditDebitNoteSerializer(
                     data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
@@ -153,6 +163,16 @@ class CreditDebitNoteView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "MRPValue": b['MRPValue'],
+                                "Discount": b['Discount'],
+                                "DiscountAmount": b['DiscountAmount'],
+                                "DiscountType": b['DiscountType'],
+                                "QtyInNo": b['QtyInNo'],
+                                "QtyInKg": b['QtyInKg'],
+                                "QtyInBox": b['QtyInBox'],
+                                "ItemComment":b['ItemComment']
+                                
                             }) 
                         
                         CRDRInvoices = list()
