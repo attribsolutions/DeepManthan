@@ -16,7 +16,7 @@ class CreditDebitNoteItemSerializer(serializers.ModelSerializer):
     
     class Meta :
         model= TC_CreditDebitNoteItems
-        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode']
+        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode', 'GSTPercentage','MRPValue','DiscountType', 'Discount', 'DiscountAmount','QtyInBox','QtyInKg','QtyInNo','ItemComment']
 
 class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRInvoices = CreditDebitNoteInvoiceSerializer(many=True)
@@ -93,7 +93,7 @@ class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
     
     class Meta :
         model= TC_CreditDebitNoteItems
-        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode']        
+        fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode','GSTPercentage','MRPValue','DiscountType', 'Discount', 'DiscountAmount','QtyInBox','QtyInKg','QtyInNo','ItemComment']        
     
     def to_representation(self, instance):
         # get representation from ModelSerializer
