@@ -1653,6 +1653,7 @@ class TC_CreditDebitNoteItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
+    ItemComment = models.CharField(max_length=500,null=True,blank=True)
 
     class Meta:
         db_table = "TC_CreditDebitNoteItems"  
@@ -2068,7 +2069,11 @@ class TC_DeletedInvoicesReferences(models.Model):
     Invoice =models.IntegerField(null=True)
     Order = models.IntegerField(null=True)
     class Meta:
-        db_table = "TC_DeletedInvoicesReferences"                      
+        db_table = "TC_DeletedInvoicesReferences"
+        
+        
+        
+                                      
    
                         
          
