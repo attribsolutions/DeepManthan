@@ -63,9 +63,6 @@ class CreditDebitNoteListView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
-                            "Receipt": a['Receipt']['FullReceiptNumber'],
-                            "Invoice": a['Invoice']['FullInvoiceNumber'],
-                            "PurchaseReturn": a['PurchaseReturn']['FullReturnNumber'],
                             "CreatedOn": a['CreatedOn']
                         })
                     log_entry = create_transaction_log(request, CreditDebitdata, 0, Party,'CreditDebitNote List',83,0)
