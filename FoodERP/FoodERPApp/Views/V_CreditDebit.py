@@ -170,8 +170,9 @@ class CreditDebitNoteView(CreateAPIView):
                                 "DiscountType": b['DiscountType'],
                                 "QtyInNo": b['QtyInNo'],
                                 "QtyInKg": b['QtyInKg'],
-                                "QtyInBox": b['QtyInBox']
-                             
+                                "QtyInBox": b['QtyInBox'],
+                                "ItemComment":b['ItemComment']
+                                
                             }) 
                         
                         CRDRInvoices = list()
