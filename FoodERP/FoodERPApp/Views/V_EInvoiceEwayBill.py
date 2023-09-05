@@ -323,7 +323,7 @@ class Uploaded_EwayBill(CreateAPIView):
                                     "unit_of_product": a['Unit']['UnitID']['EwayBillUnit'],
                                     "cgst_rate": a['SGSTPercentage'],
                                     "sgst_rate": a['SGSTPercentage'],
-                                    "igst_rate": a['SGSTPercentage'],
+                                    "igst_rate": a['IGSTPercentage'],
                                     "cess_rate": 0,
                                     "cessNonAdvol": 0,
                                     "taxable_amount": a['BasicAmount'],
@@ -389,12 +389,14 @@ class Uploaded_EwayBill(CreateAPIView):
                             })
                             print('ddddddddddddd')
                             E_Way_Bill_URL = 'https://pro.mastersindia.co/ewayBillsGenerate'
+                            
                             payload = json.dumps(InvoiceData[0])
                             
                             headers = {
                                 'Content-Type': 'application/json',
                             }
-                            print('eeeeeeeeeeee')
+                            # print(payload)
+                           
                             response = requests.request(
                                 "POST", E_Way_Bill_URL, headers=headers, data=payload)
 
@@ -531,3 +533,4 @@ class Cancel_EInvoice(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
