@@ -81,14 +81,12 @@ class PartyItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
-    
     @transaction.atomic()
     def post(self, request, id=0):
         try:
             with transaction.atomic():
                 PartyItems_data = JSONParser().parse(request)
-                PartyItems_serializer = MC_PartyItemSerializer(
-                    data=PartyItems_data, many=True)
+                PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data, many=True)
             if PartyItems_serializer.is_valid():
                 id = PartyItems_serializer.data[0]['Party']
                 MC_PartyItem_data = MC_PartyItems.objects.filter(Party=id)
@@ -100,5 +98,28 @@ class PartyItemsView(CreateAPIView):
             else:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class ChannelWiseItemsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Items_data = JSONParser().parse(request)
+                Items_Serializer = M_ChannelWiseItemsSerializer(data=Items_data, many=True)
+            if Items_Serializer.is_valid():
+                id = Items_Serializer.data[0]['PartyType']
+                ChanelWiseItem_data = M_ChannelWiseItems.objects.filter(PartyType_id=id)
+                print(str(ChanelWiseItem_data.query))
+                ChanelWiseItem_data.delete()
+                Items_Serializer.save()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully', 'Data': []})
+            else:
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Items_Serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
