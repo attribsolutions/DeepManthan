@@ -415,7 +415,7 @@ class Uploaded_EwayBill(CreateAPIView):
                                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': [] })
                             else:
                                 print('hhhhhhh')
-                                return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': data_dict['results']['status'], 'Message': data_dict['results'], 'Data': [] })
+                                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': [] })
                     else:
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
