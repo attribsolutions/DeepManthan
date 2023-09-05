@@ -485,7 +485,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             BoxSize= a['Length']+" L X "+a['Breadth']+" B X "+a['Height']+" W - MM"
                         
                         ItemMargindata = M_MarginMaster.objects.filter(Item=a['id'],IsDeleted=0).values('Margin').order_by('-EffectiveDate','-id')[:1]
-                        ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0).values('MRP').order_by('-id')[:1]
+                        ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0,Division_id__isnull=True,Party_id__isnull=True).values('MRP').order_by('-id')[:1]
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
 
