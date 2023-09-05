@@ -1613,7 +1613,6 @@ class T_CreditDebitNotes(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Customer = models.ForeignKey(M_Parties,related_name='NoteCustomer',on_delete=models.PROTECT)
-    Invoice = models.ForeignKey(T_Invoices,related_name='Invoice', on_delete=models.PROTECT,blank=True, null=True)
     NoteReason = models.ForeignKey(M_GeneralMaster,related_name='NoteReason', on_delete=models.PROTECT,blank=True, null=True)
     NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
