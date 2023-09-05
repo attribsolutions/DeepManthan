@@ -90,6 +90,7 @@ class StockEntryPageView(CreateAPIView):
                 
                 StockEntrydata.update({"O_LiveBatchesList":O_LiveBatchesList})
                 
+                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
                 for aa in StockEntrydata['O_LiveBatchesList']:
                 
                     StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
