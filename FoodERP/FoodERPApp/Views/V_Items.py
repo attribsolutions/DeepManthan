@@ -549,127 +549,127 @@ class ProductAndMarginReportView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
-class DiscountMasterSaveView(CreateAPIView):
+# class DiscountMasterSaveView(CreateAPIView):
 
-    permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication
+#     permission_classes = (IsAuthenticated,)
+#     # authentication_class = JSONWebTokenAuthentication
 
-    @transaction.atomic()
-    def post(self, request, id=0):
-        try:
-            with transaction.atomic():
-                DiscountMaster_data = JSONParser().parse(request)
-                Discount_serializer = DiscountSerializer(data=DiscountMaster_data, many=True)
-                if Discount_serializer.is_valid():
-                    Discount_serializer.save()
+#     @transaction.atomic()
+#     def post(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 DiscountMaster_data = JSONParser().parse(request)
+#                 Discount_serializer = DiscountSerializer(data=DiscountMaster_data, many=True)
+#                 if Discount_serializer.is_valid():
+#                     Discount_serializer.save()
                 
-                    log_entry = create_transaction_log(request, DiscountMaster_data, 0, 0,"Discount Master Save Successfully",107,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully', 'Data': []})
-                else:
-                    log_entry = create_transaction_log(request,DiscountMaster_data, 0, 0,Discount_serializer.errors,34,0)
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
-        except Exception as e:
-            log_entry = create_transaction_log(request,DiscountMaster_data, 0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+#                     log_entry = create_transaction_log(request, DiscountMaster_data, 0, 0,"Discount Master Save Successfully",107,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully', 'Data': []})
+#                 else:
+#                     log_entry = create_transaction_log(request,DiscountMaster_data, 0, 0,Discount_serializer.errors,34,0)
+#                     transaction.set_rollback(True)
+#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
+#         except Exception as e:
+#             log_entry = create_transaction_log(request,DiscountMaster_data, 0, 0,Exception(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-class DiscountMasterView(CreateAPIView):
+# class DiscountMasterView(CreateAPIView):
 
-    permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication
+#     permission_classes = (IsAuthenticated,)
+#     # authentication_class = JSONWebTokenAuthentication
 
-    @transaction.atomic()
-    def get(self, request, id=0):
-        try:
-            with transaction.atomic():
-                DiscountMasterdata = M_DiscountMaster.objects.get(id=id)
-                Discount_Serializer = DiscountSerializer(DiscountMasterdata)
-                log_entry = create_transaction_log(request, {'DiscountMasterID':id}, 0, 0,"DiscountMaster",107,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Discount_Serializer.data})
-        except  M_Bank.DoesNotExist:
-            log_entry = create_transaction_log(request, {'DiscountMasterID':id}, 0, 0,"Data Not available",33,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'DiscountMaster Not available', 'Data': []})
-        except Exception as e:
-            log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+#     @transaction.atomic()
+#     def get(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 DiscountMasterdata = M_DiscountMaster.objects.get(id=id)
+#                 Discount_Serializer = DiscountSerializer(DiscountMasterdata)
+#                 log_entry = create_transaction_log(request, {'DiscountMasterID':id}, 0, 0,"DiscountMaster",107,0)
+#                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Discount_Serializer.data})
+#         except  M_Bank.DoesNotExist:
+#             log_entry = create_transaction_log(request, {'DiscountMasterID':id}, 0, 0,"Data Not available",33,0)
+#             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'DiscountMaster Not available', 'Data': []})
+#         except Exception as e:
+#             log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,Exception(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
-    @transaction.atomic()
-    def put(self, request, id=0):
-        try:
-            with transaction.atomic():
-                DiscountMasterdata = JSONParser().parse(request)
-                DiscountMasterByID = M_DiscountMaster.objects.get(id=id)
-                Discount_Serializer = DiscountSerializer(
-                    DiscountMasterByID, data=DiscountMasterdata)
-                if Discount_Serializer.is_valid():
-                    Discount_Serializer.save()
-                    log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,"DiscountMaster Updated Successfully",109,id)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Updated Successfully','Data' :[]})
-                else:
-                    log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Discount_Serializer.errors,34,0)
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_Serializer.errors, 'Data' :[]})
-        except Exception as e:
-            log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+#     @transaction.atomic()
+#     def put(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 DiscountMasterdata = JSONParser().parse(request)
+#                 DiscountMasterByID = M_DiscountMaster.objects.get(id=id)
+#                 Discount_Serializer = DiscountSerializer(
+#                     DiscountMasterByID, data=DiscountMasterdata)
+#                 if Discount_Serializer.is_valid():
+#                     Discount_Serializer.save()
+#                     log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,"DiscountMaster Updated Successfully",109,id)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Updated Successfully','Data' :[]})
+#                 else:
+#                     log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Discount_Serializer.errors,34,0)
+#                     transaction.set_rollback(True)
+#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_Serializer.errors, 'Data' :[]})
+#         except Exception as e:
+#             log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Exception(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                DiscountMasterdata = M_DiscountMaster.objects.get(id=id)
-                DiscountMasterdata.delete()
-                log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"DiscountMaster Deleted Successfully",110,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Deleted Successfully','Data':[]})
-        except M_Bank.DoesNotExist:
-            log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"Data Not available",7,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'DiscountMaster Not available', 'Data': []})
-        except IntegrityError:
-            log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"Bank used in transaction",8,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
+#     @transaction.atomic()
+#     def delete(self, request, id=0):
+#         try:
+#             with transaction.atomic():
+#                 DiscountMasterdata = M_DiscountMaster.objects.get(id=id)
+#                 DiscountMasterdata.delete()
+#                 log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"DiscountMaster Deleted Successfully",110,0)
+#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Deleted Successfully','Data':[]})
+#         except M_Bank.DoesNotExist:
+#             log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"Data Not available",7,0)
+#             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'DiscountMaster Not available', 'Data': []})
+#         except IntegrityError:
+#             log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"Bank used in transaction",8,0)
+#             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
 
 
-class GetDiscountView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+# class GetDiscountView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
     
-    @transaction.atomic()
-    def post(self, request,id=0):
-        try:
-            with transaction.atomic():
-                Discountdata = JSONParser().parse(request)
-                FromDate = Discountdata['FromDate']
-                ToDate = Discountdata['ToDate']
-                PartyType = Discountdata['PartyType']
-                PriceList = Discountdata['PriceList']
-                Party = Discountdata['PartyID']
-                Customer = Discountdata['CustomerID']
+#     @transaction.atomic()
+#     def post(self, request,id=0):
+#         try:
+#             with transaction.atomic():
+#                 Discountdata = JSONParser().parse(request)
+#                 FromDate = Discountdata['FromDate']
+#                 ToDate = Discountdata['ToDate']
+#                 PartyType = Discountdata['PartyType']
+#                 PriceList = Discountdata['PriceList']
+#                 Party = Discountdata['PartyID']
+#                 Customer = Discountdata['CustomerID']
 
-                if Party == '':
-                    x = Customer
-                else:
-                    x = Party
+#                 if Party == '':
+#                     x = Customer
+#                 else:
+#                     x = Party
 
-                query = M_DiscountMaster.objects.filter(FromDate__range=[FromDate,ToDate],PartyType=PartyType,PriceList=PriceList)
-                if query:
-                    Discount_Serializer = DiscountSerializerSecond(query, many=True).data
-                    DiscountList = list()
-                    for a in Discount_Serializer:
+#                 query = M_DiscountMaster.objects.filter(FromDate__range=[FromDate,ToDate],PartyType=PartyType,PriceList=PriceList)
+#                 if query:
+#                     Discount_Serializer = DiscountSerializerSecond(query, many=True).data
+#                     DiscountList = list()
+#                     for a in Discount_Serializer:
                         
-                        DiscountList.append({
-                            "ItemId":a['Item']['id'],
-                            "ItemName": a['Item']['Name'],
-                            "Discount":a['Discount'],
-                            "DiscountType":a['DiscountType']
+#                         DiscountList.append({
+#                             "ItemId":a['Item']['id'],
+#                             "ItemName": a['Item']['Name'],
+#                             "Discount":a['Discount'],
+#                             "DiscountType":a['DiscountType']
                                  
-                        })
-                    log_entry = create_transaction_log(request,Discountdata, 0, x,"GetDiscount",111,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
-        except Exception as e:
-            log_entry = create_transaction_log(request,Discountdata, 0, x,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+#                         })
+#                     log_entry = create_transaction_log(request,Discountdata, 0, x,"GetDiscount",111,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
+#         except Exception as e:
+#             log_entry = create_transaction_log(request,Discountdata, 0, x,Exception(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 
