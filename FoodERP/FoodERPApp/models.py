@@ -2072,6 +2072,15 @@ class TC_DeletedInvoicesReferences(models.Model):
         
         
         
+class M_ChannelWiseItems(models.Model):
+    Item = models.ForeignKey(M_Items,related_name='ChannelItem', on_delete=models.PROTECT)
+    PartyType =models.ForeignKey(M_PartyType, related_name='ChannelPartyType', on_delete=models.PROTECT) 
+
+
+    class Meta:
+        db_table = "M_ChannelWiseItems"        
+        
+        
                                       
    
                         
