@@ -239,6 +239,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         "POST", EInvoice_URL, headers=headers, data=payload1)
                     
                     data_dict = json.loads(response.text)
+                    print(data_dict)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                         Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
@@ -554,13 +555,13 @@ class Uploaded_CreditDebitNotes_EInvoice(CreateAPIView):
                 if(aa[0] == '1'):
                     
                     access_token=aa[1]
-                    ItemQuery = T_Invoices.objects.raw('''select * from 
+                    ItemQuery = T_CreditDebitNotes.objects.raw('''select * from 
                     (SELECT T_CreditDebitNotes.id ,T_CreditDebitNotes.CRDRNoteDate document_date,
 P.Name seller_legal_name,C.Name Buyer_legal_name,T_CreditDebitNotes.FullNoteNumber document_number,
 PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
 PD.Name Seller_location ,CD.Name Buyer_location,
 P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
-PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode 
+PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode ,T_CreditDebitNotes.NoteType_id
 FROM T_CreditDebitNotes 
 join M_Parties P on P.id=T_CreditDebitNotes.Party_id
 join M_Parties C on C.id=T_CreditDebitNotes.Customer_id
@@ -588,7 +589,7 @@ join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 
 
 where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCode,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,TC_CreditDebitNoteItems.GSTPercentage''',[id])
-                    InvoiceUploadSerializer = InvoicegovUploadSerializer2(ItemQuery, many=True).data
+                    InvoiceUploadSerializer = CRDRNotegovUploadSerializer2(ItemQuery, many=True).data
                     Invoice=InvoiceUploadSerializer[0]
                     InvoiceItemUploadSerializer = InvoiceItemgovUploadSerializer2(InvoiceItem, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceItemUploadSerializer})
@@ -606,17 +607,10 @@ where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCo
                     value_details = list()
                     ewaybill_details = list()
                     InvoiceItemDetails = list()
-                    # Total_assessable_value = 0
-                    # total_invoice_value = 0
-                    # total_cgst_value = 0
-                    # total_sgst_value = 0
-                    # total_igst_value = 0
-                    # total_discount = 0
-                    # for Invoice in InvoiceUploadSerializer:
-                        # user_gstin=Invoice['Party']['GSTIN']
+                    
                     for a in InvoiceItemUploadSerializer:
-                        q0=TC_InvoiceItems.objects.filter(Invoice_id=id ,Item_id=a['id']).values("BatchCode")
-                        
+                        q0=TC_CreditDebitNoteItems.objects.filter(CRDRNote_id=id ,Item_id=a['id']).values("BatchCode")
+                          
                         Batchlist = list()
                         for d in q0:
                             Batchlist.append({
@@ -641,13 +635,18 @@ where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCo
                             'batch_details': Batchlist
                         })
 
-                   
+                    if Invoice['NoteType_id'] == 37 or Invoice['NoteType_id'] == 39:
+                            document_type='CRN'
+                            NoteType= 'CreditNote'
+                    else:
+                            document_type='DBN'  
+                            NoteType= 'DebitNote'
 
                     transaction_details.append({
                         "supply_type": 'B2B'
                     }),
                     document_details.append({
-                        'document_type': 'CRN',
+                        'document_type': document_type,
                         'document_number': Invoice['document_number'],
                         'document_date': Invoice['document_date']
                     }),
@@ -743,17 +742,17 @@ where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCo
                     data_dict = json.loads(response.text)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        Query=TC_CreditDebitNoteUploads.objects.filter(CRDRNote_id=id)
                        
                         if(Query.count() > 0):
                             
-                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
+                            StatusUpdates=TC_CreditDebitNoteUploads.objects.filter(CRDRNote=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': NoteType +' E-Invoice Upload Successfully', 'Data': [] })
                         else:
                            
-                            InvoiceID=T_Invoices.objects.get(id=id)
-                            Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
+                            InvoiceID=T_CreditDebitNotes.objects.get(id=id)
+                            Statusinsert=TC_CreditDebitNoteUploads.objects.create(CRDRNote=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': NoteType +' E-Invoice Upload Successfully', 'Data': [] })
                     else:
                         
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
@@ -763,3 +762,58 @@ where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCo
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+#==========================================================================================================================
+class Cancel_CreditDebitNotes_EInvoice(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request, id=0,userID=0):
+        try:
+            with transaction.atomic():
+
+                access_token = generate_Access_Token()
+                aa=access_token.split('!')
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
+# =======================================================================================
+                invoicedetaillist=list()
+                if(aa[0] == '1'):
+                    access_token=aa[1]
+                    InvoiceUploadsData=TC_CreditDebitNoteUploads.objects.filter(CRDRNote_id=id).values("user_gstin","Irn")
+                   
+                    invoicedetaillist.append({
+                            "access_token" : access_token,
+                            "user_gstin" : InvoiceUploadsData[0]["user_gstin"],
+                            "irn" : InvoiceUploadsData[0]["Irn"],
+                            "cancel_reason" : "2",
+                            "cancel_remarks" : "Data Entry Mistake"
+
+                    })
+                    EInvoiceCancel_URL = 'https://pro.mastersindia.co/cancelEinvoice'
+                    payload = json.dumps(invoicedetaillist[0])
+                    
+                    headers = {
+                        'Content-Type': 'application/json',
+                    }
+
+                    response = requests.request(
+                        "POST", EInvoiceCancel_URL, headers=headers, data=payload)
+
+                    data_dict = json.loads(response.text)
+                    
+                    if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
+                        Query=TC_CreditDebitNoteUploads.objects.filter(CRDRNote_id=id)
+                        
+                        if(Query.count() > 0):
+                            
+                            StatusUpdates=TC_CreditDebitNoteUploads.objects.filter(CRDRNote_id=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Cancel Successfully', 'Data': [] })
+                        else:
+                              
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Data Invalid', 'Data': [] })
+                    else:
+                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': [] })
+                else:
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
