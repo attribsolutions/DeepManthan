@@ -113,7 +113,10 @@ class CreditDebitNoteView(CreateAPIView):
                     CreditDebit = CreditNote_Serializer.save()
                     LastinsertID = CreditDebit.id
                     log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CreditdebitNote Save Successfully',84,LastinsertID,0,0,CreditNotedata['Customer'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditdebitNote Save Successfully', 'Data': []})
+                    if(NoteType==37 or NoteType==39):
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data': []})
+                    else:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DebitNote Save Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, CreditNotedata, Party,CreditNote_Serializer.errors,34,0)
                     transaction.set_rollback(True)
