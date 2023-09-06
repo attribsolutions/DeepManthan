@@ -79,7 +79,7 @@ class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
 class SingleCreditNoteInvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'CreatedOn'] 
+        fields = ['id','InvoiceDate', 'FullInvoiceNumber','CreatedOn'] 
 
 
 class CreditDebitNoteInvoiceSerializerSecond(serializers.ModelSerializer):
@@ -87,6 +87,14 @@ class CreditDebitNoteInvoiceSerializerSecond(serializers.ModelSerializer):
     class Meta :
         model= TC_ReceiptInvoices
         fields = ['id', 'GrandTotal', 'PaidAmount', 'AdvanceAmtAdjusted', 'Invoice']
+    
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(CreditDebitNoteInvoiceSerializerSecond, self).to_representation(instance)
+        # if parent is None, overwrite
+        if not ret.get("Invoice", None):
+            ret["Invoice"] = {"id": None, "InvoiceDate": None,"FullInvoiceNumber": None, "CreatedOn":None} 
+        return ret    
         
              
 class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):

@@ -317,7 +317,7 @@ class GetPrifix:
     
     def GetCRDRPrifix(*args):
        
-        if (args[1]==37):
+        if (args[1]==37 or args[1]==39 ):
             Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Creditprefix')
         else:
             Prifix=MC_PartyPrefixs.objects.filter(Party_id=args[0]).values('Debitprefix')
@@ -325,7 +325,7 @@ class GetPrifix:
         if not Prifix :
             a=""
         else:
-            if (args[1]==37):
+            if (args[1]==37 or args[1]==39):
                 a=Prifix[0]['Creditprefix']
             else:
                 a=Prifix[0]['Debitprefix']               
