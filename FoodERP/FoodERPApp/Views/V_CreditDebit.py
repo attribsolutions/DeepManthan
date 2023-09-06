@@ -132,13 +132,14 @@ class CreditDebitNoteView(CreateAPIView):
                 query = T_CreditDebitNotes.objects.filter(id=id)
                
                 if query:
+                    
                     CreditDebitNote_serializer = SingleCreditDebitNoteThirdSerializer(query,many=True).data
                     CreditDebitListData = list()
                     # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': CreditDebitNote_serializer})
                     for a in CreditDebitNote_serializer:
                         CRDRNoteItems = list()
-                        
                         for b in a['CRDRNoteItems']:
+                          
                             CRDRNoteItems.append({
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
@@ -223,9 +224,9 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRNoteItems":CRDRNoteItems,
                             "CRDRInvoices": CRDRInvoices 
                         })
-                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'CreditdebitNote',85,0,0,0,a['Customer']['id'])
+                    # log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'CreditdebitNote',85,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
-                log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
+                # log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0, Exception(e),33,0)
