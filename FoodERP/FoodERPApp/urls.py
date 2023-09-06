@@ -498,6 +498,9 @@ urlpatterns = [
             url(r'CreditDebitNote$', CreditDebitNoteView.as_view()), 
             url(r'CreditDebitNote/([0-9]+)$', CreditDebitNoteView.as_view()),   
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
+            
+            url(r'Uploaded_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Uploaded_CreditDebitNotes_EInvoice.as_view()),
+            
 
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),  
