@@ -37,9 +37,39 @@ class InvoicegovUploadSerializer2(serializers.Serializer):
     total_sgst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
     total_igst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
     total_discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+   
     # transportation_mode = serializers.CharField(max_length=500)
     # transportation_distance = serializers.CharField(max_length=500)
 
+class CRDRNotegovUploadSerializer2(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    # userGstin=serializers.CharField(max_length=500)
+    document_number = serializers.CharField(max_length=500)
+    document_date = serializers.CharField(max_length=500)
+    Seller_gstin = serializers.CharField(max_length=500)
+    seller_legal_name = serializers.CharField(max_length=500)
+    seller_address1 =  serializers.CharField(max_length=500)
+    Seller_location =serializers.CharField(max_length=500)
+    seller_pincode = serializers.CharField(default=False)
+    Seller_state_code =  serializers.CharField(max_length=500)
+    seller_State= serializers.CharField(max_length=500)
+    
+    Buyer_gstin = serializers.CharField(max_length=500)
+    Buyer_legal_name =  serializers.CharField(max_length=500)
+    Buyer_address1 = serializers.CharField(max_length=500)
+    Buyer_location = serializers.CharField(max_length=500)
+    buyer_pincode = serializers.CharField(max_length=500)
+    buyer_State= serializers.CharField(max_length=500)
+    Buyer_state_code = serializers.CharField(max_length=500)
+    
+    Total_assessable_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_invoice_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_cgst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_sgst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_igst_value = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    NoteType_id =  serializers.IntegerField()
 
 class InvoiceItemgovUploadSerializer2(serializers.Serializer):
     
