@@ -152,7 +152,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     seller_details.append({
                         'gstin': Invoice['Seller_gstin'],
                         'legal_name': Invoice['seller_legal_name'],
-                        'address1': Invoice['seller_address1'],
+                        'address1': Invoice['seller_address1'][:100],
                         'location': Invoice['Seller_location'],
                         'pincode': Invoice['seller_pincode'],
                         'state_code': Invoice['seller_State']
@@ -160,7 +160,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     buyer_details.append({
                         'gstin': Invoice['Buyer_gstin'],
                         'legal_name': Invoice['Buyer_legal_name'],
-                        'address1': Invoice['Buyer_address1'],
+                        'address1': Invoice['Buyer_address1'][:100],
                         'location': Invoice['Buyer_location'],
                         'pincode': Invoice['buyer_pincode'],
                         'place_of_supply': Invoice['Buyer_state_code'],
@@ -168,7 +168,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     }),
                     dispatch_details.append({
                         'company_name': Invoice['seller_legal_name'],
-                        'address1': Invoice['seller_address1'],
+                        'address1': Invoice['seller_address1'][:100],
                         'location': Invoice['Seller_location'],
                         'pincode': Invoice['seller_pincode'],
                         'state_code': Invoice['seller_State']
@@ -176,7 +176,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     ship_details.append({
                         'gstin': Invoice['Buyer_gstin'],
                         'legal_name': Invoice['Buyer_legal_name'],
-                        'address1': Invoice['Buyer_address1'],
+                        'address1': Invoice['Buyer_address1'][:100],
                         'location': Invoice['Buyer_location'],
                         'pincode':Invoice['buyer_pincode'],
                         'state_code': Invoice['buyer_State']
@@ -331,12 +331,12 @@ class Uploaded_EwayBill(CreateAPIView):
 
                             for address in Invoice['Party']['PartyAddress']:
                                 if address['IsDefault'] == 1:
-                                    selleraddress = address['Address']
+                                    selleraddress = address['Address'][:100]
                                     sellerpin = address['PIN']
 
                             for address in Invoice['Customer']['PartyAddress']:
                                 if address['IsDefault'] == 1:
-                                    buyeraddress = address['Address']
+                                    buyeraddress = address['Address'][:100]
                                     buyerpin = address['PIN']
 
                             InvoiceData.append({
@@ -534,3 +534,232 @@ class Cancel_EInvoice(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+
+
+#================================================Uploaded_CreditDebitNotes_EInvoice=============================================
+
+class Uploaded_CreditDebitNotes_EInvoice(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request, id=0,userID=0):
+        try:
+            with transaction.atomic():
+
+                access_token = generate_Access_Token()
+                aa=access_token.split('!')
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
+# =======================================================================================
+                
+                if(aa[0] == '1'):
+                    
+                    access_token=aa[1]
+                    ItemQuery = T_Invoices.objects.raw('''select * from 
+                    (SELECT T_CreditDebitNotes.id ,T_CreditDebitNotes.CRDRNoteDate document_date,
+P.Name seller_legal_name,C.Name Buyer_legal_name,T_CreditDebitNotes.FullNoteNumber document_number,
+PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
+PD.Name Seller_location ,CD.Name Buyer_location,
+P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
+PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode 
+FROM T_CreditDebitNotes 
+join M_Parties P on P.id=T_CreditDebitNotes.Party_id
+join M_Parties C on C.id=T_CreditDebitNotes.Customer_id
+left join MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
+left join MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
+left join M_States PS on PS.id=P.State_id
+left join M_States CS on CS.id=C.State_id
+left join M_Districts PD on PD.id=P.District_id
+left join M_Districts CD on  CD.id=C.District_id
+where T_CreditDebitNotes.id=%s)a
+left join 
+(select sum(BasicAmount)Total_assessable_value,(sum(Amount)-sum(DiscountAmount))total_invoice_value,sum(CGST)total_cgst_value,
+sum(SGST) total_sgst_value,sum(IGST)total_igst_value,sum(DiscountAmount)total_discount, CRDRNote_id 
+from TC_CreditDebitNoteItems where CRDRNote_id=%s)b
+on a.id=b.CRDRNote_id''',([id],[id])
+)
+                    InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,M_GSTHSNCode.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,sum(TC_CreditDebitNoteItems.DiscountAmount)DiscountAmount,
+sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,TC_CreditDebitNoteItems.GSTPercentage gst_rate,
+sum(Amount) total_item_value
+FROM TC_CreditDebitNoteItems 
+join M_Items on TC_CreditDebitNoteItems.Item_id=M_Items.id
+join M_GSTHSNCode on M_GSTHSNCode.id=TC_CreditDebitNoteItems.GST_id
+join MC_ItemUnits on MC_ItemUnits.id=TC_CreditDebitNoteItems.Unit_id
+join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+
+
+where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCode,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,TC_CreditDebitNoteItems.GSTPercentage''',[id])
+                    InvoiceUploadSerializer = InvoicegovUploadSerializer2(ItemQuery, many=True).data
+                    Invoice=InvoiceUploadSerializer[0]
+                    InvoiceItemUploadSerializer = InvoiceItemgovUploadSerializer2(InvoiceItem, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceItemUploadSerializer})
+
+                    InvoiceData = list()
+                    transaction_details = list()
+                    document_details = list()
+                    seller_details = list()
+                    buyer_details = list()
+                    dispatch_details = list()
+                    ship_details = list()
+                    reference_details = list()
+                    document_period_details = list()
+                    preceding_document_details = list()
+                    value_details = list()
+                    ewaybill_details = list()
+                    InvoiceItemDetails = list()
+                    # Total_assessable_value = 0
+                    # total_invoice_value = 0
+                    # total_cgst_value = 0
+                    # total_sgst_value = 0
+                    # total_igst_value = 0
+                    # total_discount = 0
+                    # for Invoice in InvoiceUploadSerializer:
+                        # user_gstin=Invoice['Party']['GSTIN']
+                    for a in InvoiceItemUploadSerializer:
+                        q0=TC_InvoiceItems.objects.filter(Invoice_id=id ,Item_id=a['id']).values("BatchCode")
+                        
+                        Batchlist = list()
+                        for d in q0:
+                            Batchlist.append({
+                                'name': "Batch-"+d['BatchCode']
+                            })
+                        InvoiceItemDetails.append({
+                            'item_serial_number': a['id'],
+                            'product_description': a['ItemName'],
+                            'is_service': 'N',
+                            'hsn_code': a['HSNCode'],
+                            'quantity': a['Quantity'],
+                            'unit': a['EwayBillUnit'],
+                            'unit_price': a['Rate'],
+                            'discount': a['DiscountAmount'],
+                            'igst_amount': a['IGST'],
+                            'cgst_amount': a['CGST'],
+                            'sgst_amount': a['SGST'],
+                            'total_amount':  round(float(a['Quantity'])*float(a['Rate']),2),
+                            'assessable_value': round((float(a['Quantity'])*float(a['Rate']))-(float(a['DiscountAmount'])),2),
+                            'gst_rate': a['gst_rate'],
+                            'total_item_value': float(a['total_item_value']),
+                            'batch_details': Batchlist
+                        })
+
+                   
+
+                    transaction_details.append({
+                        "supply_type": 'B2B'
+                    }),
+                    document_details.append({
+                        'document_type': 'CRN',
+                        'document_number': Invoice['document_number'],
+                        'document_date': Invoice['document_date']
+                    }),
+                    seller_details.append({
+                        'gstin': Invoice['Seller_gstin'],
+                        'legal_name': Invoice['seller_legal_name'],
+                        'address1': Invoice['seller_address1'][:100],
+                        'location': Invoice['Seller_location'],
+                        'pincode': Invoice['seller_pincode'],
+                        'state_code': Invoice['seller_State']
+                    }),
+                    buyer_details.append({
+                        'gstin': Invoice['Buyer_gstin'],
+                        'legal_name': Invoice['Buyer_legal_name'],
+                        'address1': Invoice['Buyer_address1'][:100],
+                        'location': Invoice['Buyer_location'],
+                        'pincode': Invoice['buyer_pincode'],
+                        'place_of_supply': Invoice['Buyer_state_code'],
+                        'state_code': Invoice['seller_State']
+                    }),
+                    dispatch_details.append({
+                        'company_name': Invoice['seller_legal_name'],
+                        'address1': Invoice['seller_address1'][:100],
+                        'location': Invoice['Seller_location'],
+                        'pincode': Invoice['seller_pincode'],
+                        'state_code': Invoice['seller_State']
+                    }),
+                    ship_details.append({
+                        'gstin': Invoice['Buyer_gstin'],
+                        'legal_name': Invoice['Buyer_legal_name'],
+                        'address1': Invoice['Buyer_address1'][:100],
+                        'location': Invoice['Buyer_location'],
+                        'pincode':Invoice['buyer_pincode'],
+                        'state_code': Invoice['buyer_State']
+                    }),
+                    a= datetime.strptime(Invoice['document_date'], "%Y-%m-%d")
+                    c = a+timedelta(days=1)
+
+                    document_period_details.append({
+                        'invoice_period_start_date': Invoice['document_date'],
+                        # 'invoice_period_end_date': c.date()
+                        'invoice_period_end_date': Invoice['document_date']
+                    })
+                    reference_details.append({
+                        'document_period_details': document_period_details
+                    }),
+
+                    preceding_document_details.append({
+                        'reference_of_original_invoice': Invoice['id'],
+                        'preceding_invoice_date': Invoice['document_date']
+                    }),
+                    value_details.append({
+                        'total_assessable_value': Invoice['Total_assessable_value'],
+                        'total_invoice_value': Invoice['total_invoice_value'],
+                        'total_cgst_value': Invoice['total_cgst_value'],
+                        'total_sgst_value': Invoice['total_sgst_value'],
+                        'total_igst_value': Invoice['total_igst_value'],
+                        'total_discount': Invoice['total_discount']
+                    }),
+                    ewaybill_details.append({
+                        'transportation_mode': 1,
+                        'transportation_distance': 1
+                    })
+
+                    
+                    InvoiceData.append({
+
+                        "access_token": access_token,
+                        "user_gstin": Invoice['Seller_gstin'],
+                        "transaction_details": transaction_details[0],
+                        "document_details": document_details[0],
+                        "seller_details": seller_details[0],
+                        "buyer_details": buyer_details[0],
+                        "dispatch_details": dispatch_details[0],
+                        "ship_details": ship_details[0],
+                        "reference_details": reference_details[0],
+                        "preceding_document_details": preceding_document_details[0],
+                        "value_details": value_details[0],
+                        "ewaybill_details": ewaybill_details[0],
+                        "item_list": InvoiceItemDetails
+                    })
+                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': InvoiceData[0]})
+                    EInvoice_URL = 'https://pro.mastersindia.co/generateEinvoice'
+                    payload1 = json.dumps(InvoiceData[0])
+                    # payload = json.loads(payload1)
+                    headers = {
+                        'Content-Type': 'application/json',
+                    }
+                   
+                    response = requests.request(
+                        "POST", EInvoice_URL, headers=headers, data=payload1)
+                    
+                    data_dict = json.loads(response.text)
+                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
+                    if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
+                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                       
+                        if(Query.count() > 0):
+                            
+                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
+                        else:
+                           
+                            InvoiceID=T_Invoices.objects.get(id=id)
+                            Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
+                    else:
+                        
+                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
+                    
+                else:
+                    
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
