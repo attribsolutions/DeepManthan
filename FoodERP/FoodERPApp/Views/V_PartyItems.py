@@ -134,9 +134,9 @@ class ChannelWiseItemsFilterView(CreateAPIView):
                 Itemsdata = JSONParser().parse(request)
                 UserID = Itemsdata['UserID']   
                 RoleID=  Itemsdata['RoleID']  
-                CompanyID=(Itemsdata['CompanyID'])
-                PartyID=(Itemsdata['PartyID']) 
-                CompanyGroupID =(Itemsdata['CompanyGroup']) 
+                CompanyID=Itemsdata['CompanyID']
+                PartyTypeID=Itemsdata['PartyTypeID'] 
+                CompanyGroupID =Itemsdata['CompanyGroup']
                 IsSCMCompany = Itemsdata['IsSCMCompany']
 
                 if IsSCMCompany == 1:
@@ -148,7 +148,7 @@ left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left J
 ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group
 ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
 ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.IsSCM=1 and M_Items.Company_id 
-in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC_SubGroup.id)''',([PartyID],[CompanyGroupID]))
+in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC_SubGroup.id)''',([PartyTypeID],[CompanyGroupID]))
                 else:
                     Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,
@@ -159,7 +159,7 @@ ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType
 ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group 
 ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
 ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.Company_id =%s 
-order by M_Group.id, MC_SubGroup.id''',([PartyID],[CompanyID]))
+order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                 # print(str(Itemquery.query))
                 if not Itemquery:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -171,7 +171,7 @@ order by M_Group.id, MC_SubGroup.id''',([PartyID],[CompanyID]))
                         ItemList.append({
                             "Item": a['id'],
                             "ItemName": a['Name'],
-                            "PartyType": a['PartyType'], 
+                            "PartyType": a['PartyType_id'], 
                             "PartyTypeName": a['PartyTypeName'],
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
