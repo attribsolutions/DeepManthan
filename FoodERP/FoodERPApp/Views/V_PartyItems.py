@@ -114,12 +114,98 @@ class ChannelWiseItemsView(CreateAPIView):
             if Items_Serializer.is_valid():
                 id = Items_Serializer.data[0]['PartyType']
                 ChanelWiseItem_data = M_ChannelWiseItems.objects.filter(PartyType_id=id)
-                print(str(ChanelWiseItem_data.query))
                 ChanelWiseItem_data.delete()
                 Items_Serializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully', 'Data': []})
             else:
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Items_Serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+class ChannelWiseItemsFilterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Itemsdata = JSONParser().parse(request)
+                UserID = Itemsdata['UserID']   
+                RoleID=  Itemsdata['RoleID']  
+                CompanyID=(Itemsdata['CompanyID'])
+                PartyID=(Itemsdata['PartyID']) 
+                CompanyGroupID =(Itemsdata['CompanyGroup']) 
+                IsSCMCompany = Itemsdata['IsSCMCompany']
+
+                if IsSCMCompany == 1:
+                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
+ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,
+ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id 
+AND M_ChannelWiseItems.PartyType_id=%s left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType 
+ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group
+ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
+ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.IsSCM=1 and M_Items.Company_id 
+in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC_SubGroup.id)''',([PartyID],[CompanyGroupID]))
+                else:
+                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
+ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,
+ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items 
+left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id AND M_ChannelWiseItems.PartyType_id=%s
+left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id left JOIN MC_ItemGroupDetails 
+ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType 
+ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group 
+ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
+ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.Company_id =%s 
+order by M_Group.id, MC_SubGroup.id''',([PartyID],[CompanyID]))
+                # print(str(Itemquery.query))
+                if not Itemquery:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
+                else:
+                    ItemsList_Serializer = ChanelwiseItemListSerializer(
+                        Itemquery, many=True).data
+                    ItemList = list()
+                    for a in ItemsList_Serializer:
+                        ItemList.append({
+                            "Item": a['id'],
+                            "ItemName": a['Name'],
+                            "PartyType": a['PartyType'], 
+                            "PartyTypeName": a['PartyTypeName'],
+                            "GroupTypeName": a['GroupTypeName'],
+                            "GroupName": a['GroupName'], 
+                            "SubGroupName": a['SubGroupName'],
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+class ChanelWiseItemsListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query = M_ChannelWiseItems.objects.raw(
+                    '''select M_ChannelWiseItems.id,M_PartyType.Name, M_ChannelWiseItems.PartyType_id,count(M_ChannelWiseItems.Item_id)As Total 
+From M_ChannelWiseItems join M_PartyType on M_PartyType.id=M_ChannelWiseItems.PartyType_id group by M_ChannelWiseItems.PartyType_id''')
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
+                else:
+                    Items_Serializer = ChanelwiseItemSerializer(
+                        query, many=True).data
+                    # return JsonResponse({ 'query': Items_Serializer[0]})
+                    ItemList = list()
+                    for a in Items_Serializer:
+                        ItemList.append({
+                            "id": a['PartyType_id'],
+                            "Name": a['Name'],
+                            "Total": a['Total']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

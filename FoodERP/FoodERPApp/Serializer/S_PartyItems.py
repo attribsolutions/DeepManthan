@@ -54,6 +54,19 @@ class M_ChannelWiseItemsSerializer(serializers.ModelSerializer):
         model = M_ChannelWiseItems
         fields = ['Item','PartyType']    
      
-        
-    
+
+class ChanelwiseItemListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Name=serializers.CharField(max_length=500)
+    PartyType = serializers.IntegerField()
+    PartyTypeName=serializers.CharField(max_length=500)
+    GroupTypeName=serializers.CharField(max_length=500)
+    GroupName=serializers.CharField(max_length=500)
+    SubGroupName=serializers.CharField(max_length=500)   
                
+
+class ChanelwiseItemSerializer(serializers.Serializer):
+    PartyType_id= serializers.IntegerField()
+    Name=serializers.CharField(max_length=500)
+    Item_id = serializers.IntegerField()
+    Total = serializers.IntegerField()
