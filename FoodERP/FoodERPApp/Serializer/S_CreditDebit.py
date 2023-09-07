@@ -41,12 +41,19 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     
     
     
+class CreditDebitNoteUploadsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_CreditDebitNoteUploads
+        fields=['AckNo','Irn','QRCodeUrl','EInvoicePdf','EwayBillNo','EwayBillUrl','EInvoiceIsCancel','EwayBillIsCancel']           
+
+
 # CreditDebitNote List Serializer 
 class CreditDebitNoteSecondSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializer(read_only=True)
     Party = PartiesSerializer(read_only=True)
     NoteReason = GeneralMasterserializer(read_only=True)
     NoteType = GeneralMasterserializer(read_only=True)
+    CRDRNoteUploads=CreditDebitNoteUploadsSerializer(many=True)
     
     class Meta :
         model= T_CreditDebitNotes

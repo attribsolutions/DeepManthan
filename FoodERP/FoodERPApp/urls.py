@@ -1,7 +1,7 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
-# from .Views.V_MobileAppOrder import T_MobileAppOrdersView
+from .Views.V_MobileAppOrder import *
 
 from .Views.V_Claim import *
 
@@ -147,7 +147,7 @@ urlpatterns = [
     url(r'SAPOrder', SAPOrderView.as_view()),
     url(r'SAPLedger',SAPLedgerView.as_view()),
     url(r'InvoicetoSCM',InvoiceToSCMView.as_view()),
-    # url(r'MobileAppOrder$',T_MobileAppOrdersView.as_view()),
+    url(r'MobileAppOrder$',T_MobileAppOrdersView.as_view()),
     
 # User 
             path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -502,6 +502,7 @@ urlpatterns = [
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
             
             url(r'Uploaded_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Uploaded_CreditDebitNotes_EInvoice.as_view()),
+            url(r'Cancel_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Cancel_CreditDebitNotes_EInvoice.as_view()),
             
 
 #ImportField
