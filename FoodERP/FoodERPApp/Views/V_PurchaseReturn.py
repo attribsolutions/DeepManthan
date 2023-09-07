@@ -235,6 +235,11 @@ class PurchaseReturnView(CreateAPIView):
 
                     y = Party
 
+                elif Mode == 3:
+                    x = PurchaseReturndata['Customer']
+
+                    y = Party
+
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
