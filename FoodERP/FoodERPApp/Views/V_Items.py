@@ -489,6 +489,11 @@ class ProductAndMarginReportView(CreateAPIView):
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
 
+                        if ItemMRPdata.count() == 0:
+                            MRPV=0
+                        else:    
+                            MRPV=float(ItemMRPdata[0]['MRP'])
+                        
                         if IsSCM == '0' :
                             query = M_PriceList.objects.values('id','Name')
                         else:
@@ -517,7 +522,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             })
                         
                         ww=ItemMargins+RateList
-                       
+                        print(a['id'])
                         ItemsList.append({
 
                             "FE2ItemID": a['id'],
@@ -529,7 +534,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "SKUActiveDeactivestatus":a['isActive'],
                             "BoxSize":BoxSize,
                             "StoringCondition":a['StoringCondition'],
-                            "MRP":float(ItemMRPdata[0]['MRP']),
+                            "MRP":MRPV,
                             "GST":float(ItemGstHsnCodedata[0]['GSTPercentage']),
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUGr":a['Grammage'],

@@ -1618,6 +1618,7 @@ class T_CreditDebitNotes(models.Model):
     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
+    IsDeleted = models.BooleanField(default=False)
  
     class Meta:
         db_table = "T_CreditDebitNotes"
