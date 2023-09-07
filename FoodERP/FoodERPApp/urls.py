@@ -453,7 +453,9 @@ urlpatterns = [
             url(r'PartyItem$',PartyItemsView.as_view()),
             url(r'PartyItemFilter$',PartyItemsFilterView.as_view()),
             url(r'PartyItemList$',PartyItemsListView.as_view()),
-            url(r'ChanelWiseItems$',ChannelWiseItemsView.as_view()),
+            url(r'ItemChannelWise$',ChannelWiseItemsView.as_view()),
+            url(r'ChannelWiseItemsFilter$',ChannelWiseItemsFilterView.as_view()),
+            url(r'ChannelWiseItemsList$',ChanelWiseItemsListView.as_view()),
     
 # Mrps
             url(r'Mrps$',M_MRPsView.as_view()),
