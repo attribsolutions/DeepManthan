@@ -47,7 +47,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                     
                     if user is not None:
                         print('aaaaaaaaaaaa')
-                        Supplier = data['FoodERPSupploerID']
+                        Supplier = data['FoodERPSupplierID']
                         Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
                         OrderAmount = data['TotalOrderValue']
@@ -55,7 +55,9 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderdata = list()
 
                         Orderitem=list()
+                        
                         for aa in data['OrderItem']:
+                            print(aa['FoodERPItemID'])
                             unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
                             Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
                             BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
