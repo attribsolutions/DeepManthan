@@ -453,7 +453,9 @@ urlpatterns = [
             url(r'PartyItem$',PartyItemsView.as_view()),
             url(r'PartyItemFilter$',PartyItemsFilterView.as_view()),
             url(r'PartyItemList$',PartyItemsListView.as_view()),
-            url(r'ChanelWiseItems$',ChannelWiseItemsView.as_view()),
+            url(r'ItemChannelWise$',ChannelWiseItemsView.as_view()),
+            url(r'ChannelWiseItemsFilter$',ChannelWiseItemsFilterView.as_view()),
+            url(r'ChannelWiseItemsList$',ChanelWiseItemsListView.as_view()),
     
 # Mrps
             url(r'Mrps$',M_MRPsView.as_view()),
@@ -498,6 +500,9 @@ urlpatterns = [
             url(r'CreditDebitNote$', CreditDebitNoteView.as_view()), 
             url(r'CreditDebitNote/([0-9]+)$', CreditDebitNoteView.as_view()),   
             url(r'CreditDebitNoteFilter$', CreditDebitNoteListView.as_view()), 
+            
+            url(r'Uploaded_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Uploaded_CreditDebitNotes_EInvoice.as_view()),
+            
 
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),  
