@@ -63,7 +63,9 @@ class CreditDebitNoteListView(CreateAPIView):
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
-                            "CreatedOn": a['CreatedOn']
+                            "CreatedOn": a['CreatedOn'],
+                            "IsDeleted" : a["IsDeleted"],
+                            "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
                     log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitNote List',83,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
