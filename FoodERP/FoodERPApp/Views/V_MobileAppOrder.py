@@ -47,32 +47,33 @@ class T_MobileAppOrdersView(CreateAPIView):
                     
                     if user is not None:
                         print('aaaaaaaaaaaa')
-                        Supplier = data['Supplier']
-                        Customer = data['Customer']
+                        Supplier = data['FoodERPSupploerID']
+                        Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
-                        OrderAmount = data['OrderAmount']
+                        OrderAmount = data['TotalOrderValue']
+                        AppOrderNumber = data['AppOrderNumber']
                         Orderdata = list()
 
                         Orderitem=list()
                         for aa in data['OrderItem']:
-                            unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['Item'],IsDeleted=0).values('id')
-                            Gst = GSTHsnCodeMaster(aa['Item'], OrderDate).GetTodaysGstHsnCode()
+                            unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
+                            Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
                             BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
                             CGST= round(BasicAmount*(float(Gst[0]['GST'])/100),2)
                             BaseUnitQuantity = UnitwiseQuantityConversion(
-                                aa['Item'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 0, 0).GetBaseUnitQuantity()
+                                aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 0, 0).GetBaseUnitQuantity()
                             QtyInNo = UnitwiseQuantityConversion(
-                                aa['Item'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 1, 0).ConvertintoSelectedUnit()
+                                aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 1, 0).ConvertintoSelectedUnit()
                             QtyInKg = UnitwiseQuantityConversion(
-                                aa['Item'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                                aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 2, 0).ConvertintoSelectedUnit()
                             QtyInBox = UnitwiseQuantityConversion(
-                                aa['Item'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                                aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 4, 0).ConvertintoSelectedUnit()
                         
                             
                             
                             Orderitem.append(
                                 {
-                                    "Item": aa['Item'],
+                                    "Item": aa['FoodERPItemID'],
                                     "Quantity": aa['QuantityinPieces'],
                                     "MRP": '',
                                     "MRPValue": aa['MRP'],
@@ -123,7 +124,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                             "BillingAddress": c[0]['id'],
                             "ShippingAddress": c[0]['id'],
                             "OrderNo": a,
-                            "FullOrderNumber": b+""+str(a),
+                            # "FullOrderNumber": b+""+str(a),
+                            "FullOrderNumber" : AppOrderNumber,
                             "Division": Supplier,
                             "POType": 1,
                             "POFromDate": OrderDate,
