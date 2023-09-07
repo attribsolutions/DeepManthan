@@ -197,11 +197,11 @@ FROM
                 ELSE 4
             END) AS Flag,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN T_CreditDebitNotes.GrandTotal
+                WHEN T_CreditDebitNotes.NoteType_id = 38  OR T_CreditDebitNotes.NoteType_id =40 THEN T_CreditDebitNotes.GrandTotal
                 ELSE 0
             END) AS DebitNote,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN 0
+                WHEN T_CreditDebitNotes.NoteType_id = 38 OR T_CreditDebitNotes.NoteType_id =40 THEN 0
                 ELSE T_CreditDebitNotes.GrandTotal
             END) CreditNote,
             0 AS BasicAmount,
@@ -219,7 +219,7 @@ FROM
             AND Party_id = %s
             AND Customer_id = %s) q
 ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
-
+                # print(str(query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
