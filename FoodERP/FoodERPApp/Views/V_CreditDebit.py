@@ -240,8 +240,7 @@ class CreditDebitNoteView(CreateAPIView):
             with transaction.atomic():
                 query = T_CreditDebitNotes.objects.filter(id=id).values('NoteType')
                 NoteType = query[0]['NoteType']
-                CreditDebitdata = T_CreditDebitNotes.objects.get(id=id)
-                CreditDebitdata.delete()
+                CreditDebitdata = T_CreditDebitNotes.objects.filter(id=id).update(IsDeleted=1)
                 if(NoteType==37 or NoteType==39):
                     log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditNote Deleted Successfully',86,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Deleted Successfully', 'Data': []})
