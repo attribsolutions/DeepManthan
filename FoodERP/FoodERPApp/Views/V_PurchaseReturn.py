@@ -283,7 +283,6 @@ class PurchaseReturnView(CreateAPIView):
                 O_LiveBatchesList=list()
                 UpdateO_BatchWiseLiveStockList = list()
                 
-                 
                 for a in PurchaseReturndata['ReturnItems']:
                     
                     # '''Image Upload Code End''' 
