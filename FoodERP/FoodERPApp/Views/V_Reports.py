@@ -183,17 +183,17 @@ FROM
             "" AS DocumentNo,
             "" AS ReceiptMode,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN T_CreditDebitNotes.GrandTotal
+                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN T_CreditDebitNotes.GrandTotal
                 ELSE 0
             END) AS InvoiceAmount,
             0 AS TotalTCS,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN 0
+                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 0
                 ELSE T_CreditDebitNotes.GrandTotal
             END) ReceiptAmt,
             0 AS CashReceiptAmt,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN 3
+                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 3
                 ELSE 4
             END) AS Flag,
             (CASE
