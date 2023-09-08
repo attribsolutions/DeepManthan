@@ -64,7 +64,7 @@ class CreditDebitNoteListView(CreateAPIView):
                             "Party": a['Party']['Name'],
                             "Narration": a['Narration'],
                             "CreatedOn": a['CreatedOn'],
-                            "IsDeleted" : a["IsDeleted"],
+                            "IsRecordDeleted" : a["IsDeleted"],
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
                     log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitNote List',83,0,FromDate,ToDate,0)
@@ -238,8 +238,8 @@ class CreditDebitNoteView(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                CreditDebitdata = T_CreditDebitNotes.objects.get(id=id)
-                CreditDebitdata.delete()
+                CreditDebitdata = T_CreditDebitNotes.objects.filter(id=id).update(IsDeleted=1)
+                # CreditDebitdata.delete()
                 log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditdebitNote Deleted Successfully',86,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditdebitNote Deleted Successfully', 'Data': []})
         except IntegrityError:
