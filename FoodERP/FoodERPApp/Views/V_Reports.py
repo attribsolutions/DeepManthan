@@ -756,8 +756,8 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND  T_Invoices.Party_id=%s ''',(
 # JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id        
 # JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_Invoices.Customer_id AND MC_PartySubParty.SubParty_id=%s
 # LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id    
-# JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
-                print(str(query.query))
+
+                # print(str(query.query))
                 if query:
                     InvoiceExportData=list()
                     InvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
