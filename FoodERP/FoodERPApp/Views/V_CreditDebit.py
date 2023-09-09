@@ -238,10 +238,16 @@ class CreditDebitNoteView(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
+
+                query = T_CreditDebitNotes.objects.filter(id=id).values('NoteType')
+                NoteType = query[0]['NoteType']
                 CreditDebitdata = T_CreditDebitNotes.objects.filter(id=id).update(IsDeleted=1)
-                # CreditDebitdata.delete()
-                log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditdebitNote Deleted Successfully',86,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditdebitNote Deleted Successfully', 'Data': []})
+                if(NoteType==37 or NoteType==39):
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditNote Deleted Successfully',86,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Deleted Successfully', 'Data': []})
+                else:
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'DebitNote Deleted Successfully',86,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DebitNote Deleted Successfully', 'Data': []})
         except IntegrityError:
             log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditdebitNote used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
