@@ -54,36 +54,41 @@ class SAPInvoiceView(CreateAPIView):
 
                         DuplicateCheck = T_Invoices.objects.filter(
                             FullInvoiceNumber=aa["InvoiceNumber"])
+                        print('aaaaaaa')
                         if(DuplicateCheck.count() == 0):
                                 
-                               
+                            print('bbbbbb')   
                             CustomerMapping = M_Parties.objects.filter(
                                 SAPPartyCode=aa['CustomerID']).values("id")
                             PartyMapping = M_Parties.objects.filter(
                                 SAPPartyCode=aa['Plant']).values("id")
-
+                            print('ccccccccc')
                             if CustomerMapping.exists():
                                 aa['Customer'] = CustomerMapping
                             else:
                                 log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Customer Data ')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data': []})
-                            
+                            print('dddddddddd')
                             if PartyMapping.exists():
                                 aa['Party'] = PartyMapping
                             else:
                                 log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
-
+                            print('eeeeeeeeee')
                             InvoiceDate = datetime.strptime(
                                 aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                            
                             for bb in aa['InvoiceItems']:
+                                print(bb)
+                                BatchDate = datetime.strptime(
+                                bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
                                 ItemMapping = M_Items.objects.filter(
                                     SAPItemCode=bb['MaterialCode']).values("id")
                                 UnitMapping = M_Units.objects.filter(
                                     SAPUnit=bb['BaseUOM']).values("id")
                                 # print(ItemMapping,UnitMapping)
-                               
+                                print('fffffffffff')
                                 if ItemMapping.exists():
                                     bb['Item'] = ItemMapping
                                 else:
@@ -91,7 +96,7 @@ class SAPInvoiceView(CreateAPIView):
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
 
                                 if UnitMapping.exists():
-
+                                    print('gggggggggg')
                                     MC_UnitID = MC_ItemUnits.objects.filter(
                                         UnitID=UnitMapping[0]["id"], Item=ItemMapping[0]["id"], IsDeleted=0).values("id")
                                     # print(MC_UnitID)
@@ -104,7 +109,7 @@ class SAPInvoiceView(CreateAPIView):
                                 else:
                                     log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Unit Code')
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data': []})
-
+                                print('hhhhhhhhhhhh')
                                 BaseUnitQuantity = UnitwiseQuantityConversion(
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 0, 0).GetBaseUnitQuantity()
                                 QtyInNo = UnitwiseQuantityConversion(
@@ -113,14 +118,14 @@ class SAPInvoiceView(CreateAPIView):
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                 QtyInBox = UnitwiseQuantityConversion(
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                                
+                                print('iiiiiiiiiii')
                                 InvoiceItems.append({
 
                                     "Item": ItemMapping[0]["id"],
                                     "Unit": MC_UnitID[0]["id"],
                                     "BatchCode": bb['BatchCode'],
                                     "Quantity":  bb['Quantity'],
-                                    "BatchDate": bb['BatchDate'],
+                                    "BatchDate": BatchDate,
                                     "BaseUnitQuantity": 1,
                                     "LiveBatch": "",
                                     "MRP": "",
@@ -178,8 +183,8 @@ class SAPInvoiceView(CreateAPIView):
 
                             else:
                                 transaction.set_rollback(True)
-                                log_entry = create_transaction_log(
-                                    request, aa, 0, 0, Invoice_serializer.errors)
+                                # log_entry = create_transaction_log(
+                                #     request, aa, 0, 0, Invoice_serializer.errors)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
                                 
                         
