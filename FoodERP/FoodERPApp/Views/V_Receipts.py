@@ -25,6 +25,12 @@ class ReceiptInvoicesView(CreateAPIView):
                 Customer = Receiptdata['CustomerID']
                 InvoiceIDs = Receiptdata['InvoiceID']
                 Invoice_list = InvoiceIDs.split(",")
+
+                #for log 
+                if Customer == '':
+                    x = 0
+                else:
+                    x = Customer
                 if(InvoiceIDs == ""):
                     Receiptinvoicequery = TC_ReceiptInvoices.objects.raw(
                         '''SELECT '0' id,TC_ReceiptInvoices.Receipt_id,T_Invoices.id as Invoice_ID ,T_Invoices.InvoiceDate,T_Invoices.FullInvoiceNumber,T_Invoices.Customer_id,T_Invoices.CreatedOn,M_Parties.Name AS CustomerName, T_Invoices.GrandTotal,SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)) PaidAmount,(T_Invoices.GrandTotal - SUM(IFNULL(TC_ReceiptInvoices.PaidAmount,0)))  BalAmt FROM T_Invoices LEFT JOIN TC_ReceiptInvoices ON T_Invoices.id=TC_ReceiptInvoices.Invoice_id JOIN M_Parties ON M_Parties.id= T_Invoices.Customer_id  WHERE T_Invoices.id NOT IN (SELECT Invoice_ID FROM (SELECT Invoice_id,TC_ReceiptInvoices.GrandTotal,SUM(PaidAmount) PaidAmount FROM TC_ReceiptInvoices JOIN T_Invoices  ON T_Invoices.id= TC_ReceiptInvoices.Invoice_id  WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id ) Invoicess WHERE (GrandTotal-PaidAmount)=0) AND T_Invoices.Party_id=%s AND T_Invoices.Customer_id=%s GROUP BY T_Invoices.id	''', ([Party], [Customer], [Party], [Customer]))
@@ -49,7 +55,7 @@ class ReceiptInvoicesView(CreateAPIView):
                         "PaidAmount": a['PaidAmount'],
                         "BalanceAmount": a['BalAmt'],
                     })
-                log_entry = create_transaction_logNew(request, Receiptdata, Party, "ReceiptInvoiceList",76,0,0,0,Customer)
+                log_entry = create_transaction_logNew(request, Receiptdata, Party, "ReceiptInvoiceList",76,0,0,0,x)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': ReceiptInvoiceList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Receiptdata, 0, Exception(e),33,0)
