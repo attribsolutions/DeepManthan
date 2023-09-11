@@ -263,32 +263,32 @@ class PurchaseReturnView(CreateAPIView):
                 item = ""
 
                 #for log
-                if Mode == 1:
-                        x = Party
+                # if Mode == 1:
+                #         x = Party
 
-                        y = PurchaseReturndata['Customer']
+                #         y = PurchaseReturndata['Customer']
 
-                elif  Mode == 2:
-                    x = PurchaseReturndata['Customer']
+                # elif  Mode == 2:
+                #     x = PurchaseReturndata['Customer']
 
-                    y = Party
+                #     y = Party
 
-                elif Mode == 3:
-                    x = PurchaseReturndata['Customer']
+                # elif Mode == 3:
+                #     x = PurchaseReturndata['Customer']
 
-                    y = Party
+                #     y = Party
 
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 UpdateO_BatchWiseLiveStockList = list()
                 
-                 
                 for a in PurchaseReturndata['ReturnItems']:
                     
                     # '''Image Upload Code End''' 
                     # keyname='uploaded_images_'+str(a['Item'])
                     # avatar = request.FILES.getlist(keyname)
+                    # print(avatar)
                     # for img,file in zip(a['ReturnItemImages'],avatar):
                     #     img['Image']=file 
                     # '''Image Upload Code End'''    
@@ -371,10 +371,10 @@ class PurchaseReturnView(CreateAPIView):
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
-                    log_entry = create_transaction_logNew(request, PurchaseReturndata, x, 'Return Save Successfully',53,LastInsertID,0,0,y)
+                    # log_entry = create_transaction_logNew(request, PurchaseReturndata, x, 'Return Save Successfully',53,LastInsertID,0,0,y)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request, PurchaseReturndata, x,  PurchaseReturn_Serializer.errors,34,0)
+                    # log_entry = create_transaction_logNew(request, PurchaseReturndata, x,  PurchaseReturn_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:

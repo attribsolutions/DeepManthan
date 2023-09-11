@@ -120,7 +120,7 @@ class SAPInvoiceView(CreateAPIView):
                                     "Unit": MC_UnitID[0]["id"],
                                     "BatchCode": bb['BatchCode'],
                                     "Quantity":  bb['Quantity'],
-                                    "BatchDate": InvoiceDate,
+                                    "BatchDate": bb['BatchDate'],
                                     "BaseUnitQuantity": 1,
                                     "LiveBatch": "",
                                     "MRP": "",
