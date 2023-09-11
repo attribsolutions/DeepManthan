@@ -80,8 +80,10 @@ class SAPInvoiceView(CreateAPIView):
                             
                             for bb in aa['InvoiceItems']:
                                 print(bb)
-                                BatchDate = datetime.strptime(
-                                bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                                if bb['BatchDate'] == '00.00.0000':
+                                    BatchDate=""
+                                else:
+                                    BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
                                 ItemMapping = M_Items.objects.filter(
                                     SAPItemCode=bb['MaterialCode']).values("id")
