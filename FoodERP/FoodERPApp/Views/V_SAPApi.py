@@ -54,37 +54,41 @@ class SAPInvoiceView(CreateAPIView):
 
                         DuplicateCheck = T_Invoices.objects.filter(
                             FullInvoiceNumber=aa["InvoiceNumber"])
+                        print('aaaaaaa')
                         if(DuplicateCheck.count() == 0):
                                 
-                               
+                            print('bbbbbb')   
                             CustomerMapping = M_Parties.objects.filter(
                                 SAPPartyCode=aa['CustomerID']).values("id")
                             PartyMapping = M_Parties.objects.filter(
                                 SAPPartyCode=aa['Plant']).values("id")
-
+                            print('ccccccccc')
                             if CustomerMapping.exists():
                                 aa['Customer'] = CustomerMapping
                             else:
                                 log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Customer Data ')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data': []})
-                            
+                            print('dddddddddd')
                             if PartyMapping.exists():
                                 aa['Party'] = PartyMapping
                             else:
                                 log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
 
-                            InvoiceDate = datetime.strptime(aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                            InvoiceDate = datetime.strptime(
+                                aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                            
                             for bb in aa['InvoiceItems']:
-                                
-                                BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                                print(bb)
+                                BatchDate = datetime.strptime(
+                                bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
                                 ItemMapping = M_Items.objects.filter(
                                     SAPItemCode=bb['MaterialCode']).values("id")
                                 UnitMapping = M_Units.objects.filter(
                                     SAPUnit=bb['BaseUOM']).values("id")
                                 # print(ItemMapping,UnitMapping)
-                               
+                                print('fffffffffff')
                                 if ItemMapping.exists():
                                     bb['Item'] = ItemMapping
                                 else:
@@ -92,7 +96,7 @@ class SAPInvoiceView(CreateAPIView):
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
 
                                 if UnitMapping.exists():
-
+                                    print('gggggggggg')
                                     MC_UnitID = MC_ItemUnits.objects.filter(
                                         UnitID=UnitMapping[0]["id"], Item=ItemMapping[0]["id"], IsDeleted=0).values("id")
                                     # print(MC_UnitID)
@@ -105,7 +109,7 @@ class SAPInvoiceView(CreateAPIView):
                                 else:
                                     log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Unit Code')
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data': []})
-
+                                print('hhhhhhhhhhhh')
                                 BaseUnitQuantity = UnitwiseQuantityConversion(
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 0, 0).GetBaseUnitQuantity()
                                 QtyInNo = UnitwiseQuantityConversion(
@@ -114,7 +118,7 @@ class SAPInvoiceView(CreateAPIView):
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                 QtyInBox = UnitwiseQuantityConversion(
                                     ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                                
+                                print('iiiiiiiiiii')
                                 InvoiceItems.append({
 
                                     "Item": ItemMapping[0]["id"],
@@ -179,8 +183,8 @@ class SAPInvoiceView(CreateAPIView):
 
                             else:
                                 transaction.set_rollback(True)
-                                log_entry = create_transaction_log(
-                                    request, aa, 0, 0, Invoice_serializer.errors)
+                                # log_entry = create_transaction_log(
+                                #     request, aa, 0, 0, Invoice_serializer.errors)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
                                 
                         
@@ -292,7 +296,7 @@ class InvoiceToSCMView(CreateAPIView):
                 q1 = TC_InvoiceItems.objects.filter(Invoice =InvoiceID)
                 LineItemsQuantity=q1.count()
           
-                query = T_Invoices.objects.raw('''SELECT  T_Invoices.id,T_Invoices.InvoiceDate,TC_InvoicesReferences.Order_id as OrderNumber,b.SAPPartyCode AS CustomerID,'' DriverName,'' VehicleNo,b.GSTIN,a.SAPPartyCode as Plant,T_Invoices.GrandTotal GrossAmount,'' refInvoiceNo,'' refInvoiceType, '' refInvoiceDate,'' AS LineItemsQuantity,M_Items.SAPItemCode AS MaterialCode,BatchCode,BatchDate,TC_InvoiceItems.QtyInNo,'' BaseUOM, Rate as LandedPerUnitRate,MRPValue as MRP, BasicAmount as TaxableAmount,CGST,SGST,IGST,'' UGST,CGSTPercentage, SGSTPercentage, IGSTPercentage, '' UGSTPercentage,Discount as DiscountPercentage, DiscountAmount,Amount as TotalValue FROM T_Invoices LEFT JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id JOIN M_Parties a ON a.id=T_Invoices.Party_id JOIN M_Parties b ON b.id=T_Invoices.Customer_id  JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id  Where T_Invoices.id=%s ''',[InvoiceID])
+                query = T_Invoices.objects.raw('''SELECT  T_Invoices.id,T_Invoices.InvoiceDate,TC_InvoicesReferences.Order_id as OrderNumber,(case when b.SAPPartyCode is null then b.id else b.SAPPartyCode end)  AS CustomerID,'' DriverName,'' VehicleNo,b.GSTIN,a.SAPPartyCode as Plant,T_Invoices.GrandTotal GrossAmount,'' refInvoiceNo,'' refInvoiceType, '' refInvoiceDate,'' AS LineItemsQuantity,M_Items.SAPItemCode AS MaterialCode,BatchCode,BatchDate,TC_InvoiceItems.QtyInNo,'' BaseUOM, Rate as LandedPerUnitRate,MRPValue as MRP, BasicAmount as TaxableAmount,CGST,SGST,IGST,'' UGST,CGSTPercentage, SGSTPercentage, IGSTPercentage, '' UGSTPercentage,Discount as DiscountPercentage, DiscountAmount,Amount as TotalValue FROM T_Invoices LEFT JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id JOIN M_Parties a ON a.id=T_Invoices.Party_id JOIN M_Parties b ON b.id=T_Invoices.Customer_id  JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id  Where T_Invoices.id=%s ''',[InvoiceID])
                 if query:
                    
                     InvoiceSCMSerializer=InvoiceToSCMSerializer(query, many=True).data
