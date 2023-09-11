@@ -70,3 +70,10 @@ class ChanelwiseItemSerializer(serializers.Serializer):
     Name=serializers.CharField(max_length=500)
     Item_id = serializers.IntegerField()
     Total = serializers.IntegerField()
+    
+    
+    
+class CheckPartiesImChannelItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name']  
