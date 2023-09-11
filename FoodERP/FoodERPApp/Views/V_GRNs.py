@@ -38,7 +38,7 @@ class GRNListFilterView(CreateAPIView):
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
-                    log_entry = create_transaction_log(request, GRNdata, 0, Customer,'Data Not available',7,0)
+                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'Data Not available',7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
@@ -75,10 +75,15 @@ class GRNListFilterView(CreateAPIView):
                             "POType":POType
 
                         })
-                    log_entry = create_transaction_log(request, GRNdata, 0, Customer,'GRN List',68,0)
+                        #for log
+                        if Supplier == '':
+                            x = 0
+                        else:
+                            x= Supplier
+                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'GRN List',68,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
-            log_entry = create_transaction_log(request, GRNdata, 0, Customer,'Exception(e)',33,0)
+            log_entry = create_transaction_logNew(request, GRNdata, 0,'Exception(e)',33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 # GRN Save  API
@@ -182,12 +187,12 @@ class T_GRNView(CreateAPIView):
                     # return JsonResponse({'Data':GRN_serializer.data})
                     GRN = GRN_serializer.save()
                     LastInsertId = GRN.id
-                    log_entry = create_transaction_log(request, GRNdata, 0, Customer,'GRN Save Successfully',69,LastInsertId)
+                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'GRN Save Successfully',69,LastInsertId,0,0,GRNdata['Party'])
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': []})
-                log_entry = create_transaction_log(request, GRNdata, 0,Customer,GRN_serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request, GRNdata,0,GRN_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': GRN_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, GRNdata, 0, Customer,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, GRNdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 #GRN Single Get API
@@ -264,10 +269,10 @@ class T_GRNViewSecond(CreateAPIView):
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
-                log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],'GRN',70,0)
+                log_entry = create_transaction_logNew(request, {'GRNID':id}, a['Customer']['id'],'GRN',70,0,0,0,a['Party']['id'])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
-            # log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
  
 # GRN DELETE API 
@@ -283,16 +288,16 @@ class T_GRNViewSecond(CreateAPIView):
                 
                 GRN_Data = T_GRNs.objects.get(id=id)
                 GRN_Data.delete()
-                log_entry = create_transaction_log(request, {'GRNID':id}, 0, 0,'GRN Deleted Successfully',71,0)
+                log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'GRN Deleted Successfully',71,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Deleted Successfully', 'Data': []})
         except T_GRNs.DoesNotExist:
-            log_entry = create_transaction_log(request, {'GRNID':id}, 0, 0,'Data Not available',7,0)
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'Data Not available',7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_log(request, {'GRNID':id}, 0, 0,'GRN Used in another Transaction',72,0)
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'GRN Used in another Transaction',72,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'GRNID':id}, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 # Get PO Details For Make GRN POST API 
 
@@ -311,7 +316,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 if Mode == 1:
                     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
                     if not OrderQuery:
-                        log_entry = create_transaction_log(request, 0, 0, 0,"Records Not Found",29,0)
+                        log_entry = create_transaction_logNew(request, 0, 0,"Records Not Found",29,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                     else:
                         OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
@@ -371,7 +376,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "InvoiceNumber":" ",
                             "OrderItem": OrderItemDetails,
                         })
-                        log_entry = create_transaction_log(request, {'GRNID':id}, 0, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,b['id'])
+                        log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
                 elif Mode == 2: #Make GRN from Challan
@@ -464,7 +469,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "InvoiceNumber":" ",
                             "OrderItem": ChallanItemDetails,
                         })
-                        log_entry = create_transaction_log(request,{'GRNID':id}, 0, x['Customer']['id'],'ChallanData',74,0)
+                        log_entry = create_transaction_logNew(request,ChallanSerializedata, 0,'ChallanData',74,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
                     
                 elif Mode == 3: #Make GRN from Invoice
@@ -573,12 +578,12 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "OrderItem": InvoiceItemDetails,
                                 
                             })
-                        log_entry = create_transaction_log(request,{'GRNID':id}, 0, a['Customer']['id'],'InvoiceItemDetails Save Successfully',75,0)
+                        log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Customer']['id'],'InvoiceItemDetails Save Successfully',75,0,0,0,a['Party']['id'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
                 else:
-                    log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],'Data Not available',7,0)
+                    log_entry = create_transaction_logNew(request, InvoiceSerializedata, a['Customer']['id'],'Data Not available',7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
-            log_entry = create_transaction_log(request, {'GRNID':id}, 0, a['Customer']['id'],Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
