@@ -183,17 +183,17 @@ FROM
             "" AS DocumentNo,
             "" AS ReceiptMode,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN T_CreditDebitNotes.GrandTotal
+                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN T_CreditDebitNotes.GrandTotal
                 ELSE 0
             END) AS InvoiceAmount,
             0 AS TotalTCS,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN 0
+                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 0
                 ELSE T_CreditDebitNotes.GrandTotal
             END) ReceiptAmt,
             0 AS CashReceiptAmt,
             (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 THEN 3
+                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 3
                 ELSE 4
             END) AS Flag,
             (CASE
@@ -217,9 +217,9 @@ FROM
     WHERE
         T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
             AND Party_id = %s
-            AND Customer_id = %s) q
+            AND Customer_id = %s and IsDeleted=0) q
 ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
-                # print(str(query.query))
+                print(str(query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
