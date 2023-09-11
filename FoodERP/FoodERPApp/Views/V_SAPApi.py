@@ -74,14 +74,16 @@ class SAPInvoiceView(CreateAPIView):
                             else:
                                 log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
-                            print('eeeeeeeeee')
+
                             InvoiceDate = datetime.strptime(
                                 aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
                             
                             for bb in aa['InvoiceItems']:
                                 print(bb)
-                                BatchDate = datetime.strptime(
-                                bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                                if bb['BatchDate'] == '00.00.0000':
+                                    BatchDate=""
+                                else:
+                                    BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
                                 ItemMapping = M_Items.objects.filter(
                                     SAPItemCode=bb['MaterialCode']).values("id")
