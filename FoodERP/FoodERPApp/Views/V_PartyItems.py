@@ -167,6 +167,14 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in ItemsList_Serializer:
+                      
+                        # Query to retrieve PartyType_id values
+                        party_ids = MC_PartyItems.objects.filter(Item_id=a['id']).values_list('Party_id', flat=True)
+                        # Get unique PartyType_id values using a set
+                        distinct_party_types = set(M_Parties.objects.filter(id__in=party_ids).values_list('PartyType_id', flat=True))
+                        # Check if PartyTypeID exists in distinct_party_types
+                        Flag = PartyTypeID in distinct_party_types
+                                
                         ItemList.append({
                             "Item": a['id'],
                             "ItemName": a['Name'],
@@ -175,10 +183,41 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
+                            "InPartyItem":Flag
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+        
+class CheckPartiesInChanelWiseItemsList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                ChannelItemsdata = JSONParser().parse(request)
+                Item = ChannelItemsdata['Item']   
+                PartyType=  ChannelItemsdata['PartyType']
+                
+                party_ids = MC_PartyItems.objects.filter(Item_id=Item).values_list('Party_id') 
+                PartiesList = M_Parties.objects.filter(id__in=party_ids,PartyType=PartyType)
+            
+                Parties_Serializer = CheckPartiesImChannelItemSerializer(PartiesList, many=True).data
+        
+                PartiesList = list()
+                for a in Parties_Serializer:
+                    PartiesList.append({
+                        "id": a['id'],
+                        "Name": a['Name']
+                    })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartiesList})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
+        
 
 
 class ChanelWiseItemsListView(CreateAPIView):
