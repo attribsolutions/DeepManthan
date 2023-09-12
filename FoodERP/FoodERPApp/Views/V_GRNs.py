@@ -578,12 +578,12 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "OrderItem": InvoiceItemDetails,
                                 
                             })
-                        log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Customer']['id'],'InvoiceItemDetails Save Successfully',75,0,0,0,a['Party']['id'])
+                        # log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Customer']['id'],'InvoiceItemDetails Save Successfully',75,0,0,0,a['Party']['id'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
                 else:
-                    log_entry = create_transaction_logNew(request, InvoiceSerializedata, a['Customer']['id'],'Data Not available',7,0)
+                    # log_entry = create_transaction_logNew(request, InvoiceSerializedata, a['Customer']['id'],'Data Not available',7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
+            # log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
