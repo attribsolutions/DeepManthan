@@ -219,33 +219,33 @@ class PurchaseReturnView(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                '''Image Upload Code start'''
-                # Assuming these fields are JSON arrays in the POST data
-                purchase_return_references_json = request.POST.get('PurchaseReturnReferences')
-                return_items_json = request.POST.get('ReturnItems')
-                # Parse JSON arrays into Python lists
-                purchase_return_references = json.loads(purchase_return_references_json) if purchase_return_references_json else []
-                return_items = json.loads(return_items_json) if return_items_json else []
-                PurchaseReturndata = {
-                    "ReturnDate" : request.POST.get('ReturnDate'),
-                    "ReturnReasonOptions" : request.POST.get('ReturnReasonOptions'),
-                    "BatchCode" : request.POST.get('BatchCode'),
-                    "Customer" : request.POST.get('Customer'),
-                    "Party" : request.POST.get('Party'),
-                    "Comment" : request.POST.get('Comment'),
-                    "GrandTotal" : request.POST.get('GrandTotal'),
-                    "RoundOffAmount" : request.POST.get('RoundOffAmount'),
-                    "CreatedBy" : request.POST.get('CreatedBy'),
-                    "UpdatedBy" : request.POST.get('UpdatedBy'),
-                    "IsApproved" : request.POST.get('IsApproved'),
-                    "Mode" : request.POST.get('Mode'),
-                    "PurchaseReturnReferences" : purchase_return_references,
-                    "ReturnItems" : return_items
-                }
+                # '''Image Upload Code start'''
+                # # Assuming these fields are JSON arrays in the POST data
+                # purchase_return_references_json = request.POST.get('PurchaseReturnReferences')
+                # return_items_json = request.POST.get('ReturnItems')
+                # # Parse JSON arrays into Python lists
+                # purchase_return_references = json.loads(purchase_return_references_json) if purchase_return_references_json else []
+                # return_items = json.loads(return_items_json) if return_items_json else []
+                # PurchaseReturndata = {
+                #     "ReturnDate" : request.POST.get('ReturnDate'),
+                #     "ReturnReasonOptions" : request.POST.get('ReturnReasonOptions'),
+                #     "BatchCode" : request.POST.get('BatchCode'),
+                #     "Customer" : request.POST.get('Customer'),
+                #     "Party" : request.POST.get('Party'),
+                #     "Comment" : request.POST.get('Comment'),
+                #     "GrandTotal" : request.POST.get('GrandTotal'),
+                #     "RoundOffAmount" : request.POST.get('RoundOffAmount'),
+                #     "CreatedBy" : request.POST.get('CreatedBy'),
+                #     "UpdatedBy" : request.POST.get('UpdatedBy'),
+                #     "IsApproved" : request.POST.get('IsApproved'),
+                #     "Mode" : request.POST.get('Mode'),
+                #     "PurchaseReturnReferences" : purchase_return_references,
+                #     "ReturnItems" : return_items
+                # }
                 
-                '''Image Upload code END'''
+                # '''Image Upload code END'''
                 
-                # PurchaseReturndata = JSONParser().parse(request)
+                PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
                 Mode = PurchaseReturndata['Mode']
@@ -285,12 +285,12 @@ class PurchaseReturnView(CreateAPIView):
                 
                 for a in PurchaseReturndata['ReturnItems']:
                     
-                    '''Image Upload Code End''' 
-                    keyname='uploaded_images_'+str(a['Item'])
-                    avatar = request.FILES.getlist(keyname)
-                    for img,file in zip(a['ReturnItemImages'],avatar):
-                        img['Image']=file 
-                    '''Image Upload Code End'''    
+                    # '''Image Upload Code End''' 
+                    # keyname='uploaded_images_'+str(a['Item'])
+                    # avatar = request.FILES.getlist(keyname)
+                    # for img,file in zip(a['ReturnItemImages'],avatar):
+                    #     img['Image']=file 
+                    # '''Image Upload Code End'''    
 
                     if a['ItemReason'] == 56:
                         
