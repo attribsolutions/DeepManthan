@@ -129,7 +129,11 @@ class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
              
         return ret
     
-        
+class CreditDebitNoteUploadsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_CreditDebitNoteUploads
+        fields=['AckNo','Irn','QRCodeUrl','EInvoicePdf','EwayBillNo','EwayBillUrl','EInvoiceIsCancel','EwayBillIsCancel'] 
+                 
 class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
@@ -138,6 +142,8 @@ class SingleCreditDebitNoteThirdSerializer(serializers.ModelSerializer):
     PurchaseReturn = PurchaseReturnSerializer(read_only=True)
     CRDRInvoices = CreditDebitNoteInvoiceSerializerSecond(many=True)
     CRDRNoteItems = CreditDebitNoteItemSerializerSecond(many=True)
+    CRDRNoteUploads=CreditDebitNoteUploadsSerializer(many=True)
+    
     
     class Meta :
         model= T_CreditDebitNotes

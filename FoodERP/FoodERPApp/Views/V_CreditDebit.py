@@ -224,7 +224,8 @@ class CreditDebitNoteView(CreateAPIView):
                             "Narration": a['Narration'],
                             "CreatedOn": a['CreatedOn'],
                             "CRDRNoteItems":CRDRNoteItems,
-                            "CRDRInvoices": CRDRInvoices 
+                            "CRDRInvoices": CRDRInvoices,
+                            "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
                     # log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'CreditdebitNote',85,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
