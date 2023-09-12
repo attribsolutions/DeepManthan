@@ -63,6 +63,12 @@ class PartyItemsFilterView(CreateAPIView):
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in Items_Serializer:
+                        query=O_BatchWiseLiveStock.objects.filter(Item=a['id'],Party=PartyID,BaseUnitQuantity__gt=0)
+                        if query.exists():
+                            InStock = True
+                        else:
+                            InStock=False    
+                            
                         ItemList.append({
                             "Item": a['id'],
                             "ItemName": a['Name'],
@@ -71,6 +77,7 @@ class PartyItemsFilterView(CreateAPIView):
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
+                            "InStock":InStock
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
