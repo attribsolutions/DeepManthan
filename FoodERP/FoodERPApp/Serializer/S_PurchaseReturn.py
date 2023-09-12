@@ -171,7 +171,6 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
         model= TC_PurchaseReturnItems
         fields = '__all__'
 
-    
 class PurchaseReturnSerializerThird(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
     class Meta :
@@ -189,7 +188,6 @@ class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
         
 
 ###################### Purchase Return Print Serializers ########################################## 
-
 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:

@@ -244,7 +244,6 @@ class PurchaseReturnView(CreateAPIView):
                 }
                 
                 '''Image Upload code END'''
-                
                 # PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
