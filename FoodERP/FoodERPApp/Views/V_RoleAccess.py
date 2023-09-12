@@ -326,7 +326,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                     RoleAccessID = a['id']
                     RoleAccessDeletedata = M_RoleAccess.objects.get(id=RoleAccessID)
                     RoleAccessDeletedata.delete()
-                log_entry = create_transaction_logNew(request,0,Company,"RoleAccess Deleted Successfully",131,0)
+                log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},Company,"RoleAccess Deleted Successfully",131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
@@ -458,7 +458,7 @@ class CopyRoleAccessView(CreateAPIView):
                         RoleAccessdata.delete()
                         RoleAccessSerialize_data.save()
 
-                        log_entry = create_transaction_logNew(request, 0,NewDivision,"Copy Role Access Save Successfully",134,0)
+                        log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,"Copy Role Access Save Successfully",134,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Copy Role Access Save Successfully', 'Data': []})
                     log_entry = create_transaction_logNew(request, 0,0,RoleAccessSerialize_data.errors,34,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
