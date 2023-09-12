@@ -585,7 +585,7 @@ class RateCalculationFunction:
         else:
                 a=Q(id=MCItemUnit)   
             
-        q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0).filter( a ).values('BaseUnitQuantity')
+        q3SelectedUnit=MC_ItemUnits.objects.filter(Item=ItemID).filter( a ).values('BaseUnitQuantity') #IsDeleted=0
        
         q3NoUnit=MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0,UnitID=1).values('BaseUnitQuantity')
         
