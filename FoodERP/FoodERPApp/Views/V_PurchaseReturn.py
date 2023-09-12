@@ -288,7 +288,6 @@ class PurchaseReturnView(CreateAPIView):
                     # '''Image Upload Code End''' 
                     # keyname='uploaded_images_'+str(a['Item'])
                     # avatar = request.FILES.getlist(keyname)
-                    # print(avatar)
                     # for img,file in zip(a['ReturnItemImages'],avatar):
                     #     img['Image']=file 
                     # '''Image Upload Code End'''    
