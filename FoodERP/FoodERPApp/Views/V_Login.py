@@ -259,6 +259,7 @@ class UserLoginView(RetrieveAPIView):
             log_entry = create_transaction_log(request, {'UserDetails':serializer},serializer.data['UserID'],0,"Login Successfully",140,0)
             return Response(response, status=status_code)
         else:
+            log_entry = create_transaction_log(request, {'UserDetails':serializer},0,0,"Incorrect LoginName and Password",141,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
 
 
@@ -276,13 +277,14 @@ class ChangePasswordView(RetrieveAPIView):
                 
                 user = authenticate(LoginName=LoginName, password=password)
                 if user is None:
+                    log_entry = create_transaction_log(request,Logindata,0,"A user with this LoginName and password is not found",142,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]}) 
                 else:
                     user.set_password(newpassword)
                     user.AdminPassword = newpassword
                     user.save()
 
-                    log_entry = create_transaction_logNew(request,Logindata,0,"Password change successfully",141,0)
+                    log_entry = create_transaction_logNew(request,Logindata,0,"Password change successfully",143,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Password change successfully', 'Data':[]}) 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -322,7 +324,7 @@ class UserPartiesViewSecond(CreateAPIView):
                     M_UserParties_Serializer = M_UserPartiesSerializer1(
                         query, many=True).data
 
-                    log_entry = create_transaction_logNew(request,{'UserID':id},0,"UserPartiesForUserMaster",142,0)
+                    log_entry = create_transaction_logNew(request,{'UserID':id},0,"UserPartiesForUserMaster",144,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
@@ -356,7 +358,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     M_UserParties_Serializer = self.serializer_class(
                         query, many=True).data
                     
-                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,M_UserParties_Serializer[0]['Party_id'] ,"PartyDropdownforloginpage",143,0)
+                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0 ,"PartyDropdownforloginpage",145,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
         except Exception as e:
             log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0 ,e,34,0)
@@ -380,7 +382,7 @@ NOT IN (SELECT Employee_id From M_Users) ''')
                 else:
                     M_Employees_Serializer = EmployeeSerializerForUserCreation(
                         query, many=True).data
-                    log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"GetEmployeeForUserCreation",143,0)
+                    log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"GetEmployeeForUserCreation",146,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
         except Exception:
             log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"Exception",33,0)
