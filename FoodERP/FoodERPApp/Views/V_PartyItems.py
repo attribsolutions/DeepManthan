@@ -174,14 +174,13 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in ItemsList_Serializer:
-                      
-                        # Query to retrieve PartyType_id values
-                        party_ids = MC_PartyItems.objects.filter(Item_id=a['id']).values_list('Party_id', flat=True)
-                        # Get unique PartyType_id values using a set
-                        distinct_party_types = set(M_Parties.objects.filter(id__in=party_ids).values_list('PartyType_id', flat=True))
-                        # Check if PartyTypeID exists in distinct_party_types
-                        Flag = PartyTypeID in distinct_party_types
-                                
+                        
+                        count= MC_PartyItems.objects.filter(Item_id=a['id']).count()
+                        if count > 0:
+                            Flag = True
+                        else:
+                            Flag = False 
+                              
                         ItemList.append({
                             "Item": a['id'],
                             "ItemName": a['Name'],
@@ -195,7 +194,6 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
         
         
 class CheckPartiesInChanelWiseItemsList(CreateAPIView):
