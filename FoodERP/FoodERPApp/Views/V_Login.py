@@ -277,7 +277,7 @@ class ChangePasswordView(RetrieveAPIView):
                 
                 user = authenticate(LoginName=LoginName, password=password)
                 if user is None:
-                    log_entry = create_transaction_log(request,Logindata,0,"A user with this LoginName and password is not found",142,0)
+                    log_entry = create_transaction_logNew(request,Logindata,0,"A user with this LoginName and password is not found",142,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'A user with this LoginName and password is not found', 'Data':[]}) 
                 else:
                     user.set_password(newpassword)
