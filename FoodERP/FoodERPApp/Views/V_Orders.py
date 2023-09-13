@@ -91,7 +91,7 @@ class OrderListFilterView(CreateAPIView):
                         queryForOpenPO = T_Orders.objects.filter(
                             POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         q = query.union(queryForOpenPO)
-                print(query.query)
+                # print(query.query)
                 # return JsonResponse({'query': str(q.query)})
                 if q:
                     Order_serializer = T_OrderSerializerSecond(

@@ -9,3 +9,9 @@ class EmplyoeeSerializerSecond(serializers.ModelSerializer):
 
     def get_Name(self, obj):
         return obj.Employee.Name if obj.Employee else None
+    
+
+class TransactionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_TransactionType
+        fields = '__all__'
