@@ -602,7 +602,7 @@ urlpatterns = [
             
 
 # Transactionlog  
-            url(r'GetEmplyoeefromUser$',EmplyoeeListView.as_view()),        
+            url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()),        
 
 
 
