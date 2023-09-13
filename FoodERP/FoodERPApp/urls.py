@@ -139,6 +139,8 @@ from .Views.V_GST_Reports import *
 
 from .Views.V_ItemSale import *
 
+from .Views.V_Transaction import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -598,7 +600,9 @@ urlpatterns = [
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
             url(r'Claimlist$',ClaimlistView.as_view()),
             
-            
+
+# Transactionlog  
+            url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()),        
 
 
 
