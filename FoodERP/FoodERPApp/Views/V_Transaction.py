@@ -25,6 +25,23 @@ class EmplyoeeListView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
+class TransactionTypeListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self,request):
+        try:
+            with transaction.atomic():
+                query = M_TransactionType.objects.all()
+                if query:
+                    serializer = TransactionTypeSerializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'TransactionType not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
 
 
     
