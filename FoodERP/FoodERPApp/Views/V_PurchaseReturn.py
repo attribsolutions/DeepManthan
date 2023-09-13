@@ -291,6 +291,7 @@ class PurchaseReturnView(CreateAPIView):
                     print(avatar)
                     for img,file in zip(a['ReturnItemImages'],avatar):
                         img['Image']=file 
+                        print(img['Image'])
                     '''Image Upload Code End'''
                     
                     SaleableItemReason=MC_SettingsDetails.objects.filter(SettingID=14).values('Value')
@@ -369,6 +370,7 @@ class PurchaseReturnView(CreateAPIView):
                     
                 # print(GRNdata)
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
+                print(PurchaseReturndata)
                
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
