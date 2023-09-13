@@ -123,7 +123,7 @@ class MasterClaimView(CreateAPIView):
     FROM T_PurchaseReturn
     join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
     where IsApproved=1  and  T_PurchaseReturn.ReturnDate between %s and %s and Customer_id=%s and FinalApprovalDate is null''',([FromDate], [ToDate], [Party]))
-                print(q10.query)
+                # print(q10.query)
                 for row in q10:
                     count = row.cnt
                    
@@ -166,8 +166,8 @@ class MasterClaimView(CreateAPIView):
         join M_Parties on M_Parties.id=PRPS.Customer_id
         where T_PurchaseReturn.IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s group by TC_PurchaseReturnItems.ItemReason_id)p ''',
                                                                                         ([FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [PartyType], [FromDate], [ToDate], [Party]))
-                            print('==============================================')
-                            print(PartyType ,claimREasonwise.query)
+                            # print('==============================================')
+                            # print(PartyType ,claimREasonwise.query)
                             serializer = MasterclaimReasonReportSerializer(
                                 claimREasonwise, many=True).data
                         
@@ -246,7 +246,7 @@ class MasterClaimView(CreateAPIView):
         ''',
                                                                             ([Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party]))
 
-                        print(StockProcessQuery.query)
+                        # print(StockProcessQuery.query)
                         serializer = MasterclaimReportSerializer(
                             StockProcessQuery, many=True).data
                     
@@ -348,7 +348,7 @@ on a.PartyID=b.Customer_id
 left join
 (select count(*)returncnt ,Customer_id from T_PurchaseReturn where T_PurchaseReturn.ReturnDate between %s and %s group by Customer_id )c
 on a.PartyID=c.Customer_id''',([Party],[Party],[FromDate],[ToDate],[FromDate],[ToDate]))
-                print(Claimlistquery.query)
+                # print(Claimlistquery.query)
                 if Claimlistquery:
                     
                     Claimlist = ClaimlistSerializer(Claimlistquery, many=True).data
