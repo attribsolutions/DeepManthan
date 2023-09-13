@@ -38,7 +38,7 @@ class PartyTypeListView(CreateAPIView):
                     else:
                        
                         query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)
-                        print(str(query.query))
+                       
                         p=0
                 else:    
                     
