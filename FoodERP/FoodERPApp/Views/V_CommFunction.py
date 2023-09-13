@@ -12,6 +12,7 @@ from ..Serializer.S_GSTHSNCode import *
 from ..Serializer.S_GSTHSNCode import *
 from ..models import *
 from datetime import date
+from ..models import TransactionLogJsonData 
 
 
 '''Common Functions List
@@ -51,17 +52,20 @@ def create_transaction_logNew(request,data,PartyID,TransactionDetails,Transactio
     
     Authenticated_User = request.user
     User = Authenticated_User.id
+    
     if not FromDate :
         log_entry = Transactionlog.objects.create(
             TranasactionDate=date.today(),
-            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID
+            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID
         )
     else:
         log_entry = Transactionlog.objects.create(
             TranasactionDate=date.today(),
-            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=data,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID
+            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID
         )
 
+    TransactionLogJsonData.objects.create(Transactionlog=log_entry, JsonData=data)
+    
     return log_entry
 
 
