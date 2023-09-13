@@ -219,7 +219,7 @@ FROM
             AND Party_id = %s
             AND Customer_id = %s and IsDeleted=0) q
 ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
-                print(str(query.query))
+                
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
@@ -293,7 +293,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
 
                             Description = '(' + str(a['Description']) + ')'
 
-                        print(BankName, '')
+                        
                         PartyLedgerItemDetails.append({
                             "Date": a['InvoiceDate'],
                             "DocumentNO": a['BillNo'],
@@ -432,7 +432,7 @@ class StockProcessingView(CreateAPIView):
                 current_date = start_date
                 while current_date <= end_date:
                     Date=current_date.strftime("%Y-%m-%d") 
-                    print(Date)
+                    # print(Date)
                     # StockDeleteQuery  = O_DateWiseLiveStock.objects.raw('''DELETE FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s''',([Date],[Party]))
                     StockDeleteQuery  = O_DateWiseLiveStock.objects.filter(Party_id=Party,StockDate=Date)
                     StockDeleteQuery.delete()
@@ -494,7 +494,7 @@ where
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
 ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
-                    print(StockProcessQuery)
+                    # print(StockProcessQuery)
                     serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # print(serializer)
                     for a in serializer:
@@ -567,7 +567,7 @@ FROM
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
 		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[unitname],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
-                print(StockreportQuery)
+                # print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
                 
                 
@@ -843,7 +843,7 @@ JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_DeletedInvoices.Customer
 LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 LEFT JOIN TC_DeletedInvoiceUploads on TC_DeletedInvoiceUploads.Invoice= T_DeletedInvoices.id
 WHERE T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s AND  T_DeletedInvoices.Party=%s ''',([Party],[FromDate],[ToDate],[Party]))
-                print(str(query.query))
+               
                 if query:
                     DeletedInvoiceExportData=list()
                     DeletedInvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
