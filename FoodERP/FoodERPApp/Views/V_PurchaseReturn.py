@@ -289,14 +289,18 @@ class PurchaseReturnView(CreateAPIView):
                     avatar = request.FILES.getlist(keyname)
                     for img,file in zip(a['ReturnItemImages'],avatar):
                         img['Image']=file 
-                    '''Image Upload Code End'''    
-
-                    if a['ItemReason'] == 56:
-                        
+                    '''Image Upload Code End'''
+                    
+                    SaleableItemReason=MC_SettingsDetails.objects.filter(SettingID=14).values('Value')
+                    value_str = SaleableItemReason[0]['Value']
+                    # Split the string by ',' and convert the resulting substrings to integers
+                    values_to_check = [int(val) for val in value_str.split(',')]
+                    if a['ItemReason'] in values_to_check:
                         IsDamagePieces =False
                     else:
-                        IsDamagePieces =True 
-                        
+                        IsDamagePieces =True
+                            
+                          
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     if(item == ""):
@@ -787,9 +791,13 @@ class SalesReturnItemApproveView(CreateAPIView):
                     # Rate=RateCalculationFunction(0,a['Item'],Party,0,1,0,0).RateWithGST()
                     
                     Rate =0.00
+                    
 
-                    if a['ItemReason'] == 56:
-                        
+                    SaleableItemReason=MC_SettingsDetails.objects.filter(SettingID=14).values('Value')
+                    value_str = SaleableItemReason[0]['Value']
+                    # Split the string by ',' and convert the resulting substrings to integers
+                    values_to_check = [int(val) for val in value_str.split(',')]
+                    if a['ItemReason'] in values_to_check:
                         IsDamagePieces =False
                     else:
                         IsDamagePieces =True 
