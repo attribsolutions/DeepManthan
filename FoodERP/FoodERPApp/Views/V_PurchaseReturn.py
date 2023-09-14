@@ -368,27 +368,31 @@ class PurchaseReturnView(CreateAPIView):
                     O_BatchWiseLiveStockList=list()
                     UpdateO_BatchWiseLiveStockList = list()
                     
-                # print(GRNdata)
+              
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
-                # print(PurchaseReturndata)
-               
+             
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
-                    print('AAAAAAAAAAAAAAA')
-                    
+                    print('AAAAA')
                     PurchaseReturn = PurchaseReturn_Serializer.save()
-                    print('BBBB')
+                    print('BBBBB')
+                    
                     LastInsertID = PurchaseReturn.id
                     # log_entry = create_transaction_logNew(request, PurchaseReturndata, x, 'Return Save Successfully',53,LastInsertID,0,0,y)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'Data':[]})
                 else:
+                    print('CCCCC')
                     # log_entry = create_transaction_logNew(request, PurchaseReturndata, x,  PurchaseReturn_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            print('DDDDD')
+            
+            # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
+            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data':[]})
+ 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
     
     # Purchase Return DELETE API New code Date 25/07/2023
     @transaction.atomic()
