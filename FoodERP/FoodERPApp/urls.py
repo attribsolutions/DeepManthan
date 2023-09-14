@@ -139,6 +139,8 @@ from .Views.V_GST_Reports import *
 
 from .Views.V_ItemSale import *
 
+from .Views.V_StockAdjustment import *
+
 from .Views.V_Transaction import *
 
 urlpatterns = [
@@ -600,10 +602,17 @@ urlpatterns = [
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
             url(r'Claimlist$',ClaimlistView.as_view()),
             
+            
+# StockAdjustment
+            url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
+            
+            
 
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
-            url(r'GetTransactionType$',TransactionTypeListView.as_view())       
+            url(r'GetTransactionType$',TransactionTypeListView.as_view()) 
+            
+                  
 
 
 
