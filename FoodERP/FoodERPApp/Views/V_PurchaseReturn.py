@@ -376,7 +376,8 @@ class PurchaseReturnView(CreateAPIView):
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
                     print('AAAAAAAAAAAAAAA')
-                    
+                    print('BBBBB')
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     print('BBBB')
                     LastInsertID = PurchaseReturn.id
