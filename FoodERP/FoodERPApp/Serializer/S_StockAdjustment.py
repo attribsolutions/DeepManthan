@@ -5,6 +5,7 @@ from ..models import *
 class OBatchWiseLiveStockAdjustmentSerializer(serializers.Serializer):
     id=serializers.IntegerField()
     Item_id= serializers.IntegerField()
+    ItemName = serializers.CharField(max_length=100) 
     OriginalBaseUnitQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
     BaseUnitQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
     BatchDate = serializers.CharField(max_length=100) 
