@@ -390,7 +390,9 @@ class PurchaseReturnView(CreateAPIView):
             print('DDDDD')
             
             # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data':[]})
+            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data':[]})
+ 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
     
     # Purchase Return DELETE API New code Date 25/07/2023
     @transaction.atomic()
