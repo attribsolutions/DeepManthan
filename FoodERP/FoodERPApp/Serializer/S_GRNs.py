@@ -59,7 +59,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
         grnID = T_GRNs.objects.create(**validated_data)
         
         for GRNItem_data in GRNItems_data :
-            print(grnID)
+            # print(grnID)
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
  
         for O_LiveBatchesList_data in O_LiveBatchesLists_data :
