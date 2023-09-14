@@ -69,6 +69,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
         
         for ReturnItem_data in ReturnItems_data:
             ReturnItemImages_data = ReturnItem_data.pop('ReturnItemImages')
+            print(ReturnItemImages_data)
             ReturnItemID =TC_PurchaseReturnItems.objects.create(PurchaseReturn=PurchaseReturnID, **ReturnItem_data)
             if(Mode == 1 or Mode ==2):
                 a=match = re.search(r'\((\d+)\)', str(ReturnItemID))
@@ -78,6 +79,7 @@ class PurchaseReturnSerializer(serializers.ModelSerializer):
 
             
             for ReturnItemImage_data in ReturnItemImages_data:
+                print(ReturnItemImage_data)
                 ItemImages =TC_PurchaseReturnItemImages.objects.create(PurchaseReturnItem=ReturnItemID, **ReturnItemImage_data)
         
         if (Mode == 1 or Mode ==3): # For Sales Return and Consolidated Sales Return update BatchID Null       
