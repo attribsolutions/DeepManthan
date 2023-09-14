@@ -370,11 +370,13 @@ class PurchaseReturnView(CreateAPIView):
                     
                 # print(GRNdata)
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
-                print(PurchaseReturndata)
+                # print(PurchaseReturndata)
                
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
+                    print('AAAAAAAAAAAAAAA')
+                    
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
                     # log_entry = create_transaction_logNew(request, PurchaseReturndata, x, 'Return Save Successfully',53,LastInsertID,0,0,y)
