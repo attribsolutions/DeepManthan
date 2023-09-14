@@ -15,6 +15,8 @@ class OBatchWiseLiveStockAdjustmentSerializer(serializers.Serializer):
     MRPValue = serializers.DecimalField(max_digits=10, decimal_places=2)
     MRPID = serializers.IntegerField()
     MRP = serializers.DecimalField(max_digits=10, decimal_places=2)
+    GST_id=serializers.IntegerField()
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     UnitID = serializers.IntegerField()
     UnitName = serializers.CharField(max_length=100) 
     
