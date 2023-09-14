@@ -350,7 +350,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             'Name':  a['Name'],
                             'SAPPartyCode':a['SAPPartyCode']
                         })
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': '', 'Data': Partylist})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
