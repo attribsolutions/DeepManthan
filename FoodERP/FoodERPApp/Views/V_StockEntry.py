@@ -135,7 +135,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     ItemList = list()
                     for a in Items_Serializer:
                         ActualQty='00.00'
-                        stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
                    
                         if stockquery['Qty'] is None:
                             Stock = 0.0
