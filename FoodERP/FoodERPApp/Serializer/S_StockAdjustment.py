@@ -12,7 +12,7 @@ class OBatchWiseLiveStockAdjustmentSerializer(serializers.Serializer):
     SystemBatchDate = serializers.CharField(max_length=100) 
     SystemBatchCode = serializers.CharField(max_length=100) 
     MRPValue = serializers.DecimalField(max_digits=10, decimal_places=2)
-    MRP_id = serializers.IntegerField()
+    MRPID = serializers.IntegerField()
     MRP = serializers.DecimalField(max_digits=10, decimal_places=2)
     UnitID = serializers.IntegerField()
     UnitName = serializers.CharField(max_length=100) 
