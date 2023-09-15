@@ -313,7 +313,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                             PartyID = Order_serializer.data['Customer']
                             
 
-                            log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Save Successfully',1,OrderID)    
+                            log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Update Successfully',1,OrderID)    
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Update Successfully', 'FoodERPOrderID': OrderID})
                         log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,34,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
@@ -360,7 +360,7 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
                         id = data['FoodERPOrderID']
                         Order_Data = T_Orders.objects.get(id=id)
                         Order_Data.delete()
-                        log_entry = create_transaction_logNew(request, {'OrderID':id}, 0, 'Order Deleted Successfully',3,0)
+                        log_entry = create_transaction_logNew(request, {'OrderID':id}, 0, 'MobileAPPOrder Deleted Successfully',3,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully'})
         except T_Orders.DoesNotExist:
             log_entry = create_transaction_logNew(request, {'OrderID':id}, 0, 'Record Not available',29,0)
