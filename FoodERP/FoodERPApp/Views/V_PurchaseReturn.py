@@ -381,7 +381,6 @@ class PurchaseReturnView(CreateAPIView):
         except Exception as e:
             print('DDDDD')
             print(str(e))
-            print(str(e.__dict__))
             # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
             # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data':[]})
  
