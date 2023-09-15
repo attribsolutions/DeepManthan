@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+
+from ..Serializer.S_Orders import Mc_ItemUnitSerializerThird
 from ..Serializer.S_StockAdjustment import *
 from ..Serializer.S_Parties import *
 from ..Serializer.S_ItemSale import *
@@ -25,6 +27,17 @@ class ShowBatchesForItemView(CreateAPIView):
                     BatchCodelist = list()
                     Obatchwise_serializer = OBatchWiseLiveStockAdjustmentSerializer(query, many=True).data
                     for a in Obatchwise_serializer:
+                        Unitquery = MC_ItemUnits.objects.filter(Item_id=a['Item_id'],IsDeleted=0)
+                        if Unitquery.exists():
+                            Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
+                            ItemUnitDetails = list()
+                            for c in Unitdata:
+                                ItemUnitDetails.append({
+                                "Unit": c['id'],
+                                "BaseUnitQuantity": c['BaseUnitQuantity'],
+                                "IsBase": c['IsBase'],
+                                "UnitName": c['BaseUnitConversion'],
+                            })
                         BatchCodelist.append({
                             'id':  a['id'],
                             'Item':  a['Item_id'],
@@ -41,7 +54,8 @@ class ShowBatchesForItemView(CreateAPIView):
                             'GSTID':  a['GST_id'],
                             'GSTPercentage':  a['GSTPercentage'],
                             'UnitID':  a['UnitID'],
-                            'UnitName':  a['UnitName']
+                            'UnitName':  a['UnitName'],
+                            'UnitOptions' : ItemUnitDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available ', 'Data': []})

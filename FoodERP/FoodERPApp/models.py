@@ -1764,7 +1764,9 @@ class T_Stock(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-   
+    IsSaleable= models.BooleanField(default=False)
+    BatchCode = models.CharField(max_length=500,blank=True,null=True)
+    Difference = models.DecimalField(max_digits=20, decimal_places=2,blank=True,null=True)
     class Meta:
         db_table="T_Stock"        
                 
