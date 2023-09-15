@@ -158,8 +158,9 @@ USE_TZ = False
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/home/admin1/DeepManthan/FoodERP/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, '/media/Images')
+# MEDIA_ROOT = '/media/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -187,8 +188,7 @@ REST_FRAMEWORK = {
      )
 }
 
-# MEDIA_ROOT = os.path.join(BASE_DIR,'media')
-# MEDIA_URL = '/media/'
+
 
 # Jwt Authentication
 
