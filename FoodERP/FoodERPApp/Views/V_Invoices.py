@@ -341,6 +341,7 @@ class InvoiceViewSecond(CreateAPIView):
                         for x in a['Party']['PartyAddress']:
                             if x['IsDefault'] == True :
                                 DefPartyAddress = x['Address']
+                                DefPartyFSSAI = x['FSSAINo']
 
                         # code by ankita 
                         # DefCustomerRoute = ''
@@ -378,7 +379,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
                             "PartyMobileNo": a['Party']['MobileNo'],
-                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "PartyFSSAINo": DefPartyFSSAI,
                             "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
                             "PartyState": a['Party']['State']['Name'],
                             "CustomerState": a['Customer']['State']['Name'],
@@ -412,7 +413,7 @@ class InvoiceViewSecond(CreateAPIView):
                 
                 for a in Invoicedataserializer[0]['InvoiceItems']:
                     BaseUnitQuantity11=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                    print(a['LiveBatch'])
+                    # print(a['LiveBatch'])
                     if a['LiveBatch'] is None:
                         pass
                     else:
