@@ -286,12 +286,10 @@ class PurchaseReturnView(CreateAPIView):
                     
                     '''Image Upload Code End''' 
                     keyname='uploaded_images_'+str(a['Item'])
-                    print(keyname)
                     avatar = request.FILES.getlist(keyname)
-                    print(avatar)
                     for img,file in zip(a['ReturnItemImages'],avatar):
                         img['Image']=file 
-                        print(img['Image'])
+                       
                     '''Image Upload Code End'''
                     
                     SaleableItemReason=MC_SettingsDetails.objects.filter(SettingID=14).values('Value')
@@ -302,8 +300,7 @@ class PurchaseReturnView(CreateAPIView):
                         IsDamagePieces =False
                     else:
                         IsDamagePieces =True
-                            
-                          
+                             
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     if(item == ""):
@@ -367,29 +364,23 @@ class PurchaseReturnView(CreateAPIView):
                     })
                     O_BatchWiseLiveStockList=list()
                     UpdateO_BatchWiseLiveStockList = list()
-                    
               
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
-             
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
-                    print('AAAAA')
                     PurchaseReturn = PurchaseReturn_Serializer.save()
-                    print('BBBBB')
-                    
                     LastInsertID = PurchaseReturn.id
                     # log_entry = create_transaction_logNew(request, PurchaseReturndata, x, 'Return Save Successfully',53,LastInsertID,0,0,y)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'Data':[]})
                 else:
-                    print('CCCCC')
+                  
                     # log_entry = create_transaction_logNew(request, PurchaseReturndata, x,  PurchaseReturn_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
             print('DDDDD')
             print(str(e))
-            print('EEE')
             print(str(e.__dict__))
             # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
             # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data':[]})
