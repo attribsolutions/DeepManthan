@@ -54,7 +54,8 @@ class ShowBatchesForItemView(CreateAPIView):
                             'GSTID':  a['GST_id'],
                             'GSTPercentage':  a['GSTPercentage'],
                             'UnitID':  a['UnitID'],
-                            'UnitName':  ItemUnitDetails
+                            'UnitName':  a['UnitName'],
+                            'UnitOptions' : ItemUnitDetails
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available ', 'Data': []})
