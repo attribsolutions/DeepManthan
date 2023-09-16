@@ -46,7 +46,7 @@ class StockEntryPageView(CreateAPIView):
                         query3 = O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party).aggregate(total=Sum('BaseUnitQuantity'))
                     else:
                         query3 = O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,id=a['BatchCodeID']).aggregate(total=Sum('BaseUnitQuantity'))
-                    print(query3['total'])
+                  
                     
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
@@ -60,6 +60,7 @@ class StockEntryPageView(CreateAPIView):
                     "OriginalBaseUnitQuantity": round(BaseUnitQuantity,3),
                     "Party": Party,
                     "CreatedBy":CreatedBy,
+                    
                     
                     })
                     
@@ -90,6 +91,7 @@ class StockEntryPageView(CreateAPIView):
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
+                    "Mode" :Mode,
                     "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,3),
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList, 
                     "T_StockEntryList" :T_StockEntryList                   
@@ -100,20 +102,27 @@ class StockEntryPageView(CreateAPIView):
                     T_StockEntryList=list()
                 
                 StockEntrydata.update({"O_LiveBatchesList":O_LiveBatchesList})
+                if(Mode == 1):   # Stock Entry case update 0 to all stock for given party
+                    
+                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
                 
-                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
                 for aa in StockEntrydata['O_LiveBatchesList']:
-                
-                    StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
+                  
+                    if(Mode == 1):
+                        StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
+                    else:
+                        StockEntry_OLiveBatchesSerializer = PartyStockAdjustmentOLiveBatchesSerializer(data=aa)
+                    
+                    
                     if StockEntry_OLiveBatchesSerializer.is_valid():
                         Stock = StockEntry_OLiveBatchesSerializer.save()
-                        LastInsertID = Stock.id
+                        # LastInsertID = Stock.id
                         pass
                     else:
                         log_entry = create_transaction_logNew(request, StockEntrydata, 0, StockEntry_OLiveBatchesSerializer.errors,34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': StockEntry_OLiveBatchesSerializer.errors, 'Data': []})
-                log_entry = create_transaction_logNew(request, StockEntrydata, Party,"Party Stock Entry Save Successfully",87,LastInsertID)
+                log_entry = create_transaction_logNew(request, StockEntrydata, Party,"Party Stock Entry Save Successfully",87,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, StockEntrydata, 0,  Exception(e),33,0)
