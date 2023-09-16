@@ -10,7 +10,7 @@ from .S_Orders import *
 class PartyStockEntryT_StockSerializer(serializers.ModelSerializer):
     class Meta:
         model = T_Stock
-        fields = ['StockDate','Item','Quantity','Unit','BaseUnitQuantity','MRPValue','MRP','Party','CreatedBy']
+        fields = ['StockDate','Item','Quantity','Unit','BaseUnitQuantity','MRPValue','MRP','Party','CreatedBy','BatchCode','Difference','IsSaleable']
     
 class PartyStockEntryOBatchWiseLiveStockSerializer(serializers.ModelSerializer):
     class Meta:
