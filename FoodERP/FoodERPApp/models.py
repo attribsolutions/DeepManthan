@@ -2109,7 +2109,21 @@ class TransactionLogJsonData(models.Model):
     Transactionlog = models.ForeignKey(Transactionlog,related_name='Transactionlog', on_delete=models.CASCADE)
     JsonData = models.TextField(blank = True)
     class Meta:
-        db_table = "TransactionLogJsonData"                                       
+        db_table = "TransactionLogJsonData"       
+
+class L_TransactionDateLog(models.Model):
+    OldestTrnDate = models.DateField()
+    NewestTrnDate = models.DateField()
+    StockAdjustmentDate = models.DateField()
+    Party = models.IntegerField()
+    Item =models.IntegerField()
+    class Meta:
+        db_table = "L_TransactionDateLog"   
+
+
+
+
+
    
                         
          
