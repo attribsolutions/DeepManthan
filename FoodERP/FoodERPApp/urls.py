@@ -611,7 +611,8 @@ urlpatterns = [
 
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
-            url(r'GetTransactionType$',TransactionTypeListView.as_view()) 
+            url(r'GetTransactionType$',TransactionTypeListView.as_view()),
+            url(r'TransactionDetails$',TransactionTypeView.as_view()),
             
                   
 
