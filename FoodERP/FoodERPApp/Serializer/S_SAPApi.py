@@ -22,7 +22,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','TCSAmount', 'InvoiceItems']
 
     def create(self, validated_data):
-        print('dddddddddddddddddddddddd',validated_data)
+        # print('dddddddddddddddddddddddd',validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         # InvoicesReferences_data = validated_data.pop('InvoicesReferences')
         # O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
