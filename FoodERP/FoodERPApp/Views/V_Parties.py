@@ -204,7 +204,7 @@ class M_PartiesViewSecond(CreateAPIView):
                                   "PartySubParty": PartySubPartyList})
                     # # M_Parties_serializer.update({"PartySubParty":list2})
                     # M_Parties_serializer.extend(list2)
-                    log_entry = create_transaction_logNew(request,{'PartyID':id}, a['Party']['id'], "Party",93,0)
+                    log_entry = create_transaction_logNew(request,{'PartyID':id},0, "Party",93,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': list2[0]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'PartyID':id}, 0, Exception(e),33,0)
