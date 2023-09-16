@@ -1766,6 +1766,7 @@ class T_Stock(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     IsSaleable= models.BooleanField(default=False)
     BatchCode = models.CharField(max_length=500,blank=True,null=True)
+    BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
     Difference = models.DecimalField(max_digits=20, decimal_places=2,blank=True,null=True)
     class Meta:
         db_table="T_Stock"        
@@ -2109,7 +2110,21 @@ class TransactionLogJsonData(models.Model):
     Transactionlog = models.ForeignKey(Transactionlog,related_name='Transactionlog', on_delete=models.CASCADE)
     JsonData = models.TextField(blank = True)
     class Meta:
-        db_table = "TransactionLogJsonData"                                       
+        db_table = "TransactionLogJsonData"       
+
+class L_TransactionDateLog(models.Model):
+    OldestTrnDate = models.DateField()
+    NewestTrnDate = models.DateField()
+    StockAdjustmentDate = models.DateField()
+    Party = models.IntegerField()
+    Item =models.IntegerField()
+    class Meta:
+        db_table = "L_TransactionDateLog"   
+
+
+
+
+
    
                         
          
