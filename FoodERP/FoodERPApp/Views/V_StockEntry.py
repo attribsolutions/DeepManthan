@@ -73,7 +73,8 @@ class StockEntryPageView(CreateAPIView):
                     "MRP": a['MRP'],
                     "Party": Party,
                     "CreatedBy":CreatedBy,
-                    "BatchCode" : a['BatchCodeID'],
+                    "BatchCode" : a['BatchCode'],
+                    "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
                     "Difference" : float(query3['total'])-round(BaseUnitQuantity,3)
                     })
