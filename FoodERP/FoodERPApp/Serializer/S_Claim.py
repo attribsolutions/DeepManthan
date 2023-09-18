@@ -87,3 +87,10 @@ class ClaimlistSerializer(serializers.Serializer):
     SecondaryAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
     ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
     returncnt = serializers.CharField(max_length=500)
+
+
+class ClaimlistforClaimTrackingSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
+    ClaimAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
+    PartyID = serializers.IntegerField()
+    PartyName= serializers.CharField(max_length=500)
