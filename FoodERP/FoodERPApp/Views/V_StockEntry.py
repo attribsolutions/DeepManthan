@@ -30,6 +30,7 @@ class StockEntryPageView(CreateAPIView):
                 Party = StockEntrydata['PartyID']
                 CreatedBy = StockEntrydata['CreatedBy']
                 StockDate = StockEntrydata['Date']
+                Mode =  StockEntrydata['Mode']
               
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
@@ -40,6 +41,12 @@ class StockEntryPageView(CreateAPIView):
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                    Item=a['Item']
+                    if Mode == 1:
+                        query3 = O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party).aggregate(total=Sum('BaseUnitQuantity'))
+                    else:
+                        query3 = O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,id=a['BatchCodeID']).aggregate(total=Sum('BaseUnitQuantity'))
+                    print(query3['total'])
                     
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
@@ -66,6 +73,10 @@ class StockEntryPageView(CreateAPIView):
                     "MRP": a['MRP'],
                     "Party": Party,
                     "CreatedBy":CreatedBy,
+                    "BatchCode" : a['BatchCode'],
+                    "BatchCodeID" : a['BatchCodeID'],
+                    "IsSaleable" : 1,
+                    "Difference" : float(query3['total'])-round(BaseUnitQuantity,3)
                     })
                     
                     O_LiveBatchesList.append({
@@ -97,6 +108,7 @@ class StockEntryPageView(CreateAPIView):
                     if StockEntry_OLiveBatchesSerializer.is_valid():
                         Stock = StockEntry_OLiveBatchesSerializer.save()
                         LastInsertID = Stock.id
+                        pass
                     else:
                         log_entry = create_transaction_logNew(request, StockEntrydata, 0, StockEntry_OLiveBatchesSerializer.errors,34,0)
                         transaction.set_rollback(True)
