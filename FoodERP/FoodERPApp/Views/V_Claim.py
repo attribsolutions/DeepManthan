@@ -395,10 +395,11 @@ class ClaimTrackingEntryListView(CreateAPIView):
 FROM T_ClaimTrackingEntry 
 JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id
 JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
-JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
+LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
 JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
 JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.year =%s  AND   T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
+JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
+                
                 if ClaimTrackingquery :
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
@@ -432,9 +433,9 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                             "PartyName": a['PartyName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Category Not available ', 'Data': []})
-        except M_Category.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Not available', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
+        except T_ClaimTrackingEntry.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Claim Tracking Entry Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
@@ -470,12 +471,12 @@ class ClaimTrackingEntryViewSecond(CreateAPIView):
 FROM T_ClaimTrackingEntry 
 JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id
 JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
-JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
+LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
 JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
 JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.id =%s''',([id]))
-              
-                if ClaimTrackingquery.exists():
+JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.id = %s ''',([id]))
+                print(ClaimTrackingquery.query)
+                if ClaimTrackingquery :
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
                     ClaimTrackingList=list()
                     for a in ClaimTrackingdata:
@@ -507,9 +508,9 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                             "PartyName": a['PartyName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList[0]})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Category Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Claim Tracking Entry Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
