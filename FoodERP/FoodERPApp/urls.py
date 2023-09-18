@@ -607,6 +607,9 @@ urlpatterns = [
             
 # ClaimTracking
             url(r'ClaimListfortracking$',Listofclaimforclaimtracking.as_view()),
+            url(r'ClaimTracking/([0-9]+)$',ClaimTrackingEntryViewSecond.as_view()),
+            url(r'ClaimTracking$', ClaimTrackingEntryView.as_view()),
+            url(r'ClaimTrackingList$', ClaimTrackingEntryListView.as_view()),
             
             
             

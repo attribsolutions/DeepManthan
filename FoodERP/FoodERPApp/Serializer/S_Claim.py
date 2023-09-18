@@ -94,3 +94,43 @@ class ClaimlistforClaimTrackingSerializer(serializers.Serializer):
     ClaimAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
     PartyID = serializers.IntegerField()
     PartyName= serializers.CharField(max_length=500)
+    
+    
+class ClaimTrackingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  T_ClaimTrackingEntry
+        fields = '__all__'
+        
+          
+class ClaimTrackingSerializerSecond(serializers.Serializer):
+    id= serializers.IntegerField()
+    Date =  serializers.DateField()
+    Month =  serializers.CharField(max_length=500)  
+    Year = serializers.CharField(max_length=500) 
+    ClaimReceivedSource =  serializers.CharField(max_length=500) 
+    Type = serializers.IntegerField()
+    TypeName = serializers.CharField(max_length=500)
+    ClaimTrade = serializers.IntegerField()
+    ClaimTradeName = serializers.CharField(max_length=500)
+    TypeOfClaim = serializers.IntegerField()
+    TypeOfClaimName = serializers.CharField(max_length=500)
+    ClaimAmount =serializers.DecimalField(max_digits=20, decimal_places=2)
+    Remark = serializers.CharField(max_length=500) 
+    ClaimCheckBy =serializers.IntegerField()
+    ClaimCheckByName = serializers.CharField(max_length=500) 
+    CreditNotestatus =serializers.IntegerField()
+    CreditNotestatusName = serializers.CharField(max_length=500) 
+    CreditNoteNo = serializers.CharField(max_length=500) 	
+    CreditNoteDate = serializers.DateField()	
+    CreditNoteAmount	= serializers.DecimalField(max_digits=20, decimal_places=2)
+    ClaimSummaryDate = serializers.DateField()	
+    CreditNoteUpload = serializers.CharField(max_length=500)
+    Claim_id = serializers.IntegerField()
+    Party_id= serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500) 
+ 
+
+    
+    
+   
+        
