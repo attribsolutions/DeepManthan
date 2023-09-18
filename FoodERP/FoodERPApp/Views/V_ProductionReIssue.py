@@ -109,7 +109,7 @@ class ProductionReIssueView(CreateAPIView):
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(
                         a['Item'], a['IssueQuantity'], a['Unit'], 0, 0, 0, 1).GetBaseUnitQuantity()
-                    print(BaseUnitQuantity)
+                    # print(BaseUnitQuantity)
 
                     O_BatchWiseLiveStockList.append({
                         "Quantity": a['BatchID'],
@@ -186,7 +186,7 @@ class ProductionReIsssueFilter(CreateAPIView):
                 FromDate = ProductionReIsssuedata['FromDate']
                 ToDate = ProductionReIsssuedata['ToDate']
                 query = T_ProductionReIssue.objects.filter(Date__range=[FromDate, ToDate])
-                print(str(query.query))
+                # print(str(query.query))
                 if query:
                     ProductionReIsssue_serializerdata = ProductionReIssueSerializer(
                         query, many=True).data

@@ -51,7 +51,7 @@ class M_PartiesFilterView(CreateAPIView):
     def post(self, request):
 
         session = SessionStore(session_key=request.session.session_key)
-        print('bbbbbbbbbbbbbbbbb', session.get('UserName'))
+        # print('bbbbbbbbbbbbbbbbb', session.get('UserName'))
         try:
             with transaction.atomic():
 

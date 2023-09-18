@@ -93,7 +93,7 @@ WHERE Transactiontime BETWEEN %s AND %s'''
                     Transactionquery_sql += f' AND {where_clause}'
 
                 Transactionquery = Transactionlog.objects.raw(Transactionquery_sql, [FromDate, ToDate])
-                print(Transactionquery.query)
+                # print(Transactionquery.query)
                 if Transactionquery:
                         Transaction_Serializer = TransactionlogSerializer(Transactionquery,many=True).data
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Transaction_Serializer})
