@@ -134,7 +134,7 @@ class M_MRPsViewThird(CreateAPIView):
         # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':MRP_Serializer})
         for a in MRP_Serializer:
             deletedID = a['id'] 
-            print(deletedID)
+            # print(deletedID)
             try:
                 with transaction.atomic():
                     MRPdata = M_MRPMaster.objects.filter(id=deletedID).update(IsDeleted=1)

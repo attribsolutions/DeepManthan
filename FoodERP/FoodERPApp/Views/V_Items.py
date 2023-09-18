@@ -522,7 +522,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             })
                         
                         ww=ItemMargins+RateList
-                        print(a['id'])
+                        # print(a['id'])
                         ItemsList.append({
 
                             "FE2ItemID": a['id'],
