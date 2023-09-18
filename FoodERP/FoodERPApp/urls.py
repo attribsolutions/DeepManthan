@@ -604,6 +604,12 @@ urlpatterns = [
             url(r'Claimlist$',ClaimlistView.as_view()),
             
             
+            
+# ClaimTracking
+            url(r'ClaimListfortracking$',Listofclaimforclaimtracking.as_view()),
+            
+            
+            
 # StockAdjustment
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
             
