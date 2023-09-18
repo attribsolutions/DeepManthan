@@ -357,3 +357,26 @@ on a.PartyID=c.Customer_id''',([Party],[Party],[FromDate],[ToDate],[FromDate],[T
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not available', 'Data': []})
+        
+        
+        
+class Listofclaimforclaimtracking(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                ClaimTrackingdata = JSONParser().parse(request)
+                Year = ClaimTrackingdata['Year']
+                Month = ClaimTrackingdata['Month']
+                FromDate = Year+'-'+Month+'-'+'01'
+                Claimlistquery = M_Claim.objects.raw('''select M_Claim.id ,ReturnAmount As ClaimAmount, M_Parties.id As PartyID,M_Parties.Name PartyName FROM M_Claim JOIN M_Parties ON M_Parties.id=M_Claim.Customer_id WHERE FromDate =%s  ''',([FromDate]))
+                
+                if Claimlistquery:
+                    Claimlist = ClaimlistforClaimTrackingSerializer(Claimlistquery, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Claimlist})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not available', 'Data': []})
+            
