@@ -1659,7 +1659,7 @@ class TC_CreditDebitNoteItems(models.Model):
         db_table = "TC_CreditDebitNoteItems" 
 
 class TC_CreditDebitNoteUploads(models.Model):
-    CRDRNote = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNoteUploads',on_delete=models.CASCADE,null=True,blank=True)
+    CRDRNote = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNoteUploads',on_delete=models.PROTECT,null=True,blank=True)
     AckNo =  models.CharField(max_length=500,null=True)  
     Irn =  models.CharField(max_length=500,null=True)
     QRCodeUrl =models.CharField(max_length=500,null=True)
@@ -1858,7 +1858,7 @@ class Transactionlog(models.Model):
         db_table="Transactionlog"     
         
 class TC_InvoiceUploads(models.Model):
-    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.CASCADE) 
+    Invoice = models.ForeignKey(T_Invoices,related_name='InvoiceUploads', on_delete=models.PROTECT) 
     AckNo =  models.CharField(max_length=500,null=True)  
     Irn =  models.CharField(max_length=500,null=True)
     QRCodeUrl =models.CharField(max_length=500,null=True)
@@ -2119,7 +2119,47 @@ class L_TransactionDateLog(models.Model):
     Party = models.IntegerField()
     Item =models.IntegerField()
     class Meta:
-        db_table = "L_TransactionDateLog"   
+        db_table = "L_TransactionDateLog"
+        
+        
+        
+class T_ClaimTrackingEntry(models.Model):
+    Date =  models.DateField()
+    Month =  models.CharField(max_length=500,null=True)  
+    year = models.CharField(max_length=500,null=True) 
+    ClaimReceivedSource =  models.CharField(max_length=500,null=True) 
+    Type = models.IntegerField()
+    ClaimTrade = models.IntegerField()
+    TypeOfClaim = models.IntegerField()
+    ClaimAmount =models.DecimalField(max_digits=20, decimal_places=2)
+    Remark = models.CharField(max_length=500,null=True) 
+    ClaimCheckBy =models.IntegerField()
+    CreditNotestatus =models.IntegerField()
+    CreditNoteNo = models.CharField(max_length=500,null=True) 	
+    CreditNoteDate = models.DateField()	
+    CreditoteAmount	= models.DecimalField(max_digits=20, decimal_places=2)
+    ClaimSummaryDate = models.DateField()	
+    CreditNoteUpload = models.CharField(max_length=500,null=True)   
+	
+	
+
+
+
+
+
+
+
+
+	
+
+
+	
+
+
+	
+
+
+
 
 
 
