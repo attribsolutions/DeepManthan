@@ -27,6 +27,7 @@ class CustomDateTimeField(serializers.Field):
                 return datetime.strptime(data, "%d-%m-%y %H:%M")
             except ValueError:
                 raise serializers.ValidationError("Invalid datetime format. Use 'd-m-y H:M'.")
+            
 
 
 class TransactionlogSerializer(serializers.Serializer):
@@ -37,7 +38,7 @@ class TransactionlogSerializer(serializers.Serializer):
     TransactionType = serializers.CharField(max_length=500)
     TransactionID = serializers.IntegerField(default=1)
     PartyName = serializers.CharField(max_length=500)
-    TransactionDetails = serializers.CharField(max_length=500)
+    
 
 
     
