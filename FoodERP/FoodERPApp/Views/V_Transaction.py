@@ -65,7 +65,6 @@ class TransactionTypeView(CreateAPIView):
 
                 conditions = []
 
-                # Build conditions for TransactionType, User, and Party
                 if TransactionTypes == '' :
                     pass
                 else:
@@ -82,7 +81,7 @@ class TransactionTypeView(CreateAPIView):
                 where_clause = " AND ".join(conditions) if conditions else ""
 
 
-                Transactionquery_sql = f'''SELECT Transactionlog.id, Transactiontime, concat(M_Employees.Name,' (',M_Users.LoginName,')') UserName, IPaddress, M_TransactionType.Name, TransactionID, M_Parties.Name PartyName, TransactionDetails 
+                Transactionquery_sql = f'''SELECT Transactionlog.id, Transactiontime, concat(M_Employees.Name,' (',M_Users.LoginName,')') UserName, IPaddress, M_TransactionType.Name as TransactionType, TransactionID, M_Parties.Name PartyName, TransactionDetails
 FROM Transactionlog 
 JOIN M_Users ON Transactionlog.User = M_Users.id
 JOIN M_Employees ON M_Users.Employee_id = M_Employees.id
