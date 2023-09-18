@@ -259,8 +259,10 @@ class UserLoginView(RetrieveAPIView):
             log_entry = create_transaction_log(request, {'UserDetails':serializer},serializer.data['UserID'],0,"Login Successfully",140,0)
             return Response(response, status=status_code)
         else:
+         
             log_entry = create_transaction_log(request, {'UserDetails':serializer},0,0,"Incorrect LoginName and Password",141,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
+            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
 
 
 class ChangePasswordView(RetrieveAPIView):
