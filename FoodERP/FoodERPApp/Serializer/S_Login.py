@@ -100,14 +100,14 @@ class UserLoginSerializer(serializers.Serializer):
         user = authenticate(LoginName=LoginName, password=password)
       
         if user is None:
-            raise serializers.ValidationError('Incorrect LoginName and Password Please Check.')
+            raise serializers.ValidationError('Incorrect Username or Password.')
         try:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
             update_last_login(None, user)
         except M_Users.DoesNotExist:
-            raise serializers.ValidationError('User with given LoginName and Password does not exists')
+            raise serializers.ValidationError('User with given Username and Password does not exists')
             # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
         return {
             'LoginName': user.LoginName,
