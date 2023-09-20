@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from django.db import transaction
 from rest_framework.views import APIView
 import jwt
-from ..Views.V_CommFunction import *
+from .V_CommFunction import create_transaction_logNew
 
 # Create your views here.
 
@@ -180,7 +180,7 @@ class UserListViewSecond(CreateAPIView):
                         'UserRole': RoleData,
 
                     })
-                    log_entry = create_transaction_logNew(request, Usersdata_Serializer,PartyID,"User",137,0)
+                    log_entry = create_transaction_logNew(request, Usersdata_Serializer,PartyID,"Single User",137,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData[0]})
                 log_entry = create_transaction_logNew(request, Usersdata_Serializer,PartyID,"Data Not available",7,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data': ''})
@@ -255,12 +255,13 @@ class UserLoginView(RetrieveAPIView):
                 'refreshtoken': serializer.data['refreshtoken'],
                 'UserID': serializer.data['UserID']
             }
+            
             status_code = status.HTTP_200_OK
-            log_entry = create_transaction_log(request, {'UserDetails':serializer},serializer.data['UserID'],0,"Login Successfully",140,0)
+            log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
             return Response(response, status=status_code)
         else:
          
-            log_entry = create_transaction_log(request, {'UserDetails':serializer},0,0,"Incorrect LoginName and Password",141,0)
+            # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
             # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
 
