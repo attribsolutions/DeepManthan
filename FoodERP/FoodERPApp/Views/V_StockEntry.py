@@ -47,7 +47,12 @@ class StockEntryPageView(CreateAPIView):
                     else:
                         query3 = O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,id=a['BatchCodeID']).aggregate(total=Sum('BaseUnitQuantity'))
                   
+                    if query3['total']:
+                        totalstock=float(query3['total'])
+                    else:
+                        totalstock=0    
                     
+                    print(query3)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
@@ -77,7 +82,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : float(query3['total'])-round(BaseUnitQuantity,3)
+                    "Difference" : totalstock-round(BaseUnitQuantity,3)
                     })
                     
                     O_LiveBatchesList.append({
