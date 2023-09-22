@@ -94,7 +94,8 @@ class ClaimlistforClaimTrackingSerializer(serializers.Serializer):
     ClaimAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
     PartyID = serializers.IntegerField()
     PartyName= serializers.CharField(max_length=500)
-    
+    PartyTypeID = serializers.IntegerField()
+    PartyTypeName= serializers.CharField(max_length=500)
     
 class ClaimTrackingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -127,7 +128,10 @@ class ClaimTrackingSerializerSecond(serializers.Serializer):
     CreditNoteUpload = serializers.CharField(max_length=500)
     Claim_id = serializers.IntegerField()
     Party_id= serializers.IntegerField()
-    PartyName = serializers.CharField(max_length=500) 
+    PartyName = serializers.CharField(max_length=500)
+    FullClaimNo=serializers.CharField(max_length=500) 
+    PartyType_id= serializers.IntegerField() 
+    PartyTypeName = serializers.CharField(max_length=500)
  
 
     
