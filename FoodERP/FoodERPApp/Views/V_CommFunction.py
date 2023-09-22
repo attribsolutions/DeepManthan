@@ -15,6 +15,7 @@ from datetime import date
 from ..models import TransactionLogJsonData 
 
 
+
 '''Common Functions List
 1) class MaxValueMaster -  GetMaxValue
 2) class MRPMaster - GetTodaysDateMRP, GetEffectiveDateMRP, GetEffectiveDateMRPID
@@ -52,7 +53,12 @@ def create_transaction_logNew(request,data,PartyID,TransactionDetails,Transactio
     
     Authenticated_User = request.user
     User = Authenticated_User.id
-    
+
+    if not User:
+        User = data['UserID']
+    else:
+        pass
+
     if not FromDate :
         log_entry = Transactionlog.objects.create(
             TranasactionDate=date.today(),
