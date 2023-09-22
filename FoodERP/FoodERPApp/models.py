@@ -2140,9 +2140,10 @@ class T_ClaimTrackingEntry(models.Model):
     CreditNoteAmount	= models.DecimalField(max_digits=20, decimal_places=2)
     ClaimSummaryDate = models.DateField()	
     CreditNoteUpload = models.CharField(max_length=500,null=True)
-    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties, related_name='ClaimTrackingParty', on_delete=models.PROTECT) 
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
+    PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
+    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
     class Meta:
         db_table = "T_ClaimTrackingEntry"   
 	
