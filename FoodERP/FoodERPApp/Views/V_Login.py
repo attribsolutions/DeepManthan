@@ -180,12 +180,12 @@ class UserListViewSecond(CreateAPIView):
                         'UserRole': RoleData,
 
                     })
-                    # log_entry = create_transaction_logNew(request, Usersdata_Serializer,PartyID,"Single User",137,0)
+                    log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Single User",137,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData[0]})
-                # log_entry = create_transaction_logNew(request, Usersdata_Serializer,PartyID,"Data Not available",7,0)
+                log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Data Not available",7,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data': ''})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Execution Error",135,0) 
+            log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Execution Error",135,0) 
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
 
     @transaction.atomic()
