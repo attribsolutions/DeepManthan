@@ -213,7 +213,7 @@ class InvoiceListFilterView(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List",35,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
-                log_entry = create_transaction_logNew(request, Invoicedata, Party, "Record Not Found",29,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found",29,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Invoicedata, 0, Exception(e),33,0)
@@ -397,7 +397,7 @@ class InvoiceViewSecond(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice",50,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], " Data Not available",7,0,0,0,a['Customer']['id'])
+                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Data Not available",7,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
@@ -485,7 +485,7 @@ class InvoiceNoView(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request, InVoice_Data, x, "Invoice No List",36,0,0,0,Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
-                log_entry = create_transaction_logNew(request, InVoice_Data, x, "Record Not Found",29,0,0,0,Customer)
+                log_entry = create_transaction_logNew(request, InVoice_Data, x, "Invoice No Not Found",29,0,0,0,Customer)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, InVoice_Data, 0, Exception(e),33,0)
@@ -596,7 +596,7 @@ class InvoiceViewThird(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "InvoiceReturnCRDR",64,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Data Not available",7,0,0,0,a['Customer']['id'])
+                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Order Data Not available",7,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)

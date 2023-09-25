@@ -15,6 +15,7 @@ from datetime import date
 from ..models import TransactionLogJsonData 
 
 
+
 '''Common Functions List
 1) class MaxValueMaster -  GetMaxValue
 2) class MRPMaster - GetTodaysDateMRP, GetEffectiveDateMRP, GetEffectiveDateMRPID
@@ -52,7 +53,12 @@ def create_transaction_logNew(request,data,PartyID,TransactionDetails,Transactio
     
     Authenticated_User = request.user
     User = Authenticated_User.id
-    
+
+    if not User:
+        User = data['UserID']
+    else:
+        pass
+
     if not FromDate :
         log_entry = Transactionlog.objects.create(
             TranasactionDate=date.today(),
@@ -671,6 +677,37 @@ class GetPartyAddressDetails:
         
         
         
-        
- 
-        
+def ValidationFunForStockTransactions(PartyID, ItemID, TransactionDate) :
+
+    q=L_TransactionDateLog.objects.raw('''select 1 as id,StockAdjustmentDate from L_TransactionDateLog where Item=%s and Party=%s ''',([ItemID],[PartyID]))
+    for row in q:
+        StockAdjustmentDate = row.StockAdjustmentDate
+    
+    print(StockAdjustmentDate,TransactionDate)
+    if StockAdjustmentDate  >= TransactionDate:
+        print('55555')
+        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Transaction not allowed', 'Data': []})
+    else:
+        print('6666')
+        pass
+
+def TransactionDateLogFun(PartyID, ItemID, inputTransactionDate,inputStockAdjustmentDate):
+    q=L_TransactionDateLog.objects.raw('''select id,OldestTrnDate,NewestTrnDate,StockAdjustmentDate from L_TransactionDateLog where Item=%s and Party=%s ''',([ItemID],[PartyID]))
+    
+    if q:
+        for row in q:
+            OldestTrnDate = row.OldestTrnDate
+            NewestTrnDate = row.NewestTrnDate
+            StockAdjustmentDate = row.StockAdjustmentDate
+            if not StockAdjustmentDate:
+                pass
+
+
+
+    
+    
+    
+    
+    
+    else:
+        q1=L_TransactionDateLog.objects.create(OldestTrnDate=inputTransactionDate, NewestTrnDate=inputTransactionDate, StockAdjustmentDate=inputStockAdjustmentDate, Party=PartyID, Item=ItemID)               

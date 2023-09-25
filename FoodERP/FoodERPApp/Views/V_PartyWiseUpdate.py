@@ -104,12 +104,12 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "PartyName": a['SubParty']['Name'],
                                 Type: a['SubParty'][Type],
                                 })
-                    log_entry = create_transaction_log(request, Party_data, 0, Party, "PartyWise SubParty List",112,0)
+                    log_entry = create_transaction_logNew(request, Party_data, Party, "PartyWise SubParty List",112,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
-                log_entry = create_transaction_log(request, Party_data, 0, Party, PartyID_serializer.error,34,0)
+                log_entry = create_transaction_logNew(request, Party_data, 0, PartyID_serializer.error,34,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  PartyID_serializer.error, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Party_data, 0, Party,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Party_data, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -136,9 +136,9 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'], District=a['Value2'])
                     else:    
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})  
-                log_entry = create_transaction_log(request, Partydata, 0, Partydata['PartyID'], "PartyWise Update Successfully",113,0)
+                log_entry = create_transaction_logNew(request, Partydata,Partydata['PartyID'], "PartyWise Update Successfully",113,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_log(request, Partydata, 0, Partydata['PartyID'], Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Partydata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
 
