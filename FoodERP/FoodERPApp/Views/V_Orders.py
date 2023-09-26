@@ -859,7 +859,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                     })
 
                     FinalResult = NewOrder[0]
-                # log_entry = create_transaction_logNew(request, {'OrderID':OrderID}, Party,'From:'+a['POFromDate']+','+'To:'+a['POToDate']+','+'Customer:'+str(Customer),63,0,a['POFromDate'],a['POToDate'],Customer)
+                log_entry = create_transaction_logNew(request, {'OrderID':OrderID}, Party,'From:'+a['POFromDate']+','+'To:'+a['POToDate']+','+'Customer:'+str(Customer),63,0,a['POFromDate'],a['POToDate'],Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'OrderID':OrderID}, 0, e,33,0)
