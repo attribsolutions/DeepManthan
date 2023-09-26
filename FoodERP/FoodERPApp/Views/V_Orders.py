@@ -248,9 +248,9 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                                 "Percentage": "",
                                 "IsRecordDeleted":a.Hide,
                             })
-                        log_entry = create_transaction_logNew(request, Orderdata, a.SupplierID,'From:'+FromDate+','+'To:'+ToDate+','+'Customer:'+str(x),28,0,FromDate,ToDate,x)
+                        log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Customer:'+str(x),28,0,FromDate,ToDate,x)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
-                    log_entry = create_transaction_logNew(request, Orderdata, a.SupplierID, "Order List Not Found",28,0,FromDate,ToDate,x)
+                    log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
                 elif(OrderType == 1):  # OrderType -1 PO Order
