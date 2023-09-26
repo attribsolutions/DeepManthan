@@ -297,3 +297,134 @@ class GlobleInvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = T_Invoices
         fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'CreatedOn']                
+        
+        
+        
+
+
+class InvoiceEditStockSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
+    BatchDate = serializers.DateField()
+    BatchCode=serializers.CharField(max_length=100) 
+    SystemBatchDate = serializers.DateField()
+    SystemBatchCode=serializers.CharField(max_length=100) 
+    LiveBatchID = serializers.IntegerField() 
+    MRP_id=serializers.IntegerField() 
+    GST_id=serializers.IntegerField() 
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    UnitID_id = serializers.IntegerField()
+    BaseUnitConversion = serializers.CharField(max_length=100) 
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)      
+         
+class InvoiceEditItemSerializer(serializers.Serializer):
+    id=serializers.IntegerField()
+    Item_id=serializers.IntegerField()
+    ItemName=serializers.CharField(max_length=100)
+    Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    MRP_id=serializers.IntegerField() 
+    MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Unit_id=serializers.IntegerField() 
+    UnitName=serializers.CharField(max_length=100)
+    ConversionUnit =serializers.DecimalField(max_digits=10, decimal_places=2) 
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GST_id=serializers.IntegerField()
+    HSNCode = serializers.CharField(max_length=100)
+    GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGST=serializers.DecimalField(max_digits=10, decimal_places=2)
+    CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2) 
+    DiscountType = serializers.IntegerField() 
+    Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    
+    
+    
+class UpdateInvoicesReferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_InvoicesReferences
+        fields = ['Order']         
+         
+class UpdateInvoiceItemsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = TC_InvoiceItems
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']   
+
+class UpdateobatchwiseStockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=O_BatchWiseLiveStock
+        fields=['id','LiveBatche','BaseUnitQuantity','Item','PreviousInvoiceBaseBaseUnitQuantity']
+        
+class UpdateInvoiceSerializer(serializers.ModelSerializer):
+    InvoiceItems = UpdateInvoiceItemsSerializer(many=True)
+    InvoicesReferences = UpdateInvoicesReferencesSerializer(many=True) 
+    obatchwiseStock=UpdateobatchwiseStockSerializer(many=True)
+    class Meta:
+        model = T_Invoices
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+    
+    def update(self, instance, validated_data):
+    
+        instance.InvoiceDate = validated_data.get(
+            'InvoiceDate', instance.InvoiceDate)
+        instance.InvoiceNumber = validated_data.get(
+            'InvoiceNumber', instance.InvoiceNumber)
+        instance.FullInvoiceNumber = validated_data.get(
+            'FullInvoiceNumber', instance.FullInvoiceNumber)
+        instance.GrandTotal = validated_data.get(
+            'GrandTotal', instance.GrandTotal)
+        instance.RoundOffAmount = validated_data.get(
+            'RoundOffAmount', instance.RoundOffAmount)
+        instance.CreatedBy = validated_data.get(
+            'CreatedBy', instance.CreatedBy)
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy)
+        instance.Customer = validated_data.get(
+            'Customer', instance.Customer)
+        instance.Party = validated_data.get(
+            'Party', instance.Party)
+        instance.Vehicle = validated_data.get(
+            'Vehicle', instance.Vehicle)
+        instance.Driver = validated_data.get(
+            'Driver', instance.Driver)
+        instance.TCSAmount = validated_data.get(
+            'TCSAmount', instance.TCSAmount)
+            
+        instance.save()
+
+        for a in instance.InvoiceItems.all():
+            a.delete()
+            
+        for b in instance.InvoicesReferences.all():
+            b.delete()
+            
+            
+        for InvoiceItem_data in validated_data['InvoiceItems']:
+            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
+            
+        for O_BatchWiseLiveStockItem_data in validated_data['obatchwiseStock']:
+            
+                OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['id'],LiveBatche=O_BatchWiseLiveStockItem_data['LiveBatche']).values('BaseUnitQuantity')
+                OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['id']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] + O_BatchWiseLiveStockItem_data['PreviousInvoiceBaseUnitQuantity'])
+                UpdatedOBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['id'],LiveBatche=O_BatchWiseLiveStockItem_data['LiveBatche']).values('BaseUnitQuantity')
+
+                if(UpdatedOBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
+                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['id']).update(BaseUnitQuantity =  UpdatedOBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
+                else:
+                    raise serializers.ValidationError("Not In Stock ")    
+          
+        for InvoicesReference_data in  validated_data['InvoicesReferences']:
+          
+            InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=instance, **InvoicesReference_data)   
+                  
+
+        return instance         
