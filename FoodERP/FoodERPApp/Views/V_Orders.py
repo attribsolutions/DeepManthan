@@ -143,7 +143,7 @@ class OrderListFilterView(CreateAPIView):
                             "Inward": inward,
                             "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
                         })
-                    log_entry = create_transaction_logNew(request, Orderdata,a['Supplier']['id'],'From:'+FromDate+','+'To:'+ToDate+','+'Customer:'+str(x),28,0,FromDate,ToDate,x)
+                    log_entry = create_transaction_logNew(request, Orderdata,a['Supplier']['id'],'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
                 log_entry = create_transaction_logNew(request, Orderdata, a['Supplier']['id'], "Order List Not Found",28,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
@@ -248,7 +248,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                                 "Percentage": "",
                                 "IsRecordDeleted":a.Hide,
                             })
-                        log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Customer:'+str(x),28,0,FromDate,ToDate,x)
+                        log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                     log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -351,7 +351,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                         "Percentage": Percentage,
 
                     })
-                log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Customer:'+str(x),28,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
             log_entry = create_transaction_logNew(request, Orderdata, z, "Order Not available",28,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
@@ -408,7 +408,7 @@ class T_OrdersView(CreateAPIView):
                     else:
                         IsSAPCustomer = 1
 
-                    log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Customer:'+str(Division),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Division)    
+                    log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Division)+','+'TransactionID:'+str(OrderID),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Division)    
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'TransactionID': OrderID, 'IsSAPCustomer': IsSAPCustomer, 'Data': []})
                 log_entry = create_transaction_logNew(request, Orderdata, 0, Order_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
@@ -526,7 +526,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "OrderItem": OrderItemDetails,
                             "OrderTermsAndCondition": OrderTermsAndCondition
                         })
-                    log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'],'From:'+a['POFromDate']+','+'To:'+a['POToDate']+','+'Customer:'+str(a['Customer']['id']),62,0,a['POFromDate'],a['POToDate'],a['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'],'From:'+a['POFromDate']+','+'To:'+a['POToDate']+','+'Supplier:'+str(a['Customer']['id']),62,0,a['POFromDate'],a['POToDate'],a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                 log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'], 'Order Not Found',62,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
@@ -560,7 +560,7 @@ class T_OrdersViewSecond(CreateAPIView):
                     OrderupdateByID, data=Orderupdatedata)
                 if Orderupdate_Serializer.is_valid():
                     Orderupdate_Serializer.save()
-                    log_entry = create_transaction_logNew(request, Orderupdatedata, Orderupdatedata['Supplier'],'From:'+Orderupdatedata['POFromDate']+','+'To:'+Orderupdatedata['POToDate']+','+'Customer:'+str(Orderupdatedata['Customer']),2,id,Orderupdatedata['POFromDate'],Orderupdatedata['POToDate'],Orderupdatedata['Customer'])
+                    log_entry = create_transaction_logNew(request, Orderupdatedata, Orderupdatedata['Supplier'],'From:'+Orderupdatedata['POFromDate']+','+'To:'+Orderupdatedata['POToDate']+','+'Supplier:'+str(Orderupdatedata['Customer']),2,id,Orderupdatedata['POFromDate'],Orderupdatedata['POToDate'],Orderupdatedata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, Orderupdatedata, 0, Orderupdate_Serializer.errors,34,0)
@@ -980,7 +980,7 @@ where Supplier_id=%s and OrderDate between %s and %s
                     #                 "OrderAmount": float(a['OrderAmount']),
                     #                 "CreatedOn": a['CreatedOn']
                     #             })
-                    log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate+','+'Customer:'+str(Company),31,0,FromDate,ToDate,Company)            
+                    log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(Company),31,0,FromDate,ToDate,Company)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order Summary Not available",7,0)
 
