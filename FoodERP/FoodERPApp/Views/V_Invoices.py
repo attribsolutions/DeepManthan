@@ -687,4 +687,140 @@ class UpdateVehicleInvoiceView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})         
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
+        
+
+
+  
+
+class InvoiceViewEditView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                
+                query1 = TC_InvoicesReferences.objects.filter(Invoice=id).values('Order')
+                Orderdata = list()
+                query = T_Invoices.objects.filter(id=id).values('Customer')
+                # print(query.query)
+                Customer=query[0]['Customer']
+                Itemsquery= TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,TC_InvoiceItems.Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.Unit_id,MC_ItemUnits.BaseUnitConversion UnitName,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_InvoiceItems.BaseUnitQuantity,TC_InvoiceItems.GST_id,M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.BasicAmount,TC_InvoiceItems.GSTAmount,CGST, SGST, IGST, CGSTPercentage,SGSTPercentage, IGSTPercentage,Amount,DiscountType,Discount,DiscountAmount FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id Where TC_InvoiceItems.Invoice_id=%s ''',([id]))
+                if Itemsquery:
+                    InvoiceEditSerializer = InvoiceEditItemSerializer(Itemsquery, many=True).data
+                    OrderItemDetails=list()
+                    seen_item_ids = set()
+                    for b in InvoiceEditSerializer:
+                        item_id = b['Item_id']
+                        if item_id in seen_item_ids:
+                            break  # Exit the loop when a repeated Item_id is encountered
+                        seen_item_ids.add(item_id)  # Add the current Item_id to the set of seen Item_ids
+                        batchquery = TC_InvoiceItems.objects.filter(Item=b['Item_id'],Invoice = id).values('LiveBatch_id')
+                        LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
+                        # print(LiveBatchIDlist)
+                        stockquery=O_LiveBatches.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity FROM O_LiveBatches JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(id,LiveBatchIDlist))
+                        # print(stockquery.query)
+                        InvocieEditStock=InvoiceEditStockSerializer(stockquery,many=True).data
+                        stockDatalist = list()
+                        for d in InvocieEditStock:
+                            Rate=RateCalculationFunction(d['LiveBatchID'],d['Item_id'],Customer,0,d["UnitID_id"],0,0).RateWithGST()
+
+                            stockDatalist.append({
+                                    "id": d['id'],
+                                    "Item":d['Item_id'],
+                                    "BatchDate":d['BatchDate'],
+                                    "BatchCode":d['BatchCode'],
+                                    "SystemBatchDate":d['SystemBatchDate'],
+                                    "SystemBatchCode":d['SystemBatchCode'],
+                                    "LiveBatche" : d['LiveBatchID'],
+                                    "LiveBatcheMRPID" : d['MRP_id'],
+                                    "LiveBatcheGSTID" : d['GST_id'],
+                                    "Rate":Rate[0]["NoRatewithOutGST"],
+                                    "MRP" : d['MRPValue'],
+                                    "GST" : d['GSTPercentage'],
+                                    "UnitName":d['BaseUnitConversion'], 
+                                    "BaseUnitQuantity":d['BaseUnitQuantity'],
+                                    
+                                    })
+                        
+                        OrderItemDetails.append({
+                            
+                            "id": b['id'],
+                            "Item": item_id,
+                            "ItemName": b['ItemName'],
+                            "Quantity": b['Quantity'],
+                            "MRP": b['MRP_id'],
+                            "MRPValue": b['MRPValue'],
+                            "Rate": b['Rate'],
+                            "Unit": b['Unit_id'],
+                            "UnitName": b['UnitName'],
+                            "ConversionUnit": b['ConversionUnit'],
+                            "BaseUnitQuantity": b['BaseUnitQuantity'],
+                            "GST": b['GST_id'],
+                            "HSNCode": b['HSNCode'],
+                            "GSTPercentage": b['GSTPercentage'],
+                            "BasicAmount": b['BasicAmount'],
+                            "GSTAmount": b['GSTAmount'],
+                            "CGST": b['CGST'],
+                            "SGST": b['SGST'],
+                            "IGST": b['IGST'],
+                            "CGSTPercentage": b['CGSTPercentage'],
+                            "SGSTPercentage": b['SGSTPercentage'],
+                            "IGSTPercentage": b['IGSTPercentage'],
+                            "Amount": b['Amount'],
+                            "DiscountType" : b['DiscountType'],
+                            "Discount" :b['Discount'] ,
+                            "DiscountAmount":b['DiscountAmount'],
+                            "UnitDetails":UnitDropdown(b['Item_id'],Customer,0),
+                            "StockDetails":stockDatalist
+                        })
+                    Orderdata.append({
+                        "OrderIDs":[str(query1[0]['Order'])],
+                        "OrderItemDetails":OrderItemDetails
+                        })       
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+    
+    @transaction.atomic()
+    def put(self, request, id=0, Company=0):
+        try:
+            with transaction.atomic():
+                
+                Invoicedata = JSONParser().parse(request)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bomsdata })
+                InvoicedataByID = T_Invoices.objects.get(id=id)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(BomsdataByID.query)})
+                InvoiceItems = Invoicedata['InvoiceItems']
+                O_BatchWiseLiveStockList=list()
+                for InvoiceItem in InvoiceItems:
+                    # print(InvoiceItem['Quantity'])
+                    BaseUnitQuantity=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                    QtyInNo=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                    InvoiceItem['QtyInNo'] =  float(QtyInNo)
+                    QtyInKg=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                    InvoiceItem['QtyInKg'] =  float(QtyInKg)
+                    QtyInBox=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                    InvoiceItem['QtyInBox'] = float(QtyInBox)
+                    
+                    O_BatchWiseLiveStockList.append({
+                        "id" : InvoiceItem['BatchID'],
+                        "LiveBatche":InvoiceItem['LiveBatch'],
+                        "Item" : InvoiceItem['Item'],
+                        "BaseUnitQuantity" : InvoiceItem['BaseUnitQuantity'],
+                        "PreviousInvoiceBaseUnitQuantity" : InvoiceItem['PreviousInvoiceBaseUnitQuantity']
+                    })
+                Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList})
+                Invoice_Serializer = UpdateInvoiceSerializer(InvoicedataByID, data=Invoicedata)
+                if Invoice_Serializer.is_valid():
+                    Invoice_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Invoice_Serializer.errors, 'Data': []})    
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
+                                  
