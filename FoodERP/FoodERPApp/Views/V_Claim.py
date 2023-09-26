@@ -401,7 +401,7 @@ LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
 JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
 JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
 JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
-                
+                # print(ClaimTrackingquery.query)
                 if ClaimTrackingquery :
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data

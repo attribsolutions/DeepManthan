@@ -203,7 +203,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         'total_cgst_value': Invoice['total_cgst_value'],
                         'total_sgst_value': Invoice['total_sgst_value'],
                         'total_igst_value': Invoice['total_igst_value'],
-                        'total_discount': Invoice['total_discount']
+                        'total_discount': 0
                     }),
                     ewaybill_details.append({
                         'transportation_mode': 1,
