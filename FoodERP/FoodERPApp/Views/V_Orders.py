@@ -53,8 +53,16 @@ class OrderListFilterView(CreateAPIView):
                 # for log
                 if OrderType == 1:
                     x = Customer
+                    if Supplier == '':
+                        z = 0
+                    else:
+                        z = Supplier
                 else:
                     x = Supplier
+                    if Customer == '':
+                        z = 0
+                    else:
+                        z = Customer
                     
 
                 if(OrderType == 1):  # OrderType -1 PO Order
@@ -143,9 +151,9 @@ class OrderListFilterView(CreateAPIView):
                             "Inward": inward,
                             "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
                         })
-                    log_entry = create_transaction_logNew(request, Orderdata,a['Supplier']['id'],'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
+                    log_entry = create_transaction_logNew(request, Orderdata,z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-                log_entry = create_transaction_logNew(request, Orderdata, a['Supplier']['id'], "Order List Not Found",28,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0, Exception(e),33,0)
