@@ -78,7 +78,7 @@ class LoadingSheetView(CreateAPIView):
                 if Loadingsheet_Serializer.is_valid():
                     LoadingSheet = Loadingsheet_Serializer.save()
                     LastInsertID = LoadingSheet.id 
-                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'TransactionID:'+str(LastInsertID),43,LastInsertID)
+                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party,'LoadingSheetDate:'+Date+','+'TransactionID:'+str(LastInsertID),43,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
                     log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, Loadingsheet_Serializer.errors,34,0)
