@@ -69,7 +69,7 @@ left join M_Districts PD on PD.id=P.District_id
 left join M_Districts CD on  CD.id=C.District_id
 where T_Invoices.id=%s)a
 left join 
-(select sum(BasicAmount)Total_assessable_value,(sum(Amount)-sum(DiscountAmount))total_invoice_value,sum(CGST)total_cgst_value,
+(select sum(BasicAmount)Total_assessable_value,(sum(Amount))total_invoice_value,sum(CGST)total_cgst_value,
 sum(SGST) total_sgst_value,sum(IGST)total_igst_value,sum(DiscountAmount)total_discount, Invoice_id 
 from TC_InvoiceItems where Invoice_id=%s)b
 on a.id=b.Invoice_id''',([id],[id])
@@ -247,12 +247,12 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         if(Query.count() > 0):
                             
                             StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1 })
                         else:
                            
                             InvoiceID=T_Invoices.objects.get(id=id)
                             Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': [] })
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1})
                     else:
                         
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
