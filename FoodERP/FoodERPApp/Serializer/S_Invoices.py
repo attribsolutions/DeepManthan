@@ -360,9 +360,11 @@ class UpdateInvoiceItemsSerializer(serializers.ModelSerializer):
         fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']   
 
 class UpdateobatchwiseStockSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    PreviousInvoiceBaseUnitQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
     class Meta:
         model=O_BatchWiseLiveStock
-        fields=['id','LiveBatche','BaseUnitQuantity','Item','PreviousInvoiceBaseBaseUnitQuantity']
+        fields=['id','LiveBatche','BaseUnitQuantity','Item','PreviousInvoiceBaseUnitQuantity']
         
 class UpdateInvoiceSerializer(serializers.ModelSerializer):
     InvoiceItems = UpdateInvoiceItemsSerializer(many=True)
