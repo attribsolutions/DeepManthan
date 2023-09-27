@@ -488,7 +488,12 @@ class ProductAndMarginReportView(CreateAPIView):
                         ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0,Division_id__isnull=True,Party_id__isnull=True).values('MRP').order_by('-id')[:1]
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
-
+                        PcsInBoxQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=4).values('BaseUnitQuantity')
+                        if PcsInBoxQuery :
+                            PcsInBox =float(PcsInBoxQuery[0]['BaseUnitQuantity'])
+                        else:
+                            PcsInBox = 0.00
+                        
                         if ItemMRPdata.count() == 0:
                             MRPV=0
                         else:    
@@ -542,6 +547,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
                             "Company": a['Company']['Name'],
                             "ShelfLife":float(Itemshelfdata[0]['Days']),
+                            "PcsInBox":PcsInBox,
                             "ItemMargins":ww
                             
                         })
