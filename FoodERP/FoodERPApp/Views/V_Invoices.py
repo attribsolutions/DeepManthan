@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django.db.models import Sum
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
@@ -717,16 +718,22 @@ class InvoiceViewEditView(CreateAPIView):
                     seen_item_ids = set()
                     for b in InvoiceEditSerializer:
                         item_id = b['Item_id']
+                      
                         if item_id in seen_item_ids:
                             break  # Exit the loop when a repeated Item_id is encountered
                         seen_item_ids.add(item_id)  # Add the current Item_id to the set of seen Item_ids
-                        batchquery = TC_InvoiceItems.objects.filter(Item=b['Item_id'],Invoice = id).values('LiveBatch_id')
+                        batchquery = TC_InvoiceItems.objects.filter(Item=item_id,Invoice = id).values('LiveBatch_id')
                         LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
                         # print(LiveBatchIDlist)
                         stockquery=O_LiveBatches.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity FROM O_LiveBatches JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(id,LiveBatchIDlist))
-                        # print(stockquery.query)
+                
                         InvocieEditStock=InvoiceEditStockSerializer(stockquery,many=True).data
                         stockDatalist = list()
+                        queryset = TC_InvoiceItems.objects.filter(Item_id=item_id,Invoice_id=id,LiveBatch_id__in=LiveBatchIDlist).aggregate(Quantity=Sum('Quantity'))
+                        quantity_sum = queryset.get('Quantity', 0)
+                       
+                       
+
                         for d in InvocieEditStock:
                             Rate=RateCalculationFunction(d['LiveBatchID'],d['Item_id'],Customer,0,d["UnitID_id"],0,0).RateWithGST()
 
@@ -753,7 +760,7 @@ class InvoiceViewEditView(CreateAPIView):
                             "id": b['id'],
                             "Item": item_id,
                             "ItemName": b['ItemName'],
-                            "Quantity": b['Quantity'],
+                            "Quantity": quantity_sum,
                             "MRP": b['MRP_id'],
                             "MRPValue": b['MRPValue'],
                             "Rate": b['Rate'],

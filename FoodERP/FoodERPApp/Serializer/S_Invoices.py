@@ -362,7 +362,7 @@ class UpdateInvoiceItemsSerializer(serializers.ModelSerializer):
 class UpdateobatchwiseStockSerializer(serializers.ModelSerializer):
     class Meta:
         model=O_BatchWiseLiveStock
-        fields=['id','LiveBatche','BaseUnitQuantity','Item','PreviousInvoiceBaseBaseUnitQuantity']
+        fields=['id','LiveBatche','BaseUnitQuantity','Item','PreviousInvoiceBaseUnitQuantity']
         
 class UpdateInvoiceSerializer(serializers.ModelSerializer):
     InvoiceItems = UpdateInvoiceItemsSerializer(many=True)
