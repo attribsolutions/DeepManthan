@@ -991,8 +991,104 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
+        
+        
+              
+class CreditDebitExportReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Reportdata = JSONParser().parse(request)
+                FromDate = Reportdata['FromDate']
+                ToDate = Reportdata['ToDate']
+                Party =  Reportdata['Party']
+                Customer = Reportdata['Customer']
+                NoteTypeIDs = Reportdata['NoteTypeIDs']
+                NoteType_list = NoteTypeIDs.split(",")
+                
+                
+                if(Party)>0:
+                    query = TC_CreditDebitNoteItems.objects.raw('''SELECT TC_CreditDebitNoteItems.id,T_CreditDebitNotes.Party_id AS SupplierID,A.Name SupplierName,T_CreditDebitNotes.FullNoteNumber AS InvoiceNumber,T_CreditDebitNotes.CRDRNoteDate AS InvoiceDate,M_GeneralMaster.Name,T_CreditDebitNotes.Customer_id As CustomerID,B.Name CustomerName,TC_CreditDebitNoteItems.Item_id As FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_CreditDebitNoteItems.MRPValue , TC_CreditDebitNoteItems.QtyInNo, TC_CreditDebitNoteItems.QtyInKg,TC_CreditDebitNoteItems.QtyInBox, "" AS RatePerPiece,TC_CreditDebitNoteItems.Rate AS BasicRate, (TC_CreditDebitNoteItems.Rate +((TC_CreditDebitNoteItems.Rate * TC_CreditDebitNoteItems.GSTPercentage)/100))WithGSTRate,M_Units.Name AS UnitName,TC_CreditDebitNoteItems.DiscountType, TC_CreditDebitNoteItems.Discount, TC_CreditDebitNoteItems.DiscountAmount,TC_CreditDebitNoteItems.BasicAmount AS TaxableValue, TC_CreditDebitNoteItems.CGSTPercentage, TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGSTPercentage, TC_CreditDebitNoteItems.SGST,TC_CreditDebitNoteItems.IGSTPercentage,TC_CreditDebitNoteItems.IGST,TC_CreditDebitNoteItems.GSTPercentage, TC_CreditDebitNoteItems.Amount AS TotalValue, T_CreditDebitNotes.RoundOffAmount,T_CreditDebitNotes.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_CreditDebitNoteUploads.Irn, TC_CreditDebitNoteUploads.AckNo,TC_CreditDebitNoteUploads.EwayBillNo
+FROM TC_CreditDebitNoteItems
+JOIN T_CreditDebitNotes ON T_CreditDebitNotes.id=TC_CreditDebitNoteItems.CRDRNote_id
+JOIN M_Parties A ON A.id= T_CreditDebitNotes.Party_id
+JOIN M_Parties B ON B.id = T_CreditDebitNotes.Customer_id
+JOIN M_States ON M_States.id = B.State_id
+JOIN M_Items ON M_Items.id = TC_CreditDebitNoteItems.Item_id
+JOIN C_Companies ON C_Companies.id = M_Items.Company_id
+JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_CreditDebitNoteItems.Unit_id
+JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_CreditDebitNoteItems.Item_id AND M_GSTHSNCode.IsDeleted=0
+JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_CreditDebitNotes.Customer_id AND MC_PartySubParty.Party_id=%s
+LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+LEFT JOIN TC_CreditDebitNoteUploads ON TC_CreditDebitNoteUploads.CRDRNote_id=T_CreditDebitNotes.id
+JOIN M_GeneralMaster ON M_GeneralMaster.id = T_CreditDebitNotes.NoteType_id
+WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.Party_id=%s AND NoteType_id IN %s ''',([Party],[FromDate],[ToDate],[Party],NoteType_list))
+                # print(query.query)
+                if query:
+                    InvoiceExportData=list()
+                    InvoiceExportSerializer= CreditDebitDataExportSerializer(query, many=True).data
+                    for b in InvoiceExportSerializer:
+                        
+                        qur2=M_Parties.objects.filter(id=b['CustomerID']).values('PriceList').distinct()
+                        query = M_PriceList.objects.values('id').filter(id__in=qur2)
+                        
+                        Rate=RateCalculationFunction(0,b['FE2MaterialID'],0,0,1,0,query[0]['id']).RateWithGST()
+                        NoRate=float(Rate[0]['NoRatewithOutGST'])
+                        InvoiceExportData.append({
+                            
+                            "SupplierID":b['SupplierID'],
+                            "SupplierName":b['SupplierName'],
+                            "InvoiceNumber":b['InvoiceNumber'],
+                            "InvoiceDate":b['InvoiceDate'],
+                            "NoteType":b['Name'],
+                            "CustomerID":b['CustomerID'],
+                            "CustomerName":b['CustomerName'],
+                            "FE2MaterialID":b['FE2MaterialID'],
+                            "MaterialName":b['MaterialName'],
+                            "CompanyName":b['CompanyName'],
+                            "HSNCode":b['HSNCode'],
+                            "MRP":b['MRPValue'],
+                            "QtyInNo":b['QtyInNo'],
+                            "QtyInKg":b['QtyInKg'],
+                            "QtyInBox":b['QtyInBox'],
+                            "BasicRate":b['BasicRate'],
+                            "WithGSTRate":b['WithGSTRate'],
+                            "NoRate":NoRate,
+                            "UnitName":b['UnitName'],
+                            "DiscountType":b['DiscountType'],
+                            "Discount":b['Discount'],
+                            "DiscountAmount":b['DiscountAmount'],
+                            "TaxableValue":b['TaxableValue'],
+                            "CGST":b['CGST'],
+                            "CGSTPercentage":b['CGSTPercentage'],
+                            "SGST":b['SGST'],
+                            "SGSTPercentage":b['SGSTPercentage'],
+                            "IGST":b['IGST'],
+                            "IGSTPercentage":b['IGSTPercentage'],
+                            "GSTPercentage":b['GSTPercentage'],
+                            "GSTAmount":b['GSTAmount'],
+                            "TotalValue":b['TotalValue'],
+                            # "TCSAmount":b['TCSAmount'],
+                            "RoundOffAmount":b['RoundOffAmount'],
+                            "GrandTotal":b['GrandTotal'],
+                            "RouteName":b['RouteName'],
+                            "StateName":b['StateName'],
+                            "GSTIN":b['GSTIN'],
+                            "Irn":b['Irn'],
+                            "AckNo":b['AckNo'],
+                            "EwayBillNo":b['EwayBillNo'],
+                        })
+                    # InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+                
         
         
         
