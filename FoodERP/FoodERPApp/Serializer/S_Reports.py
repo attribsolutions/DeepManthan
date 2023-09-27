@@ -300,6 +300,7 @@ class CreditDebitDataExportSerializer(serializers.Serializer):
     SupplierName = serializers.CharField(max_length=500)
     InvoiceNumber=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
+    Name = serializers.CharField(max_length=500)
     CustomerID=serializers.IntegerField()
     CustomerName = serializers.CharField(max_length=500)
     FE2MaterialID=serializers.IntegerField()
@@ -335,6 +336,7 @@ class CreditDebitDataExportSerializer(serializers.Serializer):
     Irn = serializers.CharField(max_length=500)
     AckNo = serializers.CharField(max_length=500)
     EwayBillNo = serializers.CharField(max_length=500)
+    
 
     def to_representation(self, instance):
         a = super().to_representation(instance)
