@@ -114,7 +114,7 @@ class RoutesUpdateListView(CreateAPIView):
                           
                 q0 = MC_PartySubParty.objects.filter(Party = Party).values("SubParty")
                 
-                q1 = M_Parties.objects.filter(id__in=q0,PartyType__IsRetailer=1).values("id")
+                q1 = M_Parties.objects.filter(id__in=q0).values("id")
                     
                 query = MC_PartySubParty.objects.filter(SubParty__in=q1,Party=Party) 
                 
@@ -133,7 +133,7 @@ class RoutesUpdateListView(CreateAPIView):
                             "RouteName":a['Route']['Name']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Creditlimit  Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Route  Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
           
