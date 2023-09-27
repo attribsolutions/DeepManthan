@@ -38,7 +38,7 @@ class GRNListFilterView(CreateAPIView):
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
-                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'Data Not available',7,0)
+                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'GRN Not available',68,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
@@ -80,7 +80,7 @@ class GRNListFilterView(CreateAPIView):
                             x = 0
                         else:
                             x= Supplier
-                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'GRN List',68,0,FromDate,ToDate,x)
+                    log_entry = create_transaction_logNew(request, GRNdata, 0,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(Customer),68,0,FromDate,ToDate,Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'Exception(e)',33,0)
@@ -187,8 +187,8 @@ class T_GRNView(CreateAPIView):
                     # return JsonResponse({'Data':GRN_serializer.data})
                     GRN = GRN_serializer.save()
                     LastInsertId = GRN.id
-                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'GRN Save Successfully',69,LastInsertId,0,0,GRNdata['Party'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': []})
+                    log_entry = create_transaction_logNew(request, GRNdata, GRNdata['Party'],'GRNDate:'+GRNdata['GRNDate']+','+'Supplier:'+str(Customer)+','+'TransactionID:'+str(LastInsertId),69,LastInsertId,0,0,Customer)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'TransactionID':LastInsertId, 'Data': []})
                 log_entry = create_transaction_logNew(request, GRNdata,0,GRN_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': GRN_serializer.errors, 'Data': []})
         except Exception as e:
@@ -269,7 +269,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
-                log_entry = create_transaction_logNew(request, {'GRNID':id}, a['Customer']['id'],'GRN',70,0,0,0,a['Party']['id'])
+                log_entry = create_transaction_logNew(request, {'GRNID':id}, a['Party']['id'],'Single GRN',70,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,Exception(e),33,0)
