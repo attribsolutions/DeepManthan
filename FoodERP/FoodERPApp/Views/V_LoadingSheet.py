@@ -50,9 +50,9 @@ class LoadingSheetListView(CreateAPIView):
                             "CreatedOn" :a['CreatedOn']
                         })
                     
-                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'Loading Sheet List',42,0,FromDate,ToDate)
+                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party,'From:'+FromDate+','+'To:'+ToDate,42,0,FromDate,ToDate)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': LoadingSheetListData})
-                log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'Data Not available',7,0,FromDate,ToDate)
+                log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'LoadingSheetList Not available',42,0,FromDate,ToDate)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Loadingsheetdata,0, Exception(e),33,0)
@@ -77,10 +77,9 @@ class LoadingSheetView(CreateAPIView):
                 Loadingsheet_Serializer = LoadingSheetSerializer(data=Loadingsheetdata)
                 if Loadingsheet_Serializer.is_valid():
                     LoadingSheet = Loadingsheet_Serializer.save()
-                    LastInsertID = LoadingSheet.id
-                    
-                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'Loading Sheet Save Successfully',43,LastInsertID)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'Data':[]})
+                    LastInsertID = LoadingSheet.id 
+                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'TransactionID:'+str(LastInsertID),43,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
                     log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, Loadingsheet_Serializer.errors,34,0)
                     transaction.set_rollback(True)
@@ -156,9 +155,9 @@ class LoadingSheetView(CreateAPIView):
                         "InvoiceParent":InvoiceParent,
                     })    
                     
-                    log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'], 'Loadingsheet',49,0)
+                    log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'LoadingsheetDate:'+LoadingSheet_Serializer[0]['Date'],49,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
-                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'], 'Data Not available',7,0)
+                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'], 'Loadingsheet Not available',49,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, Exception(e),33,0)
@@ -194,7 +193,7 @@ class LoadingSheetView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'Loading Sheet Deleted Successfully',45,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Deleted Successfully', 'Data':[]})
         except T_LoadingSheet.DoesNotExist:
-            log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'Data Not available',7)
+            log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'LoadingSheet Not available',45)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Loading Sheet Not available', 'Data': []})
         except IntegrityError:   
             log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'Loading Sheet used in another table',8,0)
@@ -237,9 +236,9 @@ class LoadingSheetInvoicesView(CreateAPIView):
                             "GrandTotal": a['GrandTotal'],
                             "CreatedOn": a['CreatedOn'] 
                         })
-                    log_entry = create_transaction_logNew(request, Invoicedata,Party,'LoadingSheetInVoice',46,0,FromDate,ToDate)
+                    log_entry = create_transaction_logNew(request, Invoicedata,Party,'From:'+FromDate+','+'To:'+ToDate,46,0,FromDate,ToDate)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
-                log_entry = create_transaction_logNew(request, Invoicedata,Party,'Record Not Found',29,0,FromDate,ToDate)
+                log_entry = create_transaction_logNew(request, Invoicedata,Party,'LoadingSheetInvoice Not Available',46,0,FromDate,ToDate)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Invoicedata, 0,'Exception(e)',33,0)
@@ -360,7 +359,7 @@ class LoadingSheetPrintView(CreateAPIView):
                         "InvoiceItems":InvoiceItemDetails,
                         "InvoiceParent":InvoiceParent,
                     })    
-                    log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, b['Party']['id'],'LoadingSheetPrint',47,0,0,0,b['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, b['Party']['id'],'LoadingSheetPrintDate:'+LoadingSheet_Serializer[0]['Date'],47,0,0,0,b['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0] })
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, b['Party']['id'],'Data Not available',7,0,0,0,b['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Data Not available ', 'Data': []})
@@ -479,7 +478,7 @@ class MultipleInvoicesView(CreateAPIView):
                             })
                     InvoiceList.append( InvoiceData[0] )  
                     
-                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'MultipleInvoices',48,0,0,0,a['Customer']['id'])
+                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'InvoiceDate:'+InvoiceSerializedata[0]['InvoiceDate'],48,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, Exception(e),33,0)
