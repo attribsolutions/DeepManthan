@@ -1027,7 +1027,7 @@ LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 LEFT JOIN TC_CreditDebitNoteUploads ON TC_CreditDebitNoteUploads.CRDRNote_id=T_CreditDebitNotes.id
 JOIN M_GeneralMaster ON M_GeneralMaster.id = T_CreditDebitNotes.NoteType_id
 WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.Party_id=%s AND NoteType_id IN %s ''',([Party],[FromDate],[ToDate],[Party],NoteType_list))
-                print(query.query)
+                # print(query.query)
                 if query:
                     InvoiceExportData=list()
                     InvoiceExportSerializer= CreditDebitDataExportSerializer(query, many=True).data
