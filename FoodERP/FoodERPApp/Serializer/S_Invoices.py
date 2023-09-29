@@ -411,7 +411,10 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
             
             
         for InvoiceItem_data in validated_data['InvoiceItems']:
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
+            Quantity  = InvoiceItem_data.get('Quantity', 0)
+            
+            if Quantity > 0:
+                InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
             
         for O_BatchWiseLiveStockItem_data in validated_data['obatchwiseStock']:
             
@@ -425,8 +428,6 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Not In Stock ")    
           
         for InvoicesReference_data in  validated_data['InvoicesReferences']:
-          
             InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=instance, **InvoicesReference_data)   
                   
-
         return instance         
