@@ -540,40 +540,42 @@ class NewRetailerSendToMobileAppView(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                ItemData=list()
+                RetailerData=list()
                 today = date.today()
-                q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
-,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,'') FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
-,GSTHsnCodeMaster(M_Items.id,%s,3) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0) MRPValue
-FROM M_Items
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
-left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-where M_Items.id=%s''',([today],[today],[id]))
+                q0=M_Items.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
+cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
+(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id
+ FROM MC_PartySubParty 
+ join M_Parties dist on dist.id=MC_PartySubParty.Party_id
+ join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
+ left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
+ where cust.PartyType_id=11 and cust.id=%s''',([id]))
                 print(q0)
                 for row in q0:
                      
-                    ItemData.append({
-                            "FoodERPItemID": row.id,
-                            "FoodERPCategoryId":"",
-                            "FoodERPFamilyId":row.FoodERPFamilyId,
-                            "FoodERPTypeId":"",
-                            "FoodERPUomId":row.BaseUnitID_id,
-                            "ItemName":row.ItemName,
-                            "MRP":row.MRPValue,
-                            "RetailerRate":"",
-                            "DistributorRate":"",
-                            "SuperStockistRate":"",
-                            "ProductHSN":row.HSNCode,
-                            "IsActive":row.isActive
+                    RetailerData.append({
+                            "FoodERPRetailerID": row.id,
+                            "RouteId"       :row.Route_id,
+                            "RetailerName"  :row.RetailerName,
+                            "DistributorId" :row.distid,
+                            "Address"       :row.BaseUnitID_id,
+                            "MobileNumber"  :row.MobileNumber,
+                            "EmailAddress"  :row.EmailAddress,
+                            "PANNumber"     :row.PANNumber,
+                            "GSTNumber"     :row.GSTNumber,
+                            "FSSAINumber"   :row.FSSAINo,
+                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            "Latitude"      :row.Latitude,
+                            "Longitude"     :row.Longitude,
+                            "IsActive"      :row.isActive
+                           
                             
                         })
 
                 payload={
-                    "products" : ItemData
+                    "outlets" : RetailerData
                 }
-                url = "https://webapps.theskygge.com/fmcg_middleware/products/add"
+                url = "https://webapps.theskygge.com/fmcg_middleware/outlets/add"
 
                 headers = {
                             'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
@@ -593,3 +595,97 @@ where M_Items.id=%s''',([today],[today],[id]))
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
+    @transaction.atomic()
+    def put(self, request,id=0):
+        try:
+            with transaction.atomic():
+                
+                RetailerData=list()
+                today = date.today()
+                q0=M_Items.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
+cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
+(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id
+ FROM MC_PartySubParty 
+ join M_Parties dist on dist.id=MC_PartySubParty.Party_id
+ join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
+ left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
+ where cust.PartyType_id=11 and cust.id=%s''',([id]))
+                print(q0)
+                for row in q0:
+                     
+                    RetailerData.append({
+                            "FoodERPRetailerID": row.id,
+                            "RouteId"       :row.Route_id,
+                            "RetailerName"  :row.RetailerName,
+                            "DistributorId" :row.distid,
+                            "Address"       :row.BaseUnitID_id,
+                            "MobileNumber"  :row.MobileNumber,
+                            "EmailAddress"  :row.EmailAddress,
+                            "PANNumber"     :row.PANNumber,
+                            "GSTNumber"     :row.GSTNumber,
+                            "FSSAINumber"   :row.FSSAINo,
+                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            "Latitude"      :row.Latitude,
+                            "Longitude"     :row.Longitude,
+                            "IsActive"      :row.isActive
+                           
+                            
+                        })
+
+                payload={
+                    "outlets" : RetailerData
+                }
+                url = "https://webapps.theskygge.com/fmcg_middleware/outlets/update"
+
+                headers = {
+                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'Content-Type': 'application/json'
+                          }
+                
+                print(payload)
+                response = requests.request(
+                    "POST", url, headers=headers, data=payload)
+                print(response.text)
+                response_json=response.text
+
+                
+                # log_entry = create_transaction_log(request, data, 0, 0,response_json)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+            
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
+            
+    @transaction.atomic()
+    def delete(self, request,id=0):
+        try:
+            with transaction.atomic():
+                
+                RetailerData=list()
+                
+                RetailerData.append({
+                        
+                        "FoodERPRetailerID" : id
+                    })
+
+                payload={
+                    "products" : RetailerData
+                }
+                url = "https://webapps.theskygge.com/fmcg_middleware/outlets/delete"
+
+                headers = {
+                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'Content-Type': 'application/json'
+                          }
+                
+                print(payload)
+                response = requests.request(
+                    "delete", url, headers=headers, data=payload)
+                print(response.text)
+                response_json=response.text
+
+                
+                # log_entry = create_transaction_log(request, data, 0, 0,response_json)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+            
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})          
