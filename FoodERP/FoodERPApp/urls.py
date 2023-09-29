@@ -156,6 +156,10 @@ urlpatterns = [
     url(r'MobileAppOrder/([0-9]+)$',T_MobileAppOrdersView.as_view()),
     url(r'MobileAppAddProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     
+    url(r'MobileAppUpdateProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
+    url(r'MobileAppDeleteProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
+    url(r'MobileAppAddRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
+    
 # User 
             path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
             path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
