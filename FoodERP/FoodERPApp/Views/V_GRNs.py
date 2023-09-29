@@ -291,7 +291,7 @@ class T_GRNViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'GRN Deleted Successfully',71,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Deleted Successfully', 'Data': []})
         except T_GRNs.DoesNotExist:
-            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'Data Not available',7,0)
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'GRN Not Exist',71,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
             log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'GRN Used in another Transaction',72,0)

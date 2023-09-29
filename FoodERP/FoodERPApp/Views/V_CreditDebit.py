@@ -27,6 +27,7 @@ class CreditDebitNoteListView(CreateAPIView):
                 NoteType = CreditDebitdata['NoteType']
                 Note = CreditDebitdata['Note']
                 
+
                 if Note == "Credit":
                     if NoteType == '':
                         P=Q(NoteType_id__in=(37,39))
@@ -67,9 +68,14 @@ class CreditDebitNoteListView(CreateAPIView):
                             "IsRecordDeleted" : a["IsDeleted"],
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
-                    log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitNote List',83,0,FromDate,ToDate,0)
+                     #for log
+                    if Customer == '':
+                        Customer = 0
+                    else:
+                        Customer = Customer
+                    log_entry = create_transaction_logNew(request, CreditDebitdata,Customer ,'From:'+FromDate+','+'To:'+ToDate,83,0,FromDate,ToDate,Party)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
-                log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'Record Not Found',29,0)
+                log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitList Not Available',83,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, CreditDebitdata, 0,Exception(e),33,0)
@@ -113,10 +119,10 @@ class CreditDebitNoteView(CreateAPIView):
                     data=CreditNotedata)
                 if CreditNote_Serializer.is_valid():
                     CreditDebit = CreditNote_Serializer.save()
-                    LastinsertID = CreditDebit.id
-                    log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CreditdebitNote Save Successfully',84,LastinsertID,0,0,CreditNotedata['Customer'])
+                    LastInsertID = CreditDebit.id
+                    log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CRDRNoteDate:'+CreditNotedata['CRDRNoteDate']+','+'Supplier:'+str(CreditNotedata['Customer'])+','+'TransactionID:'+str(LastInsertID),84,LastInsertID,0,0,CreditNotedata['Customer'])
                     if(NoteType==37 or NoteType==39):
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'Data': []})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'TransactionID':LastInsertID, 'Data': []})
                     else:
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DebitNote Save Successfully', 'Data': []})
                 else:
@@ -227,9 +233,9 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRInvoices": CRDRInvoices,
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
-                    # log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'CreditdebitNote',85,0,0,0,a['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'Single CreditdebitNote',85,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
-                # log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
+                log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0, Exception(e),33,0)
@@ -244,13 +250,13 @@ class CreditDebitNoteView(CreateAPIView):
                 NoteType = query[0]['NoteType']
                 CreditDebitdata = T_CreditDebitNotes.objects.filter(id=id).update(IsDeleted=1)
                 if(NoteType==37 or NoteType==39):
-                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditNote Deleted Successfully',86,0)
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'',86,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Deleted Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'DebitNote Deleted Successfully',86,0)
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'',86,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DebitNote Deleted Successfully', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'CreditdebitNote used in another table',8,0)
+            log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,Exception(e),33,0)
