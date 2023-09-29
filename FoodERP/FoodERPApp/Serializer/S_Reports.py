@@ -349,7 +349,7 @@ class CreditDebitDataExportSerializer(serializers.Serializer):
         return a    
     
 class ReceiptDataExportSerializer(serializers.Serializer):
-    
+    id=serializers.IntegerField()
     SupplierID=serializers.IntegerField()
     SupplierName = serializers.CharField(max_length=500)
     ReceiptNumber=serializers.CharField(max_length=500)
