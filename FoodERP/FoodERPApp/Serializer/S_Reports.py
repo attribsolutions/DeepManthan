@@ -348,17 +348,19 @@ class CreditDebitDataExportSerializer(serializers.Serializer):
 
         return a    
     
-  
-   
-   
+class ReceiptDataExportSerializer(serializers.Serializer):
     
-    
-
-    
-    
-        
-   
-    
-
-    
-   
+    SupplierID=serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)
+    ReceiptNumber=serializers.CharField(max_length=500)
+    ReceiptDate = serializers.DateField()
+    CustomerID=serializers.IntegerField()
+    CustomerName = serializers.CharField(max_length=500)
+    ReceiptTypeName=serializers.CharField(max_length=100)
+    ReceiptModeName=serializers.CharField(max_length=100)
+    BankName=serializers.CharField(max_length=100)
+    DepositorBankName=serializers.CharField(max_length=100)
+    AmountPaid=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Description = serializers.CharField(max_length=500)
+    ChequeDate = serializers.DateField()
+    DocumentNo = serializers.CharField(max_length=500)
