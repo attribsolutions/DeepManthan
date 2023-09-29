@@ -724,7 +724,7 @@ class InvoiceViewEditView(CreateAPIView):
                         item_id = b['Item_id']
                       
                         if item_id in seen_item_ids:
-                            break  # Exit the loop when a repeated Item_id is encountered
+                            continue   # Exit the loop when a repeated Item_id is encountered
                         seen_item_ids.add(item_id)  # Add the current Item_id to the set of seen Item_ids
                         batchquery = TC_InvoiceItems.objects.filter(Item=item_id,Invoice = id).values('LiveBatch_id')
                         LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
@@ -735,8 +735,6 @@ class InvoiceViewEditView(CreateAPIView):
                         stockDatalist = list()
                         queryset = TC_InvoiceItems.objects.filter(Item_id=item_id,Invoice_id=id,LiveBatch_id__in=LiveBatchIDlist).aggregate(Quantity=Sum('Quantity'))
                         quantity_sum = queryset.get('Quantity', 0)
-                       
-                       
 
                         for d in InvocieEditStock:
                             Rate=RateCalculationFunction(d['LiveBatchID'],d['Item_id'],Customer,0,d["UnitID_id"],0,0).RateWithGST()
@@ -759,38 +757,38 @@ class InvoiceViewEditView(CreateAPIView):
                                     
                                     })
                         
-                            OrderItemDetails.append({
-                                
-                                "id": b['id'],
-                                "Item": item_id,
-                                "ItemName": b['ItemName'],
-                                "Quantity": quantity_sum,
-                                "MRP": b['MRP_id'],
-                                "MRPValue": b['MRPValue'],
-                                "Rate": b['Rate'],
-                                "Unit": b['Unit_id'],
-                                "UnitName": b['UnitName'],
-                                "DeletedMCUnitsUnitID":b['DeletedMCUnitsUnitID'],
-                                "ConversionUnit": b['ConversionUnit'],
-                                "BaseUnitQuantity": b['BaseUnitQuantity'],
-                                "GST": b['GST_id'],
-                                "HSNCode": b['HSNCode'],
-                                "GSTPercentage": b['GSTPercentage'],
-                                "BasicAmount": b['BasicAmount'],
-                                "GSTAmount": b['GSTAmount'],
-                                "CGST": b['CGST'],
-                                "SGST": b['SGST'],
-                                "IGST": b['IGST'],
-                                "CGSTPercentage": b['CGSTPercentage'],
-                                "SGSTPercentage": b['SGSTPercentage'],
-                                "IGSTPercentage": b['IGSTPercentage'],
-                                "Amount": b['Amount'],
-                                "DiscountType" : b['DiscountType'],
-                                "Discount" :b['Discount'] ,
-                                "DiscountAmount":b['DiscountAmount'],
-                                "UnitDetails":UnitDropdown(b['Item_id'],Customer,0),
-                                "StockDetails":stockDatalist
-                            })
+                        OrderItemDetails.append({
+                            
+                            "id": b['id'],
+                            "Item": item_id,
+                            "ItemName": b['ItemName'],
+                            "Quantity": quantity_sum,
+                            "MRP": b['MRP_id'],
+                            "MRPValue": b['MRPValue'],
+                            "Rate": b['Rate'],
+                            "Unit": b['Unit_id'],
+                            "UnitName": b['UnitName'],
+                            "DeletedMCUnitsUnitID":b['DeletedMCUnitsUnitID'],
+                            "ConversionUnit": b['ConversionUnit'],
+                            "BaseUnitQuantity": b['BaseUnitQuantity'],
+                            "GST": b['GST_id'],
+                            "HSNCode": b['HSNCode'],
+                            "GSTPercentage": b['GSTPercentage'],
+                            "BasicAmount": b['BasicAmount'],
+                            "GSTAmount": b['GSTAmount'],
+                            "CGST": b['CGST'],
+                            "SGST": b['SGST'],
+                            "IGST": b['IGST'],
+                            "CGSTPercentage": b['CGSTPercentage'],
+                            "SGSTPercentage": b['SGSTPercentage'],
+                            "IGSTPercentage": b['IGSTPercentage'],
+                            "Amount": b['Amount'],
+                            "DiscountType" : b['DiscountType'],
+                            "Discount" :b['Discount'] ,
+                            "DiscountAmount":b['DiscountAmount'],
+                            "UnitDetails":UnitDropdown(b['Item_id'],Customer,0),
+                            "StockDetails":stockDatalist
+                        })
                     Orderdata.append({
                         "OrderIDs":[str(query1[0]['Order'])],
                         "OrderItemDetails":OrderItemDetails,
