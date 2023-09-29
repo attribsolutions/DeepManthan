@@ -261,22 +261,6 @@ class PurchaseReturnView(CreateAPIView):
 
                 item = ""
 
-                #for log
-                # if Mode == 1:
-                #         x = Party
-
-                #         y = PurchaseReturndata['Customer']
-
-                # elif  Mode == 2:
-                #     x = PurchaseReturndata['Customer']
-
-                #     y = Party
-
-                # elif Mode == 3:
-                #     x = PurchaseReturndata['Customer']
-
-                #     y = Party
-
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
@@ -371,19 +355,14 @@ class PurchaseReturnView(CreateAPIView):
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
-                    # log_entry = create_transaction_logNew(request, PurchaseReturndata, x, 'Return Save Successfully',53,LastInsertID,0,0,y)
+                    log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,Party)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'Data':[]})
                 else:
-                  
-                    # log_entry = create_transaction_logNew(request, PurchaseReturndata, x,  PurchaseReturn_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],  PurchaseReturn_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
-            print('DDDDD')
-            print(str(e))
-            # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
-            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data':[]})
- 
+            log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
     
     # Purchase Return DELETE API New code Date 25/07/2023
