@@ -595,6 +595,7 @@ urlpatterns = [
             url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
             url(r'MaterialRegister$', MaterialRegisterDownloadView.as_view()),
             url(r'CreditDebitDataExport$', CreditDebitExportReportView.as_view()),
+            url(r'ReceiptDataExport$', ReceiptDataExportReportView.as_view()),
             
             
             
