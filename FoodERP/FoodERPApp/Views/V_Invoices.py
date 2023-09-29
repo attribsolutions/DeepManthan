@@ -715,7 +715,7 @@ class InvoiceViewEditView(CreateAPIView):
                 Customer=query[0]['Customer']
                 InvoiceNumber=query[0]['InvoiceNumber']
                 FullInvoiceNumber=query[0]['FullInvoiceNumber']
-                Itemsquery= TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,TC_InvoiceItems.Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.Unit_id,MC_ItemUnits.BaseUnitConversion UnitName,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_InvoiceItems.BaseUnitQuantity,TC_InvoiceItems.GST_id,M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.BasicAmount,TC_InvoiceItems.GSTAmount,CGST, SGST, IGST, CGSTPercentage,SGSTPercentage, IGSTPercentage,Amount,DiscountType,Discount,DiscountAmount FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id Where TC_InvoiceItems.Invoice_id=%s ''',([id]))
+                Itemsquery= TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,TC_InvoiceItems.Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.Unit_id,MC_ItemUnits.BaseUnitConversion UnitName,MC_ItemUnits.UnitID_id DeletedMCUnitsUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_InvoiceItems.BaseUnitQuantity,TC_InvoiceItems.GST_id,M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.BasicAmount,TC_InvoiceItems.GSTAmount,CGST, SGST, IGST, CGSTPercentage,SGSTPercentage, IGSTPercentage,Amount,DiscountType,Discount,DiscountAmount FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id Where TC_InvoiceItems.Invoice_id=%s ''',([id]))
                 if Itemsquery:
                     InvoiceEditSerializer = InvoiceEditItemSerializer(Itemsquery, many=True).data
                     OrderItemDetails=list()
@@ -759,37 +759,38 @@ class InvoiceViewEditView(CreateAPIView):
                                     
                                     })
                         
-                        OrderItemDetails.append({
-                            
-                            "id": b['id'],
-                            "Item": item_id,
-                            "ItemName": b['ItemName'],
-                            "Quantity": quantity_sum,
-                            "MRP": b['MRP_id'],
-                            "MRPValue": b['MRPValue'],
-                            "Rate": b['Rate'],
-                            "Unit": b['Unit_id'],
-                            "UnitName": b['UnitName'],
-                            "ConversionUnit": b['ConversionUnit'],
-                            "BaseUnitQuantity": b['BaseUnitQuantity'],
-                            "GST": b['GST_id'],
-                            "HSNCode": b['HSNCode'],
-                            "GSTPercentage": b['GSTPercentage'],
-                            "BasicAmount": b['BasicAmount'],
-                            "GSTAmount": b['GSTAmount'],
-                            "CGST": b['CGST'],
-                            "SGST": b['SGST'],
-                            "IGST": b['IGST'],
-                            "CGSTPercentage": b['CGSTPercentage'],
-                            "SGSTPercentage": b['SGSTPercentage'],
-                            "IGSTPercentage": b['IGSTPercentage'],
-                            "Amount": b['Amount'],
-                            "DiscountType" : b['DiscountType'],
-                            "Discount" :b['Discount'] ,
-                            "DiscountAmount":b['DiscountAmount'],
-                            "UnitDetails":UnitDropdown(b['Item_id'],Customer,0),
-                            "StockDetails":stockDatalist
-                        })
+                            OrderItemDetails.append({
+                                
+                                "id": b['id'],
+                                "Item": item_id,
+                                "ItemName": b['ItemName'],
+                                "Quantity": quantity_sum,
+                                "MRP": b['MRP_id'],
+                                "MRPValue": b['MRPValue'],
+                                "Rate": b['Rate'],
+                                "Unit": b['Unit_id'],
+                                "UnitName": b['UnitName'],
+                                "DeletedMCUnitsUnitID":b['DeletedMCUnitsUnitID'],
+                                "ConversionUnit": b['ConversionUnit'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST_id'],
+                                "HSNCode": b['HSNCode'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "DiscountType" : b['DiscountType'],
+                                "Discount" :b['Discount'] ,
+                                "DiscountAmount":b['DiscountAmount'],
+                                "UnitDetails":UnitDropdown(b['Item_id'],Customer,0),
+                                "StockDetails":stockDatalist
+                            })
                     Orderdata.append({
                         "OrderIDs":[str(query1[0]['Order'])],
                         "OrderItemDetails":OrderItemDetails,
