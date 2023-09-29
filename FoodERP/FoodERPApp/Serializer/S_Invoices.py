@@ -328,6 +328,7 @@ class InvoiceEditItemSerializer(serializers.Serializer):
     Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
     Unit_id=serializers.IntegerField() 
     UnitName=serializers.CharField(max_length=100)
+    DeletedMCUnitsUnitID=serializers.IntegerField() 
     ConversionUnit =serializers.DecimalField(max_digits=10, decimal_places=2) 
     BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
     GST_id=serializers.IntegerField()
@@ -411,7 +412,10 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
             
             
         for InvoiceItem_data in validated_data['InvoiceItems']:
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
+            Quantity  = InvoiceItem_data.get('Quantity', 0)
+            
+            if Quantity > 0:
+                InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
             
         for O_BatchWiseLiveStockItem_data in validated_data['obatchwiseStock']:
             
@@ -425,8 +429,6 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Not In Stock ")    
           
         for InvoicesReference_data in  validated_data['InvoicesReferences']:
-          
             InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=instance, **InvoicesReference_data)   
                   
-
         return instance         

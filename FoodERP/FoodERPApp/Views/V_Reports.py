@@ -1082,12 +1082,55 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                             "AckNo":b['AckNo'],
                             "EwayBillNo":b['EwayBillNo'],
                         })
-                    # InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+        
+        
+        
+class ReceiptDataExportReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Reportdata = JSONParser().parse(request)
+                FromDate = Reportdata['FromDate']
+                ToDate = Reportdata['ToDate']
+                Party =  Reportdata['Party']
+                
+                if(Party)>0:
+                    query = T_Receipts.objects.raw('''SELECT T_Receipts.id, T_Receipts.Party_id AS SupplierID, A.Name SupplierName, T_Receipts.FullReceiptNumber AS ReceiptNumber, T_Receipts.ReceiptDate, T_Receipts.Customer_id AS CustomerID,B.Name CustomerName,C.Name As ReceiptTypeName,D.Name As ReceiptModeName,E.Name As BankName,F.Name As DepositorBankName,AmountPaid,T_Receipts.Description,ChequeDate,DocumentNo FROM T_Receipts JOIN  M_GeneralMaster C ON C.id=T_Receipts.ReceiptType_id JOIN  M_GeneralMaster D ON D.id=T_Receipts.ReceiptMode_id LEFT JOIN M_Bank E ON E.id=T_Receipts.Bank_id LEFT JOIN M_Bank F ON F.id=T_Receipts.DepositorBank_id JOIN M_Parties A on A.id= T_Receipts.Party_id JOIN M_Parties B on B.id = T_Receipts.Customer_id WHERE T_Receipts.ReceiptDate BETWEEN %s AND %s AND T_Receipts.Party_id=%s Order By id desc''',([FromDate],[ToDate],[Party]))
+                # print(query.query)
+                if query:
+                    ReceiptExportData=list()
+                    ReceiptExportSerializer= ReceiptDataExportSerializer(query, many=True).data
+                    for b in ReceiptExportSerializer:
+                        ReceiptExportData.append({
+                            "id":b['id'],
+                            "SupplierID":b['SupplierID'],
+                            "SupplierName":b['SupplierName'],
+                            "ReceiptNumber":b['ReceiptNumber'],
+                            "ReceiptDate":b['ReceiptDate'],
+                            "CustomerID":b['CustomerID'],
+                            "CustomerName":b['CustomerName'],
+                            "ReceiptType":b['ReceiptTypeName'],
+                            "ReceiptMode":b['ReceiptModeName'],
+                            "BankName":b['BankName'],
+                            "DepositorBankName":b['DepositorBankName'],
+                            "AmountPaid":b['AmountPaid'],
+                            "Description":b['Description'],
+                            "ChequeDate":b['ChequeDate'],
+                            "DocumentNo":b['DocumentNo']
+                        })
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ReceiptExportData})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
                 
         
         
