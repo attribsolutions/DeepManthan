@@ -799,7 +799,7 @@ class InvoiceViewEditView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
     
     @transaction.atomic()
-    def put(self, request, id=0, Company=0):
+    def put(self, request, id=0):
         try:
             with transaction.atomic():
                 
