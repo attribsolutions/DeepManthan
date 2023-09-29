@@ -105,6 +105,7 @@ def UnitDropdown(ItemID,PartyForRate,BatchID=0):
             "SODefaultUnit": d['SODefaultUnit'],
             "Rate" : round(Rate,2),
             "BaseUnitQuantityNoUnit":q0[0]["BaseUnitQuantity"],
+            "DeletedMCUnitsUnitID":d['UnitID']['id'],
             
         })
     return UnitDetails

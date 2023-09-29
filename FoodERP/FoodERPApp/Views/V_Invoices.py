@@ -93,19 +93,20 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "BaseUnitQuantity":d['BaseUnitQuantity'],
                                   
                                 })
-                    query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                    # print(query.query)
-                    if query.exists():
-                        Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
-                        UnitDetails = list()
-                        for c in Unitdata:
+                    # query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
+                    # # print(query.query)
+                    # if query.exists():
+                    #     Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                    #     UnitDetails = list()
+                    #     for c in Unitdata:
                            
-                            UnitDetails.append({
-                            "Unit": c['id'],
-                            "UnitName": c['BaseUnitConversion'],
-                            "ConversionUnit": c['BaseUnitQuantity'],
-                            "Unitlabel": c['UnitID']['Name']
-                        })
+                    #         UnitDetails.append({
+                    #         "Unit": c['id'],
+                    #         "UnitName": c['BaseUnitConversion'],
+                    #         "ConversionUnit": c['BaseUnitQuantity'],
+                    #         "Unitlabel": c['UnitID']['Name'],
+                            
+                    #     })
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
                     # =====================Current Discount================================================
                     TodaysDiscount = DiscountMaster(
@@ -125,6 +126,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "Rate": b['Rate'],
                         "Unit": b['Unit']['id'],
                         "UnitName": b['Unit']['BaseUnitConversion'],
+                        "DeletedMCUnitsUnitID": b['Unit']['UnitID']['id'],
                         "ConversionUnit": b['Unit']['BaseUnitQuantity'],
                         "BaseUnitQuantity": b['BaseUnitQuantity'],
                         "GST": b['GST']['id'],
