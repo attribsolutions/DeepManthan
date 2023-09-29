@@ -154,7 +154,7 @@ class ReceiptView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, Receiptdata, Party, Receipt_serializer.errors,34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
-                log_entry = create_transaction_logNew(request, Receiptdata,Receiptdata['BulkData'][0]['Customer'] ,'ReceiptDate:'+Date+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),78,LastInsertID,0,0,Receiptdata['BulkData'][0]['Customer'])
+                log_entry = create_transaction_logNew(request, Receiptdata,Receiptdata['BulkData'][0]['Customer'] ,'ReceiptDate:'+Date+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),78,LastInsertID,0,0,Party)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully','TransactionID':LastInsertID, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Receiptdata, 0,  Exception(e),33,0)
