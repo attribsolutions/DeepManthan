@@ -328,6 +328,7 @@ class InvoiceEditItemSerializer(serializers.Serializer):
     Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
     Unit_id=serializers.IntegerField() 
     UnitName=serializers.CharField(max_length=100)
+    DeletedMCUnitsUnitID=serializers.IntegerField() 
     ConversionUnit =serializers.DecimalField(max_digits=10, decimal_places=2) 
     BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
     GST_id=serializers.IntegerField()
