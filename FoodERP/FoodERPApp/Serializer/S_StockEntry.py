@@ -51,7 +51,6 @@ class PartyStockAdjustmentOLiveBatchesSerializer(serializers.ModelSerializer):
         
         
     def create(self, validated_data):
-        print('aaaaaa',validated_data['Mode'])
         O_BatchWiseLiveStockListItems_data = validated_data.pop('O_BatchWiseLiveStockList')
         T_StockEntryItemsList_data = validated_data.pop('T_StockEntryList')
         
@@ -60,6 +59,6 @@ class PartyStockAdjustmentOLiveBatchesSerializer(serializers.ModelSerializer):
                 StockItem=T_Stock.objects.create(**T_StockEntryItem_data)
         
         for O_BatchWiseLiveStockItems_data in O_BatchWiseLiveStockListItems_data:
-            GrnItem=O_BatchWiseLiveStock.objects.filter(id=T_StockEntryItem_data['BatchCodeID']).update(BaseUnitQuantity=O_BatchWiseLiveStockItems_data['BaseUnitQuantity'])    
+            GrnItem=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItems_data['BatchCodeID']).update(BaseUnitQuantity=O_BatchWiseLiveStockItems_data['BaseUnitQuantity'])    
         
         return GrnItem
