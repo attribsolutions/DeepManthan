@@ -411,7 +411,6 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
             
             
         for InvoiceItem_data in validated_data['InvoiceItems']:
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=instance, **InvoiceItem_data)
             Quantity  = InvoiceItem_data.get('Quantity', 0)
             
             if Quantity > 0:
