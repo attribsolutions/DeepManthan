@@ -219,9 +219,10 @@ class M_PartiesViewSecond(CreateAPIView):
                 M_Parties_Serializer = UpdateM_PartiesSerializer(
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
-                    M_Parties_Serializer.save()
+                    UpdatedParty = M_Parties_Serializer.save()
+                    LastInsertID = UpdatedParty.id
                     log_entry = create_transaction_logNew(request,M_Partiesdata, 0, "Party Updated Successfully",94,id)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request,M_Partiesdata, 0, M_Parties_Serializer.errors,34,0)
                     transaction.set_rollback(True)
@@ -236,8 +237,9 @@ class M_PartiesViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Partiesdata = M_Parties.objects.get(id=id)
                 M_Partiesdata.delete()
+                
                 log_entry = create_transaction_logNew(request,{'PartyID':id}, 0, "Party Deleted Successfully",95,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party  Deleted Successfully','TransactionID':id, 'Data': []})
         except M_Parties.DoesNotExist:
             log_entry = create_transaction_logNew(request,{'PartyID':id}, 0, "Data Not available",7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Not available', 'Data': []})
