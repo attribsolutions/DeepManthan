@@ -184,7 +184,7 @@ class M_ItemsView(CreateAPIView):
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
                     log_entry = create_transaction_log(request, Itemsdata, 0, 0, "Item Save Successfully",103,LastInsertID)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 else:
                     log_entry = create_transaction_log(request, Itemsdata, 0, 0, Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
@@ -410,9 +410,10 @@ class M_ItemsViewSecond(CreateAPIView):
                 M_Items_Serializer = ItemSerializer(
                     M_ItemsdataByID, data=M_Itemsdata)
                 if M_Items_Serializer.is_valid():
-                    M_Items_Serializer.save()
+                    UpdatedItem = M_Items_Serializer.save()
+                    LastInsertID = UpdatedItem.id
                     log_entry = create_transaction_log(request, M_Itemsdata, 0, 0, "Item Updated Successfully",104,id)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','Data' : []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','TransactionID':LastInsertID,'Data' : []})
                 else:
                     log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,M_Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
@@ -428,7 +429,7 @@ class M_ItemsViewSecond(CreateAPIView):
                 M_Itemsdata = M_Items.objects.get(id=id)
                 M_Itemsdata.delete()
                 log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Item Deleted Successfully",105,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','TransactionID':id,'Data':[]})
         except M_Items.DoesNotExist:
             log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Data Not available",7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item Not available', 'Data': []})
