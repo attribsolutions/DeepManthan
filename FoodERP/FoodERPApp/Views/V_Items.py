@@ -184,7 +184,7 @@ class M_ItemsView(CreateAPIView):
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
                     log_entry = create_transaction_log(request, Itemsdata, 0, 0, "Item Save Successfully",103,LastInsertID)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 else:
                     log_entry = create_transaction_log(request, Itemsdata, 0, 0, Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
