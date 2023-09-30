@@ -49,8 +49,9 @@ class PartySubPartyView(CreateAPIView):     # PartySubParty Save
                     
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':str(PartySubpartiesdata.query)})
                    
-                    PartySubparties_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully', 'Data':[]})
+                    PartySubParty = PartySubparties_Serializer.save()
+                    LastInsertID = PartySubParty.id
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party SubParty Save Successfully','TransactionID':LastInsertID ,'Data':[]})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartySubparties_Serializer.errors, 'Data':[]})

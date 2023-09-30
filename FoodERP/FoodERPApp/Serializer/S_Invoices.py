@@ -373,28 +373,17 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=UpdateobatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = ['id','GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
     
     def update(self, instance, validated_data):
     
-        instance.InvoiceDate = validated_data.get(
-            'InvoiceDate', instance.InvoiceDate)
-        instance.InvoiceNumber = validated_data.get(
-            'InvoiceNumber', instance.InvoiceNumber)
-        instance.FullInvoiceNumber = validated_data.get(
-            'FullInvoiceNumber', instance.FullInvoiceNumber)
+        
         instance.GrandTotal = validated_data.get(
             'GrandTotal', instance.GrandTotal)
         instance.RoundOffAmount = validated_data.get(
             'RoundOffAmount', instance.RoundOffAmount)
-        instance.CreatedBy = validated_data.get(
-            'CreatedBy', instance.CreatedBy)
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
-        instance.Customer = validated_data.get(
-            'Customer', instance.Customer)
-        instance.Party = validated_data.get(
-            'Party', instance.Party)
         instance.Vehicle = validated_data.get(
             'Vehicle', instance.Vehicle)
         instance.Driver = validated_data.get(
