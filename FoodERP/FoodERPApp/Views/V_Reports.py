@@ -1028,7 +1028,7 @@ LEFT JOIN TC_CreditDebitNoteUploads ON TC_CreditDebitNoteUploads.CRDRNote_id=T_C
 JOIN M_GeneralMaster C ON C.id = T_CreditDebitNotes.NoteType_id
 LEFT JOIN M_GeneralMaster D ON D.id = T_CreditDebitNotes.NoteReason_id
 
-WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.Party_id=%s AND NoteType_id IN %s ''',([Party],[FromDate],[ToDate],[Party],NoteType_list))
+WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.IsDeleted=0 AND NoteType_id IN %s ''',([Party],[FromDate],[ToDate],[Party],NoteType_list))
                 # print(query.query)
                 if query:
                     InvoiceExportData=list()
