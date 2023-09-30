@@ -1037,7 +1037,6 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                         
                         qur2=M_Parties.objects.filter(id=b['CustomerID']).values('PriceList').distinct()
                         query = M_PriceList.objects.values('id').filter(id__in=qur2)
-                        
                         Rate=RateCalculationFunction(0,b['FE2MaterialID'],0,0,1,0,query[0]['id']).RateWithGST()
                         NoRate=float(Rate[0]['NoRatewithOutGST'])
                         InvoiceExportData.append({
@@ -1046,6 +1045,7 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                             "SupplierName":b['SupplierName'],
                             "InvoiceNumber":b['InvoiceNumber'],
                             "InvoiceDate":b['InvoiceDate'],
+                            "Narration":b['Narration'],
                             "NoteType":b['NoteTypeName'],
                             "NoteReason":b['NoteReasonName'],
                             "CustomerID":b['CustomerID'],
