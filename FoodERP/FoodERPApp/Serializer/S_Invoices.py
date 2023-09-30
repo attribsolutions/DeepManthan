@@ -373,7 +373,7 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=UpdateobatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = ['id','GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
     
     def update(self, instance, validated_data):
     
@@ -386,8 +386,6 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
             'UpdatedBy', instance.UpdatedBy)
         instance.Vehicle = validated_data.get(
             'Vehicle', instance.Vehicle)
-        instance.Driver = validated_data.get(
-            'Driver', instance.Driver)
         instance.TCSAmount = validated_data.get(
             'TCSAmount', instance.TCSAmount)
             
