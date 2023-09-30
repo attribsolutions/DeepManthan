@@ -694,10 +694,6 @@ class UpdateVehicleInvoiceView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
-        
-
-
-  
 
 class InvoiceViewEditView(CreateAPIView):
     
@@ -833,10 +829,13 @@ class InvoiceViewEditView(CreateAPIView):
                 
                 if Invoice_Serializer.is_valid():
                     Invoice_Serializer.save()
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, Invoicedata['Party'],'InvoiceDate:'+Invoicedata['InvoiceDate'],5,0,0,0,Invoicedata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully', 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,Invoice_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Invoice_Serializer.errors, 'Data': []})    
         except Exception as e:
+                log_entry = create_transaction_logNew(request, {'InvoiceID':id},0,Exception(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
                                   
