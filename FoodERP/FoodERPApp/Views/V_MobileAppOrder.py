@@ -380,9 +380,7 @@ class NewProductSendToMobileAppView(CreateAPIView):
     def post(self, request,id=0):
         try:
             with transaction.atomic():
-                # data = JSONParser().parse(request)
-                # log_entry = create_transaction_log(request, data, 0, 0, "initiat")
-                # payload = json.dumps(data)
+                
                 ItemData=list()
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
