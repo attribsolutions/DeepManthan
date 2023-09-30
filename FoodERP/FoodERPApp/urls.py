@@ -164,6 +164,9 @@ urlpatterns = [
     url(r'MobileAppUpdateRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     
+    url(r'AddRetailerFromMobileApp$',NewRetailerAddFromMobileAppview.as_view()),
+    
+    
 # User 
             path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
             path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
