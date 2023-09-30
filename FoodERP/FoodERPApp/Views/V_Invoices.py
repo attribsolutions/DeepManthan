@@ -706,11 +706,10 @@ class InvoiceViewEditView(CreateAPIView):
                 
                 query1 = TC_InvoicesReferences.objects.filter(Invoice=id).values('Order')
                 Orderdata = list()
-                query = T_Invoices.objects.filter(id=id).values('Customer','InvoiceDate','Driver_id','Vehicle_id')
+                query = T_Invoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle_id')
                 # print(query.query)
                 Customer=query[0]['Customer']
                 InvoiceDate=query[0]['InvoiceDate']
-                Driver=query[0]['Driver_id']
                 Vehicle=query[0]['Vehicle_id']
                 Itemsquery= TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,TC_InvoiceItems.Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.Unit_id,MC_ItemUnits.BaseUnitConversion UnitName,MC_ItemUnits.UnitID_id DeletedMCUnitsUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_InvoiceItems.BaseUnitQuantity,TC_InvoiceItems.GST_id,M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.BasicAmount,TC_InvoiceItems.GSTAmount,CGST, SGST, IGST, CGSTPercentage,SGSTPercentage, IGSTPercentage,Amount,DiscountType,Discount,DiscountAmount FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id Where TC_InvoiceItems.Invoice_id=%s ''',([id]))
                 if Itemsquery:
@@ -790,8 +789,7 @@ class InvoiceViewEditView(CreateAPIView):
                         "OrderIDs":[str(query1[0]['Order'])],
                         "OrderItemDetails":OrderItemDetails,
                         "InvoiceDate":InvoiceDate,
-                        "Driver":Driver,
-                        "Vehicle":Vehicle,
+                        "Vehicle":Vehicle
                         
                         })       
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
