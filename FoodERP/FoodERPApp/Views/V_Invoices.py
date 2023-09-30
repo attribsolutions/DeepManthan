@@ -789,8 +789,6 @@ class InvoiceViewEditView(CreateAPIView):
                     Orderdata.append({
                         "OrderIDs":[str(query1[0]['Order'])],
                         "OrderItemDetails":OrderItemDetails,
-                        "InvoiceNumber":InvoiceNumber,
-                        "FullInvoiceNumber":FullInvoiceNumber,
                         "InvoiceDate":InvoiceDate
                         })       
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
