@@ -394,14 +394,14 @@ class PurchaseReturnView(CreateAPIView):
                                         OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(PurchaseReturn=b['SubReturn'],Item=b['Item']['id']).update(BaseUnitQuantity = Qty ) #float(OBatchQuantity[0]['BaseUnitQuantity']) + float(b['BaseUnitQuantity'])
                                     Qty =0.00
                                 else:    
-                                    log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, '',55,0)
+                                    log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'PurchaseReturnID:'+str(id),55,0)
                                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Qty greater than Consolidated return qty', 'Data': []})     
                         PurchaseReturn_Data = T_PurchaseReturn.objects.get(id=id)
                         PurchaseReturn_Data.delete()  
-                        log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, '',54,0)      
+                        log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'PurchaseReturnID:'+str(id),54,0)      
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Deleted Successfully', 'Data': []}) 
         except IntegrityError:
-            log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, '',8,0)
+            log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'PurchaseReturnID:'+str(id),8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, Exception(e),33,0)
