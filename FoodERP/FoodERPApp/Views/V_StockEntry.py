@@ -82,7 +82,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : totalstock-round(BaseUnitQuantity,3)
+                    "Difference" : round(BaseUnitQuantity,3)-totalstock
                     })
                     
                     O_LiveBatchesList.append({
