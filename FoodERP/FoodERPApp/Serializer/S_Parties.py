@@ -54,7 +54,7 @@ class PartySubPartySerializer2(serializers.ModelSerializer):
 class PartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
-        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','PurchaseReturnprefix']
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','PurchaseReturnprefix','Creditprefix','Debitprefix']
         
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:

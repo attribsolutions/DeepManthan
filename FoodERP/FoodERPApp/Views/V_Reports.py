@@ -1011,7 +1011,7 @@ class CreditDebitExportReportView(CreateAPIView):
                 
                 
                 if(Party)>0:
-                    query = TC_CreditDebitNoteItems.objects.raw('''SELECT TC_CreditDebitNoteItems.id,T_CreditDebitNotes.Party_id AS SupplierID,A.Name SupplierName,T_CreditDebitNotes.FullNoteNumber AS InvoiceNumber,T_CreditDebitNotes.CRDRNoteDate AS InvoiceDate,M_GeneralMaster.Name,T_CreditDebitNotes.Customer_id As CustomerID,B.Name CustomerName,TC_CreditDebitNoteItems.Item_id As FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_CreditDebitNoteItems.MRPValue , TC_CreditDebitNoteItems.QtyInNo, TC_CreditDebitNoteItems.QtyInKg,TC_CreditDebitNoteItems.QtyInBox, "" AS RatePerPiece,TC_CreditDebitNoteItems.Rate AS BasicRate, (TC_CreditDebitNoteItems.Rate +((TC_CreditDebitNoteItems.Rate * TC_CreditDebitNoteItems.GSTPercentage)/100))WithGSTRate,M_Units.Name AS UnitName,TC_CreditDebitNoteItems.DiscountType, TC_CreditDebitNoteItems.Discount, TC_CreditDebitNoteItems.DiscountAmount,TC_CreditDebitNoteItems.BasicAmount AS TaxableValue, TC_CreditDebitNoteItems.CGSTPercentage, TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGSTPercentage, TC_CreditDebitNoteItems.SGST,TC_CreditDebitNoteItems.IGSTPercentage,TC_CreditDebitNoteItems.IGST,TC_CreditDebitNoteItems.GSTPercentage, TC_CreditDebitNoteItems.Amount AS TotalValue, T_CreditDebitNotes.RoundOffAmount,T_CreditDebitNotes.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_CreditDebitNoteUploads.Irn, TC_CreditDebitNoteUploads.AckNo,TC_CreditDebitNoteUploads.EwayBillNo
+                    query = TC_CreditDebitNoteItems.objects.raw('''SELECT TC_CreditDebitNoteItems.id,T_CreditDebitNotes.Party_id AS SupplierID,A.Name SupplierName,T_CreditDebitNotes.FullNoteNumber AS InvoiceNumber,T_CreditDebitNotes.CRDRNoteDate AS InvoiceDate,T_CreditDebitNotes.Narration,C.Name As NoteTypeName , D.Name As NoteReasonName,T_CreditDebitNotes.Customer_id As CustomerID,B.Name CustomerName,TC_CreditDebitNoteItems.Item_id As FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_CreditDebitNoteItems.MRPValue , TC_CreditDebitNoteItems.QtyInNo, TC_CreditDebitNoteItems.QtyInKg,TC_CreditDebitNoteItems.QtyInBox, "" AS RatePerPiece,TC_CreditDebitNoteItems.Rate AS BasicRate, (TC_CreditDebitNoteItems.Rate +((TC_CreditDebitNoteItems.Rate * TC_CreditDebitNoteItems.GSTPercentage)/100))WithGSTRate,M_Units.Name AS UnitName,TC_CreditDebitNoteItems.DiscountType, TC_CreditDebitNoteItems.Discount, TC_CreditDebitNoteItems.DiscountAmount,TC_CreditDebitNoteItems.BasicAmount AS TaxableValue, TC_CreditDebitNoteItems.CGSTPercentage, TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGSTPercentage, TC_CreditDebitNoteItems.SGST,TC_CreditDebitNoteItems.IGSTPercentage,TC_CreditDebitNoteItems.IGST,TC_CreditDebitNoteItems.GSTPercentage, TC_CreditDebitNoteItems.Amount AS TotalValue, T_CreditDebitNotes.RoundOffAmount,T_CreditDebitNotes.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_CreditDebitNoteUploads.Irn, TC_CreditDebitNoteUploads.AckNo,TC_CreditDebitNoteUploads.EwayBillNo
 FROM TC_CreditDebitNoteItems
 JOIN T_CreditDebitNotes ON T_CreditDebitNotes.id=TC_CreditDebitNoteItems.CRDRNote_id
 JOIN M_Parties A ON A.id= T_CreditDebitNotes.Party_id
@@ -1025,7 +1025,9 @@ JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_CreditDebitNoteItems.Item_id AND M_
 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_CreditDebitNotes.Customer_id AND MC_PartySubParty.Party_id=%s
 LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 LEFT JOIN TC_CreditDebitNoteUploads ON TC_CreditDebitNoteUploads.CRDRNote_id=T_CreditDebitNotes.id
-JOIN M_GeneralMaster ON M_GeneralMaster.id = T_CreditDebitNotes.NoteType_id
+JOIN M_GeneralMaster C ON C.id = T_CreditDebitNotes.NoteType_id
+LEFT JOIN M_GeneralMaster D ON D.id = T_CreditDebitNotes.NoteReason_id
+
 WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.Party_id=%s AND NoteType_id IN %s ''',([Party],[FromDate],[ToDate],[Party],NoteType_list))
                 # print(query.query)
                 if query:
@@ -1035,7 +1037,6 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                         
                         qur2=M_Parties.objects.filter(id=b['CustomerID']).values('PriceList').distinct()
                         query = M_PriceList.objects.values('id').filter(id__in=qur2)
-                        
                         Rate=RateCalculationFunction(0,b['FE2MaterialID'],0,0,1,0,query[0]['id']).RateWithGST()
                         NoRate=float(Rate[0]['NoRatewithOutGST'])
                         InvoiceExportData.append({
@@ -1044,7 +1045,9 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                             "SupplierName":b['SupplierName'],
                             "InvoiceNumber":b['InvoiceNumber'],
                             "InvoiceDate":b['InvoiceDate'],
-                            "NoteType":b['Name'],
+                            "Narration":b['Narration'],
+                            "NoteType":b['NoteTypeName'],
+                            "NoteReason":b['NoteReasonName'],
                             "CustomerID":b['CustomerID'],
                             "CustomerName":b['CustomerName'],
                             "FE2MaterialID":b['FE2MaterialID'],
