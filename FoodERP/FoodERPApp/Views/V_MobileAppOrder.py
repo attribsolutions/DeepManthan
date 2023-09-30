@@ -9,6 +9,7 @@ from rest_framework.parsers import JSONParser
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Views.V_CommFunction import *
 from ..Serializer.S_Orders import *
+from ..Serializer.S_MobileAppOrder import *
 from ..models import *
 from rest_framework import status
 from django.contrib.auth import authenticate
@@ -686,4 +687,96 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
             
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})          
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+        
+        
+        
+class NewRetailerAddFromMobileAppview(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                data = JSONParser().parse(request)
+                auth_header = request.META.get('HTTP_AUTHORIZATION')
+                if auth_header:
+                    # Parsing the authorization header
+                    auth_type, auth_string = auth_header.split(' ', 1)
+                    if auth_type.lower() == 'basic':
+                        # Decoding the base64-encoded username and password
+                        try:
+                            username, password = base64.b64decode(
+                                auth_string).decode().split(':', 1)
+                        except (TypeError, ValueError, UnicodeDecodeError):
+                            return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                        # Authenticating the user
+                    
+                    user = authenticate(request, username=username, password=password)
+                    
+                    RetailerAddList=list()
+                    for a in data['outlets']:
+                        PartySubParty = list()
+                        PartySubParty.append({
+                            "Party":a['DistributorId'],
+                            "Route": a['RouteId'],
+                            "CreatedBy":430,
+                            "UpdatedBy":430,  
+                        })
+                        PartyAddress = list()
+                        PartyAddress.append({
+                            "Address": a['Address'],
+                            "FSSAINo": a['FSSAINumber'],
+                            "FSSAIExipry": a['FSSAIExpiry'],
+                            "IsDefault": True, 
+                        })
+                        PartyPrefix = list()
+                        PartyPrefix.append({
+                            "Orderprefix": "PO",
+                            "Invoiceprefix": "IN",
+                            "Grnprefix": "GRN",
+                            "Receiptprefix": "RE",
+                            "WorkOrderprefix": "",
+                            "MaterialIssueprefix": "",
+                            "Demandprefix": "",
+                            "IBChallanprefix": "",
+                            "IBInwardprefix": "",
+                            "PurchaseReturnprefix": "PR",
+                            "Creditprefix": "CR",
+                            "Debitprefix": "DR" 
+                        })
+                        
+                        RetailerAddList.append(
+                            {
+                                "Name":a['RetailerName'],
+                                "PriceList": 3,
+                                "PartyType": 11,
+                                "Company": 3,
+                                "PAN": a['PANNumber'],
+                                "Email":a['EmailAddress'],
+                                "MobileNo": a['MobileNumber'],
+                                "Latitude": a['Latitude'],
+                                "Longitude": a['Longitude'],
+                                "GSTIN": a['GSTNumber'],
+                                "isActive": a['IsActive'],
+                                "CreatedBy":430,
+                                "UpdatedBy":430,
+                                "State":22, #Compensary
+                                "District":26, #Compensary
+                                "PartySubParty":PartySubParty,
+                                "PartyAddress":PartyAddress,
+                                "PartyPrefix":PartyPrefix
+                            })
+                        
+                    for aa in RetailerAddList:
+                        Retailer_serializer = RetailerAddFromMobileAppSerializer(data=aa)
+                        if Retailer_serializer.is_valid():
+                            Retailer = Retailer_serializer.save()
+                        else:
+                            transaction.set_rollback(True)
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Bulk Added From Mobile App Successfully', 'Data': []})                        
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
+                 
