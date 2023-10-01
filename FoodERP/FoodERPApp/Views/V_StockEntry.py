@@ -110,9 +110,9 @@ class StockEntryPageView(CreateAPIView):
                 if(Mode == 1):   # Stock Entry case update 0 to all stock for given party
                     
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
-                
+                print(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
-                  
+                    
                     if(Mode == 1):
                         StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
                     else:
