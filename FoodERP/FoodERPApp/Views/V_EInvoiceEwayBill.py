@@ -588,7 +588,7 @@ left join M_Districts PD on PD.id=P.District_id
 left join M_Districts CD on  CD.id=C.District_id
 where T_CreditDebitNotes.id=%s)a
 left join 
-(select sum(BasicAmount)Total_assessable_value,(sum(Amount)-sum(DiscountAmount))total_invoice_value,sum(CGST)total_cgst_value,
+(select sum(BasicAmount)Total_assessable_value,(sum(Amount))total_invoice_value,sum(CGST)total_cgst_value,
 sum(SGST) total_sgst_value,sum(IGST)total_igst_value,sum(DiscountAmount)total_discount, CRDRNote_id 
 from TC_CreditDebitNoteItems where CRDRNote_id=%s)b
 on a.id=b.CRDRNote_id''',([id],[id])
@@ -719,7 +719,7 @@ where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCo
                         'total_cgst_value': Invoice['total_cgst_value'],
                         'total_sgst_value': Invoice['total_sgst_value'],
                         'total_igst_value': Invoice['total_igst_value'],
-                        'total_discount': Invoice['total_discount']
+                        'total_discount': 0
                     }),
                     ewaybill_details.append({
                         'transportation_mode': 1,
