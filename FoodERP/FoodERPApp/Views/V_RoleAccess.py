@@ -162,14 +162,15 @@ class RoleAccessView(RetrieveAPIView):
                         Company=RoleAccessSerialize_data.data[0]['Company']).filter(Division=RoleAccessSerialize_data.data[0]['Division'])
                     RoleAccessdata.delete()
                     RoleAccessSerialize_data.save()
-                    Party=RoleAccessSerialize_data.data[0]['Company']
+                    Company=RoleAccessSerialize_data.data[0]['Company']
+                    Role=RoleAccessSerialize_data.data[0]['Role']
 
-                    log_entry = create_transaction_logNew(request, {'RoleAccessDetails':RoleAccessSerialize_data},Party, "Role Access Save Successfully",128,0)
+                    log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_logNew(request, {'RoleAccessDetails':RoleAccessSerialize_data},0, RoleAccessSerialize_data.errors,34,0)
+                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0, RoleAccessSerialize_data.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
-            log_entry = create_transaction_logNew(request, {'RoleAccessDetails':RoleAccessSerialize_data},0, e,33,0)
+            log_entry = create_transaction_logNew(request,RoleAccessSerialize_data,0, e,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   e, 'Data': []})
 
 
