@@ -195,7 +195,12 @@ class InvoiceListFilterView(CreateAPIView):
                             LoadingSheetCreated = False 
                         else:
                             LoadingSheetCreated = True
-                        query2 = MC_PartySubParty.objects.filter(Party=a['Party']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')     
+                        query2 = MC_PartySubParty.objects.filter(Party=a['Party']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
+                        if not query2:
+                            IsTCSParty = ""
+                        else:
+                            IsTCSParty= query2[0]['IsTCSParty']    
+                        # print(str(query2.query))    
                         InvoiceListData.append({
                             "id": a['id'],
                             "InvoiceDate": a['InvoiceDate'],
@@ -215,7 +220,7 @@ class InvoiceListFilterView(CreateAPIView):
                             "CustomerPartyType":a['Customer']['PartyType_id'],
                             "CustomerGSTIN": a['Customer']['GSTIN'],
                             "CustomerPAN": a['Customer']['PAN'],
-                            "IsTCSParty":  query2[0]['IsTCSParty']
+                            "IsTCSParty": IsTCSParty 
                         })
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate,35,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
