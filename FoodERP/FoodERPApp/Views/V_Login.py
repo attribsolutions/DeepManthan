@@ -104,9 +104,9 @@ class UserListView(CreateAPIView):
                             'UserRole': RoleData,
 
                         })
-                    log_entry = create_transaction_logNew(request, Logindata,CompanyID,"User List",136,0)
+                    log_entry = create_transaction_logNew(request, Logindata,0,'RoleID:'+str(RoleID)+','+'CompanyID:'+str(CompanyID),136,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData})
-                log_entry = create_transaction_logNew(request, Logindata,0,"Data Not available",7,0)
+                log_entry = create_transaction_logNew(request, Logindata,0,"User List Not available",136,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Logindata,0,Exception(e),33,0)
@@ -182,7 +182,7 @@ class UserListViewSecond(CreateAPIView):
                     })
                     log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Single User",137,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserData[0]})
-                log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Data Not available",7,0)
+                log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"User Not available",137,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data': ''})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Execution Error",135,0) 
@@ -194,12 +194,11 @@ class UserListViewSecond(CreateAPIView):
             with transaction.atomic():
                 Usersdata = M_Users.objects.get(id=id)
                 Usersdata.delete()
-                log_entry = create_transaction_logNew(request, {"UserID":id},0,"User Deleted Successfully",138,0)
+                log_entry = create_transaction_logNew(request, {"UserID":id},0,'UserID:'+str(id),138,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully', 'Data': []})
         except Exception:
             log_entry = create_transaction_logNew(request, {"UserID":id},0,"Execution Errors",135,0)
-            raise JsonResponse(
-                {'StatusCode': 200, 'Status': True, 'Message':  'Execution Errors', 'Data': []})
+            raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Execution Errors', 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -355,7 +354,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                 # UserID = request.user.id
                 # print(str(query.query))
                 if not query:
-                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0,"Data Not available",7,0)
+                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
                     M_UserParties_Serializer = self.serializer_class(
@@ -380,7 +379,7 @@ class GetEmployeeViewForUserCreation(CreateAPIView):
                 query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name FROM M_Employees where M_Employees.id 
 NOT IN (SELECT Employee_id From M_Users) ''')
                 if not query:
-                    log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"Data Not available",7,0)
+                    log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"Employees Not available",146,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
                 else:
                     M_Employees_Serializer = EmployeeSerializerForUserCreation(
