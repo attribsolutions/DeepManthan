@@ -164,7 +164,9 @@ urlpatterns = [
     url(r'MobileAppUpdateRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     
-    url(r'AddRetailerFromMobileApp$',NewRetailerAddFromMobileAppview.as_view()),
+    url(r'Retailer/Add$',RetailerAddFromMobileAppview.as_view()),
+    url(r'Retailer/Update$',RetailerUpdateFromMobileAppview.as_view()),
+    url(r'Retailer/Delete/([0-9]+)$',RetailerDeleteFromMobileApp.as_view()),
     
     
 # User 
