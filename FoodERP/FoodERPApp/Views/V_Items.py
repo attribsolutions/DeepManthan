@@ -517,14 +517,16 @@ class ProductAndMarginReportView(CreateAPIView):
                             Margin=MarginMaster(a['id'],x['id'],0,date.today()).GetTodaysDateMargin()
                             Rate=RateCalculationFunction(0,a['id'],0,0,1,0,x['id']).RateWithGST()
                             
+                            string1 = x['Name']
+                            string2 = string1.replace(" ","")
                             ItemMargins.append({
-                                x['Name']+'Margin' : float(Margin[0]['TodaysMargin']),
+                                string2+'Margin' : float(Margin[0]['TodaysMargin']),
                                 
                             })
                             RateList.append({
                                
-                                x['Name']+'RateWithGST' : float(Rate[0]['RatewithGST']),
-                                x['Name']+'RateWithOutGST' : float(Rate[0]['RateWithoutGST'])
+                                string2+'RateWithGST' : float(Rate[0]['RatewithGST']),
+                                string2+'RateWithOutGST' : float(Rate[0]['RateWithoutGST'])
                             })
                         
                         ww=ItemMargins+RateList
