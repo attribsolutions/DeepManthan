@@ -691,7 +691,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
         
         
         
-class NewRetailerAddFromMobileAppview(CreateAPIView):
+class RetailerAddFromMobileAppview(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
     
@@ -717,6 +717,7 @@ class NewRetailerAddFromMobileAppview(CreateAPIView):
                     
                     RetailerAddList=list()
                     for a in data['outlets']:
+                        query1 = M_Parties.objects.filter(id=a['DistributorId']).values('State_id','District_id','City_id')
                         PartySubParty = list()
                         PartySubParty.append({
                             "Party":a['DistributorId'],
@@ -762,8 +763,9 @@ class NewRetailerAddFromMobileAppview(CreateAPIView):
                                 "isActive": a['IsActive'],
                                 "CreatedBy":430,
                                 "UpdatedBy":430,
-                                "State":22, #Compensary
-                                "District":26, #Compensary
+                                "State":query1[0]['State_id'], #Compensary
+                                "District":query1[0]['District_id'], #Compensary
+                                "City":query1[0]['City_id'], #Compensary
                                 "PartySubParty":PartySubParty,
                                 "PartyAddress":PartyAddress,
                                 "PartyPrefix":PartyPrefix
@@ -773,10 +775,107 @@ class NewRetailerAddFromMobileAppview(CreateAPIView):
                         Retailer_serializer = RetailerAddFromMobileAppSerializer(data=aa)
                         if Retailer_serializer.is_valid():
                             Retailer = Retailer_serializer.save()
+                            LastInsertID = Retailer.id
+                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully',"FoodERPRetailerID":LastInsertID}) 
                         else:
                             transaction.set_rollback(True)
-                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors, 'Data': []})
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Bulk Added From Mobile App Successfully', 'Data': []})                        
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully',"FoodERPRetailerID":LastInsertID})                        
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
+        
+        
+        
+class RetailerUpdateFromMobileAppview(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                data = JSONParser().parse(request)
+                auth_header = request.META.get('HTTP_AUTHORIZATION')
+                if auth_header:
+                    # Parsing the authorization header
+                    auth_type, auth_string = auth_header.split(' ', 1)
+                    if auth_type.lower() == 'basic':
+                        # Decoding the base64-encoded username and password
+                        try:
+                            username, password = base64.b64decode(
+                                auth_string).decode().split(':', 1)
+                        except (TypeError, ValueError, UnicodeDecodeError):
+                            return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                        # Authenticating the user
+                    
+                    user = authenticate(request, username=username, password=password)
+                    
+                    RetailerAddList=list()
+                    for a in data['outlets']:
+                        
+                        PartyAddress = list()
+                        PartyAddress.append({
+                            "FoodERPRetailerID":a['FoodERPRetailerID'],
+                            "Address": a['Address'],
+                            "FSSAINo": a['FSSAINumber'],
+                            "FSSAIExipry": a['FSSAIExpiry']
+                           
+                        })
+                        RetailerAddList.append(
+                            {
+                                "FoodERPRetailerID":a['FoodERPRetailerID'],
+                                "Name":a['RetailerName'],
+                                "PAN": a['PANNumber'],
+                                "Email":a['EmailAddress'],
+                                "MobileNo": a['MobileNumber'],
+                                "Latitude": a['Latitude'],
+                                "Longitude": a['Longitude'],
+                                "GSTIN": a['GSTNumber'],
+                                "isActive": a['IsActive'],
+                                "UpdatedBy":430,
+                                "PartyAddress":PartyAddress
+                            })
+                    
+                    # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message':RetailerAddList, 'Data': []})    
+                    for aa in RetailerAddList:
+                        PartiesdataByID = M_Parties.objects.get(id=aa['FoodERPRetailerID'])
+                        Retailer_serializer = RetailerUpdateFromMobileAppSerializer(PartiesdataByID, data=aa)
+                        if Retailer_serializer.is_valid():
+                            Retailer = Retailer_serializer.save()
+                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })
+                        else:
+                            transaction.set_rollback(True)
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })                        
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
+
+class RetailerDeleteFromMobileApp(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+                  
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                auth_header = request.META.get('HTTP_AUTHORIZATION')
+                if auth_header:
+                    # Parsing the authorization header
+                    auth_type, auth_string = auth_header.split(' ', 1)
+                    if auth_type.lower() == 'basic':
+                        # Decoding the base64-encoded username and password
+                        try:
+                            username, password = base64.b64decode(
+                                auth_string).decode().split(':', 1)
+                        except (TypeError, ValueError, UnicodeDecodeError):
+                            return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                        # Authenticating the user
+                    user = authenticate(request, username=username, password=password)
+                    M_Partiesdata = M_Parties.objects.get(id=id)
+                    M_Partiesdata.delete()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Retailer  Deleted Successfully'})
+        except M_Parties.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer Not available'})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer used in another table'})              
                  
