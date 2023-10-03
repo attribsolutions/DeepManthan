@@ -462,18 +462,20 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id=%s''',([today],[today],[id]))
                 print(q0)
                 for row in q0:
-                     
+                    RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
+                    DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
+                    SuperStockistRate=RateCalculationFunction(0,row.id,0,0,1,0,1).RateWithGST() 
                     ItemData.append({
-                            "FoodERPItemID": row.id,
-                            "FoodERPCategoryId":"",
+                            "FoodERPItemID": str(row.id),
+                            "FoodERPCategoryId":1,
                             "FoodERPFamilyId":row.FoodERPFamilyId,
-                            "FoodERPTypeId":"",
+                            "FoodERPTypeId":1,
                             "FoodERPUomId":row.BaseUnitID_id,
                             "ItemName":row.ItemName,
-                            "MRP":row.MRPValue,
-                            "RetailerRate":"",
-                            "DistributorRate":"",
-                            "SuperStockistRate":"",
+                            "MRP":float(row.MRPValue),
+                            "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
+                            "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
+                            "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
                             "ProductHSN":row.HSNCode,
                             "IsActive":row.isActive
                             
@@ -506,9 +508,7 @@ where M_Items.id=%s''',([today],[today],[id]))
     def delete(self, request,id=0):
         try:
             with transaction.atomic():
-                # data = JSONParser().parse(request)
-                # log_entry = create_transaction_log(request, data, 0, 0, "initiat")
-                # payload = json.dumps(data)
+                
                 ItemData=list()
                 
                 ItemData.append({
@@ -548,9 +548,9 @@ class NewRetailerSendToMobileAppView(CreateAPIView):
                 
                 RetailerData=list()
                 today = date.today()
-                q0=M_Items.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
+                q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
 cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
-(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id
+(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id,MC_PartyAddress.Address
  FROM MC_PartySubParty 
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
@@ -560,17 +560,17 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 for row in q0:
                      
                     RetailerData.append({
-                            "FoodERPRetailerID": row.id,
+                            "FoodERPRetailerID": str(row.id),
                             "RouteId"       :row.Route_id,
                             "RetailerName"  :row.RetailerName,
                             "DistributorId" :row.distid,
-                            "Address"       :row.BaseUnitID_id,
-                            "MobileNumber"  :row.MobileNumber,
-                            "EmailAddress"  :row.EmailAddress,
-                            "PANNumber"     :row.PANNumber,
-                            "GSTNumber"     :row.GSTNumber,
-                            "FSSAINumber"   :row.FSSAINo,
-                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            "Address"       :str(row.Address),
+                            "MobileNumber"  :str(row.MobileNumber),
+                            "EmailAddress"  :str(row.EmailAddress),
+                            "PANNumber"     :str(row.PANNumber),
+                            "GSTNumber"     :str(row.GSTNumber),
+                            "FSSAINumber"   :str(row.FSSAINo),
+                            "FSSAIExpiry"   :str(row.FSSAIExipry),
                             "Latitude"      :row.Latitude,
                             "Longitude"     :row.Longitude,
                             "IsActive"      :row.isActive
