@@ -27,7 +27,7 @@ class M_MarginsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Margindata_Serializer = M_MarginsSerializerSecond(Margindata, many=True).data
-                    log_entry = create_transaction_logNew(request,Margindata_Serializer, 0,'EffectiveDate:'+Margindata_Serializer[0]['EffectiveDate'],114,0)
+                    log_entry = create_transaction_logNew(request,Margindata_Serializer, 0,'Margin List',114,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Margindata_Serializer})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Margindata_Serializer, 0, Exception(e),33,0)
