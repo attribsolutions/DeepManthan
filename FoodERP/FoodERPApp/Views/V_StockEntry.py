@@ -82,7 +82,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : totalstock-round(BaseUnitQuantity,3)
+                    "Difference" : round(BaseUnitQuantity,3)-totalstock
                     })
                     
                     O_LiveBatchesList.append({
@@ -110,9 +110,9 @@ class StockEntryPageView(CreateAPIView):
                 if(Mode == 1):   # Stock Entry case update 0 to all stock for given party
                     
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
-                
+                print(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
-                  
+                    
                     if(Mode == 1):
                         StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
                     else:

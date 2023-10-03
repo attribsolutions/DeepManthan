@@ -440,11 +440,17 @@ class StockProcessingView(CreateAPIView):
                     StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3) OpeningBalance,round(GRN,3) GRN,round(SalesReturn,3) SalesReturn,round(Sale,3) Sale,round(PurchaseReturn,3) PurchaseReturn,
 round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance,ActualStock
  from
+
 (select 1 as id,I.Item_id ItemID,I.UnitID,
-CASE WHEN StockQuantity >= 0  THEN IFNULL(StockQuantity,0)  ELSE IFNULL(ClosingBalance,0) END OpeningBalance,
-IFNULL(InvoiveQuantity,0)Sale,IFNULL(GRNQuantity,0)GRN,IFNULL(SalesReturnQuantity,0)SalesReturn,IFNULL(PurchesReturnQuantity,0)PurchaseReturn,IFNULL(ActualStock,0)ActualStock
+IFNULL(ClosingBalance,0)OpeningBalance,
+IFNULL(InvoiveQuantity,0)Sale,
+IFNULL(GRNQuantity,0)GRN,
+IFNULL(SalesReturnQuantity,0)SalesReturn,
+IFNULL(PurchesReturnQuantity,0)PurchaseReturn,
+IFNULL(StockQuantity,0)ActualStock
 
 from
+
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
 
 left join
@@ -467,10 +473,10 @@ WHERE InvoiceDate = %s AND Party_id = %s GROUP BY Item_id)Invoice
 on I.Item_id=Invoice.Item_id
 left join
 
-(SELECT Item_id,SUM(BaseUnitQuantity) StockQuantity
-FROM T_Stock
-WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
-					DAY ) AND Party_id = %s GROUP BY Item_id)Stock
+
+
+(SELECT Item_id,sum(Difference)ActualStock FROM T_Stock where StockDate = %s and Party_id= %s group by Item_id)Stock
+
 
 on I.Item_id=Stock.Item_id
 left join
@@ -488,7 +494,7 @@ WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id
 LEFT JOIN
 
-(Select Item_id,SUM(BaseUnitQuantity) ActualStock from T_Stock where StockDate = %s AND Party_id= %s GROUP BY Item_id)ActualStock
+(Select Item_id,SUM(BaseUnitQuantity) StockQuantity from T_Stock where StockDate = %s AND Party_id= %s GROUP BY Item_id)ActualStock
 on I.Item_id=ActualStock.Item_id)R
 where 
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
