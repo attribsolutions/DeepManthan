@@ -142,7 +142,7 @@ class RoleAccessView(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, {'RoleAccessID':id},CompanyID, "Role Access",127,0,0,0,PartyID)
+        log_entry = create_transaction_logNew(request, {'RoleAccessID':id},0,'RoleAccessID:'+str(id),127,0)
         return Response(response)
 
     # Role Access POST Method first delete record on role,company,division and then Insert data
@@ -203,12 +203,12 @@ class RoleAccessViewList(RetrieveAPIView):
 
                 
                 if not query:
-                    log_entry = create_transaction_logNew(request, Logindata,CompanyID, 'Data Not Found',7,0)
+                    log_entry = create_transaction_logNew(request, Logindata,0, 'RoleAccess List Not Found',129,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     M_Items_Serializer = M_RoleAccessSerializerGETList(
                         query, many=True).data
-                    log_entry = create_transaction_logNew(request, Logindata,CompanyID, 'RoleAccess List',129,0)
+                    log_entry = create_transaction_logNew(request, Logindata,0,'Company:'+str(CompanyID),129,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
@@ -312,7 +312,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, 0,Company,"RoleAccessNewUpdated",130,0)
+        log_entry = create_transaction_logNew(request, 0,0,"RoleAccessNewUpdated",130,0)
         return Response(response)
     
     @transaction.atomic()
@@ -327,7 +327,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                     RoleAccessID = a['id']
                     RoleAccessDeletedata = M_RoleAccess.objects.get(id=RoleAccessID)
                     RoleAccessDeletedata.delete()
-                log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},Company,"RoleAccess Deleted Successfully",131,0)
+                log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},0,'RoleAccessID:'+str(RoleAccessID),131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
@@ -411,7 +411,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
                     query = M_Pages.objects.raw('''Select M_Pages.id,M_Pages.Name FROM M_Pages join M_PageType on M_PageType.id= M_Pages.PageType  WHERE M_PageType.IsAvailableForAccess=1  and M_Pages.IsDivisionRequired=0 and Module_id=%s''',[moduleid])      
                    
                 if not query:
-                    log_entry = create_transaction_logNew(request,0,0,"Data Not Found",7,0)
+                    log_entry = create_transaction_logNew(request,0,0,"RoleAccessGetPagesOnModule Not Found",133,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     PageSerializer = M_PageSerializerNewUpdated(
