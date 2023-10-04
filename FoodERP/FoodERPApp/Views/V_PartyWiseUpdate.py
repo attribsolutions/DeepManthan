@@ -95,7 +95,22 @@ class PartyWiseUpdateView(CreateAPIView):
                                 "PartyName": a['SubParty']['Name'],
                                 Type: a[Type],
                             })
-                     
+                        
+                        elif (Type == 'OpeningBalance'):
+                            query = MC_PartySubPartyOpeningBalance.objects.filter(Party_id=a['Party']['id'],SubParty_id=a['SubParty']['id']).values('OpeningBalanceAmount') 
+                            if not query:
+                                OpeningBalance = 0.00
+                            else:
+                                OpeningBalance = query[0]['OpeningBalanceAmount']
+                                                             
+                            SubPartyListData.append({
+                                "id": a['id'],
+                                "PartyID":a['Party']['id'],
+                                "SubPartyID":a['SubParty']['id'],
+                                "PartyName": a['SubParty']['Name'],
+                                Type: OpeningBalance,
+                                })
+                            
                         else:                           
                             SubPartyListData.append({
                                 "id": a['id'],
