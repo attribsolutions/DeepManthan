@@ -42,3 +42,43 @@ class RetailerAddFromMobileAppSerializer(serializers.ModelSerializer):
             PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)         
     
         return PartyID
+
+
+class RetailerUpdateFormMobileAppAddressSerializer(serializers.ModelSerializer):
+    FoodERPRetailerID = serializers.IntegerField()
+    class Meta:
+        model = MC_PartyAddress
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry','FoodERPRetailerID']      
+    
+class RetailerUpdateFromMobileAppSerializer(serializers.ModelSerializer):
+    PartyAddress = RetailerUpdateFormMobileAppAddressSerializer(many=True)
+    class Meta:
+        model =  M_Parties
+        fields = ['id','Name', 'Email', 'MobileNo', 'GSTIN','PAN', 'isActive', 'Latitude','Longitude','PartyAddress'] 
+        
+        
+    def update(self, instance, validated_data):
+        instance.Name = validated_data.get(
+            'Name', instance.Name)
+        instance.Email = validated_data.get(
+            'Email', instance.Email)
+        instance.MobileNo = validated_data.get(
+            'MobileNo', instance.MobileNo)
+        instance.GSTIN = validated_data.get(
+            'GSTIN', instance.GSTIN)
+        instance.PAN = validated_data.get(
+            'PAN', instance.PAN)
+        instance.isActive = validated_data.get(
+            'isActive', instance.isActive)
+        instance.Latitude = validated_data.get(
+            'Latitude', instance.Latitude)
+        instance.Longitude = validated_data.get(
+            'Longitude', instance.Longitude)
+            
+        instance.save()   
+        
+        for PartyAddress_updatedata in validated_data['PartyAddress']:
+            if PartyAddress_updatedata['FoodERPRetailerID'] >0:
+                Partyaddress = MC_PartyAddress.objects.filter(id=PartyAddress_updatedata['FoodERPRetailerID'],IsDefault=1).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'])
+                        
+        return instance     
