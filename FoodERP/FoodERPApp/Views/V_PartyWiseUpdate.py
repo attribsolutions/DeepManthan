@@ -149,6 +149,25 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                         query = MC_PartyAddress.objects.filter(Party=a['SubPartyID'], IsDefault=1).update(FSSAINo=a['Value1'], FSSAIExipry=a['Value2'])
                     elif (Type == 'State'):
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(State=a['Value1'], District=a['Value2'])
+                    elif (Type == 'OpeningBalance'):
+                        
+                        Party = Partydata['PartyID']
+                        party_instance = M_Parties.objects.get(id=int(Party)) 
+                        subparty_instance = M_Parties.objects.get(id=int(a['SubPartyID']))   
+                        query = MC_PartySubPartyOpeningBalance.objects.filter(Party=Party,SubParty=a['SubPartyID'])
+                        num_updated = query.update(OpeningBalanceAmount=a['Value1'])
+                        if num_updated == 0:
+                            # If no records were updated, insert a new record
+                            new_record = MC_PartySubPartyOpeningBalance(
+                                Party=party_instance,
+                                SubParty=subparty_instance,
+                                OpeningBalanceAmount=a['Value1'],
+                                Year='2324',
+                                CreatedBy =Partydata['CreatedBy'],
+                                UpdatedBy =Partydata['UpdatedBy'],  
+                            )
+                            new_record.save()
+                                
                     else:    
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})  
                 log_entry = create_transaction_logNew(request, Partydata,Partydata['PartyID'], "PartyWise Update Successfully",113,0)
