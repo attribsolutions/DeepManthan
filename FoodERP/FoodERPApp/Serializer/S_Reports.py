@@ -366,3 +366,10 @@ class ReceiptDataExportSerializer(serializers.Serializer):
     Description = serializers.CharField(max_length=500)
     ChequeDate = serializers.DateField()
     DocumentNo = serializers.CharField(max_length=500)
+
+
+class BalanceSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500)
+    RouteName = serializers.CharField(max_length=500)
+    
