@@ -1142,7 +1142,46 @@ class ReceiptDataExportReportView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
                 
         
-        
+class OutStandingBalanceView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    @transaction.atomic()
+
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Balance_Data = JSONParser().parse(request)  
+                Party = Balance_Data['PartyID']
+                Route = Balance_Data['RouteID']
+                ToDate = Balance_Data['Date']
+
+                if Route == '':
+                    query = MC_PartySubParty.objects.raw('''SELECT M_Parties.id, M_parties.Name AS PartyName, M_Routes.Name AS RouteName
+FROM MC_Partysubparty
+JOIN M_Parties ON M_Parties.id = MC_Partysubparty.Party_id
+LEFT JOIN M_Routes ON M_Routes.id = MC_Partysubparty.Route_id WHERE MC_Partysubparty.Party_id = %s''',([Party]))
+
+                else:
+                    query = MC_PartySubParty.objects.raw('''SELECT M_Parties.id, M_parties.Name AS PartyName, M_Routes.Name AS RouteName
+FROM MC_Partysubparty
+JOIN M_Parties ON M_Parties.id = MC_Partysubparty.Party_id
+LEFT JOIN M_Routes ON M_Routes.id = MC_Partysubparty.Route_id WHERE MC_Partysubparty.Party_id = %s AND MC_Partysubparty.Route_id = %s''',([Party],[Route]))
+                if query:
+                    Balance_Serializer = BalanceSerializer(query,many=True).data
+                    BalanceList = list()
+                  
+                    for a in Balance_Serializer:
+                        BalanceList.append({
+                            "PartyID":a['id'],
+                            "PartyName":a['PartyName'],
+                            "RouteName":a['RouteName'],
+                            "OutStandingBalance":GetOpeningBalance(Party, a['id'],ToDate)
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BalanceList})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
                 
 
