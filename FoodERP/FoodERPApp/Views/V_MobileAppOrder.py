@@ -160,7 +160,7 @@ class T_MobileAppOrdersView(CreateAPIView):
 
                             log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Save Successfully',149,OrderID)    
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
-                        log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,34,0)
+                        log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,161,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         print('bbbbbbbbbb')
@@ -317,7 +317,7 @@ class T_MobileAppOrdersView(CreateAPIView):
 
                             log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Update Successfully',150,OrderID)    
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Update Successfully', 'FoodERPOrderID': OrderID})
-                        log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,34,0)
+                        log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,162,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         print('bbbbbbbbbb')
@@ -365,13 +365,13 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
                         log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,'MobileAPPOrder Deleted Successfully',151,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully'})
         except T_Orders.DoesNotExist:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 'Record Not available',29,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,'Record Not available',163,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 'This Order is used in another Transaction ',8,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0,0, 'This Order is used in another Transaction ',163,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Order is used in another Transaction'})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,Exception(e),163,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class NewProductSendToMobileAppView(CreateAPIView):
@@ -399,10 +399,10 @@ where M_Items.id=%s''',([today],[today],[id]))
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
                     SuperStockistRate=RateCalculationFunction(0,row.id,0,0,1,0,1).RateWithGST()
-                    # if row.isActive == True:
-                    #     ss=true
-                    # else:
-                    #     ss=false    
+                    if row.isActive == True:
+                        ss='true'
+                    else:
+                        ss='false'    
                     ItemData.append({
                             "FoodERPItemID": str(row.id),
                             "FoodERPCategoryId":1,
@@ -415,7 +415,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                             "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
                             "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
                             "ProductHSN":row.HSNCode,
-                            "IsActive":row.isActive
+                            "IsActive":bool(ss)
                             
                         })
 
@@ -429,17 +429,22 @@ where M_Items.id=%s''',([today],[today],[id]))
                             'Content-Type': 'application/json'
                           }
                 
-                print(payload)
-                response = requests.request(
-                    "POST", url, headers=headers, data=payload)
                 
-                response_json=response.text
-                print('==============================',response_json)
+                payload_json_data = json.dumps(payload)
                 
-                log_entry = create_transaction_log(request, payload, 0, 0,response_json,152)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
-            
+                response = requests.request("POST", url, headers=headers, data=payload_json_data)
+                
+                response_json=json.loads(response.text)
+                print(response_json)
+                print('==============================',response_json['success'])
+                if(response_json['success'] == True):
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,152)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
+                else:
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],164)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json, 'Data': []})
         except Exception as e:
+            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,164)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
     @transaction.atomic()
@@ -462,18 +467,20 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id=%s''',([today],[today],[id]))
                 print(q0)
                 for row in q0:
-                     
+                    RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
+                    DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
+                    SuperStockistRate=RateCalculationFunction(0,row.id,0,0,1,0,1).RateWithGST() 
                     ItemData.append({
-                            "FoodERPItemID": row.id,
-                            "FoodERPCategoryId":"",
+                            "FoodERPItemID": str(row.id),
+                            "FoodERPCategoryId":1,
                             "FoodERPFamilyId":row.FoodERPFamilyId,
-                            "FoodERPTypeId":"",
+                            "FoodERPTypeId":1,
                             "FoodERPUomId":row.BaseUnitID_id,
                             "ItemName":row.ItemName,
-                            "MRP":row.MRPValue,
-                            "RetailerRate":"",
-                            "DistributorRate":"",
-                            "SuperStockistRate":"",
+                            "MRP":float(row.MRPValue),
+                            "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
+                            "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
+                            "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
                             "ProductHSN":row.HSNCode,
                             "IsActive":row.isActive
                             
@@ -489,26 +496,27 @@ where M_Items.id=%s''',([today],[today],[id]))
                             'Content-Type': 'application/json'
                           }
                 
-                print(payload)
-                response = requests.request(
-                    "put", url, headers=headers, data=payload)
-                print(response.text)
-                response_json=response.text
-
+                payload_json_data = json.dumps(payload)
+                response = requests.request("put", url, headers=headers, data=payload_json_data)
+                response_json=json.loads(response.text)
                 
-                log_entry = create_transaction_log(request, payload, 0, 0,response_json,153)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
-            
+                if(response_json['success'] == True):
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],153)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                else:
+                    print('aaaaaaaaaaaaaaaaa')
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],165)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+
         except Exception as e:
+            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,165)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                
         
     @transaction.atomic()
     def delete(self, request,id=0):
         try:
             with transaction.atomic():
-                # data = JSONParser().parse(request)
-                # log_entry = create_transaction_log(request, data, 0, 0, "initiat")
-                # payload = json.dumps(data)
+                
                 ItemData=list()
                 
                 ItemData.append({
@@ -525,17 +533,20 @@ where M_Items.id=%s''',([today],[today],[id]))
                             'Content-Type': 'application/json'
                           }
                 
-                print(payload)
-                response = requests.request(
-                    "delete", url, headers=headers, data=payload)
+                payload_json_data = json.dumps(payload)
+                response = requests.request("delete", url, headers=headers, data=payload)
                 print(response.text)
-                response_json=response.text
-
                 
-                log_entry = create_transaction_log(request, payload, 0, 0,response_json,154)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                response_json=json.loads(response.text)
+                if(response_json['success'] == True):
+                    log_entry = create_transaction_log(request, payload, 0, 0,response_json,154)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                else:
+                    log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})     
             
         except Exception as e:
+            log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
         
 class NewRetailerSendToMobileAppView(CreateAPIView):
@@ -548,9 +559,9 @@ class NewRetailerSendToMobileAppView(CreateAPIView):
                 
                 RetailerData=list()
                 today = date.today()
-                q0=M_Items.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
+                q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
 cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
-(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id
+(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id,MC_PartyAddress.Address
  FROM MC_PartySubParty 
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
@@ -560,17 +571,17 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 for row in q0:
                      
                     RetailerData.append({
-                            "FoodERPRetailerID": row.id,
+                            "FoodERPRetailerID": str(row.id),
                             "RouteId"       :row.Route_id,
                             "RetailerName"  :row.RetailerName,
                             "DistributorId" :row.distid,
-                            "Address"       :row.BaseUnitID_id,
-                            "MobileNumber"  :row.MobileNumber,
-                            "EmailAddress"  :row.EmailAddress,
-                            "PANNumber"     :row.PANNumber,
-                            "GSTNumber"     :row.GSTNumber,
-                            "FSSAINumber"   :row.FSSAINo,
-                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            "Address"       :str(row.Address),
+                            "MobileNumber"  :str(row.MobileNumber),
+                            "EmailAddress"  :str(row.EmailAddress),
+                            "PANNumber"     :str(row.PANNumber),
+                            "GSTNumber"     :str(row.GSTNumber),
+                            "FSSAINumber"   :str(row.FSSAINo),
+                            "FSSAIExpiry"   :str(row.FSSAIExipry),
                             "Latitude"      :row.Latitude,
                             "Longitude"     :row.Longitude,
                             "IsActive"      :row.isActive
@@ -588,17 +599,20 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                             'Content-Type': 'application/json'
                           }
                 
-                print(payload)
+                payload_json_data = json.dumps(payload)
                 response = requests.request(
-                    "POST", url, headers=headers, data=payload)
+                    "POST", url, headers=headers, data=payload_json_data)
                 print(response.text)
-                response_json=response.text
+                response_json=json.loads(response.text)
+                if(response_json['success'] == True):
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                else:
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],167)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
 
-                
-                log_entry = create_transaction_log(request, payload, 0, 0,response_json,155)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
-            
         except Exception as e:
+            # log_entry = create_transaction_log(request, payload, 0, 0,response_json,167)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
     @transaction.atomic()
@@ -610,7 +624,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
 cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
-(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id
+(select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id,MC_PartyAddress.Address
  FROM MC_PartySubParty 
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
@@ -620,17 +634,17 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 for row in q0:
                      
                     RetailerData.append({
-                            "FoodERPRetailerID": row.id,
+                            "FoodERPRetailerID": str(row.id),
                             "RouteId"       :row.Route_id,
                             "RetailerName"  :row.RetailerName,
                             "DistributorId" :row.distid,
-                            "Address"       :row.BaseUnitID_id,
-                            "MobileNumber"  :row.MobileNumber,
-                            "EmailAddress"  :row.EmailAddress,
-                            "PANNumber"     :row.PANNumber,
-                            "GSTNumber"     :row.GSTNumber,
-                            "FSSAINumber"   :row.FSSAINo,
-                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            "Address"       :str(row.Address),
+                            "MobileNumber"  :str(row.MobileNumber),
+                            "EmailAddress"  :str(row.EmailAddress),
+                            "PANNumber"     :str(row.PANNumber),
+                            "GSTNumber"     :str(row.GSTNumber),
+                            "FSSAINumber"   :str(row.FSSAINo),
+                            "FSSAIExpiry"   :str(row.FSSAIExipry),
                             "Latitude"      :row.Latitude,
                             "Longitude"     :row.Longitude,
                             "IsActive"      :row.isActive
@@ -648,17 +662,20 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                             'Content-Type': 'application/json'
                           }
                 
-                print(payload)
-                response = requests.request(
-                    "POST", url, headers=headers, data=payload)
-                print(response.text)
-                response_json=response.text
-
-                
-                log_entry = create_transaction_log(request, payload, 0, 0,response_json,156)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                payload_json_data = json.dumps(payload)
+                print(payload_json_data)
+                response = requests.request("POST", url, headers=headers, data=payload_json_data)
+                response_json=json.loads(response.text)
+                print(response_json)
+                if(response_json['success'] == True):
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],156)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                else:
+                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],168)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})    
             
         except Exception as e:
+            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,168)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
             
     @transaction.atomic()
@@ -683,17 +700,20 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                             'Content-Type': 'application/json'
                           }
                 
-                print(payload)
-                response = requests.request(
-                    "delete", url, headers=headers, data=payload)
+                payload_json_data = json.dumps(payload)
+                response = requests.request("delete", url, headers=headers, data=payload_json_data)
                 print(response.text)
-                response_json=response.text
-
+                response_json=json.loads(response.text)
                 
-                log_entry = create_transaction_log(request, payload, 0, 0,response_json,157)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
-            
+                if(response_json['success'] == True):
+                    log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],157)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                else:
+                    log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],169)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+
         except Exception as e:
+            # log_entry = create_transaction_log(request, payload, 0, 0,response_json,169)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
         
@@ -784,10 +804,11 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                             Retailer = Retailer_serializer.save()
                             LastInsertID = Retailer.id
                             
-                            log_entry = create_transaction_log(request, aa, 0, 0,'Retailer Added From App Successfully',158,LastInsertID)
-                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully',"FoodERPRetailerID":LastInsertID}) 
+                            log_entry = create_transaction_log(request, aa, 0, 0,'Retailer Added From MobileApp Successfully',158,LastInsertID)
+                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From MobileApp Successfully',"FoodERPRetailerID":LastInsertID}) 
                         else:
                             transaction.set_rollback(True)
+                            log_entry = create_transaction_log(request, aa, 0, 0,'fail to Added Retailer From MobileApp ',170,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
                     # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully',"FoodERPRetailerID":LastInsertID})                        
         except Exception as e:
@@ -855,6 +876,7 @@ class RetailerUpdateFromMobileAppview(CreateAPIView):
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })
                         else:
                             transaction.set_rollback(True)
+                            log_entry = create_transaction_log(request, aa, 0, 0,'fail to  Updated retailer From MobileApp ',171)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
                     # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })                        
         except Exception as e:
@@ -886,7 +908,9 @@ class RetailerDeleteFromMobileApp(CreateAPIView):
                     log_entry = create_transaction_log(request, id, 0, 0,'Retailer  Deleted Successfully',160)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Retailer  Deleted Successfully'})
         except M_Parties.DoesNotExist:
+            log_entry = create_transaction_log(request, id, 0, 0,'Retailer Not available',172)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer Not available'})
         except IntegrityError:
+            log_entry = create_transaction_log(request, id, 0, 0,'Retailer used in another table',172)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer used in another table'})              
                  
