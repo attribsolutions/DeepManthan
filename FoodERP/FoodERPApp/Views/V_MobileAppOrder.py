@@ -365,13 +365,13 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
                         log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,'MobileAPPOrder Deleted Successfully',151,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully'})
         except T_Orders.DoesNotExist:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 'Record Not available',29,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,'Record Not available',29,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 'This Order is used in another Transaction ',8,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0,0, 'This Order is used in another Transaction ',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Order is used in another Transaction'})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class NewProductSendToMobileAppView(CreateAPIView):
