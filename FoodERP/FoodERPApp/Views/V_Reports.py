@@ -1157,16 +1157,16 @@ class OutStandingBalanceView(CreateAPIView):
                 ToDate = Balance_Data['Date']
 
                 if Route == '':
-                    query = MC_PartySubParty.objects.raw('''SELECT M_Parties.id, M_parties.Name AS PartyName, M_Routes.Name AS RouteName
-FROM MC_Partysubparty
-JOIN M_Parties ON M_Parties.id = MC_Partysubparty.Party_id
-LEFT JOIN M_Routes ON M_Routes.id = MC_Partysubparty.Route_id WHERE MC_Partysubparty.Party_id = %s''',([Party]))
+                    query = MC_PartySubParty.objects.raw('''SELECT M_Parties.id, M_Parties.Name AS PartyName, M_Routes.Name AS RouteName
+FROM MC_PartySubParty
+JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id
+LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubParty.Party_id = %s''',([Party]))
 
                 else:
-                    query = MC_PartySubParty.objects.raw('''SELECT M_Parties.id, M_parties.Name AS PartyName, M_Routes.Name AS RouteName
-FROM MC_Partysubparty
-JOIN M_Parties ON M_Parties.id = MC_Partysubparty.Party_id
-LEFT JOIN M_Routes ON M_Routes.id = MC_Partysubparty.Route_id WHERE MC_Partysubparty.Party_id = %s AND MC_Partysubparty.Route_id = %s''',([Party],[Route]))
+                    query = MC_PartySubParty.objects.raw('''SELECT M_Parties.id, M_Parties.Name AS PartyName, M_Routes.Name AS RouteName
+FROM MC_PartySubParty
+JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id
+LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubParty.Party_id = %s AND MC_PartySubParty.Route_id = %s''',([Party],[Route]))
                 if query:
                     Balance_Serializer = BalanceSerializer(query,many=True).data
                     BalanceList = list()
