@@ -567,7 +567,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
  where cust.PartyType_id=11 and cust.id=%s''',([id]))
-                print(q0)
+                
                 for row in q0:
                      
                     RetailerData.append({
@@ -602,7 +602,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 payload_json_data = json.dumps(payload)
                 response = requests.request(
                     "POST", url, headers=headers, data=payload_json_data)
-                print(response.text)
+             
                 response_json=json.loads(response.text)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
@@ -622,7 +622,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 
                 RetailerData=list()
                 today = date.today()
-                q0=M_Items.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
+                q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
 cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
 (select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id,MC_PartyAddress.Address
  FROM MC_PartySubParty 
@@ -632,7 +632,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
  where cust.PartyType_id=11 and cust.id=%s''',([id]))
                 print(q0)
                 for row in q0:
-                     
+                    print(row.isActive)
                     RetailerData.append({
                             "FoodERPRetailerID": str(row.id),
                             "RouteId"       :row.Route_id,
@@ -664,9 +664,9 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 
                 payload_json_data = json.dumps(payload)
                 print(payload_json_data)
-                response = requests.request("POST", url, headers=headers, data=payload_json_data)
+                response = requests.request("put", url, headers=headers, data=payload_json_data)
                 response_json=json.loads(response.text)
-                print(response_json)
+                print('======================',response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],156)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
