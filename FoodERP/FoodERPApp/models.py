@@ -166,6 +166,7 @@ class M_Parties(models.Model):
     City = models.ForeignKey(M_Cities, related_name='PartiesCities', on_delete=models.PROTECT,null=True,blank=True)
     Latitude = models.CharField(max_length=500,null=True, blank=True)
     Longitude = models.CharField(max_length=500,null=True, blank=True)
+    IsApprovedParty = models.BooleanField(default=False)
     class Meta:
         db_table = 'M_Parties'
         
