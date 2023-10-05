@@ -790,6 +790,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                 "isActive": a['IsActive'],
                                 "CreatedBy":430,
                                 "UpdatedBy":430,
+                                "IsApprovedParty":1,
                                 "State":query1[0]['State_id'], #Compensary
                                 "District":query1[0]['District_id'], #Compensary
                                 "City":query1[0]['City_id'], #Compensary
