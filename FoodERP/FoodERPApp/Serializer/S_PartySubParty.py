@@ -33,7 +33,7 @@ class PartySerializer(serializers.ModelSerializer):
     PartySubParty=PartySubPartySerializer(read_only=True) 
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType','GSTIN','PartyAddress','PartySubParty','PAN','isActive']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress','PartySubParty','PAN']
         
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
