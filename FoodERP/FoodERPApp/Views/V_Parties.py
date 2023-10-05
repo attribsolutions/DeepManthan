@@ -68,14 +68,14 @@ class M_PartiesFilterView(CreateAPIView):
                 if (RoleID == 1):  # SuperAdmin
 
                     q1 = M_PartyType.objects.filter(Company=CompanyID)
-                    query = M_Parties.objects.filter(PartyType__in=q1)
+                    query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
 
                 elif(IsSCMCompany == 0):  # Admin
 
                     q1 = M_PartyType.objects.filter(
                         Company=CompanyID, IsRetailer=0)
                     query = M_Parties.objects.filter(
-                        Company=CompanyID, PartyType__IsRetailer=0).select_related("PartyType")
+                        Company=CompanyID, PartyType__IsRetailer=0,IsApprovedParty=0).select_related("PartyType")
 
                 elif(RoleID == 2 and IsSCMCompany == 1):  # SCM Company Admin
 
@@ -84,7 +84,7 @@ class M_PartiesFilterView(CreateAPIView):
 
                     q1 = M_PartyType.objects.filter(
                         Company__in=q0, IsRetailer=0, IsSCM=1)
-                    query = M_Parties.objects.filter(PartyType__in=q1)
+                    query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
 
                 else:
 
@@ -94,14 +94,14 @@ class M_PartiesFilterView(CreateAPIView):
                         
                         if IsRetailer == 1:
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
-                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=1).select_related("PartyType")
+                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=1,IsApprovedParty=0).select_related("PartyType")
                         else:
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
-                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=0).select_related("PartyType")    
+                            query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=0,IsApprovedParty=0).select_related("PartyType")    
 
                     else:
                         q0 = MC_PartySubParty.objects.filter(Party=PartyID)
-                        query = M_Parties.objects.filter(id__in=q0)
+                        query = M_Parties.objects.filter(id__in=q0,IsApprovedParty=0)
                 # if PartyID == 0:
 
                 #     if(RoleID == 1 ):
@@ -370,3 +370,36 @@ FROM
         except Exception as e:
             log_entry = create_transaction_logNew(request,Retailerdata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+        
+        
+        
+class PartiesListForApprovalView(CreateAPIView): 
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Retailerdata = JSONParser().parse(request)
+                PartyID = Retailerdata['PartyID']
+                q0 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
+                query = M_Parties.objects.filter(id__in=q0,IsApprovedParty=1)
+                if not query:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:
+                    M_Parties_serializer = PartiesSerializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+        
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                q0 = M_Parties.objects.filter(id=id).update(IsApprovedParty=0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Approved Successfully'  })
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})           
+        
