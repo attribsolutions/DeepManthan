@@ -559,8 +559,8 @@ class NewRetailerSendToMobileAppView(CreateAPIView):
                 
                 RetailerData=list()
                 today = date.today()
-                q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
-cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
+                q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,(cust.MobileNo) MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
+cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,
 (select Route_id from MC_PartySubParty where Party_id=dist.id and SubParty_id=cust.id )Route_id,MC_PartyAddress.Address
  FROM MC_PartySubParty 
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
@@ -576,15 +576,15 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                             "RouteId" : 1,
                             "RetailerName"  :row.RetailerName,
                             "DistributorID" :row.distid,
-                            "Address"       :str(row.Address),
+                            "Address"       :row.Address,
                             "MobileNumber"  :str(row.MobileNumber),
-                            "EmailAddress"  :str(row.EmailAddress),
-                            "PANNumber"     :str(row.PANNumber),
-                            "GSTNumber"     :str(row.GSTNumber),
-                            "FSSAINumber"   :str(row.FSSAINo),
-                            "FSSAIExpiry"   :str(row.FSSAIExipry),
-                            "Latitude"      :row.Latitude,
-                            "Longitude"     :row.Longitude,
+                            "EmailAddress"  :row.EmailAddress,
+                            "PANNumber"     :row.PANNumber,
+                            "GSTNumber"     :row.GSTNumber,
+                            "FSSAINumber"   :row.FSSAINo,
+                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            # "Latitude"      :row.Latitude,
+                            # "Longitude"     :row.Longitude,
                             "IsActive"      :row.isActive
                            
                             
@@ -593,6 +593,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 payload={
                     "outlets" : RetailerData
                 }
+                
                 url = "http://webapp.theskygge.com/fmcg_middleware/outlets/add"
 
                 headers = {
@@ -601,10 +602,12 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                           }
                 
                 payload_json_data = json.dumps(payload)
+                print(payload_json_data)
                 response = requests.request(
                     "POST", url, headers=headers, data=payload_json_data)
              
                 response_json=json.loads(response.text)
+                print(response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
@@ -613,7 +616,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
 
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload, 0, 0,response_json,167)
+            print("fffffffffffffffddddddddddddddddddddddddddddddddddddddddd",response_json,payload_json_data)
+            log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
     @transaction.atomic()
@@ -640,15 +644,15 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                             "RouteId" : 1,
                             "RetailerName"  :row.RetailerName,
                             "DistributorID" :row.distid,
-                            "Address"       :str(row.Address),
+                            "Address"       :row.Address,
                             "MobileNumber"  :str(row.MobileNumber),
-                            "EmailAddress"  :str(row.EmailAddress),
-                            "PANNumber"     :str(row.PANNumber),
-                            "GSTNumber"     :str(row.GSTNumber),
-                            "FSSAINumber"   :str(row.FSSAINo),
-                            "FSSAIExpiry"   :str(row.FSSAIExipry),
-                            "Latitude"      :row.Latitude,
-                            "Longitude"     :row.Longitude,
+                            "EmailAddress"  :row.EmailAddress,
+                            "PANNumber"     :row.PANNumber,
+                            "GSTNumber"     :row.GSTNumber,
+                            "FSSAINumber"   :row.FSSAINo,
+                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            # "Latitude"      :row.Latitude,
+                            # "Longitude"     :row.Longitude,
                             "IsActive"      :row.isActive
                            
                             
@@ -689,7 +693,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 
                 RetailerData.append({
                         
-                        "FoodERPRetailerID" : id
+                        "FoodERPRetailerID" : id 
                     })
 
                 payload={
