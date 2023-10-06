@@ -238,11 +238,11 @@ class UpdatePartyAddressSerializer(serializers.ModelSerializer):
         fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
         
 class UpdateMC_PartySubPartySerializer(serializers.ModelSerializer):
-    # Delete = serializers.IntegerField()
+    Delete = serializers.IntegerField()
     
     class Meta:
         model =MC_PartySubParty
-        fields =['Party','Route','CreatedBy','UpdatedBy']
+        fields =['Party','Route','CreatedBy','UpdatedBy','Delete']
 
 
 class UpdateM_PartiesSerializer(serializers.ModelSerializer):
