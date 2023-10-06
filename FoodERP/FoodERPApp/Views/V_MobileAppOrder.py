@@ -572,7 +572,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                      
                     RetailerData.append({
                             "FoodERPRetailerID": str(row.id),
-                            "RouteId"       :row.Route_id,
+                            # "RouteId"       :row.Route_id,
+                            "RouteId" : 1,
                             "RetailerName"  :row.RetailerName,
                             "DistributorID" :row.distid,
                             "Address"       :str(row.Address),
@@ -635,7 +636,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     print(row.isActive)
                     RetailerData.append({
                             "FoodERPRetailerID": str(row.id),
-                            "RouteId"       :row.Route_id,
+                            # "RouteId"       :row.Route_id,
+                            "RouteId" : 1,
                             "RetailerName"  :row.RetailerName,
                             "DistributorID" :row.distid,
                             "Address"       :str(row.Address),
