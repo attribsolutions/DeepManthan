@@ -1190,7 +1190,7 @@ class ManPowerReportView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
 
-    def post(self, request):
+    def get(self, request):
         try:
             with transaction.atomic():
                 query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName, 
