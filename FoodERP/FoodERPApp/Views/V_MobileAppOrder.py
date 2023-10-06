@@ -644,15 +644,15 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                             "RouteId" : 1,
                             "RetailerName"  :row.RetailerName,
                             "DistributorID" :row.distid,
-                            "Address"       :str(row.Address),
+                            "Address"       :row.Address,
                             "MobileNumber"  :str(row.MobileNumber),
-                            "EmailAddress"  :str(row.EmailAddress),
-                            "PANNumber"     :str(row.PANNumber),
-                            "GSTNumber"     :str(row.GSTNumber),
-                            "FSSAINumber"   :str(row.FSSAINo),
-                            "FSSAIExpiry"   :str(row.FSSAIExipry),
-                            "Latitude"      :row.Latitude,
-                            "Longitude"     :row.Longitude,
+                            "EmailAddress"  :row.EmailAddress,
+                            "PANNumber"     :row.PANNumber,
+                            "GSTNumber"     :row.GSTNumber,
+                            "FSSAINumber"   :row.FSSAINo,
+                            "FSSAIExpiry"   :row.FSSAIExipry,
+                            # "Latitude"      :row.Latitude,
+                            # "Longitude"     :row.Longitude,
                             "IsActive"      :row.isActive
                            
                             
