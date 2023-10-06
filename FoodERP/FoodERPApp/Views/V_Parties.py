@@ -393,7 +393,6 @@ class PartiesListForApprovalView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
-        
     @transaction.atomic()
     def get(self, request,id=0):
         try:
