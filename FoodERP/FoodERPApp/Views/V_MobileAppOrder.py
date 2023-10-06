@@ -693,7 +693,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     })
 
                 payload={
-                    "products" : RetailerData
+                    "outlets" : RetailerData
                 }
                 url = "http://webapp.theskygge.com/fmcg_middleware/outlets/delete"
 
