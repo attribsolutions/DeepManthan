@@ -322,18 +322,11 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
           
             for PartySubParty in validated_data['PartySubParty']:
                 query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
-                PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)
-                
-                # if PartySubParty['Delete']== 1 :
-                #     query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
-                # else:
-                #     query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance)
-                #     if query.count() >0 :
-                #         pass
-                #     else:
-                #         del PartySubParty['Delete']
-                #         PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
-                        
+     
+                if PartySubParty['Delete']== 0 :
+                    del PartySubParty['Delete']
+                    PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty) 
+
         return instance        
         
                     
