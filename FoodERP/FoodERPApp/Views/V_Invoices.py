@@ -152,7 +152,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     "OrderIDs":Order_list,
                     "OrderItemDetails":OrderItemDetails
                    })  
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Customer),32,0,0,0,Customer)         
+            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,Customer)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0, Exception(e),33,0)
