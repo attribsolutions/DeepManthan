@@ -94,11 +94,14 @@ class M_ItemsFilterView(CreateAPIView):
                         x = PartyID
 
                 if IsSCMCompany == 1:
-                    Company=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
-                    query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
+                    company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
+                    company_ids = [company.id for company in company_queryset]
+                    # query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))
                 else:
-                    query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
-                # return JsonResponse({'query':  str(query.query)})
+                    # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
+            
                 if not query:
                     log_entry = create_transaction_log(request, Logindata, 0, x, "Data Not available",7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -123,10 +126,10 @@ class M_ItemsFilterView(CreateAPIView):
                             "id": a['id'],
                             "Name": a['Name'],
                             "ShortName": a['ShortName'],
-                            "Company": a['Company']['id'],
-                            "CompanyName": a['Company']['Name'],
-                            "BaseUnitID": a['BaseUnitID']['id'],
-                            "BaseUnitName": a['BaseUnitID']['Name'],
+                            "Company": a['Company_id'],
+                            "CompanyName": a['CompanyName'],
+                            "BaseUnitID": a['BaseUnitID_id'],
+                            "BaseUnitName": a['BaseUnitName'],
                             "BarCode": a['BarCode'],
                             "Sequence": a['Sequence'],
                             "isActive":a['isActive'] ,
