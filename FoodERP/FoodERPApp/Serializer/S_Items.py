@@ -461,18 +461,9 @@ class ItemReportSerializer(serializers.ModelSerializer):
         fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails']
 
 
-# class DiscountSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = M_DiscountMaster
-#         fields = '__all__'
-
-# class DiscountItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = M_Items
-#         fields = ['id','Name']
-
-# class DiscountSerializerSecond(serializers.ModelSerializer):
-#     Item = DiscountItemSerializer()
-#     class Meta:
-#         model = M_DiscountMaster
-#         fields = '__all__'
+class ItemSerializerThird(serializers.ModelSerializer):
+    Company=CompanySerializerSecond()
+    BaseUnitID = UnitSerializerSecond()
+    class Meta:
+        model = M_Items
+        fields='__all__'
