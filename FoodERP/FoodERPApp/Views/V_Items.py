@@ -106,6 +106,19 @@ class M_ItemsFilterView(CreateAPIView):
                     Items_Serializer = ItemSerializerThird(query, many=True).data
                     ItemListData = list ()
                     for a in Items_Serializer:
+                        # UnitDetails=list()
+                        # for d in a['ItemUnitDetails']:
+                        #     if d['IsDeleted']== 0 :
+                                
+                        #         UnitDetails.append({
+                        #             "id": d['id'],
+                        #             "UnitID": d['UnitID']['id'],
+                        #             "UnitName": d['BaseUnitConversion'],
+                        #             "BaseUnitQuantity": d['BaseUnitQuantity'],
+                        #             "IsBase": d['IsBase'],
+                        #             "PODefaultUnit": d['PODefaultUnit'],
+                        #             "SODefaultUnit": d['SODefaultUnit'],
+                        #         })
                         ItemListData.append({
                             "id": a['id'],
                             "Name": a['Name'],
@@ -131,8 +144,10 @@ class M_ItemsFilterView(CreateAPIView):
                             "CreatedBy": a['CreatedBy'],
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn'] 
-                        })      
+                            "UpdatedOn": a['UpdatedOn'],
+                            # "UnitDetails":UnitDetails
+                        })    
+                        
                     log_entry = create_transaction_log(request, Logindata, 0, x, "Item Filter List",102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
