@@ -272,7 +272,7 @@ class InvoiceView(CreateAPIView):
                 if Invoice_serializer.is_valid():
                     Invoice = Invoice_serializer.save()
                     LastInsertId = Invoice.id
-                    log_entry = create_transaction_logNew(request, Invoicedata, Invoicedata['Customer'],'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0,Party)
+                    log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','TransactionID':LastInsertId, 'Data':[]})
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, Invoice_serializer.errors,34,0,InvoiceDate,0,Invoicedata['Customer'])
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
@@ -481,7 +481,7 @@ class InvoiceNoView(CreateAPIView):
                 Customer = InVoice_Data['CustomerID']
 
                 if Party == '':
-                    x = Customer
+                    x = 0
                 else:
                     x = Party
 
