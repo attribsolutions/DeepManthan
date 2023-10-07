@@ -1184,4 +1184,74 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
                 
+class ManPowerReportView(CreateAPIView):
 
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    @transaction.atomic()
+
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName, 
+M_PartyType.Name AS PartyType, A.Email, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
+"" AS Cluster, "" AS SubCluster, C.Address, M_States.Name AS State, M_Districts.Name AS District,
+M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
+A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
+C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, "" AS RSM, "" AS ASM, "" AS Salesofficer,
+"" AS SalesExecutive, "" AS SalesRepresentative
+FROM MC_PartySubParty 
+LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
+LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
+LEFT JOIN M_PartyType ON M_PartyType.id = A.PartyType_id
+LEFT JOIN MC_PartyAddress  C ON C.id = A.id
+LEFT JOIN M_States ON M_States.id = A.State_id
+LEFT JOIN M_Districts ON M_Districts.id = A.District_id
+LEFT JOIN M_Cities ON M_Cities.id = A.City_id
+LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
+LEFT JOIN M_Employees on M_Employees.id = MC_EmployeeParties.Employee_id
+LEFT JOIN M_Users on M_Users.Employee_id = M_Employees.id
+WHERE M_PartyType.id IN(9,10,15,17)''')
+
+                if query:
+                    ManPower_Serializer = ManPowerSerializer(query,many=True).data
+                    ManPowerList = list()
+                  
+                    for a in ManPower_Serializer:
+                        ManPowerList.append({
+                            "SAPCode":a['SAPCode'],
+                            "FEParty_id":a['FEParty_id'],
+                            "PartyName":a['PartyName'],
+                            "PartyType":a['PartyType'],
+                            "Email":a['Email'],
+                            "SS_id":a['SS_id'],
+                            "SSName":a['SSName'],
+                            "LoginID":a['LoginID'],
+                            "country":a['country'],
+                            "Cluster":a['Cluster'],
+                            "SubCluster":a['SubCluster'],
+                            "Address":a['Address'],
+                            "State":a['State'],
+                            "District":a['District'],
+                            "City":a['City'],
+                            "PIN":a['PIN'],
+                            "Mobile":a['Mobile'],
+                            "OwnerName":a['OwnerName'],
+                            "Latitude":a['Latitude'],
+                            "Longitude":a['Longitude'],
+                            "FSSAINo":a['FSSAINo'],
+                            "FSSAIExpiry":a['FSSAIExpiry'],
+                            "GSTIN":a['GSTIN'],
+                            "RSM":a['RSM'],
+                            "ASM":a['ASM'],
+                            "Salesofficer":a['Salesofficer'],
+                            "SalesExecutive":a['SalesExecutive'],
+                            "SalesRepresentative":a['SalesRepresentative']
+
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ManPowerList})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
+        
+                
