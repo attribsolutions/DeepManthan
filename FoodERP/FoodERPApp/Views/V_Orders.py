@@ -996,7 +996,7 @@ where Supplier_id=%s and OrderDate between %s and %s
                     #                 "OrderAmount": float(a['OrderAmount']),
                     #                 "CreatedOn": a['CreatedOn']
                     #             })
-                    log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(Company),31,0,FromDate,ToDate,Company)            
+                    log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order Summary Not available",7,0)
 
