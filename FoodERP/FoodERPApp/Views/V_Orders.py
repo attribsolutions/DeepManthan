@@ -50,22 +50,23 @@ class OrderListFilterView(CreateAPIView):
                 CustomerType = Orderdata['CustomerType']
                 d = date.today()   
 
-                # # for log
-                # if OrderType == 2:
-                #     if Customer == '':
-                #         log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],0)               
-                #     else:
-                #         log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])               
-                #     #     if Supplier == '':
-                #     #         x = 0
-                #     #         log_entry = create_transaction_logNew(request, Orderdata, x,'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])               
-                #     #     else:
-                #     #         log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])        
-                #     # else:
-                #     #     print('bbb')
-                #     #     z = Supplier
-                #     #     log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(z),28,0,FromDate,ToDate,x)
-                    
+                # for log
+                if OrderType == 1:
+                    x = Customer
+                    if Supplier == '':
+                        z = 0
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,0)
+                    else:
+                        z = Supplier
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(z),28,0,FromDate,ToDate,x)
+                else:
+                    x = Supplier
+                    if Customer == '':
+                        z = 0
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,173,0,FromDate,ToDate,0)
+                    else:
+                        z = Customer
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,173,0,FromDate,ToDate,z)
 
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
@@ -154,24 +155,13 @@ class OrderListFilterView(CreateAPIView):
                             "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
                         })
 
-                    if OrderType == 2:
-                        if Customer == '':
-                            log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],0)
-                        else:
-                            log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
-                    else:
-                        if Supplier == '':
-                            log_entry = create_transaction_logNew(request, Orderdata,0,'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate'],1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
-                        else:
-                            log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
-
-
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-                log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'], "Order List Not Found",28,0,FromDate,ToDate,Orderdata['Customer'])
+                log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
 
 class OrderListFilterViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
