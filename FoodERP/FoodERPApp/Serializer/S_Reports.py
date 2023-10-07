@@ -372,4 +372,46 @@ class BalanceSerializer(serializers.Serializer):
     id= serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     RouteName = serializers.CharField(max_length=500)
-    
+
+class ManPowerSerializer(serializers.Serializer):
+    SAPCode = serializers.CharField(max_length=500)
+    FEParty_id = serializers.IntegerField(allow_null=True)
+    PartyName = serializers.CharField(max_length=500)
+    PartyType = serializers.CharField(max_length=500)
+    Email = serializers.CharField(max_length=500)
+    SS_id = serializers.IntegerField(allow_null=True)
+    SSName = serializers.CharField(max_length=500)
+    LoginID = serializers.CharField(max_length=500)
+    country = serializers.CharField(max_length=500)
+    Cluster = serializers.CharField(max_length=500)
+    SubCluster = serializers.CharField(max_length=500)
+    Address = serializers.CharField(max_length=500)
+    State = serializers.CharField(max_length=500)
+    District = serializers.CharField(max_length=500)
+    City = serializers.CharField(max_length=500)
+    PIN = serializers.IntegerField(allow_null=True)
+    Mobile = serializers.CharField(max_length=500)
+    OwnerName = serializers.CharField(max_length=500)
+    Latitude = serializers.CharField(max_length=500)
+    Longitude = serializers.CharField(max_length=500)
+    FSSAINo = serializers.CharField(max_length=500)
+    FSSAIExpiry = serializers.DateField()
+    GSTIN = serializers.CharField(max_length=500)
+    RSM = serializers.CharField(max_length=500)
+    ASM = serializers.CharField(max_length=500)
+    Salesofficer = serializers.CharField(max_length=500)
+    SalesExecutive = serializers.CharField(max_length=500)
+    SalesRepresentative = serializers.CharField(max_length=500)
+
+
+
+
+
+
+
+
+
+
+
+
+

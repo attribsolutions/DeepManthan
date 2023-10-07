@@ -605,6 +605,7 @@ urlpatterns = [
             url(r'CreditDebitDataExport$', CreditDebitExportReportView.as_view()),
             url(r'ReceiptDataExport$', ReceiptDataExportReportView.as_view()),
             url(r'OutStandingBalance$', OutStandingBalanceView.as_view()),
+            url(r'ManPowerReport$', ManPowerReportView.as_view()),
             
             
             
