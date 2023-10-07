@@ -155,9 +155,17 @@ class OrderListFilterView(CreateAPIView):
                         })
 
                     if OrderType == 2:
-                        log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
+                        if Customer == '':
+                            log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),174,0,Orderdata['POFromDate'],Orderdata['POToDate'],0)
+                        else:
+                            log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
                     else:
-                        log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
+                        if Supplier == '':
+                            log_entry = create_transaction_logNew(request, Orderdata,0,'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate'],1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
+                        else:
+                            log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier']),1,0,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
+
+
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
                 log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'], "Order List Not Found",28,0,FromDate,ToDate,Orderdata['Customer'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
