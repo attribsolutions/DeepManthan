@@ -620,26 +620,27 @@ urlpatterns = [
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
             url(r'Claimlist$',ClaimlistView.as_view()),
-            
-            
-            
+                           
 # ClaimTracking
             url(r'ClaimListfortracking$',Listofclaimforclaimtracking.as_view()),
             url(r'ClaimTracking/([0-9]+)$',ClaimTrackingEntryViewSecond.as_view()),
             url(r'ClaimTracking$', ClaimTrackingEntryView.as_view()),
             url(r'ClaimTrackingList$', ClaimTrackingEntryListView.as_view()),
-            
-            
+                 
             
 # StockAdjustment
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
             
-            
-
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
             url(r'GetTransactionType$',TransactionTypeListView.as_view()),
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
+
+# RetailerApproval Apis
+            url(r'PartyListForApproval/([0-9]+)$',PartiesListForApprovalView.as_view()),
+            url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
+           
+            
             
                   
 

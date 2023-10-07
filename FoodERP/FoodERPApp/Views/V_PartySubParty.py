@@ -213,7 +213,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                          
                             })
                         else:
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):

@@ -238,10 +238,11 @@ class UpdatePartyAddressSerializer(serializers.ModelSerializer):
         fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
         
 class UpdateMC_PartySubPartySerializer(serializers.ModelSerializer):
+    Delete = serializers.IntegerField()
     
     class Meta:
         model =MC_PartySubParty
-        fields =['Party','Route','CreatedBy','UpdatedBy']
+        fields =['Party','Route','CreatedBy','UpdatedBy','Delete']
 
 
 class UpdateM_PartiesSerializer(serializers.ModelSerializer):
@@ -321,8 +322,11 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
           
             for PartySubParty in validated_data['PartySubParty']:
                 query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
-                PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty)     
-                        
+     
+                if PartySubParty['Delete']== 0 :
+                    del PartySubParty['Delete']
+                    PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty) 
+
         return instance        
         
                     
