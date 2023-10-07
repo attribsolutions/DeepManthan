@@ -55,18 +55,18 @@ class OrderListFilterView(CreateAPIView):
                     x = Customer
                     if Supplier == '':
                         z = 0
-                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,0)
+                        log_entry = create_transaction_logNew(request, Orderdata,0,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,x)
                     else:
                         z = Supplier
-                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(z),28,0,FromDate,ToDate,x)
+                        log_entry = create_transaction_logNew(request, Orderdata,z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(z),28,0,FromDate,ToDate,x)
                 else:
                     x = Supplier
                     if Customer == '':
                         z = 0
-                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,173,0,FromDate,ToDate,0)
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),173,0,FromDate,ToDate,0)
                     else:
                         z = Customer
-                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,173,0,FromDate,ToDate,z)
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),173,0,FromDate,ToDate,z)
 
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
