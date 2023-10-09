@@ -98,7 +98,7 @@ class PartyTypeView(CreateAPIView):
                     PartyTypedataByID, data=PartyTypedata)
                 if PartyTypedata_Serializer.is_valid():
                     PartyTypedata_Serializer.save()
-                    log_entry = create_transaction_logNew(request,PartyTypedata,PartyTypedata['Company'],'',187,0)
+                    log_entry = create_transaction_logNew(request,PartyTypedata,0,'Company:'+str(PartyTypedata['Company']),187,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Updated Successfully', 'Data':[]})
                 else:
                     log_entry = create_transaction_logNew(request,PartyTypedata,0,PartyTypedata_Serializer.errors,34,0)
