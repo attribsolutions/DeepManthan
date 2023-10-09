@@ -807,20 +807,22 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                 "PartyAddress":PartyAddress,
                                 "PartyPrefix":PartyPrefix
                             })
-                        
+                    inserted_retailerlist = list()     
                     for aa in RetailerAddList:
                         Retailer_serializer = RetailerAddFromMobileAppSerializer(data=aa)
                         if Retailer_serializer.is_valid():
                             Retailer = Retailer_serializer.save()
-                            LastInsertID = Retailer.id
-                            
-                            log_entry = create_transaction_log(request, aa, 0, 0,'Retailer Added From MobileApp Successfully',158,LastInsertID)
-                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From MobileApp Successfully',"FoodERPRetailerID":LastInsertID}) 
+                            inserted_retailerlist.append({
+                                "FoodERPRetailerID":Retailer.id,
+                                "Name":Retailer.Name,
+                                "GSTNumber":Retailer.GSTIN
+                            })
                         else:
                             transaction.set_rollback(True)
                             log_entry = create_transaction_log(request, aa, 0, 0,'fail to Added Retailer From MobileApp ',170,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
-                    # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully',"FoodERPRetailerID":LastInsertID})                        
+                    log_entry = create_transaction_log(request, aa, 0, 0,'Retailer Added From MobileApp Successfully',158,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
         
