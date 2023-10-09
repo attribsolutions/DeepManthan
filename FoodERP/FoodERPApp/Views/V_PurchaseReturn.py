@@ -347,13 +347,12 @@ class PurchaseReturnView(CreateAPIView):
                     UpdateO_BatchWiseLiveStockList = list()
               
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
-                print(PurchaseReturndata)
+                # print(PurchaseReturndata)
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
                 # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':'', 'Data':PurchaseReturn_Serializer.data})
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
-                    
                     if Mode == 1:
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
                     elif Mode == 2:
@@ -366,8 +365,8 @@ class PurchaseReturnView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
+            # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
     
     # Purchase Return DELETE API New code Date 25/07/2023
     @transaction.atomic()

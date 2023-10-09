@@ -161,7 +161,7 @@ urlpatterns = [
     url(r'MobileAppUpdateProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     
-    url(r'MobileAppAddRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
+    url(r'MobileAppAddRetailer$',NewRetailerSendToMobileAppView.as_view()),
     url(r'MobileAppUpdateRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     
@@ -637,7 +637,6 @@ urlpatterns = [
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
 
 # RetailerApproval Apis
-            url(r'PartyListForApproval/([0-9]+)$',PartiesListForApprovalView.as_view()),
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
            
             

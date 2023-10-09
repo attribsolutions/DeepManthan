@@ -285,7 +285,7 @@ class PartyAddressView(CreateAPIView):
                 PartiesAddress.delete()
                 log_entry = create_transaction_logNew(request,{'PartyID':id}, 0, "Party Address Deleted Successfully",97,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Address Deleted Successfully', 'Data': []})
-        except M_Parties.DoesNotExist:
+        except MC_PartyAddress.DoesNotExist:
             log_entry = create_transaction_logNew(request,{'PartyID':id}, 0, 'Data Not available',7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Address Not available', 'Data': []})
         except IntegrityError:
@@ -392,13 +392,5 @@ class PartiesListForApprovalView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic():
-                q0 = M_Parties.objects.filter(id=id).update(IsApprovedParty=0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Approved Successfully'  })
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})           
+           
         
