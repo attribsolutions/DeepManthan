@@ -23,9 +23,10 @@ class DiscountMastergo(CreateAPIView):
         try:
             with transaction.atomic():
                 Discountdata = M_DiscountMaster.objects.filter(id=id).update(IsDeleted=1)
-                
+                log_entry = create_transaction_logNew(request, 0, 0,'DiscountID:'+str(id),110,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Deleted Successfully', 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
     
@@ -94,10 +95,14 @@ class DiscountMastergo(CreateAPIView):
                     # print(Discountquery.query)
                 if Discountquery:
                     Discountdata = DiscountMasterSerializer(Discountquery, many=True).data
+                    print('aaa')
+                    log_entry = create_transaction_logNew(request, Discountdata, Party,'',200,0,FromDate,ToDate,Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
                 else:
+                    print('bbb')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':''})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -114,12 +119,19 @@ class DiscountMasterSaveView(CreateAPIView):
                 Discount_serializer = DiscountSerializer(
                     data=DiscountMaster_data, many=True)
                 if Discount_serializer.is_valid():
-                    Discount_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully', 'Data': []})
+                    Discount = Discount_serializer.save()
+                    LastInsertID = Discount[0].id
+                    if DiscountMaster_data[0]['Customer'] == '':
+                        log_entry = create_transaction_logNew(request, DiscountMaster_data,DiscountMaster_data[0]['Party'],'From:'+str(DiscountMaster_data[0]['FromDate'])+','+'To:'+str(DiscountMaster_data[0]['ToDate'])+','+'Supplier:'+str(DiscountMaster_data[0]['Party'])+','+'TransactionID:'+str(LastInsertID),108,LastInsertID,DiscountMaster_data[0]['FromDate'],DiscountMaster_data[0]['ToDate'],0)
+                    else:
+                        log_entry = create_transaction_logNew(request, DiscountMaster_data,DiscountMaster_data[0]['Party'],'From:'+str(DiscountMaster_data[0]['FromDate'])+','+'To:'+str(DiscountMaster_data[0]['ToDate'])+','+'TransactionID:'+str(LastInsertID),108,LastInsertID,DiscountMaster_data[0]['FromDate'],DiscountMaster_data[0]['ToDate'],DiscountMaster_data[0]['Customer'])
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request, DiscountMaster_data,0,Discount_serializer.errors,34,0)
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -162,10 +174,13 @@ ORDER BY M_DiscountMaster.id DESC''', ([Party], [today], [today]))
                 if Discountquery:
                     Discountdata = DiscountMasterFilterSerializer(
                         Discountquery, many=True).data
+                    log_entry = create_transaction_logNew(request, Discountdata, Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),124,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
                 else:
+                    log_entry = create_transaction_logNew(request, Discountdata, Party,'DiscountList not available',124,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -187,8 +202,10 @@ class DiscountPartyTypeView(CreateAPIView):
                 else:
                     PartyTypes_Serializer = PartyTypeSerializer(
                         query2, many=True).data
+                    log_entry = create_transaction_logNew(request, PartyTypes_Serializer, 0,'Company:'+str(PartyTypes_Serializer[0]['Company']),125,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyTypes_Serializer})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     
@@ -210,6 +227,8 @@ class DiscountCustomerView(CreateAPIView):
                 else:
                     M_Parties_serializer = PartiesSerializer(
                         query, many=True).data
+                    log_entry = create_transaction_logNew(request, M_Parties_serializer,0,'',126,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
