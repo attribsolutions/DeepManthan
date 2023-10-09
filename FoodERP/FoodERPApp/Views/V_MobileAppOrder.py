@@ -27,13 +27,12 @@ class T_MobileAppOrdersView(CreateAPIView):
             with transaction.atomic():
                 data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
-                print(auth_header)
                 if auth_header:
-                    print('000000000')
+                    
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
                     if auth_type.lower() == 'basic':
-                        print('000011111')
+                       
                         # Decoding the base64-encoded username and password
                         try:
                             username, password = base64.b64decode(
@@ -41,14 +40,14 @@ class T_MobileAppOrdersView(CreateAPIView):
                         except (TypeError, ValueError, UnicodeDecodeError):
                             return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                         # Authenticating the user
-                    print(username,password)    
-                    print('1111!1')    
+                    # print(username,password)    
+                    # print('1111!1')    
                     user = authenticate(request, username=username, password=password)
-                    print(username,password)
+                    # print(username,password)
                     InvoiceItems = list()
                     
                     if user is not None:
-                        print('aaaaaaaaaaaa')
+                        # print('aaaaaaaaaaaa')
                         Supplier = data['FoodERPSupplierID']
                         Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
@@ -59,7 +58,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderitem=list()
                         
                         for aa in data['OrderItem']:
-                            print(aa['FoodERPItemID'])
+                            # print(aa['FoodERPItemID'])
                             unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
                             Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
                             BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
@@ -116,7 +115,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         b = GetPrifix.GetOrderPrifix(Supplier)
                         
                         c=MC_PartyAddress.objects.filter(Party_id=Customer,IsDefault=1).values('id')
-                        print(c)
+                        # print(c)
                             
                         
                         Orderdata.append({
@@ -163,12 +162,12 @@ class T_MobileAppOrdersView(CreateAPIView):
                         log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,161,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
-                        print('bbbbbbbbbb')
+                        # print('bbbbbbbbbb')
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             # log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
-            print('ccccccccccccccccccc')
+            # print('ccccccccccccccccccc')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -179,13 +178,13 @@ class T_MobileAppOrdersView(CreateAPIView):
             with transaction.atomic():
                 data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
-                print(auth_header)
+                # print(auth_header)
                 if auth_header:
-                    print('000000000')
+                    # print('000000000')
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
                     if auth_type.lower() == 'basic':
-                        print('000011111')
+                        # print('000011111')
                         # Decoding the base64-encoded username and password
                         try:
                             username, password = base64.b64decode(
@@ -193,17 +192,17 @@ class T_MobileAppOrdersView(CreateAPIView):
                         except (TypeError, ValueError, UnicodeDecodeError):
                             return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                         # Authenticating the user
-                    print(username,password)    
-                    print('1111!1')    
+                    # print(username,password)    
+                    # print('1111!1')    
                     user = authenticate(request, username=username, password=password)
-                    print(username,password)
+                    # print(username,password)
                     InvoiceItems = list()
                     
                     if user is not None:
-                        print('aaaaaaaaaaaa')
-                        print(id)
+                        # print('aaaaaaaaaaaa')
+                        # print(id)
                         OrderupdateByID = T_Orders.objects.get(id=id)
-                        print(OrderupdateByID)
+                        # print(OrderupdateByID)
                         Supplier = data['FoodERPSupplierID']
                         Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
@@ -214,7 +213,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderitem=list()
                         
                         for aa in data['OrderItem']:
-                            print(aa['FoodERPItemID'])
+                            # print(aa['FoodERPItemID'])
                             unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
                             Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
                             BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
@@ -271,7 +270,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         # b = GetPrifix.GetOrderPrifix(Supplier)
                         
                         c=MC_PartyAddress.objects.filter(Party_id=Customer,IsDefault=1).values('id')
-                        print(c)
+                        # print(c)
                             
                         
                         Orderdata.append({
@@ -320,12 +319,12 @@ class T_MobileAppOrdersView(CreateAPIView):
                         log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,162,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
-                        print('bbbbbbbbbb')
+                        # print('bbbbbbbbbb')
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             # log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
-            print('ccccccccccccccccccc')
+            # print('ccccccccccccccccccc')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 class T_MobileAppOrdersDeleteView(CreateAPIView):
@@ -338,13 +337,13 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
             with transaction.atomic():
                 data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
-                print(auth_header)
+                # print(auth_header)
                 if auth_header:
-                    print('000000000')
+                    # print('000000000')
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
                     if auth_type.lower() == 'basic':
-                        print('000011111')
+                        # print('000011111')
                         # Decoding the base64-encoded username and password
                         try:
                             username, password = base64.b64decode(
@@ -352,10 +351,10 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
                         except (TypeError, ValueError, UnicodeDecodeError):
                             return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                         # Authenticating the user
-                    print(username,password)    
-                    print('1111!1')    
+                    # print(username,password)    
+                    # print('1111!1')    
                     user = authenticate(request, username=username, password=password)
-                    print(username,password)
+                    # print(username,password)
                     InvoiceItems = list()
                     
                     if user is not None:
@@ -393,7 +392,7 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id=%s''',([today],[today],[id]))
-                print(q0)
+                # print(q0)
                 for row in q0:
                      
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
@@ -435,8 +434,8 @@ where M_Items.id=%s''',([today],[today],[id]))
                 response = requests.request("POST", url, headers=headers, data=payload_json_data)
                 
                 response_json=json.loads(response.text)
-                print(response_json)
-                print('==============================',response_json['success'])
+                # print(response_json)
+                # print('==============================',response_json['success'])
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,152)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
@@ -465,7 +464,7 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id=%s''',([today],[today],[id]))
-                print(q0)
+                # print(q0)
                 for row in q0:
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
@@ -504,7 +503,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],153)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
                 else:
-                    print('aaaaaaaaaaaaaaaaa')
+                    # print('aaaaaaaaaaaaaaaaa')
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],165)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
 
@@ -535,7 +534,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                 
                 payload_json_data = json.dumps(payload)
                 response = requests.request("delete", url, headers=headers, data=payload)
-                print(response.text)
+                # print(response.text)
                 
                 response_json=json.loads(response.text)
                 if(response_json['success'] == True):
@@ -613,13 +612,14 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 # print(response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
+                    for a in response_json['data']:
+                        query = M_Parties.objects.filter(id=a['externalMappingId']).update(SkyggeID =a['outletId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],167)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
 
         except Exception as e:
-            print("fffffffffffffffddddddddddddddddddddddddddddddddddddddddd",response_json,payload_json_data)
             log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
@@ -638,9 +638,9 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
  where cust.PartyType_id=11 and cust.id=%s''',([id]))
-                print(q0)
+                # print(q0)
                 for row in q0:
-                    print(row.isActive)
+                    # print(row.isActive)
                     RetailerData.append({
                             "FoodERPRetailerID": str(row.id),
                             # "RouteId"       :row.Route_id,
@@ -672,10 +672,10 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                           }
                 
                 payload_json_data = json.dumps(payload)
-                print(payload_json_data)
+                # print(payload_json_data)
                 response = requests.request("put", url, headers=headers, data=payload_json_data)
                 response_json=json.loads(response.text)
-                print('======================',response_json)
+                # print('======================',response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],156)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
@@ -711,7 +711,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 
                 payload_json_data = json.dumps(payload)
                 response = requests.request("delete", url, headers=headers, data=payload_json_data)
-                print(response.text)
+                # print(response.text)
                 response_json=json.loads(response.text)
                 
                 if(response_json['success'] == True):
