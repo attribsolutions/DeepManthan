@@ -637,7 +637,6 @@ urlpatterns = [
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
 
 # RetailerApproval Apis
-            url(r'PartyListForApproval/([0-9]+)$',PartiesListForApprovalView.as_view()),
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
            
             
