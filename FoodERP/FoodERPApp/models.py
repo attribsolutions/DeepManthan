@@ -1912,6 +1912,7 @@ class O_DateWiseLiveStock(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     MRPValue = models.DecimalField(max_digits=20,decimal_places=10)
+    StockAdjustment = models.DecimalField(max_digits=20,decimal_places=10)
 
     class Meta:
         db_table="O_DateWiseLiveStock"      
