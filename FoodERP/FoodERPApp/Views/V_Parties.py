@@ -285,7 +285,7 @@ class PartyAddressView(CreateAPIView):
                 PartiesAddress.delete()
                 log_entry = create_transaction_logNew(request,{'PartyID':id}, 0, "Party Address Deleted Successfully",97,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Address Deleted Successfully', 'Data': []})
-        except M_Parties.DoesNotExist:
+        except MC_PartyAddress.DoesNotExist:
             log_entry = create_transaction_logNew(request,{'PartyID':id}, 0, 'Data Not available',7,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Address Not available', 'Data': []})
         except IntegrityError:
