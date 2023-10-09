@@ -613,6 +613,8 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 # print(response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
+                    for a in response_json['data']:
+                        query = M_Parties.objects.filter(id=a['externalMappingId']).update(SkyggeID =a['outletId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],167)
