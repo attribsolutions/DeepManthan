@@ -392,13 +392,5 @@ class PartiesListForApprovalView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
-    @transaction.atomic()
-    def get(self, request,id=0):
-        try:
-            with transaction.atomic():
-                q0 = M_Parties.objects.filter(id=id).update(IsApprovedParty=0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Approved Successfully'  })
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})           
+           
         

@@ -294,6 +294,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'Latitude', instance.Latitude)
         instance.Longitude = validated_data.get(
             'Longitude', instance.Longitude)
+        instance.IsApprovedParty = validated_data.get(
+            'IsApprovedParty', instance.IsApprovedParty)    
             
         instance.save()   
         
