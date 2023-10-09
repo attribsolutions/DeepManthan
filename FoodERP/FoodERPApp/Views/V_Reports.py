@@ -437,82 +437,82 @@ class StockProcessingView(CreateAPIView):
                     StockDeleteQuery  = O_DateWiseLiveStock.objects.filter(Party_id=Party,StockDate=Date)
                     StockDeleteQuery.delete()
                     # print(StockDeleteQuery.query)
-                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3) OpeningBalance,round(GRN,3) GRN,round(SalesReturn,3) SalesReturn,round(Sale,3) Sale,round(PurchaseReturn,3) PurchaseReturn,
-round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance,ActualStock
+                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,
+                    round(OpeningBalance,3) OpeningBalance,
+                    round(GRN,3) GRN,
+                    round(SalesReturn,3) SalesReturn,
+                    round(Sale,3) Sale,
+                    round(PurchaseReturn,3) PurchaseReturn,
+                    round(((OpeningBalance+GRN+SalesReturn+StockAdjustment)-(Sale+PurchaseReturn)),3) ClosingBalance,
+                    StockAdjustment,ActualStock
  from
 
 (select 1 as id,I.Item_id ItemID,I.UnitID,
-IFNULL(ClosingBalance,0)OpeningBalance,
+
+(CASE WHEN StockEntry >= 0  THEN IFNULL(StockEntry,0)  ELSE IFNULL(ClosingBalance,0) END )OpeningBalance,
 IFNULL(InvoiveQuantity,0)Sale,
 IFNULL(GRNQuantity,0)GRN,
 IFNULL(SalesReturnQuantity,0)SalesReturn,
 IFNULL(PurchesReturnQuantity,0)PurchaseReturn,
-IFNULL(StockQuantity,0)ActualStock
+IFNULL(StockAdjustmentQTY,0)StockAdjustment,
+IFNULL(ActualStock,0)ActualStock
 
 from
 
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
 
-left join
-(SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
+left join (SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
 					DAY ) AND Party_id =%s GROUP BY ItemID)CB
                     
 on I.Item_id=CB.ItemID
-left join
-(SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
+
+left join (SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
 FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
 WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
 
 on I.Item_id=GRN.Item_id
-left join
 
-(SELECT Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
+left join (SELECT Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
 FROM T_Invoices JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
 WHERE InvoiceDate = %s AND Party_id = %s GROUP BY Item_id)Invoice
 
 on I.Item_id=Invoice.Item_id
-left join
 
-
-
-(SELECT Item_id,sum(Difference)ActualStock FROM T_Stock where StockDate = %s and Party_id= %s group by Item_id)Stock
-
-
-on I.Item_id=Stock.Item_id
-left join
-
-(SELECT Item_id,SUM(BaseUnitQuantity) SalesReturnQuantity,sum(Amount) SalesReturnValue
+left join (SELECT Item_id,SUM(BaseUnitQuantity) SalesReturnQuantity,sum(Amount) SalesReturnValue
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
-WHERE ReturnDate = %s AND Party_id = %s GROUP BY Item_id)SalesReturn
+WHERE ReturnDate = %s AND Party_id = %s and TC_PurchaseReturnItems.ItemReason_id in(SELECT DefaultValue FROM M_Settings where id=14) GROUP BY Item_id)SalesReturn
 
 on I.Item_id=SalesReturn.Item_id
-left join
 
-(SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
+left join (SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
-WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
+WHERE ReturnDate = %s AND Customer_id = %s and TC_PurchaseReturnItems.ItemReason_id in(SELECT DefaultValue FROM M_Settings where id=14) GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id
-LEFT JOIN
 
-(Select Item_id,SUM(BaseUnitQuantity) StockQuantity from T_Stock where StockDate = %s AND Party_id= %s GROUP BY Item_id)ActualStock
-on I.Item_id=ActualStock.Item_id)R
+Left join (Select Item_id,SUM(BaseUnitQuantity)StockEntry  from T_Stock where IsStockAdjustment=0 and StockDate= DATE_SUB(  %s, INTERVAL 1 DAY ) AND Party_id=%s GROUP BY Item_id)StockEntry 
+ON I.Item_id=StockEntry.Item_id
+
+left join (SELECT Item_id,sum(Difference)StockAdjustmentQTY FROM T_Stock where IsStockAdjustment=1 and StockDate = %s and Party_id= %s group by Item_id)StockAdjustment 
+on I.Item_id=StockAdjustment.Item_id
+
+left join (SELECT Item_id,sum(BaseUnitQuantity)ActualStock FROM T_Stock where IsStockAdjustment=0 and StockDate = %s and Party_id= %s group by Item_id)ActualStock
+on I.Item_id=ActualStock.Item_id
+
+)R
 where 
-OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
-([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 ''',
+([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
                     # print(StockProcessQuery)
                     serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # print(serializer)
                     for a in serializer:
 
-                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a["ClosingBalance"], ActualStock=a['ActualStock'], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a["ClosingBalance"], ActualStock=0,StockAdjustment=a["StockAdjustment"] ,Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
 
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': []})
-
-                
-
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -543,11 +543,12 @@ UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
 A.ItemName,
 D.QuantityInBaseUnit,
 UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
-UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn
+UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn,
+UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,%s,0)StockAdjustment
 ,GroupTypeName,GroupName,SubGroupName,%s UnitName
 FROM 
 	
-	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,
+	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
     ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 	 FROM O_DateWiseLiveStock
 	
@@ -1185,7 +1186,7 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
         
                 
 class ManPowerReportView(CreateAPIView):
-
+    
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
