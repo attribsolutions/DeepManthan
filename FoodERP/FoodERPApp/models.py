@@ -167,7 +167,7 @@ class M_Parties(models.Model):
     Latitude = models.CharField(max_length=500,null=True, blank=True)
     Longitude = models.CharField(max_length=500,null=True, blank=True)
     IsApprovedParty = models.BooleanField(default=False)
-    SkyggID = models.CharField(max_length=500,null=True, blank=True)
+    SkyggeID = models.CharField(max_length=500,null=True, blank=True)
     class Meta:
         db_table = 'M_Parties'
         
