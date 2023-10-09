@@ -814,7 +814,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                             Retailer = Retailer_serializer.save()
                             inserted_retailerlist.append({
                                 "FoodERPRetailerID":Retailer.id,
-                                "Name":Retailer.Name,
+                                "RetailerName":Retailer.Name,
                                 "GSTNumber":Retailer.GSTIN
                             })
                         else:
