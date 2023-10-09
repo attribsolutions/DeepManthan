@@ -38,7 +38,7 @@ class GRNListFilterView(CreateAPIView):
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
-                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'GRN Not available',68,0)
+                    log_entry = create_transaction_logNew(request, GRNdata, 0,'GRN Not available',68,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
@@ -80,7 +80,7 @@ class GRNListFilterView(CreateAPIView):
                             x = 0
                         else:
                             x= Supplier
-                    log_entry = create_transaction_logNew(request, GRNdata, 0,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(Customer),68,0,FromDate,ToDate,Customer)
+                    log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),68,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'Exception(e)',33,0)
@@ -578,7 +578,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "OrderItem": InvoiceItemDetails,
                                 
                             })
-                        log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Customer']['id'],'InvoiceItemDetails Save Successfully',75,0,0,0,a['Party']['id'])
+                        log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Party']['id'],'Supplier:'+str(a['Party']['id']),75,0,0,0,a['Customer']['id'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
                 else:
                     log_entry = create_transaction_logNew(request, InvoiceSerializedata, a['Customer']['id'],'Data Not available',7,0)
