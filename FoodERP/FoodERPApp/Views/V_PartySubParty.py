@@ -108,7 +108,7 @@ class PartySubPartyViewSecond(CreateAPIView):
                     })
                    
                 
-                log_entry = create_transaction_logNew(request, PartySerializer,a['Party']['id'],'PartySubPartyList',175,0)               
+                log_entry = create_transaction_logNew(request, PartySerializer,a['Party']['id'],'',175,0)               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
         except  MC_PartySubParty.DoesNotExist:
             log_entry = create_transaction_logNew(request, PartySerializer,PartySerializer[0]['Party'],'PartySubPartyList Not Available',175,0)
