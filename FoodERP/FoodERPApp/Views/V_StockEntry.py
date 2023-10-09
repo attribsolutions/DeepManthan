@@ -31,12 +31,13 @@ class StockEntryPageView(CreateAPIView):
                 CreatedBy = StockEntrydata['CreatedBy']
                 StockDate = StockEntrydata['Date']
                 Mode =  StockEntrydata['Mode']
+                IsStockAdjustment=StockEntrydata['IsStockAdjustment']
               
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 T_StockEntryList = list()
                 for a in StockEntrydata['StockItems']:
-                  
+                    # print(a)
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
@@ -52,7 +53,7 @@ class StockEntryPageView(CreateAPIView):
                     else:
                         totalstock=0    
                     
-                    print(query3)
+                    # print(query3)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
@@ -83,7 +84,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
                     "Difference" : round(BaseUnitQuantity,3)-totalstock,
-                    "IsStockAdjustment" : a['IsStockAdjustment']
+                    "IsStockAdjustment" : IsStockAdjustment
                     })
                     
                     O_LiveBatchesList.append({
@@ -111,7 +112,7 @@ class StockEntryPageView(CreateAPIView):
                 if(Mode == 1):   # Stock Entry case update 0 to all stock for given party
                     
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
-                print(StockEntrydata['O_LiveBatchesList'])
+                # print(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
                     
                     if(Mode == 1):
