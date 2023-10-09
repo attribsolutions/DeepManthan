@@ -556,7 +556,10 @@ class NewRetailerSendToMobileAppView(CreateAPIView):
     def post(self, request,id=0):
         try:
             with transaction.atomic():
-                
+                Orderdata = JSONParser().parse(request)
+                RetailerID = Orderdata['RetailerID']
+                RetailerID_list = RetailerID.split(",")
+                # print(RetailerID_list)
                 RetailerData=list()
                 today = date.today()
                 q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,(cust.MobileNo) MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
@@ -566,10 +569,10 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
- where cust.PartyType_id=11 and cust.id=%s''',([id]))
-                
+ where cust.PartyType_id=11 and cust.id in %s''',([RetailerID_list]))
+                # print(q0.query)
                 for row in q0:
-                     
+                    # print(row) 
                     RetailerData.append({
                             "FoodERPRetailerID": str(row.id),
                             # "RouteId"       :row.Route_id,
@@ -602,12 +605,12 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                           }
                 
                 payload_json_data = json.dumps(payload)
-                print(payload_json_data)
+                # print(payload_json_data)
                 response = requests.request(
                     "POST", url, headers=headers, data=payload_json_data)
              
                 response_json=json.loads(response.text)
-                print(response_json)
+                # print(response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
