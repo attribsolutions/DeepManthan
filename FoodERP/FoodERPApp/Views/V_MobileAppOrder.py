@@ -757,7 +757,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                         PartySubParty = list()
                         PartySubParty.append({
                             "Party":a['DistributorId'],
-                            "Route": a['RouteId'],
+                            "Route": "",
                             "CreatedBy":430,
                             "UpdatedBy":430,  
                         })
