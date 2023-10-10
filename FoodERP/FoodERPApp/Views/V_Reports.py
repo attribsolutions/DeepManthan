@@ -984,13 +984,12 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
                     query2 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('OpeningBalance','Unit_id')
-                    if query2:
-                        if int(query2[0]['OpeningBalance']) > 0:
-                            OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
-                        else:
-                            OpeningBalance=0.00      
+                    
+                    if int(query2[0]['OpeningBalance']) > 0:
+                        OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
                     else:
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
+                        OpeningBalance=0.00      
+                    
                  
                     query3 = O_DateWiseLiveStock.objects.filter(StockDate=ToDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
                     if query3:
