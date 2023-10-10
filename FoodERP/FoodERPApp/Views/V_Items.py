@@ -560,7 +560,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "Company": a['Company']['Name'],
                             "ShelfLife":float(Itemshelfdata[0]['Days']),
                             "PcsInBox":PcsInBox,
-                            "PcsInBox":PcsInKG,
+                            "PcsInKG":PcsInKG,
                             "ItemMargins":ww
                             
                         })
