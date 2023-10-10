@@ -573,8 +573,8 @@ FROM
 		FROM T_Stock 
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
-		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[unitname],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
-                # print(StockreportQuery)
+		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[unitname],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
+                print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
                 
                 

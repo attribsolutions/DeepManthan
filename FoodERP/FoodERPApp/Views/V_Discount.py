@@ -41,6 +41,12 @@ class DiscountMastergo(CreateAPIView):
                 PartyType = Discountdata["PartyType"]
                 PriceList = Discountdata["PriceList"] 
                 Customer = Discountdata["Customer"]
+
+                #for log 
+                if Customer == '':
+                    x = 0 
+                else:
+                    x = Customer
                 
                 if not Customer:
                     Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
@@ -93,13 +99,13 @@ class DiscountMastergo(CreateAPIView):
                     WHERE  MC_PartyItems.Item_id IS NOT NULL
                     ORDER BY M_Items.Sequence)a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate]))
                     # print(Discountquery.query)
+
+                
                 if Discountquery:
                     Discountdata = DiscountMasterSerializer(Discountquery, many=True).data
-                    print('aaa')
-                    log_entry = create_transaction_logNew(request, Discountdata, Party,'',200,0,FromDate,ToDate,Customer)
+                    log_entry = create_transaction_logNew(request, Discountdata, Party,'',200,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
                 else:
-                    print('bbb')
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':''})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
