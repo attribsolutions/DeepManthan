@@ -196,6 +196,12 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                                 "MRP":MRPValue
                             })
                         # Append a default entry if there are no results
+                        if int(Unit) == 1:
+                            StockUnit = 'No'
+                        if int(Unit) == 2:
+                            StockUnit = 'Kg'
+                        if int(Unit) == 4:
+                            StockUnit = 'Box'        
                         if not stockquery:
                             ItemList.append({
                                 "Item": a['id'],
