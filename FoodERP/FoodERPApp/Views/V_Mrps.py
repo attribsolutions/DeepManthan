@@ -49,11 +49,7 @@ class M_MRPsView(CreateAPIView):
             if M_Mrps_Serializer.is_valid():
                 MRP = M_Mrps_Serializer.save()
                 LastInsertID = MRP[0].id
-                if M_Mrpsdata[0]['Party'] == '':
-                    x = 0
-                else:
-                    x = M_Mrpsdata[0]['Party']
-                log_entry = create_transaction_logNew(request, M_Mrpsdata,x,'TransactionID:'+str(LastInsertID),120,LastInsertID)
+                log_entry = create_transaction_logNew(request, M_Mrpsdata,0,'TransactionID:'+str(LastInsertID),120,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully', 'TransactionID':LastInsertID,'Data' :[]})
             else:
                 log_entry = create_transaction_logNew(request, M_Mrpsdata, 0, M_Mrps_Serializer.errors,34,0)
