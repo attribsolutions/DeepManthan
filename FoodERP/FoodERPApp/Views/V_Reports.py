@@ -876,8 +876,7 @@ class StockDamageReportView(CreateAPIView):
 
                 query1 = M_Units.objects.filter(
                     id=ConversionUnit).values('Name')
-                query = O_BatchWiseLiveStock.objects.raw(
-                    '''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.id UnitID FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''', ([PartyID]))
+                query = O_BatchWiseLiveStock.objects.raw('''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.id UnitID,O_LiveBatches.MRPValue FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0  GROUP BY O_BatchWiseLiveStock.Item_id,O_LiveBatches.MRPValue''', ([PartyID]))
                 if query:
                     DamageStockData = list()
                     DamageItemStocktSerializer = DamageStocktSerializer(
@@ -886,12 +885,12 @@ class StockDamageReportView(CreateAPIView):
                         ConversionUnitQty = UnitwiseQuantityConversion(
                             a['id'], a['Qty'], 0, a['UnitID'], 0, ConversionUnit, 0).ConvertintoSelectedUnit()
                         DamageStockData.append({
-                            "id": a['id'],
+                            "Item": a['id'],
                             "ItemName": a['ItemName'],
-                            "Quantity": ConversionUnitQty,
-                            "UnitName": query1[0]['Name']
+                            "ActualQty": ConversionUnitQty,
+                            "Unit": query1[0]['Name'],
+                            "MRP":a['MRPValue']
                         })
-
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DamageStockData})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
