@@ -81,7 +81,6 @@ class PartySubPartyViewSecond(CreateAPIView):
                 query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
                 query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
                 PartySerializer = PartySubpartySerializerSecond(query3, many=True).data
-               
                 
                 SubPartyList = list()
                 for a in PartySerializer:
@@ -106,12 +105,15 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "Route": a['Route']['id'],
                         "Creditlimit": a['Creditlimit']
                     })
-                   
+                    if a['Party']['id'] == '':
+                       x = 0
+                    else:
+                       x = a['Party']['id']
                 
-                log_entry = create_transaction_logNew(request, PartySerializer,a['Party']['id'],'',175,0)               
+                log_entry = create_transaction_logNew(request, PartySerializer,x,'',175,0)               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
         except  MC_PartySubParty.DoesNotExist:
-            log_entry = create_transaction_logNew(request, PartySerializer,PartySerializer[0]['Party'],'PartySubPartyList Not Available',175,0)
+            log_entry = create_transaction_logNew(request, PartySerializer,0,'PartySubPartyList Not Available',175,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, PartySerializer,0,Exception(e),33,0)
