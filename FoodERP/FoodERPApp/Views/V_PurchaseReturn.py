@@ -363,6 +363,7 @@ class PurchaseReturnView(CreateAPIView):
                 else:
                     log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],  PurchaseReturn_Serializer.errors,34,0)
                     # transaction.set_rollback(True)
+        
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         # except Exception as e:
             # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
