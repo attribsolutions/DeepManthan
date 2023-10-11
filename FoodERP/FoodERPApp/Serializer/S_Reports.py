@@ -153,7 +153,8 @@ class DamageStocktSerializer(serializers.Serializer):
     id=serializers.IntegerField()
     ItemName = serializers.CharField(max_length=500) 
     Qty = serializers.DecimalField(max_digits=10, decimal_places=2)
-    UnitID=serializers.IntegerField()        
+    UnitID=serializers.IntegerField()
+    MRPValue = serializers.DecimalField(max_digits=10, decimal_places=2)       
     
     
     
