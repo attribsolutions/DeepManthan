@@ -213,7 +213,7 @@ class PurchaseReturnView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request,format=None):
-        try:
+        # try:
             with transaction.atomic():
                 
                 '''Image Upload Code start'''
@@ -364,9 +364,9 @@ class PurchaseReturnView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],  PurchaseReturn_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
-        except Exception as e:
+        # except Exception as e:
             # log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
     
     # Purchase Return DELETE API New code Date 25/07/2023
     @transaction.atomic()
