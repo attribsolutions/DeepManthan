@@ -47,9 +47,10 @@ class M_MarginsView(CreateAPIView):
                     additionaldata.append(b)     
                 M_Margins_Serializer = M_MarginsSerializer(data=additionaldata,many=True)
             if M_Margins_Serializer.is_valid():
-                M_Margins_Serializer.save()
-                log_entry = create_transaction_logNew(request, M_Marginsdata, 0, 'EffectiveDate:'+M_Marginsdata[0]['EffectiveDate'],115,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margins Save Successfully','Data' :[]})
+                Margin = M_Margins_Serializer.save()
+                LastInsertID = Margin[0].id
+                log_entry = create_transaction_logNew(request, M_Marginsdata, 0,'TransactionID:'+str(LastInsertID)+','+'EffectiveDate:'+M_Marginsdata[0]['EffectiveDate'],115,LastInsertID)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margins Save Successfully','TransactionID':LastInsertID,'ItemID':M_Marginsdata[0]['Item'],'Data' :[]})
             else:
                 log_entry = create_transaction_logNew(request, M_Marginsdata, 0, M_Margins_Serializer.errors,34,0)
                 transaction.set_rollback(True)
@@ -110,7 +111,7 @@ class M_MarginsViewSecond(CreateAPIView):
                 Margindata = M_MarginMaster.objects.filter(id=id).update(IsDeleted=1)
                 # Margindata.delete()
                 log_entry = create_transaction_logNew(request, {'MarginID':id}, 0, 'MarginID:'+str(id),117,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','DeleteID':id, 'Data':[]})
         except M_MarginMaster.DoesNotExist:
             log_entry = create_transaction_logNew(request, {'MarginID':id}, 0, "Margin Not available",117,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})
@@ -146,5 +147,5 @@ class M_MarginsViewThird(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'MarginID':id}, 0,'MarginID:'+str(id),118,0)
-        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','Data':[]})
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','DeleteID':id,'Data':[]})
     
