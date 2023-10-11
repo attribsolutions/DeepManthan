@@ -50,7 +50,7 @@ class M_MRPsView(CreateAPIView):
                 MRP = M_Mrps_Serializer.save()
                 LastInsertID = MRP[0].id
                 log_entry = create_transaction_logNew(request, M_Mrpsdata,0,'TransactionID:'+str(LastInsertID),120,LastInsertID)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully', 'TransactionID':LastInsertID,'Data' :[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully', 'TransactionID':LastInsertID,'ItemID':M_Mrpsdata[0]['Item'],'Data' :[]})
             else:
                 log_entry = create_transaction_logNew(request, M_Mrpsdata, 0, M_Mrps_Serializer.errors,34,0)
                 transaction.set_rollback(True)
@@ -110,7 +110,7 @@ class M_MRPsViewSecond(CreateAPIView):
                 MRPdata = M_MRPMaster.objects.filter(id=id).update(IsDeleted=1)
                 # MRPdata.delete()
                 log_entry = create_transaction_logNew(request, {'MRPID':id}, 0, 'MRPID:'+str(id),122,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','DeleteID':id,'Data':[]})
         except M_MRPMaster.DoesNotExist:
             log_entry = create_transaction_logNew(request,{'MRPID':id}, 0, "MRP Not available",122,0)
             transaction.set_rollback(True)
@@ -147,7 +147,7 @@ class M_MRPsViewThird(CreateAPIView):
                 transaction.set_rollback(True)   
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'MRPID':id}, 0,'MRPID:'+str(id),123,0)
-        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','Data':[]})
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','DeleteID':id,'Data':[]})
            
             
                 
