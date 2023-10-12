@@ -99,7 +99,7 @@ WHERE Transactiontime BETWEEN %s AND %s'''
                         Transaction_Serializer = TransactionlogSerializer(Transactionquery,many=True).data
                         log_entry = create_transaction_logNew(request, Transactiondata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate),196,0,FromDate,ToDate,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Transaction_Serializer})
-                log_entry = create_transaction_logNew(request, Transactiondata, 0,'TransactionTypeDetails not available',115,0)
+                log_entry = create_transaction_logNew(request, Transactiondata, 0,'TransactionTypeDetails not available',196,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'TransactionTypeDetails not available', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)

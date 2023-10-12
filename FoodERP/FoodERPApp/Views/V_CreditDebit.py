@@ -68,16 +68,17 @@ class CreditDebitNoteListView(CreateAPIView):
                             "IsRecordDeleted" : a["IsDeleted"],
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
-                     #for log
+                    #for log
                     if Customer == '':
                         Customer = 0
                     else:
                         Customer = Customer
-                    log_entry = create_transaction_logNew(request, CreditDebitdata,Customer ,'From:'+FromDate+','+'To:'+ToDate,83,0,FromDate,ToDate,Party)
+                    log_entry = create_transaction_logNew(request, CreditDebitdata,Party,'From:'+FromDate+','+'To:'+ToDate,83,0,FromDate,ToDate,Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData})
                 log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitList Not Available',83,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
+            # CreditDebitData = JSONParser().parse(request)
             log_entry = create_transaction_logNew(request, CreditDebitdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -120,16 +121,18 @@ class CreditDebitNoteView(CreateAPIView):
                 if CreditNote_Serializer.is_valid():
                     CreditDebit = CreditNote_Serializer.save()
                     LastInsertID = CreditDebit.id
-                    log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CRDRNoteDate:'+CreditNotedata['CRDRNoteDate']+','+'Supplier:'+str(CreditNotedata['Customer'])+','+'TransactionID:'+str(LastInsertID),84,LastInsertID,0,0,CreditNotedata['Customer'])
                     if(NoteType==37 or NoteType==39):
+                        log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CRDRNoteDate:'+CreditNotedata['CRDRNoteDate']+','+'TransactionID:'+str(LastInsertID),84,LastInsertID,0,0,CreditNotedata['Customer'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Save Successfully', 'TransactionID':LastInsertID, 'Data': []})
                     else:
+                        log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CRDRNoteDate:'+CreditNotedata['CRDRNoteDate']+','+'TransactionID:'+str(LastInsertID),197,LastInsertID,0,0,CreditNotedata['Customer'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DebitNote Save Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, CreditNotedata, Party,CreditNote_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data': []})
         except Exception as e:
+            # CreditNoteData = JSONParser().parse(request)
             log_entry = create_transaction_logNew(request, CreditNotedata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
@@ -233,7 +236,7 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRInvoices": CRDRInvoices,
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
-                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'Single CreditdebitNote',85,0,0,0,a['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'',85,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
                 log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
