@@ -78,8 +78,8 @@ class CreditDebitNoteListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitList Not Available',83,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            CreditDebitData = JSONParser().parse(request)
-            log_entry = create_transaction_logNew(request, CreditDebitData, 0,Exception(e),33,0)
+            # CreditDebitData = JSONParser().parse(request)
+            log_entry = create_transaction_logNew(request, CreditDebitdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -132,8 +132,8 @@ class CreditDebitNoteView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data': []})
         except Exception as e:
-            CreditNoteData = JSONParser().parse(request)
-            log_entry = create_transaction_logNew(request, CreditNoteData, 0,Exception(e),33,0)
+            # CreditNoteData = JSONParser().parse(request)
+            log_entry = create_transaction_logNew(request, CreditNotedata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
