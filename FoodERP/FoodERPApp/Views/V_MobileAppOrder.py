@@ -450,9 +450,10 @@ where M_Items.id=%s''',([today],[today],[id]))
     def put(self, request,id=0):
         try:
             with transaction.atomic():
-                # data = JSONParser().parse(request)
-                # log_entry = create_transaction_log(request, data, 0, 0, "initiat")
-                # payload = json.dumps(data)
+                Productdata = JSONParser().parse(request)
+                ProductID = Productdata['products']
+                ProductID_list = ProductID.split(",")
+                print(ProductID_list)
                 ItemData=list()
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
@@ -463,8 +464,8 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-where M_Items.id=%s''',([today],[today],[id]))
-                # print(q0)
+where M_Items.id in %s''',([today],[today],ProductID_list))
+                print(q0)
                 for row in q0:
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
@@ -501,11 +502,11 @@ where M_Items.id=%s''',([today],[today],[id]))
                 
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],153)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     # print('aaaaaaaaaaaaaaaaa')
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],165)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
             # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,165)
@@ -539,13 +540,13 @@ where M_Items.id=%s''',([today],[today],[id]))
                 response_json=json.loads(response.text)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload, 0, 0,response_json,154)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})     
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})     
             
         except Exception as e:
-            log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
+            # log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
         
 class NewRetailerSendToMobileAppView(CreateAPIView):
@@ -614,20 +615,22 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
                     for a in response_json['data']:
                         query = M_Parties.objects.filter(id=a['externalMappingId']).update(SkyggeID =a['outletId'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],167)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
+            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
     @transaction.atomic()
     def put(self, request,id=0):
         try:
             with transaction.atomic():
-                
+                Orderdata = JSONParser().parse(request)
+                RetailerID = Orderdata['RetailerID']
+                RetailerID_list = RetailerID.split(",")
                 RetailerData=list()
                 today = date.today()
                 q0=M_Parties.objects.raw('''SELECT cust.id,cust.Name RetailerName,cust.MobileNo MobileNumber,cust.Email EmailAddress,cust.PAN PANNumber,
@@ -637,8 +640,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
- where cust.PartyType_id=11 and cust.id=%s''',([id]))
-                # print(q0)
+ where cust.PartyType_id=11 and cust.id in %s''',[RetailerID_list])
+                print(q0)
                 for row in q0:
                     # print(row.isActive)
                     RetailerData.append({
@@ -678,10 +681,10 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 # print('======================',response_json)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],156)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],168)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})    
             
         except Exception as e:
             # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,168)
@@ -716,10 +719,10 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],157)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],169)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
             # log_entry = create_transaction_log(request, payload, 0, 0,response_json,169)
