@@ -155,14 +155,14 @@ urlpatterns = [
     url(r'MobileAppOrder$',T_MobileAppOrdersView.as_view()),
     url(r'MobileAppOrderDelete$',T_MobileAppOrdersDeleteView.as_view()),
     url(r'MobileAppOrder/([0-9]+)$',T_MobileAppOrdersView.as_view()),
-    url(r'MobileAppAddProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     
+   
     url(r'MobileAppAddProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
-    url(r'MobileAppUpdateProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
+    url(r'MobileAppUpdateProduct$',NewProductSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     
     url(r'MobileAppAddRetailer$',NewRetailerSendToMobileAppView.as_view()),
-    url(r'MobileAppUpdateRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
+    url(r'MobileAppUpdateRetailer$',NewRetailerSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     
     url(r'Retailer/Add$',RetailerAddFromMobileAppview.as_view()),
