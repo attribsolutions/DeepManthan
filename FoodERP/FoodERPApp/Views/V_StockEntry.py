@@ -132,7 +132,7 @@ class StockEntryPageView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, StockEntrydata, Party,'',87,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, StockEntrydata, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,  Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -216,7 +216,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
-            log_entry = create_transaction_logNew(request, StockReportdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 
