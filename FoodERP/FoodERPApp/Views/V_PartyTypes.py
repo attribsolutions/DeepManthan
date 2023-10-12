@@ -29,18 +29,22 @@ class PartyTypeListView(CreateAPIView):
                 
                 if (id == 0):
                     
-                    if(IsSCM == 0):
-                       
-                        q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")
-                        q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')
-                        query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))
-                        # print(str(query.query))
+                    if(CompanyID == 0):
+                        query = M_PartyType.objects.all()
                         p=0
-                    else:
-                       
-                        query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)
-                       
-                        p=0
+                    else:    
+                        if(IsSCM == 0):
+                        
+                            q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")
+                            q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')
+                            query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))
+                            # print(str(query.query))
+                            p=0
+                        else:
+                        
+                            query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)
+                        
+                            p=0
                 else:    
                     
                     
