@@ -224,6 +224,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Latitude=serializers.CharField(max_length=100)
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
+    Routeid =serializers.IntegerField()
     
     
     
