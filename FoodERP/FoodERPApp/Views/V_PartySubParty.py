@@ -76,7 +76,6 @@ class PartySubPartyViewSecond(CreateAPIView):
                 query= MC_PartySubParty.objects.filter(Party=id)
                 
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
-                
                 query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
                 query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
                 query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
@@ -94,6 +93,7 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "Route": a['Route']['id'],
                         "Creditlimit": a['Creditlimit']
                     }) 
+
                 for a in SubPartySerializer:
                     SubPartyList.append({
                         "Party": a['Party']['id'],
@@ -105,18 +105,14 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "Route": a['Route']['id'],
                         "Creditlimit": a['Creditlimit']
                     })
-                    if a['Party']['id'] == '':
-                       x = 0
-                    else:
-                       x = a['Party']['id']
                 
-                log_entry = create_transaction_logNew(request, PartySerializer,x,'',175,0)               
+                log_entry = create_transaction_logNew(request, PartySerializer,0,'',175,0)               
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
         except  MC_PartySubParty.DoesNotExist:
             log_entry = create_transaction_logNew(request, PartySerializer,0,'PartySubPartyList Not Available',175,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, PartySerializer,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GetVendorSupplierCustomerListView(CreateAPIView):
