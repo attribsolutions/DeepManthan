@@ -17,18 +17,6 @@ from rest_framework.authentication import BasicAuthentication
 import json ,requests
 
 
-
-
-def GetSkyggeAPIandSecureToken(id):
-    
-    url_query = M_Settings.objects.filter(id=id).values('DefaultValue')
-    token_query = M_Settings.objects.filter(id=24).values('DefaultValue')
-    URL = url_query[0]['DefaultValue']
-    Token = token_query[0]['DefaultValue']
- 
-    return URL, Token
-
-
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
@@ -438,7 +426,7 @@ where M_Items.id=%s''',([today],[today],[id]))
 
                 # url = "http://webapp.theskygge.com/fmcg_middleware/products/add"
                 # 'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(18)
+                SkyggeURL, Token  = GetThirdPartyAPIs(18)
                 url = SkyggeURL
                 
                 headers = {
@@ -508,7 +496,7 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     "products" : ItemData
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/products/update"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(19)
+                SkyggeURL, Token  = GetThirdPartyAPIs(19)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
@@ -547,7 +535,7 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/products/delete"
                 # 'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7'
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(20)
+                SkyggeURL, Token  = GetThirdPartyAPIs(20)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
@@ -619,7 +607,7 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 }
                 
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/add"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(21)
+                SkyggeURL, Token  = GetThirdPartyAPIs(21)
                 url = SkyggeURL
 
                 headers = {
@@ -691,7 +679,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     "outlets" : RetailerData
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/update"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(22)
+                SkyggeURL, Token  = GetThirdPartyAPIs(22)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
@@ -730,7 +718,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     "outlets" : RetailerData
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/delete"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(23)
+                SkyggeURL, Token  = GetThirdPartyAPIs(23)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
