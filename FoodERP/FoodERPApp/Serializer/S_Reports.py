@@ -217,6 +217,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     StateName = serializers.CharField(max_length=500)
     DistrictName = serializers.CharField(max_length=500)
     CityName = serializers.CharField(max_length=500)
+    Routeid =serializers.IntegerField()
     RouteName = serializers.CharField(max_length=500)
     CompanyName=serializers.CharField(max_length=100) 
     PartyTypeName=serializers.CharField(max_length=100) 
@@ -224,6 +225,8 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Latitude=serializers.CharField(max_length=100)
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
+    Supplierid = serializers.CharField(max_length=500)
+    
     
     
     
