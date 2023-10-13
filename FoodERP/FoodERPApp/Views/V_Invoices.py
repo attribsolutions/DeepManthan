@@ -347,8 +347,7 @@ class InvoiceViewSecond(CreateAPIView):
                         for ad in a['Customer']['PartyAddress']:
                             if ad['IsDefault'] == True :
                                 DefCustomerAddress = ad['Address']
-                                
-                        DefPartyAddress = ''
+                                DefCustomerFSSAI = ad['FSSAINo']
                         for x in a['Party']['PartyAddress']:
                             if x['IsDefault'] == True :
                                 DefPartyAddress = x['Address']
@@ -391,7 +390,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "PartyGSTIN": a['Party']['GSTIN'],
                             "PartyMobileNo": a['Party']['MobileNo'],
                             "PartyFSSAINo": DefPartyFSSAI,
-                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": DefCustomerFSSAI,
                             "PartyState": a['Party']['State']['Name'],
                             "CustomerState": a['Customer']['State']['Name'],
                             "PartyAddress": DefPartyAddress,                            
