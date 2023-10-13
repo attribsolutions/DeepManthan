@@ -16,6 +16,19 @@ from django.contrib.auth import authenticate
 from rest_framework.authentication import BasicAuthentication
 import json ,requests
 
+
+
+
+def GetSkyggeAPIandSecureToken(id):
+    
+    url_query = M_Settings.objects.filter(id=id).values('DefaultValue')
+    token_query = M_Settings.objects.filter(id=24).values('DefaultValue')
+    URL = url_query[0]['DefaultValue']
+    Token = token_query[0]['DefaultValue']
+ 
+    return URL, Token
+
+
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
@@ -375,7 +388,8 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
 
 class NewProductSendToMobileAppView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-
+ 
+   
     @transaction.atomic()
     def post(self, request,id=0):
         try:
@@ -421,10 +435,14 @@ where M_Items.id=%s''',([today],[today],[id]))
                 payload={
                     "products" : ItemData
                 }
-                url = "http://webapp.theskygge.com/fmcg_middleware/products/add"
 
+                # url = "http://webapp.theskygge.com/fmcg_middleware/products/add"
+                # 'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(18)
+                url = SkyggeURL
+                
                 headers = {
-                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
                 
@@ -489,10 +507,11 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                 payload={
                     "products" : ItemData
                 }
-                url = "http://webapp.theskygge.com/fmcg_middleware/products/update"
-
+                # url = "http://webapp.theskygge.com/fmcg_middleware/products/update"
+                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(19)
+                url = SkyggeURL
                 headers = {
-                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
                 
@@ -526,10 +545,12 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                 payload={
                     "products" : ItemData
                 }
-                url = "http://webapp.theskygge.com/fmcg_middleware/products/delete"
-
+                # url = "http://webapp.theskygge.com/fmcg_middleware/products/delete"
+                # 'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7'
+                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(20)
+                url = SkyggeURL
                 headers = {
-                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
                 
@@ -597,10 +618,12 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                     "outlets" : RetailerData
                 }
                 
-                url = "http://webapp.theskygge.com/fmcg_middleware/outlets/add"
+                # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/add"
+                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(21)
+                url = SkyggeURL
 
                 headers = {
-                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
                 
@@ -667,10 +690,11 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 payload={
                     "outlets" : RetailerData
                 }
-                url = "http://webapp.theskygge.com/fmcg_middleware/outlets/update"
-
+                # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/update"
+                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(22)
+                url = SkyggeURL
                 headers = {
-                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
                 
@@ -705,10 +729,11 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 payload={
                     "outlets" : RetailerData
                 }
-                url = "http://webapp.theskygge.com/fmcg_middleware/outlets/delete"
-
+                # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/delete"
+                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(23)
+                url = SkyggeURL
                 headers = {
-                            'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
+                            'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
                 
