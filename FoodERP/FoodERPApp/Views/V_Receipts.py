@@ -124,7 +124,7 @@ class ReceiptListView(CreateAPIView):
                         x = Customer 
                     log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,77,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
-                log_entry = create_transaction_logNew(request, Receiptdata, Party, "Record Not Found",29,0)
+                log_entry = create_transaction_logNew(request, Receiptdata, Party, "ReceiptList Not Found",77,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Receiptdata, 0, Exception(e),33,0)
