@@ -117,7 +117,12 @@ class ReceiptListView(CreateAPIView):
                             "CreatedOn": a['CreatedOn']
 
                         })
-                    log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,77,0,FromDate,ToDate,Customer)
+                    #for log
+                    if Customer == '':
+                        x = 0
+                    else:
+                        x = Customer 
+                    log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,77,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
                 log_entry = create_transaction_logNew(request, Receiptdata, Party, "Record Not Found",29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -276,6 +281,7 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                             "CreatedOn": a['CreatedOn']
 
                         })
+                    #for log
                     if Customer == '':
                         x = 0
                     else:
