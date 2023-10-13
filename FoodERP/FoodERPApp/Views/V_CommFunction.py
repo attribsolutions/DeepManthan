@@ -25,9 +25,26 @@ from ..models import TransactionLogJsonData
 6) class ShowBaseUnitQtyOnUnitDropDown - ShowDetails(baseunitname), TrimQty(Baseunitqty)
 7) class UnitwiseQuantityConversion - GetBaseUnitQuantity,ConvertintoSelectedUnit
 8) class ShowBaseUnitQtyOnUnitDropDown -ShowDetails
+9)Skygge Third Party API - Product
 
 
 '''
+
+
+def GetThirdPartyAPIs(id):
+    
+    url_query = M_Settings.objects.filter(id=id).values('DefaultValue')
+    URL = url_query[0]['DefaultValue']
+    # Token only For Skygge APIs
+    token_query = M_Settings.objects.filter(id=24).values('DefaultValue')
+    
+    Token = token_query[0]['DefaultValue']
+ 
+    return URL, Token
+
+
+
+
 
 def get_client_ip(request):
     """
