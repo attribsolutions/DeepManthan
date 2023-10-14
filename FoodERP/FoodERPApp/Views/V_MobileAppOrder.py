@@ -17,18 +17,6 @@ from rest_framework.authentication import BasicAuthentication
 import json ,requests
 
 
-
-
-def GetSkyggeAPIandSecureToken(id):
-    
-    url_query = M_Settings.objects.filter(id=id).values('DefaultValue')
-    token_query = M_Settings.objects.filter(id=24).values('DefaultValue')
-    URL = url_query[0]['DefaultValue']
-    Token = token_query[0]['DefaultValue']
- 
-    return URL, Token
-
-
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
@@ -438,7 +426,7 @@ where M_Items.id=%s''',([today],[today],[id]))
 
                 # url = "http://webapp.theskygge.com/fmcg_middleware/products/add"
                 # 'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7',
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(18)
+                SkyggeURL, Token  = GetThirdPartyAPIs(18)
                 url = SkyggeURL
                 
                 headers = {
@@ -471,7 +459,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                 Productdata = JSONParser().parse(request)
                 ProductID = Productdata['products']
                 ProductID_list = ProductID.split(",")
-                print(ProductID_list)
+                # print(ProductID_list)
                 ItemData=list()
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
@@ -483,7 +471,7 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id in %s''',([today],[today],ProductID_list))
-                print(q0)
+                # print(q0)
                 for row in q0:
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
@@ -508,7 +496,7 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     "products" : ItemData
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/products/update"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(19)
+                SkyggeURL, Token  = GetThirdPartyAPIs(19)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
@@ -528,36 +516,33 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,165)
+            log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,165)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                
         
     @transaction.atomic()
     def delete(self, request,id=0):
         try:
             with transaction.atomic():
+                payload = json.dumps({
+                "products": [
+                    {
+                    "FoodERPItemID": id
+                    }
+                ]
+                })
                 
-                ItemData=list()
-                
-                ItemData.append({
-                        "FoodERPItemID": id,
-                    })
-
-                payload={
-                    "products" : ItemData
-                }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/products/delete"
                 # 'SecureToken': '1AJ6IseHBRn+fMD2cRmvMfZYXTUY/qGiX1qfGeOGV8nNa7LJH6osRq9ga3uGgU2P4gsvR/GGp5KQcNII7qdBjN/mt/DVo8nnWMNqzoRFDBiQXzK4k/yE7rlMCDgz42Y7'
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(20)
+               
+                SkyggeURL, Token  = GetThirdPartyAPIs(20)
                 url = SkyggeURL
+               
                 headers = {
-                            'SecureToken': Token,
-                            'Content-Type': 'application/json'
-                          }
-                
-                payload_json_data = json.dumps(payload)
-                response = requests.request("delete", url, headers=headers, data=payload)
-                # print(response.text)
-                
+                'SecureToken': Token,
+                'Content-Type': 'application/json'
+                }
+
+                response = requests.request("DELETE", url, headers=headers, data=payload)
                 response_json=json.loads(response.text)
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload, 0, 0,response_json,154)
@@ -567,7 +552,7 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})     
             
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
+            log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
         
 class NewRetailerSendToMobileAppView(CreateAPIView):
@@ -619,7 +604,7 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 }
                 
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/add"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(21)
+                SkyggeURL, Token  = GetThirdPartyAPIs(21)
                 url = SkyggeURL
 
                 headers = {
@@ -691,7 +676,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     "outlets" : RetailerData
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/update"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(22)
+                SkyggeURL, Token  = GetThirdPartyAPIs(22)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
@@ -730,7 +715,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     "outlets" : RetailerData
                 }
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/delete"
-                SkyggeURL, Token  = GetSkyggeAPIandSecureToken(23)
+                SkyggeURL, Token  = GetThirdPartyAPIs(23)
                 url = SkyggeURL
                 headers = {
                             'SecureToken': Token,
