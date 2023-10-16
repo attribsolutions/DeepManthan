@@ -51,7 +51,7 @@ JOIN M_Cities ON M_Cities.id=M_Employees.City_id
 where M_Employees.CreatedBy=%s
 ''', [UserID])
                 if not query:
-                    log_entry = create_transaction_logNew(request,Logindata,0,'List Not available',199,id)
+                    log_entry = create_transaction_logNew(request,Logindata,0,'List Not available',199,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
                 else:
                     M_Employees_Serializer = M_EmployeesSerializer02(
