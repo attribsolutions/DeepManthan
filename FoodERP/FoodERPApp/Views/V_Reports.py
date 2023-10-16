@@ -1201,7 +1201,7 @@ class ManPowerReportView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName, 
+                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
 M_PartyType.Name AS PartyType, A.Email, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
 "" AS Cluster, "" AS SubCluster, C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
@@ -1230,6 +1230,7 @@ WHERE M_PartyType.id IN(9,10,15,17)''')
                             "SAPCode":a['SAPCode'],
                             "FEParty_id":a['FEParty_id'],
                             "PartyName":a['PartyName'],
+                            "PartyActive":a['PartyActive'],
                             "PartyType":a['PartyType'],
                             "Email":a['Email'],
                             "SS_id":a['SS_id'],
