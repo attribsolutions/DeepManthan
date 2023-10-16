@@ -162,10 +162,12 @@ class GenericSaleReportSerializer(serializers.Serializer):
     
     PartyID=serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
+    PartyType = serializers.CharField(max_length=500)
     FullInvoiceNumber=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
     CustomerID=serializers.IntegerField()
     CustomerName = serializers.CharField(max_length=500)
+    CustomeType = serializers.CharField(max_length=500)
     ItemID=serializers.IntegerField()
     ItemName=serializers.CharField(max_length=100)
     CompanyName=serializers.CharField(max_length=100)
