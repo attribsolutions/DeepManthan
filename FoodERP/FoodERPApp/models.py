@@ -1891,6 +1891,7 @@ class M_PartySettingsDetails(models.Model):
     Setting=models.ForeignKey(M_Settings,related_name='Settingid',on_delete=models.CASCADE)  
     Company = models.ForeignKey(C_Companies,related_name='SetCompany', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.CASCADE)
+    Image = models.ImageField(upload_to="Images\PartyRelatedImages",default="",null=True,blank=True)
     
     class Meta:
         db_table="M_PartySettingsDetails"
