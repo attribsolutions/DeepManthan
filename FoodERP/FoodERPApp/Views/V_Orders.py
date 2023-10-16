@@ -55,7 +55,7 @@ class OrderListFilterView(CreateAPIView):
                     x = Customer
                     if Supplier == '':
                         z = 0
-                        log_entry = create_transaction_logNew(request, Orderdata,0,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,x)
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,0)
                     else:
                         z = Supplier
                         log_entry = create_transaction_logNew(request, Orderdata,z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(z),28,0,FromDate,ToDate,x)
@@ -428,8 +428,7 @@ class T_OrdersView(CreateAPIView):
                     if OrderType == 2:
                         log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier'])+','+'TransactionID:'+str(OrderID),174,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
                     else:
-                        log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier'])+','+'TransactionID:'+str(OrderID),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
-
+                        log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Customer'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'TransactionID:'+str(OrderID),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Supplier'])
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'TransactionID': OrderID, 'OrderID': OrderID,  'IsSAPCustomer': IsSAPCustomer, 'Data': []})
                 log_entry = create_transaction_logNew(request, Orderdata, 0, Order_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
