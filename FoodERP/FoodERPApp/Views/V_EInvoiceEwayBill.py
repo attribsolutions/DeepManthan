@@ -316,8 +316,7 @@ class Uploaded_EwayBill(CreateAPIView):
                             response = requests.request("GET", Calculate_Distance_URL, headers=headers)
 
                             distance_dict = json.loads(response.text)
-                            print(distance_dict)
-                            print(distance_dict['results']['message'])
+                            
                 #===============================================================================================================           
                             if(distance_dict['results']['status']== 'Success' and distance_dict['results']['code']== 200):
                                 
