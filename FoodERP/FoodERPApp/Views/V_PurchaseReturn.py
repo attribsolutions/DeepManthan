@@ -134,7 +134,7 @@ class PurchaseReturnView(CreateAPIView):
                 Query = T_PurchaseReturn.objects.filter(id=id)
                 
                 if Query.exists():
-                    PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True).data 
+                    PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True, context= {'request': request}).data 
                     
                     PuchaseReturnList=list()
 
