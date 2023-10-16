@@ -382,6 +382,7 @@ class ManPowerSerializer(serializers.Serializer):
     SAPCode = serializers.CharField(max_length=500)
     FEParty_id = serializers.IntegerField(allow_null=True)
     PartyName = serializers.CharField(max_length=500)
+    PartyActive = serializers.BooleanField(default=True)
     PartyType = serializers.CharField(max_length=500)
     Email = serializers.CharField(max_length=500)
     SS_id = serializers.IntegerField(allow_null=True)
