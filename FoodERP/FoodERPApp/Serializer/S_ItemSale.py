@@ -27,6 +27,7 @@ class ItemSaleReportSerializer(serializers.Serializer):
     RoundOffAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     TCSAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     FullGRNNumber = serializers.CharField(max_length=500)
+    MRPValue = serializers.DecimalField(max_digits=10, decimal_places=2)
     
 class PartyTypeSerializer(serializers.ModelSerializer):
     class Meta:
