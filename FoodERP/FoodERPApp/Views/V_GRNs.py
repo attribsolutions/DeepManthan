@@ -30,6 +30,7 @@ class GRNListFilterView(CreateAPIView):
                 ToDate = GRNdata['ToDate']
                 Customer = GRNdata['Party']
                 Supplier = GRNdata['Supplier']
+
                 if(Supplier == ''):
                     query = T_GRNs.objects.filter(
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer)
@@ -38,7 +39,7 @@ class GRNListFilterView(CreateAPIView):
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # return JsonResponse({'Data':str(query.query)})
                 if not query:
-                    log_entry = create_transaction_logNew(request, GRNdata, 0,'GRN Not available',68,0)
+                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'List Not available',68,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     GRN_serializer = T_GRNSerializerForGET(
@@ -75,12 +76,12 @@ class GRNListFilterView(CreateAPIView):
                             "POType":POType
 
                         })
-                        #for log
-                        if Supplier == '':
-                            x = 0
-                        else:
-                            x= Supplier
-                    log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),68,0,FromDate,ToDate,0)
+                    #for log
+                    if Supplier == '':
+                        y = 0
+                    else:
+                        y= Supplier
+                    log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(y),68,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'Exception(e)',33,0)
