@@ -142,11 +142,30 @@ class MasterClaimView(CreateAPIView):
                         Claim.save()
                         ClaimID = Claim.id
 
-                        q1 = M_PartyType.objects.filter(
-                            IsSCM=1, Company_id=3).values("id")
-                        for i in q1:
-                            PartyType = i["id"]
+                        # q1 = M_Settings.objects.raw('''SELECT id,DefaultValue FROM M_Settings where id=25''')
+                        q1 = M_Settings.objects.filter(id=25).values("DefaultValue")
+                        # print(q1)
+                        value = q1[0]['DefaultValue']
+                        # print(value)
+                        id=0
+                        PartyType_list = value.split(":")
+                        for row in PartyType_list:
+                            # print('aaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                            # print(row)
                         
+                        
+                        # q1 = M_PartyType.objects.filter(
+                        #     IsSCM=1, Company_id=3).values("id")
+                        # for i in q1:
+                            
+                            PartyType = row.split(",")
+                            if id == 0:
+                                PartyTypeID=11
+                            else:
+                                PartyTypeID=PartyType    
+                            # print(PartyType)
+#===========================================================================================================================================                       
+
                             claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                             IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
         (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
@@ -164,18 +183,20 @@ class MasterClaimView(CreateAPIView):
         join TC_PurchaseReturnItems PRIPS on TC_PurchaseReturnItems.primarySourceID=PRIPS.id
         join T_PurchaseReturn PRPS on PRPS.id=PRIPS.PurchaseReturn_id
         join M_Parties on M_Parties.id=PRPS.Customer_id
-        where T_PurchaseReturn.IsApproved=1 and M_Parties.PartyType_id=%s  and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s group by TC_PurchaseReturnItems.ItemReason_id)p ''',
-                                                                                        ([FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [PartyType], [FromDate], [ToDate], [Party]))
+        where T_PurchaseReturn.IsApproved=1 and M_Parties.PartyType_id in %s  and  T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s group by TC_PurchaseReturnItems.ItemReason_id)p ''',
+                                                                                        ([FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], PartyType, [FromDate], [ToDate], [Party]))
                             # print('==============================================')
-                            # print(PartyType ,claimREasonwise.query)
+                            print(PartyType ,claimREasonwise.query)
                             serializer = MasterclaimReasonReportSerializer(
                                 claimREasonwise, many=True).data
                         
                             for a in serializer:
 
                                 stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
-                                                                    "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=PartyType, Party_id=Party, CreatedBy=0)
+                                                                    "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=PartyTypeID, Party_id=Party, CreatedBy=0)
                                 stock.save()
+                        id=id+1
+ #===========================================================================================================================================                       
                         # for all partyType
                         claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                             IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
@@ -186,10 +207,10 @@ class MasterClaimView(CreateAPIView):
         (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
         (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
         join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
-        where InvoiceDate between %s and %sand Customer_id=%s )PA,
+        where InvoiceDate between %s and %s and Customer_id=%s )PA,
         (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
         join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
-        where InvoiceDate between %s and %sand Party_id=%s )SA
+        where InvoiceDate between %s and %s and Party_id=%s )SA
         FROM T_PurchaseReturn
         join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
         join TC_PurchaseReturnItems PRIPS on TC_PurchaseReturnItems.primarySourceID=PRIPS.id
@@ -214,6 +235,7 @@ class MasterClaimView(CreateAPIView):
                                                                 "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=0, Party_id=Party, CreatedBy=0)
                             stock.save()
                         claimupdate=M_Claim.objects.filter(id=ClaimID).update(PrimaryAmount=PrimaryAmount,SecondaryAmount=SecondaryAmount,ReturnAmount=ReturnAmount)
+ #===========================================================================================================================================                       
 
                         StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select * from (select 1 as id, I.Item_id,ifnull(PA.PrimaryAmount,0)PrimaryAmount,ifnull(SA.secondaryAmount,0)secondaryAmount,ifnull(RA.ReturnAmount,0)ReturnAmount,
                             ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
@@ -255,6 +277,7 @@ class MasterClaimView(CreateAPIView):
                             stock = M_MasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
                                                 "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], Item_id=a["Item_id"],  Party_id=Party, CreatedBy=0)
                             stock.save()
+ #===========================================================================================================================================                       
 
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Master Claim Create Successfully', 'Data': []})
                     else:
