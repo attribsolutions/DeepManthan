@@ -161,7 +161,7 @@ class OrderListFilterView(CreateAPIView):
                         })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-                log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Orderdata, x, "Order List Not Found",28,0,FromDate,ToDate,z)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,Exception(e),33,0)
