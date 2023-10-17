@@ -190,8 +190,11 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in ItemsList_Serializer:
-                        
-                        count= MC_PartyItems.objects.filter(Item_id=a['id']).count()
+                        ItemID=a['id']
+                        # count= MC_PartyItems.objects.filter(Item_id=a['id']).count()
+                        Count=MC_PartyItems.objects.raw('''select 1 as id,count(*) cnt from MC_PartyItems join M_Parties on M_Parties.id=MC_PartyItems.Party_id where Item_id=%s and M_Parties.PartyType_id=%s''',(ItemID,PartyTypeID))
+                        for row in Count:
+                            count = row.cnt
                         if count > 0:
                             Flag = True
                         else:

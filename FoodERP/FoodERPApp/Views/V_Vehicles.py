@@ -39,7 +39,7 @@ class VehicleViewList(CreateAPIView):
                             "UpdatedOn": a['UpdatedOn']
                         })
 
-                    log_entry = create_transaction_logNew(request, Vehicledata,Party,"Vehicle List",147,0)
+                    log_entry = create_transaction_logNew(request, Vehicledata,Party,'',147,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData})
                 log_entry = create_transaction_logNew(request, Vehicledata,0,"Data Not Available",7,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
@@ -110,8 +110,9 @@ class VehicleView(CreateAPIView):
                 Vehicle_Serializer = VehiclesSerializer(
                     VehiclesdataByID, data=Vehiclesdata)
                 if Vehicle_Serializer.is_valid():
-                    Vehicle_Serializer.save()
-                    log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],"Vehicle Updated Successfully",14,0)
+                    Vehicle = Vehicle_Serializer.save()
+                    LastInsertID = Vehicle.id
+                    log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],'TransactionID:'+str(LastInsertID),14,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Updated Successfully','Data' : []})
                 else:
                     log_entry = create_transaction_logNew(request, Vehiclesdata,0,Vehicle_Serializer.errors,34,0)
@@ -127,7 +128,7 @@ class VehicleView(CreateAPIView):
             with transaction.atomic():
                 Vehiclesdata = M_Vehicles.objects.get(id=id)
                 Vehiclesdata.delete()
-                log_entry = create_transaction_logNew(request, {'VehicleId':id},0,"Vehicle Deleted Successfully",15,0)
+                log_entry = create_transaction_logNew(request, {'VehicleId':id},0,'',15,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
         except M_Vehicles.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0,0,"Vehicle Not available",7,0)
