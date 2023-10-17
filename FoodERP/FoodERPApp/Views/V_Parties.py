@@ -4,12 +4,16 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from django.contrib.sessions.backends.db import SessionStore
 from ..Serializer.S_Parties import *
 from ..Serializer.S_Settings import *
 from ..models import *
 from ..Serializer.S_Orders import *
+import base64
+from io import BytesIO
+from PIL import Image
+
 
 class DivisionsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -296,6 +300,7 @@ class PartyAddressView(CreateAPIView):
 class PartiesSettingsDetailsView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
@@ -347,15 +352,23 @@ FROM
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
-    def post(self, request):
+    def post(self, request,format=None):
         try:
             with transaction.atomic():
-                Retailerdata = JSONParser().parse(request)
-                Party = Retailerdata['BulkData'][0]['Party']
-                query = M_PartySettingsDetails.objects.filter(
-                    Party=Party).all()
+                
+                Retailerdata = request.POST.get('BulkData')
+                Retailerdatareferences = json.loads(Retailerdata) if Retailerdata else []
+                Party= Retailerdatareferences[0]['Party']
+                query = M_PartySettingsDetails.objects.filter(Party=Party).all()
                 query.delete()
-                for aa in Retailerdata['BulkData']:
+                for aa in Retailerdatareferences:
+                    
+                    '''Image Upload Code End''' 
+                    keyname='uploaded_images_'+str(aa['Setting'])
+                    avatar = request.FILES.getlist(keyname)
+                    for file in avatar:
+                        aa['Image']=file
+                    '''Image Upload Code End'''
                     Partysettings_serializer = PartiesSettingSerializer(
                         data=aa)
                     if Partysettings_serializer.is_valid():
