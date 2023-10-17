@@ -444,6 +444,8 @@ where M_Items.id=%s''',([today],[today],[id]))
                 # print('==============================',response_json['success'])
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,152)
+                    for a in response_json['data']:
+                        query = M_Items.objects.filter(id=id).update(SkyggeProductID =a['productId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],164)
