@@ -23,6 +23,8 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
             media_url = "http://cbmfooderp.com:8000/media/"  # Replace with your actual media URL prefix from settings
             return f"{media_url}/{obj.Image}"
         return None
+    
+    
 class PartiesSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_PartySettingsDetails
