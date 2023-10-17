@@ -399,14 +399,14 @@ class PartiesListForApprovalView(CreateAPIView):
                 q0 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
                 query = M_Parties.objects.filter(id__in=q0,IsApprovedParty=1)
                 if not query:
-                    # log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'PartyList Not available',198,0)                   
+                    log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'PartyList Not available',198,0)                   
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     M_Parties_serializer = PartiesSerializer(query, many=True).data
-                    # log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'',198,0)
+                    log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'',198,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request,Retailerdata, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,Retailerdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
            
         
