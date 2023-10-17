@@ -25,7 +25,7 @@ class M_ItemTag(CreateAPIView):
                 query = M_Items.objects.all()
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
-                    log_entry = create_transaction_log(request, {'ItemTag':id}, 0, 0, "Data Not available",7,0)
+                    log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0, "Items Not available",100,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = ItemSerializerSecond(query, many=True).data
@@ -37,10 +37,10 @@ class M_ItemTag(CreateAPIView):
                             ListData.append({
                                 "dta": d+ "-" + a['Name']
                             })  
-                    log_entry = create_transaction_log(request, {'ItemTag':id}, 0, 0, "Item Tag List",100,0)
+                    log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0,'',100,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemTag':id}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 class MCUnitDetailsView(CreateAPIView):
@@ -65,10 +65,10 @@ class MCUnitDetailsView(CreateAPIView):
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],         
                         })
-                log_entry = create_transaction_log(request, {'ItemID':ItemID}, 0, 0, "UnitDetails",101,0)
+                log_entry = create_transaction_logNew(request, {'ItemID':ItemID}, 0, '',101,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UnitDetails})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemID':ItemID}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':ItemID}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
 class M_ItemsFilterView(CreateAPIView):
@@ -88,8 +88,9 @@ class M_ItemsFilterView(CreateAPIView):
                 CompanyGroupID =Logindata['CompanyGroup'] 
                 IsSCMCompany = Logindata['IsSCMCompany'] 
                 
+                #for log
                 if PartyID == '':
-                        x = CompanyID
+                        x = 0
                 else:
                         x = PartyID
 
@@ -103,7 +104,7 @@ class M_ItemsFilterView(CreateAPIView):
                     query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
             
                 if not query:
-                    log_entry = create_transaction_log(request, Logindata, 0, x, "Data Not available",7,0)
+                    log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = ItemSerializerThird(query, many=True).data
@@ -151,10 +152,10 @@ class M_ItemsFilterView(CreateAPIView):
                             # "UnitDetails":UnitDetails
                         })    
                         
-                    log_entry = create_transaction_log(request, Logindata, 0, x, "Item Filter List",102,0)
+                    log_entry = create_transaction_logNew(request, Logindata, x,'',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
-            log_entry = create_transaction_log(request, Logindata, 0, x, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Logindata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -186,14 +187,14 @@ class M_ItemsView(CreateAPIView):
                 if Items_Serializer.is_valid():
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
-                    log_entry = create_transaction_log(request, Itemsdata, 0, 0, "Item Save Successfully",103,LastInsertID)
+                    log_entry = create_transaction_logNew(request, Itemsdata, 0,'TransactionID:'+str(LastInsertID),103,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 else:
-                    log_entry = create_transaction_log(request, Itemsdata, 0, 0, Items_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Itemsdata, 0, Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Itemsdata, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Itemsdata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -382,15 +383,15 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemGSTHSNDetails":GSTHSNDetails,
                             "ItemShelfLife":ShelfLifeDetails
                         })
-                    log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, "Item List",103,0)
+                    log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',103,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
-                log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, "Data Not available",7,0)
+                log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, "Data Not available",7,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
     @transaction.atomic()
@@ -415,14 +416,14 @@ class M_ItemsViewSecond(CreateAPIView):
                 if M_Items_Serializer.is_valid():
                     UpdatedItem = M_Items_Serializer.save()
                     LastInsertID = UpdatedItem.id
-                    log_entry = create_transaction_log(request, M_Itemsdata, 0, 0, "Item Updated Successfully",104,id)
+                    log_entry = create_transaction_logNew(request, M_Itemsdata, 0,'',104,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','TransactionID':LastInsertID,'Data' : []})
                 else:
-                    log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,M_Items_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, M_Itemsdata, 0,M_Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, M_Itemsdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -431,16 +432,16 @@ class M_ItemsViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Itemsdata = M_Items.objects.get(id=id)
                 M_Itemsdata.delete()
-                log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Item Deleted Successfully",105,0)
+                log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',105,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','TransactionID':id,'Data':[]})
         except M_Items.DoesNotExist:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Data Not available",7,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,"Item Not available",105,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item Not available', 'Data': []})
         except IntegrityError:   
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Item used in another table'",8,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,"Item used in another table'",8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []}) 
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class M_ImageTypesView(CreateAPIView):
@@ -564,11 +565,11 @@ class ProductAndMarginReportView(CreateAPIView):
                             "ItemMargins":ww
                             
                         })
-                    log_entry = create_transaction_log(request, {'ItemDetails':Itemsdata_Serializer}, 0, 0,"ProductAndMarginReport",106,0)
+                    log_entry = create_transaction_logNew(request, Itemsdata_Serializer, 0,'',106,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
-                log_entry = create_transaction_log(request, {'ItemDetails':Itemsdata_Serializer}, 0, 0,"Data Not Available",7,0)
+                log_entry = create_transaction_logNew(request,Itemsdata_Serializer, 0,"Report Not Available",106,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemDetails':Itemsdata_Serializer}, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Itemsdata_Serializer, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
