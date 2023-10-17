@@ -320,7 +320,8 @@ class PartiesSettingsDetailsView(CreateAPIView):
     (CASE WHEN c.Value is Null THEN a.DefaultValue ELSE c.Value END)
 	ELSE 
     (CASE WHEN b.Value is Null THEN a.DefaultValue ELSE b.Value END)
-	END) Value
+	END) Value, 
+    c.Image
 FROM
     (SELECT 
         M_Settings.id AS Setting,
@@ -339,12 +340,11 @@ FROM
       ON a.Setting = b.SettingID
             
       LEFT JOIN
-    (SELECT Setting_id SettingID, M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE
+    (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
                 
-                a = PartiesSettingsDetailsListSerializer(
-                    query, many=True).data
-
+                # print(query.query)
+                a = PartiesSettingsDetailsListSerializer(query, many=True).data
                 log_entry = create_transaction_logNew(request,0, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
