@@ -4,12 +4,16 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from django.contrib.sessions.backends.db import SessionStore
 from ..Serializer.S_Parties import *
 from ..Serializer.S_Settings import *
 from ..models import *
 from ..Serializer.S_Orders import *
+import base64
+from io import BytesIO
+from PIL import Image
+
 
 class DivisionsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -296,6 +300,7 @@ class PartyAddressView(CreateAPIView):
 class PartiesSettingsDetailsView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
@@ -315,7 +320,8 @@ class PartiesSettingsDetailsView(CreateAPIView):
     (CASE WHEN c.Value is Null THEN a.DefaultValue ELSE c.Value END)
 	ELSE 
     (CASE WHEN b.Value is Null THEN a.DefaultValue ELSE b.Value END)
-	END) Value
+	END) Value, 
+    c.Image
 FROM
     (SELECT 
         M_Settings.id AS Setting,
@@ -334,12 +340,11 @@ FROM
       ON a.Setting = b.SettingID
             
       LEFT JOIN
-    (SELECT Setting_id SettingID, M_PartySettingsDetails.Value FROM M_PartySettingsDetails WHERE
+    (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
                 
-                a = PartiesSettingsDetailsListSerializer(
-                    query, many=True).data
-
+                # print(query.query)
+                a = PartiesSettingsDetailsListSerializer(query, many=True).data
                 log_entry = create_transaction_logNew(request,0, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
@@ -347,15 +352,23 @@ FROM
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
-    def post(self, request):
+    def post(self, request,format=None):
         try:
             with transaction.atomic():
-                Retailerdata = JSONParser().parse(request)
-                Party = Retailerdata['BulkData'][0]['Party']
-                query = M_PartySettingsDetails.objects.filter(
-                    Party=Party).all()
+                
+                Retailerdata = request.POST.get('BulkData')
+                Retailerdatareferences = json.loads(Retailerdata) if Retailerdata else []
+                Party= Retailerdatareferences[0]['Party']
+                query = M_PartySettingsDetails.objects.filter(Party=Party).all()
                 query.delete()
-                for aa in Retailerdata['BulkData']:
+                for aa in Retailerdatareferences:
+                    
+                    '''Image Upload Code End''' 
+                    keyname='uploaded_images_'+str(aa['Setting'])
+                    avatar = request.FILES.getlist(keyname)
+                    for file in avatar:
+                        aa['Image']=file
+                    '''Image Upload Code End'''
                     Partysettings_serializer = PartiesSettingSerializer(
                         data=aa)
                     if Partysettings_serializer.is_valid():
@@ -386,14 +399,14 @@ class PartiesListForApprovalView(CreateAPIView):
                 q0 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
                 query = M_Parties.objects.filter(id__in=q0,IsApprovedParty=1)
                 if not query:
-                    # log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'PartyList Not available',198,0)                   
+                    log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'PartyList Not available',198,0)                   
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     M_Parties_serializer = PartiesSerializer(query, many=True).data
-                    # log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'',198,0)
+                    log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'',198,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request,Retailerdata, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,Retailerdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
            
         
