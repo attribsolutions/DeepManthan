@@ -496,7 +496,12 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             InvoiceItemDetails = list()
                             
                             for b in a['InvoiceItems']:
-                                
+                                checkitemassigninPartyItems=MC_PartyItems.objects.filter(Item=b['Item']['id'],Party=a['Customer']['id']).count()
+                                if checkitemassigninPartyItems > 0:
+                                    PartyItemAssign = True
+                                else:
+                                    PartyItemAssign = False
+                                    
                                 if IsDivisionFlag == 1:
                                     CustRate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,b['Unit']["id"],0,0).RateWithGST()
                                     Rate=CustRate[0]["RateWithoutGST"]
@@ -567,7 +572,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "DiscountAmount": b['DiscountAmount'],
                                     "UnitDetails":UnitDetails,
                                     "MRP":b['MRP']['id'],
-                                    "MRPValue":b['MRPValue'] 
+                                    "MRPValue":b['MRPValue'],
+                                    "PartyItemAssign":PartyItemAssign 
                                 })
                                 
                             InvoiceData.append({
