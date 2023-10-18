@@ -359,10 +359,10 @@ class GenericSaleView(CreateAPIView):
                     GenericSaleData=list()
                     GenericSaleSerializer=GenericSaleReportSerializer(Genericdataquery, many=True).data
                     # GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
-                    log_entry = create_transaction_logNew(request,Genericdata, Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),207,0,FromDate,ToDate,0)
+                    log_entry = create_transaction_logNew(request,Genericdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate),207,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': GenericSaleSerializer})
                 else:
-                    log_entry = create_transaction_logNew(request,Genericdata, Party,'Report Not available',207,0)
+                    log_entry = create_transaction_logNew(request,Genericdata, 0,'Report Not available',207,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
@@ -934,10 +934,10 @@ class ReturnReportDownloadView(CreateAPIView):
                
                 if query:
                     ReturnSerializer=ReturnReportSerializer(query, many=True).data
-                    log_entry = create_transaction_logNew(request,Reportdata,Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),214,0,FromDate,ToDate,0)
+                    log_entry = create_transaction_logNew(request,Reportdata,0,'From:'+str(FromDate)+','+'To:'+str(ToDate),214,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ReturnSerializer})
                 else:
-                    log_entry = create_transaction_logNew(request,Reportdata,Party,'Report Not available',214,0)
+                    log_entry = create_transaction_logNew(request,Reportdata,0,'Report Not available',214,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
@@ -1292,7 +1292,7 @@ WHERE M_PartyType.id IN(9,10,15,17)''')
                             "SalesRepresentative":a['SalesRepresentative']
 
                         })
-                    log_entry = create_transaction_logNew(request,ManPower_Serializer, a['FEParty_id'],'',219,0)
+                    log_entry = create_transaction_logNew(request,ManPower_Serializer, 0,'',219,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ManPowerList})
                 log_entry = create_transaction_logNew(request,ManPower_Serializer, 0,'Report Not Found',219,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
