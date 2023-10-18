@@ -649,6 +649,7 @@ class M_Items(models.Model):
     Length = models.CharField(max_length=200,null=True,blank=True)
     StoringCondition = models.CharField(max_length=200,null=True,blank=True)
     Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         

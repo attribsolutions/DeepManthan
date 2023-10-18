@@ -386,7 +386,7 @@ class NewProductSendToMobileAppView(CreateAPIView):
                 ItemData=list()
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
-,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,'') FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
+,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,0) FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
 ,GSTHsnCodeMaster(M_Items.id,%s,3) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0) MRPValue
 FROM M_Items
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
@@ -394,7 +394,7 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id=%s''',([today],[today],[id]))
-                # print(q0)
+    
                 for row in q0:
                      
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
@@ -440,10 +440,12 @@ where M_Items.id=%s''',([today],[today],[id]))
                 response = requests.request("POST", url, headers=headers, data=payload_json_data)
                 
                 response_json=json.loads(response.text)
-                # print(response_json)
+                
                 # print('==============================',response_json['success'])
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,152)
+                    for a in response_json['data']:
+                        query = M_Items.objects.filter(id=id).update(SkyggeProductID =a['productId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],164)
@@ -832,9 +834,9 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                             })
                         else:
                             transaction.set_rollback(True)
-                            log_entry = create_transaction_log(request, aa, 0, 0,'fail to Added Retailer From MobileApp ',170,0)
+                            # log_entry = create_transaction_log(request, RetailerAddList, 0, 0,'fail to Added Retailer From MobileApp ',170,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
-                    log_entry = create_transaction_log(request, aa, 0, 0,'Retailer Added From MobileApp Successfully',158,0)
+                    # log_entry = create_transaction_log(request, RetailerAddList, 0, 0,'Retailer Added From MobileApp Successfully',158,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
