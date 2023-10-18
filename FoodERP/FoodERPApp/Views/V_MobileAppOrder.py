@@ -394,7 +394,7 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id=%s''',([today],[today],[id]))
-                print(q0)
+    
                 for row in q0:
                      
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
@@ -440,7 +440,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                 response = requests.request("POST", url, headers=headers, data=payload_json_data)
                 
                 response_json=json.loads(response.text)
-                # print(response_json)
+                
                 # print('==============================',response_json['success'])
                 if(response_json['success'] == True):
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,152)
