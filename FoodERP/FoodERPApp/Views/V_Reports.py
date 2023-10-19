@@ -1246,7 +1246,7 @@ FROM MC_PartySubParty
 LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
 LEFT JOIN M_PartyType ON M_PartyType.id = A.PartyType_id
-LEFT JOIN MC_PartyAddress  C ON C.id = A.id
+LEFT JOIN MC_PartyAddress  C ON C.Party_id = A.id
 LEFT JOIN M_States ON M_States.id = A.State_id
 LEFT JOIN M_Districts ON M_Districts.id = A.District_id
 LEFT JOIN M_Cities ON M_Cities.id = A.City_id
