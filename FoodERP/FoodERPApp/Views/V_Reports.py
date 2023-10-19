@@ -1225,7 +1225,6 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
             log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
-                
 class ManPowerReportView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
