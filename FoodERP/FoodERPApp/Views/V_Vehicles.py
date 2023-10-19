@@ -41,10 +41,10 @@ class VehicleViewList(CreateAPIView):
 
                     log_entry = create_transaction_logNew(request, Vehicledata,Party,'',147,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData})
-                log_entry = create_transaction_logNew(request, Vehicledata,0,"Data Not Available",7,0)
+                log_entry = create_transaction_logNew(request, Vehicledata,Party,"List Not Available",147,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Vehicledata,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -69,7 +69,7 @@ class VehicleView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Vehicles_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Vehiclesdata,0,str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,str(e),33,0)
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
@@ -131,7 +131,7 @@ class VehicleView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'VehicleId':id},0,'',15,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
         except M_Vehicles.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,0,"Vehicle Not available",7,0)
+            log_entry = create_transaction_logNew(request, 0,0,"Vehicle Not available",15,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Not available', 'Data': []})
         except IntegrityError:   
             log_entry = create_transaction_logNew(request, 0,0,"Vehicle used in another table",8,0)
