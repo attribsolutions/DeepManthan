@@ -344,7 +344,7 @@ FROM
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
                 
                 # print(query.query)
-                a = PartiesSettingsDetailsListSerializer(query, many=True).data
+                a = PartiesSettingsDetailsListSerializer(query, many=True,context= {'request': request}).data
                 log_entry = create_transaction_logNew(request,0, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
