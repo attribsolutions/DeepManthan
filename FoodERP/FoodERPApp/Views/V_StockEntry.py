@@ -32,7 +32,7 @@ class StockEntryPageView(CreateAPIView):
                 StockDate = StockEntrydata['Date']
                 Mode =  StockEntrydata['Mode']
                 IsStockAdjustment=StockEntrydata['IsStockAdjustment'],
-                # IsAllStockZero = StockEntrydata['IsAllStockZero']
+                IsAllStockZero = StockEntrydata['IsAllStockZero']
               
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
@@ -112,11 +112,11 @@ class StockEntryPageView(CreateAPIView):
                 StockEntrydata.update({"O_LiveBatchesList":O_LiveBatchesList})
                 
                 if(Mode == 1):   # Stock Entry case update 0 to all stock for given party
-                    # if IsAllStockZero == True:
-                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
-                    # else:
-                    #     for b in StockEntrydata['StockItems']:
-                    #         OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party,Item=a['Item']).update(BaseUnitQuantity=0)      
+                    if IsAllStockZero == True:
+                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
+                    else:
+                        for b in StockEntrydata['StockItems']:
+                            OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party,Item=b['Item']).update(BaseUnitQuantity=0)      
                 # print(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
                     
