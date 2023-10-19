@@ -66,7 +66,7 @@ def create_transaction_log(request,data,User, PartyID,TransactionDetails,Transac
     )
     return log_entry
 
-def create_transaction_logNew(request,data,PartyID,TransactionDetails,TransactionType=0,TransactionID=0, FromDate=0,ToDate=0,CustomerID=0):
+def create_transaction_logNew(request,data,PartyID,TransactionDetails,TransactionType=0,TransactionID=0, FromDate=0,ToDate=0,CustomerID=0,TransactionCategory=0):
     
     Authenticated_User = request.user
     User = Authenticated_User.id
@@ -77,15 +77,9 @@ def create_transaction_logNew(request,data,PartyID,TransactionDetails,Transactio
         pass
 
     if not FromDate :
-        log_entry = Transactionlog.objects.create(
-            TranasactionDate=date.today(),
-            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID
-        )
+        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(),User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID,TransactionCategory=TransactionCategory)
     else:
-        log_entry = Transactionlog.objects.create(
-            TranasactionDate=date.today(),
-            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID
-        )
+        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(),User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID,TransactionCategory=TransactionCategory)
 
     TransactionLogJsonData.objects.create(Transactionlog=log_entry, JsonData=data)
     
