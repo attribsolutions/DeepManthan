@@ -31,12 +31,14 @@ class StockEntryPageView(CreateAPIView):
                 CreatedBy = StockEntrydata['CreatedBy']
                 StockDate = StockEntrydata['Date']
                 Mode =  StockEntrydata['Mode']
+                IsStockAdjustment=StockEntrydata['IsStockAdjustment']
+                IsAllStockZero = StockEntrydata['IsAllStockZero']
               
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 T_StockEntryList = list()
                 for a in StockEntrydata['StockItems']:
-                  
+                    # print(a)
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
@@ -52,7 +54,7 @@ class StockEntryPageView(CreateAPIView):
                     else:
                         totalstock=0    
                     
-                    print(query3)
+                    # print(query3)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
@@ -82,7 +84,8 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : round(BaseUnitQuantity,3)-totalstock
+                    "Difference" : round(BaseUnitQuantity,3)-totalstock,
+                    "IsStockAdjustment" : IsStockAdjustment
                     })
                     
                     O_LiveBatchesList.append({
@@ -107,12 +110,17 @@ class StockEntryPageView(CreateAPIView):
                     T_StockEntryList=list()
                 
                 StockEntrydata.update({"O_LiveBatchesList":O_LiveBatchesList})
+                
                 if(Mode == 1):   # Stock Entry case update 0 to all stock for given party
-                    
-                    OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
-                print(StockEntrydata['O_LiveBatchesList'])
+                    if IsAllStockZero == True:
+                        OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party).update(BaseUnitQuantity=0)
+                    else:
+                        
+                        for b in StockEntrydata['StockItems']:
+                            OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party,Item=b['Item']).update(BaseUnitQuantity=0)      
+                # print(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
-                    
+               
                     if(Mode == 1):
                         StockEntry_OLiveBatchesSerializer = PartyStockEntryOLiveBatchesSerializer(data=aa)
                     else:
@@ -130,7 +138,7 @@ class StockEntryPageView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, StockEntrydata, Party,'',87,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, StockEntrydata, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,  Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -161,38 +169,60 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     ItemList = list()
                     for a in Items_Serializer:
                         ActualQty='00.00'
-                        stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
-                   
-                        if stockquery['Qty'] is None:
-                            Stock = 0.0
-                        else:
-                            Stock = stockquery['Qty']
-                        
+                        stockquery = O_BatchWiseLiveStock.objects.raw('''SELECT O_BatchWiseLiveStock.id, sum(BaseUnitQuantity)Qty,O_LiveBatches.MRPValue From O_BatchWiseLiveStock JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id  WHERE IsDamagePieces=0 AND BaseUnitQuantity >0 AND Item_id =%s AND Party_id=%s group by  MRPValue ''',(a['id'],Party))
+                        for row in stockquery:
+                            Stock = row.Qty
+                            MRPValue = row.MRPValue
+                        # stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
+                        # print(stockquery)
+                            if Stock is None:
+                                Stock = 0.0
+                            else:
+                                Stock = Stock
+                            
+                            if int(Unit) == 1:
+                                ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,1,0).ConvertintoSelectedUnit()
+                                StockUnit = 'No'
+                            if int(Unit) == 2:
+                                ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,2,0).ConvertintoSelectedUnit()
+                                StockUnit = 'Kg'
+                            
+                            if int(Unit) == 4:
+                                ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,4,0).ConvertintoSelectedUnit()
+                                StockUnit = 'Box'
+                                
+                            ItemList.append({
+                                "Item": a['id'],
+                                "ItemName": a['Name'],
+                                "GroupTypeName": a['GroupTypeName'],
+                                "GroupName": a['GroupName'], 
+                                "SubGroupName": a['SubGroupName'],
+                                "ActualQty":round(ActualQty,3),
+                                "Unit":StockUnit,
+                                "MRP":MRPValue
+                            })
+                        # Append a default entry if there are no results
                         if int(Unit) == 1:
-                            ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,1,0).ConvertintoSelectedUnit()
                             StockUnit = 'No'
                         if int(Unit) == 2:
-                            ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,2,0).ConvertintoSelectedUnit()
                             StockUnit = 'Kg'
-                           
                         if int(Unit) == 4:
-                            ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,4,0).ConvertintoSelectedUnit()
-                            StockUnit = 'Box'
-                           
-                            
-                        ItemList.append({
-                            "Item": a['id'],
-                            "ItemName": a['Name'],
-                            "GroupTypeName": a['GroupTypeName'],
-                            "GroupName": a['GroupName'], 
-                            "SubGroupName": a['SubGroupName'],
-                            "ActualQty":round(ActualQty,3),
-                            "Unit":StockUnit 
-                        })
+                            StockUnit = 'Box'        
+                        if not stockquery:
+                            ItemList.append({
+                                "Item": a['id'],
+                                "ItemName": a['Name'],
+                                "GroupTypeName": a['GroupTypeName'],
+                                "GroupName": a['GroupName'],
+                                "SubGroupName": a['SubGroupName'],
+                                "ActualQty": 0.00,
+                                "Unit": StockUnit,
+                                "MRP": ""
+                            })    
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
-            log_entry = create_transaction_logNew(request, StockReportdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 

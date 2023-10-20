@@ -167,6 +167,7 @@ class M_Parties(models.Model):
     Latitude = models.CharField(max_length=500,null=True, blank=True)
     Longitude = models.CharField(max_length=500,null=True, blank=True)
     IsApprovedParty = models.BooleanField(default=False)
+    SkyggeID = models.CharField(max_length=500,null=True, blank=True)
     class Meta:
         db_table = 'M_Parties'
         
@@ -648,6 +649,7 @@ class M_Items(models.Model):
     Length = models.CharField(max_length=200,null=True,blank=True)
     StoringCondition = models.CharField(max_length=200,null=True,blank=True)
     Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         
@@ -1838,6 +1840,7 @@ class MC_SettingDependency(models.Model):
 
 class M_TransactionType(models.Model):
     Name = models.CharField(max_length=500) 
+    TransactionCategory =  models.IntegerField(blank=True, null=True)
     class Meta:
         db_table="M_TransactionType"           
         
@@ -1855,6 +1858,7 @@ class Transactionlog(models.Model):
     FromDate = models.DateField(blank=True, null=True)
     ToDate = models.DateField(blank=True, null=True)
     CustomerID = models.IntegerField(default=1)
+    # TransactionCategory =  models.IntegerField(blank=True, null=True)
     
     class Meta:
         db_table="Transactionlog"     
@@ -1890,6 +1894,7 @@ class M_PartySettingsDetails(models.Model):
     Setting=models.ForeignKey(M_Settings,related_name='Settingid',on_delete=models.CASCADE)  
     Company = models.ForeignKey(C_Companies,related_name='SetCompany', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.CASCADE)
+    Image = models.ImageField(upload_to="Images\PartyRelatedImages",default="",null=True,blank=True)
     
     class Meta:
         db_table="M_PartySettingsDetails"
@@ -1912,6 +1917,7 @@ class O_DateWiseLiveStock(models.Model):
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     MRPValue = models.DecimalField(max_digits=20,decimal_places=10)
+    StockAdjustment = models.DecimalField(max_digits=20,decimal_places=10)
 
     class Meta:
         db_table="O_DateWiseLiveStock"      
@@ -2147,5 +2153,24 @@ class T_ClaimTrackingEntry(models.Model):
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
     Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
     class Meta:
-        db_table = "T_ClaimTrackingEntry"   
+        db_table = "T_ClaimTrackingEntry"
+
+class M_Cluster(models.Model):
+    Name = models.CharField(max_length=500,null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_Cluster"    
+
+class M_SubCluster(models.Model):
+    Name = models.CharField(max_length=500,null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.CASCADE) 
+    class Meta:
+        db_table = "M_SubCluster" 
 	

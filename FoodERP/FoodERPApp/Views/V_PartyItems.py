@@ -20,6 +20,7 @@ class PartyItemsListView(CreateAPIView):
                 query = MC_PartyItems.objects.raw(
                     '''select MC_PartyItems.id,M_Parties.Name, MC_PartyItems.Party_id,count(MC_PartyItems.Item_id)As Total From MC_PartyItems join M_Parties on M_Parties.id=MC_PartyItems.Party_id group by MC_PartyItems.Party_id  ''')
                 if not query:
+                    log_entry = create_transaction_logNew(request,0,0,'Items Not available',180,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = MC_PartyItemListSerializer(
@@ -32,8 +33,10 @@ class PartyItemsListView(CreateAPIView):
                             "Name": a['Name'],
                             "Total": a['Total']
                         })
+                    log_entry = create_transaction_logNew(request,Items_Serializer,0,'',180,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PartyItemsFilterView(CreateAPIView):
@@ -58,6 +61,7 @@ class PartyItemsFilterView(CreateAPIView):
                     Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  left JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.Company_id =%s order by M_Group.id, MC_SubGroup.id''',([PartyID],[CompanyID]))
                 
                 if not Itemquery:
+                    log_entry = create_transaction_logNew(request,Logindata,0,'Items Not available',181,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
             
@@ -81,8 +85,10 @@ class PartyItemsFilterView(CreateAPIView):
                             "SubGroupName": a['SubGroupName'],
                             "InStock":InStock
                         })
+                    log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PartyItemsView(CreateAPIView):
@@ -101,12 +107,16 @@ class PartyItemsView(CreateAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :str(MC_PartyItem_data.query)})
                 MC_PartyItem_data.delete()
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :PartyItems_serializer.data[0]['Party']})
-                PartyItems_serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data': []})
+                Item = PartyItems_serializer.save()
+                LastInsertID = Item[0].id
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'TransactionID:'+str(LastInsertID),182,LastInsertID)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],PartyItems_serializer.errors,34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ChannelWiseItemsView(CreateAPIView):
@@ -123,12 +133,16 @@ class ChannelWiseItemsView(CreateAPIView):
                 id = Items_Serializer.data[0]['PartyType']
                 ChanelWiseItem_data = M_ChannelWiseItems.objects.filter(PartyType_id=id)
                 ChanelWiseItem_data.delete()
-                Items_Serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully', 'Data': []})
+                ChannelWiseItem = Items_Serializer.save()
+                LastInsertID = ChannelWiseItem[0].id
+                log_entry = create_transaction_logNew(request,Items_data,0,'PartyTypeID:'+str(id)+','+'TransactionID:'+str(LastInsertID),183,LastInsertID)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
+                log_entry = create_transaction_logNew(request,Items_data,0,Items_Serializer.errors,34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Items_Serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ChannelWiseItemsFilterView(CreateAPIView):
@@ -176,8 +190,11 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in ItemsList_Serializer:
-                        
-                        count= MC_PartyItems.objects.filter(Item_id=a['id']).count()
+                        ItemID=a['id']
+                        # count= MC_PartyItems.objects.filter(Item_id=a['id']).count()
+                        Count=MC_PartyItems.objects.raw('''select 1 as id,count(*) cnt from MC_PartyItems join M_Parties on M_Parties.id=MC_PartyItems.Party_id where Item_id=%s and M_Parties.PartyType_id=%s''',(ItemID,PartyTypeID))
+                        for row in Count:
+                            count = row.cnt
                         if count > 0:
                             Flag = True
                         else:
@@ -193,8 +210,10 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                             "SubGroupName": a['SubGroupName'],
                             "InPartyItem":Flag
                         })
+                    log_entry = create_transaction_logNew(request,Itemsdata,0,'',184,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         

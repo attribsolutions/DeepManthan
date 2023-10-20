@@ -461,18 +461,33 @@ class ItemReportSerializer(serializers.ModelSerializer):
         fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails']
 
 
-# class DiscountSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = M_DiscountMaster
-#         fields = '__all__'
-
-# class DiscountItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = M_Items
-#         fields = ['id','Name']
-
-# class DiscountSerializerSecond(serializers.ModelSerializer):
-#     Item = DiscountItemSerializer()
-#     class Meta:
-#         model = M_DiscountMaster
-#         fields = '__all__'
+class ItemSerializerThird(serializers.Serializer):
+   
+    id=serializers.IntegerField()    
+    Name = serializers.CharField(max_length=500)
+    ShortName = serializers.CharField(max_length=500)
+    Sequence = serializers.DecimalField(max_digits=5, decimal_places=2)
+    BarCode = serializers.CharField(max_length=500) 
+    SAPItemCode = serializers.CharField(max_length=100)
+    isActive = serializers.BooleanField()
+    IsSCM = serializers.BooleanField()
+    CanBeSold = serializers.BooleanField()
+    CanBePurchase = serializers.BooleanField()
+    BrandName = serializers.CharField(max_length=500)
+    Tag = serializers.CharField(max_length=1000)
+    CreatedBy = serializers.IntegerField()
+    CreatedOn = serializers.DateTimeField()
+    UpdatedBy = serializers.IntegerField()
+    UpdatedOn = serializers.DateTimeField()
+    Breadth = serializers.CharField(max_length=200)
+    Grammage = serializers.CharField(max_length=200)
+    Height = serializers.CharField(max_length=200)
+    Length = serializers.CharField(max_length=200)
+    StoringCondition = serializers.CharField(max_length=200,)
+    Budget = serializers.DecimalField(max_digits=20, decimal_places=2) 
+    BaseUnitID_id = serializers.IntegerField()
+    Company_id =serializers.IntegerField()
+    CompanyName = serializers.CharField(max_length=200)
+    BaseUnitName = serializers.CharField(max_length=200)   
+        
+   

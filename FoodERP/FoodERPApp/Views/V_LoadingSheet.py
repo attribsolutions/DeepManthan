@@ -190,7 +190,7 @@ class LoadingSheetView(CreateAPIView):
             with transaction.atomic():
                 Loadingsheetdata = T_LoadingSheet.objects.get(id=id)
                 Loadingsheetdata.delete()
-                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'Loading Sheet Deleted Successfully',45,0)
+                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'LoadingSheetID:'+str(id),45,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Deleted Successfully', 'Data':[]})
         except T_LoadingSheet.DoesNotExist:
             log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'LoadingSheet Not available',45)

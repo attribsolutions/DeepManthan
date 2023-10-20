@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+from .V_CommFunction import *
+
 
 class PartyBanksFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -22,9 +24,12 @@ class PartyBanksFilterView(CreateAPIView):
               
                 if query1:
                     bank_serializer = PartyBanksSerializer(query1, many=True).data
+                    log_entry = create_transaction_logNew(request, Bank_data,Party,'Company:'+str(Company),189,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
+                log_entry = create_transaction_logNew(request, Bank_data,Party,'Bank not available',189,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class PartyBanksListView(CreateAPIView):
@@ -41,9 +46,12 @@ class PartyBanksListView(CreateAPIView):
                 query = MC_PartyBanks.objects.filter(Party=Party, Company=Company)
                 if query:
                     bank_serializer = PartyBanksSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request, Bank_data,Party,'Company:'+str(Company),190,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
+                log_entry = create_transaction_logNew(request, Bank_data,Party,'Bank not available',190,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -63,12 +71,16 @@ class PartyBanksSaveView(CreateAPIView):
                     id = PartyBanks_serializer.data[0]['Party']
                     MC_PartyBanks_data = MC_PartyBanks.objects.filter(Party=id)
                     MC_PartyBanks_data.delete()
-                    PartyBanks_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Banks Save Successfully', 'Data': []})
+                    PartyBank = PartyBanks_serializer.save()
+                    LastInsertID = PartyBank[0].id
+                    log_entry = create_transaction_logNew(request, PartyBanks_data,id,'TransactionID:'+str(LastInsertID),191,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Banks Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request, PartyBanks_data,id,PartyBanks_serializer.errors,34,0)
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyBanks_serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -83,9 +95,12 @@ class BankListView(CreateAPIView):
                 query = M_Bank.objects.all()
                 if query:
                     bank_serializer = BankSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request, bank_serializer,0,'',192,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :bank_serializer})
+                log_entry = create_transaction_logNew(request, bank_serializer,0,'Bank not available',192,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class BankView(CreateAPIView):
@@ -98,12 +113,16 @@ class BankView(CreateAPIView):
                 Bank_data = JSONParser().parse(request)
                 Bank_serializer = BankSerializer(data=Bank_data)
                 if Bank_serializer.is_valid():
-                    Bank_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Save Successfully', 'Data':[]})
+                    Bank = Bank_serializer.save()
+                    LastInsertID = Bank.id
+                    log_entry = create_transaction_logNew(request, Bank_data,0,'TransactionID:'+str(LastInsertID),193,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Save Successfully','TransactionID':LastInsertID, 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, Bank_data,0,Bank_serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Bank_serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     @transaction.atomic()
@@ -128,11 +147,14 @@ class BankView(CreateAPIView):
                     BankdataByID, data=Bankdata)
                 if Bank_serializer.is_valid():
                     Bank_serializer.save()
+                    log_entry = create_transaction_logNew(request, Bankdata,0,'BankID:'+str(id),194,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Updated Successfully','Data' :[]})
                 else:
+                    log_entry = create_transaction_logNew(request, Bankdata,0, Bank_serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Bank_serializer.errors, 'Data' :[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 
@@ -142,10 +164,13 @@ class BankView(CreateAPIView):
             with transaction.atomic():
                 Bankdata = M_Bank.objects.get(id=id)
                 Bankdata.delete()
+                log_entry = create_transaction_logNew(request, 0,0,'BankID:'+str(id),195,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Deleted Successfully','Data':[]})
         except M_Bank.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'',195,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_logNew(request, 0,0,'',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
             
             

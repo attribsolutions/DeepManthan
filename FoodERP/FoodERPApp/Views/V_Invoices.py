@@ -152,7 +152,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     "OrderIDs":Order_list,
                     "OrderItemDetails":OrderItemDetails
                    })  
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Customer),32,0,0,0,Customer)         
+            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,Customer)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0, Exception(e),33,0)
@@ -272,7 +272,7 @@ class InvoiceView(CreateAPIView):
                 if Invoice_serializer.is_valid():
                     Invoice = Invoice_serializer.save()
                     LastInsertId = Invoice.id
-                    log_entry = create_transaction_logNew(request, Invoicedata, Invoicedata['Customer'],'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0,Party)
+                    log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','TransactionID':LastInsertId, 'Data':[]})
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, Invoice_serializer.errors,34,0,InvoiceDate,0,Invoicedata['Customer'])
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
@@ -347,8 +347,7 @@ class InvoiceViewSecond(CreateAPIView):
                         for ad in a['Customer']['PartyAddress']:
                             if ad['IsDefault'] == True :
                                 DefCustomerAddress = ad['Address']
-                                
-                        DefPartyAddress = ''
+                                DefCustomerFSSAI = ad['FSSAINo']
                         for x in a['Party']['PartyAddress']:
                             if x['IsDefault'] == True :
                                 DefPartyAddress = x['Address']
@@ -391,7 +390,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "PartyGSTIN": a['Party']['GSTIN'],
                             "PartyMobileNo": a['Party']['MobileNo'],
                             "PartyFSSAINo": DefPartyFSSAI,
-                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": DefCustomerFSSAI,
                             "PartyState": a['Party']['State']['Name'],
                             "CustomerState": a['Customer']['State']['Name'],
                             "PartyAddress": DefPartyAddress,                            
@@ -481,7 +480,7 @@ class InvoiceNoView(CreateAPIView):
                 Customer = InVoice_Data['CustomerID']
 
                 if Party == '':
-                    x = Customer
+                    x = 0
                 else:
                     x = Party
 

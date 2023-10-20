@@ -6,7 +6,7 @@ from django.db import transaction
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_Parties import M_PartiesSerializerSecond
-
+from ..Views.V_CommFunction import *
 from ..Views.V_CommFunction import GetOpeningBalance, UnitwiseQuantityConversion,RateCalculationFunction
 from ..Serializer.S_Invoices import InvoiceSerializerSecond
 
@@ -221,6 +221,7 @@ FROM
 ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
                 
                 if not query:
+                    log_entry = create_transaction_logNew(request,Orderdata, Party,'Report Not Found',206,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     PartyLedgerSerializedata = PartyLedgerReportSerializer(
@@ -332,8 +333,10 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                         "TotalTCS": TotalTCS,
                         "InvoiceItems": PartyLedgerItemDetails
                     })
+                log_entry = create_transaction_logNew(request,Orderdata, Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),206,0,FromDate,ToDate,Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -351,15 +354,18 @@ class GenericSaleView(CreateAPIView):
                 Party_list = Party.split(",")
                 
         
-                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName,T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal FROM TC_InvoiceItems JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id JOIN M_Parties A ON A.id = T_Invoices.Party_id JOIN M_Parties B ON B.id = T_Invoices.Customer_id JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
+                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal FROM TC_InvoiceItems JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id JOIN M_Parties A ON A.id = T_Invoices.Party_id JOIN M_Parties B ON B.id = T_Invoices.Customer_id JOIN M_PartyType X on A.PartyType_id = X.id JOIN M_PartyType Y on B.PartyType_id = Y.id JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
                 if Genericdataquery:
                     GenericSaleData=list()
                     GenericSaleSerializer=GenericSaleReportSerializer(Genericdataquery, many=True).data
                     # GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
+                    log_entry = create_transaction_logNew(request,Genericdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate),207,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': GenericSaleSerializer})
                 else:
+                    log_entry = create_transaction_logNew(request,Genericdata, 0,'Report Not available',207,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -372,7 +378,7 @@ class RetailerDataView(CreateAPIView):
                 Retailerdata = JSONParser().parse(request)
                 Party = Retailerdata['Party']
                 if(Party==0):
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -386,7 +392,7 @@ LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
 Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 ''')
                 else:
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid 
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -399,17 +405,18 @@ LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
 LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
 Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 WHERE MC_PartySubParty.Party_id=%s''',[Party])
-
-
-               
+  
                 if query:
                     RetailerExportData=list()
                     RetailerExportSerializer=RetailerDataExportSerializer(query, many=True).data
                     RetailerExportData.append({"ReportExportSerializerDetails" : RetailerExportSerializer})
+                    log_entry = create_transaction_logNew(request,Retailerdata,Party,'',208,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': RetailerExportData[0]})
                 else:
+                    log_entry = create_transaction_logNew(request,Retailerdata, Party,'Report Not available ',208,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
 # ================================Stock Processing ================================
@@ -437,84 +444,85 @@ class StockProcessingView(CreateAPIView):
                     StockDeleteQuery  = O_DateWiseLiveStock.objects.filter(Party_id=Party,StockDate=Date)
                     StockDeleteQuery.delete()
                     # print(StockDeleteQuery.query)
-                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,round(OpeningBalance,3) OpeningBalance,round(GRN,3) GRN,round(SalesReturn,3) SalesReturn,round(Sale,3) Sale,round(PurchaseReturn,3) PurchaseReturn,
-round(((OpeningBalance+GRN+SalesReturn)-(Sale+PurchaseReturn)),3) ClosingBalance,ActualStock
+                    StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,
+                    round(OpeningBalance,3) OpeningBalance,
+                    round(GRN,3) GRN,
+                    round(SalesReturn,3) SalesReturn,
+                    round(Sale,3) Sale,
+                    round(PurchaseReturn,3) PurchaseReturn,
+                    round(((OpeningBalance+GRN+SalesReturn+StockAdjustment)-(Sale+PurchaseReturn)),3) ClosingBalance,
+                    StockAdjustment,ActualStock
  from
 
 (select 1 as id,I.Item_id ItemID,I.UnitID,
-IFNULL(ClosingBalance,0)OpeningBalance,
+
+(CASE WHEN StockEntry >= 0  THEN IFNULL(StockEntry,0)  ELSE IFNULL(ClosingBalance,0) END )OpeningBalance,
 IFNULL(InvoiveQuantity,0)Sale,
 IFNULL(GRNQuantity,0)GRN,
 IFNULL(SalesReturnQuantity,0)SalesReturn,
 IFNULL(PurchesReturnQuantity,0)PurchaseReturn,
-IFNULL(StockQuantity,0)ActualStock
+IFNULL(StockAdjustmentQTY,0)StockAdjustment,
+IFNULL(ActualStock,0)ActualStock
 
 from
 
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
 
-left join
-(SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
+left join (SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
 					DAY ) AND Party_id =%s GROUP BY ItemID)CB
                     
 on I.Item_id=CB.ItemID
-left join
-(SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
+
+left join (SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
 FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
 WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
 
 on I.Item_id=GRN.Item_id
-left join
 
-(SELECT Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
+left join (SELECT Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
 FROM T_Invoices JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
 WHERE InvoiceDate = %s AND Party_id = %s GROUP BY Item_id)Invoice
 
 on I.Item_id=Invoice.Item_id
-left join
 
-
-
-(SELECT Item_id,sum(Difference)ActualStock FROM T_Stock where StockDate = %s and Party_id= %s group by Item_id)Stock
-
-
-on I.Item_id=Stock.Item_id
-left join
-
-(SELECT Item_id,SUM(BaseUnitQuantity) SalesReturnQuantity,sum(Amount) SalesReturnValue
+left join (SELECT Item_id,SUM(BaseUnitQuantity) SalesReturnQuantity,sum(Amount) SalesReturnValue
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
-WHERE ReturnDate = %s AND Party_id = %s GROUP BY Item_id)SalesReturn
+WHERE ReturnDate = %s AND Party_id = %s and TC_PurchaseReturnItems.ItemReason_id in(SELECT DefaultValue FROM M_Settings where id=14) GROUP BY Item_id)SalesReturn
 
 on I.Item_id=SalesReturn.Item_id
-left join
 
-(SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
+left join (SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
-WHERE ReturnDate = %s AND Customer_id = %s GROUP BY Item_id)PurchesReturn
+WHERE ReturnDate = %s AND Customer_id = %s and TC_PurchaseReturnItems.ItemReason_id in(SELECT DefaultValue FROM M_Settings where id=14) GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id
-LEFT JOIN
 
-(Select Item_id,SUM(BaseUnitQuantity) StockQuantity from T_Stock where StockDate = %s AND Party_id= %s GROUP BY Item_id)ActualStock
-on I.Item_id=ActualStock.Item_id)R
+Left join (Select Item_id,SUM(BaseUnitQuantity)StockEntry  from T_Stock where IsStockAdjustment=0 and StockDate= DATE_SUB(  %s, INTERVAL 1 DAY ) AND Party_id=%s GROUP BY Item_id)StockEntry 
+ON I.Item_id=StockEntry.Item_id
+
+left join (SELECT Item_id,sum(Difference)StockAdjustmentQTY FROM T_Stock where IsStockAdjustment=1 and StockDate = %s and Party_id= %s group by Item_id)StockAdjustment 
+on I.Item_id=StockAdjustment.Item_id
+
+left join (SELECT Item_id,sum(BaseUnitQuantity)ActualStock FROM T_Stock where IsStockAdjustment=0 and StockDate = %s and Party_id= %s group by Item_id)ActualStock
+on I.Item_id=ActualStock.Item_id
+
+)R
 where 
-OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0  ''',
-([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 ''',
+([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
                     
                     # print(StockProcessQuery)
                     serializer=StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # print(serializer)
                     for a in serializer:
 
-                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a["ClosingBalance"], ActualStock=a['ActualStock'], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        stock=O_DateWiseLiveStock(StockDate=Date,OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a["ClosingBalance"], ActualStock=0,StockAdjustment=a["StockAdjustment"] ,Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
-
+                log_entry = create_transaction_logNew(request,Orderdata,Party,'',209,0,start_date_str,end_date_str,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': []})
 
-                
-
-
         except Exception as e:
+            log_entry = create_transaction_logNew(request,Orderdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 # ======================================STOCK REPORT=================================
@@ -543,11 +551,12 @@ UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
 A.ItemName,
 D.QuantityInBaseUnit,
 UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
-UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn
+UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn,
+UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,%s,0)StockAdjustment
 ,GroupTypeName,GroupName,SubGroupName,%s UnitName
 FROM 
 	
-	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,
+	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
     ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
 	 FROM O_DateWiseLiveStock
 	
@@ -572,8 +581,8 @@ FROM
 		FROM T_Stock 
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
-		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[unitname],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
-                # print(StockreportQuery)
+		ON A.Item_id = D.Item_id ''',([Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[Unit],[unitname],[FromDate],[ToDate],[Party],[FromDate],[Party],[ToDate],[Party],[Party],[FromDate],[ToDate]))
+                print(StockreportQuery)
                 serializer=StockReportSerializer(StockreportQuery, many=True).data
                 
                 
@@ -588,10 +597,13 @@ FROM
                 })
 
                 if StockreportQuery:
+                    log_entry = create_transaction_logNew(request,Orderdata, Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),210,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})      
                 else:
+                    log_entry = create_transaction_logNew(request,Orderdata, Party,'Report Not Found',210,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})           
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
                                           
          
@@ -692,8 +704,10 @@ class PurchaseGSTReportView(CreateAPIView):
                         PurchaseGSTRateWiseData=list()
                         PurchaseGSTRateWiseSerializer=PurchaseGSTRateWiseReportSerializer(query, many=True).data
                         PurchaseGSTRateWiseData.append({"PurchaseGSTRateWiseDetails" : PurchaseGSTRateWiseSerializer})
+                        log_entry = create_transaction_logNew(request,Reportdata, Customer,'From:'+str(FromDate)+'To:'+str(ToDate),211,0,FromDate,ToDate,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTRateWiseData[0]})
                     else:
+                        log_entry = create_transaction_logNew(request,Reportdata, Customer,'Report Not available',211,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
                 else:
                     query=TC_GRNReferences.objects.raw('''SELECT 1 AS id,M_Parties.Name,InvoiceNumber,FullInvoiceNumber,InvoiceDate,SUM(CGSTPercentage + SGSTPercentage + IGSTPercentage) GSTRate,GSTPercentage,SUM(BasicAmount) TaxableValue,SUM(CGST) CGST,SUM(SGST) SGST,SUM(IGST) IGST,SUM(GSTAmount) GSTAmount,SUM(TC_InvoiceItems.DiscountAmount) DiscountAmount,SUM(Amount) TotalValue FROM TC_GRNReferences JOIN T_Invoices ON T_Invoices.id = TC_GRNReferences.Invoice_id JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id JOIN M_Parties ON T_Invoices.Party_id = M_Parties.id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Customer_id =%s GROUP BY M_Parties.id, T_Invoices.InvoiceNumber, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, TC_InvoiceItems.GSTPercentage''',([FromDate],[ToDate],[Customer]))
@@ -702,10 +716,13 @@ class PurchaseGSTReportView(CreateAPIView):
                         # print(PurchaseGSTSerializer)
                         PurchaseGSTData=list()
                         PurchaseGSTData.append({"PurchaseGSTDetails" : PurchaseGSTSerializer})
+                        log_entry = create_transaction_logNew(request,Reportdata, Customer,'From:'+str(FromDate)+'To:'+str(ToDate),211,0,FromDate,ToDate,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': PurchaseGSTData[0]})
                     else:
+                        log_entry = create_transaction_logNew(request,Reportdata, Customer,'',211,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
   
   
@@ -818,10 +835,13 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND  T_Invoices.Party_id=%s ''',(
                             "EwayBillNo":b['EwayBillNo'],
                         })
                     # InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
+                    log_entry = create_transaction_logNew(request,Reportdata, Party,'From:'+str(FromDate)+'To:'+str(ToDate),212,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData})
                 else:
+                    log_entry = create_transaction_logNew(request,Reportdata, 0,'Report Not available',212,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
         
@@ -854,10 +874,13 @@ WHERE T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s AND  T_DeletedInvoices.Par
                     DeletedInvoiceExportData=list()
                     DeletedInvoiceExportSerializer=InvoiceDataExportSerializer(query, many=True).data
                     DeletedInvoiceExportData.append({"DeletedInvoiceExportSerializerDetails" : DeletedInvoiceExportSerializer})
+                    log_entry = create_transaction_logNew(request,Reportdata, Party,'From:'+str(FromDate)+'To:'+str(ToDate),213,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': DeletedInvoiceExportData[0]})
                 else:
+                    log_entry = create_transaction_logNew(request,Reportdata, 0,'Report Not available',213,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})         
         
 
@@ -875,8 +898,7 @@ class StockDamageReportView(CreateAPIView):
 
                 query1 = M_Units.objects.filter(
                     id=ConversionUnit).values('Name')
-                query = O_BatchWiseLiveStock.objects.raw(
-                    '''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.id UnitID FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id  WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0   GROUP BY O_BatchWiseLiveStock.Item_id''', ([PartyID]))
+                query = O_BatchWiseLiveStock.objects.raw('''SELECT M_Items.id, M_Items.Name ItemName, SUM(BaseUnitQuantity) Qty,M_Units.id UnitID,O_LiveBatches.MRPValue FROM O_BatchWiseLiveStock JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id WHERE O_BatchWiseLiveStock.Party_id=%s AND O_BatchWiseLiveStock.IsDamagePieces=1 AND O_BatchWiseLiveStock.BaseUnitQuantity>0  GROUP BY O_BatchWiseLiveStock.Item_id,O_LiveBatches.MRPValue''', ([PartyID]))
                 if query:
                     DamageStockData = list()
                     DamageItemStocktSerializer = DamageStocktSerializer(
@@ -885,12 +907,12 @@ class StockDamageReportView(CreateAPIView):
                         ConversionUnitQty = UnitwiseQuantityConversion(
                             a['id'], a['Qty'], 0, a['UnitID'], 0, ConversionUnit, 0).ConvertintoSelectedUnit()
                         DamageStockData.append({
-                            "id": a['id'],
+                            "Item": a['id'],
                             "ItemName": a['ItemName'],
-                            "Quantity": ConversionUnitQty,
-                            "UnitName": query1[0]['Name']
+                            "ActualQty": ConversionUnitQty,
+                            "Unit": query1[0]['Name'],
+                            "MRP":a['MRPValue']
                         })
-
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DamageStockData})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
@@ -912,10 +934,13 @@ class ReturnReportDownloadView(CreateAPIView):
                
                 if query:
                     ReturnSerializer=ReturnReportSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request,Reportdata,0,'From:'+str(FromDate)+','+'To:'+str(ToDate),214,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ReturnSerializer})
                 else:
+                    log_entry = create_transaction_logNew(request,Reportdata,0,'Report Not available',214,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -956,7 +981,15 @@ SELECT 3 Sequence, StockDate TransactionDate,CreatedOn, FullReturnNumber Transac
 FROM (SELECT 3 Sequence,T_Stock.StockDate,T_Stock.CreatedOn ,'STOCK' FullReturnNumber,M_Parties.Name, '' QtyInBox,'' QtyInKg,''QtyInNo, SUM(T_Stock.BaseUnitQuantity) QStock 
 From T_Stock
  JOIN M_Parties ON M_Parties.id=T_Stock.Party_id  
- WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name, QtyInBox, QtyInKg,QtyInNo)AA
+ WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s and IsStockAdjustment=0 GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name, QtyInBox, QtyInKg,QtyInNo)AA
+
+UNION ALL
+
+SELECT 6 Sequence, StockDate TransactionDate,CreatedOn, FullReturnNumber TransactionNumber, Name, UnitwiseQuantityConversion(%s,QStock,0,%s,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,QStock,0,%s,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,QStock,0,%s,0,1,0)QtyInNo 
+FROM (SELECT 3 Sequence,T_Stock.StockDate,T_Stock.CreatedOn ,'Stock Adjustment' FullReturnNumber,M_Parties.Name, '' QtyInBox,'' QtyInKg,''QtyInNo, SUM(T_Stock.Difference) QStock 
+From T_Stock
+ JOIN M_Parties ON M_Parties.id=T_Stock.Party_id  
+ WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s and IsStockAdjustment =1 GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name, QtyInBox, QtyInKg,QtyInNo)AA
 
 UNION ALL
 
@@ -970,18 +1003,18 @@ UNION ALL
 SELECT 5 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn,T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,UnitwiseQuantityConversion(%s,Quantity,0,1,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,Quantity,0,1,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,Quantity,0,1,0,1,0)QtyInNo  FROM T_PurchaseReturn 
 JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
 JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Party_id
-WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s)a order by CreatedOn ''',([FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item,DefaultValues, Item,BaseUnitID,Item,BaseUnitID,Item,BaseUnitID,FromDate,ToDate,Party,Item, FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item]))
-                
+WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s)a order by CreatedOn ''',([FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item,DefaultValues, Item,BaseUnitID,Item,BaseUnitID,Item,BaseUnitID,FromDate,ToDate,Party,Item,Item,BaseUnitID,Item,BaseUnitID,Item,BaseUnitID,FromDate,ToDate,Party,Item, FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item]))
+                print(query)
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
                     query2 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('OpeningBalance','Unit_id')
-                    if query2:
-                        if int(query2[0]['OpeningBalance']) > 0:
-                            OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
-                        else:
-                            OpeningBalance=0.00      
+                    print(query2)
+                    if query2 :
+                    # if int(query2[0]['OpeningBalance']) > 0:
+                        OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
                     else:
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
+                        OpeningBalance=0.00      
+                    
                  
                     query3 = O_DateWiseLiveStock.objects.filter(StockDate=ToDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
                     if query3:
@@ -990,13 +1023,16 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                         else:
                             ClosingBalance=0.00
                     else:
+                        log_entry = create_transaction_logNew(request,Reportdata,Party,'Stock Processing Needed',215,0,FromDate,ToDate,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
-                    
                     MaterialRegisterList.append({"OpeningBalance":OpeningBalance,"ClosingBalance":ClosingBalance})
+                    log_entry = create_transaction_logNew(request,Reportdata,Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),215,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': MaterialRegisterList})
                 else:
+                    log_entry = create_transaction_logNew(request,Reportdata, Party,'Records Not available',215,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
         
@@ -1014,7 +1050,6 @@ class CreditDebitExportReportView(CreateAPIView):
                 Customer = Reportdata['Customer']
                 NoteTypeIDs = Reportdata['NoteTypeIDs']
                 NoteType_list = NoteTypeIDs.split(",")
-                
                 
                 if(Party)>0:
                     query = TC_CreditDebitNoteItems.objects.raw('''SELECT TC_CreditDebitNoteItems.id,T_CreditDebitNotes.Party_id AS SupplierID,A.Name SupplierName,T_CreditDebitNotes.FullNoteNumber AS InvoiceNumber,T_CreditDebitNotes.CRDRNoteDate AS InvoiceDate,T_CreditDebitNotes.Narration,C.Name As NoteTypeName , D.Name As NoteReasonName,T_CreditDebitNotes.Customer_id As CustomerID,B.Name CustomerName,TC_CreditDebitNoteItems.Item_id As FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_CreditDebitNoteItems.MRPValue , TC_CreditDebitNoteItems.QtyInNo, TC_CreditDebitNoteItems.QtyInKg,TC_CreditDebitNoteItems.QtyInBox, "" AS RatePerPiece,TC_CreditDebitNoteItems.Rate AS BasicRate, (TC_CreditDebitNoteItems.Rate +((TC_CreditDebitNoteItems.Rate * TC_CreditDebitNoteItems.GSTPercentage)/100))WithGSTRate,M_Units.Name AS UnitName,TC_CreditDebitNoteItems.DiscountType, TC_CreditDebitNoteItems.Discount, TC_CreditDebitNoteItems.DiscountAmount,TC_CreditDebitNoteItems.BasicAmount AS TaxableValue, TC_CreditDebitNoteItems.CGSTPercentage, TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGSTPercentage, TC_CreditDebitNoteItems.SGST,TC_CreditDebitNoteItems.IGSTPercentage,TC_CreditDebitNoteItems.IGST,TC_CreditDebitNoteItems.GSTPercentage, TC_CreditDebitNoteItems.Amount AS TotalValue, T_CreditDebitNotes.RoundOffAmount,T_CreditDebitNotes.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_CreditDebitNoteUploads.Irn, TC_CreditDebitNoteUploads.AckNo,TC_CreditDebitNoteUploads.EwayBillNo
@@ -1091,11 +1126,13 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                             "AckNo":b['AckNo'],
                             "EwayBillNo":b['EwayBillNo'],
                         })
-                    
+                    log_entry = create_transaction_logNew(request,Reportdata,Party,'From:'+str(FromDate)+'To:'+str(ToDate),216,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': InvoiceExportData})
                 else:
+                    log_entry = create_transaction_logNew(request,Reportdata, 0,'Report Not available',216,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
         
@@ -1134,11 +1171,13 @@ class ReceiptDataExportReportView(CreateAPIView):
                             "ChequeDate":b['ChequeDate'],
                             "DocumentNo":b['DocumentNo']
                         })
-                    
+                    log_entry = create_transaction_logNew(request,Reportdata, Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),217,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ReceiptExportData})
                 else:
+                    log_entry = create_transaction_logNew(request,Reportdata, Party,'Report Not available',217,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
                 
         
@@ -1178,10 +1217,86 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
                             "RouteName":a['RouteName'],
                             "OutStandingBalance":GetOpeningBalance(Party, a['id'],ToDate)
                         })
+                    log_entry = create_transaction_logNew(request,Balance_Data, Party,'To:'+str(ToDate),218,0,0,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BalanceList})
+                log_entry = create_transaction_logNew(request,Balance_Data, Party,'Report Not Found',218,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
+        
+class ManPowerReportView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    @transaction.atomic()
+
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
+M_PartyType.Name AS PartyType, A.Email, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
+"" AS Cluster, "" AS SubCluster, C.Address, M_States.Name AS State, M_Districts.Name AS District,
+M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
+A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
+C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, "" AS RSM, "" AS ASM, "" AS Salesofficer,
+"" AS SalesExecutive, "" AS SalesRepresentative
+FROM MC_PartySubParty 
+LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
+LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
+LEFT JOIN M_PartyType ON M_PartyType.id = A.PartyType_id
+LEFT JOIN MC_PartyAddress  C ON C.Party_id = A.id
+LEFT JOIN M_States ON M_States.id = A.State_id
+LEFT JOIN M_Districts ON M_Districts.id = A.District_id
+LEFT JOIN M_Cities ON M_Cities.id = A.City_id
+LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
+LEFT JOIN M_Employees on M_Employees.id = MC_EmployeeParties.Employee_id
+LEFT JOIN M_Users on M_Users.Employee_id = M_Employees.id
+WHERE M_PartyType.id IN(9,10,15,17)''')
+
+                if query:
+                    ManPower_Serializer = ManPowerSerializer(query,many=True).data
+                    ManPowerList = list()
+                  
+                    for a in ManPower_Serializer:
+                        ManPowerList.append({
+                            "SAPCode":a['SAPCode'],
+                            "FEParty_id":a['FEParty_id'],
+                            "PartyName":a['PartyName'],
+                            "PartyActive":a['PartyActive'],
+                            "PartyType":a['PartyType'],
+                            "Email":a['Email'],
+                            "SS_id":a['SS_id'],
+                            "SSName":a['SSName'],
+                            "LoginID":a['LoginID'],
+                            "country":a['country'],
+                            "Cluster":a['Cluster'],
+                            "SubCluster":a['SubCluster'],
+                            "Address":a['Address'],
+                            "State":a['State'],
+                            "District":a['District'],
+                            "City":a['City'],
+                            "PIN":a['PIN'],
+                            "Mobile":a['Mobile'],
+                            "OwnerName":a['OwnerName'],
+                            "Latitude":a['Latitude'],
+                            "Longitude":a['Longitude'],
+                            "FSSAINo":a['FSSAINo'],
+                            "FSSAIExpiry":a['FSSAIExpiry'],
+                            "GSTIN":a['GSTIN'],
+                            "RSM":a['RSM'],
+                            "ASM":a['ASM'],
+                            "Salesofficer":a['Salesofficer'],
+                            "SalesExecutive":a['SalesExecutive'],
+                            "SalesRepresentative":a['SalesRepresentative']
+
+                        })
+                    log_entry = create_transaction_logNew(request,ManPower_Serializer, 0,'',219,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ManPowerList})
+                log_entry = create_transaction_logNew(request,ManPower_Serializer, 0,'Report Not Found',219,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
                 
-

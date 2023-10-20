@@ -167,11 +167,11 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                                 UpdatedBy =Partydata['UpdatedBy'],  
                             )
                             new_record.save()
-                                
+                            
                     else:    
                         query = M_Parties.objects.filter(id=a['SubPartyID']).update(**{Type: a['Value1']})  
                 log_entry = create_transaction_logNew(request, Partydata,Partydata['PartyID'], "PartyWise Update Successfully",113,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully', 'Data': []})  
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully','PartyID':Partydata['PartyID'], 'Data': []})  
         except Exception as e:
             log_entry = create_transaction_logNew(request, Partydata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     

@@ -155,14 +155,14 @@ urlpatterns = [
     url(r'MobileAppOrder$',T_MobileAppOrdersView.as_view()),
     url(r'MobileAppOrderDelete$',T_MobileAppOrdersDeleteView.as_view()),
     url(r'MobileAppOrder/([0-9]+)$',T_MobileAppOrdersView.as_view()),
-    url(r'MobileAppAddProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     
+   
     url(r'MobileAppAddProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
-    url(r'MobileAppUpdateProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
+    url(r'MobileAppUpdateProduct$',NewProductSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteProduct/([0-9]+)$',NewProductSendToMobileAppView.as_view()),
     
-    url(r'MobileAppAddRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
-    url(r'MobileAppUpdateRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
+    url(r'MobileAppAddRetailer$',NewRetailerSendToMobileAppView.as_view()),
+    url(r'MobileAppUpdateRetailer$',NewRetailerSendToMobileAppView.as_view()),
     url(r'MobileAppDeleteRetailer/([0-9]+)$',NewRetailerSendToMobileAppView.as_view()),
     
     url(r'Retailer/Add$',RetailerAddFromMobileAppview.as_view()),
@@ -605,6 +605,7 @@ urlpatterns = [
             url(r'CreditDebitDataExport$', CreditDebitExportReportView.as_view()),
             url(r'ReceiptDataExport$', ReceiptDataExportReportView.as_view()),
             url(r'OutStandingBalance$', OutStandingBalanceView.as_view()),
+            url(r'ManPowerReport$', ManPowerReportView.as_view()),
             
             
             
@@ -619,26 +620,26 @@ urlpatterns = [
             url(r'MasterClaimCreate$',MasterClaimView.as_view()),
             url(r'MasterClaimPrint$',MasterClaimPrintView.as_view()),
             url(r'Claimlist$',ClaimlistView.as_view()),
-            
-            
-            
+                           
 # ClaimTracking
             url(r'ClaimListfortracking$',Listofclaimforclaimtracking.as_view()),
             url(r'ClaimTracking/([0-9]+)$',ClaimTrackingEntryViewSecond.as_view()),
             url(r'ClaimTracking$', ClaimTrackingEntryView.as_view()),
             url(r'ClaimTrackingList$', ClaimTrackingEntryListView.as_view()),
-            
-            
+                 
             
 # StockAdjustment
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
             
-            
-
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
             url(r'GetTransactionType$',TransactionTypeListView.as_view()),
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
+
+# RetailerApproval Apis
+            url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
+           
+            
             
                   
 

@@ -48,22 +48,25 @@ class OrderListFilterView(CreateAPIView):
                 Supplier = Orderdata['Supplier']
                 OrderType = Orderdata['OrderType']
                 CustomerType = Orderdata['CustomerType']
-                d = date.today() 
+                d = date.today()   
 
                 # for log
                 if OrderType == 1:
                     x = Customer
                     if Supplier == '':
                         z = 0
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,0)
                     else:
                         z = Supplier
+                        log_entry = create_transaction_logNew(request, Orderdata,z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(z),28,0,FromDate,ToDate,x)
                 else:
                     x = Supplier
                     if Customer == '':
                         z = 0
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),173,0,FromDate,ToDate,0)
                     else:
                         z = Customer
-                    
+                        log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),173,0,FromDate,ToDate,z)
 
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
@@ -109,7 +112,12 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
-                        TCSPartyFlag = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
+                        tcsflagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
+                        if tcsflagquery:
+                            TCSPartyFlag= tcsflagquery[0]['IsTCSParty']   
+                        else:
+                            TCSPartyFlag = False    
+                            
                         inward = 0
                         for c in a['OrderReferences']:
                             if(c['Inward'] == 1):
@@ -149,14 +157,14 @@ class OrderListFilterView(CreateAPIView):
                             "SAPResponse": a['SAPResponse'],
                             "IsConfirm": a['IsConfirm'],
                             "Inward": inward,
-                            "IsTCSParty":TCSPartyFlag[0]['IsTCSParty']
+                            "IsTCSParty":TCSPartyFlag
                         })
-                    log_entry = create_transaction_logNew(request, Orderdata,z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
+
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
-                log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Orderdata, x, "Order List Not Found",28,0,FromDate,ToDate,z)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Orderdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Orderdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -256,7 +264,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                                 "Percentage": "",
                                 "IsRecordDeleted":a.Hide,
                             })
-                        log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
+                        log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,x)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                     log_entry = create_transaction_logNew(request, Orderdata, z, "Order List Not Found",28,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -359,7 +367,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                         "Percentage": Percentage,
 
                     })
-                log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),28,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
             log_entry = create_transaction_logNew(request, Orderdata, z, "Order Not available",28,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
@@ -416,7 +424,11 @@ class T_OrdersView(CreateAPIView):
                     else:
                         IsSAPCustomer = 1
 
-                    log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Division)+','+'TransactionID:'+str(OrderID),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Division)    
+                    #for log
+                    if OrderType == 2:
+                        log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Supplier'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'Supplier:'+str(Orderdata['Supplier'])+','+'TransactionID:'+str(OrderID),174,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Customer'])
+                    else:
+                        log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Customer'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'TransactionID:'+str(OrderID),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Supplier'])
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'TransactionID': OrderID, 'OrderID': OrderID,  'IsSAPCustomer': IsSAPCustomer, 'Data': []})
                 log_entry = create_transaction_logNew(request, Orderdata, 0, Order_serializer.errors,34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
@@ -988,7 +1000,7 @@ where Supplier_id=%s and OrderDate between %s and %s
                     #                 "OrderAmount": float(a['OrderAmount']),
                     #                 "CreatedOn": a['CreatedOn']
                     #             })
-                    log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(Company),31,0,FromDate,ToDate,Company)            
+                    log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order Summary Not available",7,0)
 

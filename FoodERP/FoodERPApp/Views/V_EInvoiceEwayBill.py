@@ -316,6 +316,7 @@ class Uploaded_EwayBill(CreateAPIView):
                             response = requests.request("GET", Calculate_Distance_URL, headers=headers)
 
                             distance_dict = json.loads(response.text)
+                            
                 #===============================================================================================================           
                             if(distance_dict['results']['status']== 'Success' and distance_dict['results']['code']== 200):
                                 
@@ -432,7 +433,7 @@ class Uploaded_EwayBill(CreateAPIView):
                                     # print('hhhhhhh')
                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                             else:
-                                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': InvoiceData[0] })     
+                                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
                             
                     else:
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})

@@ -25,9 +25,26 @@ from ..models import TransactionLogJsonData
 6) class ShowBaseUnitQtyOnUnitDropDown - ShowDetails(baseunitname), TrimQty(Baseunitqty)
 7) class UnitwiseQuantityConversion - GetBaseUnitQuantity,ConvertintoSelectedUnit
 8) class ShowBaseUnitQtyOnUnitDropDown -ShowDetails
+9)Skygge Third Party API - Product
 
 
 '''
+
+
+def GetThirdPartyAPIs(id):
+    
+    url_query = M_Settings.objects.filter(id=id).values('DefaultValue')
+    URL = url_query[0]['DefaultValue']
+    # Token only For Skygge APIs
+    token_query = M_Settings.objects.filter(id=24).values('DefaultValue')
+    
+    Token = token_query[0]['DefaultValue']
+ 
+    return URL, Token
+
+
+
+
 
 def get_client_ip(request):
     """
@@ -60,15 +77,9 @@ def create_transaction_logNew(request,data,PartyID,TransactionDetails,Transactio
         pass
 
     if not FromDate :
-        log_entry = Transactionlog.objects.create(
-            TranasactionDate=date.today(),
-            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID
-        )
+        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(),User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, CustomerID=CustomerID)
     else:
-        log_entry = Transactionlog.objects.create(
-            TranasactionDate=date.today(),
-            User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID
-        )
+        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(),User=User,PartyID=PartyID,IPaddress=get_client_ip(request),TransactionDetails=TransactionDetails,JsonData=0,TransactionType=TransactionType,TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
 
     TransactionLogJsonData.objects.create(Transactionlog=log_entry, JsonData=data)
     

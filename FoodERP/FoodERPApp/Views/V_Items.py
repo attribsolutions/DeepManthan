@@ -25,7 +25,7 @@ class M_ItemTag(CreateAPIView):
                 query = M_Items.objects.all()
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
-                    log_entry = create_transaction_log(request, {'ItemTag':id}, 0, 0, "Data Not available",7,0)
+                    log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0, "Items Not available",100,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = ItemSerializerSecond(query, many=True).data
@@ -37,10 +37,10 @@ class M_ItemTag(CreateAPIView):
                             ListData.append({
                                 "dta": d+ "-" + a['Name']
                             })  
-                    log_entry = create_transaction_log(request, {'ItemTag':id}, 0, 0, "Item Tag List",100,0)
+                    log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0,'',100,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemTag':id}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 class MCUnitDetailsView(CreateAPIView):
@@ -65,10 +65,10 @@ class MCUnitDetailsView(CreateAPIView):
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],         
                         })
-                log_entry = create_transaction_log(request, {'ItemID':ItemID}, 0, 0, "UnitDetails",101,0)
+                log_entry = create_transaction_logNew(request, {'ItemID':ItemID}, 0, '',101,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UnitDetails})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemID':ItemID}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':ItemID}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
 class M_ItemsFilterView(CreateAPIView):
@@ -88,45 +88,49 @@ class M_ItemsFilterView(CreateAPIView):
                 CompanyGroupID =Logindata['CompanyGroup'] 
                 IsSCMCompany = Logindata['IsSCMCompany'] 
                 
+                #for log
                 if PartyID == '':
-                        x = CompanyID
+                        x = 0
                 else:
                         x = PartyID
 
                 if IsSCMCompany == 1:
-                    Company=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
-                    query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
+                    company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
+                    company_ids = [company.id for company in company_queryset]
+                    # query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))
                 else:
-                    query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
-                # return JsonResponse({'query':  str(query.query)})
+                    # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
+            
                 if not query:
-                    log_entry = create_transaction_log(request, Logindata, 0, x, "Data Not available",7,0)
+                    log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
-                    Items_Serializer = ItemSerializerSecond(query, many=True).data
+                    Items_Serializer = ItemSerializerThird(query, many=True).data
                     ItemListData = list ()
                     for a in Items_Serializer:
-                        UnitDetails=list()
-                        for d in a['ItemUnitDetails']:
-                            if d['IsDeleted']== 0 :
+                        # UnitDetails=list()
+                        # for d in a['ItemUnitDetails']:
+                        #     if d['IsDeleted']== 0 :
                                 
-                                UnitDetails.append({
-                                    "id": d['id'],
-                                    "UnitID": d['UnitID']['id'],
-                                    "UnitName": d['BaseUnitConversion'],
-                                    "BaseUnitQuantity": d['BaseUnitQuantity'],
-                                    "IsBase": d['IsBase'],
-                                    "PODefaultUnit": d['PODefaultUnit'],
-                                    "SODefaultUnit": d['SODefaultUnit'],
-                                })
+                        #         UnitDetails.append({
+                        #             "id": d['id'],
+                        #             "UnitID": d['UnitID']['id'],
+                        #             "UnitName": d['BaseUnitConversion'],
+                        #             "BaseUnitQuantity": d['BaseUnitQuantity'],
+                        #             "IsBase": d['IsBase'],
+                        #             "PODefaultUnit": d['PODefaultUnit'],
+                        #             "SODefaultUnit": d['SODefaultUnit'],
+                        #         })
                         ItemListData.append({
                             "id": a['id'],
                             "Name": a['Name'],
                             "ShortName": a['ShortName'],
-                            "Company": a['Company']['id'],
-                            "CompanyName": a['Company']['Name'],
-                            "BaseUnitID": a['BaseUnitID']['id'],
-                            "BaseUnitName": a['BaseUnitID']['Name'],
+                            "Company": a['Company_id'],
+                            "CompanyName": a['CompanyName'],
+                            "BaseUnitID": a['BaseUnitID_id'],
+                            "BaseUnitName": a['BaseUnitName'],
                             "BarCode": a['BarCode'],
                             "Sequence": a['Sequence'],
                             "isActive":a['isActive'] ,
@@ -145,13 +149,13 @@ class M_ItemsFilterView(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
-                            "UnitDetails":UnitDetails
+                            # "UnitDetails":UnitDetails
                         })    
                         
-                    log_entry = create_transaction_log(request, Logindata, 0, x, "Item Filter List",102,0)
+                    log_entry = create_transaction_logNew(request, Logindata, x,'',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
-            log_entry = create_transaction_log(request, Logindata, 0, x, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Logindata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -183,14 +187,14 @@ class M_ItemsView(CreateAPIView):
                 if Items_Serializer.is_valid():
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
-                    log_entry = create_transaction_log(request, Itemsdata, 0, 0, "Item Save Successfully",103,LastInsertID)
+                    log_entry = create_transaction_logNew(request, Itemsdata, 0,'TransactionID:'+str(LastInsertID),103,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 else:
-                    log_entry = create_transaction_log(request, Itemsdata, 0, 0, Items_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Itemsdata, 0, Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, Itemsdata, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Itemsdata, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -379,15 +383,15 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemGSTHSNDetails":GSTHSNDetails,
                             "ItemShelfLife":ShelfLifeDetails
                         })
-                    log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, "Item List",103,0)
+                    log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',103,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
-                log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, "Data Not available",7,0)
+                log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, "Data Not available",7,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
     @transaction.atomic()
@@ -412,14 +416,14 @@ class M_ItemsViewSecond(CreateAPIView):
                 if M_Items_Serializer.is_valid():
                     UpdatedItem = M_Items_Serializer.save()
                     LastInsertID = UpdatedItem.id
-                    log_entry = create_transaction_log(request, M_Itemsdata, 0, 0, "Item Updated Successfully",104,id)
+                    log_entry = create_transaction_logNew(request, M_Itemsdata, 0,'',104,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Updated Successfully','TransactionID':LastInsertID,'Data' : []})
                 else:
-                    log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,M_Items_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, M_Itemsdata, 0,M_Items_Serializer.errors,34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_log(request, M_Itemsdata, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, M_Itemsdata, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -428,16 +432,16 @@ class M_ItemsViewSecond(CreateAPIView):
             with transaction.atomic():
                 M_Itemsdata = M_Items.objects.get(id=id)
                 M_Itemsdata.delete()
-                log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Item Deleted Successfully",105,0)
+                log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',105,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Deleted Successfully','TransactionID':id,'Data':[]})
         except M_Items.DoesNotExist:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Data Not available",7,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,"Item Not available",105,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item Not available', 'Data': []})
         except IntegrityError:   
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,"Item used in another table'",8,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,"Item used in another table'",8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []}) 
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemID':id}, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class M_ImageTypesView(CreateAPIView):
@@ -490,10 +494,16 @@ class ProductAndMarginReportView(CreateAPIView):
                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
                         PcsInBoxQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=4).values('BaseUnitQuantity')
+                        PcsInKgQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=2).values('BaseUnitQuantity')
                         if PcsInBoxQuery :
                             PcsInBox =float(PcsInBoxQuery[0]['BaseUnitQuantity'])
                         else:
                             PcsInBox = 0.00
+
+                        if PcsInKgQuery :
+                            PcsInKG =float(PcsInKgQuery[0]['BaseUnitQuantity'])
+                        else:
+                            PcsInKG = 0.00    
                         
                         if ItemMRPdata.count() == 0:
                             MRPV=0
@@ -536,7 +546,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "FE2ItemID": a['id'],
                             "SAPCode":a['SAPItemCode'],
                             "Barcode":a['BarCode'],
-                            "HSNCode":ItemGstHsnCodedata[0]['HSNCode'],
+                            "HSNCode":str(ItemGstHsnCodedata[0]['HSNCode']),
                             "ItemName": a['Name'],
                             "ItemShortName":a['ShortName'],
                             "SKUActiveDeactivestatus":a['isActive'],
@@ -545,201 +555,21 @@ class ProductAndMarginReportView(CreateAPIView):
                             "MRP":MRPV,
                             "GST":float(ItemGstHsnCodedata[0]['GSTPercentage']),
                             "BaseUnit": a['BaseUnitID']['Name'],
-                            "SKUGr":a['Grammage'],
+                            "SKUVol":a['Grammage'],
                             "Product":a['ItemGroupDetails'][0]['Group']['Name'],
                             "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
                             "Company": a['Company']['Name'],
                             "ShelfLife":float(Itemshelfdata[0]['Days']),
                             "PcsInBox":PcsInBox,
+                            "PcsInKG":PcsInKG,
                             "ItemMargins":ww
                             
                         })
-                    log_entry = create_transaction_log(request, {'ItemDetails':Itemsdata_Serializer}, 0, 0,"ProductAndMarginReport",106,0)
+                    log_entry = create_transaction_logNew(request, Itemsdata_Serializer, 0,'',106,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
-                log_entry = create_transaction_log(request, {'ItemDetails':Itemsdata_Serializer}, 0, 0,"Data Not Available",7,0)
+                log_entry = create_transaction_logNew(request,Itemsdata_Serializer, 0,"Report Not Available",106,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    
         except Exception as e:
-            log_entry = create_transaction_log(request, {'ItemDetails':Itemsdata_Serializer}, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Itemsdata_Serializer, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-
-# class DiscountMasterSaveView(CreateAPIView):
-
-#     permission_classes = (IsAuthenticated,)
-#     # authentication_class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def post(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 DiscountMaster_data = JSONParser().parse(request)
-#                 Discount_serializer = DiscountSerializer(data=DiscountMaster_data, many=True)
-#                 if Discount_serializer.is_valid():
-#                     Discount_serializer.save()
-                
-#                     log_entry = create_transaction_log(request, DiscountMaster_data, 0, 0,"Discount Master Save Successfully",107,0)
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully', 'Data': []})
-#                 else:
-#                     log_entry = create_transaction_log(request,DiscountMaster_data, 0, 0,Discount_serializer.errors,34,0)
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
-#         except Exception as e:
-#             log_entry = create_transaction_log(request,DiscountMaster_data, 0, 0,Exception(e),33,0)
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
-# class DiscountMasterView(CreateAPIView):
-
-#     permission_classes = (IsAuthenticated,)
-#     # authentication_class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def get(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 DiscountMasterdata = M_DiscountMaster.objects.get(id=id)
-#                 Discount_Serializer = DiscountSerializer(DiscountMasterdata)
-#                 log_entry = create_transaction_log(request, {'DiscountMasterID':id}, 0, 0,"DiscountMaster",107,0)
-#                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Discount_Serializer.data})
-#         except  M_Bank.DoesNotExist:
-#             log_entry = create_transaction_log(request, {'DiscountMasterID':id}, 0, 0,"Data Not available",33,0)
-#             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'DiscountMaster Not available', 'Data': []})
-#         except Exception as e:
-#             log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,Exception(e),33,0)
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-
-#     @transaction.atomic()
-#     def put(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 DiscountMasterdata = JSONParser().parse(request)
-#                 DiscountMasterByID = M_DiscountMaster.objects.get(id=id)
-#                 Discount_Serializer = DiscountSerializer(
-#                     DiscountMasterByID, data=DiscountMasterdata)
-#                 if Discount_Serializer.is_valid():
-#                     Discount_Serializer.save()
-#                     log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,"DiscountMaster Updated Successfully",109,id)
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Updated Successfully','Data' :[]})
-#                 else:
-#                     log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Discount_Serializer.errors,34,0)
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_Serializer.errors, 'Data' :[]})
-#         except Exception as e:
-#             log_entry = create_transaction_log(request,DiscountMasterdata, 0, 0,Exception(e),33,0)
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-    
-
-#     @transaction.atomic()
-#     def delete(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 DiscountMasterdata = M_DiscountMaster.objects.get(id=id)
-#                 DiscountMasterdata.delete()
-#                 log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"DiscountMaster Deleted Successfully",110,0)
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DiscountMaster Deleted Successfully','Data':[]})
-#         except M_Bank.DoesNotExist:
-#             log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"Data Not available",7,0)
-#             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'DiscountMaster Not available', 'Data': []})
-#         except IntegrityError:
-#             log_entry = create_transaction_log(request,{'DiscountMasterID':id}, 0, 0,"Bank used in transaction",8,0)
-#             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
-
-
-# class GetDiscountView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-    
-#     @transaction.atomic()
-#     def post(self, request,id=0):
-#         try:
-#             with transaction.atomic():
-#                 Discountdata = JSONParser().parse(request)
-#                 FromDate = Discountdata['FromDate']
-#                 ToDate = Discountdata['ToDate']
-#                 PartyType = Discountdata['PartyType']
-#                 PriceList = Discountdata['PriceList']
-#                 Party = Discountdata['PartyID']
-#                 Customer = Discountdata['CustomerID']
-
-#                 if Party == '':
-#                     x = Customer
-#                 else:
-#                     x = Party
-
-#                 query = M_DiscountMaster.objects.filter(FromDate__range=[FromDate,ToDate],PartyType=PartyType,PriceList=PriceList)
-#                 if query:
-#                     Discount_Serializer = DiscountSerializerSecond(query, many=True).data
-#                     DiscountList = list()
-#                     for a in Discount_Serializer:
-                        
-#                         DiscountList.append({
-#                             "ItemId":a['Item']['id'],
-#                             "ItemName": a['Item']['Name'],
-#                             "Discount":a['Discount'],
-#                             "DiscountType":a['DiscountType']
-                                 
-#                         })
-#                     log_entry = create_transaction_log(request,Discountdata, 0, x,"GetDiscount",111,0)
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
-#         except Exception as e:
-#             log_entry = create_transaction_log(request,Discountdata, 0, x,Exception(e),33,0)
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class GetDiscountView(CreateAPIView):
-
-#     permission_classes = (IsAuthenticated,)
-#     # authentication_class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def post(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 DiscountMaster_data = JSONParser().parse(request)
-#                 FromDate=DiscountMaster_data['FromDate']
-#                 ToDate=DiscountMaster_data['ToDate']
-#                 PartyType=DiscountMaster_data['PartyType']
-#                 PriceList=DiscountMaster_data['PriceList']
-#                 PartyID=DiscountMaster_data['PartyID']
-#                 # CustomerID=DiscountMaster_data['CustomerID'] 
-#                 query = M_DiscountMaster.objects.all()
-
-#                 if query:
-#                     Discount_Serializer = DiscountSerializerSecond(query, many=True).data
-#                     DiscountList = list()
-
-#                     for a in Discount_Serializer:
-#                         DiscountList.append({
-#                             "ItemId":a['Item']['id'],
-#                             "ItemName": a['Item']['Name'],
-#                             "Discount":a['Discount'],
-#                             "DiscountType":a['DiscountType']
-
-#                         })
-#                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':DiscountList})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
-                   
-
-            

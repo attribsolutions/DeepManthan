@@ -55,7 +55,7 @@ class ReceiptInvoicesView(CreateAPIView):
                         "PaidAmount": a['PaidAmount'],
                         "BalanceAmount": a['BalAmt'],
                     })
-                log_entry = create_transaction_logNew(request, Receiptdata,x,'Supplier:'+str(Party),76,0,0,0,Party)
+                log_entry = create_transaction_logNew(request, Receiptdata,Party,'',76,0,0,0,x)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': ReceiptInvoiceList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Receiptdata, 0, Exception(e),33,0)
@@ -117,9 +117,14 @@ class ReceiptListView(CreateAPIView):
                             "CreatedOn": a['CreatedOn']
 
                         })
-                    log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,77,0,FromDate,ToDate,0)
+                    #for log
+                    if Customer == '':
+                        x = 0
+                    else:
+                        x = Customer 
+                    log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,77,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
-                log_entry = create_transaction_logNew(request, Receiptdata, Party, "Record Not Found",29,0)
+                log_entry = create_transaction_logNew(request, Receiptdata, Party, "ReceiptList Not Found",77,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Receiptdata, 0, Exception(e),33,0)
@@ -154,7 +159,7 @@ class ReceiptView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, Receiptdata, Party, Receipt_serializer.errors,34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
-                log_entry = create_transaction_logNew(request, Receiptdata,Receiptdata['BulkData'][0]['Customer'] ,'ReceiptDate:'+Date+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),78,LastInsertID,0,0,Party)
+                log_entry = create_transaction_logNew(request, Receiptdata,Party,'ReceiptDate:'+Date+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),78,LastInsertID,0,0,Receiptdata['BulkData'][0]['Customer'])
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully','TransactionID':LastInsertID, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Receiptdata, 0,  Exception(e),33,0)
@@ -199,7 +204,7 @@ class ReceiptView(CreateAPIView):
                             "CreatedBy":a['CreatedBy'],
                             "CreatedOn": a['CreatedOn']
                         })
-                    log_entry = create_transaction_logNew(request, {'ReceiptID':id}, a['Customer']['id'],'ReceiptDate:'+a['ReceiptDate']+','+'Supplier:'+str(a['Party']['id']),79,0,0,0,a['Party']['id'])
+                    log_entry = create_transaction_logNew(request, {'ReceiptID':id}, a['Party']['id'],'ReceiptDate:'+a['ReceiptDate']+','+'Supplier:'+str(a['Party']['id']),79,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData[0]})
                 log_entry = create_transaction_logNew(request, {'ReceiptID':id}, a['Party']['id'], "Receipt Not Found",79,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -276,12 +281,17 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                             "CreatedOn": a['CreatedOn']
 
                         })
-                    log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,81,0,FromDate,ToDate,0)
+                    #for log
+                    if Customer == '':
+                        x = 0
+                    else:
+                        x = Customer
+                    log_entry = create_transaction_logNew(request, Receiptdata, Party,'From:'+FromDate+','+'To:'+ToDate,81,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptListData})
                 log_entry = create_transaction_logNew(request, Receiptdata, Party,"Receipt Not Found",81,0,FromDate,ToDate,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Receiptdata, Party,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, Receiptdata, 0,  Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 class ReceiptNoView(CreateAPIView):
@@ -307,7 +317,7 @@ class ReceiptNoView(CreateAPIView):
                             "AmountPaid":a['AmountPaid'],
                             "ReceiptDate":a['ReceiptDate'] 
                         })
-                    log_entry = create_transaction_logNew(request,Receipt_Data,Customer,'ReceiptDate:'+str(a['ReceiptDate'])+','+'Supplier:'+str(Party),82,0,0,0,Party)
+                    # log_entry = create_transaction_logNew(request,Receipt_Data,Party,'ReceiptDate:'+str(a['ReceiptDate'])+','+'Supplier:'+str(Party),82,0,0,0,Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReceiptList})
                 log_entry = create_transaction_logNew(request, Receipt_Data, Party, "ReceiptNoList Not Found",82,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})

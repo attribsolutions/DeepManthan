@@ -39,12 +39,12 @@ class VehicleViewList(CreateAPIView):
                             "UpdatedOn": a['UpdatedOn']
                         })
 
-                    log_entry = create_transaction_logNew(request, Vehicledata,Party,"Vehicle List",147,0,0,0,Company)
+                    log_entry = create_transaction_logNew(request, Vehicledata,Party,'',147,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData})
-                log_entry = create_transaction_logNew(request, Vehicledata,0,"Data Not Available",7,0)
+                log_entry = create_transaction_logNew(request, Vehicledata,Party,"List Not Available",147,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Vehicledata,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -62,14 +62,14 @@ class VehicleView(CreateAPIView):
             if Vehicles_Serializer.is_valid():
                 Vehicle = Vehicles_Serializer.save()
                 LastInsertId = Vehicle.id
-                log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],"Vehicle Save Successfully",13,LastInsertId,0,0,Vehiclesdata['Company'])
+                log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],'TransactionID:'+str(LastInsertId),13,LastInsertId)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Save Successfully', 'TransactionID': LastInsertId, 'Data': []})
             else:
                 log_entry = create_transaction_logNew(request, Vehiclesdata,0,Vehicles_Serializer.errors,34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Vehicles_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Vehiclesdata,0,str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,str(e),33,0)
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
@@ -95,10 +95,10 @@ class VehicleView(CreateAPIView):
                         "UpdatedOn": a['UpdatedOn']
                     })
                 
-                log_entry = create_transaction_logNew(request, Vehicle_serializer,a['Party'],"Single Vehicle",148,0,0,0, a['Company'])
+                log_entry = create_transaction_logNew(request, Vehicle_serializer,a['Party'],'',148,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData[0]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Vehicle_serializer,0,str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
     @transaction.atomic()
@@ -110,8 +110,9 @@ class VehicleView(CreateAPIView):
                 Vehicle_Serializer = VehiclesSerializer(
                     VehiclesdataByID, data=Vehiclesdata)
                 if Vehicle_Serializer.is_valid():
-                    Vehicle_Serializer.save()
-                    log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],"Vehicle Updated Successfully",14,0)
+                    Vehicle = Vehicle_Serializer.save()
+                    LastInsertID = Vehicle.id
+                    log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],'TransactionID:'+str(LastInsertID),14,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Updated Successfully','Data' : []})
                 else:
                     log_entry = create_transaction_logNew(request, Vehiclesdata,0,Vehicle_Serializer.errors,34,0)
@@ -127,10 +128,10 @@ class VehicleView(CreateAPIView):
             with transaction.atomic():
                 Vehiclesdata = M_Vehicles.objects.get(id=id)
                 Vehiclesdata.delete()
-                log_entry = create_transaction_logNew(request, {'VehicleId':id},0,"Vehicle Deleted Successfully",15,0)
+                log_entry = create_transaction_logNew(request, {'VehicleId':id},0,'',15,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Deleted Successfully','Data':[]})
         except M_Vehicles.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,0,"Vehicle Not available",7,0)
+            log_entry = create_transaction_logNew(request, 0,0,"Vehicle Not available",15,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Vehicle Not available', 'Data': []})
         except IntegrityError:   
             log_entry = create_transaction_logNew(request, 0,0,"Vehicle used in another table",8,0)

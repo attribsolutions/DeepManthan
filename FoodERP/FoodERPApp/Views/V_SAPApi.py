@@ -214,8 +214,9 @@ class SAPOrderView(CreateAPIView):
                 log_entry = create_transaction_log(request, data, 0, 0, "initiat")
                 payload = json.dumps(data)
                 
-                url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
-
+                SAPURL, Token  = GetThirdPartyAPIs(26)
+                # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
+                url = SAPURL
                 headers = {
                     'X-Requested-With': 'x',
                     'Authorization': 'Basic SW50ZXJmYWNlOkFkbWluQDEyMzQ=',
@@ -354,8 +355,10 @@ class InvoiceToSCMView(CreateAPIView):
                             
                             })
                     
-                    # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData[0]})              
-                    url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"
+                    # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'' , 'Data':InvoiceData[0]}) 
+                    SAPURL, Token  = GetThirdPartyAPIs(27)  
+                    # url = "https://cfe.chitalegroup.co.in/chitalescm/RestAPI/RestController.php?page_key=GetSAPInvoice"           
+                    url = SAPURL
                     payload = json.dumps(InvoiceData[0])
                     headers = {
                     'Content-Type': 'application/json',
