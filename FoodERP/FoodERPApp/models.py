@@ -1857,6 +1857,7 @@ class Transactionlog(models.Model):
     FromDate = models.DateField(blank=True, null=True)
     ToDate = models.DateField(blank=True, null=True)
     CustomerID = models.IntegerField(default=1)
+    TransactionCategory =  models.IntegerField(blank=True, null=True)
     
     class Meta:
         db_table="Transactionlog"     
