@@ -1707,7 +1707,7 @@ class M_ImportFields(models.Model):
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.PROTECT)
     ImportExcelType = models.ForeignKey(M_ImportExcelTypes,related_name='ImportFieldExcelType', on_delete=models.PROTECT)
     Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
-    Sequence = models.IntegerField()
+    Sequence = models.IntegerField(blank=True, null=True)
     class Meta:
         db_table = "M_ImportFields"
  
@@ -1721,7 +1721,7 @@ class MC_PartyImportFields(models.Model):
     Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT,blank=True, null=True)
     ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.CASCADE)
     Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT,blank=True, null=True)
-   
+    Sequence = models.IntegerField(blank=True, null=True)
     class Meta:
         db_table = "MC_PartyImportFields"
                                 
