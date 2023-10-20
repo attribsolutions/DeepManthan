@@ -1840,6 +1840,7 @@ class MC_SettingDependency(models.Model):
 
 class M_TransactionType(models.Model):
     Name = models.CharField(max_length=500) 
+    TransactionCategory =  models.IntegerField(blank=True, null=True)
     class Meta:
         db_table="M_TransactionType"           
         
@@ -1857,7 +1858,7 @@ class Transactionlog(models.Model):
     FromDate = models.DateField(blank=True, null=True)
     ToDate = models.DateField(blank=True, null=True)
     CustomerID = models.IntegerField(default=1)
-    TransactionCategory =  models.IntegerField(blank=True, null=True)
+    # TransactionCategory =  models.IntegerField(blank=True, null=True)
     
     class Meta:
         db_table="Transactionlog"     
@@ -2152,5 +2153,24 @@ class T_ClaimTrackingEntry(models.Model):
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
     Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
     class Meta:
-        db_table = "T_ClaimTrackingEntry"   
+        db_table = "T_ClaimTrackingEntry"
+
+class M_Cluster(models.Model):
+    Name = models.CharField(max_length=500,null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table = "M_Cluster"    
+
+class M_SubCluster(models.Model):
+    Name = models.CharField(max_length=500,null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.CASCADE) 
+    class Meta:
+        db_table = "M_SubCluster" 
 	
