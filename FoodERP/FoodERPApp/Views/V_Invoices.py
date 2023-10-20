@@ -622,6 +622,7 @@ class BulkInvoiceView(CreateAPIView):
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request)
                 for aa in Invoicedata['BulkData']:
+                    aa['InvoiceNumber']=1   #Invoice Import 
                     CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
                    
                     if CustomerMapping.count() > 0:
