@@ -178,7 +178,7 @@ class InvoiceListFilterView(CreateAPIView):
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
-
+                print(query.query)
                 # for log
                 if(Customer == ''):
                     x = 0
@@ -620,8 +620,10 @@ class BulkInvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Invoicedata = JSONParser().parse(request)
+                Invoicedata = JSONParser().parse(request) 
                 for aa in Invoicedata['BulkData']:
+                    print(aa)
+                    print('===================================')
                     aa['InvoiceNumber']=1   #Invoice Import 
                     CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
                    
@@ -632,6 +634,8 @@ class BulkInvoiceView(CreateAPIView):
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
                     # print(aa['Customer'])
                     for bb in aa['InvoiceItems']:
+                        print(bb)
+                        print('----------------------------------------')
                         ItemMapping=M_ItemMappingMaster.objects.filter(MapItem=bb['Item'],Party=aa['Party']).values("Item")
                         if ItemMapping.count() > 0:
                             bb['Item']=ItemMapping[0]['Item']
@@ -653,9 +657,12 @@ class BulkInvoiceView(CreateAPIView):
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
                          
                     # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':aa })    
+                    print(aa)
                     Invoice_serializer = BulkInvoiceSerializer(data=aa)
                     if Invoice_serializer.is_valid():
+                        # print(Invoice_serializer)
                         Invoice_serializer.save()
+                        pass
                     else:
                         transaction.set_rollback(True)
                         # log_entry = create_transaction_logNew(request, Invoicedata, 0, Invoice_serializer.errors,34,0)
