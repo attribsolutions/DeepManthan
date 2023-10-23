@@ -13,4 +13,4 @@ class ClusterSerializer(serializers.ModelSerializer):
 class SubClusterSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_SubCluster
-        fields = '__all__'
+        fields = '__all__'   

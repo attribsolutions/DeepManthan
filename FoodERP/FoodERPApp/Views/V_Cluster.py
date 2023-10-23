@@ -143,7 +143,7 @@ class SubClusterView(CreateAPIView):
             with transaction.atomic():
                 SubCluster_data = M_SubCluster.objects.all()
          
-                SubCluster_data_serializer = ClusterSerializer(SubCluster_data,many=True)
+                SubCluster_data_serializer = SubClusterSerializer(SubCluster_data,many=True)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubCluster_data_serializer.data})
         except  M_SubCluster.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'SubCluster Data Not available', 'Data': []})
