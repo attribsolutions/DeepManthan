@@ -643,12 +643,12 @@ urlpatterns = [
            
  # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
-             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
+            url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
           
 
 # SubCluster
-              url(r'SubCluster$',SubClusterView.as_view()),
-             url(r'SubCluster/([0-9]+)$',SubClusterViewsecond.as_view()),
+             url(r'SubClusters$',SubClusterView.as_view()),
+             url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
                 
             
                   
