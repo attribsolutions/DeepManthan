@@ -145,6 +145,9 @@ from .Views.V_Transaction import *
 
 from .Views.V_Cluster import *
 
+from .Views.V_CentralServiceItemMaster import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -644,11 +647,17 @@ urlpatterns = [
  # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
-          
-
+            
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),
              url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
+             
+# CentralServiceItem
+             url(r'CentralItemService$',CentralServiceItemView.as_view()),
+             url(r'CentralItemService/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
+             url(r'CentralServiceItemAssign$',CentralServiceItemAssignFilterView.as_view()),
+             
+              
                 
             
                   
