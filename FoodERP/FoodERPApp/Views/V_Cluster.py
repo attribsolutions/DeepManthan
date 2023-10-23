@@ -124,16 +124,14 @@ class SubClusterView(CreateAPIView):
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-    
-    @transaction.atomic()
+
     @transaction.atomic()
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Groupquery = M_SubCluster.objects.all()
-                if Groupquery.exists():
-                    # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Groupdata = SubClusterSerializerSecond(Groupquery, many=True).data
+                query = M_SubCluster.objects.all()
+                if query.exists():
+                    Groupdata = SubClusterSerializerSecond(query, many=True).data
                     GroupList=list()
                     for a in Groupdata:
                         GroupList.append({
@@ -147,7 +145,7 @@ class SubClusterView(CreateAPIView):
                             "UpdatedOn": a['UpdatedOn']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubCluster Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
@@ -159,13 +157,13 @@ class SubClusterViewsecond(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
-                Groupquery = M_SubCluster.objects.filter(id=id)
-                if Groupquery.exists():
+                query = M_SubCluster.objects.filter(id=id)
+                if query.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Groupdata = SubClusterSerializerSecond(Groupquery, many=True).data
-                    GroupList=list()
-                    for a in Groupdata:
-                        GroupList.append({
+                    Subclusterdata = SubClusterSerializerSecond(query, many=True).data
+                    SubclusterList=list()
+                    for a in Subclusterdata:
+                        Subclusterdata.append({
                             "id": a['id'],
                             "Name": a['Name'],
                             "Cluster": a['Cluster']['id'],
@@ -175,8 +173,8 @@ class SubClusterViewsecond(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList[0]})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubclusterList[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Sub Cluster Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
