@@ -8,10 +8,7 @@ from ..Serializer.S_Cluster import *
 from ..models import *
 
 class ClusterView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
-    # authentication_classes = [BasicAuthentication]
-    # parser_classes = (MultiPartParser, FormParser)
 
     @transaction.atomic()
     def post(self, request ):
@@ -108,13 +105,7 @@ class ClusterViewsecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Cluster Data used in another table', 'Data': []})
         
 
-         
-
-   
-
-        
-
-
+    
 class SubClusterView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
