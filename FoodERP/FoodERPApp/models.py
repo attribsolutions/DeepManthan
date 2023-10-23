@@ -2188,6 +2188,18 @@ class M_CentralServiceItems(models.Model):
         db_table = "M_CentralServiceItems"
 
 
+class MC_CentralServiceItemAssign(models.Model):
+    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    CentralServiceItem = models.ForeignKey(M_CentralServiceItems, related_name='CentralServiceItems', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties, related_name='CentralServiceItemParty', on_delete=models.PROTECT) 
+    class Meta:
+        db_table = "MC_CentralServiceItemAssign"        
+
+
 
 
 	
