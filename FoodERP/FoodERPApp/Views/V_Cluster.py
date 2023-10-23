@@ -158,21 +158,19 @@ class SubClusterViewsecond(CreateAPIView):
         try:
             with transaction.atomic():
                 query = M_SubCluster.objects.filter(id=id)
-                if query.exists():
-                    # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Subclusterdata = SubClusterSerializerSecond(query, many=True).data
-                    SubclusterList=list()
-                    for a in Subclusterdata:
-                        Subclusterdata.append({
-                            "id": a['id'],
-                            "Name": a['Name'],
-                            "Cluster": a['Cluster']['id'],
-                            "ClusterName": a['Cluster']['Name'],
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "UpdatedBy": a['UpdatedBy'],
-                            "UpdatedOn": a['UpdatedOn']
-                        })
+                Subclusterdata = SubClusterSerializerSecond(query, many=True).data
+                SubclusterList=list()
+                for a in Subclusterdata:
+                    SubclusterList.append({
+                        "id": a['id'],
+                        "Name": a['Name'],
+                        "Cluster": a['Cluster']['id'],
+                        "ClusterName": a['Cluster']['Name'],
+                        "CreatedBy": a['CreatedBy'],
+                        "CreatedOn": a['CreatedOn'],
+                        "UpdatedBy": a['UpdatedBy'],
+                        "UpdatedOn": a['UpdatedOn']
+                    })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubclusterList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Sub Cluster Not available ', 'Data': []})
         except Exception as e:
