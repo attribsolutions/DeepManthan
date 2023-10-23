@@ -143,6 +143,8 @@ from .Views.V_StockAdjustment import *
 
 from .Views.V_Transaction import *
 
+from .Views.V_Cluster import *
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -639,7 +641,15 @@ urlpatterns = [
 # RetailerApproval Apis
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
            
-            
+ # Cluster 
+            url(r'Cluster$',ClusterView.as_view()),
+             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
+          
+
+# SubCluster
+              url(r'SubCluster$',SubClusterView.as_view()),
+             url(r'SubCluster/([0-9]+)$',SubClusterViewsecond.as_view()),
+                
             
                   
 
