@@ -13,6 +13,13 @@ class MC_CentralServiceItemAssignSerializer(serializers.Serializer):
     Name=serializers.CharField(max_length=500)
     Party_id = serializers.IntegerField()
     PartyName=serializers.CharField(max_length=500)
+    
+    
+    
+class MC_CentralServiceItemAssignSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model =  MC_CentralServiceItemAssign
+        fields = '__all__'      
              
 
 

@@ -655,8 +655,10 @@ urlpatterns = [
 # CentralServiceItem
              url(r'CentralItemService$',CentralServiceItemView.as_view()),
              url(r'CentralItemService/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
-             url(r'CentralServiceItemAssign$',CentralServiceItemAssignFilterView.as_view()),
+             url(r'CentralServiceItemAssignFilter$',CentralServiceItemAssignFilterView.as_view()),
+             url(r'CentralServiceItemAssign$',CentralServiceItemAssignForParty.as_view()),
              
+      
               
                 
             
