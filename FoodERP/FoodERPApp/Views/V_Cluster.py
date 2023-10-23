@@ -107,10 +107,7 @@ class ClusterViewsecond(CreateAPIView):
 
     
 class SubClusterView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
-    # authentication_classes = [BasicAuthentication]
-    # parser_classes = (MultiPartParser, FormParser)
 
     @transaction.atomic()
     def post(self, request ):
@@ -129,34 +126,57 @@ class SubClusterView(CreateAPIView):
         
     
     @transaction.atomic()
-    def get(self, request):
+    @transaction.atomic()
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                SubCluster_data = M_SubCluster.objects.all()
-         
-                SubCluster_data_serializer = SubClusterSerializer(SubCluster_data,many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubCluster_data_serializer.data})
-        except  M_SubCluster.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'SubCluster Data Not available', 'Data': []})
+                Groupquery = M_SubCluster.objects.all()
+                if Groupquery.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Groupdata = SubClusterSerializerSecond(Groupquery, many=True).data
+                    GroupList=list()
+                    for a in Groupdata:
+                        GroupList.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "Cluster": a['Cluster']['id'],
+                            "ClusterName": a['Cluster']['Name'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
+        
     
 class SubClusterViewsecond(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
-
-    
-
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                SubCluster_data = M_SubCluster.objects.get(id=id)
-                SubCluster_data_serializer = SubClusterSerializer(SubCluster_data)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubCluster_data_serializer.data})
-        except  M_SubCluster.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Cluster Data Not available', 'Data': []})
+                Groupquery = M_SubCluster.objects.filter(id=id)
+                if Groupquery.exists():
+                    # return JsonResponse({'query':  str(Itemsquery.query)})
+                    Groupdata = SubClusterSerializerSecond(Groupquery, many=True).data
+                    GroupList=list()
+                    for a in Groupdata:
+                        GroupList.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "Cluster": a['Cluster']['id'],
+                            "ClusterName": a['Cluster']['Name'],
+                            "CreatedBy": a['CreatedBy'],
+                            "CreatedOn": a['CreatedOn'],
+                            "UpdatedBy": a['UpdatedBy'],
+                            "UpdatedOn": a['UpdatedOn']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupList[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
@@ -209,6 +229,21 @@ class SubClusterViewsecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'SubCluster Data Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'SubCluster Data used in another table', 'Data': []})
+        
+
+class GetSubClusterOnclusterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                SubCluster_data = M_SubCluster.objects.get(Cluster=id)
+                SubCluster_data_serializer = SubClusterSerializerSecond(SubCluster_data,many=True)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubCluster_data_serializer})
+        except  M_SubCluster.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Cluster Data Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
         
          
 

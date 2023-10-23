@@ -11,6 +11,16 @@ class ClusterSerializer(serializers.ModelSerializer):
 # Post, Get, Getall,  Put and Patch Methods Serializer for M_SubCluster
 
 class SubClusterSerializer(serializers.ModelSerializer):
+
     class Meta :
         model= M_SubCluster
         fields = '__all__'   
+
+
+class SubClusterSerializerSecond(serializers.ModelSerializer):
+    Cluster = ClusterSerializer(read_only=True)
+    class Meta:
+        model = M_SubCluster
+        fields = '__all__'          
+
+   
