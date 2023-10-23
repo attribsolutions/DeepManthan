@@ -2172,5 +2172,22 @@ class M_SubCluster(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.CASCADE) 
     class Meta:
-        db_table = "M_SubCluster" 
+        db_table = "M_SubCluster"
+
+class M_CentralServiceItems(models.Model):
+    Name = models.CharField(max_length=500)
+    HSNCode = models.CharField(max_length=500)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    isActive = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Unit = models.ForeignKey(M_Units, related_name='CentralServiceItemUnit', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "M_CentralServiceItems"
+
+
+
+
 	
