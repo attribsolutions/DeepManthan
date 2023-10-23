@@ -2184,6 +2184,8 @@ class M_CentralServiceItems(models.Model):
     UpdatedBy = models.IntegerField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)
     Unit = models.ForeignKey(M_Units, related_name='CentralServiceItemUnit', on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
+    Company = models.ForeignKey(C_Companies,related_name='ServiceItemCompany', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_CentralServiceItems"
 
