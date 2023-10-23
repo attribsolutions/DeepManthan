@@ -2170,7 +2170,7 @@ class M_SubCluster(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.CASCADE) 
+    Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.PROTECT) 
     class Meta:
         db_table = "M_SubCluster"
 
