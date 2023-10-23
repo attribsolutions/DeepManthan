@@ -653,8 +653,8 @@ urlpatterns = [
              url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
              
 # CentralServiceItem
-             url(r'CentralServiceItemList$',CentralServiceItemView.as_view()),
-             url(r'CentralServiceItemList/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
+             url(r'CentralItemService$',CentralServiceItemView.as_view()),
+             url(r'CentralItemService/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
              url(r'CentralServiceItemAssign$',CentralServiceItemAssignFilterView.as_view()),
              
               
