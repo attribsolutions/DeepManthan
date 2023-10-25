@@ -23,11 +23,11 @@ class M_MRPsView(CreateAPIView):
                 MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.CommonID >0 AND M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
                 # print(str(MRPdata.query))
                 if not MRPdata:
-                    log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",119,0)
+                    log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",121,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Not available', 'Data': []})
                 else:
                     MRPdata_Serializer = M_MRPsSerializerSecond(MRPdata, many=True).data
-                    log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',119,0)
+                    log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',121,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPdata_Serializer})
         except Exception as e:
             log_entry = create_transaction_logNew(request,MRPdata_Serializer, 0, Exception(e),33,0)
