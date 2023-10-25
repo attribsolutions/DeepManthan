@@ -200,14 +200,15 @@ class PurchaseReturnView(CreateAPIView):
                             "Comment":a['Comment'],
                             "CreatedOn":a['CreatedOn'],
                             "UpdatedOn":a['UpdatedOn'],
-                            "Customer":a['Customer'],
+                            "Customer":a['Customer']['id'],
+                            "CustomerName":a['Customer']['Name'],
                             "Party":a['Party'],
                             "ReturnReason":a['ReturnReason'],
                             "IsApproved" : a["IsApproved"],
                             "ReturnItems":PurchaseReturnItemList
                         })
                         
-                        log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, a['Party'],'ReturnDate:'+a['ReturnDate']+','+'Supplier:'+str(a['Party']),52,0,0,0,a['Customer'])
+                        log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, a['Party'],'ReturnDate:'+a['ReturnDate']+','+'Supplier:'+str(a['Party']),52,0,0,0,int(a['Customer']['id']))
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PuchaseReturnList})
                 log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, a['Party'], 'PurchaseReturn not available',52,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
