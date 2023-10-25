@@ -91,7 +91,7 @@ class CentralServiceItemAssignFilterView(CreateAPIView):
                 ServiceItemdata = JSONParser().parse(request)
                 PartyID=ServiceItemdata['PartyID'] 
                 CompanyID=ServiceItemdata['CompanyID']
-                ServiceItemquery= MC_CentralServiceItemAssign.objects.raw('''SELECT distinct M_CentralServiceItems.id,M_CentralServiceItems.Name,ifnull(MC_CentralServiceItemAssign.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName FROM M_CentralServiceItems LEFT JOIN MC_CentralServiceItemAssign ON MC_CentralServiceItemAssign.CentralServiceItem_id=M_CentralServiceItems.id AND MC_CentralServiceItemAssign.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_CentralServiceItemAssign.Party_id where M_CentralServiceItems.Company_id =%s''',([PartyID],[CompanyID]))
+                ServiceItemquery= MC_CentralServiceItemAssign.objects.raw('''SELECT distinct M_CentralServiceItems.id,M_CentralServiceItems.Name,ifnull(MC_CentralServiceItemAssign.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,(CASE WHEN MC_CentralServiceItemAssign.Rate IS NOT NULL AND MC_CentralServiceItemAssign.Rate <> 0 THEN MC_CentralServiceItemAssign.Rate ELSE M_CentralServiceItems.Rate END )AS Rate FROM M_CentralServiceItems LEFT JOIN MC_CentralServiceItemAssign ON MC_CentralServiceItemAssign.CentralServiceItem_id=M_CentralServiceItems.id AND MC_CentralServiceItemAssign.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_CentralServiceItemAssign.Party_id where M_CentralServiceItems.Company_id =%s''',([PartyID],[CompanyID]))
                 if not ServiceItemquery:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Central Service Items Not available', 'Data': []})
                 else:
@@ -103,6 +103,7 @@ class CentralServiceItemAssignFilterView(CreateAPIView):
                             "ServiceItemName": a['Name'],
                             "Party": a['Party_id'], 
                             "PartyName": a['PartyName'],
+                            "Rate":a['Rate']
                         })
                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ServiceItemList})

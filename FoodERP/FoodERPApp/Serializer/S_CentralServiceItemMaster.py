@@ -13,6 +13,7 @@ class MC_CentralServiceItemAssignSerializer(serializers.Serializer):
     Name=serializers.CharField(max_length=500)
     Party_id = serializers.IntegerField()
     PartyName=serializers.CharField(max_length=500)
+    Rate = serializers.DecimalField(max_digits=10, decimal_places=2)
     
     
     
