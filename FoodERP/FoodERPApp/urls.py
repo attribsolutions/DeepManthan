@@ -143,6 +143,11 @@ from .Views.V_StockAdjustment import *
 
 from .Views.V_Transaction import *
 
+from .Views.V_Cluster import *
+
+from .Views.V_CentralServiceItemMaster import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -639,7 +644,25 @@ urlpatterns = [
 # RetailerApproval Apis
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
            
+ # Cluster 
+            url(r'Cluster$',ClusterView.as_view()),
+            url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
             
+# SubCluster
+             url(r'SubClusters$',SubClusterView.as_view()),
+             url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
+
+             url(r'GetSubclusterOncluster/([0-9]+)$',GetSubClusterOnclusterView.as_view()),
+             
+# CentralServiceItem
+             url(r'CentralItemService$',CentralServiceItemView.as_view()),
+             url(r'CentralItemService/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
+             url(r'CentralServiceItemAssignFilter$',CentralServiceItemAssignFilterView.as_view()),
+             url(r'CentralServiceItemAssign$',CentralServiceItemAssignForParty.as_view()),
+             
+      
+              
+                
             
                   
 

@@ -1707,7 +1707,7 @@ class M_ImportFields(models.Model):
     FieldValidation = models.ForeignKey(M_FieldValidations, related_name='ImportFieldValidation', on_delete=models.PROTECT)
     ImportExcelType = models.ForeignKey(M_ImportExcelTypes,related_name='ImportFieldExcelType', on_delete=models.PROTECT)
     Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
-
+    Sequence = models.IntegerField(blank=True, null=True)
     class Meta:
         db_table = "M_ImportFields"
  
@@ -1721,7 +1721,7 @@ class MC_PartyImportFields(models.Model):
     Company = models.ForeignKey(C_Companies,related_name='PartyImportFieldCompany', on_delete=models.PROTECT,blank=True, null=True)
     ImportField = models.ForeignKey(M_ImportFields, related_name='ImportFields',on_delete=models.CASCADE)
     Party = models.ForeignKey(M_Parties,related_name='PartyImport', on_delete=models.PROTECT,blank=True, null=True)
-   
+    Sequence = models.IntegerField(blank=True, null=True)
     class Meta:
         db_table = "MC_PartyImportFields"
                                 
@@ -2170,7 +2170,38 @@ class M_SubCluster(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.CASCADE) 
+    Cluster = models.ForeignKey(M_Cluster,related_name='SubClusters', on_delete=models.PROTECT) 
     class Meta:
-        db_table = "M_SubCluster" 
+        db_table = "M_SubCluster"
+
+class M_CentralServiceItems(models.Model):
+    Name = models.CharField(max_length=500)
+    HSNCode = models.CharField(max_length=500)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    isActive = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Unit = models.ForeignKey(M_Units, related_name='CentralServiceItemUnit', on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
+    Company = models.ForeignKey(C_Companies,related_name='ServiceItemCompany', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "M_CentralServiceItems"
+
+
+class MC_CentralServiceItemAssign(models.Model):
+    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    CentralServiceItem = models.ForeignKey(M_CentralServiceItems, related_name='CentralServiceItems', on_delete=models.PROTECT)
+    Party = models.ForeignKey(M_Parties, related_name='CentralServiceItemParty', on_delete=models.PROTECT) 
+    class Meta:
+        db_table = "MC_CentralServiceItemAssign"        
+
+
+
+
 	

@@ -40,7 +40,8 @@ class MC_PartyItemSerializerSingleGet(serializers.Serializer):
     PartyName=serializers.CharField(max_length=500)
     GroupTypeName=serializers.CharField(max_length=500)
     GroupName=serializers.CharField(max_length=500)
-    SubGroupName=serializers.CharField(max_length=500)   
+    SubGroupName=serializers.CharField(max_length=500) 
+
      
 class MC_PartyItemListSerializer(serializers.Serializer):
     Party_id = serializers.IntegerField()
