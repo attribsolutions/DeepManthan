@@ -499,7 +499,7 @@ class ReturnItemAddView(CreateAPIView):
                                 "UnitName": c['BaseUnitConversion'],
                             })
                         
-                        MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                        MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')
                         if MRPquery.exists():
                             MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                             ItemMRPDetails = list()
