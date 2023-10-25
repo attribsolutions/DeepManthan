@@ -105,3 +105,28 @@ WHERE Transactiontime BETWEEN %s AND %s'''
             log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
+class TransactionJsonView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+
+
+    
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Transactiondata = Transactionlog.objects.raw('''SELECT transactionlog.id, transactionlog.Transactiontime, 
+                                                             transactionlog.User, transactionlog.IPaddress,
+                                                              transactionlog.PartyID,transactionlog.TransactionDetails, 
+                                                             transactionlog.TransactionType, transactionlog.TransactionID, 
+                                                             transactionlog.FromDate, transactionlog.ToDate, transactionlog.CustomerID, 
+                                                             transactionlog.JsonData,  transactionlogjsondata.JsonData AS JsonData2
+                                                             FROM transactionlog
+                                                             INNER JOIN transactionlogjsondata 
+                                                             ON transactionlog.id = transactionlogjsondata.Transactionlog_id 
+                                                              WHERE Transactionlog_id = %s''',[id])
+                Transaction_serializer = TransactionJsonSerializer(Transactiondata, many=True ).data
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Transaction_serializer})
+        except  Transactionlog.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Transaction Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})

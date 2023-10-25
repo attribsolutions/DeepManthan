@@ -29,4 +29,21 @@ class TransactionlogSerializer(serializers.Serializer):
     PartyName = serializers.CharField(max_length=500)
     CustomerName = serializers.CharField(max_length=500)
     TransactionDetails =  serializers.CharField(max_length=500)
+
+class TransactionJsonSerializer(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    JsonData=serializers.CharField(max_length=500)
+    JsonData2=serializers.CharField(max_length=500)
+    TranasactionDate = serializers.DateField()
+    Transactiontime =serializers.DateTimeField()
+    User = serializers.IntegerField()
+    IPaddress  = serializers.IPAddressField()
+    PartyID = serializers.IntegerField()
+    TransactionDetails = serializers.CharField(max_length=500)
+    TransactionType  = serializers.IntegerField()
+    TransactionID = serializers.IntegerField()
+    FromDate =serializers.DateField()
+    ToDate=serializers.DateField()
+    CustomerID = serializers.IntegerField()
  
