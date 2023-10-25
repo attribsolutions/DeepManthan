@@ -24,9 +24,12 @@ class RouteListView(CreateAPIView):
                 Routequery = M_Routes.objects.filter(Party=Party,Company=Company)
                 if Routequery.exists():
                     Routesdata = RoutesSerializer(Routequery, many=True).data
+                    log_entry = create_transaction_logNew(request, Routesdata,Party,'',228,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Routesdata})
+                log_entry = create_transaction_logNew(request, Routesdata,Party,'Routes Not available',228,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Routes Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'RouteList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
      
 class RoutesView(CreateAPIView):
@@ -41,13 +44,16 @@ class RoutesView(CreateAPIView):
                 Routes_data = JSONParser().parse(request)
                 Routes_Serializer = RoutesSerializer(data=Routes_data)
                 if Routes_Serializer.is_valid():
-                    Routes_Serializer.save()
-                    # log_entry = create_transaction_log(request,Routes_data,0,0,'Route Save Successfully')
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Save Successfully', 'Data':[]})
+                    Routes = Routes_Serializer.save()
+                    LastInsertID = Routes.id
+                    log_entry = create_transaction_logNew(request,Routes_data,Routes_data['Party'],'TransactionID:'+str(LastInsertID),16,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Save Successfully','TransactionID':LastInsertID, 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, Routes_data,0,'RoutesSave:'+str( Routes_Serializer.errors),16,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Routes_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'RoutesSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     @transaction.atomic()
@@ -57,11 +63,15 @@ class RoutesView(CreateAPIView):
                 Routequery = M_Routes.objects.filter(id=id)
                 if Routequery.exists():
                     Routesdata = RoutesSerializer(Routequery, many=True).data
+                    log_entry = create_transaction_logNew(request, Routesdata,0,'TransactionID:'+str(id),229,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Routesdata[0]})
+                log_entry = create_transaction_logNew(request, Routesdata,0,'Details Not available',229,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Routes Not available ', 'Data': []})
         except M_Routes.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'Routes Not available',229,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Routes Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'Single Route'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -73,13 +83,16 @@ class RoutesView(CreateAPIView):
                 RoutesdataByID = M_Routes.objects.get(id=id)
                 Routesdata_Serializer = RoutesSerializer(RoutesdataByID, data=Routesdata)
                 if Routesdata_Serializer.is_valid():
-                    Routesdata_Serializer.save()
-                    # log_entry = create_transaction_log(request,Routesdata,0,0,'Route Updated Successfully')
+                    Routes = Routesdata_Serializer.save()
+                    LastInsertID = Routes.id
+                    log_entry = create_transaction_logNew(request,Routesdata,Routesdata['Party'],'TransactionID:'+str(LastInsertID),17,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Routes Updated Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, Routesdata,0,'Route Edit:'+str(Routesdata_Serializer.errors),17,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Routesdata_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'Route Edit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -89,14 +102,16 @@ class RoutesView(CreateAPIView):
             with transaction.atomic():
                 Routesdata = M_Routes.objects.get(id=id)
                 Routesdata.delete()
-                
-                # log_entry = create_transaction_log(request,Routesdata,0,0,'Route Deleted Successfully')
+                log_entry = create_transaction_logNew(request,{'RouteID':id},0,'RouteID:'+str(id),18,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Routes Deleted Successfully', 'Data':[]})
         except M_Routes.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'Routes Not available',18,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Routes Not available', 'Data': []})
         except IntegrityError:   
+            log_entry = create_transaction_logNew(request, 0,0,'Routes used in another table',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message':'Routes used in another table', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'RouteDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
   
@@ -132,9 +147,12 @@ class RoutesUpdateListView(CreateAPIView):
                             "Route":a['Route']['id'],
                             "RouteName":a['Route']['Name']
                         })
+                    log_entry = create_transaction_logNew(request, PartySubpartydata,Party,'',230,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
+                log_entry = create_transaction_logNew(request, PartySubpartydata,Party,'PartyRoute  Not available',230,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Route  Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'RouteUpdateList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
           
 
@@ -151,9 +169,12 @@ class RoutesUpdateView(CreateAPIView):
                     if(a['Route']!= ""):
                         query = MC_PartySubParty.objects.filter(id=a['id'],Party=a['Party'],SubParty=a['SubParty']).update(Route=a['Route']) 
                     else:
+                        log_entry = create_transaction_logNew(request, PartySubPartydata,a['Party'],'Route Not Updated',231,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Route Not Updated', 'Data': []})     
+                log_entry = create_transaction_logNew(request, PartySubPartydata,a['Party'],'',231,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Route Updated Successfully', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'PartyRouteUpdate:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})             
 
 
