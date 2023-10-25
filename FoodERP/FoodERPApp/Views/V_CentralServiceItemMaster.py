@@ -82,7 +82,7 @@ class CentralServiceItemViewSecond(CreateAPIView):
                 
 class CentralServiceItemAssignFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
+ 
 
     @transaction.atomic()
     def post(self, request):
@@ -90,14 +90,9 @@ class CentralServiceItemAssignFilterView(CreateAPIView):
             with transaction.atomic():
                 ServiceItemdata = JSONParser().parse(request)
                 PartyID=ServiceItemdata['PartyID'] 
-                CompanyID=ServiceItemdata['ServiceItemdata']
-                ServiceItemquery= M_CentralServiceItems.objects.raw('''SELECT distinct M_CentralServiceItems.id,M_CentralServiceItems.Name,ifnull(MC_CentralServiceItemAssign.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName 
-FROM M_CentralServiceItems
-LEFT JOIN MC_CentralServiceItemAssign ON MC_CentralServiceItemAssign.CentralServiceItem_id=M_CentralServiceItems.id AND MC_CentralServiceItemAssign.Party_id=97 
-LEFT JOIN M_Parties ON M_Parties.id=MC_CentralServiceItemAssign.Party_id where M_CentralServiceItems.Company_id =%s''',([PartyID],[CompanyID]))
-                
+                CompanyID=ServiceItemdata['CompanyID']
+                ServiceItemquery= MC_CentralServiceItemAssign.objects.raw('''SELECT distinct M_CentralServiceItems.id,M_CentralServiceItems.Name,ifnull(MC_CentralServiceItemAssign.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName FROM M_CentralServiceItems LEFT JOIN MC_CentralServiceItemAssign ON MC_CentralServiceItemAssign.CentralServiceItem_id=M_CentralServiceItems.id AND MC_CentralServiceItemAssign.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_CentralServiceItemAssign.Party_id where M_CentralServiceItems.Company_id =%s''',([PartyID],[CompanyID]))
                 if not ServiceItemquery:
-                    
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Central Service Items Not available', 'Data': []})
                 else:
                     ServiceItems_Serializer = MC_CentralServiceItemAssignSerializer(ServiceItemquery, many=True).data
@@ -130,7 +125,8 @@ class CentralServiceItemAssignForParty(CreateAPIView):
                     ServiceItemParty_data = MC_CentralServiceItemAssign.objects.filter(Party=id)
                     ServiceItemParty_data.delete()
                     ServiceItem = PartyItems_serializer.save()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CentralServiceItemForParty Save Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CentralServiceItem For Party Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyItems_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
