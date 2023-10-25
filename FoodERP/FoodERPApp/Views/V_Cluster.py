@@ -239,7 +239,7 @@ class GetSubClusterOnclusterView(CreateAPIView):
         except  M_SubCluster.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Cluster Data Not available', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})     
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
         
          
 
