@@ -21,7 +21,7 @@ class TransactionTypeSerializer(serializers.ModelSerializer):
 
 class TransactionlogSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    TransactionDate = serializers.DateTimeField(format="%d-%m-%Y %H:%M")
+    TransactionDate = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     UserName = serializers.CharField(max_length=500)
     IPaddress = serializers.CharField(max_length=500)
     TransactionType = serializers.CharField(max_length=500)
@@ -29,4 +29,6 @@ class TransactionlogSerializer(serializers.Serializer):
     PartyName = serializers.CharField(max_length=500)
     CustomerName = serializers.CharField(max_length=500)
     TransactionDetails =  serializers.CharField(max_length=500)
+
+
  

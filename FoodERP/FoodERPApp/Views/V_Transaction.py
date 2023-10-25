@@ -55,14 +55,15 @@ class TransactionTypeView(CreateAPIView):
                 Transactiondata = JSONParser().parse(request)
                 FromDateStr = Transactiondata['FromDate']
                 ToDateStr = Transactiondata['ToDate']
-                FromDate = datetime.strptime(FromDateStr, '%Y-%m-%d %H:%M')
-                ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M')
+                FromDate = datetime.strptime(FromDateStr, '%Y-%m-%d %H:%M:%S')
+                ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M:%S')
                 TransactionTypes = Transactiondata['TransactionType']
                 TransactionTypesIDs = TransactionTypes.split(',')
                 Users = Transactiondata['User']
                 UsersIDs = Users.split(',')
                 Parties = Transactiondata['Party']
                 PartyIDs = Parties.split(',')
+                TransactionCategory = Transactiondata['TransactionCategory']
 
 
                 conditions = []
@@ -90,11 +91,11 @@ LEFT JOIN M_Employees ON M_Users.Employee_id = M_Employees.id
 LEFT JOIN M_TransactionType ON TransactionType = M_TransactionType.id
 LEFT JOIN M_Parties A ON Transactionlog.PartyID = A.id 
 LEFT JOIN M_Parties B ON Transactionlog.CustomerID = B.id
-WHERE Transactiontime BETWEEN %s AND %s'''
+WHERE Transactiontime BETWEEN %s AND %s AND TransactionCategory = %s'''
                 if where_clause:
                     Transactionquery_sql += f' AND {where_clause}'
                 Transactionquery_sql += ' ORDER BY Transactiontime DESC'
-                Transactionquery = Transactionlog.objects.raw(Transactionquery_sql, [FromDate, ToDate])
+                Transactionquery = Transactionlog.objects.raw(Transactionquery_sql, [FromDate, ToDate, TransactionCategory])
                 if Transactionquery:
                         Transaction_Serializer = TransactionlogSerializer(Transactionquery,many=True).data
                         log_entry = create_transaction_logNew(request, Transactiondata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate),196,0,FromDate,ToDate,0)
