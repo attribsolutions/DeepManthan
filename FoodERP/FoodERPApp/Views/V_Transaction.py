@@ -115,15 +115,15 @@ class TransactionJsonView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Transactiondata = Transactionlog.objects.raw('''SELECT transactionlog.id, transactionlog.Transactiontime, 
-                                                             transactionlog.User, transactionlog.IPaddress,
-                                                              transactionlog.PartyID,transactionlog.TransactionDetails, 
-                                                             transactionlog.TransactionType, transactionlog.TransactionID, 
-                                                             transactionlog.FromDate, transactionlog.ToDate, transactionlog.CustomerID, 
-                                                             transactionlog.JsonData,  transactionlogjsondata.JsonData AS JsonData2
-                                                             FROM transactionlog
-                                                             INNER JOIN transactionlogjsondata 
-                                                             ON transactionlog.id = transactionlogjsondata.Transactionlog_id 
+                Transactiondata = Transactionlog.objects.raw('''SELECT Transactionlog.id, Transactionlog.Transactiontime, 
+                                                             Transactionlog.User, Transactionlog.IPaddress,
+                                                             Transactionlog.PartyID,Transactionlog.TransactionDetails, 
+                                                             Transactionlog.TransactionType, Transactionlog.TransactionID, 
+                                                             Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
+                                                             Transactionlog.JsonData,  Transactionlogjsondata.JsonData AS JsonData2
+                                                             FROM Transactionlog
+                                                             INNER JOIN Transactionlogjsondata 
+                                                             ON Transactionlog.id = Transactionlogjsondata.Transactionlog_id 
                                                               WHERE Transactionlog_id = %s''',[id])
                 Transaction_serializer = TransactionJsonSerializer(Transactiondata, many=True ).data
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Transaction_serializer})
@@ -131,3 +131,4 @@ class TransactionJsonView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Transaction Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+  

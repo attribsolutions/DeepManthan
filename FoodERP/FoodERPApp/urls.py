@@ -641,7 +641,7 @@ urlpatterns = [
             url(r'GetTransactionType$',TransactionTypeListView.as_view()),
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
 
-            url(r'TransactionJson/([0-9]+)$',TransactionJsonView.as_view()), 
+            url(r'TransactionJson/([0-9]+)$',TransactionJsonView.as_view()),    
 
 # RetailerApproval Apis
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
