@@ -233,8 +233,8 @@ class GetSubClusterOnclusterView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                SubCluster_data = M_SubCluster.objects.get(Cluster=id)
-                SubCluster_data_serializer = SubClusterSerializerSecond(SubCluster_data,many=True)
+                SubCluster_data = M_SubCluster.objects.filter(Cluster=id)
+                SubCluster_data_serializer = SubClusterSerializer(SubCluster_data,many=True).data
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubCluster_data_serializer})
         except  M_SubCluster.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Cluster Data Not available', 'Data': []})
