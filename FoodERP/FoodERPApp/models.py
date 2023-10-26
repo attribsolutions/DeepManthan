@@ -2199,7 +2199,18 @@ class MC_CentralServiceItemAssign(models.Model):
     CentralServiceItem = models.ForeignKey(M_CentralServiceItems, related_name='CentralServiceItems', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='CentralServiceItemParty', on_delete=models.PROTECT) 
     class Meta:
-        db_table = "MC_CentralServiceItemAssign"        
+        db_table = "MC_CentralServiceItemAssign"
+
+class M_PartyDetails(models.Model):
+    Party = models.ForeignKey(M_Parties, related_name='PartyDetailsParty', on_delete=models.PROTECT)
+    Group = models.ForeignKey(M_Group, related_name='PartyItemGroup', on_delete=models.PROTECT,null=True,blank=True)
+    Cluster = models.ForeignKey(M_Cluster, related_name='PartyCluster', on_delete=models.PROTECT,null=True,blank=True)
+    SubCluster = models.ForeignKey(M_SubCluster, related_name='PartySubCluster', on_delete=models.PROTECT,null=True,blank=True)
+     
+    class Meta:
+        db_table = "M_PartyDetails" 
+
+
 
 
 
