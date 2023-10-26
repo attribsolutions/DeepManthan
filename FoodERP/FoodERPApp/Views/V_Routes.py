@@ -63,7 +63,7 @@ class RoutesView(CreateAPIView):
                 Routequery = M_Routes.objects.filter(id=id)
                 if Routequery.exists():
                     Routesdata = RoutesSerializer(Routequery, many=True).data
-                    log_entry = create_transaction_logNew(request, Routesdata,0,'TransactionID:'+str(id),229,id)
+                    log_entry = create_transaction_logNew(request, Routesdata,Routesdata[0]['Party'],'TransactionID:'+str(id),229,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Routesdata[0]})
                 log_entry = create_transaction_logNew(request, Routesdata,0,'Details Not available',229,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Routes Not available ', 'Data': []})
