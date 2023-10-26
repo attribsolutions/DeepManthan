@@ -163,7 +163,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 Itemquery= MC_PartyItems.objects.raw('''SELECT ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,O_BatchWiseLiveStock.BaseUnitQuantity Qty ,O_LiveBatches.MRPValue ,
 O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode
-FROM FoodERP.M_Items 
+FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id
 left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
