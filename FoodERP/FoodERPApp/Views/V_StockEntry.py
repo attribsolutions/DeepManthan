@@ -157,68 +157,54 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 ToDate = StockReportdata['ToDate']
                 Party = StockReportdata['PartyID']
                 Unit = StockReportdata['Unit']
+                IsDamagePieces=StockReportdata['IsDamagePieces']
+
                 
-                Itemquery= MC_PartyItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items JOIN MC_PartyItems ON MC_PartyItems.item_id=M_Items.id left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where MC_PartyItems.Party_id=%s  order by M_Group.id, MC_SubGroup.id''',([Party]))
+                Itemquery= MC_PartyItems.objects.raw('''SELECT ifnull(M_GroupType.Name,'') GroupTypeName,
+ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,O_BatchWiseLiveStock.BaseUnitQuantity Qty ,O_LiveBatches.MRPValue ,
+O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode
+FROM M_Items 
+join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id=%s
+JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
+where MC_PartyItems.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity >0 and O_BatchWiseLiveStock.IsDamagePieces=%s order by M_Group.id, MC_SubGroup.id ,M_Items.id ''',([Party],[Party],[IsDamagePieces]))
                 # print(str(Itemquery.query))
                 if not Itemquery:
-                    log_entry = create_transaction_logNew(request, StockReportdata, 0, Party, "BatchWiseLiveStock Not available",88,0)
+                    log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
-                    Items_Serializer = MC_PartyItemSerializerSingleGet(
-                        Itemquery, many=True).data
                     ItemList = list()
-                    for a in Items_Serializer:
-                        ActualQty='00.00'
-                        stockquery = O_BatchWiseLiveStock.objects.raw('''SELECT O_BatchWiseLiveStock.id, sum(BaseUnitQuantity)Qty,O_LiveBatches.MRPValue From O_BatchWiseLiveStock JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id  WHERE IsDamagePieces=0 AND BaseUnitQuantity >0 AND Item_id =%s AND Party_id=%s group by  MRPValue ''',(a['id'],Party))
-                        for row in stockquery:
-                            Stock = row.Qty
-                            MRPValue = row.MRPValue
-                        # stockquery = O_BatchWiseLiveStock.objects.filter(Item=a['id'], Party=Party,IsDamagePieces=0).aggregate(Qty=Sum('BaseUnitQuantity'))
-                        # print(stockquery)
-                            if Stock is None:
-                                Stock = 0.0
-                            else:
-                                Stock = Stock
-                            
-                            if int(Unit) == 1:
-                                ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,1,0).ConvertintoSelectedUnit()
-                                StockUnit = 'No'
-                            if int(Unit) == 2:
-                                ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,2,0).ConvertintoSelectedUnit()
-                                StockUnit = 'Kg'
-                            
-                            if int(Unit) == 4:
-                                ActualQty=UnitwiseQuantityConversion(a['id'],Stock,0,0,0,4,0).ConvertintoSelectedUnit()
-                                StockUnit = 'Box'
-                                
-                            ItemList.append({
-                                "Item": a['id'],
-                                "ItemName": a['Name'],
-                                "GroupTypeName": a['GroupTypeName'],
-                                "GroupName": a['GroupName'], 
-                                "SubGroupName": a['SubGroupName'],
-                                "ActualQty":round(ActualQty,3),
-                                "Unit":StockUnit,
-                                "MRP":MRPValue
-                            })
-                        # Append a default entry if there are no results
+                    for row in Itemquery:
+                        Stock = row.Qty
+                        
                         if int(Unit) == 1:
+                            ActualQty=UnitwiseQuantityConversion(row.id,Stock,0,0,0,1,0).ConvertintoSelectedUnit()
                             StockUnit = 'No'
                         if int(Unit) == 2:
+                            ActualQty=UnitwiseQuantityConversion(row.id,Stock,0,0,0,2,0).ConvertintoSelectedUnit()
                             StockUnit = 'Kg'
+                        
                         if int(Unit) == 4:
-                            StockUnit = 'Box'        
-                        if not stockquery:
-                            ItemList.append({
-                                "Item": a['id'],
-                                "ItemName": a['Name'],
-                                "GroupTypeName": a['GroupTypeName'],
-                                "GroupName": a['GroupName'],
-                                "SubGroupName": a['SubGroupName'],
-                                "ActualQty": 0.00,
-                                "Unit": StockUnit,
-                                "MRP": ""
-                            })    
+                            ActualQty=UnitwiseQuantityConversion(row.id,Stock,0,0,0,4,0).ConvertintoSelectedUnit()
+                            StockUnit = 'Box'
+                            
+                        ItemList.append({
+                            "Item": row.id,
+                            "ItemName": row.Name,
+                            "GroupTypeName": row.GroupTypeName,
+                            "GroupName": row.GroupName, 
+                            "SubGroupName": row.SubGroupName,
+                            "ActualQty":round(ActualQty,3),
+                            "BatchCode" : row.BatchCode ,
+                            "SystemBatchCode" : row.SystemBatchCode ,
+                            "Unit":StockUnit,
+                            "MRP":row.MRPValue
+                        })
+                    
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
