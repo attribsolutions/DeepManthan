@@ -1252,7 +1252,7 @@ LEFT JOIN M_Cities ON M_Cities.id = A.City_id
 LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
 LEFT JOIN M_Employees on M_Employees.id = MC_EmployeeParties.Employee_id
 LEFT JOIN M_Users on M_Users.Employee_id = M_Employees.id
-WHERE M_PartyType.id IN(9,10,15,17)''')
+WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
 
                 if query:
                     ManPower_Serializer = ManPowerSerializer(query,many=True).data
