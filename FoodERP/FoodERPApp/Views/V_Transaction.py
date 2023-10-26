@@ -64,8 +64,7 @@ class TransactionTypeView(CreateAPIView):
                 Parties = Transactiondata['Party']
                 PartyIDs = Parties.split(',')
                 TransactionCategory = Transactiondata['TransactionCategory']
-
-
+                
                 conditions = []
 
                 if TransactionTypes == '' :
