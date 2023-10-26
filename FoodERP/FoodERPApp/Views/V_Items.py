@@ -530,8 +530,8 @@ class ProductAndMarginReportView(CreateAPIView):
                             string1 = x['Name']
                             string2 = string1.replace(" ","")
                             ItemMargins.append({
-                               
-                                string2 + 'Margin': f"{float(Margin[0]['TodaysMargin']):.2f}%",
+                                string2+'Margin' : str(float(Margin[0]['TodaysMargin'])) + '%'
+                              
                                 
                             })
                             RateList.append({
