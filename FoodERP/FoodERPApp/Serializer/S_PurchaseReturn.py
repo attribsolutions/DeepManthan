@@ -173,6 +173,7 @@ class PurchaseReturnItemsSerializer(serializers.ModelSerializer):
 
 class PurchaseReturnSerializerThird(serializers.ModelSerializer):
     ReturnItems = PurchaseReturnItemsSerializer(read_only=True,many=True)
+    Customer = PartiesSerializer(read_only=True)
     class Meta :
         model= T_PurchaseReturn
         fields = '__all__'
