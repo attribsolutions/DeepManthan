@@ -562,19 +562,31 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')
                 if MRPquery.exists():
                     MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                     ItemMRPDetails = list()
-
+                    unique_MRPs = set()
                     for d in MRPdata:
-                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
+                        MRPs = d['MRP']
+                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
                         Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
-                        ItemMRPDetails.append({
-                        "MRP": d['id'],
-                        "MRPValue": d['MRP'],   
-                        "Rate" : round(Rate,2),
-                    })
+                        if MRPs not in unique_MRPs:
+                            ItemMRPDetails.append({
+                                "MRP": d['id'],
+                                "MRPValue": MRPs,
+                                "Rate" : round(Rate,2),
+                            })
+                            unique_MRPs.add(MRPs)
+
+                    # for d in MRPdata:
+                    #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
+                    #     Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
+                    #     ItemMRPDetails.append({
+                    #     "MRP": d['id'],
+                    #     "MRPValue": d['MRP'],   
+                    #     "Rate" : round(Rate,2),
+                    # })
 
                 GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
                 if GSTquery.exists():

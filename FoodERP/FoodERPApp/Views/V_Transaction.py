@@ -64,8 +64,7 @@ class TransactionTypeView(CreateAPIView):
                 Parties = Transactiondata['Party']
                 PartyIDs = Parties.split(',')
                 TransactionCategory = Transactiondata['TransactionCategory']
-
-
+                
                 conditions = []
 
                 if TransactionTypes == '' :
@@ -110,8 +109,6 @@ class TransactionJsonView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
 
-
-    
     def get(self, request, id=0):
         try:
             with transaction.atomic():
@@ -132,3 +129,4 @@ class TransactionJsonView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
   
+
