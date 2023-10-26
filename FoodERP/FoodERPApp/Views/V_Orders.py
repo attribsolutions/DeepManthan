@@ -918,8 +918,9 @@ class SummaryReportView(CreateAPIView):
                 Company = Orderdata['CompanyID']
                 Party = Orderdata['PartyID']
 
+                #for log
                 if Party == '':
-                    x = Company
+                    x = 0
                 else:
                     x = Party
 
@@ -1003,7 +1004,6 @@ where Supplier_id=%s and OrderDate between %s and %s
                     log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order Summary Not available",31,0)
-
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'OrderSummaryReport:'+str(Exception(e)),33,0)
