@@ -430,7 +430,7 @@ class T_OrdersView(CreateAPIView):
                     else:
                         log_entry = create_transaction_logNew(request, Orderdata, Orderdata['Customer'],'From:'+Orderdata['POFromDate']+','+'To:'+Orderdata['POToDate']+','+'TransactionID:'+str(OrderID),1,OrderID,Orderdata['POFromDate'],Orderdata['POToDate'],Orderdata['Supplier'])
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'TransactionID': OrderID, 'OrderID': OrderID,  'IsSAPCustomer': IsSAPCustomer, 'Data': []})
-                log_entry = create_transaction_logNew(request, Orderdata, 0, Order_serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request, Orderdata, 0, 'OrderSave:'+str(Order_serializer.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'OrderSave:'+str(Exception(e)),33,0)
@@ -583,7 +583,7 @@ class T_OrdersViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Orderupdatedata, Orderupdatedata['Customer'],'From:'+Orderupdatedata['POFromDate']+','+'To:'+Orderupdatedata['POToDate']+','+'TransactionID:'+str(id),2,id,Orderupdatedata['POFromDate'],Orderupdatedata['POToDate'],Orderupdatedata['Supplier'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, Orderupdatedata, 0, Orderupdate_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Orderupdatedata, 0,'OrderEdit:'+str(Orderupdate_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Orderupdate_Serializer.errors, 'Data': []})
         except Exception as e:
@@ -882,7 +882,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                 # log_entry = create_transaction_logNew(request, {'OrderID':OrderID}, Party,'From:'+a['POFromDate']+','+'To:'+a['POToDate'],2,0,a['POFromDate'],a['POToDate'],Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, e,33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'EditOrder:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
