@@ -58,7 +58,7 @@ class ReceiptInvoicesView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Receiptdata,Party,'',76,0,0,0,x)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': ReceiptInvoiceList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Receiptdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'ReceiptInvoices:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -127,7 +127,7 @@ class ReceiptListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Receiptdata, Party, "ReceiptList Not Found",77,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Receiptdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'ReceiptList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -158,11 +158,11 @@ class ReceiptView(CreateAPIView):
                     else:
                         log_entry = create_transaction_logNew(request, Receiptdata, Party, Receipt_serializer.errors,34,0)
                         transaction.set_rollback(True)
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'ReceiptSave:'+str(Receipt_serializer.errors), 'Data': []})
                 log_entry = create_transaction_logNew(request, Receiptdata,Party,'ReceiptDate:'+Date+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),78,LastInsertID,0,0,Receiptdata['BulkData'][0]['Customer'])
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully','TransactionID':LastInsertID, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Receiptdata, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'ReceiptSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
@@ -209,7 +209,7 @@ class ReceiptView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'ReceiptID':id}, a['Party']['id'], "Receipt Not Found",79,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'ReceiptID':id}, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'SingleReceipt:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -224,7 +224,7 @@ class ReceiptView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'ReceiptID':id}, 0,  "Used in another table",8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Receipt used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'ReceiptID':id}, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'ReceiptDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class MakeReceiptOfPaymentListView(CreateAPIView):
@@ -291,7 +291,7 @@ class MakeReceiptOfPaymentListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Receiptdata, Party,"Receipt Not Found",81,0,FromDate,ToDate,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Receiptdata, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MakeReceiptofPayment:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 class ReceiptNoView(CreateAPIView):
@@ -322,6 +322,6 @@ class ReceiptNoView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Receipt_Data, Party, "ReceiptNoList Not Found",82,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Receipt_Data, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'ReceiptNoList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
