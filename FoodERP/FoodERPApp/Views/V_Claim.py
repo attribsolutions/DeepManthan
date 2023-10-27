@@ -133,7 +133,7 @@ class MasterClaimView(CreateAPIView):
                 for row in q11:
                     Party = row.PartyID
                     PartyName=row.Name
-                    print(PartyName)
+                    # print(PartyName)
                 
                 
                     q10 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,count(*) cnt
@@ -175,11 +175,14 @@ class MasterClaimView(CreateAPIView):
                                 # for i in q1:
 
                                 PartyType = row.split(",")
+                                # print('----------',id)
                                 if id == 0:
                                     PartyTypeID = 11
                                 else:
-                                    PartyTypeID = PartyType
+                                    PartyTypeID = 15
                                 # print(PartyType)
+                                # print('-----------')
+                                # print(PartyTypeID)
     # ===========================================================================================================================================
 
                                 claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
@@ -207,11 +210,11 @@ class MasterClaimView(CreateAPIView):
                                     claimREasonwise, many=True).data
 
                                 for a in serializer:
-
+                                    # print('========',PartyTypeID,'=============',a)
                                     stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
                                         "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=PartyTypeID, Party_id=Party, CreatedBy=0)
                                     stock.save()
-                            id = id+1
+                                id = id+1
     # ===========================================================================================================================================
                             # for all partyType
                             claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
@@ -381,13 +384,13 @@ class ClaimlistView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Party = Orderdata['Party']
-                Claimlistquery = M_Claim.objects.raw('''select id,PartyID,PartyName,PartyType, PrimaryAmount, ReturnAmount, SecondaryAmount,returncnt from (SELECT Distinct M_Parties.id PartyID,M_Parties.Name PartyName,M_PartyType.id M_PartyTypeID,M_PartyType.Name PartyType 
+                Claimlistquery = M_Claim.objects.raw('''select id,PartyID,PartyName,PartyType, PrimaryAmount, ReturnAmount, SecondaryAmount,returncnt,ClaimDate from (SELECT Distinct M_Parties.id PartyID,M_Parties.Name PartyName,M_PartyType.id M_PartyTypeID,M_PartyType.Name PartyType 
                 FROM M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
 join M_PartyType on M_PartyType.id=M_Parties.PartyType_id 
 where ( MC_PartySubParty.Party_id=%s or MC_PartySubParty.SubParty_id=%s) and M_PartyType.IsVendor=0 and M_PartyType.IsRetailer=0)a
 left join 
-(select id ,Customer_id, PrimaryAmount, ReturnAmount, SecondaryAmount from M_Claim where FromDate=%s and ToDate=%s )b
+(select id,Date ClaimDate ,Customer_id, PrimaryAmount, ReturnAmount, SecondaryAmount from M_Claim where FromDate=%s and ToDate=%s )b
 on a.PartyID=b.Customer_id
 left join
 (select count(*)returncnt ,Customer_id from T_PurchaseReturn where T_PurchaseReturn.ReturnDate between %s and %s group by Customer_id )c
