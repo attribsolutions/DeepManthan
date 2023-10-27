@@ -622,14 +622,14 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 response_json=json.loads(response.text)
                 # print(response_json)
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
+                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],155)
+                    # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
                     for a in response_json['data']:
                         query = M_Parties.objects.filter(id=a['externalMappingId']).update(SkyggeID =a['outletId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],167)
+                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],167)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
-
         except Exception as e:
             # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
@@ -651,7 +651,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
  where cust.PartyType_id=11 and cust.id in %s''',[RetailerID_list])
-                print(q0)
+              
                 for row in q0:
                     # print(row.isActive)
                     RetailerData.append({
@@ -833,10 +833,10 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                 "GSTNumber":Retailer.GSTIN
                             })
                         else:
-                            log_entry = create_transaction_log(request, RetailerAddList, 0, 0,'fail to Added Retailer From MobileApp ',170,0)
+                            log_entry = create_transaction_log(request, Retailer_serializer.errors, 0,'fail to Added Retailer From MobileApp ',170,0)
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
-                    log_entry = create_transaction_log(request, RetailerAddList, 0, 0,'Retailer Added From MobileApp Successfully',158,0)
+                    log_entry = create_transaction_logNew(request,inserted_retailerlist,0,'Retailer Added From MobileApp Successfully',158,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
