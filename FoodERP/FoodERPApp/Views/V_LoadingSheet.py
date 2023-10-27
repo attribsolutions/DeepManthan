@@ -55,7 +55,7 @@ class LoadingSheetListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'LoadingSheetList Not available',42,0,FromDate,ToDate)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Loadingsheetdata,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'LoadingSheetList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -81,11 +81,11 @@ class LoadingSheetView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Loadingsheetdata, Party,'LoadingSheetDate:'+Date+','+'TransactionID:'+str(LastInsertID),43,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, Loadingsheet_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Loadingsheetdata, Party,'LoadingSheetSave:'+str(Loadingsheet_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Loadingsheet_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Loadingsheetdata,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'LoadingSheetSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     def get(self, request, id=0):
@@ -160,7 +160,7 @@ class LoadingSheetView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'], 'Loadingsheet Not available',49,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'LoadingSheetGETmethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -180,7 +180,7 @@ class LoadingSheetView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Loadingsheet_Serializer.errors, 'Data':[]})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, Loadingsheetdata, 0, Exception(e),33,0)
+            # log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -199,7 +199,7 @@ class LoadingSheetView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'Loading Sheet used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Loading Sheet used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,{'LoadingSheetID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'LoadingSheetDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 class LoadingSheetInvoicesView(CreateAPIView):
@@ -241,7 +241,7 @@ class LoadingSheetInvoicesView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Invoicedata,Party,'LoadingSheetInvoice Not Available',46,0,FromDate,ToDate)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Invoicedata, 0,'Exception(e)',33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'LoadingSheetInvoice:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 ######################################## Loading Sheet Print API ##################################################
@@ -364,7 +364,7 @@ class LoadingSheetPrintView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, b['Party']['id'],'Data Not available',7,0,0,0,b['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'LoadingSheetPrint:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 ######################################## MultipleInvoice Loading Sheet Print API ##################################################
@@ -481,5 +481,5 @@ class MultipleInvoicesView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'InvoiceDate:'+InvoiceSerializedata[0]['InvoiceDate'],48,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'MultipleInvoices:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
