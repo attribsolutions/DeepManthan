@@ -833,10 +833,10 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                 "GSTNumber":Retailer.GSTIN
                             })
                         else:
-                            log_entry = create_transaction_log(request, RetailerAddList, 0, 0,'fail to Added Retailer From MobileApp ',170,0)
+                            log_entry = create_transaction_log(request, Retailer_serializer.errors, 0,'fail to Added Retailer From MobileApp ',170,0)
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
-                    log_entry = create_transaction_log(request, RetailerAddList, 0, 0,'Retailer Added From MobileApp Successfully',158,0)
+                    log_entry = create_transaction_logNew(request,inserted_retailerlist,0,'Retailer Added From MobileApp Successfully',158,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
