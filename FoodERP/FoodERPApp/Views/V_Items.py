@@ -530,7 +530,8 @@ class ProductAndMarginReportView(CreateAPIView):
                             string1 = x['Name']
                             string2 = string1.replace(" ","")
                             ItemMargins.append({
-                                string2+'Margin' : float(Margin[0]['TodaysMargin']),
+                                string2+'Margin' : str(float(Margin[0]['TodaysMargin'])) + '%'
+                              
                                 
                             })
                             RateList.append({
@@ -547,18 +548,18 @@ class ProductAndMarginReportView(CreateAPIView):
                             "SAPCode":a['SAPItemCode'],
                             "Barcode":a['BarCode'],
                             "HSNCode":str(ItemGstHsnCodedata[0]['HSNCode']),
-                            "ItemName": a['Name'],
-                            "ItemShortName":a['ShortName'],
+                            "Company": a['Company']['Name'],
                             "SKUActiveDeactivestatus":a['isActive'],
                             "BoxSize":BoxSize,
                             "StoringCondition":a['StoringCondition'],
+                            "Product":a['ItemGroupDetails'][0]['Group']['Name'],
+                            "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
+                            "ItemName": a['Name'],
+                            "ItemShortName":a['ShortName'],
                             "MRP":MRPV,
                             "GST":float(ItemGstHsnCodedata[0]['GSTPercentage']),
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUVol":a['Grammage'],
-                            "Product":a['ItemGroupDetails'][0]['Group']['Name'],
-                            "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
-                            "Company": a['Company']['Name'],
                             "ShelfLife":float(Itemshelfdata[0]['Days']),
                             "PcsInBox":PcsInBox,
                             "PcsInKG":PcsInKG,

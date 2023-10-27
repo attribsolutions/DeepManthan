@@ -6,6 +6,7 @@ from django.db import transaction
 from ..Serializer.S_States import *
 from ..models import *
 from rest_framework.parsers import JSONParser
+from .V_CommFunction import *
 
 class M_StateView(CreateAPIView):
     
@@ -84,11 +85,15 @@ class M_CitiesView(CreateAPIView):
                 Cities_data = JSONParser().parse(request)
                 Cities_serializer =  CitiesSerializer(data=Cities_data)
                 if Cities_serializer.is_valid():
-                    Cities_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'City Save Successfully', 'Data': []})
+                    City = Cities_serializer.save()
+                    LastInsertID = City.id
+                    log_entry = create_transaction_logNew(request, Cities_data, 0,'TransactionID:'+str(LastInsertID),237,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'City Save Successfully','TransactionID':LastInsertID ,'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request, Cities_data, 0,'CitySave:'+str(Cities_serializer.errors),34,0)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Cities_serializer.errors, 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'CitySave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
