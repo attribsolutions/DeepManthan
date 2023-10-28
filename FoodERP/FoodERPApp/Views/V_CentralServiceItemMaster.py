@@ -51,6 +51,7 @@ class CentralServiceItemViewSecond(CreateAPIView):
                         "id": a["id"],
                         "Name": a['Name'],
                         "HSNCode": a['HSNCode'], 
+                        "GSTPercentage": a['GSTPercentage'], 
                         "isActive": a['isActive'],
                         "CreatedBy": a['CreatedBy'],
                         "CreatedOn": a['CreatedOn'],
