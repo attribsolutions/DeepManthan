@@ -132,13 +132,13 @@ class StockEntryPageView(CreateAPIView):
                         
                         pass
                     else:
-                        log_entry = create_transaction_logNew(request, StockEntrydata, 0, StockEntry_OLiveBatchesSerializer.errors,34,0)
+                        log_entry = create_transaction_logNew(request, StockEntrydata, 0,'PartyStockEntrySave:'+str(StockEntry_OLiveBatchesSerializer.errors),34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': StockEntry_OLiveBatchesSerializer.errors, 'Data': []})
                 log_entry = create_transaction_logNew(request, StockEntrydata, Party,'',87,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PartyStockEntrySave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -208,7 +208,7 @@ where MC_PartyItems.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity >0 and
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PartyLiveStock:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 

@@ -112,21 +112,26 @@ class TransactionJsonView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Transactiondata = Transactionlog.objects.raw('''SELECT Transactionlog.id, Transactionlog.Transactiontime, 
-                                                             Transactionlog.User, Transactionlog.IPaddress,
-                                                             Transactionlog.PartyID,Transactionlog.TransactionDetails, 
-                                                             Transactionlog.TransactionType, Transactionlog.TransactionID, 
-                                                             Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
-                                                             Transactionlog.JsonData,  Transactionlogjsondata.JsonData AS JsonData2
-                                                             FROM Transactionlog
-                                                             INNER JOIN Transactionlogjsondata 
-                                                             ON Transactionlog.id = Transactionlogjsondata.Transactionlog_id 
-                                                              WHERE Transactionlog_id = %s''',[id])
-                Transaction_serializer = TransactionJsonSerializer(Transactiondata, many=True ).data
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Transaction_serializer})
-        except  Transactionlog.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Transaction Not available', 'Data': []})
+                Transactiondata = Transactionlog.objects.raw('''
+                    SELECT Transactionlog.id, Transactionlog.Transactiontime, 
+                           Transactionlog.User, Transactionlog.IPaddress,
+                           Transactionlog.PartyID,Transactionlog.TransactionDetails, 
+                           Transactionlog.TransactionType, Transactionlog.TransactionID, 
+                           Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
+                           Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS JsonData2
+                    FROM Transactionlog
+                    INNER JOIN TransactionLogJsonData 
+                    ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
+                    WHERE Transactionlog_id = %s
+                ''',[id])
+
+                if not Transactiondata:
+                    return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Transaction Not available', 'Data': []})
+
+                Transaction_serializer = TransactionJsonSerializer(Transactiondata, many=True).data
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Transaction_serializer})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
   
 

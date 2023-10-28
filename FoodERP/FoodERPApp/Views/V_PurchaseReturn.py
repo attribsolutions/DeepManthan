@@ -99,7 +99,7 @@ class PurchaseReturnListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PuchaseReturnList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 def primarySourceNAme(ID):
@@ -213,7 +213,7 @@ class PurchaseReturnView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, a['Party'], 'PurchaseReturn not available',52,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PurchaseReturnDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     @transaction.atomic()
@@ -368,7 +368,7 @@ class PurchaseReturnView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,  Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PurchaseReturnSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
     
     # Purchase Return DELETE API New code Date 25/07/2023
@@ -412,7 +412,7 @@ class PurchaseReturnView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'PurchaseReturnID:'+str(id),8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PurchaseReturnDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
     
     #Purchase Return Delete API code Date Working code  Date 24/07/2023
@@ -540,7 +540,7 @@ class ReturnItemAddView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'ReturnItemList Not available',56,0) 
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0, Exception(e),33,0) 
+            log_entry = create_transaction_logNew(request,0, 0,'ReturnItemAdd:'+str(Exception(e)),33,0) 
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
 
 
@@ -696,7 +696,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
             log_entry = create_transaction_logNew(request, PurchaseReturndata, 0, 'ReturnItemBatchCode Not Available',58,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'ReturnItemBatchCode:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 
@@ -762,7 +762,7 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, ReturnItemdata, Party, 'PurchaseReturnItemList not available',59,0 )
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, str(e),33,0 )
+            log_entry = create_transaction_logNew(request, 0, 0,'SalesReturnconsolidateItem:'+str(e),33,0 )
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})     
         
 
@@ -875,7 +875,7 @@ class SalesReturnItemApproveView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, str(e),33,0 )
+            log_entry = create_transaction_logNew(request, 0, 0,'ReturnItemApprove:'+str(e),33,0 )
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})     
                 
                 
@@ -974,5 +974,5 @@ class PurchaseReturnPrintView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, a['Party']['id'], 'PurchaseReturnPrint not available',61,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0, Exception(e),33,0 )
+            log_entry = create_transaction_logNew(request,0, 0,'PurchaseReturnPrint:'+str(Exception(e)),33,0 )
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                

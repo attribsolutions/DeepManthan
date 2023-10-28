@@ -155,7 +155,7 @@ class OrderDetailsForInvoice(CreateAPIView):
             log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,Customer)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Orderdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'OrderDetailsForInvoice:'+str (Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -227,7 +227,7 @@ class InvoiceListFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found",35,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Invoicedata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList'(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -277,7 +277,7 @@ class InvoiceView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, Invoice_serializer.errors,34,0,InvoiceDate,0,Invoicedata['Customer'])
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Invoicedata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
 class InvoiceViewSecond(CreateAPIView):
@@ -410,7 +410,7 @@ class InvoiceViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Not available",50,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -463,7 +463,7 @@ class InvoiceViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request,  {'InvoiceID':id}, 0, '',8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,  {'InvoiceID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,  0, 0, 'InvoiceDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
           
 class InvoiceNoView(CreateAPIView):
@@ -498,7 +498,7 @@ class InvoiceNoView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, InVoice_Data, x, "Invoice No List Not Found",36,0,0,0,Customer)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, InVoice_Data, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceNoList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
 ##################### Purchase Return Invoice View ###########################################     
@@ -609,7 +609,7 @@ class InvoiceViewThird(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Order Data Not available",64,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceReturnCRDR:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                                      
  
 class BulkInvoiceView(CreateAPIView):
@@ -665,12 +665,12 @@ class BulkInvoiceView(CreateAPIView):
                         pass
                     else:
                         transaction.set_rollback(True)
-                        # log_entry = create_transaction_logNew(request, Invoicedata, 0, Invoice_serializer.errors,34,0)
+                        # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
                 # log_entry = create_transaction_logNew(request, Invoicedata, 0, 'Invoice Save Successfully',4,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, Invoicedata, 0, e, 33,0)
+            # log_entry = create_transaction_logNew(request, 0, 0,'BulkInvoices:'+str(e), 33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
         
 
@@ -692,7 +692,7 @@ class InvoiceHideView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'',66,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Hide Successfully ', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceHide:'+(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
         
         
@@ -708,7 +708,7 @@ class UpdateVehicleInvoiceView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'',67,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'UpdateVehicleInvoice:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
 
 class InvoiceViewEditView(CreateAPIView):
@@ -849,10 +849,10 @@ class InvoiceViewEditView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, Invoicedata['Party'],'InvoiceDate:'+Invoicedata['InvoiceDate'],5,0,0,0,Invoicedata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,Invoice_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'Invoicegetandupdate:'+str(Invoice_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Invoice_Serializer.errors, 'Data': []})    
         except Exception as e:
-                log_entry = create_transaction_logNew(request, {'InvoiceID':id},0,Exception(e),33,0)
+                log_entry = create_transaction_logNew(request, 0,0,'Invoicegetandupdate:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
                                   
