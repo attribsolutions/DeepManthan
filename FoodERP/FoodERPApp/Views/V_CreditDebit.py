@@ -79,7 +79,7 @@ class CreditDebitNoteListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             # CreditDebitData = JSONParser().parse(request)
-            log_entry = create_transaction_logNew(request, CreditDebitdata, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -128,12 +128,12 @@ class CreditDebitNoteView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CRDRNoteDate:'+CreditNotedata['CRDRNoteDate']+','+'TransactionID:'+str(LastInsertID),197,LastInsertID,0,0,CreditNotedata['Customer'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'DebitNote Save Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, CreditNotedata, Party,CreditNote_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CreditDebitNoteSave:'+str(CreditNote_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data': []})
         except Exception as e:
             # CreditNoteData = JSONParser().parse(request)
-            log_entry = create_transaction_logNew(request, CreditNotedata, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitNoteSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -241,7 +241,7 @@ class CreditDebitNoteView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'Single CreditdebitNote:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -262,6 +262,6 @@ class CreditDebitNoteView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitNoteDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 

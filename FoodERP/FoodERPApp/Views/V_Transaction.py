@@ -64,6 +64,7 @@ class TransactionTypeView(CreateAPIView):
                 Parties = Transactiondata['Party']
                 PartyIDs = Parties.split(',')
                 TransactionCategory = Transactiondata['TransactionCategory']
+                TransactionCategoryIDs = TransactionCategory.split(',')
                 
                 conditions = []
 
@@ -79,6 +80,10 @@ class TransactionTypeView(CreateAPIView):
                     pass
                 else:
                     conditions.append(f"PartyID IN ({','.join(PartyIDs)})")
+                if TransactionCategory == '' :
+                    pass
+                else:
+                    conditions.append(f"TransactionCategory IN ({','.join(TransactionCategoryIDs)})")
 
                 where_clause = " AND ".join(conditions) if conditions else ""
 
@@ -90,11 +95,11 @@ LEFT JOIN M_Employees ON M_Users.Employee_id = M_Employees.id
 LEFT JOIN M_TransactionType ON TransactionType = M_TransactionType.id
 LEFT JOIN M_Parties A ON Transactionlog.PartyID = A.id 
 LEFT JOIN M_Parties B ON Transactionlog.CustomerID = B.id
-WHERE Transactiontime BETWEEN %s AND %s AND TransactionCategory = %s'''
+WHERE Transactiontime BETWEEN %s AND %s'''
                 if where_clause:
                     Transactionquery_sql += f' AND {where_clause}'
                 Transactionquery_sql += ' ORDER BY Transactiontime DESC'
-                Transactionquery = Transactionlog.objects.raw(Transactionquery_sql, [FromDate, ToDate, TransactionCategory])
+                Transactionquery = Transactionlog.objects.raw(Transactionquery_sql, [FromDate, ToDate])
                 if Transactionquery:
                         Transaction_Serializer = TransactionlogSerializer(Transactionquery,many=True).data
                         log_entry = create_transaction_logNew(request, Transactiondata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate),196,0,FromDate,ToDate,0)
@@ -118,10 +123,10 @@ class TransactionJsonView(CreateAPIView):
                            Transactionlog.PartyID,Transactionlog.TransactionDetails, 
                            Transactionlog.TransactionType, Transactionlog.TransactionID, 
                            Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
-                           Transactionlog.JsonData,  Transactionlogjsondata.JsonData AS JsonData2
+                           Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS JsonData2
                     FROM Transactionlog
-                    INNER JOIN Transactionlogjsondata 
-                    ON Transactionlog.id = Transactionlogjsondata.Transactionlog_id 
+                    INNER JOIN TransactionLogJsonData 
+                    ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
                     WHERE Transactionlog_id = %s
                 ''',[id])
 
