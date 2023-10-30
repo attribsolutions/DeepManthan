@@ -36,7 +36,14 @@ class PartyCustomerMappingView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,M_Parties.Name as CustomerName ,MC_PartySubParty.Party_id,MC_PartySubParty.SubParty_id as Customer,M_PartyCustomerMappingMaster.MapCustomer From MC_PartySubParty LEFT join M_PartyCustomerMappingMaster ON M_PartyCustomerMappingMaster.Customer_id = MC_PartySubParty.SubParty_id JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id AND MC_PartySubParty.Party_id=%s JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id AND M_PartyType.IsRetailer=1''', ([id]))
+                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,M_Parties.Name as CustomerName ,MC_PartySubParty.Party_id,MC_PartySubParty.SubParty_id 
+as Customer,M_PartyCustomerMappingMaster.MapCustomer, MC_PartyAddress.Address as CustomerAddress, M_Parties.GSTIN, M_Routes.Name as RouteName
+From MC_PartySubParty 
+LEFT join M_PartyCustomerMappingMaster ON M_PartyCustomerMappingMaster.Customer_id = MC_PartySubParty.SubParty_id 
+JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id AND MC_PartySubParty.Party_id=%s
+JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id AND M_PartyType.IsRetailer=1
+LEFT JOIN M_Routes ON  M_Routes.Party_id = M_Parties.id
+LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_PartyAddress.IsDefault=1''', ([id]))
                 # print(str(query.query))
                 if query:
                     Party_Serializer = PartyCustomerMappingSerializerSecond(query,many=True).data
