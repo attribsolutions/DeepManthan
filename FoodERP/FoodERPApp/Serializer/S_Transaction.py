@@ -35,7 +35,7 @@ class TransactionJsonSerializer(serializers.Serializer):
     
     id = serializers.IntegerField()
     JsonData=serializers.CharField(max_length=500)
-    JsonData2=serializers.CharField(max_length=500)
+    TransactionlogJsondata=serializers.CharField(max_length=500)
     TranasactionDate = serializers.DateField()
     Transactiontime =serializers.DateTimeField()
     User = serializers.IntegerField()
