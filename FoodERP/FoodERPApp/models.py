@@ -1713,7 +1713,6 @@ class M_ImportFields(models.Model):
         db_table = "M_ImportFields"
 
  
-        
 class MC_PartyImportFields(models.Model):
     Value =models.CharField(max_length=500)
     CreatedBy = models.IntegerField()
