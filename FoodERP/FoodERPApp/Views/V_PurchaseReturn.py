@@ -46,12 +46,18 @@ class PurchaseReturnListView(CreateAPIView):
                 if (Party == ''):
                     x = 0
                     y = Customer
+                    log_entry = create_transaction_logNew(request, Returndata, y,'From:'+FromDate+','+'To:'+ToDate,51,0,FromDate,ToDate,0)
+
                 elif (Customer == ''):
                     x = Party
                     y = 0
+                    log_entry = create_transaction_logNew(request, Returndata, x,'From:'+FromDate+','+'To:'+ToDate,51,0,FromDate,ToDate,0)
+
                 else:
                     x = Party
-                    y = Customer                
+                    y = Customer      
+                    log_entry = create_transaction_logNew(request, Returndata, x,'From:'+FromDate+','+'To:'+ToDate,238,0,FromDate,ToDate,y)
+          
                 query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
                 
                 # print(query.query)
@@ -94,7 +100,6 @@ class PurchaseReturnListView(CreateAPIView):
                             "Status" :Status,
                             "Mode":a["Mode"]
                         })
-                    log_entry = create_transaction_logNew(request, Returndata, x,'From:'+FromDate+','+'To:'+ToDate,51,0,FromDate,ToDate,y)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -356,15 +361,15 @@ class PurchaseReturnView(CreateAPIView):
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
-                    if Mode == 1:
+                    if Mode == str(1):
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
-                    elif Mode == 2:
+                    elif Mode == str(2):
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
-                    elif Mode == 3:
+                    elif Mode == str(3):
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],  PurchaseReturn_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],'ReturnSave:'+str(PurchaseReturn_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PurchaseReturn_Serializer.errors, 'Data':[]})
         except Exception as e:
