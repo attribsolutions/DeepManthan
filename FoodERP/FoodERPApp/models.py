@@ -1708,8 +1708,10 @@ class M_ImportFields(models.Model):
     ImportExcelType = models.ForeignKey(M_ImportExcelTypes,related_name='ImportFieldExcelType', on_delete=models.PROTECT)
     Company = models.ForeignKey(C_Companies,related_name='ImportFieldCompany', on_delete=models.PROTECT)
     Sequence = models.IntegerField(blank=True, null=True)
+    Format = models.CharField(max_length=500,blank=True, null=True)
     class Meta:
         db_table = "M_ImportFields"
+
  
         
 class MC_PartyImportFields(models.Model):
