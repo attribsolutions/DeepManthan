@@ -43,9 +43,27 @@ class CentralServiceItemViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                ServiceItem_data = M_CentralServiceItems.objects.get(id=id)
-                ServiceItem_Serializer = CentralServiceItemSerializer(ServiceItem_data).data
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': ServiceItem_Serializer})
+                ServiceItem_data = M_CentralServiceItems.objects.filter(id=id)
+                ServiceItem_Serializer = CentralServiceItemGetSerializer(ServiceItem_data,many=True).data
+                ServiceItemList = list()
+                for a in ServiceItem_Serializer:
+                    ServiceItemList.append({
+                        "id": a["id"],
+                        "Name": a['Name'],
+                        "HSNCode": a['HSNCode'], 
+                        "GSTPercentage": a['GSTPercentage'], 
+                        "isActive": a['isActive'],
+                        "CreatedBy": a['CreatedBy'],
+                        "CreatedOn": a['CreatedOn'],
+                        "UpdatedBy": a['UpdatedBy'],
+                        "UpdatedOn": a['UpdatedOn'],
+                        "Rate":a['Rate'],
+                        "Unit": a['Unit']['id'],
+                        "UnitName": a['Unit']['Name'],
+                        "Company":a['Company'],
+                        
+                    })
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': ServiceItemList[0]})
         except  M_CentralServiceItems.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Central Service Item Data Not available', 'Data': []})
         except Exception as e:
