@@ -33,7 +33,7 @@ class DivisionsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'DivisonID':id}, 0, "Division Not available",89,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Division Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'DivisonID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'DivisonDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 # def get_session(request):
@@ -127,7 +127,7 @@ class M_PartiesFilterView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Logindata,PartyID ,'Company:'+str(CompanyID),90,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Logindata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'PartiesFilterList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -150,7 +150,7 @@ class M_PartiesView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,M_Parties_serializer, 0, "All Parties List",91,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,M_Parties_serializer, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'AllPartiesList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -165,11 +165,11 @@ class M_PartiesView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, M_Partiesdata,M_Partiesdata['PartySubParty'][0]['Party'],'',92,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Save Successfully', 'TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request, M_Partiesdata, 0, M_Parties_Serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request, M_Partiesdata, 0,'PartySave:'+str(M_Parties_Serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, M_Partiesdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PartySave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -211,7 +211,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request,{'PartyID':id},0,'',93,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': list2[0]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {'PartyID':id}, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PartyGETMethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -232,7 +232,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,M_Partiesdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PartyEditMethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -273,7 +273,7 @@ class BulkRetailerDataView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Retailerdata, 0, "Retailer Bulk Data Import Successfully",96,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Bulk Data Import Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Retailerdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'RetailerBulkDataImportMethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
@@ -348,7 +348,7 @@ FROM
                 log_entry = create_transaction_logNew(request,0, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PartiesSettingsDetailsList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -375,13 +375,13 @@ FROM
                         PartySettings = Partysettings_serializer.save()
                         LastInsertID = PartySettings.id
                     else:
-                        log_entry = create_transaction_logNew(request,Retailerdata, 0,Partysettings_serializer.errors,34,0)
+                        log_entry = create_transaction_logNew(request,Retailerdata, 0,'PartySettingsDataSave:'+str(Partysettings_serializer.errors),34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Partysettings_serializer.errors, 'Data': []})
                 log_entry = create_transaction_logNew(request,Retailerdata, Party,'',99,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Settings data Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Retailerdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PartySettingsDataSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
         
         
@@ -406,7 +406,7 @@ class PartiesListForApprovalView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Retailerdata, PartyID,'',198,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Retailerdata, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PartyListForApproval:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
            
         
