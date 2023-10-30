@@ -50,6 +50,7 @@ class PartyImportFieldSerializerList(serializers.Serializer):
     FieldValidationName = serializers.CharField(max_length=500)
     RegularExpression = serializers.CharField(max_length=500)
     Sequence = serializers.IntegerField()
+    Format = serializers.CharField(max_length=500)
         
 
 
