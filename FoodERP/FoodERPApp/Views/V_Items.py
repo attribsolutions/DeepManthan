@@ -557,7 +557,7 @@ class ProductAndMarginReportView(CreateAPIView):
                             "ItemName": a['Name'],
                             "ItemShortName":a['ShortName'],
                             "MRP":MRPV,
-                            "GST":float(ItemGstHsnCodedata[0]['GSTPercentage']),
+                            "GST":str(float(ItemGstHsnCodedata[0]['GSTPercentage'])) + '%',
                             "BaseUnit": a['BaseUnitID']['Name'],
                             "SKUVol":a['Grammage'],
                             "ShelfLife":float(Itemshelfdata[0]['Days']),

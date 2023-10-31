@@ -14,7 +14,10 @@ class PartyCustomerMappingSerializerSecond(serializers.Serializer):
     Party_id = serializers.IntegerField()
     Customer = serializers.IntegerField()
     CustomerName = serializers.CharField(max_length=100)
-    MapCustomer = serializers.CharField(max_length=200)    
+    MapCustomer = serializers.CharField(max_length=200)  
+    CustomerAddress = serializers.CharField(max_length=500) 
+    GSTIN =  serializers.CharField(max_length=500, allow_blank=True, allow_null=True) 
+    RouteName = serializers.CharField(max_length=500)
 
 # For Items Mapping Serializers
 
