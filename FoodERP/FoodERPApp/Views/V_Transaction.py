@@ -123,7 +123,7 @@ class TransactionJsonView(CreateAPIView):
                            Transactionlog.PartyID,Transactionlog.TransactionDetails, 
                            Transactionlog.TransactionType, Transactionlog.TransactionID, 
                            Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
-                           Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS JsonData2
+                           Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS TransactionlogJsondata
                     FROM Transactionlog
                     INNER JOIN TransactionLogJsonData 
                     ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
