@@ -793,7 +793,7 @@ class SalesReturnItemApproveView(CreateAPIView):
                 O_LiveBatchesList=list()
                
                 for a in ReturnItem:
-                         
+                    O_BatchWiseLiveStockList=list()     
                     SetFlag=TC_PurchaseReturnItems.objects.filter(id=a["id"]).update(ApprovedQuantity=a["ApprovedQuantity"],ApprovedBy=a["Approvedby"],ApproveComment=a["ApproveComment"])
                     
                     # Company Division Pricelist not assign we got error
@@ -856,7 +856,7 @@ class SalesReturnItemApproveView(CreateAPIView):
                     "MRP": a['MRP'],
                     "MRPValue": a['MRPValue'],
 
-                    "Rate": Rate,                  '''round(float(Rate[0]["NoRatewithOutGST"]),2)'''
+                    "Rate": Rate,                  #'''round(float(Rate[0]["NoRatewithOutGST"]),2)'''
 
                     "GST": a['GST'],
                     "GSTPercentage": a['GSTPercentage'],
@@ -870,6 +870,7 @@ class SalesReturnItemApproveView(CreateAPIView):
                     })
                    
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList})
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':PurchaseReturndata})
                 PurchaseReturn_Serializer = ReturnApproveQtySerializer(data=PurchaseReturndata)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
