@@ -663,10 +663,12 @@ urlpatterns = [
              url(r'CentralItemService/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
              url(r'CentralServiceItemAssignFilter$',CentralServiceItemAssignFilterView.as_view()),
              url(r'CentralServiceItemAssign$',CentralServiceItemAssignForParty.as_view()),
+             url(r'ReturnCentralServiceItemBatchcode$',CentralServiceItemView.as_view()),
 
 #PartyDetails
               url(r'PartyDetails$',PartyDetailsView.as_view()),
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
+              url(r'downloadAAAA$',FileDownloadView.as_view()),
              
       
               
