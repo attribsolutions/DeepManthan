@@ -290,6 +290,13 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "RoleAccess_Exceldownload": RolePageAccessSerializer[10]['id'],
                 "RoleAccess_IsCopy": RolePageAccessSerializer[11]['id'],
                 "RoleAccess_IsMultipleInvoicePrint": RolePageAccessSerializer[12]['id'],
+                "RoleAccess_E-WayBill Upload": RolePageAccessSerializer[13]['id'],
+                "RoleAccess_E-WayBill cancel": RolePageAccessSerializer[14]['id'],
+                "RoleAccess_E-WayBill Print": RolePageAccessSerializer[15]['id'],
+                "RoleAccess_E-Invoice Upload": RolePageAccessSerializer[16]['id'],
+                "RoleAccess_E-Invoice cancel": RolePageAccessSerializer[17]['id'],
+                "RoleAccess_E-Invoice Print": RolePageAccessSerializer[18]['id'],
+                
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
@@ -302,7 +309,13 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
                 "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
                 "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
-                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id']
+                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id'],
+                "PageAccess_E-WayBill Upload": PageAccessSerializer[13]['id'],
+                "PageAccess_E-WayBill cancel": PageAccessSerializer[14]['id'],
+                "PageAccess_E-WayBill Print": PageAccessSerializer[15]['id'],
+                "PageAccess_E-Invoice Upload": PageAccessSerializer[16]['id'],
+                "PageAccess_E-Invoice cancel": PageAccessSerializer[17]['id'],
+                "PageAccess_E-Invoice Print": PageAccessSerializer[18]['id'],
 
             })
 

@@ -2206,7 +2206,8 @@ class M_PartyDetails(models.Model):
     Group = models.ForeignKey(M_Group, related_name='PartyItemGroup', on_delete=models.PROTECT,null=True,blank=True)
     Cluster = models.ForeignKey(M_Cluster, related_name='PartyCluster', on_delete=models.PROTECT,null=True,blank=True)
     SubCluster = models.ForeignKey(M_SubCluster, related_name='PartySubCluster', on_delete=models.PROTECT,null=True,blank=True)
-     
+    Supplier = models.ForeignKey(M_Parties, related_name='PartyDetailSupplier', on_delete=models.PROTECT ,null=True,blank=True) 
+    
     class Meta:
         db_table = "M_PartyDetails" 
 
