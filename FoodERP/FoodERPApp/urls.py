@@ -651,11 +651,11 @@ urlpatterns = [
  # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
+            url(r'GetPartydetailsOncluster$',GetPartydetailsOnclusterView.as_view()),
             
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),
              url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
-
              url(r'GetSubclusterOncluster/([0-9]+)$',GetSubClusterOnclusterView.as_view()),
              
 # CentralServiceItem

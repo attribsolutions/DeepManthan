@@ -175,7 +175,6 @@ class SubClusterViewsecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Sub Cluster Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
 
 
     @transaction.atomic()
@@ -239,7 +238,30 @@ class GetSubClusterOnclusterView(CreateAPIView):
         except  M_SubCluster.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Cluster Data Not available', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
+
+class GetPartydetailsOnclusterView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                PartydetailsOnclusterdata = M_PartyDetails.objects.raw(''' SELECT M_Parties.id, M_Parties.Name, M_Group.id AS Group_id, M_Cluster.id AS Cluster_id, M_Cluster.Name AS Cluster_Name, M_SubCluster.id AS SubCluster_id, M_SubCluster.Name AS SubCluster_Name, a.id Supplier_id, a.Name Supplier_Name
+                                                                           FROM M_Parties
+                                                                           LEFT JOIN M_PartyDetails ON M_Parties.id = M_PartyDetails.Party_id
+                                                                           LEFT JOIN M_Group ON M_PartyDetails.Group_id = M_Group.id
+                                                                           LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+                                                                           LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id   
+                                                                           LEFT JOIN M_Parties a on a.id=M_PartyDetails.Supplier_id
+                                                                           WHERE M_Parties.PartyType_id IN (9,10)''')
+
+                if not PartydetailsOnclusterdata:
+                    return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'PartydetailsOncluster Not available', 'Data': []})
+                PartydetailsOncluster_serializer =  GetPartydetailsOnclusterSerializer(PartydetailsOnclusterdata, many=True).data
+                # print(PartydetailsOncluster_serializer)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartydetailsOncluster_serializer})
+                
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
         
          
 
