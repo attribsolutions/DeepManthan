@@ -669,6 +669,8 @@ urlpatterns = [
               url(r'PartyDetails$',PartyDetailsView.as_view()),
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
               url(r'downloadAAAA$',FileDownloadView.as_view()),
+              url(r'downloadBBBB/([0-9]+)$',FileDownloadViewSecond.as_view()),
+              
              
       
               
