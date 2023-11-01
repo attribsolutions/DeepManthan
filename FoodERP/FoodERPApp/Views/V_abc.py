@@ -1,4 +1,6 @@
 import base64
+import os
+from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -18,6 +20,88 @@ from django.contrib.auth import authenticate
 import xml.etree.ElementTree as ET
 import xmltodict
 import json
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+import requests
+from django.http import HttpResponse
+from django.views import View
+
+from django.http import HttpResponse
+from django.views import View
+import requests
+from rest_framework.parsers import JSONParser
+
+class FileDownloadView(View):
+    def get(self, request):
+        Imagedata = JSONParser().parse(request)
+        link = Imagedata['link']
+        # Replace 'image_url' with the actual URL of the image you want to download.
+        image_url = link
+       
+        # image_url = 'http://192.168.1.114:8000/media/Images/PartyRelatedImages/qr-code-demo.png'
+       
+        try:
+            response = requests.get(image_url)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            return HttpResponse(f"Error: {e}", status=500)
+
+        # Set the content type of the response to match the image type (e.g., image/jpeg).
+        content_type = response.headers.get('content-type', 'application/octet-stream')
+        response_headers = {
+            'Content-Type': content_type,
+        }
+
+        # Create an HttpResponse and set the filename in the Content-Disposition header.
+        filename = os.path.basename(image_url)
+        response = HttpResponse(response.content, content_type=content_type)
+        response['Content-Disposition'] = 'attachment; filename="{filename}"'
+
+        # Return the HttpResponse object.
+        return response
+    
+
+class FileDownloadViewSecond(View):
+    def get(self, request,id=0):
+        # Imagedata = JSONParser().parse(request)
+        # link = Imagedata['link']
+        # # Replace 'image_url' with the actual URL of the image you want to download.
+        # image_url = link
+        query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
+        Image = query[0]['Image']
+        image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+        
+        try:
+            response = requests.get(image_url)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            return HttpResponse(f"Error: {e}", status=500)
+
+        # Set the content type of the response to match the image type (e.g., image/jpeg).
+        content_type = response.headers.get('content-type', 'application/octet-stream')
+        response_headers = {
+            'Content-Type': content_type,
+        }
+       
+        # Create an HttpResponse and set the filename in the Content-Disposition header.
+        filename = os.path.basename(image_url)
+        response = HttpResponse(response.content, content_type=content_type)
+        # response['Content-Disposition'] = 'attachment; filename="{filename}"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        # Return the HttpResponse object.
+        return response    
+
+    
+
+
+
+
+
+
+
+
+
+
 
 
 class AbcView(CreateAPIView):

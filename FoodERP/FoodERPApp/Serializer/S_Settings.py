@@ -18,6 +18,7 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
     Value  = serializers.CharField(max_length=500)
     # Image  = serializers.CharField(max_length=500)
     Image = serializers.SerializerMethodField()
+    ImageID = serializers.IntegerField()
     def get_Image(self, obj):
         if obj.Image:
             media_url = "http://cbmfooderp.com:8000/media"  # Replace with your actual media URL prefix from settings

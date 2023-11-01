@@ -321,7 +321,8 @@ class PartiesSettingsDetailsView(CreateAPIView):
 	ELSE 
     (CASE WHEN b.Value is Null THEN a.DefaultValue ELSE b.Value END)
 	END) Value, 
-    c.Image
+    c.Image,
+    c.ImageID
 FROM
     (SELECT 
         M_Settings.id AS Setting,
@@ -334,13 +335,12 @@ FROM
     WHERE
         M_Settings.IsActive = 1) a
       
-      
       LEFT  JOIN 
       (SELECT SettingID_id SettingID,MC_SettingsDetails.Value FROM MC_SettingsDetails WHERE MC_SettingsDetails.Company_id=%s)b
       ON a.Setting = b.SettingID
             
       LEFT JOIN
-    (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image FROM M_PartySettingsDetails WHERE
+    (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image,M_PartySettingsDetails.id AS ImageID FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
                 
                 # print(query.query)
