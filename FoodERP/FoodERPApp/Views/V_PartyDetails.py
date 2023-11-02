@@ -21,7 +21,6 @@ class FileDownloadView(View):
         query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
         Image = query[0]['Image']
         image_url = f'http://cbmfooderp.com:8000/media/{Image}'
-        
         try:
             response = requests.get(image_url)
             response.raise_for_status()
