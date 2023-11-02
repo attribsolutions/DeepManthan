@@ -362,12 +362,12 @@ FROM
                 query = M_PartySettingsDetails.objects.filter(Party=Party).all()
                 query.delete()
                 for aa in Retailerdatareferences:
-                    
                     '''Image Upload Code End''' 
                     keyname='uploaded_images_'+str(aa['Setting'])
                     avatar = request.FILES.getlist(keyname)
                     for file in avatar:
-                        aa['Image']=file
+                        # aa['Image']=file
+                        aa['Value']=file
                     '''Image Upload Code End'''
                     Partysettings_serializer = PartiesSettingSerializer(
                         data=aa)
