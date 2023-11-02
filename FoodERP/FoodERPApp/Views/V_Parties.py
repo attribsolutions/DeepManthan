@@ -366,8 +366,7 @@ FROM
                     keyname='uploaded_images_'+str(aa['Setting'])
                     avatar = request.FILES.getlist(keyname)
                     for file in avatar:
-                        # aa['Image']=file
-                        aa['Value']=file
+                        aa['Image']=file
                     '''Image Upload Code End'''
                     Partysettings_serializer = PartiesSettingSerializer(
                         data=aa)
