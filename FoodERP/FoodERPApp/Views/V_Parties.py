@@ -362,7 +362,6 @@ FROM
                 query = M_PartySettingsDetails.objects.filter(Party=Party).all()
                 query.delete()
                 for aa in Retailerdatareferences:
-                    
                     '''Image Upload Code End''' 
                     keyname='uploaded_images_'+str(aa['Setting'])
                     avatar = request.FILES.getlist(keyname)
