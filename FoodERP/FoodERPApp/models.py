@@ -2152,6 +2152,8 @@ class T_ClaimTrackingEntry(models.Model):
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
     Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
+    File = models.FileField(upload_to="Images\ClaimTrackingFiles",default="",null=True,blank=True)
+    
     class Meta:
         db_table = "T_ClaimTrackingEntry"
 
