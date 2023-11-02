@@ -305,7 +305,7 @@ class GetPartydetailsOnclusterView(CreateAPIView):
                 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
-        
+             
          
 
 
