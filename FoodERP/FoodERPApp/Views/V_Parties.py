@@ -13,6 +13,7 @@ from ..Serializer.S_Orders import *
 import base64
 from io import BytesIO
 from PIL import Image
+import os
 
 
 class DivisionsView(CreateAPIView):
@@ -359,6 +360,14 @@ FROM
                 Retailerdata = request.POST.get('BulkData')
                 Retailerdatareferences = json.loads(Retailerdata) if Retailerdata else []
                 Party= Retailerdatareferences[0]['Party']
+                query = M_PartySettingsDetails.objects.filter(Setting=3,Party=Party).values('Image')
+                Image = query[0]['Image']
+                image_url = f'http://192.168.1.114:8000/media/{Image}'
+                if os.path.exists(image_url):
+                    os.remove(image_url)
+                else:
+                    pass
+                
                 query = M_PartySettingsDetails.objects.filter(Party=Party).all()
                 query.delete()
                 for aa in Retailerdatareferences:
