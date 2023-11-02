@@ -651,7 +651,7 @@ urlpatterns = [
  # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
-            url(r'GetPartydetailsOncluster$',GetPartydetailsOnclusterView.as_view()),
+            url(r'GetPartydetailsOncluster/([0-9]+)$',GetPartydetailsOnclusterView.as_view()),
             
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),
