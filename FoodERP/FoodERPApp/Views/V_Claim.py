@@ -4,11 +4,13 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
-from rest_framework.parsers import JSONParser
-
+from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from ..Serializer.S_Claim import *
 from ..models import *
 from datetime import date
+import base64
+from io import BytesIO
+from PIL import Image
 
 
 class ClaimSummaryView(CreateAPIView):
@@ -498,12 +500,39 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
 
 class ClaimTrackingEntryView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
 
     @transaction.atomic()
-    def post(self, request):
+    def post(self, request,format=None):
         try:
             with transaction.atomic():
-                Claimtracking_data = JSONParser().parse(request)
+                # Claimtracking_data = JSONParser().parse(request)
+                Claimtracking_data = {
+                    "Date" : request.POST.get('Date'),
+                    "Month" : request.POST.get('Month'),
+                    "Year" : request.POST.get('Year'),
+                    "ClaimReceivedSource" : request.POST.get('ClaimReceivedSource'),
+                    "Type" : request.POST.get('Type'),
+                    "ClaimTrade" : request.POST.get('ClaimTrade'),
+                    "TypeOfClaim" : request.POST.get('TypeOfClaim'),
+                    "ClaimAmount" : request.POST.get('ClaimAmount'),
+                    "Remark" : request.POST.get('Remark'),
+                    "ClaimCheckBy" : request.POST.get('ClaimCheckBy'),
+                    "CreditNotestatus" : request.POST.get('CreditNotestatus'),
+                    "CreditNoteNo" : request.POST.get('CreditNoteNo'),
+                    "CreditNoteDate" : request.POST.get('CreditNoteDate'),
+                    "CreditNoteAmount" : request.POST.get('CreditNoteAmount'),
+                    "ClaimSummaryDate" : request.POST.get('ClaimSummaryDate'),
+                    "CreditNoteUpload" : request.POST.get('CreditNoteUpload'),
+                    "Claim" : request.POST.get('Claim'),
+                    "Party" : request.POST.get('Party'),
+                    "FullClaimNo" : request.POST.get('FullClaimNo'),  
+                }
+                '''Image Upload Code End''' 
+                avatar = request.FILES.getlist('CreditNoteUpload')
+                for file in avatar:
+                    Claimtracking_data['CreditNoteUpload']=file
+                '''Image Upload Code End'''
                 Claimtracking_Serializer = ClaimTrackingSerializer(
                     data=Claimtracking_data)
                 if Claimtracking_Serializer.is_valid():
@@ -519,6 +548,7 @@ class ClaimTrackingEntryView(CreateAPIView):
 class ClaimTrackingEntryViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
@@ -581,7 +611,34 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
     def put(self, request, id=0):
         try:
             with transaction.atomic():
-                Claimtrackingdata = JSONParser().parse(request)
+                # Claimtrackingdata = JSONParser().parse(request)
+                Claimtrackingdata = {
+                    "Date" : request.POST.get('Date'),
+                    "Month" : request.POST.get('Month'),
+                    "Year" : request.POST.get('Year'),
+                    "ClaimReceivedSource" : request.POST.get('ClaimReceivedSource'),
+                    "Type" : request.POST.get('Type'),
+                    "ClaimTrade" : request.POST.get('ClaimTrade'),
+                    "TypeOfClaim" : request.POST.get('TypeOfClaim'),
+                    "ClaimAmount" : request.POST.get('ClaimAmount'),
+                    "Remark" : request.POST.get('Remark'),
+                    "ClaimCheckBy" : request.POST.get('ClaimCheckBy'),
+                    "CreditNotestatus" : request.POST.get('CreditNotestatus'),
+                    "CreditNoteNo" : request.POST.get('CreditNoteNo'),
+                    "CreditNoteDate" : request.POST.get('CreditNoteDate'),
+                    "CreditNoteAmount" : request.POST.get('CreditNoteAmount'),
+                    "ClaimSummaryDate" : request.POST.get('ClaimSummaryDate'),
+                    "CreditNoteUpload" : request.POST.get('CreditNoteUpload'),
+                    "Claim" : request.POST.get('Claim'),
+                    "Party" : request.POST.get('Party'),
+                    "FullClaimNo" : request.POST.get('FullClaimNo'),  
+                }
+                '''Image Upload Code End''' 
+                avatar = request.FILES.getlist('CreditNoteUpload')
+                for file in avatar:
+                    Claimtrackingdata['CreditNoteUpload']=file
+                '''Image Upload Code End'''
+
                 ClaimtrackingdataByID = T_ClaimTrackingEntry.objects.get(id=id)
                 Claimtrackingdata_Serializer = ClaimTrackingSerializer(
                     ClaimtrackingdataByID, data=Claimtrackingdata)
