@@ -1626,6 +1626,21 @@ class T_CreditDebitNotes(models.Model):
     class Meta:
         db_table = "T_CreditDebitNotes"
         
+class M_CentralServiceItems(models.Model):
+    Name = models.CharField(max_length=500)
+    HSNCode = models.CharField(max_length=500)
+    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
+    isActive = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Unit = models.ForeignKey(M_Units, related_name='CentralServiceItemUnit', on_delete=models.PROTECT)
+    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
+    Company = models.ForeignKey(C_Companies,related_name='ServiceItemCompany', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "M_CentralServiceItems"
+
 class TC_CreditDebitNoteItems(models.Model):
     
     Quantity = models.DecimalField(max_digits=15, decimal_places=3)
@@ -1645,7 +1660,7 @@ class TC_CreditDebitNoteItems(models.Model):
     BatchCode = models.CharField(max_length=500)
     CRDRNote = models.ForeignKey(T_CreditDebitNotes,related_name='CRDRNoteItems',on_delete=models.CASCADE,null=True,blank=True)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='CRDRItemGST',null=True,on_delete=models.PROTECT)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT,null=True,blank=True)
     MRP = models.ForeignKey(M_MRPMaster, related_name='CRDRMRP', on_delete=models.PROTECT,null=True,blank=True)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='CRDRUnit', on_delete=models.PROTECT)
     GSTPercentage = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
@@ -1657,6 +1672,7 @@ class TC_CreditDebitNoteItems(models.Model):
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20,null=True,blank=True)
     ItemComment = models.CharField(max_length=500,null=True,blank=True)
+    ServiceItem = models.ForeignKey(M_CentralServiceItems, on_delete=models.PROTECT ,null=True,blank=True)
 
     class Meta:
         db_table = "TC_CreditDebitNoteItems" 
@@ -2147,11 +2163,13 @@ class T_ClaimTrackingEntry(models.Model):
     CreditNoteDate = models.DateField()	
     CreditNoteAmount	= models.DecimalField(max_digits=20, decimal_places=2)
     ClaimSummaryDate = models.DateField()	
-    CreditNoteUpload = models.CharField(max_length=500,null=True)
+    CreditNoteUpload = models.FileField(upload_to="Images\ClaimTrackingFiles",default="",null=True,blank=True)
     Party = models.ForeignKey(M_Parties, related_name='ClaimTrackingParty', on_delete=models.PROTECT) 
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
     Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
+    
+
     class Meta:
         db_table = "T_ClaimTrackingEntry"
 
@@ -2174,20 +2192,7 @@ class M_SubCluster(models.Model):
     class Meta:
         db_table = "M_SubCluster"
 
-class M_CentralServiceItems(models.Model):
-    Name = models.CharField(max_length=500)
-    HSNCode = models.CharField(max_length=500)
-    GSTPercentage = models.DecimalField(max_digits=10, decimal_places=2)
-    isActive = models.BooleanField(default=False)
-    CreatedBy = models.IntegerField(default=False)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    Unit = models.ForeignKey(M_Units, related_name='CentralServiceItemUnit', on_delete=models.PROTECT)
-    Rate = models.DecimalField(max_digits=10, decimal_places=2,null=True,blank=True)
-    Company = models.ForeignKey(C_Companies,related_name='ServiceItemCompany', on_delete=models.PROTECT)
-    class Meta:
-        db_table = "M_CentralServiceItems"
+
 
 
 class MC_CentralServiceItemAssign(models.Model):
