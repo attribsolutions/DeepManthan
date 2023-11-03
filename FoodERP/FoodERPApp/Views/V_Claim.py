@@ -548,6 +548,7 @@ class ClaimTrackingEntryView(CreateAPIView):
 class ClaimTrackingEntryViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
@@ -610,7 +611,34 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
     def put(self, request, id=0):
         try:
             with transaction.atomic():
-                Claimtrackingdata = JSONParser().parse(request)
+                # Claimtrackingdata = JSONParser().parse(request)
+                Claimtrackingdata = {
+                    "Date" : request.POST.get('Date'),
+                    "Month" : request.POST.get('Month'),
+                    "Year" : request.POST.get('Year'),
+                    "ClaimReceivedSource" : request.POST.get('ClaimReceivedSource'),
+                    "Type" : request.POST.get('Type'),
+                    "ClaimTrade" : request.POST.get('ClaimTrade'),
+                    "TypeOfClaim" : request.POST.get('TypeOfClaim'),
+                    "ClaimAmount" : request.POST.get('ClaimAmount'),
+                    "Remark" : request.POST.get('Remark'),
+                    "ClaimCheckBy" : request.POST.get('ClaimCheckBy'),
+                    "CreditNotestatus" : request.POST.get('CreditNotestatus'),
+                    "CreditNoteNo" : request.POST.get('CreditNoteNo'),
+                    "CreditNoteDate" : request.POST.get('CreditNoteDate'),
+                    "CreditNoteAmount" : request.POST.get('CreditNoteAmount'),
+                    "ClaimSummaryDate" : request.POST.get('ClaimSummaryDate'),
+                    "CreditNoteUpload" : request.POST.get('CreditNoteUpload'),
+                    "Claim" : request.POST.get('Claim'),
+                    "Party" : request.POST.get('Party'),
+                    "FullClaimNo" : request.POST.get('FullClaimNo'),  
+                }
+                '''Image Upload Code End''' 
+                avatar = request.FILES.getlist('CreditNoteUpload')
+                for file in avatar:
+                    Claimtrackingdata['CreditNoteUpload']=file
+                '''Image Upload Code End'''
+
                 ClaimtrackingdataByID = T_ClaimTrackingEntry.objects.get(id=id)
                 Claimtrackingdata_Serializer = ClaimTrackingSerializer(
                     ClaimtrackingdataByID, data=Claimtrackingdata)
