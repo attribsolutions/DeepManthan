@@ -228,7 +228,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request,M_Partiesdata,M_Partiesdata['PartySubParty'][0]['Party'],'',94,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,M_Partiesdata, 0, M_Parties_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request,M_Partiesdata, 0, 'PartyEditMethod:'+str(M_Parties_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:

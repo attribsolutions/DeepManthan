@@ -172,7 +172,8 @@ class ReturnCentralServiceItemView(CreateAPIView):
 
                 
                 Itemquery = M_CentralServiceItems.objects.filter(id=ItemID)
-                if query:
+                CentralServiceItems = list()
+                if Itemquery:
                     GRNItemsdata = CentralServiceItemSerializer(Itemquery, many=True).data
                     for b in GRNItemsdata:
                         GSTPercentage= b['GSTPercentage']
@@ -209,7 +210,7 @@ class ReturnCentralServiceItemView(CreateAPIView):
                                 "BaseUnitQuantity":"",
                                 })
 
-                    CentralServiceItems = list()
+                    
                     CentralServiceItems.append({
                         "Item": a['CentralServiceItem']['id'],
                         "ItemName": a['CentralServiceItem']['Name'],
@@ -226,9 +227,8 @@ class ReturnCentralServiceItemView(CreateAPIView):
                         "ItemGSTDetails":ItemGSTDetails,
                         "StockDetails":StockDatalist 
                 })   
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CentralServiceItems})
-        except M_Items.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CentralServiceItems})    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
