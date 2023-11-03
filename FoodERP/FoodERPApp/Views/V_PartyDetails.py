@@ -13,14 +13,22 @@ import os
 from rest_framework.parsers import JSONParser
 
 class FileDownloadView(View):
-    def get(self, request,id=0):
+    def get(self, request,id=0,table=0):
         # Imagedata = JSONParser().parse(request)
         # link = Imagedata['link']
         # # Replace 'image_url' with the actual URL of the image you want to download.
         # image_url = link
-        query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
-        Image = query[0]['Image']
-        image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+        if int(table)==1: #M_PartySettingsDetails table
+            query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
+            Image = query[0]['Image']
+            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'
+        else: #T_ClaimTrackingEntry
+            query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
+            Image = query[0]['CreditNoteUpload']
+            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'
+            
         try:
             response = requests.get(image_url)
             response.raise_for_status()

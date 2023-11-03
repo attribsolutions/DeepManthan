@@ -36,5 +36,8 @@ class MC_CentralServiceItemAssignSerializerSecond(serializers.ModelSerializer):
 
 
 
-
-  
+class CentralServiceItemSerializerSecond(serializers.ModelSerializer):
+    CentralServiceItem = CentralServiceItemSerializer()
+    class Meta:
+        model = MC_CentralServiceItemAssign
+        fields = ['CentralServiceItem','Rate','Party'] 
