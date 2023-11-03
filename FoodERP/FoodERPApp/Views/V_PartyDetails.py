@@ -21,13 +21,13 @@ class FileDownloadView(View):
         if int(table)==1: #M_PartySettingsDetails table
             query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
-            image_url = f'http://192.168.1.114:8000/media/{Image}'
+            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'
         else: #T_ClaimTrackingEntry
             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
             Image = query[0]['CreditNoteUpload']
-            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
-            image_url = f'http://192.168.1.114:8000/media/{Image}'
+            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
         try:
             response = requests.get(image_url)
