@@ -161,6 +161,8 @@ class CreditDebitNoteView(CreateAPIView):
                             CRDRNoteItems.append({
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
+                                "ServiceItemID":b['ServiceItem']['id'],
+                                "ServiceItemName":b['ServiceItem']['Name'],
                                 "Quantity": b['Quantity'],
                                 "MRP": b['MRP']['id'],
                                 "MRPValue": b['MRP']['MRP'],
