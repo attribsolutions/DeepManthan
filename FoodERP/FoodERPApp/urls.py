@@ -663,7 +663,7 @@ urlpatterns = [
              url(r'CentralItemService/([0-9]+)$',CentralServiceItemViewSecond.as_view()), 
              url(r'CentralServiceItemAssignFilter$',CentralServiceItemAssignFilterView.as_view()),
              url(r'CentralServiceItemAssign$',CentralServiceItemAssignForParty.as_view()),
-             url(r'ReturnCentralServiceItemBatchcode$',CentralServiceItemView.as_view()),
+             url(r'ReturnCentralServiceItem$',ReturnCentralServiceItemView.as_view()),
 
 #PartyDetails
               url(r'PartyDetails$',PartyDetailsView.as_view()),
