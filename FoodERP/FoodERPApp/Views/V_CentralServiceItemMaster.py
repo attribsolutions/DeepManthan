@@ -6,6 +6,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_CentralServiceItemMaster import *
 from ..models import *
+from ..Serializer.S_Items import *
+from ..Serializer.S_GRNs import *
+
 
 class CentralServiceItemView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -149,4 +152,83 @@ class CentralServiceItemAssignForParty(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
-                      
+
+class ReturnCentralServiceItemView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                PurchaseReturndata = JSONParser().parse(request)
+                ItemID = PurchaseReturndata['ItemID']
+                BatchCode = PurchaseReturndata['BatchCode']
+                CustomerID =PurchaseReturndata['Customer']
+
+                query = MC_CentralServiceItemAssign.objects.filter(CentralServiceItem=ItemID,Party=CustomerID)
+                CentralItemServiceSerializer = CentralServiceItemSerializerSecond(query,many=True).data
+
+                
+                Itemquery = M_CentralServiceItems.objects.filter(id=ItemID)
+                if query:
+                    GRNItemsdata = CentralServiceItemSerializer(Itemquery, many=True).data
+                    for b in GRNItemsdata:
+                        GSTPercentage= b['GSTPercentage']
+                for a in CentralItemServiceSerializer:
+                    ItemMRPDetails = list() 
+                    ItemMRPDetails.append({
+                                    "MRP":"",
+                                    "MRPValue": "",
+                                    "Rate" : a['CentralServiceItem']['Rate'],
+                                }) 
+
+                    ItemGSTDetails = list()
+                        
+                    ItemGSTDetails.append({
+                            "GST": "",
+                            "GSTPercentage":GSTPercentage,   
+                        }) 
+
+                    StockDatalist = list()
+                        
+                    StockDatalist.append({
+                                "id": "",
+                                "Item":"",
+                                "BatchDate":"",
+                                "BatchCode":"",
+                                "SystemBatchDate":"",
+                                "SystemBatchCode":"",
+                                "LiveBatche" : "",
+                                "LiveBatcheMRPID" : "",
+                                "LiveBatcheGSTID" :"",
+                                "Rate":"",
+                                "MRP" : "",
+                                "GST" : "",
+                                "BaseUnitQuantity":"",
+                                })
+
+                    CentralServiceItems = list()
+                    CentralServiceItems.append({
+                        "Item": a['CentralServiceItem']['id'],
+                        "ItemName": a['CentralServiceItem']['Name'],
+                        "MRP": "",
+                        "MRPValue": "",
+                        "Rate": a['CentralServiceItem']['Rate'],
+                        "GST": "",
+                        "GSTPercentage": GSTPercentage,
+                        "BatchCode": "",
+                        "BatchDate": "",
+                        "Unit" :a['CentralServiceItem']['Unit'],
+                        "UnitName" : "No", 
+                        "ItemMRPDetails":ItemMRPDetails,
+                        "ItemGSTDetails":ItemGSTDetails,
+                        "StockDetails":StockDatalist 
+                })   
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CentralServiceItems})
+        except M_Items.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+
