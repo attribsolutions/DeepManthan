@@ -268,7 +268,7 @@ class GetSubClusterOnclusterView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
 
-class GetPartydetailsOnclusterView(CreateAPIView):
+class GetPartydetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request, id=0):
         try:
@@ -284,7 +284,8 @@ class GetPartydetailsOnclusterView(CreateAPIView):
                                                                            LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                            LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id   
                                                                            LEFT JOIN M_Parties a on a.id=M_PartyDetails.Supplier_id
-                                                                           WHERE M_Parties.PartyType_id IN (9,10) AND M_Parties.id = %s AND M_Group.id = %s''',([party_values], id))
+                                                                           WHERE M_Parties.PartyType_id IN (9,10) AND M_Parties.id IN %s AND M_Group.id = %s''',(party_values, id))
+
 
                 else:
                     PartydetailsOnclusterdata = M_PartyDetails.objects.raw(''' SELECT M_Parties.id, M_Parties.Name, M_Group.id AS Group_id, M_Cluster.id AS Cluster_id, M_Cluster.Name AS Cluster_Name, M_SubCluster.id AS SubCluster_id, M_SubCluster.Name AS SubCluster_Name, a.id Supplier_id, a.Name Supplier_Name
@@ -298,8 +299,8 @@ class GetPartydetailsOnclusterView(CreateAPIView):
 
                 print(PartydetailsOnclusterdata.query)
                 if not PartydetailsOnclusterdata:
-                    return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'PartydetailsOncluster Not available', 'Data': []})
-                PartydetailsOncluster_serializer =  GetPartydetailsOnclusterSerializer(PartydetailsOnclusterdata, many=True).data
+                    return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Partydetails Not available', 'Data': []})
+                PartydetailsOncluster_serializer =  GetPartydetailsSerializer(PartydetailsOnclusterdata, many=True).data
                 # print(PartydetailsOncluster_serializer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartydetailsOncluster_serializer})
                 
