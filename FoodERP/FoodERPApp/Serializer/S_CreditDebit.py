@@ -103,13 +103,18 @@ class CreditDebitNoteInvoiceSerializerSecond(serializers.ModelSerializer):
             ret["Invoice"] = {"id": None, "InvoiceDate": None,"FullInvoiceNumber": None, "CreatedOn":None} 
         return ret    
         
-             
+
+class ServiceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_CentralServiceItems
+        fields = ['id','Name']            
+
 class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
     MRP = M_MRPsSerializer(read_only=True)
     GST = M_GstHsnCodeSerializer(read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     Unit = Mc_ItemUnitSerializerThird(read_only=True)
-    
+    ServiceItem = ServiceItemSerializer(read_only=True)
     class Meta :
         model= TC_CreditDebitNoteItems
         fields = ['CRDRNote','Item','Quantity','Unit','BaseUnitQuantity','MRP','Rate','BasicAmount','TaxType','GST','GSTAmount','Amount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','BatchDate','BatchCode','GSTPercentage','MRPValue','DiscountType', 'Discount', 'DiscountAmount','QtyInBox','QtyInKg','QtyInNo','ItemComment','ServiceItem']        
@@ -125,7 +130,10 @@ class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
             ret["Margin"] = {"id": None, "Margin": None} 
         
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage ": None}        
+            ret["GST"] = {"id": None, "GSTPercentage ": None}   
+
+        if not ret.get("ServiceItem", None):
+            ret["ServiceItem"] = {"id": None, "Name": None}     
              
         return ret
     
