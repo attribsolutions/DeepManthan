@@ -153,7 +153,7 @@ class CentralServiceItemAssignForParty(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
 
-class ReturnCentralServiceItemView(CreateAPIView):
+class CentralServiceItemViewThird(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
@@ -166,22 +166,19 @@ class ReturnCentralServiceItemView(CreateAPIView):
                 ItemID = PurchaseReturndata['ItemID']
                 BatchCode = PurchaseReturndata['BatchCode']
                 CustomerID =PurchaseReturndata['Customer']
-
-                query = MC_CentralServiceItemAssign.objects.filter(CentralServiceItem=ItemID,Party=CustomerID)
-                CentralItemServiceSerializer = CentralServiceItemSerializerSecond(query,many=True).data
-
                 
                 Itemquery = M_CentralServiceItems.objects.filter(id=ItemID)
-                if query:
+                CentralServiceItems = list()
+                if Itemquery:
                     GRNItemsdata = CentralServiceItemSerializer(Itemquery, many=True).data
-                    for b in GRNItemsdata:
-                        GSTPercentage= b['GSTPercentage']
-                for a in CentralItemServiceSerializer:
+                    for a in GRNItemsdata:
+                        GSTPercentage= a['GSTPercentage']
+                
                     ItemMRPDetails = list() 
                     ItemMRPDetails.append({
                                     "MRP":"",
                                     "MRPValue": "",
-                                    "Rate" : a['CentralServiceItem']['Rate'],
+                                    "Rate" : a['Rate'],
                                 }) 
 
                     ItemGSTDetails = list()
@@ -209,26 +206,26 @@ class ReturnCentralServiceItemView(CreateAPIView):
                                 "BaseUnitQuantity":"",
                                 })
 
-                    CentralServiceItems = list()
+                    
                     CentralServiceItems.append({
-                        "Item": a['CentralServiceItem']['id'],
-                        "ItemName": a['CentralServiceItem']['Name'],
+                        "Item": a['id'],
+                        "ItemName": a['Name'],
                         "MRP": "",
                         "MRPValue": "",
-                        "Rate": a['CentralServiceItem']['Rate'],
+                        "Rate": a['Rate'],
                         "GST": "",
                         "GSTPercentage": GSTPercentage,
                         "BatchCode": "",
                         "BatchDate": "",
-                        "Unit" :a['CentralServiceItem']['Unit'],
+                        "Unit" :a['Unit'],
                         "UnitName" : "No", 
                         "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
                         "StockDetails":StockDatalist 
                 })   
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CentralServiceItems})
-        except M_Items.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CentralServiceItems})
+    
+                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 

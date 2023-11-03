@@ -107,14 +107,21 @@ class CreditDebitNoteView(CreateAPIView):
                 CRDRNoteItems = CreditNotedata['CRDRNoteItems']
                 for CRDRNoteItem in CRDRNoteItems:
                        
-                    BaseUnitQuantity=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                    CRDRNoteItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
-                    QtyInNo=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
-                    CRDRNoteItem['QtyInNo'] =  float(QtyInNo)
-                    QtyInKg=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
-                    CRDRNoteItem['QtyInKg'] =  float(QtyInKg)
-                    QtyInBox=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
-                    CRDRNoteItem['QtyInBox'] = float(QtyInBox)
+                    if CRDRNoteItem['Item'] is None:
+                        CRDRNoteItem['BaseUnitQuantity'] =0
+                        CRDRNoteItem['QtyInNo'] =0
+                        CRDRNoteItem['QtyInKg'] =0
+                        CRDRNoteItem['QtyInBox'] =0
+                    else:
+
+                        BaseUnitQuantity=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                        CRDRNoteItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                        QtyInNo=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                        CRDRNoteItem['QtyInNo'] =  float(QtyInNo)
+                        QtyInKg=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                        CRDRNoteItem['QtyInKg'] =  float(QtyInKg)
+                        QtyInBox=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                        CRDRNoteItem['QtyInBox'] = float(QtyInBox)
                 
                 CreditNote_Serializer = CreditDebitNoteSerializer(
                     data=CreditNotedata)
