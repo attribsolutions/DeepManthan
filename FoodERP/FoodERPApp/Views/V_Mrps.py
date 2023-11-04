@@ -23,14 +23,14 @@ class M_MRPsView(CreateAPIView):
                 MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.CommonID >0 AND M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
                 # print(str(MRPdata.query))
                 if not MRPdata:
-                    log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",121,0)
+                    log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",119,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Not available', 'Data': []})
                 else:
                     MRPdata_Serializer = M_MRPsSerializerSecond(MRPdata, many=True).data
-                    log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',121,0)
+                    log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',119,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPdata_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,MRPdata_Serializer, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'SingleGET MRP:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
     @transaction.atomic()
@@ -52,11 +52,11 @@ class M_MRPsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, M_Mrpsdata,0,'TransactionID:'+str(LastInsertID),120,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully', 'TransactionID':LastInsertID,'ItemID':M_Mrpsdata[0]['Item'],'Data' :[]})
             else:
-                log_entry = create_transaction_logNew(request, M_Mrpsdata, 0, M_Mrps_Serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request, M_Mrpsdata, 0,'MRPSave:'+str(M_Mrps_Serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Mrps_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, M_Mrpsdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -95,7 +95,7 @@ class GETMrpDetails(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Items_Serializer, PartyID,'',121,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Items_Serializer, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,Items_Serializer, 0,'GetMRPmethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 ''' MRP Master List Delete Api Depend on ID '''
@@ -112,11 +112,11 @@ class M_MRPsViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'MRPID':id}, 0, 'MRPID:'+str(id),122,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','DeleteID':id,'Data':[]})
         except M_MRPMaster.DoesNotExist:
-            log_entry = create_transaction_logNew(request,{'MRPID':id}, 0, "MRP Not available",122,0)
+            log_entry = create_transaction_logNew(request,0, 0, "MRP Not available",122,0)
             transaction.set_rollback(True)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_logNew(request,{'MRPID':id}, 0, "MRP used in another table",8,0)
+            log_entry = create_transaction_logNew(request,0, 0, "MRP used in another table",8,0)
             transaction.set_rollback(True)   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
 
@@ -139,11 +139,11 @@ class M_MRPsViewThird(CreateAPIView):
                 with transaction.atomic():
                     MRPdata = M_MRPMaster.objects.filter(id=deletedID).update(IsDeleted=1)
             except M_MRPMaster.DoesNotExist:
-                log_entry = create_transaction_logNew(request, {'MRPID':id}, 0, "MRP Not available",123,0)
+                log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",123,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP Not available', 'Data': []})    
             except IntegrityError:
-                log_entry = create_transaction_logNew(request, {'MRPID':id}, 0, "MRP used in another table",8,0)
+                log_entry = create_transaction_logNew(request, 0, 0, "MRP used in another table",8,0)
                 transaction.set_rollback(True)   
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'MRPID':id}, 0,'MRPID:'+str(id),123,0)

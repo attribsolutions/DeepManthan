@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GeneralMaster import *
+from ..Views.V_CommFunction import *
 
 class ReceiptModeView(CreateAPIView):
     
@@ -61,9 +62,12 @@ class GeneralMasterFilterView(CreateAPIView):
                         "Company": a['Company']['id'],
                         "CompanyName":a['Company']['Name']
                         }) 
+                    log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'',240,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList })
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterList Not Found',240,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterList:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
 
@@ -100,8 +104,10 @@ class GeneralMasterTypeView(CreateAPIView):
                         "Name": a['Name']   
                         })
                     GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'CompanyID:'+str(CompanyID),241,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterType:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
 
 
@@ -125,9 +131,11 @@ class GeneralMasterSubTypeView(CreateAPIView):
                     "id":a['id'],    
                     "Name": a['Name']   
                     })
-                # GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})     
+                # GeneralMaster_SerializerList.append({"id":"0","Name":"NewGeneralMasterType"})  
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'Company:'+str(Company),242,0)   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterSubType:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
     
@@ -144,12 +152,16 @@ class GeneralMasterView(CreateAPIView):
                 GeneralMasterdata = JSONParser().parse(request)
                 GeneralMaster_Serializer = GeneralMasterserializer(data=GeneralMasterdata)
                 if GeneralMaster_Serializer.is_valid():
-                    GeneralMaster_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Genearl Master Save Successfully', 'Data':[]})
+                    GeneralMaster = GeneralMaster_Serializer.save()
+                    LastInsertID = GeneralMaster.id
+                    log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'Company:'+str(GeneralMasterdata['Company'])+','+'TransactionID:'+str(LastInsertID),243,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Genearl Master Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GenearlMasterSave:'+str(GeneralMaster_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':GeneralMaster_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GenearlMasterSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
             
 class GeneralMasterViewSecond(CreateAPIView):
@@ -181,9 +193,12 @@ class GeneralMasterViewSecond(CreateAPIView):
                             "Name": a['Name'],
                             "IsActive": a['IsActive']
                         })
+                    log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'TransactionID:'+str(id),244,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GeneralMasterList[0]})
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMaster Not available',244,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'General Master data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'SingleGETGeneralMaster:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -196,12 +211,16 @@ class GeneralMasterViewSecond(CreateAPIView):
                 GeneralMaster_Serializer = GeneralMasterserializer(
                     GeneralMasterdataByID, data=GeneralMasterdata)
                 if GeneralMaster_Serializer.is_valid():
-                    GeneralMaster_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Updated Successfully', 'Data':[]})
+                    GeneralMaster = GeneralMaster_Serializer.save()
+                    LastInsertID = GeneralMaster.id
+                    log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterEdit:'+str(LastInsertID),245,id)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Updated Successfully','TransactionID':LastInsertID, 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterEdit:'+str(GeneralMaster_Serializer.errors),245,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GeneralMaster_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterEdit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
         
 
@@ -213,10 +232,13 @@ class GeneralMasterViewSecond(CreateAPIView):
                 if GeneralMasterdata == 0:
                     GeneralMasterdata = M_GeneralMaster.objects.get(id=id)
                     GeneralMasterdata.delete()
+                    log_entry = create_transaction_logNew(request,{"GeneralMasterID":id}, 0,'GeneralMasterDeleteID:'+str(id),246,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Deleted Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request,0, 0,'GeneralMaster Used in another table',8,0)
                     return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This is used in another transaction', 'Data':[]}) 
         except IntegrityError:   
+            log_entry = create_transaction_logNew(request,0, 0,'GeneralMaster Used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'General Master used in another table', 'Data': []})   
 
 class GeneralMasterBrandName(CreateAPIView):
@@ -233,6 +255,7 @@ class GeneralMasterBrandName(CreateAPIView):
                 query = M_GeneralMaster.objects.filter(Company_id = Company,TypeID=Type)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': str(query.query)}) 
                 if not query:
+                    log_entry = create_transaction_logNew(request,BrandDetailsdata, 0,'Items Not available',34,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = GeneralMasterserializer(query, many=True).data
@@ -242,8 +265,10 @@ class GeneralMasterBrandName(CreateAPIView):
                             "id": a['id'],
                             "Name": a['Name']       
                         }) 
+                    log_entry = create_transaction_logNew(request,BrandDetailsdata, 0,'Company:'+str(Company),247,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterBrandName:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
         
