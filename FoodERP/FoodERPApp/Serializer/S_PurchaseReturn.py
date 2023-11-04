@@ -178,6 +178,18 @@ class PurchaseReturnSerializerThird(serializers.ModelSerializer):
         model= T_PurchaseReturn
         fields = '__all__'
 
+class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
+    # Define a custom method field for the Image field
+    Image = serializers.SerializerMethodField()
+    class Meta:
+        model = TC_PurchaseReturnItemImages
+        fields = ['id','Item_pic', 'Image']
+
+    def get_Image(self, obj):
+        if obj.Image:
+            media_url = f"http://192.168.1.114:8000/downloadQr/{obj.id}/3"
+            return media_url
+        return None
 
 class PurchaseReturnItemsSerializer2(serializers.ModelSerializer):
     Item=M_ItemsSerializer(read_only=True)
