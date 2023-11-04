@@ -724,6 +724,17 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
                         Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
+                        Imagequery = TC_PurchaseReturnItemImages.objects.filter(PurchaseReturnItem_id=b['id'])
+                        # print(query.query)
+                        if Imagequery.exists():
+                            ReturnImagesdata = PurchaseReturnItemImageSerializer2(Imagequery, many=True).data
+                            ReturnItemImages = list()
+                            
+                            for c in ReturnImagesdata:
+                                ReturnItemImages.append({
+                                "Image": c['Image'],
+                            })
+                        
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
@@ -759,7 +770,9 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                             "Discount":b['Discount'],
                             "DiscountAmount":b['DiscountAmount'],
                             "primarySourceID" : b['primarySourceID'],
-                            "ApprovedByCompany" : b['ApprovedByCompany']
+                            "ApprovedByCompany" : b['ApprovedByCompany'],
+                            "ReturnItemImages":ReturnItemImages
+                            
                             
                         })
                     log_entry = create_transaction_logNew(request, ReturnItemdata, Party,'Supplier:'+str(Party),59,0)   
