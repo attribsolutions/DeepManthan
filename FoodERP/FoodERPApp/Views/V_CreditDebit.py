@@ -159,10 +159,8 @@ class CreditDebitNoteView(CreateAPIView):
                         for b in a['CRDRNoteItems']:
                           
                             CRDRNoteItems.append({
-                                "Item": b['Item']['id'],
-                                "ItemName": b['Item']['Name'],
-                                "ServiceItemID":b['ServiceItem']['id'],
-                                "ServiceItemName":b['ServiceItem']['Name'],
+                                "Item": b['ServiceItem']['id'],
+                                "ItemName": b['ServiceItem']['Name'],
                                 "Quantity": b['Quantity'],
                                 "MRP": b['MRP']['id'],
                                 "MRPValue": b['MRP']['MRP'],
@@ -172,7 +170,7 @@ class CreditDebitNoteView(CreateAPIView):
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "GST": b['GST']['id'],
-                                "GSTPercentage": b['GST']['GSTPercentage'],
+                                "GSTPercentage": b['GSTPercentage'],
                                 "BasicAmount": b['BasicAmount'],
                                 "GSTAmount": b['GSTAmount'],
                                 "CGST": b['CGST'],
