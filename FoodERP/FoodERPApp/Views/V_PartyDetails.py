@@ -23,11 +23,19 @@ class FileDownloadView(View):
             Image = query[0]['Image']
             image_url = f'http://cbmfooderp.com:8000/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
-        else: #T_ClaimTrackingEntry
+            
+        elif int(table)==2:  #T_ClaimTrackingEntry
             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
             Image = query[0]['CreditNoteUpload']
             image_url = f'http://cbmfooderp.com:8000/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
+            
+        else: # 3 TC_PurchaseReturnItemImages
+            '''check serializer PurchaseReturnItemImageSerializer2'''
+            query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
+            Image = query[0]['Image']
+            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            image_url = f'http://192.168.1.114:8000/media/{Image}'    
             
         try:
             response = requests.get(image_url)
