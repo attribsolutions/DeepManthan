@@ -66,17 +66,20 @@ class PartyDetailsView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyDetails_data = JSONParser().parse(request)
-                PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data)
+         
+                PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data, many=True)
+               
                 if PartyDetails_serializer.is_valid():
+                    PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'])
+                    PartyDetailsdata.delete()   
                     PartyDetails_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Uploaded Successfully', 'Data': []})
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyDetails_serializer.errors, 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-
   
 
 
