@@ -648,10 +648,10 @@ urlpatterns = [
 # RetailerApproval Apis
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
            
- # Cluster 
+# Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
-            url(r'GetPartydetails/([0-9]+)$',GetPartydetailsView.as_view()),
+            url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
             
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),

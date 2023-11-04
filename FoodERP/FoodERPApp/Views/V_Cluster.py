@@ -270,34 +270,54 @@ class GetSubClusterOnclusterView(CreateAPIView):
 
 class GetPartydetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    def get(self, request, id=0):
+    def get(self, request, Employee=0,Group=0):
         try:
             with transaction.atomic():
-                if int(id) > 0:
-                    EmpParties = MC_ManagementParties.objects.filter(Employee=id).values('Party')
+                
+                # if int(Employee) > 0:
+                if Employee.isdigit() and int(Employee) > 0:
+
+                    EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')
                     party_values = [str(record['Party']) for record in EmpParties]
 
-                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw(''' SELECT M_Parties.id, M_Parties.Name, M_Group.id AS Group_id, M_Cluster.id AS Cluster_id, M_Cluster.Name AS Cluster_Name, M_SubCluster.id AS SubCluster_id, M_SubCluster.Name AS SubCluster_Name, a.id Supplier_id, a.Name Supplier_Name
-                                                                           FROM M_Parties
-                                                                           LEFT JOIN M_PartyDetails ON M_Parties.id = M_PartyDetails.Party_id
-                                                                           LEFT JOIN M_Group ON M_PartyDetails.Group_id = M_Group.id
-                                                                           LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
-                                                                           LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id   
-                                                                           LEFT JOIN M_Parties a on a.id=M_PartyDetails.Supplier_id
-                                                                           WHERE M_Parties.PartyType_id IN (9,10) AND M_Parties.id IN %s AND M_Group.id = %s''',(party_values, id))
+                    # if Group > 0:
+                    if Group.isdigit() and int(Group) > 0:
 
+                        query = "Group_id = %s"
+                        
+                    else:
+                        query = "Group_id IS NULL"
+                        
+
+                    PartydetailsOnclusterdata = (f'''select 1 as id, Party, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName from 
+(select id Party,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
+left join 
+(select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName
+from M_PartyDetails 
+LEFT JOIN
+    M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+        LEFT JOIN
+    M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+        LEFT JOIN
+    M_Parties a ON a.id = M_PartyDetails.Supplier_id where {query})b 
+on a.party=b.Party_id ''',(party_values, Group))
+                    
 
                 else:
-                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw(''' SELECT M_Parties.id, M_Parties.Name, M_Group.id AS Group_id, M_Cluster.id AS Cluster_id, M_Cluster.Name AS Cluster_Name, M_SubCluster.id AS SubCluster_id, M_SubCluster.Name AS SubCluster_Name, a.id Supplier_id, a.Name Supplier_Name
-                                                                           FROM M_Parties
-                                                                           LEFT JOIN M_PartyDetails ON M_Parties.id = M_PartyDetails.Party_id
-                                                                           LEFT JOIN M_Group ON M_PartyDetails.Group_id = M_Group.id
-                                                                           LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
-                                                                           LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id   
-                                                                           LEFT JOIN M_Parties a on a.id=M_PartyDetails.Supplier_id
-                                                                           WHERE M_Parties.PartyType_id IN (9,10)''')
-
-                print(PartydetailsOnclusterdata.query)
+                    
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, Party, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName from 
+(select id Party,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
+left join 
+(select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName
+from M_PartyDetails 
+LEFT JOIN
+    M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+        LEFT JOIN
+    M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+        LEFT JOIN
+    M_Parties a ON a.id = M_PartyDetails.Supplier_id where Group_id =%s)b 
+on a.party=b.Party_id''',(party_values, Group))
+                # print(PartydetailsOnclusterdata.query)
                 if not PartydetailsOnclusterdata:
                     return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Partydetails Not available', 'Data': []})
                 PartydetailsOncluster_serializer =  GetPartydetailsSerializer(PartydetailsOnclusterdata, many=True).data
@@ -306,6 +326,8 @@ class GetPartydetailsView(CreateAPIView):
                 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
+        
+
              
          
 

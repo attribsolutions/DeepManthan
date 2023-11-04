@@ -28,6 +28,7 @@ class SubClusterSerializerSecond(serializers.ModelSerializer):
 class  GetPartydetailsSerializer(serializers.Serializer):
     
     id = serializers.IntegerField()
+    Party = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
     Group_id = serializers.IntegerField()
     Cluster_id = serializers.IntegerField()
