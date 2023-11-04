@@ -267,7 +267,7 @@ class BulkRetailerDataView(CreateAPIView):
                         Retailer = Retailer_serializer.save()
                         LastInsertID = Retailer.id
                     else:
-                        log_entry = create_transaction_logNew(request,Retailerdata, 0, Retailer_serializer.errors,34,0)
+                        log_entry = create_transaction_logNew(request,Retailerdata, 0, 'RetailerBulkDataImportMethod:'+str(Retailer_serializer.errors),34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors, 'Data': []})
                 log_entry = create_transaction_logNew(request,Retailerdata, 0, "Retailer Bulk Data Import Successfully",96,LastInsertID)
@@ -345,7 +345,7 @@ FROM
                 
                 # print(query.query)
                 a = PartiesSettingsDetailsListSerializer(query, many=True,context= {'request': request}).data
-                log_entry = create_transaction_logNew(request,0, PartyID,'',98,0)
+                log_entry = create_transaction_logNew(request,a, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'PartiesSettingsDetailsList:'+str(Exception(e)),33,0)
