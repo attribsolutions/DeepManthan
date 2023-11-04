@@ -23,11 +23,19 @@ class FileDownloadView(View):
             Image = query[0]['Image']
             image_url = f'http://cbmfooderp.com:8000/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
-        else: #T_ClaimTrackingEntry
+            
+        elif int(table)==2:  #T_ClaimTrackingEntry
             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
             Image = query[0]['CreditNoteUpload']
             image_url = f'http://cbmfooderp.com:8000/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
+            
+        else: # 3 TC_PurchaseReturnItemImages
+            '''check serializer PurchaseReturnItemImageSerializer2'''
+            query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
+            Image = query[0]['Image']
+            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            image_url = f'http://192.168.1.114:8000/media/{Image}'    
             
         try:
             response = requests.get(image_url)
@@ -58,17 +66,20 @@ class PartyDetailsView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyDetails_data = JSONParser().parse(request)
-                PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data)
+         
+                PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data, many=True)
+               
                 if PartyDetails_serializer.is_valid():
+                    PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'])
+                    PartyDetailsdata.delete()   
                     PartyDetails_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Uploaded Successfully', 'Data': []})
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyDetails_serializer.errors, 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-
   
 
 

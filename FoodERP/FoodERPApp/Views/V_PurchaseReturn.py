@@ -366,7 +366,8 @@ class PurchaseReturnView(CreateAPIView):
                     elif Mode == str(2): #PurchaseReturn
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,PurchaseReturndata['Customer'],'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,Party)
                     elif Mode == str(3):
-                        log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
+                        pass
+                        # log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
                     log_entry = create_transaction_logNew(request, PurchaseReturndata, PurchaseReturndata['Customer'],'ReturnSave:'+str(PurchaseReturn_Serializer.errors),34,0)
@@ -724,6 +725,17 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
                         Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
+                        Imagequery = TC_PurchaseReturnItemImages.objects.filter(PurchaseReturnItem_id=b['id'])
+                        # print(query.query)
+                        if Imagequery.exists():
+                            ReturnImagesdata = PurchaseReturnItemImageSerializer2(Imagequery, many=True).data
+                            ReturnItemImages = list()
+                            
+                            for c in ReturnImagesdata:
+                                ReturnItemImages.append({
+                                "Image": c['Image'],
+                            })
+                        
                         PurchaseReturnItemList.append({
                             "ItemComment":b['ItemComment'],
                             "Quantity":b['Quantity'],
@@ -759,7 +771,9 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                             "Discount":b['Discount'],
                             "DiscountAmount":b['DiscountAmount'],
                             "primarySourceID" : b['primarySourceID'],
-                            "ApprovedByCompany" : b['ApprovedByCompany']
+                            "ApprovedByCompany" : b['ApprovedByCompany'],
+                            "ReturnItemImages":ReturnItemImages
+                            
                             
                         })
                     log_entry = create_transaction_logNew(request, ReturnItemdata, Party,'Supplier:'+str(Party),59,0)   
