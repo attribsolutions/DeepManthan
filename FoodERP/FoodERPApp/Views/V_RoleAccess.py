@@ -167,10 +167,10 @@ class RoleAccessView(RetrieveAPIView):
 
                     log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0, RoleAccessSerialize_data.errors,34,0)
+                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
-            log_entry = create_transaction_logNew(request,RoleAccessSerialize_data,0, e,33,0)
+            log_entry = create_transaction_logNew(request,0,0,'RoleAccessSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   e, 'Data': []})
 
 
@@ -212,7 +212,7 @@ class RoleAccessViewList(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
-            log_entry = create_transaction_logNew(request, Logindata,0, e,33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -343,8 +343,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},0,'RoleAccessID:'+str(RoleAccessID),131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]}) 
 
 class RoleAccessViewAddPage(RetrieveAPIView):
     
@@ -432,7 +432,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
                     log_entry = create_transaction_logNew(request,0,0,"RoleAccessGetPagesOnModule",133,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
         except Exception  :
-            log_entry = create_transaction_logNew(request, 0,0,"Execution Error",135,0)
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessGetPagesOnModule:'+'Execution Error',135,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
         
       
@@ -474,12 +474,12 @@ class CopyRoleAccessView(CreateAPIView):
 
                         log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,"Copy Role Access Save Successfully",134,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Copy Role Access Save Successfully', 'Data': []})
-                    log_entry = create_transaction_logNew(request, 0,0,RoleAccessSerialize_data.errors,34,0)
+                    log_entry = create_transaction_logNew(request, 0,0,'CopyRoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
                 log_entry = create_transaction_logNew(request, 0,0,"Execution Error",135,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Execution Error', 'Data': []})
         except Exception :
-            log_entry = create_transaction_logNew(request, 0,0,"Execution Error",135,0)
+            log_entry = create_transaction_logNew(request, 0,0,'CopyRoleAccessSave:'+'Execution Error',135,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data': []})
         
 
