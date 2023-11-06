@@ -100,6 +100,8 @@ class MasterClaimView(CreateAPIView):
 
                 q = M_Claim.objects.filter(
                     FromDate=FromDate, ToDate=ToDate, Customer_id=Party)
+                # print(q.query)
+                # print(q)
                 q.delete()
                 q0 = MC_ReturnReasonwiseMasterClaim.objects.filter(
                     FromDate=FromDate, ToDate=ToDate, Party_id=Party)
@@ -142,7 +144,7 @@ class MasterClaimView(CreateAPIView):
         FROM T_PurchaseReturn
         join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
         where IsApproved=1  and  T_PurchaseReturn.ReturnDate between %s and %s 
-        and Customer_id=%s and FinalApprovalDate is null''', ([FromDate], [ToDate], [Party]))
+        and Customer_id=%s and FinalApprovalDate is null and ApprovedQuantity  > 0''', ([FromDate], [ToDate], [Party]))
                     # print(q10.query)
                     for row in q10:
                         count = row.cnt

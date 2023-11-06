@@ -629,7 +629,7 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],167)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
@@ -695,7 +695,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],168)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})    
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})    
             
         except Exception as e:
             # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,168)
@@ -734,7 +734,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],169)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
             # log_entry = create_transaction_log(request, payload, 0, 0,response_json,169)
