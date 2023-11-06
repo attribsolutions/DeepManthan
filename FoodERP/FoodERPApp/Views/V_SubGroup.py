@@ -132,7 +132,7 @@ class SubGroupViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'SubGroupID':id},0,'SubGroup Not available',27,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'SubGroup Not available', 'Data': []})
         except IntegrityError:   
-            log_entry = create_transaction_logNew(request,0,0,'',8,0)
+            log_entry = create_transaction_logNew(request,0,0,'SubGroup used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'SubGroup used in another table', 'Data': []})   
 
 class GetSubGroupByGroupID(CreateAPIView):
