@@ -107,7 +107,7 @@ class CreditDebitNoteInvoiceSerializerSecond(serializers.ModelSerializer):
 class ServiceItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_CentralServiceItems
-        fields = ['id','Name']            
+        fields = ['id','Name','HSNCode']            
 
 class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
     MRP = M_MRPsSerializer(read_only=True)
@@ -132,18 +132,9 @@ class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
         if not ret.get("GST", None):
             ret["GST"] = {"id": None, "GSTPercentage ": None} 
 
-        # service_item = ret.pop('ServiceItem', None)
-        # if not service_item:
-        #     ret['Item'] = ret.pop('Item', None)  
-
-        # if not service_item and not ret['Item']:
-        #     ret['ServiceItem'] = {"id": None, "Name": None}
-        #     ret['Item'] = {"id": None, "Name": None}
         if not ret.get("ServiceItem", None):
             ret["ServiceItem"] = {"id": None, "Name": None}  
         
-           
-             
         return ret
     
 class CreditDebitNoteUploadsSerializer(serializers.ModelSerializer):
