@@ -30,7 +30,7 @@ class M_MarginsView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Margindata_Serializer, 0,'Margin List',114,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Margindata_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Margindata_Serializer, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MarginList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
     
@@ -56,7 +56,7 @@ class M_MarginsView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Margins_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, M_Marginsdata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MarginSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -95,7 +95,7 @@ class GETMarginDetails(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Items_Serializer, 0,'EffectiveDate:'+EffectiveDate+','+'Supplier:'+str(PartyID),116,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Items_Serializer,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'MarginDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 ''' MRP Master List Delete Api Depend on ID '''
@@ -113,10 +113,10 @@ class M_MarginsViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'MarginID':id}, 0, 'MarginID:'+str(id),117,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','DeleteID':id, 'Data':[]})
         except M_MarginMaster.DoesNotExist:
-            log_entry = create_transaction_logNew(request, {'MarginID':id}, 0, "Margin Not available",117,0)
+            log_entry = create_transaction_logNew(request, 0, 0, "Margin Not available",117,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})
         except IntegrityError: 
-            log_entry = create_transaction_logNew(request, {'MarginID':id},0, "Margin used in another table",8,0)  
+            log_entry = create_transaction_logNew(request,0, 0,0, "Margin used in another table",8,0)  
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
 
 
@@ -139,11 +139,11 @@ class M_MarginsViewThird(CreateAPIView):
                 with transaction.atomic():
                     Margindata = M_MarginMaster.objects.filter(id=deletedID).update(IsDeleted=1) 
             except M_MarginMaster.DoesNotExist:
-                log_entry = create_transaction_logNew(request, {'MarginID':id}, 0, "Margin Not available",118,0)
+                log_entry = create_transaction_logNew(request, 0, 0, "Margin Not available",118,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin Not available', 'Data': []})    
             except IntegrityError:
-                log_entry = create_transaction_logNew(request, {'MarginID':id}, 0, "Margin used in another table",8,0)
+                log_entry = create_transaction_logNew(request, 0, 0, "Margin used in another table",8,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'MarginID':id}, 0,'MarginID:'+str(id),118,0)

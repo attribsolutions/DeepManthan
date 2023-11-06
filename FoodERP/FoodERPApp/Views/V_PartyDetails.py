@@ -23,11 +23,19 @@ class FileDownloadView(View):
             Image = query[0]['Image']
             image_url = f'http://cbmfooderp.com:8000/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
-        else: #T_ClaimTrackingEntry
+            
+        elif int(table)==2:  #T_ClaimTrackingEntry
             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
             Image = query[0]['CreditNoteUpload']
             image_url = f'http://cbmfooderp.com:8000/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
+            
+        else: # 3 TC_PurchaseReturnItemImages
+            '''check serializer PurchaseReturnItemImageSerializer2'''
+            query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
+            Image = query[0]['Image']
+            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            image_url = f'http://192.168.1.114:8000/media/{Image}'    
             
         try:
             response = requests.get(image_url)
@@ -58,17 +66,20 @@ class PartyDetailsView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyDetails_data = JSONParser().parse(request)
-                PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data)
+         
+                PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data, many=True)
+               
                 if PartyDetails_serializer.is_valid():
+                    PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'])
+                    PartyDetailsdata.delete()   
                     PartyDetails_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Uploaded Successfully', 'Data': []})
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyDetails_serializer.errors, 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-
   
 
 
@@ -89,5 +100,58 @@ class PartyDetailsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
+class GetPartydetailsView(CreateAPIView): 
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, Employee=0,Group=0):
+        try:
+            with transaction.atomic():
+                
+                EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')
+                party_values = [str(record['Party']) for record in EmpParties]
+                if int(Group) > 0:
+                    
+                    
 
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName from 
+(select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
+left join 
+(select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName
+from M_PartyDetails 
+LEFT JOIN
+    M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+        LEFT JOIN
+    M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+        LEFT JOIN
+    M_Parties a ON a.id = M_PartyDetails.Supplier_id where Group_id = %s)b 
+on a.partyID=b.Party_id ''',(party_values, Group))
+                    
+
+                else:
+                   
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName from 
+(select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
+left join 
+(select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName
+from M_PartyDetails 
+LEFT JOIN
+    M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+        LEFT JOIN
+    M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+        LEFT JOIN
+    M_Parties a ON a.id = M_PartyDetails.Supplier_id where Group_id IS NULL)b 
+on a.partyID=b.Party_id''',([party_values]))
+                
+                
+                # print(PartydetailsOnclusterdata.query)
+                if not PartydetailsOnclusterdata:
+                  
+                    return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Partydetails Not available', 'Data': []})
+                PartydetailsOncluster_serializer =  GetPartydetailsSerializer(PartydetailsOnclusterdata, many=True).data
+                # print(PartydetailsOncluster_serializer)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartydetailsOncluster_serializer})
+                
+        except Exception as e:
+            
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
+        
   

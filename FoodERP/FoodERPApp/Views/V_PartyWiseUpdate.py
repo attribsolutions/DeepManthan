@@ -121,10 +121,10 @@ class PartyWiseUpdateView(CreateAPIView):
                                 })
                     log_entry = create_transaction_logNew(request, Party_data, Party, "PartyWise SubParty List",112,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyListData})
-                log_entry = create_transaction_logNew(request, Party_data, 0, PartyID_serializer.error,34,0)
+                log_entry = create_transaction_logNew(request, Party_data, 0,'PartyWiseUpdate:'+str(PartyID_serializer.error),34,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  PartyID_serializer.error, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Party_data, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PartyWiseUpdate:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
@@ -173,6 +173,6 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Partydata,Partydata['PartyID'], "PartyWise Update Successfully",113,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully','PartyID':Partydata['PartyID'], 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Partydata, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'PartyWiseSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
 
