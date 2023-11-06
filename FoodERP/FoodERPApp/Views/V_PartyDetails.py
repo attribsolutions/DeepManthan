@@ -100,7 +100,7 @@ class PartyDetailsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-class GetPartydetailsView(CreateAPIView):
+class GetPartydetailsView(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
     def get(self, request, Employee=0,Group=0):
         try:
