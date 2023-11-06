@@ -157,10 +157,17 @@ class CreditDebitNoteView(CreateAPIView):
                     for a in CreditDebitNote_serializer:
                         CRDRNoteItems = list()
                         for b in a['CRDRNoteItems']:
-                          
+                            if b['ServiceItem']['id'] is None:
+                                ItemId= b['Item']['id']
+                                ItemName=b['Item']['Name']
+                            else:
+                                ItemId=b['ServiceItem']['id']
+                                ItemName=b['ServiceItem']['Name']
+                            
+                            
                             CRDRNoteItems.append({
-                                "Item": b['ServiceItem']['id'],
-                                "ItemName": b['ServiceItem']['Name'],
+                                "Item": ItemId,
+                                "ItemName": ItemName,
                                 "Quantity": b['Quantity'],
                                 "MRP": b['MRP']['id'],
                                 "MRPValue": b['MRP']['MRP'],
