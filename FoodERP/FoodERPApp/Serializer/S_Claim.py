@@ -88,6 +88,7 @@ class ClaimlistSerializer(serializers.Serializer):
     ReturnAmount= serializers.DecimalField(max_digits=10, decimal_places=2)
     returncnt = serializers.CharField(max_length=500)
     ClaimDate=serializers.DateField()
+    CreatedOn = serializers.DateTimeField()
 
 
 class ClaimlistforClaimTrackingSerializer(serializers.Serializer):
