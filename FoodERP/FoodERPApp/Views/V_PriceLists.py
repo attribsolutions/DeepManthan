@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_PriceLists import *
 from ..models import *
-
+from ..Views.V_CommFunction import *
 
 def CalculationPathLable(CalculationPathSting):
     
@@ -83,8 +83,10 @@ class CompanywisePriceListView(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
+                    log_entry = create_transaction_logNew(request,PriceList_Serializer, 0,'Company:'+str(a['Company']['id']),248,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'CompanywisePriceLists:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PriceListView(CreateAPIView):
@@ -101,12 +103,16 @@ class PriceListView(CreateAPIView):
                 PriceListdata_Serializer = PriceListSerializer(
                     data=PriceListdata)
                 if PriceListdata_Serializer.is_valid():
-                    PriceListdata_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Price List Save Successfully', 'Data': []})
+                    PriceList = PriceListdata_Serializer.save()
+                    LastInsertID = PriceList.id
+                    log_entry = create_transaction_logNew(request,PriceListdata, 0,'Company:'+str(PriceListdata['Company'])+','+'TransactionID:'+str(LastInsertID),249,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Price List Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request,PriceListdata, 0,'PriceListSave:'+str(PriceListdata_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PriceListdata_Serializer.errors, 'Data': []})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'PriceListSave:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -139,8 +145,10 @@ class PriceListViewSecond(CreateAPIView):
 
                             "children":child
                             })
+                log_entry = create_transaction_logNew(request,PriceList_Serializer, 0,'TransactionID:'+str(id),250,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'SinglePriceList'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -153,11 +161,14 @@ class PriceListViewSecond(CreateAPIView):
                     PriceListdataID, data=PriceListdata)
                 if PriceListdata_Serializer.is_valid():
                     PriceListdata_Serializer.save()
+                    log_entry = create_transaction_logNew(request,PriceListdata, 0,'TransactionID:'+str(id),251,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Price List Updated Successfully', 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request,PriceListdata, 0,'PriceListEdit:'+str(PriceListdata_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PriceListdata_Serializer.errors, 'Data': []})
         except Exception as e:
+                log_entry = create_transaction_logNew(request,0, 0,'PriceListEdit:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -166,8 +177,11 @@ class PriceListViewSecond(CreateAPIView):
             with transaction.atomic():
                 PriceListdata = M_PriceList.objects.get(id=id)
                 PriceListdata.delete()
+                log_entry = create_transaction_logNew(request,{"PriceListID":id}, 0,'PriceListDeleteID:'+str(id),252,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Price List Deleted Successfully', 'Data': []})
         except M_PriceList.DoesNotExist:
+            log_entry = create_transaction_logNew(request,0, 0,'Price List Not available',252,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List Not available', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_logNew(request,0, 0,'PriceListDeleteID:'+str(id),8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Price List used in another table', 'Data': []})
