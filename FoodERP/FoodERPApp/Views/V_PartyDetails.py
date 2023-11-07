@@ -34,8 +34,8 @@ class FileDownloadView(View):
             '''check serializer PurchaseReturnItemImageSerializer2'''
             query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
-            image_url = f'http://192.168.1.114:8000/media/{Image}'    
+            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'    
             
         try:
             response = requests.get(image_url)
