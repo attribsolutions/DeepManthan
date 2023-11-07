@@ -336,7 +336,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                 log_entry = create_transaction_logNew(request,Orderdata, Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),206,0,FromDate,ToDate,Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PartyLedgerReport'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -365,7 +365,7 @@ class GenericSaleView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Genericdata, 0,'Report Not available',207,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GenericSale:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -416,7 +416,7 @@ WHERE MC_PartySubParty.Party_id=%s''',[Party])
                     log_entry = create_transaction_logNew(request,Retailerdata, Party,'Report Not available ',208,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'RetailerData:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
 
 # ================================Stock Processing ================================
@@ -522,7 +522,7 @@ OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'Stock Process Successfully', 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Orderdata, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'StockProcessing:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 # ======================================STOCK REPORT=================================
@@ -603,7 +603,7 @@ FROM
                     log_entry = create_transaction_logNew(request,Orderdata, Party,'Report Not Found',210,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})           
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'StockReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
                                           
          
@@ -722,7 +722,7 @@ class PurchaseGSTReportView(CreateAPIView):
                         log_entry = create_transaction_logNew(request,Reportdata, Customer,'',211,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'PurchaseGSTReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
   
   
@@ -841,7 +841,7 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND  T_Invoices.Party_id=%s ''',(
                     log_entry = create_transaction_logNew(request,Reportdata, 0,'Report Not available',212,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'InvoiceDateExportReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
         
@@ -880,7 +880,7 @@ WHERE T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s AND  T_DeletedInvoices.Par
                     log_entry = create_transaction_logNew(request,Reportdata, 0,'Report Not available',213,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'DeletedInvoiceDateExportReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})         
         
 
@@ -940,7 +940,7 @@ class ReturnReportDownloadView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Reportdata,0,'Report Not available',214,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'ReturnReportDownload:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -1032,7 +1032,7 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                     log_entry = create_transaction_logNew(request,Reportdata, Party,'Records Not available',215,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'MaterialRegister:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
         
@@ -1132,7 +1132,7 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                     log_entry = create_transaction_logNew(request,Reportdata, 0,'Report Not available',216,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'CreditDebitExportReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
         
@@ -1177,7 +1177,7 @@ class ReceiptDataExportReportView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Reportdata, Party,'Report Not available',217,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'ReceiptDataExportReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
                 
         
@@ -1222,7 +1222,7 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
                 log_entry = create_transaction_logNew(request,Balance_Data, Party,'Report Not Found',218,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'OutStandingBalanceReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
 class ManPowerReportView(CreateAPIView):
@@ -1296,7 +1296,7 @@ WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
                 log_entry = create_transaction_logNew(request,ManPower_Serializer, 0,'Report Not Found',219,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'ManPowerReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
                 
