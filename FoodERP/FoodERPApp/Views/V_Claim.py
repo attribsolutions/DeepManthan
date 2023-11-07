@@ -388,13 +388,13 @@ class ClaimlistView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Party = Orderdata['Party']
-                Claimlistquery = M_Claim.objects.raw('''select id,PartyID,PartyName,PartyType, PrimaryAmount, ReturnAmount, SecondaryAmount,returncnt,ClaimDate from (SELECT Distinct M_Parties.id PartyID,M_Parties.Name PartyName,M_PartyType.id M_PartyTypeID,M_PartyType.Name PartyType 
+                Claimlistquery = M_Claim.objects.raw('''select id,PartyID,PartyName,PartyType, PrimaryAmount, ReturnAmount, SecondaryAmount,returncnt,ClaimDate,CreatedOn from (SELECT Distinct M_Parties.id PartyID,M_Parties.Name PartyName,M_PartyType.id M_PartyTypeID,M_PartyType.Name PartyType 
                 FROM M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
 join M_PartyType on M_PartyType.id=M_Parties.PartyType_id 
 where ( MC_PartySubParty.Party_id=%s or MC_PartySubParty.SubParty_id=%s) and M_PartyType.IsVendor=0 and M_PartyType.IsRetailer=0)a
 left join 
-(select id,Date ClaimDate ,Customer_id, PrimaryAmount, ReturnAmount, SecondaryAmount from M_Claim where FromDate=%s and ToDate=%s )b
+(select id,Date ClaimDate ,Customer_id, PrimaryAmount, ReturnAmount, SecondaryAmount,CreatedOn from M_Claim where FromDate=%s and ToDate=%s )b
 on a.PartyID=b.Customer_id
 left join
 (select count(*)returncnt ,Customer_id from T_PurchaseReturn where T_PurchaseReturn.ReturnDate between %s and %s group by Customer_id )c
