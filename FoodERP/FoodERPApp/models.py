@@ -1867,7 +1867,7 @@ class Transactionlog(models.Model):
     User = models.IntegerField()
     IPaddress = models.CharField(max_length=500)
     PartyID = models.IntegerField()
-    TransactionDetails =  models.CharField(max_length=500)
+    TransactionDetails =  models.CharField(max_length=2000)
     JsonData = models.TextField(blank = True)
     TransactionType =  models.IntegerField(default=1)
     TransactionID =  models.IntegerField(default=1)

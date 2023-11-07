@@ -726,9 +726,10 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                         Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
                         Imagequery = TC_PurchaseReturnItemImages.objects.filter(PurchaseReturnItem_id=b['id'])
                         # print(query.query)
+                        ReturnItemImages = list()
                         if Imagequery.exists():
                             ReturnImagesdata = PurchaseReturnItemImageSerializer2(Imagequery, many=True).data
-                            ReturnItemImages = list()
+                            
                             
                             for c in ReturnImagesdata:
                                 ReturnItemImages.append({
