@@ -25,11 +25,11 @@ class M_EmployeeTypeView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, M_EmployeeTypedata, 0,'TransactionID:'+str(LastInsertID),232,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Type Save Successfully','TransactionID':LastInsertID, 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request, M_EmployeeTypedata, 0,'EmployeeTypeSave'+str(M_EmployeeType_serializer.errors),34,0)
+                    log_entry = create_transaction_logNew(request, M_EmployeeTypedata, 0,'EmployeeTypeSave:'+str(M_EmployeeType_serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
         except Exception :
-            log_entry = create_transaction_logNew(request, 0, 0,'Exception Found',33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeSave:'+'Exception Found',33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
                    
 class M_EmployeeTypeFilterView(CreateAPIView):
@@ -104,5 +104,5 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'EmployeeType Not available',236,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'EmployeeType Not available', 'Data': []}) 
         except IntegrityError:   
-            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeType used in another table',8,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeDelete'+'EmployeeType used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'EmployeeType used in another table', 'Data': []})   
