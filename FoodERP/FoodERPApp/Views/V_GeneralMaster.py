@@ -235,10 +235,10 @@ class GeneralMasterViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request,{"GeneralMasterID":id}, 0,'GeneralMasterDeleteID:'+str(id),246,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'General Master Deleted Successfully', 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request,0, 0,'GeneralMaster Used in another table',8,0)
+                    log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterDelete:'+'GeneralMaster Used in another table',8,0)
                     return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This is used in another transaction', 'Data':[]}) 
         except IntegrityError:   
-            log_entry = create_transaction_logNew(request,0, 0,'GeneralMaster Used in another table',8,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterDelete:'+'GeneralMaster Used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'General Master used in another table', 'Data': []})   
 
 class GeneralMasterBrandName(CreateAPIView):
