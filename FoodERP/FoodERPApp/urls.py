@@ -440,6 +440,9 @@ urlpatterns = [
             url(r'Items$', M_ItemsView.as_view()),
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
+            url(r'ItemWiseUpdate$', ItemWiseUpdateView.as_view()),
+            url(r'ItemWiseSave$', ItemWiseSaveView.as_view()),
+            
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 
@@ -651,7 +654,7 @@ urlpatterns = [
 # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
-            url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
+          
             
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),
@@ -668,6 +671,7 @@ urlpatterns = [
 #PartyDetails
               url(r'PartyDetails$',PartyDetailsView.as_view()),
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
+              url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
               
                 

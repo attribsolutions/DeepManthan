@@ -490,4 +490,9 @@ class ItemSerializerThird(serializers.Serializer):
     CompanyName = serializers.CharField(max_length=200)
     BaseUnitName = serializers.CharField(max_length=200)   
         
-   
+        
+        
+class ItemWiseUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Items
+        fields = ['id','Name','ShortName']
