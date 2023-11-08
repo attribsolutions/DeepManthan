@@ -591,7 +591,7 @@ class ItemWiseUpdateView(CreateAPIView):
                 Item_serializer = ItemWiseUpdateSerializer(query, many=True).data
                 ItemListData = list()
                 for a in Item_serializer:
-                    if (Type=='Name'):      
+                    if (Type=='ShortName'):      
                         ItemListData.append({
                                 "id": a['id'],
                                 "Name":a['Name'],
