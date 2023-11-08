@@ -36,7 +36,7 @@ class PartyItemsListView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Items_Serializer,0,'',180,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'PartyItemList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PartyItemsFilterView(CreateAPIView):
@@ -88,7 +88,7 @@ class PartyItemsFilterView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'FetchSingleGETItem:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PartyItemsView(CreateAPIView):
@@ -112,11 +112,11 @@ class PartyItemsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'TransactionID:'+str(LastInsertID),182,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],PartyItems_serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'PartyItem Save:'+str(PartyItems_serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'PartyItem Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ChannelWiseItemsView(CreateAPIView):
@@ -138,11 +138,11 @@ class ChannelWiseItemsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Items_data,0,'PartyTypeID:'+str(id)+','+'TransactionID:'+str(LastInsertID),183,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request,Items_data,0,Items_Serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request,Items_data,0,'ChannelWiseItemSave:'+str(Items_Serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Items_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ChannelWiseItemSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ChannelWiseItemsFilterView(CreateAPIView):
@@ -213,7 +213,7 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                     log_entry = create_transaction_logNew(request,Itemsdata,0,'',184,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ChannelWiseItemDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         

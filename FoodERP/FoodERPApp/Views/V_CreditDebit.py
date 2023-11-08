@@ -167,10 +167,6 @@ class CreditDebitNoteView(CreateAPIView):
                                 ItemName=b['ServiceItem']['Name']
                                 HSNCode = b['ServiceItem']['HSNCode']
                             
-                            # if b['ServiceItem']['HSNCode'] is not None:
-                            #     HSNCode = b['ServiceItem']['HSNCode']
-                            # else:
-                            #     HSNCode = 0
                             
                             CRDRNoteItems.append({
                                 "Item": ItemId,

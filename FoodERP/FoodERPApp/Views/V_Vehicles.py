@@ -119,7 +119,7 @@ class VehicleView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Vehicle_Serializer.errors,'Data' :[]})
         except Exception :
-            log_entry = create_transaction_logNew(request, Vehiclesdata,0,"Exception Found",33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'VehicleEdit:'+"Exception Found",33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
     
     @transaction.atomic()
