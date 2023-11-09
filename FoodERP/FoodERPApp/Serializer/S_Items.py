@@ -495,4 +495,5 @@ class ItemSerializerThird(serializers.Serializer):
 class ItemWiseUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Items
-        fields = ['id','Name','ShortName']
+        fields = ['id','Name','ShortName','Sequence','BarCode','SAPItemCode','Breadth','Grammage','Height','Length','StoringCondition']
+        
