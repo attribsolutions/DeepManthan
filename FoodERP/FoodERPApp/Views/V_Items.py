@@ -573,14 +573,14 @@ class ProductAndMarginReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'ProductAndMarginReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-        
-        
+
+
+
 class ItemWiseUpdateView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
- 
+
     @transaction.atomic() 
     def post(self, request):
         try:
@@ -588,21 +588,19 @@ class ItemWiseUpdateView(CreateAPIView):
                 Item_data = JSONParser().parse(request)
                 Type = Item_data['Type']
                 query = M_Items.objects.all()
-                Item_serializer = ItemWiseUpdateSerializer(query, many=True).data
-                ItemListData = list()
-                for a in Item_serializer:
-                    if (Type=='ShortName'):      
-                        ItemListData.append({
-                                "id": a['id'],
-                                "Name":a['Name'],
-                                "ShortName":a['ShortName']
-                            })
-                                      
+                Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
+                ItemListData = list()   
+                for a in Item_Serializer:
+                    ItemListData.append({
+                        "id": a['id'],
+                        "Name": a['Name'],
+                        Type: a[Type]
+                    })
+                    
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  Item_serializer.error, 'Data': []})
+
         except Exception as e:
-           
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
 
@@ -616,11 +614,11 @@ class ItemWiseSaveView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Item_data = JSONParser().parse(request)      
-                for a in Item_data:          
-                    Item_id = a['Item_id']
-                    UpdatedData = a['UpdatedData']
-                    query = M_Items.objects.filter(id= Item_id).update(ShortName= UpdatedData)
+                Item_data = JSONParser().parse(request) 
+                Type = Item_data['Type']
+                UpdatedData = Item_data['UpdatedData']
+                for a in UpdatedData:          
+                    query = M_Items.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully', 'Data': [] })
         except Exception as e:
