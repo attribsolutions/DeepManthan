@@ -266,9 +266,14 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
             # return JsonResponse({'data':  RolePageAccessSerializer})
+                  
+
             pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerNewUpdated(pageaccessquery,  many=True).data
+            
+            
+
             Moduledata.append({
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
@@ -296,7 +301,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "RoleAccess_E-InvoiceUpload": RolePageAccessSerializer[16]['id'],
                 "RoleAccess_E-Invoicecancel": RolePageAccessSerializer[17]['id'],
                 "RoleAccess_E-InvoicePrint": RolePageAccessSerializer[18]['id'],
-                
+
                 "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
                 "PageAccess_IsSave": PageAccessSerializer[1]['id'],
                 "PageAccess_IsView": PageAccessSerializer[2]['id'],
@@ -316,7 +321,6 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageAccess_E-InvoiceUpload": PageAccessSerializer[16]['id'],
                 "PageAccess_E-Invoicecancel": PageAccessSerializer[17]['id'],
                 "PageAccess_E-InvoicePrint": PageAccessSerializer[18]['id'],
-
             })
 
         response = {
