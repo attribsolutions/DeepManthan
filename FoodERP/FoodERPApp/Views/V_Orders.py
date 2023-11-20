@@ -114,8 +114,7 @@ class OrderListFilterView(CreateAPIView):
                     for a in Order_serializer:
                         if (Orderdata['DashBoardMode'] == 1):
                             OrderListData.append({
-                                "OrderDate": a['OrderDate'],
-                                "CreatedOn": a['CreatedOn']
+                                "OrderDate": a['OrderDate']
                             })
                         else:
                             tcsflagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
