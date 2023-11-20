@@ -266,9 +266,27 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
             # return JsonResponse({'data':  RolePageAccessSerializer})
+            aa = []
+            for x in RolePageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                aa.append({
+                #     "RoleAccess_"+ string +"ForMaster" : stringID,
+                #     "RoleAccess_"+string+"ForList": RolePageAccessSerializerforListPAge[0]['id'],
+                     "RoleAccess_"+string: stringID})      
+
             pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerNewUpdated(pageaccessquery,  many=True).data
+            
+            bb=[]
+            for x in PageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                bb.append({
+                    "PageAccess_" + string : stringID
+                })
+
             Moduledata.append({
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
@@ -278,45 +296,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageType" : a['PageType'],
                 "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
                 "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
-                "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
-                "RoleAccess_IsView": RolePageAccessSerializer[2]['id'],
-                "RoleAccess_IsEdit": RolePageAccessSerializer[3]['id'],
-                "RoleAccess_IsDelete": RolePageAccessSerializer[4]['id'],
-                "RoleAccess_IsEditSelf": RolePageAccessSerializer[5]['id'],
-                "RoleAccess_IsDeleteSelf": RolePageAccessSerializer[6]['id'],
-                "RoleAccess_IsPrint": RolePageAccessSerializer[7]['id'],
-                "RoleAccess_IsTopOfTheDivision": RolePageAccessSerializer[8]['id'],
-                "RoleAccess_Pdfdownload": RolePageAccessSerializer[9]['id'],
-                "RoleAccess_Exceldownload": RolePageAccessSerializer[10]['id'],
-                "RoleAccess_IsCopy": RolePageAccessSerializer[11]['id'],
-                "RoleAccess_IsMultipleInvoicePrint": RolePageAccessSerializer[12]['id'],
-                "RoleAccess_E-WayBillUpload": RolePageAccessSerializer[13]['id'],
-                "RoleAccess_E-WayBillcancel": RolePageAccessSerializer[14]['id'],
-                "RoleAccess_E-WayBillPrint": RolePageAccessSerializer[15]['id'],
-                "RoleAccess_E-InvoiceUpload": RolePageAccessSerializer[16]['id'],
-                "RoleAccess_E-Invoicecancel": RolePageAccessSerializer[17]['id'],
-                "RoleAccess_E-InvoicePrint": RolePageAccessSerializer[18]['id'],
-                
-                "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
-                "PageAccess_IsSave": PageAccessSerializer[1]['id'],
-                "PageAccess_IsView": PageAccessSerializer[2]['id'],
-                "PageAccess_IsEdit": PageAccessSerializer[3]['id'],
-                "PageAccess_IsDelete": PageAccessSerializer[4]['id'],
-                "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
-                "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
-                "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
-                "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
-                "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
-                "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
-                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id'],
-                "PageAccess_E-WayBillUpload": PageAccessSerializer[13]['id'],
-                "PageAccess_E-WayBillcancel": PageAccessSerializer[14]['id'],
-                "PageAccess_E-WayBillPrint": PageAccessSerializer[15]['id'],
-                "PageAccess_E-InvoiceUpload": PageAccessSerializer[16]['id'],
-                "PageAccess_E-Invoicecancel": PageAccessSerializer[17]['id'],
-                "PageAccess_E-InvoicePrint": PageAccessSerializer[18]['id'],
-
+                "RoleAccess": aa,
+                "PageAccess": bb
             })
 
         response = {
