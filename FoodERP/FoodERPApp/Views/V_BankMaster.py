@@ -29,7 +29,7 @@ class PartyBanksFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Bank_data,Party,'Bank not available',189,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'PartyBankDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class PartyBanksListView(CreateAPIView):
@@ -51,7 +51,7 @@ class PartyBanksListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Bank_data,Party,'Bank not available',190,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'PartyBankList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -76,12 +76,12 @@ class PartyBanksSaveView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, PartyBanks_data,id,'TransactionID:'+str(LastInsertID),191,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Banks Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, PartyBanks_data,id,PartyBanks_serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, PartyBanks_data,id,'PartyBanksSave:'+str(PartyBanks_serializer.errors),34,0)
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyBanks_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0,0,'PartyBanksSave:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
 
 
 class BankListView(CreateAPIView):
@@ -100,7 +100,7 @@ class BankListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, bank_serializer,0,'Bank not available',192,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'BankList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class BankView(CreateAPIView):
@@ -118,11 +118,11 @@ class BankView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Bank_data,0,'TransactionID:'+str(LastInsertID),193,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Save Successfully','TransactionID':LastInsertID, 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request, Bank_data,0,Bank_serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Bank_data,0,'BankSave:'+str(Bank_serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Bank_serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'BankSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
     @transaction.atomic()
@@ -147,14 +147,14 @@ class BankView(CreateAPIView):
                     BankdataByID, data=Bankdata)
                 if Bank_serializer.is_valid():
                     Bank_serializer.save()
-                    log_entry = create_transaction_logNew(request, Bankdata,0,'BankID:'+str(id),194,0)
+                    log_entry = create_transaction_logNew(request, Bankdata,0,'BankID:'+str(id),194,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Updated Successfully','Data' :[]})
                 else:
-                    log_entry = create_transaction_logNew(request, Bankdata,0, Bank_serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Bankdata,0,'BankEdit:'+str(Bank_serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Bank_serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'BankEdit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
 
@@ -164,13 +164,13 @@ class BankView(CreateAPIView):
             with transaction.atomic():
                 Bankdata = M_Bank.objects.get(id=id)
                 Bankdata.delete()
-                log_entry = create_transaction_logNew(request, 0,0,'BankID:'+str(id),195,0)
+                log_entry = create_transaction_logNew(request, 0,0,'BankID:'+str(id),195,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bank Deleted Successfully','Data':[]})
         except M_Bank.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0,0,'',195,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_logNew(request, 0,0,'',8,0)
+            log_entry = create_transaction_logNew(request, 0,0,'BankDelete:'+'Bank used in transaction',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Bank used in transaction', 'Data': []})
             
             

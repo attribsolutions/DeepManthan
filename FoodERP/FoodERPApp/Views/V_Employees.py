@@ -98,7 +98,7 @@ where M_Employees.CreatedBy=%s
                     log_entry = create_transaction_logNew(request,Logindata,Logindata['PartyID'],'',199,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmployeesData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Logindata,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'EmployeeList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -120,11 +120,11 @@ class M_EmployeesView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,M_Employeesdata,M_Employeesdata['EmployeeParties'][0]['Party'],'TransactionID:'+str(LastInsertID),200,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Data Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,M_Employeesdata,0,M_Employees_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request,M_Employeesdata,0,'EmplyoeeSave:'+str(M_Employees_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,M_Employeesdata,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -194,10 +194,10 @@ where M_Employees.id= %s''', [id])
                         'PIN':  M_Employees_Serializer[0]['PIN'],
                         'EmployeeParties': EmployeeParties
                     })
-                    log_entry = create_transaction_logNew(request,M_Employees_Serializer,0,'',201,0)
+                    log_entry = create_transaction_logNew(request,M_Employees_Serializer,0,'',201,id)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'SingleGETEmplyoees:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -215,11 +215,11 @@ where M_Employees.id= %s''', [id])
                     log_entry = create_transaction_logNew(request,M_Employeesdata,M_Employeesdata['EmployeeParties'][0]['Party'],'TransactionID:'+str(LastInsertID),202,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,M_Employeesdata,0,M_Employees_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request,M_Employeesdata,0,'EmplyoeeEdit:'+str(M_Employees_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,M_Employeesdata,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeEdit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -228,13 +228,13 @@ where M_Employees.id= %s''', [id])
             with transaction.atomic():
                 M_Employeesdata = M_Employees.objects.get(id=id)
                 M_Employeesdata.delete()
-                log_entry = create_transaction_logNew(request,{'EmployeeID':id},0,'',203,0)
+                log_entry = create_transaction_logNew(request,{'EmployeeID':id},0,'',203,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee data Deleted Successfully', 'Data': []})
         except M_Employees.DoesNotExist:
-            log_entry = create_transaction_logNew(request,{'EmployeeID':id},0,'Employee Not available',203,0)
+            log_entry = create_transaction_logNew(request,0,0,'Employee Not available',203,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_logNew(request,{'EmployeeID':id},0,'Employee used in another table',8,0)
+            log_entry = create_transaction_logNew(request,0,0,'EmployeeDelete:'+'Employee used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employee used in another table', 'Data': []})
 
 
@@ -261,7 +261,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                 log_entry = create_transaction_logNew(request,ManagementEmployeedata,0,'Employee Not Available',204,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Employee Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,ManagementEmployeedata,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeeList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -322,7 +322,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,ManagementEmpParties_data,0,'Company:'+str(CompanyID),204,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GetAllData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,ManagementEmpParties_data,0,e,33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeePartiesFilter:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -346,11 +346,11 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata[0]['Party'],'',205,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Management Employee Parties Data Save Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata['Party'],ManagementEmployeesParties_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata['Party'],'ManagementEmpPartiesSave:'+str(ManagementEmployeesParties_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()

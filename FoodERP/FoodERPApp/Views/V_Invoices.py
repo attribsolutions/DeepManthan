@@ -457,7 +457,7 @@ class InvoiceViewSecond(CreateAPIView):
                 
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
-                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, '',6,0)
+                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, 'DeletedInvoiceID:'+str(id),6,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
             log_entry = create_transaction_logNew(request,  {'InvoiceID':id}, 0, '',8,0)

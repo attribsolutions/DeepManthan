@@ -63,7 +63,7 @@ class PartyTypeListView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,PartyType_Data,PartyType_Data['PartyID'],'',185,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': data})   
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+                log_entry = create_transaction_logNew(request,0,0,'PartyTypeList:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -84,11 +84,11 @@ class PartyTypeView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,PartyTypedata,0,'TransactionID:'+str(LastInsertID),186,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Save Successfully', 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request,PartyTypedata,0,PartyTypedata_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request,PartyTypedata,0,'PartyTypeSave:'+str(PartyTypedata_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+                log_entry = create_transaction_logNew(request,0,0,'PartyTypeSave:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
         
@@ -102,10 +102,10 @@ class PartyTypeView(CreateAPIView):
                     PartyTypedataByID, data=PartyTypedata)
                 if PartyTypedata_Serializer.is_valid():
                     PartyTypedata_Serializer.save()
-                    log_entry = create_transaction_logNew(request,PartyTypedata,0,'Company:'+str(PartyTypedata['Company']),187,0)
+                    log_entry = create_transaction_logNew(request,PartyTypedata,0,'Company:'+str(PartyTypedata['Company']),187,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Updated Successfully', 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request,PartyTypedata,0,PartyTypedata_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request,PartyTypedata,0,'PartyTypeEdit:'+str(PartyTypedata_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
@@ -119,13 +119,13 @@ class PartyTypeView(CreateAPIView):
             with transaction.atomic():
                 PartyTypedata = M_PartyType.objects.get(id=id)
                 PartyTypedata.delete()
-                log_entry = create_transaction_logNew(request,{'PartyTypeID':id},0,'PartyTypeID:'+str(id),188,0)
+                log_entry = create_transaction_logNew(request,{'PartyTypeID':id},0,'PartyTypeID:'+str(id),188,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Type Deleted Successfully', 'Data':[]})
         except M_PartyType.DoesNotExist:
-            log_entry = create_transaction_logNew(request,{'PartyTypeID':id},0,'Party Type Not available',188,0)
+            log_entry = create_transaction_logNew(request,{'PartyTypeID':id},0,'PartyTypeDelete:'+'Party Type Not available',188,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Type Not available', 'Data': []})
         except IntegrityError:   
-            log_entry = create_transaction_logNew(request,0,0,'Party Type used in another table',8,0)
+            log_entry = create_transaction_logNew(request,0,0,'PartyTypeDelete:'+'Party Type used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Party Type used in another table', 'Data': []})   
 
 
