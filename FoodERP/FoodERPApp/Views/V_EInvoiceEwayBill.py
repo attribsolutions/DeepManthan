@@ -749,7 +749,7 @@ where CRDRNote_id=%s group by id,ItemName,HSNCode,M_Units.EwayBillUnit,TC_Credit
                         "ewaybill_details": ewaybill_details[0],
                         "item_list": InvoiceItemDetails
                     })
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': InvoiceData[0]})
+                    # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': InvoiceData[0]})
                     EInvoice_URL = 'https://pro.mastersindia.co/generateEinvoice'
                     payload1 = json.dumps(InvoiceData[0])
                     # payload = json.loads(payload1)
