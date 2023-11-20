@@ -49,8 +49,8 @@ class GRNListFilterView(CreateAPIView):
                     for a in GRN_serializer:
                         if (GRNdata['DashBoardMode'] == 1):
                             GRNListData.append({
-                                "GRNDate": a['GRNDate'],
-                                "CreatedOn": a['CreatedOn']
+                                "GRNDate": a['GRNDate']
+                                
                             })
                         else:
 

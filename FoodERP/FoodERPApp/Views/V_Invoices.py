@@ -178,7 +178,7 @@ class InvoiceListFilterView(CreateAPIView):
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
-                print(query.query)
+                # print(query.query)
                 # for log
                 if(Customer == ''):
                     x = 0
@@ -192,8 +192,8 @@ class InvoiceListFilterView(CreateAPIView):
                     for a in Invoice_serializer:
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
-                                "InvoiceDate":a['InvoiceDate'],
-                                "CreatedOn": a['CreatedOn']
+                                "InvoiceDate":a['InvoiceDate']
+                                
                             })
                         else:
                             Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
