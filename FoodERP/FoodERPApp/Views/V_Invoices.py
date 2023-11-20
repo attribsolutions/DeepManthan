@@ -190,38 +190,44 @@ class InvoiceListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
                     InvoiceListData = list()
                     for a in Invoice_serializer:
-                        Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
-                        if Count == 0:
-                            LoadingSheetCreated = False 
+                        if (Invoicedata['DashBoardMode'] == 1):
+                            InvoiceListData.append({
+                                "InvoiceDate":a['InvoiceDate'],
+                                "CreatedOn": a['CreatedOn']
+                            })
                         else:
-                            LoadingSheetCreated = True
-                        query2 = MC_PartySubParty.objects.filter(Party=a['Party']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
-                        if not query2:
-                            IsTCSParty = ""
-                        else:
-                            IsTCSParty= query2[0]['IsTCSParty']    
-                        # print(str(query2.query))    
-                        InvoiceListData.append({
-                            "id": a['id'],
-                            "InvoiceDate": a['InvoiceDate'],
-                            "FullInvoiceNumber": a['FullInvoiceNumber'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
-                            "PartyID": a['Party']['id'],
-                            "Party": a['Party']['Name'],
-                            "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount'],
-                            "LoadingSheetCreated": LoadingSheetCreated, 
-                            "DriverName": a['Driver']['Name'],
-                            "VehicleNo": a['Vehicle']['VehicleNumber'],
-                            "Party": a['Party']['Name'],
-                            "CreatedOn": a['CreatedOn'],
-                            "InvoiceUploads" : a["InvoiceUploads"],
-                            "CustomerPartyType":a['Customer']['PartyType_id'],
-                            "CustomerGSTIN": a['Customer']['GSTIN'],
-                            "CustomerPAN": a['Customer']['PAN'],
-                            "IsTCSParty": IsTCSParty 
-                        })
+                            Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
+                            if Count == 0:
+                                LoadingSheetCreated = False 
+                            else:
+                                LoadingSheetCreated = True
+                            query2 = MC_PartySubParty.objects.filter(Party=a['Party']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
+                            if not query2:
+                                IsTCSParty = ""
+                            else:
+                                IsTCSParty= query2[0]['IsTCSParty']    
+                            # print(str(query2.query))    
+                            InvoiceListData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "PartyID": a['Party']['id'],
+                                "Party": a['Party']['Name'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount": a['RoundOffAmount'],
+                                "LoadingSheetCreated": LoadingSheetCreated, 
+                                "DriverName": a['Driver']['Name'],
+                                "VehicleNo": a['Vehicle']['VehicleNumber'],
+                                "Party": a['Party']['Name'],
+                                "CreatedOn": a['CreatedOn'],
+                                "InvoiceUploads" : a["InvoiceUploads"],
+                                "CustomerPartyType":a['Customer']['PartyType_id'],
+                                "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "CustomerPAN": a['Customer']['PAN'],
+                                "IsTCSParty": IsTCSParty 
+                            })
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate,35,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found",35,0,FromDate,ToDate,x)

@@ -47,35 +47,42 @@ class GRNListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
-                        x = a.get('GRNReferences')
-                        challan = None 
-                        if x:
-                            challan = x[0]['Challan']
-                            POType= ""
+                        if (GRNdata['DashBoardMode'] == 1):
+                            GRNListData.append({
+                                "GRNDate": a['GRNDate'],
+                                "CreatedOn": a['CreatedOn']
+                            })
                         else:
-                            POType= ""
-                       
-                        # challan = a['GRNReferences'][0]['Challan']
-                        # if challan != None: 
-                        #     POType= ""
-                        # else:
-                        #     POType= ""
-                        #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
-                        GRNListData.append({
-                            "id": a['id'],
-                            "GRNDate": a['GRNDate'],
-                            "Customer": a['Customer']['id'],
-                            "CustomerName": a['Customer']['Name'],
-                            "GRNNumber": a['GRNNumber'],
-                            "FullGRNNumber": a['FullGRNNumber'],
-                            "InvoiceNumber": a['InvoiceNumber'],
-                            "GrandTotal": a['GrandTotal'],
-                            "Party": a['Party']['id'],
-                            "PartyName": a['Party']['Name'],
-                            "CreatedOn" : a['CreatedOn'],
-                            "POType":POType
 
-                        })
+                            x = a.get('GRNReferences')
+                            challan = None 
+                            if x:
+                                challan = x[0]['Challan']
+                                POType= ""
+                            else:
+                                POType= ""
+                        
+                            # challan = a['GRNReferences'][0]['Challan']
+                            # if challan != None: 
+                            #     POType= ""
+                            # else:
+                            #     POType= ""
+                            #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
+                            GRNListData.append({
+                                "id": a['id'],
+                                "GRNDate": a['GRNDate'],
+                                "Customer": a['Customer']['id'],
+                                "CustomerName": a['Customer']['Name'],
+                                "GRNNumber": a['GRNNumber'],
+                                "FullGRNNumber": a['FullGRNNumber'],
+                                "InvoiceNumber": a['InvoiceNumber'],
+                                "GrandTotal": a['GrandTotal'],
+                                "Party": a['Party']['id'],
+                                "PartyName": a['Party']['Name'],
+                                "CreatedOn" : a['CreatedOn'],
+                                "POType":POType
+
+                            })
                     #for log
                     if Supplier == '':
                         y = 0
