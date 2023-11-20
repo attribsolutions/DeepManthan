@@ -582,50 +582,41 @@ class ItemWiseUpdateView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic() 
-    def post(self, request):
+    def post(self, request, id=0):
         try:
             with transaction.atomic():
                 Item_data = JSONParser().parse(request)
                 Type = Item_data['Type']
-                GroupType = Item_data['GroupType']
-                query = MC_ItemGroupDetails.objects.all()
-                Item_Serializer = ItemGroupDetailsSerializerFourth(query, many=True).data
-              
+                query = M_Items.objects.all()
+                Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
                 ItemListData = list() 
                 for a in Item_Serializer:
-                    if (Type == 'ShelfLife'):
-                        query1 = MC_ItemShelfLife.objects.all()
-                        Days_Serializer = DaysSerializer(query1, many=True).data
-                        for b in Days_Serializer:
+                    if (Type == 'Group'):
+                        query1 = MC_ItemGroupDetails.objects.filter(Item=a['id'])
+                        Group_Serializer = GroupSerializer(query1, many=True).data
+                        for b in Group_Serializer:
                             ItemListData.append({
-                            "ItemID": b['Item']['id'],
-                            "ItemName": b['Item']['Name'],
-                            # "GroupID" :  a['Group']['id'],
-                            # "GroupName" : a['Group']['Name'],
-                            # "SubGroupID": a['SubGroup']['id'],
-                            # "SubGroupName": a['SubGroup']['Name'],
-                            "ShelfLife": b['Days']
+                                "ItemID": a['id'],
+                                "ItemName": a['Name'],
+                                "GroupID" :  b['Group']['id'],
+                                "GroupName" : b['Group']['Name'],
+                                "SubGroupID": b['SubGroup']['id'],
+                                "SubGroupName": b['SubGroup']['Name'],
+                            })
+                    elif (Type == 'ShelfLife'):
+                        query1 = MC_ItemShelfLife.objects.filter(Item = a['id'])
+                        Days_Serializer = DaysSerializer(query1, many=True).data
+                        for c in Days_Serializer:
+                            ItemListData.append({
+                            "ItemID": a['id'],
+                            "ItemName": a['Name'],
+                            "ShelfLife": c['Days']
                           })    
-                    elif(Type == 'Group' or Type == 'SubGroup'):
-                        ItemListData.append({
-                                "ItemID": a['Item']['id'],
-                                "ItemName" : a['Item']['Name'],
-                                "GroupID" : a['Group']['id'],
-                                "GroupName" :a['Group']['Name'],
-                                "GroupTypeID" : a['GroupType']['id'],
-                                "GroupTypeName" : a['GroupType']['Name'],
-                                "SubGroupID": a['SubGroup']['id'],
-                                "SubGroupName": a['SubGroup']['Name'],
-                           })
                     else:
                         ItemListData.append({
-                                "ItemID": a['Item']['id'],
-                                "ItemName": a['Item']['Name'],
-                                "GroupID" :  a['Group']['id'],
-                                "GroupName" : a['Group']['Name'],
-                                "SubGroupID": a['SubGroup']['id'],
-                                "SubGroupName": a['SubGroup']['Name'],
-                                Type: a['Item'][Type] 
+                                "ItemID": a['id'],
+                                "ItemName": a['Name'],
+                                Type: a[Type] 
                     })
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
@@ -636,35 +627,28 @@ class ItemWiseUpdateView(CreateAPIView):
 
 
 
-# class ItemWiseSaveView(CreateAPIView):
+class ItemWiseSaveView(CreateAPIView):
 
-#     permission_classes = (IsAuthenticated,)
-#     # authentication__Class = JSONWebTokenAuthentication
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
 
-#     @transaction.atomic()
-#     def post(self, request):
-#         try:
-#             with transaction.atomic():
-#                 Item_data = JSONParser().parse(request) 
-#                 Type = Item_data['Type']
-#                 UpdatedData = Item_data['UpdatedData']
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Item_data = JSONParser().parse(request) 
+                Type = Item_data['Type']
+                UpdatedData = Item_data['UpdatedData']
                 
-#                 for a in UpdatedData: 
-#                     value_to_update = a['Value1']
-#                     if (Type == 'Days'):
-#                         query = MC_ItemShelfLife.objects.filter(Item= a['ItemID']).update(**{Type: a['Value1']})
-#                     # elif(Type == 'Group' or Type == 'SubGroup'):
-#                         # query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(**{Type: a['Value1']})
-#                     elif(Type == 'Name'):
-#                         print("aaaaaaaaa")
-#                         query = M_Group.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
-#                     elif(Type == 'Group'):
-#                         print("bbbbbbbbb")
-#                         query = MC_SubGroup.objects.filter(id = a['ItemID']).update(**{Type: a['Value1']})
-#                     else:  
-#                         print("cccccc")
-#                         query = M_Items.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
+                for a in UpdatedData: 
+                    value_to_update = a['Value1']
+                    if (Type == 'Days'):
+                        query = MC_ItemShelfLife.objects.filter(Item= a['ItemID']).update(**{Type: a['Value1']})
+                    elif(Type == 'Group'):
+                        query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(Group=a['Value1'],SubGroup=a['Value2'])                   
+                    else:
+                        query = M_Items.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
                         
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
