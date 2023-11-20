@@ -929,19 +929,22 @@ class SummaryReportView(CreateAPIView):
                 if Party == "":
                     OrderQuery += " "
                     x = 0
+                    if Employee == 0:
+                        OrderQuery += " "
+                    else:
+                        OrderQuery += " and Supplier_id in (EmployeeParties(%s))"
+                
+                
                 else:
                     OrderQuery += " and Supplier_id=%s"
                     x = Party
                     
-                if Employee == 0:
-                    OrderQuery += " "
-                else:
-                    OrderQuery += " and Supplier_id in (EmployeeParties(%s))"    
+                    
                     
                
                 if Party != "" and Employee >0:
                     
-                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist,Party, Employee])
+                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist,Party])
                     
                 elif Party != "":
                     
@@ -956,7 +959,7 @@ class SummaryReportView(CreateAPIView):
                     OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])
                     
                 
-                
+                # print(OrderQueryresults.query)
                 if OrderQuery:
                     OrderItemDetails = list()
                     for row in OrderQueryresults:
