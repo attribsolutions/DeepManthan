@@ -504,12 +504,13 @@ class DaysSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemShelfLife
         fields = ['Days','Item']
-        
+
 class GroupSerializer(serializers.ModelSerializer):
     Group = ItemGroupNameSerializer(read_only=True)
     SubGroup = ItemSubGroupSerializer(read_only=True)
+    GroupType = ItemGroupTypeSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemGroupDetails
-        fields = ['Group','SubGroup','Item']
+        fields = ['Group','SubGroup','Item','GroupType']
     
   
