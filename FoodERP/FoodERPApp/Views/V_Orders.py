@@ -112,53 +112,58 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
-                        tcsflagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
-                        if tcsflagquery:
-                            TCSPartyFlag= tcsflagquery[0]['IsTCSParty']   
+                        if (Orderdata['DashBoardMode'] == 1):
+                            OrderListData.append({
+                                "OrderDate": a['OrderDate']
+                            })
                         else:
-                            TCSPartyFlag = False    
-                            
-                        inward = 0
-                        for c in a['OrderReferences']:
-                            if(c['Inward'] == 1):
-                                inward = 1
+                            tcsflagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
+                            if tcsflagquery:
+                                TCSPartyFlag= tcsflagquery[0]['IsTCSParty']   
+                            else:
+                                TCSPartyFlag = False    
+                                
+                            inward = 0
+                            for c in a['OrderReferences']:
+                                if(c['Inward'] == 1):
+                                    inward = 1
 
-                        Count = TC_InvoicesReferences.objects.filter(
-                            Order=a['id']).count()
-                        if Count == 0:
-                            InvoiceCreated = False
-                        else:
-                            InvoiceCreated = True
-                        
-                        OrderListData.append({
-                            "id": a['id'],
-                            "OrderDate": a['OrderDate'],
-                            "FullOrderNumber": a['FullOrderNumber'],
-                            "DeliveryDate": a['DeliveryDate'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
-                            "CustomerSAPCode": a['Customer']['SAPPartyCode'],
-                            "CustomerPAN" : a['Customer']['PAN'],
-                            "CustomerGSTIN":a['Customer']['GSTIN'],
-                            "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
-                            "SupplierPAN" : a['Supplier']['PAN'],
-                            "SupplierGSTIN": a['Supplier']['GSTIN'],
-                            "SupplierID": a['Supplier']['id'],
-                            "Supplier": a['Supplier']['Name'],
-                            "OrderAmount": a['OrderAmount'],
-                            "Description": a['Description'],
-                            "OrderType": a['OrderType'],
-                            "POType": a['POType']['Name'],
-                            "BillingAddress": a['BillingAddress']['Address'],
-                            "ShippingAddress": a['ShippingAddress']['Address'],
-                            "InvoiceCreated": InvoiceCreated,
-                            "CreatedBy": a['CreatedBy'],
-                            "CreatedOn": a['CreatedOn'],
-                            "SAPResponse": a['SAPResponse'],
-                            "IsConfirm": a['IsConfirm'],
-                            "Inward": inward,
-                            "IsTCSParty":TCSPartyFlag
-                        })
+                            Count = TC_InvoicesReferences.objects.filter(
+                                Order=a['id']).count()
+                            if Count == 0:
+                                InvoiceCreated = False
+                            else:
+                                InvoiceCreated = True
+                            
+                            OrderListData.append({
+                                "id": a['id'],
+                                "OrderDate": a['OrderDate'],
+                                "FullOrderNumber": a['FullOrderNumber'],
+                                "DeliveryDate": a['DeliveryDate'],
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "CustomerSAPCode": a['Customer']['SAPPartyCode'],
+                                "CustomerPAN" : a['Customer']['PAN'],
+                                "CustomerGSTIN":a['Customer']['GSTIN'],
+                                "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
+                                "SupplierPAN" : a['Supplier']['PAN'],
+                                "SupplierGSTIN": a['Supplier']['GSTIN'],
+                                "SupplierID": a['Supplier']['id'],
+                                "Supplier": a['Supplier']['Name'],
+                                "OrderAmount": a['OrderAmount'],
+                                "Description": a['Description'],
+                                "OrderType": a['OrderType'],
+                                "POType": a['POType']['Name'],
+                                "BillingAddress": a['BillingAddress']['Address'],
+                                "ShippingAddress": a['ShippingAddress']['Address'],
+                                "InvoiceCreated": InvoiceCreated,
+                                "CreatedBy": a['CreatedBy'],
+                                "CreatedOn": a['CreatedOn'],
+                                "SAPResponse": a['SAPResponse'],
+                                "IsConfirm": a['IsConfirm'],
+                                "Inward": inward,
+                                "IsTCSParty":TCSPartyFlag
+                            })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order List Not Found",28,0,FromDate,ToDate,0)
