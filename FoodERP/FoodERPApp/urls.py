@@ -304,6 +304,8 @@ urlpatterns = [
             url(r'Cancel_EwayBill/([0-9]+)/([0-9]+)$', Cancel_EwayBill.as_view()),
             url(r'UpdateVehicleInvoice/([0-9]+)/([0-9]+)$',UpdateVehicleInvoiceView.as_view()),
             url(r'InvoiceHide/([0-9]+)/([0-9]+)$',InvoiceHideView.as_view()),
+            url(r'InvoiceBulkDelete$', InvoiceBulkDeleteView.as_view()),
+            
                 
 #Loading Sheet All APIs
             url(r'LoadingSheet/([0-9]+)$', LoadingSheetView.as_view()),
@@ -441,7 +443,7 @@ urlpatterns = [
             url(r'ItemTag$',M_ItemTag.as_view()),
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
             url(r'ItemWiseUpdate$', ItemWiseUpdateView.as_view()),
-            # url(r'ItemWiseSave$', ItemWiseSaveView.as_view()),
+            url(r'ItemWiseSave$', ItemWiseSaveView.as_view()),
             
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),

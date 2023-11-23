@@ -178,7 +178,7 @@ class InvoiceListFilterView(CreateAPIView):
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
-                print(query.query)
+                # print(query.query)
                 # for log
                 if(Customer == ''):
                     x = 0
@@ -190,38 +190,44 @@ class InvoiceListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
                     InvoiceListData = list()
                     for a in Invoice_serializer:
-                        Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
-                        if Count == 0:
-                            LoadingSheetCreated = False 
+                        if (Invoicedata['DashBoardMode'] == 1):
+                            InvoiceListData.append({
+                                "InvoiceDate":a['InvoiceDate']
+                                
+                            })
                         else:
-                            LoadingSheetCreated = True
-                        query2 = MC_PartySubParty.objects.filter(Party=a['Party']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
-                        if not query2:
-                            IsTCSParty = ""
-                        else:
-                            IsTCSParty= query2[0]['IsTCSParty']    
-                        # print(str(query2.query))    
-                        InvoiceListData.append({
-                            "id": a['id'],
-                            "InvoiceDate": a['InvoiceDate'],
-                            "FullInvoiceNumber": a['FullInvoiceNumber'],
-                            "CustomerID": a['Customer']['id'],
-                            "Customer": a['Customer']['Name'],
-                            "PartyID": a['Party']['id'],
-                            "Party": a['Party']['Name'],
-                            "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount'],
-                            "LoadingSheetCreated": LoadingSheetCreated, 
-                            "DriverName": a['Driver']['Name'],
-                            "VehicleNo": a['Vehicle']['VehicleNumber'],
-                            "Party": a['Party']['Name'],
-                            "CreatedOn": a['CreatedOn'],
-                            "InvoiceUploads" : a["InvoiceUploads"],
-                            "CustomerPartyType":a['Customer']['PartyType_id'],
-                            "CustomerGSTIN": a['Customer']['GSTIN'],
-                            "CustomerPAN": a['Customer']['PAN'],
-                            "IsTCSParty": IsTCSParty 
-                        })
+                            Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
+                            if Count == 0:
+                                LoadingSheetCreated = False 
+                            else:
+                                LoadingSheetCreated = True
+                            query2 = MC_PartySubParty.objects.filter(Party=a['Party']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
+                            if not query2:
+                                IsTCSParty = ""
+                            else:
+                                IsTCSParty= query2[0]['IsTCSParty']    
+                            # print(str(query2.query))    
+                            InvoiceListData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "CustomerID": a['Customer']['id'],
+                                "Customer": a['Customer']['Name'],
+                                "PartyID": a['Party']['id'],
+                                "Party": a['Party']['Name'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount": a['RoundOffAmount'],
+                                "LoadingSheetCreated": LoadingSheetCreated, 
+                                "DriverName": a['Driver']['Name'],
+                                "VehicleNo": a['Vehicle']['VehicleNumber'],
+                                "Party": a['Party']['Name'],
+                                "CreatedOn": a['CreatedOn'],
+                                "InvoiceUploads" : a["InvoiceUploads"],
+                                "CustomerPartyType":a['Customer']['PartyType_id'],
+                                "CustomerGSTIN": a['Customer']['GSTIN'],
+                                "CustomerPAN": a['Customer']['PAN'],
+                                "IsTCSParty": IsTCSParty 
+                            })
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate,35,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found",35,0,FromDate,ToDate,x)
@@ -854,5 +860,26 @@ class InvoiceViewEditView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Invoice_Serializer.errors, 'Data': []})    
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0,0,'Invoicegetandupdate:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
-                                  
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+
+          
+class InvoiceBulkDeleteView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def delete(self, request):
+        try:
+            with transaction.atomic():
+                invoice_data = JSONParser().parse(request)
+                invoice_ids = invoice_data.get('Invoice_ID', '').split(',')
+                
+                if not invoice_ids:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No Invoice IDs provided', 'Data': []})
+                
+                T_Invoices.objects.filter(id__in=invoice_ids).delete()
+             
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bulk Invoices Delete Successfully', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
