@@ -645,8 +645,8 @@ class ItemWiseSaveView(CreateAPIView):
                 UpdatedData = Item_data['UpdatedData']
                 
                 for a in UpdatedData: 
-                    if (Type == 'Days'):
-                        query = MC_ItemShelfLife.objects.filter(Item= a['ItemID']).update(**{Type: a['Value1']})
+                    if (Type == 'ShelfLife'):
+                        query = MC_ItemShelfLife.objects.filter(Item=a['ItemID']).update(Days=a['Value1'])
                     elif(Type == 'Group'):
                         query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(Group=a['Value1'],SubGroup=a['Value2'])                   
                     else:
