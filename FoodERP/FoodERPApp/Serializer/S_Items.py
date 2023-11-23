@@ -425,6 +425,7 @@ class ItemShelfLifeSerializerThird(serializers.ModelSerializer):
         fields = ['Days']
 
 class ItemGroupNameSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = M_Group
         fields = ['id','Name']
@@ -493,7 +494,23 @@ class ItemSerializerThird(serializers.Serializer):
         
         
 class ItemWiseUpdateSerializer(serializers.ModelSerializer):
+  
     class Meta:
         model = M_Items
         fields = ['id','Name','ShortName','Sequence','BarCode','SAPItemCode','Breadth','Grammage','Height','Length','StoringCondition']
         
+class DaysSerializer(serializers.ModelSerializer):
+    Item = M_ItemsSerializer01(read_only=True)
+    class Meta:
+        model = MC_ItemShelfLife
+        fields = ['Days','Item']
+
+class GroupSerializer(serializers.ModelSerializer):
+    Group = ItemGroupNameSerializer(read_only=True)
+    SubGroup = ItemSubGroupSerializer(read_only=True)
+    GroupType = ItemGroupTypeSerializerSecond(read_only=True)
+    class Meta:
+        model = MC_ItemGroupDetails
+        fields = ['Group','SubGroup','Item','GroupType']
+    
+  
