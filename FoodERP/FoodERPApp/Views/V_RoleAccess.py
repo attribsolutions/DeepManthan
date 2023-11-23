@@ -291,9 +291,10 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 "PageType": a['PageType'],
                 "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
                 "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
-                **{f"RoleAccess_{key}": value for key, value in RoleAccess.items()},
-                **{f"PageAccess_{key}": value for key, value in PageAccess.items()}
+                **{f"{key}": value for key, value in RoleAccess.items()},
+                **{f"{key}": value for key, value in PageAccess.items()}
             }
+            RoleAccessData.pop("RoleAccess_IsShowOnMenu", None)
 
             Moduledata.append(RoleAccessData)
            
