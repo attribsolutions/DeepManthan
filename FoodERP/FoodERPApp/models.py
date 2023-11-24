@@ -914,7 +914,7 @@ class T_Invoices(models.Model):
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
     # Hide Flag is temporary 
     Hide = models.BooleanField(default=False)
-
+    ImportFromExcel= models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
 
@@ -2156,7 +2156,7 @@ class T_ClaimTrackingEntry(models.Model):
     ClaimTrade = models.IntegerField()
     TypeOfClaim = models.IntegerField(blank=True, null=True)
     ClaimAmount =models.DecimalField(max_digits=20, decimal_places=2)
-    Remark = models.CharField(max_length=500,null=True) 
+    Remark = models.CharField(max_length=500,null=True,blank=True) 
     ClaimCheckBy =models.IntegerField()
     CreditNotestatus =models.IntegerField()
     CreditNoteNo = models.CharField(max_length=500,null=True) 	
