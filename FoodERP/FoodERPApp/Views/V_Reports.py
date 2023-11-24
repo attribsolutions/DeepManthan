@@ -1004,27 +1004,30 @@ SELECT 5 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.
 JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
 JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Party_id
 WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s)a order by CreatedOn ''',([FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item,DefaultValues, Item,BaseUnitID,Item,BaseUnitID,Item,BaseUnitID,FromDate,ToDate,Party,Item,Item,BaseUnitID,Item,BaseUnitID,Item,BaseUnitID,FromDate,ToDate,Party,Item, FromDate,ToDate,Party,Item, Item,Item,Item,FromDate,ToDate,Party,Item]))
-                print(query)
+                # print(query)
                 if query:
                     MaterialRegisterList=MaterialRegisterSerializerView(query, many=True).data
                     query2 = O_DateWiseLiveStock.objects.filter(StockDate=FromDate,Party=Party,Item=Item).values('OpeningBalance','Unit_id')
-                    print(query2)
+                    
                     if query2 :
+                        
                     # if int(query2[0]['OpeningBalance']) > 0:
                         OpeningBalance=UnitwiseQuantityConversion(Item,query2[0]['OpeningBalance'],0,query2[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
                     else:
+                        
                         OpeningBalance=0.00      
                     
                  
                     query3 = O_DateWiseLiveStock.objects.filter(StockDate=ToDate,Party=Party,Item=Item).values('ClosingBalance','Unit_id')     
+                    
                     if query3:
-                        if int(query3[0]['ClosingBalance'])>0:
+                       
                             ClosingBalance=UnitwiseQuantityConversion(Item,query3[0]['ClosingBalance'],0,query3[0]['Unit_id'],0,Unit,0).ConvertintoSelectedUnit()
-                        else:
-                            ClosingBalance=0.00
+                        
                     else:
-                        log_entry = create_transaction_logNew(request,Reportdata,Party,'Stock Processing Needed',215,0,FromDate,ToDate,0)
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
+                        ClosingBalance=0.00
+                        # log_entry = create_transaction_logNew(request,Reportdata,Party,'Stock Processing Needed',215,0,FromDate,ToDate,0)
+                        # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
                     MaterialRegisterList.append({"OpeningBalance":OpeningBalance,"ClosingBalance":ClosingBalance})
                     log_entry = create_transaction_logNew(request,Reportdata,Party,'From:'+str(FromDate)+','+'To:'+str(ToDate),215,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': MaterialRegisterList})
