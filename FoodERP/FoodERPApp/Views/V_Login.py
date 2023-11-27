@@ -234,14 +234,18 @@ class UserLoginView(RetrieveAPIView):
         LoginName = str(aa)
         findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
         where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        
         if not findUser:
+            
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
+        
         FindUserSerializer_data = FindUserSerializer(findUser, many=True).data
+        
         a = {
             "LoginName": FindUserSerializer_data[0]['LoginName'],
             "password": request.data.get('password')
         }
-
+        
         serializer = UserLoginSerializer(data=a)
         
         if serializer.is_valid():

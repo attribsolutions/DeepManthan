@@ -97,8 +97,9 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, data):
         LoginName = data.get("LoginName", None)
         password = data.get("password", None)
+        
         user = authenticate(LoginName=LoginName, password=password)
-      
+        
         if user is None:
             raise serializers.ValidationError('Incorrect Username or Password.')
         try:
