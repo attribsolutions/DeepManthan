@@ -337,8 +337,8 @@ class M_Users(AbstractBaseUser):
     def __str__(self):
         return self.LoginName
 
-    def __str__(self):
-        return self.ID
+    # def __str__(self):
+    #     return self.id
 
 def make_extra_data(request,response,body):
     a=str(body) +'!'+str(response)
