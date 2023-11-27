@@ -226,14 +226,15 @@ class InvoiceListFilterView(CreateAPIView):
                                 "CustomerPartyType":a['Customer']['PartyType_id'],
                                 "CustomerGSTIN": a['Customer']['GSTIN'],
                                 "CustomerPAN": a['Customer']['PAN'],
-                                "IsTCSParty": IsTCSParty 
+                                "IsTCSParty": IsTCSParty ,
+                                "ImportFromExcel" :a['ImportFromExcel']
                             })
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate,35,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
                 log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found",35,0,FromDate,ToDate,x)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList'(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList',(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
