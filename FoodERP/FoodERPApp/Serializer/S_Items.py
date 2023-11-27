@@ -353,7 +353,7 @@ class ItemGroupSerializerSecond(serializers.ModelSerializer):
 class ItemGroupTypeSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_GroupType
-        fields = ['id','Name']        
+        fields = ['id','Name',]        
         
 
 class ItemCategorySerializerSecond(serializers.ModelSerializer):
@@ -428,7 +428,7 @@ class ItemGroupNameSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = M_Group
-        fields = ['id','Name']
+        fields = ['id','Name',]
 
 class ItemSubGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -494,16 +494,19 @@ class ItemSerializerThird(serializers.Serializer):
         
         
 class ItemWiseUpdateSerializer(serializers.ModelSerializer):
-  
+    Group = ItemGroupNameSerializer(read_only=True)
+    SubGroup = ItemSubGroupSerializer(read_only=True)
     class Meta:
         model = M_Items
-        fields = ['id','Name','ShortName','Sequence','BarCode','SAPItemCode','Breadth','Grammage','Height','Length','StoringCondition']
+        fields = ['id','Name','ShortName','Sequence','BarCode','SAPItemCode','Breadth','Grammage','Height','Length','StoringCondition','Group','SubGroup']
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = M_ItemsSerializer01(read_only=True)
+    Group = ItemGroupNameSerializer(read_only=True)
+    SubGroup = ItemSubGroupSerializer(read_only=True)
     class Meta:
         model = MC_ItemShelfLife
-        fields = ['Days','Item']
+        fields = ['Days','Item','Group','SubGroup']
 
 class GroupSerializer(serializers.ModelSerializer):
     Group = ItemGroupNameSerializer(read_only=True)

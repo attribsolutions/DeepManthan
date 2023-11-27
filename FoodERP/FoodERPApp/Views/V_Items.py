@@ -587,7 +587,7 @@ class ItemWiseUpdateView(CreateAPIView):
             with transaction.atomic():
                 Item_data = JSONParser().parse(request)
                 Type = Item_data['Type']
-                GroupTypeID = Item_data['GroupType']
+                GroupTypeID = Item_data['GroupType']     
         
                 query = M_Items.objects.all()
                 Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
@@ -600,6 +600,7 @@ class ItemWiseUpdateView(CreateAPIView):
                                     ItemListData.append({
                                     "ItemID": a['id'],
                                     "ItemName": a['Name'],
+                                    "Sequence": a['Sequence'],
                                     "GroupID" :  b['Group']['id'],
                                     "GroupName" : b['Group']['Name'],
                                     "GroupTypeID":  b['GroupType']['id'],
@@ -614,13 +615,19 @@ class ItemWiseUpdateView(CreateAPIView):
                             ItemListData.append({
                             "ItemID": a['id'],
                             "ItemName": a['Name'],
+                            "GroupName": a.get('Group', {}).get('Name'),
+                            "SubGroupName": a.get('SubGroup', {}).get('Name'),
+                            "Sequence": a.get('Sequence'),
                             "ShelfLife": c['Days']
                           })    
                     else:
                         ItemListData.append({
                                 "ItemID": a['id'],
                                 "ItemName": a['Name'],
-                                Type: a[Type] 
+                                "GroupName": a.get('Group', {}).get('Name'),
+                                "SubGroupName": a.get('SubGroup', {}).get('Name'),
+                                "Sequence": a['Sequence'],
+                                Type: a.get(Type)
                     })
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
