@@ -41,6 +41,8 @@ class PartySubPartySerializer2(serializers.ModelSerializer):
     class Meta:
         model = MC_PartySubParty
         fields = ['Party','SubParty','Creditlimit','Route','Distance']
+
+
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
@@ -174,6 +176,19 @@ class PriceListSerializerSecond(serializers.ModelSerializer):
         model =  M_PriceList
         fields = ['id','Name']                           
     
+class RoutesSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = M_Routes
+        fields = ['id', 'Name']
+
+class PartySubPartySerializer3(serializers.ModelSerializer):
+    
+    Route = RoutesSerializer1()
+    class Meta:
+        model = MC_PartySubParty
+        fields = ['Party','SubParty','Creditlimit','Route','Distance']
+
+
 class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializerSecond(many=True)
     City=CitiesSerializerSecond()
@@ -183,6 +198,7 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyType = PartyTypeSerializerSecond()
     PriceList=PriceListSerializerSecond()
     PartyPrefix = PartyPrefixsSerializer(many=True)
+    MCSubParty = PartySubPartySerializer3(many=True)
 
     class Meta:
         model =  M_Parties

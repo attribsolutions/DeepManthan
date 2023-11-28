@@ -587,20 +587,20 @@ class ItemWiseUpdateView(CreateAPIView):
             with transaction.atomic():
                 Item_data = JSONParser().parse(request)
                 Type = Item_data['Type']
-                GroupType = Item_data['GroupType']
+                GroupTypeID = Item_data['GroupType']     
         
                 query = M_Items.objects.all()
                 Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
                 ItemListData = list() 
                 for a in Item_Serializer:
                     if (Type == 'Group'):
-                        if (GroupType == GroupType):
-                            query1 = MC_ItemGroupDetails.objects.filter(Item=a['id'])
+                            query1 = MC_ItemGroupDetails.objects.filter(Item=a['id'], GroupType = GroupTypeID)
                             Group_Serializer = GroupSerializer(query1, many=True).data
                             for b in Group_Serializer:
                                     ItemListData.append({
                                     "ItemID": a['id'],
                                     "ItemName": a['Name'],
+                                    "Sequence": a['Sequence'],
                                     "GroupID" :  b['Group']['id'],
                                     "GroupName" : b['Group']['Name'],
                                     "GroupTypeID":  b['GroupType']['id'],
@@ -615,13 +615,19 @@ class ItemWiseUpdateView(CreateAPIView):
                             ItemListData.append({
                             "ItemID": a['id'],
                             "ItemName": a['Name'],
+                            "GroupName": a.get('Group', {}).get('Name'),
+                            "SubGroupName": a.get('SubGroup', {}).get('Name'),
+                            "Sequence": a.get('Sequence'),
                             "ShelfLife": c['Days']
                           })    
                     else:
                         ItemListData.append({
                                 "ItemID": a['id'],
                                 "ItemName": a['Name'],
-                                Type: a[Type] 
+                                "GroupName": a.get('Group', {}).get('Name'),
+                                "SubGroupName": a.get('SubGroup', {}).get('Name'),
+                                "Sequence": a['Sequence'],
+                                Type: a.get(Type)
                     })
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
@@ -646,8 +652,8 @@ class ItemWiseSaveView(CreateAPIView):
                 UpdatedData = Item_data['UpdatedData']
                 
                 for a in UpdatedData: 
-                    if (Type == 'Days'):
-                        query = MC_ItemShelfLife.objects.filter(Item= a['ItemID']).update(**{Type: a['Value1']})
+                    if (Type == 'ShelfLife'):
+                        query = MC_ItemShelfLife.objects.filter(Item=a['ItemID']).update(Days=a['Value1'])
                     elif(Type == 'Group'):
                         query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(Group=a['Value1'],SubGroup=a['Value2'])                   
                     else:
