@@ -269,7 +269,10 @@ class MasterClaimView(CreateAPIView):
                                 ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
 
             from
-            (Select Item_id from MC_PartyItems  where Party_id=%s)I
+            
+
+            (Select Item_id from T_Orders JOIN TC_OrderItems ON Order_id = T_Orders.id WHERE Customer_id = %s
+Group By Item_id)I
             left join
 
 
