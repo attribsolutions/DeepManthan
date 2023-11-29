@@ -49,5 +49,14 @@ gunicorn --bind 0.0.0.0:8000 FoodERP.wsgi ///--bind 0.0.0.0:8000: This option sp
 Error: That port is already in use.
 sudo netstat -tlnp | grep 8000
 sudo kill <PID>
+=========================================================================================
+apache command
+
+#this is used to check the syntax of your Apache configuration files without actually restarting the Apache web server. When you run this command with sudo, it checks the configuration files for syntax errors and prints the results
+
+sudo apache2ctl configtest
 
 
+#display the disk usage of files and directories, 
+
+du -sh * | sort -rh | head -n 10
