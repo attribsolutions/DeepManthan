@@ -52,149 +52,165 @@ class SAPInvoiceView(CreateAPIView):
                     InvoiceItems = list()
                     if user is not None:
 
-                        DuplicateCheck = T_Invoices.objects.filter(
-                            FullInvoiceNumber=aa["InvoiceNumber"])
-                        # print('aaaaaaa')
-                        if(DuplicateCheck.count() == 0):
-                                
-                            # print('bbbbbb')   
-                            CustomerMapping = M_Parties.objects.filter(
-                                SAPPartyCode=aa['CustomerID']).values("id")
-                            PartyMapping = M_Parties.objects.filter(
-                                SAPPartyCode=aa['Plant']).values("id")
-                            # print('ccccccccc')
-                            if CustomerMapping.exists():
-                                aa['Customer'] = CustomerMapping
-                            else:
-                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Customer Data ')
-                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data': []})
-                            # print('dddddddddd')
-                            if PartyMapping.exists():
-                                aa['Party'] = PartyMapping
-                            else:
-                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
-                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
-
-                            InvoiceDate = datetime.strptime(
-                                aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                        if aa['refInvoiceNo']:
                             
-                            for bb in aa['InvoiceItems']:
-                                
-                                if str(bb['BatchDate']) == "00.00.0000":
-                                    current_date = date.today()
-                                    # Format the date as yyyy-mm-dd             
-                                    BatchDate = current_date.strftime('%Y-%m-%d')
+                            CheckIsInwardornot=T_Invoices.objects.raw('''SELECT Invoice_id id,Inward FROM TC_GRNReferences join T_Invoices on Invoice_id=T_Invoices.id where T_Invoices.FullInvoiceNumber = %s ''',[aa["refInvoiceNo"]])
+                            if CheckIsInwardornot:
+                                hidedeletedInvoice=T_Invoices.objects.filter(FullInvoiceNumber=aa["refInvoiceNo"]).update(DeletedFromSAP=1)
+                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice already Inwarded')
+                                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice already Inwarded', 'Data': []})
+                            else:
+                                Delete_Invoice=T_Invoices.objects.filter(FullInvoiceNumber=aa["refInvoiceNo"]).delete()
+                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice Delete Successfully')
+                                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Delete Successfully', 'Data': []})
+
+                        else:
+                            
+                        
+                            DuplicateCheck = T_Invoices.objects.filter(
+                                FullInvoiceNumber=aa["InvoiceNumber"])
+                            # print('aaaaaaa')
+                            if(DuplicateCheck.count() == 0):
+                                    
+                                # print('bbbbbb')   
+                                CustomerMapping = M_Parties.objects.filter(
+                                    SAPPartyCode=aa['CustomerID']).values("id")
+                                PartyMapping = M_Parties.objects.filter(
+                                    SAPPartyCode=aa['Plant']).values("id")
+                                # print('ccccccccc')
+                                if CustomerMapping.exists():
+                                    aa['Customer'] = CustomerMapping
                                 else:
-                                    BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
-
-                                ItemMapping = M_Items.objects.filter(
-                                    SAPItemCode=bb['MaterialCode']).values("id")
-                                UnitMapping = M_Units.objects.filter(
-                                    SAPUnit=bb['BaseUOM']).values("id")
-                                
-                               
-                                if ItemMapping.exists():
-                                    bb['Item'] = ItemMapping
+                                    log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Customer Data ')
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data': []})
+                                # print('dddddddddd')
+                                if PartyMapping.exists():
+                                    aa['Party'] = PartyMapping
                                 else:
-                                    log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Material Code')
-                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
+                                    log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
 
-                                if UnitMapping.exists():
-                                    # print('gggggggggg')
-                                    MC_UnitID = MC_ItemUnits.objects.filter(
-                                        UnitID=UnitMapping[0]["id"], Item=ItemMapping[0]["id"], IsDeleted=0).values("id")
-                                    # print(MC_UnitID)
+                                InvoiceDate = datetime.strptime(
+                                    aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+                                
+                                for bb in aa['InvoiceItems']:
+                                    
+                                    if str(bb['BatchDate']) == "00.00.0000":
+                                        current_date = date.today()
+                                        # Format the date as yyyy-mm-dd             
+                                        BatchDate = current_date.strftime('%Y-%m-%d')
+                                    else:
+                                        BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
-                                    if MC_UnitID.exists():
-                                        bb['Unit'] = MC_UnitID
+                                    ItemMapping = M_Items.objects.filter(
+                                        SAPItemCode=bb['MaterialCode']).values("id")
+                                    UnitMapping = M_Units.objects.filter(
+                                        SAPUnit=bb['BaseUOM']).values("id")
+                                    
+                                
+                                    if ItemMapping.exists():
+                                        bb['Item'] = ItemMapping
                                     else:
                                         log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Material Code')
-                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Item Unit  ", 'Data': []})
-                                else:
-                                    log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Unit Code')
-                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data': []})
-                                # print('hhhhhhhhhhhh')
-                                BaseUnitQuantity = UnitwiseQuantityConversion(
-                                    ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 0, 0).GetBaseUnitQuantity()
-                                QtyInNo = UnitwiseQuantityConversion(
-                                    ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 1, 0).ConvertintoSelectedUnit()
-                                QtyInKg = UnitwiseQuantityConversion(
-                                    ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 2, 0).ConvertintoSelectedUnit()
-                                QtyInBox = UnitwiseQuantityConversion(
-                                    ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                                # print('iiiiiiiiiii')
-                                InvoiceItems.append({
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
 
-                                    "Item": ItemMapping[0]["id"],
-                                    "Unit": MC_UnitID[0]["id"],
-                                    "BatchCode": bb['BatchCode'],
-                                    "Quantity":  bb['Quantity'],
-                                    "BatchDate": BatchDate,
-                                    "BaseUnitQuantity": 1,
-                                    "LiveBatch": "",
-                                    "MRP": "",
-                                    "MRPValue": bb['MRP'],
-                                    "Rate": bb['LandedPerUnitRate'],
-                                    "BasicAmount": bb['TaxableAmount'],
-                                    "GSTAmount": float(bb['CGST'])+float(bb['SGST'])+float(bb['IGST'])+float(bb['UGST']),
-                                    "GST": "",
-                                    "GSTPercentage": float(bb['CGSTPercentage'])+float(bb['SGSTPercentage'])+float(bb['IGSTPercentage'])+float(bb['UGSTPercentage']),
-                                    "CGST": bb['CGST'],
-                                    "SGST": bb['SGST'],
-                                    "IGST": bb['IGST'],
-                                    "CGSTPercentage": round(float(bb['CGSTPercentage']), 2),
-                                    "SGSTPercentage": round(float(bb['CGSTPercentage']), 2),
-                                    "IGSTPercentage": round(float(bb['IGSTPercentage']), 2),
-                                    "Amount": bb['TotalValue'],
-                                    "TaxType": 'GST',
-                                    "DiscountType": 1,
-                                    "LiveBatch": "",
-                                    "Discount": bb['DiscountPercentage'],
-                                    "DiscountAmount": bb['DiscountAmount'],
+                                    if UnitMapping.exists():
+                                        # print('gggggggggg')
+                                        MC_UnitID = MC_ItemUnits.objects.filter(
+                                            UnitID=UnitMapping[0]["id"], Item=ItemMapping[0]["id"], IsDeleted=0).values("id")
+                                        # print(MC_UnitID)
 
-                                    'BaseUnitQuantity': round(BaseUnitQuantity, 3),
+                                        if MC_UnitID.exists():
+                                            bb['Unit'] = MC_UnitID
+                                        else:
+                                            log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Material Code')
+                                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Item Unit  ", 'Data': []})
+                                    else:
+                                        log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Unit Code')
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data': []})
+                                    # print('hhhhhhhhhhhh')
+                                    BaseUnitQuantity = UnitwiseQuantityConversion(
+                                        ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 0, 0).GetBaseUnitQuantity()
+                                    QtyInNo = UnitwiseQuantityConversion(
+                                        ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 1, 0).ConvertintoSelectedUnit()
+                                    QtyInKg = UnitwiseQuantityConversion(
+                                        ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                                    QtyInBox = UnitwiseQuantityConversion(
+                                        ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                                    # print('iiiiiiiiiii')
+                                    InvoiceItems.append({
 
-                                    "QtyInNo":  float(QtyInNo),
-                                    "QtyInKg":  float(QtyInKg),
-                                    "QtyInBox": float(QtyInBox)
+                                        "Item": ItemMapping[0]["id"],
+                                        "Unit": MC_UnitID[0]["id"],
+                                        "BatchCode": bb['BatchCode'],
+                                        "Quantity":  bb['Quantity'],
+                                        "BatchDate": BatchDate,
+                                        "BaseUnitQuantity": 1,
+                                        "LiveBatch": "",
+                                        "MRP": "",
+                                        "MRPValue": bb['MRP'],
+                                        "Rate": bb['LandedPerUnitRate'],
+                                        "BasicAmount": bb['TaxableAmount'],
+                                        "GSTAmount": float(bb['CGST'])+float(bb['SGST'])+float(bb['IGST'])+float(bb['UGST']),
+                                        "GST": "",
+                                        "GSTPercentage": float(bb['CGSTPercentage'])+float(bb['SGSTPercentage'])+float(bb['IGSTPercentage'])+float(bb['UGSTPercentage']),
+                                        "CGST": bb['CGST'],
+                                        "SGST": bb['SGST'],
+                                        "IGST": bb['IGST'],
+                                        "CGSTPercentage": round(float(bb['CGSTPercentage']), 2),
+                                        "SGSTPercentage": round(float(bb['CGSTPercentage']), 2),
+                                        "IGSTPercentage": round(float(bb['IGSTPercentage']), 2),
+                                        "Amount": bb['TotalValue'],
+                                        "TaxType": 'GST',
+                                        "DiscountType": 1,
+                                        "LiveBatch": "",
+                                        "Discount": bb['DiscountPercentage'],
+                                        "DiscountAmount": bb['DiscountAmount'],
+
+                                        'BaseUnitQuantity': round(BaseUnitQuantity, 3),
+
+                                        "QtyInNo":  float(QtyInNo),
+                                        "QtyInKg":  float(QtyInKg),
+                                        "QtyInBox": float(QtyInBox)
+                                    })
+
+                                # print(InvoiceItems)    
+                                InvoiceData = list()
+                                InvoiceData.append({
+
+                                    "GrandTotal": aa['GrossAmount'],
+                                    "RoundOffAmount": "0.00",
+                                    "InvoiceNumber": 1,
+                                    "FullInvoiceNumber": aa["InvoiceNumber"],
+                                    "Customer": CustomerMapping[0]["id"],
+                                    "Party": PartyMapping[0]["id"],
+                                    "CreatedBy": 30,
+                                    "UpdatedBy": 30,
+                                    "TCSAmount" : 0, 
+                                    "InvoiceDate": InvoiceDate,
+                                    "InvoiceItems": InvoiceItems
+
                                 })
+                                # print(InvoiceData[0])
 
-                            # print(InvoiceItems)    
-                            InvoiceData = list()
-                            InvoiceData.append({
+                                Invoice_serializer = InvoiceSerializer(
+                                    data=InvoiceData[0])
+                                if Invoice_serializer.is_valid():
+                                    Invoice_serializer.save()
+                                    log_entry = create_transaction_log(request, aa, 0, 0, aa["InvoiceNumber"]+" Invoice Save Successfully")
+                                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data': []})
 
-                                "GrandTotal": aa['GrossAmount'],
-                                "RoundOffAmount": "0.00",
-                                "InvoiceNumber": 1,
-                                "FullInvoiceNumber": aa["InvoiceNumber"],
-                                "Customer": CustomerMapping[0]["id"],
-                                "Party": PartyMapping[0]["id"],
-                                "CreatedBy": 30,
-                                "UpdatedBy": 30,
-                                "TCSAmount" : 0, 
-                                "InvoiceDate": InvoiceDate,
-                                "InvoiceItems": InvoiceItems
-
-                            })
-                            # print(InvoiceData[0])
-
-                            Invoice_serializer = InvoiceSerializer(
-                                data=InvoiceData[0])
-                            if Invoice_serializer.is_valid():
-                                Invoice_serializer.save()
-                                log_entry = create_transaction_log(request, aa, 0, 0, aa["InvoiceNumber"]+" Invoice Save Successfully")
-                                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data': []})
-
+                                else:
+                                    transaction.set_rollback(True)
+                                    # log_entry = create_transaction_log(
+                                    #     request, aa, 0, 0, Invoice_serializer.errors)
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                                    
+                            
                             else:
-                                transaction.set_rollback(True)
-                                # log_entry = create_transaction_log(
-                                #     request, aa, 0, 0, Invoice_serializer.errors)
-                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
-                                
-                        
-                        else:
-                            log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice already exist')
-                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice already exist', 'Data': []})
+                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice already exist')
+                                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice already exist', 'Data': []})
+                    
                     else:
                         # Invalid authorization header or authentication failed
                         return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
