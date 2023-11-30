@@ -915,6 +915,7 @@ class T_Invoices(models.Model):
     # Hide Flag is temporary 
     Hide = models.BooleanField(default=False)
     ImportFromExcel= models.BooleanField(default=False)
+    DeletedFromSAP = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
 
