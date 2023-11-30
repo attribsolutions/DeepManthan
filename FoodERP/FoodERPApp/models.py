@@ -168,6 +168,7 @@ class M_Parties(models.Model):
     Longitude = models.CharField(max_length=500,null=True, blank=True)
     IsApprovedParty = models.BooleanField(default=False)
     SkyggeID = models.CharField(max_length=500,null=True, blank=True)
+    UploadSalesDatafromExcelParty= models.BooleanField(default=False)
     class Meta:
         db_table = 'M_Parties'
         

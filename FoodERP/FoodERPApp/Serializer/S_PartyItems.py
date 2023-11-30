@@ -41,6 +41,7 @@ class MC_PartyItemSerializerSingleGet(serializers.Serializer):
     GroupTypeName=serializers.CharField(max_length=500)
     GroupName=serializers.CharField(max_length=500)
     SubGroupName=serializers.CharField(max_length=500) 
+    MapItem = serializers.CharField(max_length=500) 
 
      
 class MC_PartyItemListSerializer(serializers.Serializer):
