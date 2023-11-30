@@ -125,9 +125,9 @@ class TransactionJsonView(CreateAPIView):
                            Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
                            Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS TransactionlogJsondata
                     FROM Transactionlog
-                    INNER JOIN TransactionLogJsonData 
+                    left JOIN TransactionLogJsonData 
                     ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
-                    WHERE Transactionlog_id = %s
+                    WHERE Transactionlog.id = %s
                 ''',[id])
 
                 if not Transactiondata:
