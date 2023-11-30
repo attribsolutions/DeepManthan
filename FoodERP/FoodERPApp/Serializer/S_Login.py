@@ -201,6 +201,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     FSSAIExipry=serializers.DateField()
     PartyTypeID=serializers.IntegerField()
     PartyType=serializers.CharField(max_length=500)
+    UploadSalesDatafromExcelParty=serializers.IntegerField()
     
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     
