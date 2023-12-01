@@ -628,18 +628,14 @@ class BulkInvoiceView(CreateAPIView):
         try:
             with transaction.atomic():
                 Invoicedata = JSONParser().parse(request) 
-                print('----------------------------',Invoicedata['BulkData'][0]['InvoiceDate'])
                 queryaa=T_Invoices.objects.filter(InvoiceDate=Invoicedata['BulkData'][0]['InvoiceDate'],Party=Invoicedata['BulkData'][0]['Party'],ImportFromExcel=Invoicedata['BulkData'][0]['ImportFromExcel'])
                 if queryaa:
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice data has already been uploaded for the date '+ Invoicedata['BulkData'][0]['InvoiceDate'] , 'Data':[]})
                 else:
+                
+                
                     for aa in Invoicedata['BulkData']:
-                        print(aa)
-                        print('===================================')
-                        # queryaa=T_Invoices.objects.filter(InvoiceDate=aa['InvoiceDate'],Party=aa['Party'],ImportFromExcel=aa['ImportFromExcel'])
-                        # if queryaa:
-                        #     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice data has already been uploaded for the date '+ aa['InvoiceDate'] , 'Data':[]})
-                        # else:
+                        
                         aa['InvoiceNumber']=1   #Invoice Import 
                         CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
                     
@@ -673,17 +669,17 @@ class BulkInvoiceView(CreateAPIView):
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
                             
                         # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':aa })    
-                    print(aa)
-                Invoice_serializer = BulkInvoiceSerializer(data=aa)
-                if Invoice_serializer.is_valid():
-                    # print(Invoice_serializer)
-                    Invoice_serializer.save()
-                    pass
-                else:
-                    transaction.set_rollback(True)
-                    # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
-                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
-                # log_entry = create_transaction_logNew(request, Invoicedata, 0, 'Invoice Save Successfully',4,0)
+                        print(aa)
+                        Invoice_serializer = BulkInvoiceSerializer(data=aa)
+                        if Invoice_serializer.is_valid():
+                            # print(Invoice_serializer)
+                            Invoice_serializer.save()
+                            pass
+                        else:
+                            transaction.set_rollback(True)
+                            # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, 'Invoice Save Successfully',4,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'BulkInvoices:'+str(e), 33,0)
