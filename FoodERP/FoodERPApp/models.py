@@ -690,7 +690,8 @@ class MC_ItemUnits(models.Model):
 
 
 class MC_ItemImages(models.Model):
-    Item_pic = models.TextField()
+    
+    Item_pic = models.FileField(upload_to="Images\ItemImages",default="",null=True,blank=True)
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE,null=True,blank=True)
     class Meta:

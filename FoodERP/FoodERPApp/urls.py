@@ -444,6 +444,7 @@ urlpatterns = [
             url(r'MCUnitDetails$',MCUnitDetailsView.as_view()),
             url(r'ItemWiseUpdate$', ItemWiseUpdateView.as_view()),
             url(r'ItemWiseSave$', ItemWiseSaveView.as_view()),
+            url(r'ImageUploads$', ImageUploadsView.as_view()),
             
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
