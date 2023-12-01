@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-
+from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
@@ -654,4 +654,37 @@ class ItemWiseSaveView(CreateAPIView):
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})   
+
+
+class ImageUploadsView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+               
+                ItemImage_data = {
+                    "Item" : request.POST.get('Item'),
+                    "ImageType" : request.POST.get('ImageType')
+
+                } 
+                '''Image Upload Code start''' 
+                avatar = request.FILES.getlist('Item_pic')
+                for file in avatar:
+                    ItemImage_data['Item_pic']=file
+                '''Image Upload Code End'''
+                ItemImages_Serializer = ItemImagesSerializer(
+                    data=ItemImage_data)
+                if ItemImages_Serializer.is_valid():
+                    ItemImages_Serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Images Save Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemImages_Serializer.errors, 'Data': []})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})         

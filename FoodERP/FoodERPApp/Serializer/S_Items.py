@@ -512,5 +512,12 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemGroupDetails
         fields = ['Group','SubGroup','Item','GroupType']
+
+
+class ItemImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =  MC_ItemImages
+        fields = '__all__'    
+            
     
   
