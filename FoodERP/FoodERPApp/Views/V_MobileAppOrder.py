@@ -157,10 +157,11 @@ class T_MobileAppOrdersView(CreateAPIView):
                             OrderID = Order_serializer.data['id']
                             PartyID = Order_serializer.data['Customer']
                             
-
-                            log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Save Successfully',149,OrderID)    
+                            log_entry = create_transaction_logNew(request, data+'!--!'+Orderdata, Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
+                            # log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Save Successfully',149,OrderID)    
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
-                        log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,161,0)
+                        log_entry = create_transaction_logNew(request, data+'!--!'+Orderdata, Supplier,  Order_serializer.errors,161,OrderID,0,0,Customer)
+                        # log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,161,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         # print('bbbbbbbbbb')
@@ -317,7 +318,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                             log_entry = create_transaction_logNew(request, data+'!--!'+Orderdata, Supplier, 'MobileAppOrder Update Successfully',150,OrderID,0,0,Customer)
                             # log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Update Successfully',150,OrderID)    
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Update Successfully', 'FoodERPOrderID': OrderID})
-                        log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,162,0)
+                        log_entry = create_transaction_logNew(request, data+'!--!'+Orderdata, Supplier, Order_serializer.errors,162,OrderID,0,0,Customer)
+                        # log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,162,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         # print('bbbbbbbbbb')
