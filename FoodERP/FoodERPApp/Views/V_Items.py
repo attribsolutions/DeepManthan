@@ -607,7 +607,6 @@ class ItemWiseUpdateView(CreateAPIView):
                 ItemListData = list() 
                 
                 for a in Item_Serializer:
-                    print(query)
                     ItemListData.append({
                                 "id": a['id'],
                                 "ItemName": a['Name'],
