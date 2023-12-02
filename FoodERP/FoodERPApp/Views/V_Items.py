@@ -646,4 +646,6 @@ class ItemWiseSaveView(CreateAPIView):
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
         except Exception as e:
+
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
+
