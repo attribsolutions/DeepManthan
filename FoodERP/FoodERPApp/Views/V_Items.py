@@ -5,12 +5,15 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
+
 from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
 from ..models import *
-
+from django.db.models import F
+from django.db import connections
+from django.views import View
+from rest_framework.parsers import JSONParser
 
 
 
@@ -575,9 +578,7 @@ class ProductAndMarginReportView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
-
 class ItemWiseUpdateView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
@@ -587,56 +588,40 @@ class ItemWiseUpdateView(CreateAPIView):
             with transaction.atomic():
                 Item_data = JSONParser().parse(request)
                 Type = Item_data['Type']
-                GroupTypeID = Item_data['GroupType']     
-        
-                query = M_Items.objects.all()
+                GroupTypeID = Item_data['GroupType']
+                
+                
+                query = M_Items.objects.raw('''SELECT  M_Items.id,M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, mc_itemshelflife.Days AS ShelfLife,
+                                                            M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
+                                                            M_Items.Length, M_Items.StoringCondition
+                                                            FROM M_Items
+                                                            LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
+                                                            LEFT JOIN mc_itemshelflife ON M_Items.id = mc_itemshelflife.Item_id
+                                                            LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+                                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                                            ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID])
+                       
+                
                 Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
                 ItemListData = list() 
+                
                 for a in Item_Serializer:
-                    if (Type == 'Group'):
-                            query1 = MC_ItemGroupDetails.objects.filter(Item=a['id'], GroupType = GroupTypeID)
-                            Group_Serializer = GroupSerializer(query1, many=True).data
-                            for b in Group_Serializer:
-                                    ItemListData.append({
-                                    "ItemID": a['id'],
-                                    "ItemName": a['Name'],
-                                    "Sequence": a['Sequence'],
-                                    "GroupID" :  b['Group']['id'],
-                                    "GroupName" : b['Group']['Name'],
-                                    "GroupTypeID":  b['GroupType']['id'],
-                                    "GroupTypeName" : b['GroupType']['Name'],
-                                    "SubGroupID": b['SubGroup']['id'],
-                                    "SubGroupName": b['SubGroup']['Name'],
-                            })
-                    elif (Type == 'ShelfLife'):
-                        query1 = MC_ItemShelfLife.objects.filter(Item = a['id'])
-                        Days_Serializer = DaysSerializer(query1, many=True).data
-                        for c in Days_Serializer:
-                            ItemListData.append({
-                            "ItemID": a['id'],
-                            "ItemName": a['Name'],
-                            "GroupName": a.get('Group', {}).get('Name'),
-                            "SubGroupName": a.get('SubGroup', {}).get('Name'),
-                            "Sequence": a.get('Sequence'),
-                            "ShelfLife": c['Days']
-                          })    
-                    else:
-                        ItemListData.append({
-                                "ItemID": a['id'],
+                    print(query)
+                    ItemListData.append({
+                                "id": a['id'],
                                 "ItemName": a['Name'],
-                                "GroupName": a.get('Group', {}).get('Name'),
-                                "SubGroupName": a.get('SubGroup', {}).get('Name'),
-                                "Sequence": a['Sequence'],
-                                Type: a.get(Type)
-                    })
+                                "GroupID": a['GroupID'],
+                                "GroupName": a['GroupName'],
+                                "SubGroupID": a['SubGroupID'],
+                                "SubGroupName": a['SubGroupName'],
+                                 Type: a.get(Type)
+                        
+                        })
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
 
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
-
-
-
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 class ItemWiseSaveView(CreateAPIView):
 
@@ -661,37 +646,4 @@ class ItemWiseSaveView(CreateAPIView):
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})   
-
-
-class ImageUploadsView(CreateAPIView):
-    
-    permission_classes = (IsAuthenticated,)
-    parser_classes = [JSONParser,MultiPartParser,FormParser]
-
-    @transaction.atomic()
-    def post(self, request):
-        try:
-            with transaction.atomic():
-               
-                ItemImage_data = {
-                    "Item" : request.POST.get('Item'),
-                    "ImageType" : request.POST.get('ImageType')
-
-                } 
-                '''Image Upload Code start''' 
-                avatar = request.FILES.getlist('Item_pic')
-                for file in avatar:
-                    ItemImage_data['Item_pic']=file
-                '''Image Upload Code End'''
-                ItemImages_Serializer = ItemImagesSerializer(
-                    data=ItemImage_data)
-                if ItemImages_Serializer.is_valid():
-                    ItemImages_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Images Save Successfully', 'Data': []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemImages_Serializer.errors, 'Data': []})
-
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})         
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
