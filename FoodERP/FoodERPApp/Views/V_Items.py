@@ -662,7 +662,7 @@ class ImageUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     parser_classes = [JSONParser,MultiPartParser,FormParser]
 
-    @transaction.atomic()
+    @transaction.atomic() 
     def post(self, request):
         try:
             with transaction.atomic():
