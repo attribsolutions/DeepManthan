@@ -833,6 +833,7 @@ class T_Orders(models.Model):
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.PROTECT)
     SAPResponse =models.CharField(max_length=500 ,null=True)
     IsConfirm = models.BooleanField(default=False) 
+    MobileAppOrderFlag = models.IntegerField(blank=True,null=True) 
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
