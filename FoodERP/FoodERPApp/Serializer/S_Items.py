@@ -353,7 +353,7 @@ class ItemGroupSerializerSecond(serializers.ModelSerializer):
 class ItemGroupTypeSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_GroupType
-        fields = ['id','Name',]        
+        fields = ['id','Name']        
         
 
 class ItemCategorySerializerSecond(serializers.ModelSerializer):
@@ -428,7 +428,7 @@ class ItemGroupNameSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = M_Group
-        fields = ['id','Name',]
+        fields = ['id','Name']
 
 class ItemSubGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -492,16 +492,26 @@ class ItemSerializerThird(serializers.Serializer):
     BaseUnitName = serializers.CharField(max_length=200)   
         
         
-        
-class ItemWiseUpdateSerializer(serializers.ModelSerializer):
-    Group = ItemGroupNameSerializer(read_only=True)
-    SubGroup = ItemSubGroupSerializer(read_only=True)
-    class Meta:
-        model = M_Items
-        fields = ['id','Name','ShortName','Sequence','BarCode','SAPItemCode','Breadth','Grammage','Height','Length','StoringCondition','Group','SubGroup']
+class ItemWiseUpdateSerializer(serializers.Serializer): 
+    id=serializers.IntegerField()    
+    Name = serializers.CharField(max_length=500)
+    ShortName = serializers.CharField(max_length=500)
+    Sequence = serializers.DecimalField(max_digits=5, decimal_places=2)
+    BarCode = serializers.CharField(max_length=500) 
+    SAPItemCode = serializers.CharField(max_length=100)
+    Breadth = serializers.CharField(max_length=200)
+    Grammage = serializers.CharField(max_length=200)
+    Height = serializers.CharField(max_length=200)
+    Length = serializers.CharField(max_length=200)
+    StoringCondition = serializers.CharField(max_length=200,)
+    GroupID = serializers.IntegerField() 
+    GroupName = serializers.CharField(max_length=200)
+    SubGroupID = serializers.IntegerField()
+    SubGroupName = serializers.CharField(max_length=200) 
+    ShelfLife =  serializers.CharField(max_length=200) 
         
 class DaysSerializer(serializers.ModelSerializer):
-    Item = M_ItemsSerializer01(read_only=True)
+    Item = ItemWiseUpdateSerializer(read_only=True)
     Group = ItemGroupNameSerializer(read_only=True)
     SubGroup = ItemSubGroupSerializer(read_only=True)
     class Meta:
@@ -512,15 +522,11 @@ class GroupSerializer(serializers.ModelSerializer):
     Group = ItemGroupNameSerializer(read_only=True)
     SubGroup = ItemSubGroupSerializer(read_only=True)
     GroupType = ItemGroupTypeSerializerSecond(read_only=True)
+    Item = ItemWiseUpdateSerializer(read_only=True)
     class Meta:
         model = MC_ItemGroupDetails
         fields = ['Group','SubGroup','Item','GroupType']
 
 
-class ItemImagesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model =  MC_ItemImages
-        fields = '__all__'    
-            
-    
-  
+
+       
