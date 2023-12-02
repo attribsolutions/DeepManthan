@@ -592,12 +592,12 @@ class ItemWiseUpdateView(CreateAPIView):
                 GroupTypeID = Item_data['GroupType']
                 
                 
-                query = M_Items.objects.raw('''SELECT  M_Items.id,M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, mc_itemshelflife.Days AS ShelfLife,
+                query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
                                                             M_Items.Length, M_Items.StoringCondition
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
-                                                            LEFT JOIN mc_itemshelflife ON M_Items.id = mc_itemshelflife.Item_id
+                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id
                                                             LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                                                             LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                                             ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID])
@@ -607,7 +607,6 @@ class ItemWiseUpdateView(CreateAPIView):
                 ItemListData = list() 
                 
                 for a in Item_Serializer:
-                    print(query)
                     ItemListData.append({
                                 "id": a['id'],
                                 "ItemName": a['Name'],
@@ -638,6 +637,8 @@ class ItemWiseSaveView(CreateAPIView):
                 UpdatedData = Item_data['UpdatedData']
                 
                 for a in UpdatedData: 
+                    if 'ItemID' in a:
+                        item_id = a['ItemID']
                     if (Type == 'ShelfLife'):
                         query = MC_ItemShelfLife.objects.filter(Item=a['ItemID']).update(Days=a['Value1'])
                     elif(Type == 'Group'):
