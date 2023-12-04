@@ -151,7 +151,7 @@ class MasterClaimView(CreateAPIView):
                         count = row.cnt
 
                     if count != 0:
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName+ ' Final Company Approval is Remaining...!', 'Data': []})
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName+ ' Final Approval is Remaining...!', 'Data': []})
                     else:
 
                         q0 = MC_ReturnReasonwiseMasterClaim.objects.filter(
