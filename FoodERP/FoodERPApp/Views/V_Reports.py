@@ -739,9 +739,12 @@ class InvoiceDateExportReportView(CreateAPIView):
                 Customer = Reportdata['Customer']
                 Employee = Reportdata['Employee']
                 Mode = Reportdata['Mode']
-
-                
-
+                if Employee > 0:
+                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+                    for row in EmpPartys:
+                        p=row.id
+                    PartyIDs = p.split(",")
+                    
                 if (Mode == 1):
                     Invoicequery ='''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo
 FROM TC_InvoiceItems
@@ -764,7 +767,7 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                         if Employee == 0:
                             Invoicequery += " "
                         else:
-                            Invoicequery += "and MC_PartySubParty.Party_id in(EmployeeParties(%s))"
+                            Invoicequery += "and MC_PartySubParty.Party_id in %s"
                     else:
                         Invoicequery += " and MC_PartySubParty.Party_id=%s"
 
@@ -772,7 +775,7 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                         if Employee == 0: 
                           InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate])
                         else:
-                           InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Employee])
+                           InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,PartyIDs])
                     else:
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Party])
                     
@@ -796,7 +799,7 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                         if Employee == 0:
                             Invoicequery += " "
                         else:
-                            Invoicequery += "AND  T_Invoices.Customer_id in(EmployeeParties(%s))"
+                            Invoicequery += "AND  T_Invoices.Customer_id in %s"
                     else:
                         Invoicequery += " AND  T_Invoices.Customer_id=%s"
 
@@ -804,11 +807,11 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                         if Employee == 0: 
                           InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate])
                         else:
-                           InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Employee])
+                           InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,PartyIDs])
                     else:
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Customer])
                 
-                
+                # print(InvoiceQueryresults)
                 if InvoiceQueryresults:
                     
                     InvoiceExportData=list()
