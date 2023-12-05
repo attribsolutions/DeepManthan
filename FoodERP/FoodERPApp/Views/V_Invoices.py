@@ -640,7 +640,7 @@ class BulkInvoiceView(CreateAPIView):
 
                         checkduplicate=T_Invoices.objects.filter(FullInvoiceNumber=aa['FullInvoiceNumber'] ,Party=aa['Party'])
                         if checkduplicate:
-                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice data has already been uploaded for the date '+ Invoicedata['BulkData'][0]['InvoiceDate'] , 'Data':[]})
+                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice No '+ aa['FullInvoiceNumber'] +'already Uploaded ', 'Data':[]})
                         else:
                             CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
                         
