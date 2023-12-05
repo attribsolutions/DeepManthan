@@ -49,7 +49,7 @@ class ItemDivisionsSerializer(serializers.ModelSerializer):
 class ItemImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemImages
-        fields = ['ImageType', 'Item_pic']        
+        fields = ['ImageType', 'Item_pic','Item']        
          
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
