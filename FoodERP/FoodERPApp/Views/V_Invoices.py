@@ -637,48 +637,54 @@ class BulkInvoiceView(CreateAPIView):
                     for aa in Invoicedata['BulkData']:
                         
                         aa['InvoiceNumber']=1   #Invoice Import 
-                        CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
-                    
-                        if CustomerMapping.count() > 0:
-                            aa['Customer']=CustomerMapping[0]['Customer']
+
+                        checkduplicate=T_Invoices.objects.filter(FullInvoiceNumber=aa['FullInvoiceNumber'] ,Party=aa['Party'])
+                        if checkduplicate:
+                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice data has already been uploaded for the date '+ Invoicedata['BulkData'][0]['InvoiceDate'] , 'Data':[]})
                         else:
-                            # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Customer Data Mapping Missing",37,0)
-                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
-                        # print(aa['Customer'])
-                        for bb in aa['InvoiceItems']:
-                            print(bb)
-                            print('----------------------------------------')
-                            ItemMapping=M_ItemMappingMaster.objects.filter(MapItem=bb['Item'],Party=aa['Party']).values("Item")
-                            if ItemMapping.count() > 0:
-                                bb['Item']=ItemMapping[0]['Item']
+                            CustomerMapping=M_PartyCustomerMappingMaster.objects.filter(MapCustomer=aa['Customer'],Party=aa['Party']).values("Customer")
+                        
+                            if CustomerMapping.count() > 0:
+                                aa['Customer']=CustomerMapping[0]['Customer']
                             else:
-                                # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Item Data Mapping Missing",38,0)
-                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Item Data Mapping Missing", 'Data':[]})     
-                            UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=bb['Unit'],Party=aa['Party']).values("Unit")
-                            if UnitMapping.count() > 0:
-                                MC_UnitID=MC_ItemUnits.objects.filter(UnitID=UnitMapping[0]["Unit"],Item=ItemMapping[0]["Item"],IsDeleted=0).values("id")
-                                
-                                if MC_UnitID.count() > 0:
-                                    bb['Unit']=MC_UnitID[0]['id']
-                                    bb['BaseUnitQuantity']=UnitwiseQuantityConversion(ItemMapping[0]["Item"],bb['Quantity'],bb['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                                # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Customer Data Mapping Missing",37,0)
+                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
+                            # print(aa['Customer'])
+                            for bb in aa['InvoiceItems']:
+                                print(bb)
+                                print('----------------------------------------')
+                                ItemMapping=M_ItemMappingMaster.objects.filter(MapItem=bb['Item'],Party=aa['Party']).values("Item")
+                                if ItemMapping.count() > 0:
+                                    bb['Item']=ItemMapping[0]['Item']
                                 else:
-                                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, " MC_ItemUnits Data Mapping Missing",39,0)
-                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " MC_ItemUnits Data Mapping Missing", 'Data':[]})            
+                                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Item Data Mapping Missing",38,0)
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Item Data Mapping Missing", 'Data':[]})     
+                                UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=bb['Unit'],Party=aa['Party']).values("Unit")
+                                if UnitMapping.count() > 0:
+                                    MC_UnitID=MC_ItemUnits.objects.filter(UnitID=UnitMapping[0]["Unit"],Item=ItemMapping[0]["Item"],IsDeleted=0).values("id")
+                                    
+                                    if MC_UnitID.count() > 0:
+                                        bb['Unit']=MC_UnitID[0]['id']
+                                        bb['BaseUnitQuantity']=UnitwiseQuantityConversion(ItemMapping[0]["Item"],bb['Quantity'],bb['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                                    else:
+                                        # log_entry = create_transaction_logNew(request, Invoicedata, 0, " MC_ItemUnits Data Mapping Missing",39,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " MC_ItemUnits Data Mapping Missing", 'Data':[]})            
+                                else:
+                                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Unit Data Mapping Missing",40,0)
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
+                                
+                            # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':aa })    
+                            print(aa)
+                            Invoice_serializer = BulkInvoiceSerializer(data=aa)
+                            if Invoice_serializer.is_valid():
+                                # print(Invoice_serializer)
+                                Invoice_serializer.save()
+                                pass
                             else:
-                                # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Unit Data Mapping Missing",40,0)
-                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
-                            
-                        # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':aa })    
-                        print(aa)
-                        Invoice_serializer = BulkInvoiceSerializer(data=aa)
-                        if Invoice_serializer.is_valid():
-                            # print(Invoice_serializer)
-                            Invoice_serializer.save()
-                            pass
-                        else:
-                            transaction.set_rollback(True)
-                            # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
-                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                                transaction.set_rollback(True)
+                                # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
+                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
+                    # for loop
                     # log_entry = create_transaction_logNew(request, Invoicedata, 0, 'Invoice Save Successfully',4,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:

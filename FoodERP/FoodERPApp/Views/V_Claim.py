@@ -1,4 +1,5 @@
 
+from datetime import datetime, timedelta
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +8,9 @@ from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from ..Serializer.S_Claim import *
 from ..models import *
 from datetime import date
+import base64
+from io import BytesIO
+from PIL import Image
 from .V_CommFunction import *
 
 class ClaimSummaryView(CreateAPIView):
@@ -38,9 +42,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and 
-T_PurchaseReturn.id in (SELECT TC_PurchaseReturnReferences.SubReturn_id FROM T_PurchaseReturn join TC_PurchaseReturnReferences on T_PurchaseReturn.id=TC_PurchaseReturnReferences.PurchaseReturn_id
-where T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s ) Order By GSTPercentage''', ([FromDate], [ToDate], [Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s ) Order By GSTPercentage  ''', ([FromDate], [ToDate], [Party]))
                 else:   # Return Item Summury
                     Q1 = M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
 from M_Parties 
@@ -151,7 +153,10 @@ class MasterClaimView(CreateAPIView):
                         count = row.cnt
 
                     if count != 0:
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName+ ' Final Company Approval is Remaining...!', 'Data': []})
+                        log_entry = create_transaction_logNew(request, Orderdata,PartyID,'',260,0,FromDate,ToDate,0)
+
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName+ ' Final Approval is Remaining...!', 'Data': []})
+
                     else:
 
                         q0 = MC_ReturnReasonwiseMasterClaim.objects.filter(
@@ -267,10 +272,7 @@ class MasterClaimView(CreateAPIView):
                                 ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
 
             from
-            
-
-            (Select Item_id from T_Orders JOIN TC_OrderItems ON Order_id = T_Orders.id WHERE Customer_id = %s
-Group By Item_id)I
+            (Select Item_id from MC_PartyItems  where Party_id=%s)I
             left join
 
 
@@ -439,10 +441,10 @@ class Listofclaimforclaimtracking(CreateAPIView):
                 if Claimlistquery:
                     Claimlist = ClaimlistforClaimTrackingSerializer(
                         Claimlistquery, many=True).data
-                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'',260,0)
+                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'',261,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Claimlist})
                 else:
-                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'Claimlist Not available',260,0)
+                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'Claimlist Not available',261,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'Claimlist:'+str(e),33,0)
@@ -506,7 +508,7 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                             "PartyType": a['PartyType_id'],
                             "PartyTypeName": a['PartyTypeName']
                         })
-                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'',257,0)
+                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,a['Party_id'],'',257,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList})
                 log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'ClaimTrackingList Not available',257,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
@@ -665,14 +667,14 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                     ClaimtrackingdataByID, data=Claimtrackingdata)
                 if Claimtrackingdata_Serializer.is_valid():
                     Claimtrackingdata_Serializer.save()
-                    log_entry = create_transaction_logNew(request, Claimtrackingdata,0,'',261,id)
+                    # log_entry = create_transaction_logNew(request, Claimtrackingdata,0,'',262,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, Claimtrackingdata,0,'ClaimTrackingEdit:'+str(Claimtrackingdata_Serializer.errors),34,0)
+                    # log_entry = create_transaction_logNew(request, Claimtrackingdata,0,'ClaimTrackingEdit:'+str(Claimtrackingdata_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Claimtrackingdata_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEdit:'+str(Exception(e)),33,0)
+            # log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEdit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -681,10 +683,10 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
             with transaction.atomic():
                 Claimtrackingdata = T_ClaimTrackingEntry.objects.get(id=id)
                 Claimtrackingdata.delete()
-                log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),262,id)
+                log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Deleted Successfully', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),262,0)
+            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),33,0)
