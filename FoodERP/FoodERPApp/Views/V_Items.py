@@ -682,3 +682,22 @@ class ImageUploadsView(CreateAPIView):
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []}) 
+
+    
+    
+    @transaction.atomic()
+    def get(self, request,ItemID=0,ImageType=0):
+        try:
+            with transaction.atomic():
+                ItemImagequery = MC_ItemImages.objects.filter(Item_id=ItemID,ImageType_id=ImageType)
+                if ItemImagequery.exists():
+                   
+                    ItemImagedata = ItemImagesSerializer(ItemImagequery, many=True).data
+                    
+                    log_entry = create_transaction_logNew(request,ItemImagedata, 0,'',221,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemImagedata})
+                log_entry = create_transaction_logNew(request,ItemImagedata, 0,'Details Not available',221,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
