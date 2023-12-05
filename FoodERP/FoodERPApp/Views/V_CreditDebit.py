@@ -159,9 +159,15 @@ class CreditDebitNoteView(CreateAPIView):
                         for b in a['CRDRNoteItems']:
                                   
                             if b['ServiceItem']['id'] is None:
-                                ItemId= b['Item']['id']
-                                ItemName=b['Item']['Name']
-                                HSNCode =b['GST']['HSNCode']
+                                    if 'GST' in b and 'HSNCode' in b['GST']:
+                                        ItemId= b['Item']['id']
+                                        ItemName=b['Item']['Name']
+                                        HSNCode = b['GST']['HSNCode']
+                                    else:
+                                        ItemId= b['Item']['id']
+                                        ItemName=b['Item']['Name']
+                                        HSNCode = None
+                                    
                             else:
                                 ItemId=b['ServiceItem']['id']
                                 ItemName=b['ServiceItem']['Name']
