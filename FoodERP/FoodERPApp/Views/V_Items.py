@@ -686,10 +686,10 @@ class ImageUploadsView(CreateAPIView):
     
     
     @transaction.atomic()
-    def get(self, request,ItemID=0,ImageType=0):
+    def get(self, request,ItemID=0):
         try:
             with transaction.atomic():
-                ItemImagequery = MC_ItemImages.objects.filter(Item_id=ItemID,ImageType_id=ImageType)
+                ItemImagequery = MC_ItemImages.objects.filter(Item_id=ItemID)
                 if ItemImagequery.exists():
                    
                     ItemImagedata = ItemImagesSerializer(ItemImagequery, many=True).data
