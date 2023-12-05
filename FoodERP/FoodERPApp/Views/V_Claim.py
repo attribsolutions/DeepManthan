@@ -154,7 +154,9 @@ class MasterClaimView(CreateAPIView):
 
                     if count != 0:
                         log_entry = create_transaction_logNew(request, Orderdata,PartyID,'',260,0,FromDate,ToDate,0)
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName+ ' Final Company Approval is Remaining...!', 'Data': []})
+
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName+ ' Final Approval is Remaining...!', 'Data': []})
+
                     else:
 
                         q0 = MC_ReturnReasonwiseMasterClaim.objects.filter(

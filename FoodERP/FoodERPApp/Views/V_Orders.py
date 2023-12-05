@@ -928,6 +928,12 @@ class SummaryReportView(CreateAPIView):
                         SettingID=1, Company=Company).values('Value')
                 v=q0[0]["Value"]
                 pricelist =v.split(",")
+
+                if Employee > 0:
+                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+                    for row in EmpPartys:
+                        p=row.id
+                    PartyIDs = p.split(",")
                 
                 OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id join M_Items on M_Items.id=TC_OrderItems.Item_id join M_Parties s on T_Orders.Supplier_id=s.id join M_Parties c on T_Orders.Customer_id=c.id left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where TC_InvoicesReferences.Order_id is null and OrderDate between %s and %s and c.PriceList_id in %s '''
                 
@@ -937,7 +943,7 @@ class SummaryReportView(CreateAPIView):
                     if Employee == 0:
                         OrderQuery += " "
                     else:
-                        OrderQuery += " and Supplier_id in (EmployeeParties(%s))"
+                        OrderQuery += " and Supplier_id in %s"
                 
                 
                 else:
@@ -957,7 +963,7 @@ class SummaryReportView(CreateAPIView):
                     
                 elif Employee >0:
                     
-                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist, Employee])
+                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist, PartyIDs])
                    
                 else:
                    
