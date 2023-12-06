@@ -665,6 +665,9 @@ class ImageUploadsView(CreateAPIView):
                     "Item" : request.POST.get('Item'),
                     "ImageType" : request.POST.get('ImageType')
                 } 
+
+                Imagequery = MC_ItemImages.objects.filter(Item=request.POST.get('Item'), ImageType=request.POST.get('ImageType'))
+                Imagequery.delete()
                 '''Image Upload Code start''' 
                 avatar = request.FILES.getlist('Item_pic')
                 for file in avatar:
@@ -701,3 +704,5 @@ class ImageUploadsView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
+
+    
