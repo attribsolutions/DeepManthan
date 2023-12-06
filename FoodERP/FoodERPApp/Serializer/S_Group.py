@@ -3,7 +3,7 @@ from ..models import *
 
 # Post and Put Methods Serializer
 
-class GroupSerializer(serializers.ModelSerializer):
+class M_GroupSerializerForItem(serializers.ModelSerializer):
     class Meta:
         model = M_Group
         fields = '__all__'
