@@ -664,8 +664,10 @@ class ImageUploadsView(CreateAPIView):
                 ItemImage_data = {
                     "Item" : request.POST.get('Item'),
                     "ImageType" : request.POST.get('ImageType')
-
                 } 
+
+                Imagequery = MC_ItemImages.objects.filter(Item=request.POST.get('Item'), ImageType=request.POST.get('ImageType'))
+                Imagequery.delete()
                 '''Image Upload Code start''' 
                 avatar = request.FILES.getlist('Item_pic')
                 for file in avatar:
@@ -675,12 +677,15 @@ class ImageUploadsView(CreateAPIView):
                     data=ItemImage_data)
                 if ItemImages_Serializer.is_valid():
                     ItemImages_Serializer.save()
+                    log_entry = create_transaction_logNew(request,ItemImage_data, 0,'',264,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Images Save Successfully', 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request,ItemImage_data, 0,'ImageUploadMethod:'+str(ItemImages_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemImages_Serializer.errors, 'Data': []})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'ImageUploadMethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []}) 
 
     
@@ -690,14 +695,14 @@ class ImageUploadsView(CreateAPIView):
         try:
             with transaction.atomic():
                 ItemImagequery = MC_ItemImages.objects.filter(Item_id=ItemID)
-                if ItemImagequery.exists():
                    
-                    ItemImagedata = ItemImagesSerializer(ItemImagequery, many=True).data
-                    
-                    log_entry = create_transaction_logNew(request,ItemImagedata, 0,'',221,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemImagedata})
-                log_entry = create_transaction_logNew(request,ItemImagedata, 0,'Details Not available',221,0)
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                ItemImagedata = ItemImagesSerializer(ItemImagequery, many=True).data
+                log_entry = create_transaction_logNew(request,ItemImagedata, 0,'',265,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemImagedata})
+            log_entry = create_transaction_logNew(request,ItemImagedata, 0,'Group Not available',265,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
+
+    
