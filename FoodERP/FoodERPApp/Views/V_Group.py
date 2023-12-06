@@ -49,7 +49,8 @@ class GroupView(CreateAPIView):
         try:
             with transaction.atomic():
                 Group_data = JSONParser().parse(request)
-                Group_Serializer = GroupSerializer(data=Group_data)
+
+                Group_Serializer = M_GroupSerializerForItem(data=Group_data)
                 if Group_Serializer.is_valid():
                     Group = Group_Serializer.save()
                     LastInsertID = Group.id
