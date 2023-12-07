@@ -354,7 +354,7 @@ class GenericSaleView(CreateAPIView):
                 Party_list = Party.split(",")
                 
         
-                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal FROM TC_InvoiceItems JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id JOIN M_Parties A ON A.id = T_Invoices.Party_id JOIN M_Parties B ON B.id = T_Invoices.Customer_id JOIN M_PartyType X on A.PartyType_id = X.id JOIN M_PartyType Y on B.PartyType_id = Y.id JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
+                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName FROM TC_InvoiceItems JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id JOIN M_Parties A ON A.id = T_Invoices.Party_id JOIN M_Parties B ON B.id = T_Invoices.Customer_id JOIN M_PartyType X on A.PartyType_id = X.id JOIN M_PartyType Y on B.PartyType_id = Y.id JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
                 if Genericdataquery:
                     GenericSaleData=list()
                     GenericSaleSerializer=GenericSaleReportSerializer(Genericdataquery, many=True).data
@@ -746,23 +746,26 @@ class InvoiceDateExportReportView(CreateAPIView):
                     PartyIDs = p.split(",")
                     
                 if (Mode == 1):
-                    Invoicequery ='''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo
-FROM TC_InvoiceItems
-JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
-JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
-JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
-JOIN M_Parties A ON A.id= T_Invoices.Party_id
-JOIN M_Parties B ON B.id = T_Invoices.Customer_id
-JOIN M_States ON M_States.id = B.State_id
-JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id
-JOIN C_Companies ON C_Companies.id = M_Items.Company_id
-JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
-JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
-JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_Invoices.Customer_id 
-LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
-LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
-WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
+                    Invoicequery ='''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo, M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
+                                            FROM TC_InvoiceItems
+                                            JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
+                                            JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
+                                            JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
+                                            JOIN M_Parties A ON A.id= T_Invoices.Party_id
+                                            JOIN M_Parties B ON B.id = T_Invoices.Customer_id
+                                            JOIN M_States ON M_States.id = B.State_id
+                                            JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id
+                                            JOIN C_Companies ON C_Companies.id = M_Items.Company_id
+                                            JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
+                                            JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
+                                            JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+                                            JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_Invoices.Customer_id 
+                                            LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+                                            LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
+                                            JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+                                            LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                            WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                     if Party == 0:
                         if Employee == 0:
                             Invoicequery += " "
@@ -777,12 +780,9 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                         else:
                            InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,PartyIDs])
                     else:
-                        InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Party])
-                    
-                    
-                    
+                        InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Party])      
                 else: 
-                    Invoicequery= '''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo
+                    Invoicequery= '''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo, M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
     FROM TC_InvoiceItems
     JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
     JOIN M_Parties A ON A.id= T_Invoices.Party_id
@@ -794,6 +794,9 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
     JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
     JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_InvoiceItems.Item_id and M_GSTHSNCode.IsDeleted=0
     LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
+    JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+    LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+    LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
     WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
                     if Customer == 0:
                         if Employee == 0:
@@ -811,7 +814,6 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                     else:
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Customer])
                 
-                # print(InvoiceQueryresults)
                 if InvoiceQueryresults:
                     
                     InvoiceExportData=list()
@@ -865,6 +867,8 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                             "Irn":b['Irn'],
                             "AckNo":b['AckNo'],
                             "EwayBillNo":b['EwayBillNo'],
+                            "GroupName": b['GroupName'],
+                            "SubGroupName" :b['SubGroupName'],
                         })
                     # InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
                     log_entry = create_transaction_logNew(request,Reportdata, Party,'From:'+str(FromDate)+'To:'+str(ToDate),212,0,FromDate,ToDate,0)
