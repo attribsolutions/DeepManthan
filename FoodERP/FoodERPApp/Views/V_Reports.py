@@ -1641,3 +1641,4 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
 
 #  where MC_ItemGroupDetails.GroupType_id=1 order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence
 #  limit 50;
+ 
