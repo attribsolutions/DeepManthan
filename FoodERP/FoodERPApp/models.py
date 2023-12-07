@@ -2130,6 +2130,7 @@ class TC_DeletedInvoicesReferences(models.Model):
 class M_ChannelWiseItems(models.Model):
     Item = models.ForeignKey(M_Items,related_name='ChannelItem', on_delete=models.PROTECT)
     PartyType =models.ForeignKey(M_PartyType, related_name='ChannelPartyType', on_delete=models.PROTECT) 
+    IsAvailableForOrdering =models.BooleanField(default=False)
     class Meta:
         db_table = "M_ChannelWiseItems"        
         
@@ -2216,7 +2217,15 @@ class M_PartyDetails(models.Model):
     Cluster = models.ForeignKey(M_Cluster, related_name='PartyCluster', on_delete=models.PROTECT,null=True,blank=True)
     SubCluster = models.ForeignKey(M_SubCluster, related_name='PartySubCluster', on_delete=models.PROTECT,null=True,blank=True)
     Supplier = models.ForeignKey(M_Parties, related_name='PartyDetailSupplier', on_delete=models.PROTECT ,null=True,blank=True) 
-    
+    GM = models.ForeignKey(M_Employees, related_name='PartyDetailGM', on_delete=models.PROTECT ,null=True,blank=True)
+    NH = models.ForeignKey(M_Employees, related_name='PartyDetailNH', on_delete=models.PROTECT ,null=True,blank=True)
+    RH = models.ForeignKey(M_Employees, related_name='PartyDetailRH', on_delete=models.PROTECT ,null=True,blank=True)
+    ASM = models.ForeignKey(M_Employees, related_name='PartyDetailASM', on_delete=models.PROTECT ,null=True,blank=True)
+    SE = models.ForeignKey(M_Employees, related_name='PartyDetailSE', on_delete=models.PROTECT ,null=True,blank=True)
+    SO = models.ForeignKey(M_Employees, related_name='PartyDetailSO', on_delete=models.PROTECT ,null=True,blank=True)
+    SR = models.ForeignKey(M_Employees, related_name='PartyDetailSR', on_delete=models.PROTECT ,null=True,blank=True)
+    MT = models.ForeignKey(M_Employees, related_name='PartyDetailMT', on_delete=models.PROTECT ,null=True,blank=True)
+    # /NH/RH/ASM/SE/SO/SR/MT
     class Meta:
         db_table = "M_PartyDetails" 
 
