@@ -324,13 +324,15 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 
                 # Example data for the five sheet CDNUR 
-                CDNURquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id,'' URType, T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate, (CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteType, CONCAT(M_States.StateCode, '-', M_States.Name) aa, (T_CreditDebitNotes.GrandTotal) GrandTotal, '' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate, SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue, '' CessAmount
+                CDNURquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id,'' URType, T_CreditDebitNotes.FullNoteNumber,T_CreditDebitNotes.CRDRNoteDate, (CASE WHEN T_CreditDebitNotes.NoteType_id = 37 THEN 'C' ELSE 'D' END) NoteTypeID, CONCAT(M_States.StateCode, '-', M_States.Name) aa, (T_CreditDebitNotes.GrandTotal) GrandTotal, '' ApplicableofTaxRate,TC_CreditDebitNoteItems.GSTPercentage Rate, SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue, '' CessAmount
                 FROM T_CreditDebitNotes
                 JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id = T_CreditDebitNotes.id
                 JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id
                 JOIN M_States ON M_States.id = M_Parties.State_id
                 WHERE T_CreditDebitNotes.Party_id = %s AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN = ''
                 GROUP BY  M_Parties.Name ,T_CreditDebitNotes.CRDRNoteDate,M_States.id ,M_States.Name ,TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
+                
+                # print(CDNURquery.query)
                 CDNURdata = CDNURSerializer(CDNURquery, many=True).data
                 df5=pd.DataFrame(CDNURdata)
                 ws5 = wb.create_sheet(title="CDNUR")
