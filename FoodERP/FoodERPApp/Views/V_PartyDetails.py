@@ -72,8 +72,7 @@ class PartyDetailsView(CreateAPIView):
                 if PartyDetails_serializer.is_valid():
                     PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'])
                     PartyDetailsdata.delete()   
-                    PartyDetails_serializer.save()
-                    print(PartyDetailsdata.query)  
+                    PartyDetails_serializer.save() 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
