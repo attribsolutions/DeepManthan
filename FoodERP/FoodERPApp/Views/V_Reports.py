@@ -1521,13 +1521,13 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                             
                             if PriceListID == 0:
                                 
-                                pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM FoodERP.M_PriceList order by Sequence''')
+                                pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
                             else:
                                
-                                pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName,CalculationPath FROM FoodERP.M_PriceList where id = %s order by Sequence''',[PriceListID])
+                                pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName,CalculationPath FROM M_PriceList where id = %s order by Sequence''',[PriceListID])
                                 for i in pricelistquery:
                                     pp=(i.CalculationPath).split(',')
-                                    pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM FoodERP.M_PriceList where id in %s order by Sequence''',[pp])
+                                    pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
                          
                         else:
                             if PriceListID == 0:
@@ -1545,7 +1545,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                 for i in pricelistquery:
                                     
                                     pp=(i.CalculationPath).split(',')
-                                    pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM FoodERP.M_PriceList where id in %s order by Sequence''',[pp])
+                                    pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
                          
                         # print(pricelistquery.query) 
 
