@@ -54,7 +54,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # password = validated_data.pop('password', None)
         # if password is not None:
         #     instance.set_password(password)           
-        # instance.save()
+        instance.save()
 
         for items in instance.UserRole.all():
             items.delete()
