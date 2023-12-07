@@ -101,6 +101,8 @@ class M_PriceList(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.PROTECT)
     PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.PROTECT)
+    Sequence = models.IntegerField(null=True, blank=True)
+    ShortName=models.CharField(max_length=200,null=True, blank=True)
 
 
     class Meta:
