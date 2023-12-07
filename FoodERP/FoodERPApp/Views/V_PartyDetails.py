@@ -115,8 +115,8 @@ class GetPartydetailsView(CreateAPIView):
                                                                             (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
                                                                             left join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
-                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, m_partydetails.GM_id, m_partydetails.NH_id,
-                                                                            m_partydetails.RH_id, m_partydetails.ASM_id, m_partydetails.SE_id, m_partydetails.SO_id, m_partydetails.SR_id, m_partydetails.MT_id
+                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM_id, M_PartyDetails.NH_id,
+                                                                            M_PartyDetails.RH_id, M_PartyDetails.ASM_id, M_PartyDetails.SE_id, M_PartyDetails.SO_id, M_PartyDetails.SR_id, M_PartyDetails.MT_id
                                                                             from M_PartyDetails 
                                                                             LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
@@ -131,8 +131,8 @@ class GetPartydetailsView(CreateAPIView):
                                                                             (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
                                                                             left join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
-                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, m_partydetails.GM_id, m_partydetails.NH_id,
-                                                                            m_partydetails.RH_id, m_partydetails.ASM_id, m_partydetails.SE_id, m_partydetails.SO_id, m_partydetails.SR_id, m_partydetails.MT_id
+                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM_id, M_PartyDetails.NH_id,
+                                                                            M_PartyDetails.RH_id, M_PartyDetails.ASM_id, M_PartyDetails.SE_id, M_PartyDetails.SO_id, M_PartyDetails.SR_id, M_PartyDetails.MT_id
                                                                             from M_PartyDetails 
                                                                             LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
