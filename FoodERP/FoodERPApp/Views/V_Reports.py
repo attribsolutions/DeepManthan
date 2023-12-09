@@ -1438,7 +1438,7 @@ class ProductAndMarginReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def post(self, request, IsSCM=0, PartyID=0):
+    def post(self, request):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
