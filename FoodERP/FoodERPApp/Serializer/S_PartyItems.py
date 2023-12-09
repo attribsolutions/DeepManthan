@@ -54,7 +54,7 @@ class MC_PartyItemListSerializer(serializers.Serializer):
 class M_ChannelWiseItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_ChannelWiseItems
-        fields = ['Item','PartyType']    
+        fields = ['Item','PartyType','IsAvailableForOrdering']    
      
 
 class ChanelwiseItemListSerializer(serializers.Serializer):
@@ -72,6 +72,7 @@ class ChanelwiseItemSerializer(serializers.Serializer):
     Name=serializers.CharField(max_length=500)
     Item_id = serializers.IntegerField()
     Total = serializers.IntegerField()
+    IsAvailableForOrdering =serializers.BooleanField()
     
     
     
