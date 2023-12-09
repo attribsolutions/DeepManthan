@@ -661,7 +661,7 @@ group by Item_id)StockQuantity
 (select * from (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
 WHERE `MC_PartyItems`.`Party_id` = %s AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) and 
  M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id 
- WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s)) and M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
+ WHERE ( SubParty_id=%s)) and M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
 left join
 
 (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`,DiscountType,Discount,DiscountAmount
