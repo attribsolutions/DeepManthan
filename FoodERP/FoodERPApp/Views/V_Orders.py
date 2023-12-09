@@ -962,8 +962,7 @@ class SummaryReportView(CreateAPIView):
                    
                 else:
                    
-                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])
-                print(OrderQueryresults)   
+                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])   
                 if OrderQuery:
                     OrderItemDetails = list()
                     for row in OrderQueryresults:
@@ -989,7 +988,7 @@ class SummaryReportView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order Summary Not available",31,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, 0, 0,'OrderSummaryReport:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'OrderSummaryReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
 
 

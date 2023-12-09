@@ -257,7 +257,7 @@ class ChanelWiseItemsListView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = M_ChannelWiseItems.objects.raw(
-                    '''select M_ChannelWiseItems.id,M_PartyType.Name, M_ChannelWiseItems.PartyType_id,count(M_ChannelWiseItems.Item_id)As Total 
+                    '''select M_ChannelWiseItems.id,M_PartyType.Name, M_ChannelWiseItems.PartyType_id,count(M_ChannelWiseItems.Item_id)As Total,  M_ChannelWiseItems.IsAvailableForOrdering 
 From M_ChannelWiseItems join M_PartyType on M_PartyType.id=M_ChannelWiseItems.PartyType_id group by M_ChannelWiseItems.PartyType_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -270,7 +270,8 @@ From M_ChannelWiseItems join M_PartyType on M_PartyType.id=M_ChannelWiseItems.Pa
                         ItemList.append({
                             "id": a['PartyType_id'],
                             "Name": a['Name'],
-                            "Total": a['Total']
+                            "Total": a['Total'],
+                            "IsAvailableForOrdering": a['IsAvailableForOrdering']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
