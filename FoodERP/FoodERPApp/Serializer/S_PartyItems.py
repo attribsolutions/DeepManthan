@@ -64,7 +64,8 @@ class ChanelwiseItemListSerializer(serializers.Serializer):
     PartyTypeName=serializers.CharField(max_length=500)
     GroupTypeName=serializers.CharField(max_length=500)
     GroupName=serializers.CharField(max_length=500)
-    SubGroupName=serializers.CharField(max_length=500)   
+    SubGroupName=serializers.CharField(max_length=500)  
+    IsAvailableForOrdering=serializers.BooleanField() 
                
 
 class ChanelwiseItemSerializer(serializers.Serializer):
@@ -72,7 +73,7 @@ class ChanelwiseItemSerializer(serializers.Serializer):
     Name=serializers.CharField(max_length=500)
     Item_id = serializers.IntegerField()
     Total = serializers.IntegerField()
-    IsAvailableForOrdering =serializers.BooleanField()
+    
     
     
     

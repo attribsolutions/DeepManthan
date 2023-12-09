@@ -164,7 +164,7 @@ class ChannelWiseItemsFilterView(CreateAPIView):
                 IsSCMCompany = Itemsdata['IsSCMCompany']
 
                 if IsSCMCompany == 1:
-                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
+                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,ifnull(M_ChannelWiseItems.IsAvailableForOrdering,0) IsAvailableForOrdering,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,
 ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id 
 AND M_ChannelWiseItems.PartyType_id=%s left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id 
@@ -174,7 +174,7 @@ ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup
 ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.IsSCM=1 and M_Items.Company_id 
 in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC_SubGroup.id)''',([PartyTypeID],[CompanyGroupID]))
                 else:
-                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
+                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,ifnull(M_ChannelWiseItems.IsAvailableForOrdering,0) IsAvailableForOrdering,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items 
 left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id AND M_ChannelWiseItems.PartyType_id=%s
@@ -210,7 +210,8 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
-                            "InPartyItem":Flag
+                            "InPartyItem":Flag,
+                            "IsAvailableForOrdering":a['IsAvailableForOrdering']
                         })
                     log_entry = create_transaction_logNew(request,Itemsdata,0,'',184,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
@@ -257,7 +258,7 @@ class ChanelWiseItemsListView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = M_ChannelWiseItems.objects.raw(
-                    '''select M_ChannelWiseItems.id,M_PartyType.Name, M_ChannelWiseItems.PartyType_id,count(M_ChannelWiseItems.Item_id)As Total,  M_ChannelWiseItems.IsAvailableForOrdering 
+                    '''select M_ChannelWiseItems.id,M_PartyType.Name, M_ChannelWiseItems.PartyType_id,count(M_ChannelWiseItems.Item_id)As Total 
 From M_ChannelWiseItems join M_PartyType on M_PartyType.id=M_ChannelWiseItems.PartyType_id group by M_ChannelWiseItems.PartyType_id''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -270,8 +271,8 @@ From M_ChannelWiseItems join M_PartyType on M_PartyType.id=M_ChannelWiseItems.Pa
                         ItemList.append({
                             "id": a['PartyType_id'],
                             "Name": a['Name'],
-                            "Total": a['Total'],
-                            "IsAvailableForOrdering": a['IsAvailableForOrdering']
+                            "Total": a['Total']
+                        
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
