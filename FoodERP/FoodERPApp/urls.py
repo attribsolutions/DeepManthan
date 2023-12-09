@@ -600,7 +600,8 @@ urlpatterns = [
             url(r'getdashboard/([0-9]+)$', DashBoardView.as_view()),
 
 #Report
-            url(r'ProductMarginReport/([0-9]+)/([0-9]+)$',ProductAndMarginReportView.as_view()),
+            
+            url(r'ProductMarginReport$',ProductAndMarginReportView.as_view()),
             url(r'OrderSummaryReport$',SummaryReportView.as_view()),
             url(r'PartyLedgerReport$',PartyLedgerReportView.as_view()),
             url(r'StockProcessing$',StockProcessingView.as_view()),
