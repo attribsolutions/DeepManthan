@@ -1472,11 +1472,11 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 if IsSCM == '0':
                     query += " "
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
-                    # ItemQuery = M_Items.objects.raw(query, [today, today, today])
+                    ItemQuery = M_Items.objects.raw(query, [today, today, today])
                 else:
                     query += " join MC_PartyItems on MC_PartyItems.Item_id=M_Items.id and MC_PartyItems.Party_id=%s"
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
-                    # ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
+                    ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
                     query += " where "
