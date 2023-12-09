@@ -1481,7 +1481,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 if any(ItemID) :    
                     query += " where "
                     query += "M_Items.id in %s "
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
@@ -1491,7 +1491,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 elif any(SubGroupID):
                     query += " where "
                     query += "M_Group.id in %s and MC_SubGroup.id in %s"
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID,SubGroupID])
                     else:
@@ -1499,7 +1499,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 elif any(GroupID):
                     query += " where "
                     query += "M_Group.id in %s "
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID])
                     else:
