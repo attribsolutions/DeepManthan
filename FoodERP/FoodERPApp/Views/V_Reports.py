@@ -1471,11 +1471,11 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 if IsSCM == '0':
                     query += " "
-                    # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today])
                 else:
                     query += " join MC_PartyItems on MC_PartyItems.Item_id=M_Items.id and MC_PartyItems.Party_id=%s"
-                    # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
@@ -1508,7 +1508,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 
                 
-                # print(ItemQuery.query)
+                print(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1586,33 +1586,33 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
 
                             })
 
-                    ItemsList.append({
+                        ItemsList.append({
 
-                        "FE2ItemID": row.id,
-                        "SAPCode": row.SAPItemCode,
-                        "Barcode": row.BarCode,
-                        "HSNCode": row.HSNCode,
-                        "Company": row.CompanyName,
-                        "SKUActiveDeactivestatus": row.isActive,
-                        "BoxSize": row.BoxSize,
-                        "StoringCondition": row.StoringCondition,
-                        "Product": row.Product,
-                        "subProduct": row.SubProduct,
-                        "ItemName": row.ItemName,
-                        "ItemShortName": row.ShortName,
-                        "MRP": row.MRP,
-                        "GST": row.GST,
-                        "BaseUnit": row.BaseUnit,
-                        "SKUVol": row.SKUVol,
-                        "ShelfLife": row.ShelfLife,
-                        "PcsInBox": row.PcsInBox,
-                        "PcsInKG": row.PcsInKg,
-                        "ProductID" : row.ProductID,
-                        "SubProductID" :row.SubProductID,
-                        "ItemMargins": ww,
-                        "ItemImage": ItemImage
+                            "FE2ItemID": row.id,
+                            "SAPCode": row.SAPItemCode,
+                            "Barcode": row.BarCode,
+                            "HSNCode": row.HSNCode,
+                            "Company": row.CompanyName,
+                            "SKUActiveDeactivestatus": row.isActive,
+                            "BoxSize": row.BoxSize,
+                            "StoringCondition": row.StoringCondition,
+                            "Product": row.Product,
+                            "subProduct": row.SubProduct,
+                            "ItemName": row.ItemName,
+                            "ItemShortName": row.ShortName,
+                            "MRP": row.MRP,
+                            "GST": row.GST,
+                            "BaseUnit": row.BaseUnit,
+                            "SKUVol": row.SKUVol,
+                            "ShelfLife": row.ShelfLife,
+                            "PcsInBox": row.PcsInBox,
+                            "PcsInKG": row.PcsInKg,
+                            "ProductID" : row.ProductID,
+                            "SubProductID" :row.SubProductID,
+                            "ItemMargins": ww,
+                            "ItemImage": ItemImage
 
-                    })
+                        })
                     log_entry = create_transaction_logNew(
                         request, ItemsList, 0, '', 106, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemsList})
