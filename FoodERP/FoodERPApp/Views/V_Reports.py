@@ -1456,7 +1456,7 @@ class ProductAndMarginReportView(CreateAPIView):
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
 round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,concat(round(GSTHsnCodeMaster(M_Items.id,%s,2),2),'-')GST,M_Units.Name BaseUnit,Grammage SKUVol,
-MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg
+MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg,ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  FROM M_Items
  join C_Companies on C_Companies.id=M_Items.Company_id
  left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 1
@@ -1606,6 +1606,8 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                         "ShelfLife": row.ShelfLife,
                         "PcsInBox": row.PcsInBox,
                         "PcsInKG": row.PcsInKg,
+                        "ProductID" : row.ProductID,
+                        "SubProductID" :row.SubProductID,
                         "ItemMargins": ww,
                         "ItemImage": ItemImage
 
