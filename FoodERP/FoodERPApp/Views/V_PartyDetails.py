@@ -111,12 +111,12 @@ class GetPartydetailsView(CreateAPIView):
                
                 if int(Group) > 0:
                     
-                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName,GM_id, NH_id, RH_id, ASM_id, SE_id, SO_id, SR_id, MT_id from 
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName,GM, NH, RH, ASM, SE, SO, SR, MT from 
                                                                             (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
                                                                             left join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
-                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM_id, M_PartyDetails.NH_id,
-                                                                            M_PartyDetails.RH_id, M_PartyDetails.ASM_id, M_PartyDetails.SE_id, M_PartyDetails.SO_id, M_PartyDetails.SR_id, M_PartyDetails.MT_id
+                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
+                                                                            M_PartyDetails.RH, M_PartyDetails.ASM, M_PartyDetails.SE, M_PartyDetails.SO, M_PartyDetails.SR, M_PartyDetails.MT
                                                                             from M_PartyDetails 
                                                                             LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
@@ -127,12 +127,12 @@ class GetPartydetailsView(CreateAPIView):
 
                 else:
                    
-                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName, GM_id, NH_id, RH_id, ASM_id, SE_id, SO_id, SR_id, MT_id from 
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName, GM, NH, RH, ASM, SE, SO, SR, MT from 
                                                                             (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
                                                                             left join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
-                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM_id, M_PartyDetails.NH_id,
-                                                                            M_PartyDetails.RH_id, M_PartyDetails.ASM_id, M_PartyDetails.SE_id, M_PartyDetails.SO_id, M_PartyDetails.SR_id, M_PartyDetails.MT_id
+                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
+                                                                            M_PartyDetails.RH, M_PartyDetails.ASM, M_PartyDetails.SE, M_PartyDetails.SO, M_PartyDetails.SR, M_PartyDetails.MT
                                                                             from M_PartyDetails 
                                                                             LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
@@ -140,7 +140,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
                                                                             where Group_id IS NULL)b on a.partyID=b.Party_id''',([party_values]))
                 
-                print(PartydetailsOnclusterdata.query)
+                # print(PartydetailsOnclusterdata.query)
                 if not PartydetailsOnclusterdata:
                     
                   
