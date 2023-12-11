@@ -471,7 +471,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id 
                                                             Right Join M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id   Join M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
-                                                            Join M_SubCluster on m_partydetails.SubCluster_id=M_SubCluster.Id
+                                                            Join M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
                                                             JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
                                                             LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
                                                             JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
