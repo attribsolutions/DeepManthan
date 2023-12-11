@@ -416,7 +416,14 @@ class ManPowerSerializer(serializers.Serializer):
     SalesRepresentative = serializers.CharField(max_length=500)
 
 
-
+class TCSAmountReportSerializer(serializers.Serializer):
+    InvoiceDate = serializers.DateField()
+    InvoiceNumber = serializers.IntegerField()
+    GrandTotal = serializers.DecimalField(max_digits=20, decimal_places=2)
+    TCSTaxAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    Total = serializers.DecimalField(max_digits=20, decimal_places=2)
+    PartyID = serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500)
 
 
 
