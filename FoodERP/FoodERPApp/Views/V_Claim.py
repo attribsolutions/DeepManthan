@@ -462,16 +462,21 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, Party_id,M_Parties.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName 
-FROM T_ClaimTrackingEntry
-LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
-JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id
-JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
-LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
-JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
-JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''', ([Year], [Month]))
-                # print(ClaimTrackingquery.query)
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT distinct T_ClaimTrackingEntry.id,M_Cluster.name as Cluster,M_SubCluster.Name as SubCluster, M_PartyDetails.Party_id, M_Parties.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                                                            T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
+                                                            b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
+                                                            CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
+                                                            CreditNoteUpload,  ClaimReceivedSource 
+                                                            FROM T_ClaimTrackingEntry
+                                                            LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
+                                                            JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id 
+                                                            Right Join M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id   Join M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+                                                            Join M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
+                                                            JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
+                                                            LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
+                                                            JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
+                                                            JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
+                                                            JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''', ([Year], [Month]))
                 if ClaimTrackingquery:
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(
@@ -480,33 +485,27 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                     for a in ClaimTrackingdata:
                         ClaimTrackingList.append({
                             "id": a['id'],
+                            "Cluster": a['Cluster'],
+                            "SubCluster":a['SubCluster'],
+                            "Party": a['Party_id'],
+                            "PartyName": a['PartyName'],
+                            "FullClaimNo": a['FullClaimNo'],
+                            "Claim": a['Claim_id'],
                             "Date": a['Date'],
                             "Month": a['Month'],
                             "Year": a['Year'],
-                            "ClaimReceivedSource": a['ClaimReceivedSource'],
-                            "Type": a['Type'],
                             "TypeName": a['TypeName'],
-                            "ClaimTrade": a['ClaimTrade'],
-                            "ClaimTradeName": a['ClaimTradeName'],
-                            "TypeOfClaim": a['TypeOfClaim'],
                             "TypeOfClaimName": a['TypeOfClaimName'],
+                            "ClaimTradeName": a['ClaimTradeName'],
                             "ClaimAmount": a['ClaimAmount'],
-                            "Remark": a['Remark'],
-                            "ClaimCheckBy": a['ClaimCheckBy'],
-                            "ClaimCheckByName": a['ClaimCheckByName'],
                             "CreditNotestatus": a['CreditNotestatus'],
-                            "CreditNotestatusName": a['CreditNotestatusName'],
                             "CreditNoteNo": a['CreditNoteNo'],
                             "CreditNoteDate": a['CreditNoteDate'],
                             "CreditNoteAmount": a['CreditNoteAmount'],
                             "ClaimSummaryDate": a['ClaimSummaryDate'],
                             "CreditNoteUpload": a['CreditNoteUpload'],
-                            "Claim": a['Claim_id'],
-                            "Party": a['Party_id'],
-                            "PartyName": a['PartyName'],
-                            "FullClaimNo": a['FullClaimNo'],
-                            "PartyType": a['PartyType_id'],
-                            "PartyTypeName": a['PartyTypeName']
+                            "ClaimReceivedSource": a['ClaimReceivedSource'],
+
                         })
                     log_entry = create_transaction_logNew(request, ClaimTrackingdata,a['Party_id'],'',257,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList})

@@ -658,7 +658,10 @@ a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a
 and Party_id=%s 
 group by Item_id)StockQuantity                
                 from
-(select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s AND Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) )b 
+(select * from (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
+WHERE `MC_PartyItems`.`Party_id` = %s AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) and 
+ M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id 
+ WHERE ( SubParty_id=%s)) and M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
 left join
 
 (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`,DiscountType,Discount,DiscountAmount
@@ -676,7 +679,7 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [Party], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [Party],[PartyItem], [OrderID]))
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
@@ -935,7 +938,7 @@ class SummaryReportView(CreateAPIView):
                         p=row.id
                     PartyIDs = p.split(",")
                 
-                OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id join M_Items on M_Items.id=TC_OrderItems.Item_id join M_Parties s on T_Orders.Supplier_id=s.id join M_Parties c on T_Orders.Customer_id=c.id left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where TC_InvoicesReferences.Order_id is null and OrderDate between %s and %s and c.PriceList_id in %s '''
+                OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id join M_Items on M_Items.id=TC_OrderItems.Item_id join M_Parties s on T_Orders.Supplier_id=s.id join M_Parties c on T_Orders.Customer_id=c.id left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where TC_InvoicesReferences.Order_id is null and OrderDate between %s and %s and c.PriceList_id in %s'''
                 
                 if Party == "":
                     OrderQuery += " "
@@ -943,16 +946,11 @@ class SummaryReportView(CreateAPIView):
                     if Employee == 0:
                         OrderQuery += " "
                     else:
-                        OrderQuery += " and Supplier_id in %s"
-                
-                
+                        OrderQuery += " and Customer_id in %s"
                 else:
-                    OrderQuery += " and Supplier_id=%s"
+                    OrderQuery += " and Customer_id=%s"
                     x = Party
                     
-                    
-                    
-               
                 if Party != "" and Employee >0:
                     
                     OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist,Party])
@@ -967,10 +965,7 @@ class SummaryReportView(CreateAPIView):
                    
                 else:
                    
-                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])
-                    
-                
-                # print(OrderQueryresults.query)
+                    OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])   
                 if OrderQuery:
                     OrderItemDetails = list()
                     for row in OrderQueryresults:
@@ -996,7 +991,7 @@ class SummaryReportView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order Summary Not available",31,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, 0, 0,'OrderSummaryReport:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'OrderSummaryReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
 
 
