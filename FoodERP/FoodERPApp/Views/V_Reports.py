@@ -1609,11 +1609,9 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                             "ItemImage": ItemImage
 
                         })
-                    log_entry = create_transaction_logNew(
-                        request, ItemsList, 0, '', 106, 0)
+                    log_entry = create_transaction_logNew(request, ItemsList, 0, '', 106, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemsList})
-                log_entry = create_transaction_logNew(
-                    request, ItemsList, 0, "Report Not Available", 106, 0)
+                log_entry = create_transaction_logNew(request, ItemsList, 0, "Report Not Available", 106, 0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Item Not Available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(
@@ -1657,12 +1655,14 @@ class TCSAmountReportView(CreateAPIView):
                     query = T_Invoices.objects.raw('''Select T_Invoices.id, T_Invoices.InvoiceDate, T_Invoices.InvoiceNumber, T_Invoices.TCSAmount AS TCSTaxAmount, T_Invoices.GrandTotal AS Total , M_Parties.id AS PartyID, M_Parties.Name AS PartyName From T_Invoices
 Join M_Parties on T_Invoices.Party_id = M_Parties.id
 WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0''',(FromDate,ToDate))
+                    log_entry = create_transaction_logNew(request, TCSAmountData, 0, '',266, 0)
 
                 else:                                   
                     query = T_Invoices.objects.raw('''Select T_Invoices.id, T_Invoices.InvoiceDate, T_Invoices.InvoiceNumber, T_Invoices.TCSAmount AS TCSTaxAmount, T_Invoices.GrandTotal AS Total , M_Parties.id AS PartyID, M_Parties.Name AS PartyName
 From T_Invoices
 Join M_Parties on T_Invoices.Party_id = M_Parties.id
 WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0 AND T_Invoices.Party_id =%s''',(FromDate,ToDate,Party))
+                    log_entry = create_transaction_logNew(request, TCSAmountData, Party, '',266, 0)
                     
                 TSCAMountList = list()
                 TCSAmountSerializer = TCSAmountReportSerializer(query,many=True).data         
@@ -1678,8 +1678,10 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0 AND 
                         "PartyID":a['PartyID'],
                         "PartyName":a['PartyName']
                     })
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TSCAMountList})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'TCSAmountReport:'+str(Exception),33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
