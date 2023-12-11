@@ -223,8 +223,7 @@ FROM
 ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
 
                 if not query:
-                    log_entry = create_transaction_logNew(
-                        request, Orderdata, Party, 'Report Not Found', 206, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'Report Not Found', 206, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                 else:
                     PartyLedgerSerializedata = PartyLedgerReportSerializer(
@@ -924,7 +923,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                         })
                     # InvoiceExportData.append({"InvoiceExportSerializerDetails" : InvoiceExportSerializer})
                     log_entry = create_transaction_logNew(
-                        request, Reportdata, Party, 'From:'+str(FromDate)+'To:'+str(ToDate), 212, 0, FromDate, ToDate, 0)
+                        request, Reportdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 212, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceExportData})
                 else:
                     log_entry = create_transaction_logNew(
@@ -1601,7 +1600,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                             "ItemName": row.ItemName,
                             "ItemShortName": row.ShortName,
                             "MRP": row.MRP,
-                            "GST": row.GST,
+                            "GST": row.GST +'%',
                             "BaseUnit": row.BaseUnit,
                             "SKUVol": row.SKUVol,
                             "ShelfLife": row.ShelfLife,
