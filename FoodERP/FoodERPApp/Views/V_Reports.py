@@ -1455,7 +1455,7 @@ class ProductAndMarginReportView(CreateAPIView):
                 query = """ SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
-round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,concat(round(GSTHsnCodeMaster(M_Items.id,%s,2),2),'-')GST,M_Units.Name BaseUnit,Grammage SKUVol,
+round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
 MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg,ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  FROM M_Items
  join C_Companies on C_Companies.id=M_Items.Company_id
@@ -1464,7 +1464,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
  join M_Units on M_Units.id=M_Items.BaseUnitID_id
- left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id
+ left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id and IsDeleted=0
  join MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  join MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0"""
                 
@@ -1507,7 +1507,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 
                 
-                print(ItemQuery.query)
+                # print(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1600,7 +1600,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                             "ItemName": row.ItemName,
                             "ItemShortName": row.ShortName,
                             "MRP": row.MRP,
-                            "GST": row.GST,
+                            "GST": str(row.GST) +'%',
                             "BaseUnit": row.BaseUnit,
                             "SKUVol": row.SKUVol,
                             "ShelfLife": row.ShelfLife,

@@ -140,6 +140,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
                                                                             where Group_id IS NULL)b on a.partyID=b.Party_id''',([party_values]))
                 
+                # print(PartydetailsOnclusterdata.query)
                 if not PartydetailsOnclusterdata:
                     
                   
