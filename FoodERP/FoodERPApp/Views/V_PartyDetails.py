@@ -122,7 +122,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                                                                             LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id 
-                                                                            where Group_id = %s)b on a.partyID=b.Party_id ''',([party_values], [Group]))
+                                                                            where Group_id = %s)b on a.partyID=b.Party_id ''',(party_values, Group))
                     
 
                 else:
@@ -140,7 +140,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
                                                                             where Group_id IS NULL)b on a.partyID=b.Party_id''',([party_values]))
                 
-                # print(PartydetailsOnclusterdata.query)
+                print(PartydetailsOnclusterdata.query)
                 if not PartydetailsOnclusterdata:
                     
                   
