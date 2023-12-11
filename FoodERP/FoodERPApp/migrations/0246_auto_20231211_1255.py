@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('FoodERPApp', '0245_delete_mc_partydetailschild'),
+        ('FoodERPApp', '0234_auto_20231211_1209'),
     ]
 
     operations = [
