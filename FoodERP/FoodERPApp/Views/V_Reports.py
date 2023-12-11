@@ -1601,7 +1601,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                             "ItemName": row.ItemName,
                             "ItemShortName": row.ShortName,
                             "MRP": row.MRP,
-                            "GST": row.GST,
+                            "GST": row.GST +'%',
                             "BaseUnit": row.BaseUnit,
                             "SKUVol": row.SKUVol,
                             "ShelfLife": row.ShelfLife,
