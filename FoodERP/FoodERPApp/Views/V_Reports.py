@@ -1456,7 +1456,7 @@ class ProductAndMarginReportView(CreateAPIView):
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
 round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,concat(round(GSTHsnCodeMaster(M_Items.id,%s,2),2),'-')GST,M_Units.Name BaseUnit,Grammage SKUVol,
-MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg
+MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg,ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  FROM M_Items
  join C_Companies on C_Companies.id=M_Items.Company_id
  left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 1
@@ -1470,17 +1470,17 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 if IsSCM == '0':
                     query += " "
-                    # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today])
                 else:
                     query += " join MC_PartyItems on MC_PartyItems.Item_id=M_Items.id and MC_PartyItems.Party_id=%s"
-                    # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
                     query += " where "
                     query += "M_Items.id in %s "
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
@@ -1490,7 +1490,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 elif any(SubGroupID):
                     query += " where "
                     query += "M_Group.id in %s and MC_SubGroup.id in %s"
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID,SubGroupID])
                     else:
@@ -1498,7 +1498,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 elif any(GroupID):
                     query += " where "
                     query += "M_Group.id in %s "
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence limit 2"
+                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID])
                     else:
@@ -1507,7 +1507,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 
                 
-                # print(ItemQuery.query)
+                print(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1585,31 +1585,33 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
 
                             })
 
-                    ItemsList.append({
+                        ItemsList.append({
 
-                        "FE2ItemID": row.id,
-                        "SAPCode": row.SAPItemCode,
-                        "Barcode": row.BarCode,
-                        "HSNCode": row.HSNCode,
-                        "Company": row.CompanyName,
-                        "SKUActiveDeactivestatus": row.isActive,
-                        "BoxSize": row.BoxSize,
-                        "StoringCondition": row.StoringCondition,
-                        "Product": row.Product,
-                        "subProduct": row.SubProduct,
-                        "ItemName": row.ItemName,
-                        "ItemShortName": row.ShortName,
-                        "MRP": row.MRP,
-                        "GST": row.GST,
-                        "BaseUnit": row.BaseUnit,
-                        "SKUVol": row.SKUVol,
-                        "ShelfLife": row.ShelfLife,
-                        "PcsInBox": row.PcsInBox,
-                        "PcsInKG": row.PcsInKg,
-                        "ItemMargins": ww,
-                        "ItemImage": ItemImage
+                            "FE2ItemID": row.id,
+                            "SAPCode": row.SAPItemCode,
+                            "Barcode": row.BarCode,
+                            "HSNCode": row.HSNCode,
+                            "Company": row.CompanyName,
+                            "SKUActiveDeactivestatus": row.isActive,
+                            "BoxSize": row.BoxSize,
+                            "StoringCondition": row.StoringCondition,
+                            "Product": row.Product,
+                            "subProduct": row.SubProduct,
+                            "ItemName": row.ItemName,
+                            "ItemShortName": row.ShortName,
+                            "MRP": row.MRP,
+                            "GST": row.GST,
+                            "BaseUnit": row.BaseUnit,
+                            "SKUVol": row.SKUVol,
+                            "ShelfLife": row.ShelfLife,
+                            "PcsInBox": row.PcsInBox,
+                            "PcsInKG": row.PcsInKg,
+                            "ProductID" : row.ProductID,
+                            "SubProductID" :row.SubProductID,
+                            "ItemMargins": ww,
+                            "ItemImage": ItemImage
 
-                    })
+                        })
                     log_entry = create_transaction_logNew(
                         request, ItemsList, 0, '', 106, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemsList})
