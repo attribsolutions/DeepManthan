@@ -200,6 +200,8 @@ class GenericSaleReportSerializer(serializers.Serializer):
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2)     
     GroupName = serializers.CharField(max_length=500)
     SubGroupName = serializers.CharField(max_length=500) 
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
      
      
      
