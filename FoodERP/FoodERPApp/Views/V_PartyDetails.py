@@ -106,11 +106,11 @@ class GetPartydetailsView(CreateAPIView):
             with transaction.atomic():
                 
                 EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')
+                
                 party_values = [str(record['Party']) for record in EmpParties]
+               
                 if int(Group) > 0:
                     
-                    
-
                     PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName,GM_id, NH_id, RH_id, ASM_id, SE_id, SO_id, SR_id, MT_id from 
                                                                             (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
                                                                             left join 
@@ -120,9 +120,9 @@ class GetPartydetailsView(CreateAPIView):
                                                                             from M_PartyDetails 
                                                                             LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
-                                                                            LEFT JOIN m_employees ON m_partydetails.id = m_employees.id
+                                                                            LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id 
-                                                                            where Group_id = %s)b on a.partyID=b.Party_id ''',(party_values, Group))
+                                                                            where Group_id = %s)b on a.partyID=b.Party_id ''',([party_values], [Group]))
                     
 
                 else:
@@ -136,11 +136,12 @@ class GetPartydetailsView(CreateAPIView):
                                                                             from M_PartyDetails 
                                                                             LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
-                                                                            LEFT JOIN m_employees ON m_partydetails.id = m_employees.id
+                                                                            LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
                                                                             where Group_id IS NULL)b on a.partyID=b.Party_id''',([party_values]))
                 
                 if not PartydetailsOnclusterdata:
+                    
                   
                     return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Partydetails Not available', 'Data': []})
                 PartydetailsOncluster_serializer =  GetPartydetailsSerializer(PartydetailsOnclusterdata, many=True).data
