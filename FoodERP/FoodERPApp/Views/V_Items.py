@@ -597,7 +597,7 @@ class ItemWiseUpdateView(CreateAPIView):
                                                             M_Items.Length, M_Items.StoringCondition
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
-                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id
+                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id and IsDeleted=0
                                                             LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                                                             LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                                             ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID])
