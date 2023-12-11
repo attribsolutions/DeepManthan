@@ -1464,7 +1464,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
  join M_Units on M_Units.id=M_Items.BaseUnitID_id
- left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id
+ left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id and IsDeleted=0
  join MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  join MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0"""
                 
@@ -1643,4 +1643,46 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
 #  where MC_ItemGroupDetails.GroupType_id=1 order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence
 #  limit 50;
 
- 
+
+class TCSAmountReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                TCSAmountData = JSONParser().parse(request)
+                FromDate = TCSAmountData['FromDate']
+                ToDate = TCSAmountData['ToDate']
+                Party = TCSAmountData['Party']
+
+                if Party == "":
+                    query = T_Invoices.objects.raw('''Select T_Invoices.id, T_Invoices.InvoiceDate, T_Invoices.InvoiceNumber, T_Invoices.TCSAmount AS TCSTaxAmount, T_Invoices.GrandTotal AS Total , M_Parties.id AS PartyID, M_Parties.Name AS PartyName From T_Invoices
+Join M_Parties on T_Invoices.Party_id = M_Parties.id
+WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0''',(FromDate,ToDate))
+
+                else:                                   
+                    query = T_Invoices.objects.raw('''Select T_Invoices.id, T_Invoices.InvoiceDate, T_Invoices.InvoiceNumber, T_Invoices.TCSAmount AS TCSTaxAmount, T_Invoices.GrandTotal AS Total , M_Parties.id AS PartyID, M_Parties.Name AS PartyName
+From T_Invoices
+Join M_Parties on T_Invoices.Party_id = M_Parties.id
+WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0 AND T_Invoices.Party_id =%s''',(FromDate,ToDate,Party))
+                    
+                TSCAMountList = list()
+                TCSAmountSerializer = TCSAmountReportSerializer(query,many=True).data         
+
+                for a in TCSAmountSerializer:
+                    GrandTotal = float(a['Total']) - float(a['TCSTaxAmount'])
+                    TSCAMountList.append({
+                        "InvoiceDate": a['InvoiceDate'],
+                        "InvoiceNumber": a['InvoiceNumber'],
+                        "GrandTotal": GrandTotal,
+                        "TCSTaxAmount": a['TCSTaxAmount'],
+                        "Total": a['Total'],
+                        "PartyID":a['PartyID'],
+                        "PartyName":a['PartyName']
+                    })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TSCAMountList})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
