@@ -383,7 +383,7 @@ class RetailerDataView(CreateAPIView):
                 Retailerdata = JSONParser().parse(request)
                 Party = Retailerdata['Party']
                 if(Party == 0):
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -395,9 +395,12 @@ LEFT JOIN M_Cities ON M_Cities.id=M_Parties.City_id
 LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
 LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
 Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+LEFT JOIN M_PartyDetails on  Supplier.Id=M_PartyDetails.Party_id
+JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 ''')
                 else:
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid 
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -409,6 +412,9 @@ LEFT JOIN M_Cities ON M_Cities.id=M_Parties.City_id
 LEFT JOIN M_PriceList ON M_PriceList.id = M_Parties.PriceList_id
 LEFT JOIN C_Companies ON C_Companies.id = M_Parties.Company_id
 Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
+LEFT JOIN M_PartyDetails on  Supplier.Id=M_PartyDetails.Party_id
+JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 WHERE MC_PartySubParty.Party_id=%s''', [Party])
 
                 if query:
@@ -1366,7 +1372,7 @@ M_PartyType.Name AS PartyType, A.Email, MC_PartySubParty.Party_id AS SS_id, B.NA
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
 A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
 C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, "" AS RSM, "" AS ASM, "" AS Salesofficer,
-"" AS SalesExecutive, "" AS SalesRepresentative
+"" AS SalesExecutive, "" AS SalesRepresentative, M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName
 FROM MC_PartySubParty 
 LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
@@ -1378,6 +1384,9 @@ LEFT JOIN M_Cities ON M_Cities.id = A.City_id
 LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
 LEFT JOIN M_Employees on M_Employees.id = MC_EmployeeParties.Employee_id
 LEFT JOIN M_Users on M_Users.Employee_id = M_Employees.id
+LEFT JOIN M_PartyDetails on  A.Id=M_PartyDetails.Party_id
+JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
 
                 if query:
@@ -1415,7 +1424,9 @@ WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
                             "ASM": a['ASM'],
                             "Salesofficer": a['Salesofficer'],
                             "SalesExecutive": a['SalesExecutive'],
-                            "SalesRepresentative": a['SalesRepresentative']
+                            "SalesRepresentative": a['SalesRepresentative'],
+                            "ClusterName" : a["ClusterName"],
+                            "SubClusterName": a["SubClusterName"]
 
                         })
                     log_entry = create_transaction_logNew(
