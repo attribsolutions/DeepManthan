@@ -232,7 +232,8 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
     Supplierid = serializers.CharField(max_length=500)
-    
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
     
     
     
@@ -414,6 +415,8 @@ class ManPowerSerializer(serializers.Serializer):
     Salesofficer = serializers.CharField(max_length=500)
     SalesExecutive = serializers.CharField(max_length=500)
     SalesRepresentative = serializers.CharField(max_length=500)
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
 
 
 class TCSAmountReportSerializer(serializers.Serializer):
