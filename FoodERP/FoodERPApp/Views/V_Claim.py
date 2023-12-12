@@ -484,13 +484,12 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     ClaimTrackingList = list()
                     for a in ClaimTrackingdata:
                         ClaimTrackingList.append({
-                            "id": a['id'],
                             "Cluster": a['Cluster'],
                             "SubCluster":a['SubCluster'],
                             "Party": a['Party_id'],
                             "PartyName": a['PartyName'],
                             "FullClaimNo": a['FullClaimNo'],
-                            "Claim": a['Claim_id'],
+                            "ClaimID": a['Claim_id'],
                             "Date": a['Date'],
                             "Month": a['Month'],
                             "Year": a['Year'],
