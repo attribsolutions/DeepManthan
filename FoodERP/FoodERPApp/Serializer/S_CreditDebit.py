@@ -130,7 +130,7 @@ class CreditDebitNoteItemSerializerSecond(serializers.ModelSerializer):
             ret["Margin"] = {"id": None, "Margin": None} 
         
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage ": None} 
+            ret["GST"] = {"id": None, "HSNCode": None} 
 
         if not ret.get("ServiceItem", None):
             ret["ServiceItem"] = {"id": None, "Name": None}  
