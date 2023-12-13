@@ -463,25 +463,26 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT distinct T_ClaimTrackingEntry.id,M_Cluster.name as Cluster,M_SubCluster.Name as SubCluster, M_PartyDetails.Party_id, M_Parties.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, m_subcluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
                                                             CreditNoteUpload,  ClaimReceivedSource 
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
-                                                            JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id 
-                                                            Right Join M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id   Join M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
-                                                            Join M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
-                                                            JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
+                                                            LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
+                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id=0
+                                                            Left join M_Cluster on Y.Cluster_id = M_Cluster.id
+                                                            left join M_SubCluster on Y.SubCluster_id = M_SubCluster.id
+                                                            LEFT JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
                                                             LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
-                                                            JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
-                                                            JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-                                                            JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''', ([Year], [Month]))
-                if ClaimTrackingquery:
+                                                            LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
+                                                            LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
+                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
+                    
+                if  ClaimTrackingquery:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    ClaimTrackingdata = ClaimTrackingSerializerSecond(
-                        ClaimTrackingquery, many=True).data
+                    ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
                     ClaimTrackingList = list()
                     for a in ClaimTrackingdata:
                         ClaimTrackingList.append({
