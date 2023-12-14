@@ -137,16 +137,16 @@ class ItemSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
 
-        instance.Name = validated_data.get(
-            'Name', instance.Name)
+        # instance.Name = validated_data.get(
+        #     'Name', instance.Name)
         instance.ShortName = validated_data.get(
             'ShortName', instance.ShortName)
         instance.Sequence = validated_data.get(
             'Sequence', instance.Sequence)
-        instance.Company = validated_data.get(
-            'Company', instance.Company)
-        instance.BaseUnitID = validated_data.get(
-            'BaseUnitID', instance.BaseUnitID)
+        # instance.Company = validated_data.get(
+        #     'Company', instance.Company)
+        # instance.BaseUnitID = validated_data.get(
+        #     'BaseUnitID', instance.BaseUnitID)
         instance.BarCode = validated_data.get(
             'BarCode', instance.BarCode)
         instance.SAPItemCode = validated_data.get(
@@ -456,10 +456,10 @@ class ItemReportSerializer(serializers.ModelSerializer):
     ItemGroupDetails = ItemGroupDetailsSerializerThird(many=True)
     Company=CompanySerializerSecond()
     BaseUnitID = UnitSerializerSecond()
-
+    ItemImagesDetails = ItemImagesSerializer(many=True)
     class Meta:
         model = M_Items
-        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails']
+        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails','ItemImagesDetails']
 
 
 class ItemSerializerThird(serializers.Serializer):
