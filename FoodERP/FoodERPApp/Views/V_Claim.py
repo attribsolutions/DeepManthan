@@ -146,8 +146,12 @@ class MasterClaimView(CreateAPIView):
                     q10 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,count(*) cnt
         FROM T_PurchaseReturn
         join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
-        where IsApproved=1  and  T_PurchaseReturn.ReturnDate between %s and %s 
-        and Customer_id=%s and FinalApprovalDate is null and ApprovedQuantity  > 0''', ([FromDate], [ToDate], [Party]))
+        where IsApproved=1   
+        and Customer_id=%s and FinalApprovalDate is null and ApprovedQuantity  > 0 and T_PurchaseReturn.id in(SELECT TC_PurchaseReturnReferences.SubReturn_id
+        FROM T_PurchaseReturn
+        join TC_PurchaseReturnReferences on TC_PurchaseReturnReferences.PurchaseReturn_id=T_PurchaseReturn.id
+        where T_PurchaseReturn.ReturnDate between %s and %s 
+        and Customer_id=%s)''', ( [Party],[FromDate], [ToDate], [PartyID]))
                     # print(q10.query)
                     for row in q10:
                         count = row.cnt
