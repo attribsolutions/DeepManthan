@@ -301,7 +301,7 @@ class MasterClaimView(CreateAPIView):
 
             on  I.Item_id=RA.Item_id)aaa where PrimaryAmount !=0 OR secondaryAmount !=0 OR ReturnAmount !=0
             ''',
-                                                                                ([Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party]))
+                                                                                ( [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party]))
 
                             # print(StockProcessQuery.query)
                             serializer = MasterclaimReportSerializer(
