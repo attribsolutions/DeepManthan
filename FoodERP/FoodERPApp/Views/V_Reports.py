@@ -1696,3 +1696,41 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0 AND 
             log_entry = create_transaction_logNew(request, 0, 0,'TCSAmountReport:'+str(Exception),33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
+class CxDDDiffReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Data = JSONParser().parse(request)
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data['Party']
+                InvoiceData=list()
+                query=T_Invoices.objects.raw('''select M_Parties.id,M_Parties.Name CXName,M_Items.Name ItemName,TC_InvoiceItems.MRPValue,sum(TC_InvoiceItems.Quantity)Quantity,M_Units.Name UnitName,TC_InvoiceItems.Rate,
+RateCalculationFunction1(0, TC_InvoiceItems.Item_id, 0, M_Units.id, 0, 10, 0, 0)DDRate
+from T_Invoices 
+join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id=15
+join M_Items on M_Items.id=TC_InvoiceItems.Item_id
+join MC_ItemUnits on MC_ItemUnits.id=TC_InvoiceItems.Unit_id
+join M_Units on M_Units.id =MC_ItemUnits.UnitID_id
+where Party_id=%s and T_Invoices.InvoiceDate between %s and %s 
+group by TC_InvoiceItems.Item_id ,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Unit_id,TC_InvoiceItems.Rate limit 10''',(Party,FromDate,ToDate))
+                
+                for row in query:
+                    
+                    InvoiceData.append({
+                        "XpressName" : row.CXName,
+                        "ItemName" : row.ItemName,
+                        "MRP" : row.MRPValue,
+                        "Quantity" : row.Quantity,
+                        "Unit" :row.UnitName,
+                        "CXRate" : row.Rate,
+                        "DDRate" :row.DDRate
+                    })
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceData})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'TCSAmountReport:'+str(Exception),33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
