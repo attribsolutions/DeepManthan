@@ -54,7 +54,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # password = validated_data.pop('password', None)
         # if password is not None:
         #     instance.set_password(password)           
-        # instance.save()
+        instance.save()
 
         for items in instance.UserRole.all():
             items.delete()
@@ -97,8 +97,9 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, data):
         LoginName = data.get("LoginName", None)
         password = data.get("password", None)
+        
         user = authenticate(LoginName=LoginName, password=password)
-      
+        
         if user is None:
             raise serializers.ValidationError('Incorrect Username or Password.')
         try:
@@ -200,6 +201,7 @@ class M_UserPartiesSerializer(serializers.Serializer):
     FSSAIExipry=serializers.DateField()
     PartyTypeID=serializers.IntegerField()
     PartyType=serializers.CharField(max_length=500)
+    UploadSalesDatafromExcelParty=serializers.IntegerField()
     
 class EmployeeSerializerForUserCreation(serializers.Serializer): 
     

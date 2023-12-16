@@ -44,7 +44,7 @@ class VehicleViewList(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Vehicledata,Party,"List Not Available",147,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'VehicleList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -65,11 +65,11 @@ class VehicleView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],'TransactionID:'+str(LastInsertId),13,LastInsertId)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Save Successfully', 'TransactionID': LastInsertId, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request, Vehiclesdata,0,Vehicles_Serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request, Vehiclesdata,0,'VehicleSave:'+str(Vehicles_Serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Vehicles_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'VehicleSave:'+str(e),33,0)
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
@@ -98,7 +98,7 @@ class VehicleView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Vehicle_serializer,a['Party'],'',148,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': VehicleData[0]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'VehicleSingleGETmethod:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
     @transaction.atomic()
@@ -115,11 +115,11 @@ class VehicleView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Vehiclesdata,Vehiclesdata['Party'],'TransactionID:'+str(LastInsertID),14,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Vehicle Updated Successfully','Data' : []})
                 else:
-                    log_entry = create_transaction_logNew(request, Vehiclesdata,0,Vehicle_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Vehiclesdata,0,'VehicleEdit:'+str(Vehicle_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Vehicle_Serializer.errors,'Data' :[]})
         except Exception :
-            log_entry = create_transaction_logNew(request, Vehiclesdata,0,"Exception Found",33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'VehicleEdit:'+"Exception Found",33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' Exception Found','Data' :[]})
     
     @transaction.atomic()

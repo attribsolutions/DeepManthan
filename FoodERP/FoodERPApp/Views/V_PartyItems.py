@@ -36,7 +36,7 @@ class PartyItemsListView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,Items_Serializer,0,'',180,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'PartyItemList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PartyItemsFilterView(CreateAPIView):
@@ -56,10 +56,11 @@ class PartyItemsFilterView(CreateAPIView):
                 IsSCMCompany = Logindata['IsSCMCompany']
 
                 if IsSCMCompany == 1:
-                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName FROM M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE IsSCM=1 AND M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s) AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s))  order by M_Group.id, MC_SubGroup.id ''',([PartyID],[CompanyGroupID],[PartyID],[PartyID]))
+                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem FROM M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s WHERE IsSCM=1 AND M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s) AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s))  order by M_Group.id, MC_SubGroup.id ''',([PartyID],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
                 else:
-                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  left JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.Company_id =%s order by M_Group.id, MC_SubGroup.id''',([PartyID],[CompanyID]))
+                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem from M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  left JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s where M_Items.Company_id =%s order by M_Group.id, MC_SubGroup.id''',([PartyID],[PartyID],[CompanyID]))
                 
+                # print(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request,Logindata,0,'Items Not available',181,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -83,12 +84,13 @@ class PartyItemsFilterView(CreateAPIView):
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
-                            "InStock":InStock
+                            "InStock":InStock,
+                            "MapItem": a['MapItem'],
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'FetchSingleGETItem:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class PartyItemsView(CreateAPIView):
@@ -112,11 +114,11 @@ class PartyItemsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'TransactionID:'+str(LastInsertID),182,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],PartyItems_serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'PartyItem Save:'+str(PartyItems_serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'PartyItem Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ChannelWiseItemsView(CreateAPIView):
@@ -138,11 +140,11 @@ class ChannelWiseItemsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Items_data,0,'PartyTypeID:'+str(id)+','+'TransactionID:'+str(LastInsertID),183,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request,Items_data,0,Items_Serializer.errors,34,0)
+                log_entry = create_transaction_logNew(request,Items_data,0,'ChannelWiseItemSave:'+str(Items_Serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Items_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ChannelWiseItemSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class ChannelWiseItemsFilterView(CreateAPIView):
@@ -162,7 +164,7 @@ class ChannelWiseItemsFilterView(CreateAPIView):
                 IsSCMCompany = Itemsdata['IsSCMCompany']
 
                 if IsSCMCompany == 1:
-                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
+                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,ifnull(M_ChannelWiseItems.IsAvailableForOrdering,0) IsAvailableForOrdering,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,
 ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id 
 AND M_ChannelWiseItems.PartyType_id=%s left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id 
@@ -172,7 +174,7 @@ ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup
 ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.IsSCM=1 and M_Items.Company_id 
 in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC_SubGroup.id)''',([PartyTypeID],[CompanyGroupID]))
                 else:
-                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,
+                    Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,ifnull(M_ChannelWiseItems.IsAvailableForOrdering,0) IsAvailableForOrdering,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items 
 left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id AND M_ChannelWiseItems.PartyType_id=%s
@@ -208,12 +210,13 @@ order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                             "GroupTypeName": a['GroupTypeName'],
                             "GroupName": a['GroupName'], 
                             "SubGroupName": a['SubGroupName'],
-                            "InPartyItem":Flag
+                            "InPartyItem":Flag,
+                            "IsAvailableForOrdering":a['IsAvailableForOrdering']
                         })
                     log_entry = create_transaction_logNew(request,Itemsdata,0,'',184,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ChannelWiseItemDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -269,6 +272,7 @@ From M_ChannelWiseItems join M_PartyType on M_PartyType.id=M_ChannelWiseItems.Pa
                             "id": a['PartyType_id'],
                             "Name": a['Name'],
                             "Total": a['Total']
+                        
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:

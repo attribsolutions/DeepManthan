@@ -160,9 +160,14 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 IsDamagePieces=StockReportdata['IsDamagePieces']
                 today = date.today() 
                 
-                Itemquery= MC_PartyItems.objects.raw('''SELECT ifnull(M_GroupType.Name,'') GroupTypeName,
-ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,O_BatchWiseLiveStock.BaseUnitQuantity Qty ,O_LiveBatches.MRPValue ,
-O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,RateCalculationFunction1(0, M_Items.id, %s, %s, 0, 0, 0, 0)Rate,(RateCalculationFunction1(0, M_Items.id, %s, %s, 0, 0, 0, 0)* O_BatchWiseLiveStock.BaseUnitQuantity)Valuee,GSTHsnCodeMaster(M_Items.id,%s,2)GSTPercentage
+                Itemquery= MC_PartyItems.objects.raw('''SELECT M_Parties.id DistributorID,M_Parties.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
+O_BatchWiseLiveStock.BaseUnitQuantity Qty ,
+ifnull((case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
+ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
+O_LiveBatches.MRPValue ,
+O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,RateCalculationFunction1(0, M_Items.id, %s, %s, 0, 0, O_LiveBatches.MRPValue, 0)Rate,
+round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage
 FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id
 left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
@@ -171,7 +176,8 @@ left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id=%s
 JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
-where MC_PartyItems.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity >0 and O_BatchWiseLiveStock.IsDamagePieces=%s  order by M_Group.id, MC_SubGroup.id ,M_Items.id ''',([Party],[Unit],[Party],[Unit],today,[Party],[Party],[IsDamagePieces]))
+join M_Parties on M_Parties.id =%s
+where MC_PartyItems.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity >0   order by M_Group.id, MC_SubGroup.id ,M_Items.id ''',([Party],[Unit],today,[Party],[Party],[Party]))
                 # print(str(Itemquery.query))
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
@@ -179,32 +185,50 @@ where MC_PartyItems.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity >0 and
                 else:
                     ItemList = list()
                     for row in Itemquery:
-                        Stock = row.Qty
                         
                         if int(Unit) == 1:
-                            ActualQty=UnitwiseQuantityConversion(row.id,Stock,0,0,0,1,0).ConvertintoSelectedUnit()
+                            SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
+                            UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
                             StockUnit = 'No'
                         if int(Unit) == 2:
-                            ActualQty=UnitwiseQuantityConversion(row.id,Stock,0,0,0,2,0).ConvertintoSelectedUnit()
+                            SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,2,0).ConvertintoSelectedUnit()
+                            UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,2,0).ConvertintoSelectedUnit()
                             StockUnit = 'Kg'
                         
                         if int(Unit) == 4:
-                            ActualQty=UnitwiseQuantityConversion(row.id,Stock,0,0,0,4,0).ConvertintoSelectedUnit()
+                            SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,4,0).ConvertintoSelectedUnit()
+                            UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,4,0).ConvertintoSelectedUnit()
                             StockUnit = 'Box'
-                        withGSTRate= float(row.Valuee) +(float(row.Valuee) *(float(row.GSTPercentage)/100))
+                        
+                       
+                        SaleableStockValue = round((float(SaleableStockActualQty) * float(row.Rate)),2)
+                        SaleableStockTaxValue =round((float(SaleableStockValue)*(float(row.GSTPercentage)/100)),2)
+                        UnSaleableStockValue = round((float(UnSaleableStockActualQty) * float(row.Rate)),2)
+                        UnSaleableStockTaxValue =round((float(UnSaleableStockValue)*(float(row.GSTPercentage)/100)),2)
+                        
                         ItemList.append({
-                            "Item": row.id,
-                            "ItemName": row.Name,
+                            "DistributorCode" : row.DistributorID,
+                            "DistributorName" : row.DistributorName,
                             "GroupTypeName": row.GroupTypeName,
                             "GroupName": row.GroupName, 
                             "SubGroupName": row.SubGroupName,
-                            "ActualQty":round(ActualQty,3),
+                            "Item": row.id,
+                            "ItemName": row.Name,
                             "BatchCode" : row.BatchCode ,
                             "SystemBatchCode" : row.SystemBatchCode ,
-                            "Unit":StockUnit,
                             "MRP":row.MRPValue,
-                            "Amount" : round(withGSTRate,2),
-                            "Rate" : row.Rate
+                            "PurchaseRate" : round(row.Rate,2),
+                            "SaleableStock":round(SaleableStockActualQty,3),
+                            "UnSaleableStock":round(UnSaleableStockActualQty,3),
+                            "SaleableStockValue" : SaleableStockValue,
+                            "SaleableStockTaxValue" :SaleableStockTaxValue,
+                            "UnSaleableStockValue" : UnSaleableStockValue,
+                            "UnSaleableStockTaxValue" : UnSaleableStockTaxValue,
+                            "TotalStockValue" : SaleableStockValue+UnSaleableStockValue,
+                            "TaxValue" : SaleableStockTaxValue+UnSaleableStockTaxValue,
+                            "Stockvaluewithtax" : SaleableStockValue+SaleableStockTaxValue+UnSaleableStockValue+UnSaleableStockTaxValue,
+                            "Unit":StockUnit,
+                            "GST" : row.GSTPercentage
                         })
                     
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)

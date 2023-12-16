@@ -179,7 +179,7 @@ class PurchaseReturnSerializerThird(serializers.ModelSerializer):
         fields = '__all__'
 
 class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
-    # Define a custom method field for the Image field
+    # Define a customer method field for the Image field
     Image = serializers.SerializerMethodField()
     class Meta:
         model = TC_PurchaseReturnItemImages
@@ -187,7 +187,7 @@ class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
 
     def get_Image(self, obj):
         if obj.Image:
-            media_url = f"http://192.168.1.114:8000/downloadQr/{obj.id}/3"
+            media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.id}/3"
             return media_url
         return None
 

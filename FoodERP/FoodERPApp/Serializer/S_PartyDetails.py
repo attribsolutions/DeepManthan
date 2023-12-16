@@ -7,3 +7,24 @@ class PartyDetailsSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_PartyDetails
         fields = '__all__'
+
+class  GetPartydetailsSerializer(serializers.Serializer):
+    
+    id = serializers.IntegerField()
+    PartyID = serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500)
+    Group_id = serializers.IntegerField()
+    Cluster_id = serializers.IntegerField()
+    ClusterName = serializers.CharField(max_length=500)
+    SubCluster_id = serializers.IntegerField()
+    SubClusterName = serializers.CharField(max_length=500)
+    Supplier_id = serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)
+    GM = serializers.IntegerField()
+    NH = serializers.IntegerField()
+    RH = serializers.IntegerField()
+    ASM = serializers.IntegerField()
+    SE = serializers.IntegerField()
+    SO = serializers.IntegerField()
+    SR = serializers.IntegerField()
+    MT = serializers.IntegerField()

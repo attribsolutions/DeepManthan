@@ -4,13 +4,17 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
+from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from rest_framework.parsers import JSONParser
 
 from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
 from ..models import *
-
+from django.db.models import F
+from django.db import connections
+from django.views import View
+from rest_framework.parsers import JSONParser
 
 
 
@@ -461,116 +465,244 @@ class M_ImageTypesView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-class ProductAndMarginReportView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+# class ProductAndMarginReportView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
 
-    @transaction.atomic()
-    def get(self, request,IsSCM=0,PartyID=0):
-        try:
-            with transaction.atomic():
-                # print(IsSCM)
-                if IsSCM == '0':
-                    Itemsdata = M_Items.objects.all()
-                else:
-                    partyitem=MC_PartyItems.objects.filter(Party=PartyID).values('Item')
-                    Itemsdata = M_Items.objects.filter(id__in=partyitem)
+#     @transaction.atomic()
+#     def get(self, request,IsSCM=0,PartyID=0):
+#         try:
+#             with transaction.atomic():
+#                 # print(IsSCM)
+#                 if IsSCM == '0':
+#                     Itemsdata = M_Items.objects.all()
+#                 else:
+#                     partyitem=MC_PartyItems.objects.filter(Party=PartyID).values('Item')
+#                     Itemsdata = M_Items.objects.filter(id__in=partyitem)
                 
-                # print(Itemsdata.query)
-                if Itemsdata.exists():
-                    Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
-                    ItemsList = list()
-                    for a in Itemsdata_Serializer:
+#                 # print(Itemsdata.query)
+#                 if Itemsdata.exists():
+#                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
+#                     ItemsList = list()
+#                     for a in Itemsdata_Serializer:
                         
                        
 
-                        if a['Length'] is None:
-                            BoxSize=""
+#                         if a['Length'] is None:
+#                             BoxSize=""
                             
-                        else:    
-                            BoxSize= a['Length']+" L X "+a['Breadth']+" B X "+a['Height']+" W - MM"
+#                         else:    
+#                             BoxSize= a['Length']+" L X "+a['Breadth']+" B X "+a['Height']+" W - MM"
                         
-                        ItemMargindata = M_MarginMaster.objects.filter(Item=a['id'],IsDeleted=0).values('Margin').order_by('-EffectiveDate','-id')[:1]
-                        ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0,Division_id__isnull=True,Party_id__isnull=True).values('MRP').order_by('-id')[:1]
-                        ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
-                        Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
-                        PcsInBoxQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=4).values('BaseUnitQuantity')
-                        PcsInKgQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=2).values('BaseUnitQuantity')
-                        if PcsInBoxQuery :
-                            PcsInBox =float(PcsInBoxQuery[0]['BaseUnitQuantity'])
-                        else:
-                            PcsInBox = 0.00
+#                         ItemMargindata = M_MarginMaster.objects.filter(Item=a['id'],IsDeleted=0).values('Margin').order_by('-EffectiveDate','-id')[:1]
+#                         ItemMRPdata = M_MRPMaster.objects.filter(Item=a['id'],IsDeleted=0,Division_id__isnull=True,Party_id__isnull=True).values('MRP').order_by('-id')[:1]
+#                         ItemGstHsnCodedata = M_GSTHSNCode.objects.filter(Item=a['id'],IsDeleted=0).values('GSTPercentage','HSNCode').order_by('-EffectiveDate','-id')[:1]
+#                         Itemshelfdata = MC_ItemShelfLife.objects.filter(Item=a['id'],IsDeleted=0).values('Days').order_by('-id')[:1]
+#                         PcsInBoxQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=4).values('BaseUnitQuantity')
+#                         PcsInKgQuery = MC_ItemUnits.objects.filter(Item=a['id'],IsDeleted=0,UnitID=2).values('BaseUnitQuantity')
+#                         if PcsInBoxQuery :
+#                             PcsInBox =float(PcsInBoxQuery[0]['BaseUnitQuantity'])
+#                         else:
+#                             PcsInBox = 0.00
 
-                        if PcsInKgQuery :
-                            PcsInKG =float(PcsInKgQuery[0]['BaseUnitQuantity'])
-                        else:
-                            PcsInKG = 0.00    
+#                         if PcsInKgQuery :
+#                             PcsInKG =float(PcsInKgQuery[0]['BaseUnitQuantity'])
+#                         else:
+#                             PcsInKG = 0.00    
                         
-                        if ItemMRPdata.count() == 0:
-                            MRPV=0
-                        else:    
-                            MRPV=float(ItemMRPdata[0]['MRP'])
+#                         if ItemMRPdata.count() == 0:
+#                             MRPV=0
+#                         else:    
+#                             MRPV=float(ItemMRPdata[0]['MRP'])
                         
-                        if IsSCM == '0' :
-                            query = M_PriceList.objects.values('id','Name')
-                        else:
-                            qur1=MC_PartySubParty.objects.filter(Q(Party=PartyID)|Q(SubParty=PartyID)).values('SubParty')
-                            qur2=M_Parties.objects.filter(id__in=qur1).values('PriceList').distinct()
-                            query = M_PriceList.objects.values('id','Name').filter(id__in=qur2)
+#                         if IsSCM == '0' :
+#                             query = M_PriceList.objects.values('id','Name')
+#                         else:
+#                             qur1=MC_PartySubParty.objects.filter(Q(Party=PartyID)|Q(SubParty=PartyID)).values('SubParty')
+#                             qur2=M_Parties.objects.filter(id__in=qur1).values('PriceList').distinct()
+#                             query = M_PriceList.objects.values('id','Name').filter(id__in=qur2)
                         
                         
                         
-                        ItemMargins=list()
-                        RateList=list()
+#                         ItemMargins=list()
+#                         RateList=list()
                         
-                        for x in query:
+#                         for x in query:
                             
-                            Margin=MarginMaster(a['id'],x['id'],0,date.today()).GetTodaysDateMargin()
-                            Rate=RateCalculationFunction(0,a['id'],0,0,1,0,x['id']).RateWithGST()
+#                             Margin=MarginMaster(a['id'],x['id'],0,date.today()).GetTodaysDateMargin()
+#                             Rate=RateCalculationFunction(0,a['id'],0,0,1,0,x['id']).RateWithGST()
                             
-                            string1 = x['Name']
-                            string2 = string1.replace(" ","")
-                            ItemMargins.append({
-                                string2+'Margin' : str(float(Margin[0]['TodaysMargin'])) + '%'
+#                             string1 = x['Name']
+#                             string2 = string1.replace(" ","")
+#                             ItemMargins.append({
+#                                 string2+'Margin' : str(float(Margin[0]['TodaysMargin'])) + '%'
                               
                                 
-                            })
-                            RateList.append({
+#                             })
+#                             RateList.append({
                                
-                                string2+'RateWithGST' : float(Rate[0]['RatewithGST']),
-                                string2+'RateWithOutGST' : float(Rate[0]['RateWithoutGST'])
-                            })
+#                                 string2+'RateWithGST' : float(Rate[0]['RatewithGST']),
+#                                 string2+'RateWithOutGST' : float(Rate[0]['RateWithoutGST'])
+#                             })
                         
-                        ww=ItemMargins+RateList
-                        # print(a['id'])
-                        ItemsList.append({
+#                         ww=ItemMargins+RateList
+#                         # print(a['id'])
+#                         ItemsList.append({
 
-                            "FE2ItemID": a['id'],
-                            "SAPCode":a['SAPItemCode'],
-                            "Barcode":a['BarCode'],
-                            "HSNCode":str(ItemGstHsnCodedata[0]['HSNCode']),
-                            "Company": a['Company']['Name'],
-                            "SKUActiveDeactivestatus":a['isActive'],
-                            "BoxSize":BoxSize,
-                            "StoringCondition":a['StoringCondition'],
-                            "Product":a['ItemGroupDetails'][0]['Group']['Name'],
-                            "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
-                            "ItemName": a['Name'],
-                            "ItemShortName":a['ShortName'],
-                            "MRP":MRPV,
-                            "GST":str(float(ItemGstHsnCodedata[0]['GSTPercentage'])) + '%',
-                            "BaseUnit": a['BaseUnitID']['Name'],
-                            "SKUVol":a['Grammage'],
-                            "ShelfLife":float(Itemshelfdata[0]['Days']),
-                            "PcsInBox":PcsInBox,
-                            "PcsInKG":PcsInKG,
-                            "ItemMargins":ww
+#                             "FE2ItemID": a['id'],
+#                             "SAPCode":a['SAPItemCode'],
+#                             "Barcode":a['BarCode'],
+#                             "HSNCode":str(ItemGstHsnCodedata[0]['HSNCode']),
+#                             "Company": a['Company']['Name'],
+#                             "SKUActiveDeactivestatus":a['isActive'],
+#                             "BoxSize":BoxSize,
+#                             "StoringCondition":a['StoringCondition'],
+#                             "Product":a['ItemGroupDetails'][0]['Group']['Name'],
+#                             "subProduct":a['ItemGroupDetails'][0]['SubGroup']['Name'],
+#                             "ItemName": a['Name'],
+#                             "ItemShortName":a['ShortName'],
+#                             "MRP":MRPV,
+#                             "GST":str(float(ItemGstHsnCodedata[0]['GSTPercentage'])) + '%',
+#                             "BaseUnit": a['BaseUnitID']['Name'],
+#                             "SKUVol":a['Grammage'],
+#                             "ShelfLife":float(Itemshelfdata[0]['Days']),
+#                             "PcsInBox":PcsInBox,
+#                             "PcsInKG":PcsInKG,
+#                             "ItemMargins":ww
                             
-                        })
-                    log_entry = create_transaction_logNew(request, Itemsdata_Serializer, 0,'',106,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
-                log_entry = create_transaction_logNew(request,Itemsdata_Serializer, 0,"Report Not Available",106,0)
-                return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    
-        except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ProductAndMarginReport:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+#                         })
+#                     log_entry = create_transaction_logNew(request, Itemsdata_Serializer, 0,'',106,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemsList})
+#                 log_entry = create_transaction_logNew(request,Itemsdata_Serializer, 0,"Report Not Available",106,0)
+#                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Item Not Available', 'Data': []})    
+#         except Exception as e:
+#             log_entry = create_transaction_logNew(request, 0, 0,'ProductAndMarginReport:'+str(Exception(e)),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
+
+class ItemWiseUpdateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic() 
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Item_data = JSONParser().parse(request)
+                Type = Item_data['Type']
+                GroupTypeID = Item_data['GroupType']
+                
+                
+                query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
+                                                            M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
+                                                            M_Items.Length, M_Items.StoringCondition
+                                                            FROM M_Items
+                                                            LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
+                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id and IsDeleted=0
+                                                            LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+                                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                                            ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID])
+                       
+                
+                Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
+                ItemListData = list() 
+                
+                for a in Item_Serializer:
+                    ItemListData.append({
+                                "id": a['id'],
+                                "ItemName": a['Name'],
+                                "GroupID": a['GroupID'],
+                                "GroupName": a['GroupName'],
+                                "SubGroupID": a['SubGroupID'],
+                                "SubGroupName": a['SubGroupName'],
+                                 Type: a.get(Type)
+                        
+                        })
+                        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
+class ItemWiseSaveView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Item_data = JSONParser().parse(request) 
+                Type = Item_data['Type']
+                UpdatedData = Item_data['UpdatedData']
+                
+                for a in UpdatedData: 
+                    if 'ItemID' in a:
+                        item_id = a['ItemID']
+                    if (Type == 'ShelfLife'):
+                        query = MC_ItemShelfLife.objects.filter(Item=a['ItemID']).update(Days=a['Value1'])
+                    elif(Type == 'Group'):
+                        query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(Group=a['Value1'],SubGroup=a['Value2'])                   
+                    else:
+                        query = M_Items.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
+                        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
+        except Exception as e:
+
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
+
+class ImageUploadsView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    parser_classes = [JSONParser,MultiPartParser,FormParser]
+
+    @transaction.atomic() 
+    def post(self, request):
+        try:
+            with transaction.atomic():
+               
+                ItemImage_data = {
+                    "Item" : request.POST.get('Item'),
+                    "ImageType" : request.POST.get('ImageType')
+                } 
+
+                Imagequery = MC_ItemImages.objects.filter(Item=request.POST.get('Item'), ImageType=request.POST.get('ImageType'))
+                Imagequery.delete()
+                '''Image Upload Code start''' 
+                avatar = request.FILES.getlist('Item_pic')
+                for file in avatar:
+                    ItemImage_data['Item_pic']=file
+                '''Image Upload Code End'''
+                ItemImages_Serializer = ItemImagesSerializer(
+                    data=ItemImage_data)
+                if ItemImages_Serializer.is_valid():
+                    ItemImages_Serializer.save()
+                    log_entry = create_transaction_logNew(request,ItemImage_data, 0,'',264,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Images Save Successfully', 'Data': []})
+                else:
+                    log_entry = create_transaction_logNew(request,ItemImage_data, 0,'ImageUploadMethod:'+str(ItemImages_Serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemImages_Serializer.errors, 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'ImageUploadMethod:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []}) 
+
+    
+    
+    @transaction.atomic()
+    def get(self, request,ItemID=0):
+        try:
+            with transaction.atomic():
+                ItemImagequery = MC_ItemImages.objects.filter(Item_id=ItemID)
+                   
+                ItemImagedata = ItemImagesSerializer(ItemImagequery, many=True).data
+                log_entry = create_transaction_logNew(request,ItemImagedata, 0,'',265,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemImagedata})
+            log_entry = create_transaction_logNew(request,ItemImagedata, 0,'Group Not available',265,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
+
+    

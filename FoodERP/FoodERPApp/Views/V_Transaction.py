@@ -107,7 +107,7 @@ WHERE Transactiontime BETWEEN %s AND %s'''
                 log_entry = create_transaction_logNew(request, Transactiondata, 0,'TransactionTypeDetails not available',196,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'TransactionTypeDetails not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'TransactionLogDetails:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class TransactionJsonView(CreateAPIView):
@@ -125,9 +125,9 @@ class TransactionJsonView(CreateAPIView):
                            Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
                            Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS TransactionlogJsondata
                     FROM Transactionlog
-                    INNER JOIN TransactionLogJsonData 
+                    left JOIN TransactionLogJsonData 
                     ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
-                    WHERE Transactionlog_id = %s
+                    WHERE Transactionlog.id = %s
                 ''',[id])
 
                 if not Transactiondata:

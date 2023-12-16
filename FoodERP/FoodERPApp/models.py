@@ -101,6 +101,8 @@ class M_PriceList(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='PriceListCompany', on_delete=models.PROTECT)
     PLPartyType = models.ForeignKey(M_PartyType, related_name='PriceListPartyType', on_delete=models.PROTECT)
+    Sequence = models.IntegerField(null=True, blank=True)
+    ShortName=models.CharField(max_length=200,null=True, blank=True)
 
 
     class Meta:
@@ -168,6 +170,7 @@ class M_Parties(models.Model):
     Longitude = models.CharField(max_length=500,null=True, blank=True)
     IsApprovedParty = models.BooleanField(default=False)
     SkyggeID = models.CharField(max_length=500,null=True, blank=True)
+    UploadSalesDatafromExcelParty= models.BooleanField(default=False)
     class Meta:
         db_table = 'M_Parties'
         
@@ -337,8 +340,8 @@ class M_Users(AbstractBaseUser):
     def __str__(self):
         return self.LoginName
 
-    def __str__(self):
-        return self.ID
+    # def __str__(self):
+    #     return self.id
 
 def make_extra_data(request,response,body):
     a=str(body) +'!'+str(response)
@@ -689,7 +692,8 @@ class MC_ItemUnits(models.Model):
 
 
 class MC_ItemImages(models.Model):
-    Item_pic = models.TextField()
+    
+    Item_pic = models.FileField(upload_to="Images\ItemImages",default="",null=True,blank=True)
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE,null=True,blank=True)
     class Meta:
@@ -831,6 +835,7 @@ class T_Orders(models.Model):
     Supplier = models.ForeignKey(M_Parties, related_name='OrderSupplier', on_delete=models.PROTECT)
     SAPResponse =models.CharField(max_length=500 ,null=True)
     IsConfirm = models.BooleanField(default=False) 
+    MobileAppOrderFlag = models.IntegerField(blank=True,null=True) 
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
@@ -914,7 +919,8 @@ class T_Invoices(models.Model):
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
     # Hide Flag is temporary 
     Hide = models.BooleanField(default=False)
-
+    ImportFromExcel= models.BooleanField(default=False)
+    DeletedFromSAP = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
 
@@ -1867,7 +1873,7 @@ class Transactionlog(models.Model):
     User = models.IntegerField()
     IPaddress = models.CharField(max_length=500)
     PartyID = models.IntegerField()
-    TransactionDetails =  models.CharField(max_length=500)
+    TransactionDetails =  models.CharField(max_length=2000)
     JsonData = models.TextField(blank = True)
     TransactionType =  models.IntegerField(default=1)
     TransactionID =  models.IntegerField(default=1)
@@ -2126,6 +2132,7 @@ class TC_DeletedInvoicesReferences(models.Model):
 class M_ChannelWiseItems(models.Model):
     Item = models.ForeignKey(M_Items,related_name='ChannelItem', on_delete=models.PROTECT)
     PartyType =models.ForeignKey(M_PartyType, related_name='ChannelPartyType', on_delete=models.PROTECT) 
+    IsAvailableForOrdering =models.BooleanField(default=False)
     class Meta:
         db_table = "M_ChannelWiseItems"        
         
@@ -2156,7 +2163,7 @@ class T_ClaimTrackingEntry(models.Model):
     ClaimTrade = models.IntegerField()
     TypeOfClaim = models.IntegerField(blank=True, null=True)
     ClaimAmount =models.DecimalField(max_digits=20, decimal_places=2)
-    Remark = models.CharField(max_length=500,null=True) 
+    Remark = models.CharField(max_length=500,null=True,blank=True) 
     ClaimCheckBy =models.IntegerField()
     CreditNotestatus =models.IntegerField()
     CreditNoteNo = models.CharField(max_length=500,null=True) 	
@@ -2212,10 +2219,34 @@ class M_PartyDetails(models.Model):
     Cluster = models.ForeignKey(M_Cluster, related_name='PartyCluster', on_delete=models.PROTECT,null=True,blank=True)
     SubCluster = models.ForeignKey(M_SubCluster, related_name='PartySubCluster', on_delete=models.PROTECT,null=True,blank=True)
     Supplier = models.ForeignKey(M_Parties, related_name='PartyDetailSupplier', on_delete=models.PROTECT ,null=True,blank=True) 
-    
+    GM = models.CharField(max_length=500,null=True)
+    NH = models.CharField(max_length=500,null=True)
+    RH = models.CharField(max_length=500,null=True)
+    ASM = models.CharField(max_length=500,null=True)
+    SE = models.CharField(max_length=500,null=True)
+    SO = models.CharField(max_length=500,null=True)
+    SR = models.CharField(max_length=500,null=True)
+    MT = models.CharField(max_length=500,null=True)
+    # /NH/RH/ASM/SE/SO/SR/MT
     class Meta:
         db_table = "M_PartyDetails" 
 
+
+
+# class MC_PartyDetailsChild(models.Model):
+#     PartyDetails = models.ForeignKey(M_PartyDetails, related_name='PartyDetailsChild', on_delete=models.CASCADE)
+    
+#     GM = models.ForeignKey(M_Employees, related_name='PartyDetailGM', on_delete=models.PROTECT ,null=True,blank=True)
+#     NH = models.ForeignKey(M_Employees, related_name='PartyDetailNH', on_delete=models.PROTECT ,null=True,blank=True)
+#     RH = models.ForeignKey(M_Employees, related_name='PartyDetailRH', on_delete=models.PROTECT ,null=True,blank=True)
+#     ASM = models.ForeignKey(M_Employees, related_name='PartyDetailASM', on_delete=models.PROTECT ,null=True,blank=True)
+#     SE = models.ForeignKey(M_Employees, related_name='PartyDetailSE', on_delete=models.PROTECT ,null=True,blank=True)
+#     SO = models.ForeignKey(M_Employees, related_name='PartyDetailSO', on_delete=models.PROTECT ,null=True,blank=True)
+#     SR = models.ForeignKey(M_Employees, related_name='PartyDetailSR', on_delete=models.PROTECT ,null=True,blank=True)
+#     MT = models.ForeignKey(M_Employees, related_name='PartyDetailMT', on_delete=models.PROTECT ,null=True,blank=True)
+    
+#     class Meta:
+#         db_table = "MC_PartyDetailsChild" 
 
 
 

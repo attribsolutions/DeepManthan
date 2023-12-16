@@ -109,7 +109,7 @@ class UserListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Logindata,0,"User List Not available",136,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Logindata,0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'UserList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -185,7 +185,7 @@ class UserListViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"User Not available",137,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'User Not available', 'Data': ''})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Usersdata_Serializer,0,"Execution Error",135,0) 
+            log_entry = create_transaction_logNew(request, 0,0,'User Details:'+"Execution Error",135,0) 
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
 
     @transaction.atomic()
@@ -197,7 +197,7 @@ class UserListViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {"UserID":id},0,'UserID:'+str(id),138,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Deleted Successfully', 'Data': []})
         except Exception:
-            log_entry = create_transaction_logNew(request, {"UserID":id},0,"Execution Errors",135,0)
+            log_entry = create_transaction_logNew(request, 0,0,'UserDelete:'+"Execution Errors",135,0)
             raise JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Execution Errors', 'Data': []})
 
     @transaction.atomic()
@@ -213,11 +213,11 @@ class UserListViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Usersdata,0,"User Updated Successfully",139,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, Usersdata,0,Usersdata_Serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, Usersdata,0,'UserEdit:'+str(Usersdata_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Usersdata_Serializer.errors, 'Data': []})
         except Exception:
-            log_entry = create_transaction_logNew(request, Usersdata,0,"Execution Errors",135,0)
+            log_entry = create_transaction_logNew(request, 0,0,'UserEdit:'+"Execution Errors",135,0)
             raise JsonResponse(
                 {'StatusCode': 200, 'Status': True, 'Message':  'Execution Error', 'Data': []})
 
@@ -234,14 +234,18 @@ class UserLoginView(RetrieveAPIView):
         LoginName = str(aa)
         findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
         where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        
         if not findUser:
+            
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
+        
         FindUserSerializer_data = FindUserSerializer(findUser, many=True).data
+        
         a = {
             "LoginName": FindUserSerializer_data[0]['LoginName'],
             "password": request.data.get('password')
         }
-
+        
         serializer = UserLoginSerializer(data=a)
         
         if serializer.is_valid():
@@ -289,7 +293,8 @@ class ChangePasswordView(RetrieveAPIView):
                     log_entry = create_transaction_logNew(request,Logindata,0,"Password change successfully",143,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Password change successfully', 'Data':[]}) 
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,0,0,'PasswordChangemethod:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
 
 # class RegenrateToken(APIView):
 
@@ -329,6 +334,7 @@ class UserPartiesViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request,{'UserID':id},0,"UserPartiesForUserMaster",144,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,'UserPartiesForUserMaster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 class UserPartiesForLoginPage(CreateAPIView):
@@ -342,7 +348,7 @@ class UserPartiesForLoginPage(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType
+                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType,M_Parties.UploadSalesDatafromExcelParty
 
                      FROM  MC_UserRoles
                      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
@@ -354,7 +360,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                 # UserID = request.user.id
                 # print(str(query.query))
                 if not query:
-                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0,"Parties Not available",145,0)
+                    log_entry = create_transaction_logNew(request,0,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
                     M_UserParties_Serializer = self.serializer_class(
@@ -363,7 +369,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0 ,"PartyDropdownforloginpage",145,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0 ,e,34,0)
+            log_entry = create_transaction_logNew(request,0,0 ,'PartyDropdownforloginpage:'+str(e),34,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -387,7 +393,7 @@ NOT IN (SELECT Employee_id From M_Users) ''')
                     log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"GetEmployeeForUserCreation",146,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
         except Exception:
-            log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"Exception",33,0)
+            log_entry = create_transaction_logNew(request,0,0 ,'GetEmployeeForUserCreation:'+'Exception',33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
 
 

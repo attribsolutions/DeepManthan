@@ -34,8 +34,8 @@ class FileDownloadView(View):
             '''check serializer PurchaseReturnItemImageSerializer2'''
             query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            # image_url = f'http://cbmfooderp.com:8000/media/{Image}'
-            image_url = f'http://192.168.1.114:8000/media/{Image}'    
+            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'    
             
         try:
             response = requests.get(image_url)
@@ -72,8 +72,7 @@ class PartyDetailsView(CreateAPIView):
                 if PartyDetails_serializer.is_valid():
                     PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'])
                     PartyDetailsdata.delete()   
-                    PartyDetails_serializer.save()
-                    
+                    PartyDetails_serializer.save() 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -100,5 +99,117 @@ class PartyDetailsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
+def SalesTeamData(ID):
+    if ID:
+        EmpIDs=ID.split(',')
+        query=M_Employees.objects.raw('''Select id ,Name from M_Employees where id in %s ''',([EmpIDs]))
+        SalesTeamData=list()
+        
+        for emp in query:
+            SalesTeamData.append({
+                "value" : emp.id,
+                "label" : emp.Name
+            })            
+        
+        return SalesTeamData
+    else:
+        return ID
 
+class GetPartydetailsView(CreateAPIView): 
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, Employee=0,Group=0):
+        try:
+            with transaction.atomic():
+                
+                EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')
+                
+                party_values = [str(record['Party']) for record in EmpParties]
+                PartyDetailData= list()
+                if int(Group) > 0:
+                    
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName,GM, NH, RH, ASM, SE, SO, SR, MT from 
+                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
+                                                                            left join 
+                                                                            (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
+                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
+                                                                            M_PartyDetails.RH, M_PartyDetails.ASM, M_PartyDetails.SE, M_PartyDetails.SO, M_PartyDetails.SR, M_PartyDetails.MT
+                                                                            from M_PartyDetails 
+                                                                            LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+                                                                            LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+                                                                            LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
+                                                                            LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id 
+                                                                            where Group_id = %s)b on a.partyID=b.Party_id ''',(party_values, Group))
+                    
+
+                else:
+                   
+                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName, GM, NH, RH, ASM, SE, SO, SR, MT from 
+                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10) and id in %s)a
+                                                                            left join 
+                                                                            (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
+                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
+                                                                            M_PartyDetails.RH, M_PartyDetails.ASM, M_PartyDetails.SE, M_PartyDetails.SO, M_PartyDetails.SR, M_PartyDetails.MT
+                                                                            from M_PartyDetails 
+                                                                            LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+                                                                            LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+                                                                            LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
+                                                                            LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
+                                                                            where Group_id IS NULL)b on a.partyID=b.Party_id  ''',([party_values]))
+                
+                # print(PartydetailsOnclusterdata.query)
+                if PartydetailsOnclusterdata:
+                    
+                    for row in PartydetailsOnclusterdata:
+                        supplierData=list()
+                        
+                        supplierDataQuery=MC_PartySubParty.objects.raw('''Select M_Parties.id,M_Parties.Name from MC_PartySubParty join M_Parties on M_Parties.id=MC_PartySubParty.Party_id where SubParty_id=%s''',([row.PartyID]))
+                        for a in supplierDataQuery:
+                            seletedSupplier=0
+                            if a.id == row.Supplier_id:
+                                seletedSupplier=1
+                            supplierData.append({
+                                "Supplier_id" : a.id,
+                                "SupplierName" : a.Name,
+                                "seletedSupplier" : seletedSupplier
+                            })
+                        
+                        
+                        
+                        
+                        
+                        PartyDetailData.append({
+                                "id": row.id,
+                                "PartyID": row.PartyID,
+                                "PartyName": row.PartyName,
+                                "Group_id": row.Group_id,
+                                "Cluster_id": row.Cluster_id,
+                                "ClusterName": row.ClusterName,
+                                "SubCluster_id": row.SubCluster_id,
+                                "SubClusterName": row.SubClusterName,
+                                "Supplier": supplierData,
+                                # "SupplierName": row.SupplierName,
+                                "GM": SalesTeamData(row.GM),
+                                "NH": SalesTeamData(row.NH),
+                                "RH": SalesTeamData(row.RH),
+                                "ASM": SalesTeamData(row.ASM),
+                                "SE": SalesTeamData(row.SE),
+                                "SO": SalesTeamData(row.SO),
+                                "SR": SalesTeamData(row.SR),
+                                "MT": SalesTeamData(row.MT),
+
+
+                        })
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyDetailData})
+                else:  
+                    return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Partydetails Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': (e), 'Data': []}) 
+        
   

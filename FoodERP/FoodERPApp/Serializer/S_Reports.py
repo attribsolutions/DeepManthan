@@ -135,7 +135,8 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     Irn = serializers.CharField(max_length=500)
     AckNo = serializers.CharField(max_length=500)
     EwayBillNo = serializers.CharField(max_length=500)
-
+    GroupName = serializers.CharField(max_length=500)
+    SubGroupName = serializers.CharField(max_length=500)
     def to_representation(self, instance):
         a = super().to_representation(instance)
         Discount_Type = a['DiscountType']
@@ -197,7 +198,10 @@ class GenericSaleReportSerializer(serializers.Serializer):
     TCSAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2)     
-     
+    GroupName = serializers.CharField(max_length=500)
+    SubGroupName = serializers.CharField(max_length=500) 
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
      
      
      
@@ -228,7 +232,8 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
     Supplierid = serializers.CharField(max_length=500)
-    
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
     
     
     
@@ -387,6 +392,7 @@ class ManPowerSerializer(serializers.Serializer):
     PartyActive = serializers.BooleanField(default=True)
     PartyType = serializers.CharField(max_length=500)
     Email = serializers.CharField(max_length=500)
+    PAN = serializers.CharField(max_length=500)
     SS_id = serializers.IntegerField(allow_null=True)
     SSName = serializers.CharField(max_length=500)
     LoginID = serializers.CharField(max_length=500)
@@ -410,9 +416,18 @@ class ManPowerSerializer(serializers.Serializer):
     Salesofficer = serializers.CharField(max_length=500)
     SalesExecutive = serializers.CharField(max_length=500)
     SalesRepresentative = serializers.CharField(max_length=500)
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
 
 
-
+class TCSAmountReportSerializer(serializers.Serializer):
+    InvoiceDate = serializers.DateField()
+    InvoiceNumber = serializers.IntegerField()
+    GrandTotal = serializers.DecimalField(max_digits=20, decimal_places=2)
+    TCSTaxAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    Total = serializers.DecimalField(max_digits=20, decimal_places=2)
+    PartyID = serializers.IntegerField()
+    PartyName = serializers.CharField(max_length=500)
 
 
 

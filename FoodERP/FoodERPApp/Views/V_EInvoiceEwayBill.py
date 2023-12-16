@@ -594,17 +594,22 @@ sum(SGST) total_sgst_value,sum(IGST)total_igst_value,sum(DiscountAmount)total_di
 from TC_CreditDebitNoteItems where CRDRNote_id=%s)b
 on a.id=b.CRDRNote_id''',([id],[id])
 )
-                    InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,M_GSTHSNCode.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,sum(TC_CreditDebitNoteItems.DiscountAmount)DiscountAmount,
-sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,TC_CreditDebitNoteItems.GSTPercentage gst_rate,
+                    InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT 
+(case when M_Items.id is null then M_CentralServiceItems.id else M_Items.id end )id ,
+(case when M_Items.id is null then M_CentralServiceItems.Name else M_Items.Name end )ItemName ,
+(case when M_Items.id is null then M_CentralServiceItems.HSNCode else M_GSTHSNCode.HSNCode end )HSNCode,
+sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,sum(TC_CreditDebitNoteItems.DiscountAmount)DiscountAmount,
+sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* TC_CreditDebitNoteItems.Rate)total_amount,((sum(Quantity)* TC_CreditDebitNoteItems.Rate)-sum(DiscountAmount))assessable_value,TC_CreditDebitNoteItems.GSTPercentage gst_rate,
 sum(Amount) total_item_value
 FROM TC_CreditDebitNoteItems 
-join M_Items on TC_CreditDebitNoteItems.Item_id=M_Items.id
-join M_GSTHSNCode on M_GSTHSNCode.id=TC_CreditDebitNoteItems.GST_id
-join MC_ItemUnits on MC_ItemUnits.id=TC_CreditDebitNoteItems.Unit_id
-join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+left join M_Items on TC_CreditDebitNoteItems.Item_id=M_Items.id
+left join M_GSTHSNCode on M_GSTHSNCode.id=TC_CreditDebitNoteItems.GST_id
+left join MC_ItemUnits on MC_ItemUnits.id=TC_CreditDebitNoteItems.Unit_id
+left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+left join M_CentralServiceItems on M_CentralServiceItems.id=TC_CreditDebitNoteItems.ServiceItem_id
 
 
-where CRDRNote_id=%s group by TC_CreditDebitNoteItems.Item_id,M_GSTHSNCode.HSNCode,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,TC_CreditDebitNoteItems.GSTPercentage''',[id])
+where CRDRNote_id=%s group by id,ItemName,HSNCode,M_Units.EwayBillUnit,TC_CreditDebitNoteItems.Rate,TC_CreditDebitNoteItems.GSTPercentage''',[id])
                     InvoiceUploadSerializer = CRDRNotegovUploadSerializer2(ItemQuery, many=True).data
                     Invoice=InvoiceUploadSerializer[0]
                     InvoiceItemUploadSerializer = InvoiceItemgovUploadSerializer2(InvoiceItem, many=True).data

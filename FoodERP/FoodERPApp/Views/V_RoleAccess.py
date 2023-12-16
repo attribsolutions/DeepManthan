@@ -167,10 +167,10 @@ class RoleAccessView(RetrieveAPIView):
 
                     log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0, RoleAccessSerialize_data.errors,34,0)
+                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
-            log_entry = create_transaction_logNew(request,RoleAccessSerialize_data,0, e,33,0)
+            log_entry = create_transaction_logNew(request,0,0,'RoleAccessSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   e, 'Data': []})
 
 
@@ -212,7 +212,7 @@ class RoleAccessViewList(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
-            log_entry = create_transaction_logNew(request, Logindata,0, e,33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -269,56 +269,35 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerNewUpdated(pageaccessquery,  many=True).data
-            Moduledata.append({
+            
+            RoleAccess={}
+            for x in RolePageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                RoleAccess[f"RoleAccess_{string}"] = stringID
+
+            PageAccess={}
+            for x in PageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                PageAccess[f"PageAccess_{string}"] = stringID  
+
+            RoleAccessData = {
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['pageid'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
-                "PageType" : a['PageType'],
+                "PageType": a['PageType'],
                 "RoleAccess_IsShowOnMenuForMaster": RolePageAccessSerializer[0]['id'],
                 "RoleAccess_IsShowOnMenuForList": RolePageAccessSerializerforListPAge[0]['id'],
-                "RoleAccess_IsSave": RolePageAccessSerializer[1]['id'],
-                "RoleAccess_IsView": RolePageAccessSerializer[2]['id'],
-                "RoleAccess_IsEdit": RolePageAccessSerializer[3]['id'],
-                "RoleAccess_IsDelete": RolePageAccessSerializer[4]['id'],
-                "RoleAccess_IsEditSelf": RolePageAccessSerializer[5]['id'],
-                "RoleAccess_IsDeleteSelf": RolePageAccessSerializer[6]['id'],
-                "RoleAccess_IsPrint": RolePageAccessSerializer[7]['id'],
-                "RoleAccess_IsTopOfTheDivision": RolePageAccessSerializer[8]['id'],
-                "RoleAccess_Pdfdownload": RolePageAccessSerializer[9]['id'],
-                "RoleAccess_Exceldownload": RolePageAccessSerializer[10]['id'],
-                "RoleAccess_IsCopy": RolePageAccessSerializer[11]['id'],
-                "RoleAccess_IsMultipleInvoicePrint": RolePageAccessSerializer[12]['id'],
-                "RoleAccess_E-WayBillUpload": RolePageAccessSerializer[13]['id'],
-                "RoleAccess_E-WayBillcancel": RolePageAccessSerializer[14]['id'],
-                "RoleAccess_E-WayBillPrint": RolePageAccessSerializer[15]['id'],
-                "RoleAccess_E-InvoiceUpload": RolePageAccessSerializer[16]['id'],
-                "RoleAccess_E-Invoicecancel": RolePageAccessSerializer[17]['id'],
-                "RoleAccess_E-InvoicePrint": RolePageAccessSerializer[18]['id'],
-                
-                "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
-                "PageAccess_IsSave": PageAccessSerializer[1]['id'],
-                "PageAccess_IsView": PageAccessSerializer[2]['id'],
-                "PageAccess_IsEdit": PageAccessSerializer[3]['id'],
-                "PageAccess_IsDelete": PageAccessSerializer[4]['id'],
-                "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
-                "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
-                "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
-                "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
-                "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
-                "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
-                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id'],
-                "PageAccess_E-WayBillUpload": PageAccessSerializer[13]['id'],
-                "PageAccess_E-WayBillcancel": PageAccessSerializer[14]['id'],
-                "PageAccess_E-WayBillPrint": PageAccessSerializer[15]['id'],
-                "PageAccess_E-InvoiceUpload": PageAccessSerializer[16]['id'],
-                "PageAccess_E-Invoicecancel": PageAccessSerializer[17]['id'],
-                "PageAccess_E-InvoicePrint": PageAccessSerializer[18]['id'],
+                **{f"{key}": value for key, value in RoleAccess.items()},
+                **{f"{key}": value for key, value in PageAccess.items()}
+            }
+            RoleAccessData.pop("RoleAccess_IsShowOnMenu", None)
 
-            })
-
+            Moduledata.append(RoleAccessData)
+           
         response = {
             "StatusCode": 200,
             "Status": True,
@@ -343,8 +322,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},0,'RoleAccessID:'+str(RoleAccessID),131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]}) 
 
 class RoleAccessViewAddPage(RetrieveAPIView):
     
@@ -432,7 +411,7 @@ class RoleAccessGetPagesOnModule(RetrieveAPIView):
                     log_entry = create_transaction_logNew(request,0,0,"RoleAccessGetPagesOnModule",133,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageSerializer})
         except Exception  :
-            log_entry = create_transaction_logNew(request, 0,0,"Execution Error",135,0)
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessGetPagesOnModule:'+'Execution Error',135,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Execution Error', 'Data': []})
         
       
@@ -474,12 +453,12 @@ class CopyRoleAccessView(CreateAPIView):
 
                         log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,"Copy Role Access Save Successfully",134,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Copy Role Access Save Successfully', 'Data': []})
-                    log_entry = create_transaction_logNew(request, 0,0,RoleAccessSerialize_data.errors,34,0)
+                    log_entry = create_transaction_logNew(request, 0,0,'CopyRoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
                 log_entry = create_transaction_logNew(request, 0,0,"Execution Error",135,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Execution Error', 'Data': []})
         except Exception :
-            log_entry = create_transaction_logNew(request, 0,0,"Execution Error",135,0)
+            log_entry = create_transaction_logNew(request, 0,0,'CopyRoleAccessSave:'+'Execution Error',135,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   'Execution Error', 'Data': []})
         
 

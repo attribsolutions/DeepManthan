@@ -27,9 +27,11 @@ class DashBoardView(CreateAPIView):
                 query = T_Invoices.objects.filter(Party_id = id, InvoiceDate = date.today()).count()
                 query1 = T_GRNs.objects.filter(Customer_id = id,GRNDate = date.today()).count()
                 query2 = T_Orders.objects.filter(Supplier_id = id, OrderDate = date.today()).count()
+                query3 = T_Orders.objects.filter(Supplier_id = id,MobileAppOrderFlag=1, OrderDate = date.today()).count()
                 Invoice_list = list() 
                 Invoice_list.append({
                         "OrderCount": query2,
+                        "MobileAppOrderCount": query3,
                         "GRNsCount": query1,
                         "InvoiceCount": query
                     })

@@ -41,7 +41,7 @@ class GroupView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'List Not available',220,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
@@ -49,18 +49,19 @@ class GroupView(CreateAPIView):
         try:
             with transaction.atomic():
                 Group_data = JSONParser().parse(request)
-                Group_Serializer = GroupSerializer(data=Group_data)
+
+                Group_Serializer = M_GroupSerializerForItem(data=Group_data)
                 if Group_Serializer.is_valid():
                     Group = Group_Serializer.save()
                     LastInsertID = Group.id
                     log_entry = create_transaction_logNew(request, Group_data, 0,'TransactionID:'+str(LastInsertID),22,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,Group_data, 0,Group_Serializer.errors,22,0)
+                    log_entry = create_transaction_logNew(request,Group_data, 0,'GroupSave:'+str(Group_Serializer.errors),22,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Group_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GroupViewSecond(CreateAPIView):
@@ -94,8 +95,8 @@ class GroupViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'Details Not available',221,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
@@ -111,11 +112,11 @@ class GroupViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Group_data, 0,'GroupID:'+str(id),23,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Updated Successfully', 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request,Group_data, 0,Group_Serializer.errors,23,0)
+                    log_entry = create_transaction_logNew(request,Group_data, 0,'GroupEdit:'+str(Group_Serializer.errors),23,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Group_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupEdit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -128,7 +129,7 @@ class GroupViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request,{'GroupID':id}, 0,'',24,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Group Deleted Successfully', 'Data':[]})
         except M_Group.DoesNotExist:
-            log_entry = create_transaction_logNew(request,{'GroupID':id}, 0,'Group Not available',24,0)
+            log_entry = create_transaction_logNew(request,0, 0,'Group Not available',24,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Group Not available', 'Data': []})
         except IntegrityError:   
             log_entry = create_transaction_logNew(request,0, 0,'Group used in another table',8,0)
@@ -165,5 +166,5 @@ class GetGroupByGroupTypeID(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'Group Not available',222,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GetGroupByGroupTypeIDmethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})

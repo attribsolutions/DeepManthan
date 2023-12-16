@@ -49,7 +49,7 @@ class ItemDivisionsSerializer(serializers.ModelSerializer):
 class ItemImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemImages
-        fields = ['ImageType', 'Item_pic']        
+        fields = ['ImageType', 'Item_pic','Item']        
          
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -137,16 +137,16 @@ class ItemSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
 
-        instance.Name = validated_data.get(
-            'Name', instance.Name)
+        # instance.Name = validated_data.get(
+        #     'Name', instance.Name)
         instance.ShortName = validated_data.get(
             'ShortName', instance.ShortName)
         instance.Sequence = validated_data.get(
             'Sequence', instance.Sequence)
-        instance.Company = validated_data.get(
-            'Company', instance.Company)
-        instance.BaseUnitID = validated_data.get(
-            'BaseUnitID', instance.BaseUnitID)
+        # instance.Company = validated_data.get(
+        #     'Company', instance.Company)
+        # instance.BaseUnitID = validated_data.get(
+        #     'BaseUnitID', instance.BaseUnitID)
         instance.BarCode = validated_data.get(
             'BarCode', instance.BarCode)
         instance.SAPItemCode = validated_data.get(
@@ -425,6 +425,7 @@ class ItemShelfLifeSerializerThird(serializers.ModelSerializer):
         fields = ['Days']
 
 class ItemGroupNameSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = M_Group
         fields = ['id','Name']
@@ -455,10 +456,10 @@ class ItemReportSerializer(serializers.ModelSerializer):
     ItemGroupDetails = ItemGroupDetailsSerializerThird(many=True)
     Company=CompanySerializerSecond()
     BaseUnitID = UnitSerializerSecond()
-
+    ItemImagesDetails = ItemImagesSerializer(many=True)
     class Meta:
         model = M_Items
-        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails']
+        fields = ['id','Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive','IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag', 'Length', 'Breadth','Height','StoringCondition','Grammage','Budget','CreatedBy', 'UpdatedBy','ItemGroupDetails','ItemImagesDetails']
 
 
 class ItemSerializerThird(serializers.Serializer):
@@ -490,4 +491,42 @@ class ItemSerializerThird(serializers.Serializer):
     CompanyName = serializers.CharField(max_length=200)
     BaseUnitName = serializers.CharField(max_length=200)   
         
-   
+        
+class ItemWiseUpdateSerializer(serializers.Serializer): 
+    id=serializers.IntegerField()    
+    Name = serializers.CharField(max_length=500)
+    ShortName = serializers.CharField(max_length=500)
+    Sequence = serializers.DecimalField(max_digits=5, decimal_places=2)
+    BarCode = serializers.CharField(max_length=500) 
+    SAPItemCode = serializers.CharField(max_length=100)
+    Breadth = serializers.CharField(max_length=200)
+    Grammage = serializers.CharField(max_length=200)
+    Height = serializers.CharField(max_length=200)
+    Length = serializers.CharField(max_length=200)
+    StoringCondition = serializers.CharField(max_length=200,)
+    GroupID = serializers.IntegerField() 
+    GroupName = serializers.CharField(max_length=200)
+    SubGroupID = serializers.IntegerField()
+    SubGroupName = serializers.CharField(max_length=200) 
+    ShelfLife =  serializers.CharField(max_length=200) 
+        
+class DaysSerializer(serializers.ModelSerializer):
+    Item = ItemWiseUpdateSerializer(read_only=True)
+    Group = ItemGroupNameSerializer(read_only=True)
+    SubGroup = ItemSubGroupSerializer(read_only=True)
+    class Meta:
+        model = MC_ItemShelfLife
+        fields = ['Days','Item','Group','SubGroup']
+
+class GroupSerializer(serializers.ModelSerializer):
+    Group = ItemGroupNameSerializer(read_only=True)
+    SubGroup = ItemSubGroupSerializer(read_only=True)
+    GroupType = ItemGroupTypeSerializerSecond(read_only=True)
+    Item = ItemWiseUpdateSerializer(read_only=True)
+    class Meta:
+        model = MC_ItemGroupDetails
+        fields = ['Group','SubGroup','Item','GroupType']
+
+
+
+       
