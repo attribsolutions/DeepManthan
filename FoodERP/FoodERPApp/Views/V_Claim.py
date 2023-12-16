@@ -466,7 +466,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, m_subcluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
