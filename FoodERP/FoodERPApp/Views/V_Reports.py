@@ -1367,7 +1367,7 @@ class ManPowerReportView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
-M_PartyType.Name AS PartyType, A.Email, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
+M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
 "" AS Cluster, "" AS SubCluster, C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
 A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
@@ -1402,6 +1402,7 @@ WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
                             "PartyActive": a['PartyActive'],
                             "PartyType": a['PartyType'],
                             "Email": a['Email'],
+                            "PAN":a['PAN'],
                             "SS_id": a['SS_id'],
                             "SSName": a['SSName'],
                             "LoginID": a['LoginID'],
@@ -1694,5 +1695,4 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0 AND 
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'TCSAmountReport:'+str(Exception),33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
 

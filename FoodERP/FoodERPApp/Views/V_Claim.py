@@ -146,8 +146,12 @@ class MasterClaimView(CreateAPIView):
                     q10 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,count(*) cnt
         FROM T_PurchaseReturn
         join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
-        where IsApproved=1  and  T_PurchaseReturn.ReturnDate between %s and %s 
-        and Customer_id=%s and FinalApprovalDate is null and ApprovedQuantity  > 0''', ([FromDate], [ToDate], [Party]))
+        where IsApproved=1   
+        and Customer_id=%s and FinalApprovalDate is null and ApprovedQuantity  > 0 and T_PurchaseReturn.id in(SELECT TC_PurchaseReturnReferences.SubReturn_id
+        FROM T_PurchaseReturn
+        join TC_PurchaseReturnReferences on TC_PurchaseReturnReferences.PurchaseReturn_id=T_PurchaseReturn.id
+        where T_PurchaseReturn.ReturnDate between %s and %s 
+        and Customer_id=%s)''', ( [Party],[FromDate], [ToDate], [PartyID]))
                     # print(q10.query)
                     for row in q10:
                         count = row.cnt
@@ -267,13 +271,12 @@ class MasterClaimView(CreateAPIView):
                             claimupdate = M_Claim.objects.filter(id=ClaimID).update(
                                 PrimaryAmount=PrimaryAmount, SecondaryAmount=SecondaryAmount, ReturnAmount=ReturnAmount)
     # ===========================================================================================================================================
-
+    #  (Select Item_id from T_Orders JOIN TC_OrderItems ON Order_id = T_Orders.id WHERE Customer_id = %s Group By Item_id)I
                             StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select * from (select 1 as id, I.Item_id,ifnull(PA.PrimaryAmount,0)PrimaryAmount,ifnull(SA.secondaryAmount,0)secondaryAmount,ifnull(RA.ReturnAmount,0)ReturnAmount,
                                 ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
 
             from
-            (Select Item_id from T_Orders JOIN TC_OrderItems ON Order_id = T_Orders.id WHERE Customer_id = %s
-Group By Item_id)I
+            (Select id Item_id from M_Items )I
             left join
 
 
@@ -298,7 +301,7 @@ Group By Item_id)I
 
             on  I.Item_id=RA.Item_id)aaa where PrimaryAmount !=0 OR secondaryAmount !=0 OR ReturnAmount !=0
             ''',
-                                                                                ([Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party]))
+                                                                                ( [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party], [FromDate], [ToDate], [Party]))
 
                             # print(StockProcessQuery.query)
                             serializer = MasterclaimReportSerializer(
@@ -463,7 +466,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, m_subcluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
