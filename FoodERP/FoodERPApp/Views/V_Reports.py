@@ -1741,7 +1741,7 @@ where T_Invoices.InvoiceDate between %s and %s
                             "Quantity" : row.Quantity,
                             "Unit" :row.UnitName,
                             "CXRate" : row.Rate,
-                            "DDRate" :round(row.DDRate),
+                            "DDRate" :row.DDRate,
                             "Diff" : round(diff,2),
                             "SumofDiff" : round(diff*row.Quantity,2),
                             "SupplierName" : row.SupplierName
