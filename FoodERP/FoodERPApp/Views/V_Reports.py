@@ -361,8 +361,7 @@ class GenericSaleView(CreateAPIView):
                     GenericSaleSerializer = GenericSaleReportSerializer(
                         Genericdataquery, many=True).data
                     # GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
-                    log_entry = create_transaction_logNew(request, Genericdata, 0, 'From:'+str(
-                        FromDate)+','+'To:'+str(ToDate), 207, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, Genericdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 207, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GenericSaleSerializer})
                 else:
                     log_entry = create_transaction_logNew(
@@ -1366,7 +1365,7 @@ class ManPowerReportView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
+                query = MC_PartySubParty.objects.raw('''SELECT distinct MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
 M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
  C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
@@ -1382,12 +1381,12 @@ LEFT JOIN M_States ON M_States.id = A.State_id
 LEFT JOIN M_Districts ON M_Districts.id = A.District_id
 LEFT JOIN M_Cities ON M_Cities.id = A.City_id
 LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
-LEFT JOIN M_Employees on M_Employees.id = MC_EmployeeParties.Employee_id
-LEFT JOIN M_Users on M_Users.Employee_id = M_Employees.id
-LEFT JOIN M_PartyDetails on  A.Id=M_PartyDetails.Party_id
-JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
-JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
-WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
+LEFT JOIN M_Employees On M_Employees.id = MC_EmployeeParties.Employee_id
+LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id
+LEFT JOIN M_PartyDetails X On  A.id=X.Party_id
+LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id
+LEFT JOIN M_SubCluster On X.SubCluster_id=M_SubCluster.id
+WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
 
                 if query:
                     ManPower_Serializer = ManPowerSerializer(
