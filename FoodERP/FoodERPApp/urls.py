@@ -680,7 +680,7 @@ urlpatterns = [
               url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
               
-                
+              url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
             
                   
 
