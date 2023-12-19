@@ -161,8 +161,8 @@ class T_GRNView(CreateAPIView):
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
                     "Unit": a['Unit'],
-                    "BaseUnitQuantity": BaseUnitQuantity,
-                    "OriginalBaseUnitQuantity": BaseUnitQuantity,
+                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
+                    "OriginalBaseUnitQuantity": round(BaseUnitQuantity,3),
                     "Party": Customer,
                     "CreatedBy":CreatedBy,
                     
@@ -180,7 +180,7 @@ class T_GRNView(CreateAPIView):
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
-                    "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
+                    "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,6),
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })
