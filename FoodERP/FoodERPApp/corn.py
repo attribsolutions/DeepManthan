@@ -10,8 +10,11 @@ from .Serializer.S_Reports import *
 from .models import *
 
 def my_cron_job():
-    # your functionality goes here
-    print(time.now())
+    log_entry = Transactionlog.objects.create(
+        TranasactionDate=date.today(),
+        User=1, PartyID=1, IPaddress='', TransactionDetails=1, JsonData=1, TransactionType=1, TransactionID=1
+    )
+    return log_entry
 
 
 def AutoStockProcess():
