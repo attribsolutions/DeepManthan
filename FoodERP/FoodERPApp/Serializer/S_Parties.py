@@ -311,7 +311,7 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         instance.Longitude = validated_data.get(
             'Longitude', instance.Longitude)
         instance.IsApprovedParty = validated_data.get(
-            'IsApprovedParty', instance.IsApprovedParty)    
+            'IsApprovedParty', True)    
             
         instance.save()   
         
