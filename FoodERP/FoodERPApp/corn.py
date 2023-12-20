@@ -14,7 +14,7 @@ def my_cron_job():
     print(time.now())
 
 
-def AutoStockProcess(FromDate,ToDate,Party):
+def AutoStockProcess():
     
 
     try:
