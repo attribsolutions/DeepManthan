@@ -196,7 +196,7 @@ REST_FRAMEWORK = {
 #     ('45 * * * *', 'FoodERPApp.cron.AutoStockProcess'),
 # ]
 CRONJOBS = [
-    ('*/20 * * * *', 'FoodERPApp.cron.my_cron_job')
+    ('*/20 * * * *', 'FoodERPApp.cron.AutoStockProcess')
 ]
 
 

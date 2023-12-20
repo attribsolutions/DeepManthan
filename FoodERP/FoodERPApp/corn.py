@@ -23,7 +23,7 @@ def AutoStockProcess(FromDate,ToDate,Party):
             Date=date.today()
             start_date_str = Date
             end_date_str = Date
-            Party = 14
+            Party = 97
             print(start_date_str,start_date_str,Party)
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
             end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
