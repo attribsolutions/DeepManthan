@@ -12,7 +12,7 @@ from .models import *
 def my_cron_job():
     log_entry = Transactionlog.objects.create(
         TranasactionDate=date.today(),
-        User=1, PartyID=1, IPaddress='', TransactionDetails=1, JsonData=1, TransactionType=1, TransactionID=1
+        User=1, PartyID=1, IPaddress='10.4.5.64', TransactionDetails=1, JsonData=1, TransactionType=1, TransactionID=1
     )
     return log_entry
 
