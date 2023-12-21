@@ -355,14 +355,48 @@ class GenericSaleView(CreateAPIView):
                 Party = Genericdata['Party']
                 Party_list = Party.split(",")
 
-                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.FullInvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName, M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName FROM TC_InvoiceItems JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id JOIN M_Parties A ON A.id = T_Invoices.Party_id JOIN M_Parties B ON B.id = T_Invoices.Customer_id JOIN M_PartyType X on A.PartyType_id = X.id JOIN M_PartyType Y on B.PartyType_id = Y.id JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id JOIN M_Parties on M_Parties.id= T_Invoices.Party_id RIGHT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
+                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.FullInvoiceNumber,
+T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
+M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
+M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,
+TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,
+M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,
+TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,
+TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,
+TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,
+T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName, 
+M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName 
+FROM TC_InvoiceItems 
+JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id 
+left JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id 
+left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
+ JOIN M_Parties A ON A.id = T_Invoices.Party_id 
+ JOIN M_Parties B ON B.id = T_Invoices.Customer_id 
+ JOIN M_PartyType X on A.PartyType_id = X.id 
+ JOIN M_PartyType Y on B.PartyType_id = Y.id 
+ JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id 
+ JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
+ left JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id 
+ JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id 
+ JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id 
+ JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s
+ LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
+ LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
+ JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+ LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+ LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+ JOIN M_Parties on M_Parties.id= T_Invoices.Party_id 
+ RIGHT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id
+ LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
+ LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id 
+ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
+                print(Genericdataquery.query)
                 if Genericdataquery:
                     GenericSaleData = list()
                     GenericSaleSerializer = GenericSaleReportSerializer(
                         Genericdataquery, many=True).data
                     # GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
-                    log_entry = create_transaction_logNew(request, Genericdata, 0, 'From:'+str(
-                        FromDate)+','+'To:'+str(ToDate), 207, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, Genericdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 207, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GenericSaleSerializer})
                 else:
                     log_entry = create_transaction_logNew(
@@ -1366,13 +1400,13 @@ class ManPowerReportView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
+                query = MC_PartySubParty.objects.raw('''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
 M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
-"" AS Cluster, "" AS SubCluster, C.Address, M_States.Name AS State, M_Districts.Name AS District,
+ C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
 A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
 C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, "" AS RSM, "" AS ASM, "" AS Salesofficer,
-"" AS SalesExecutive, "" AS SalesRepresentative, M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName
+"" AS SalesExecutive, "" AS SalesRepresentative, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty 
 LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
@@ -1382,16 +1416,15 @@ LEFT JOIN M_States ON M_States.id = A.State_id
 LEFT JOIN M_Districts ON M_Districts.id = A.District_id
 LEFT JOIN M_Cities ON M_Cities.id = A.City_id
 LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
-LEFT JOIN M_Employees on M_Employees.id = MC_EmployeeParties.Employee_id
-LEFT JOIN M_Users on M_Users.Employee_id = M_Employees.id
-LEFT JOIN M_PartyDetails on  A.Id=M_PartyDetails.Party_id
-JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
-JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
-WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
+LEFT JOIN M_Employees On M_Employees.id = MC_EmployeeParties.Employee_id
+LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id
+LEFT JOIN M_PartyDetails X On  A.id=X.Party_id
+ JOIN M_Cluster On X.Cluster_id=M_Cluster.id
+ JOIN M_SubCluster On X.SubCluster_id=M_SubCluster.id
+WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
 
                 if query:
-                    ManPower_Serializer = ManPowerSerializer(
-                        query, many=True).data
+                    ManPower_Serializer = ManPowerSerializer(query, many=True).data
                     ManPowerList = list()
 
                     for a in ManPower_Serializer:
@@ -1407,8 +1440,8 @@ WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
                             "SSName": a['SSName'],
                             "LoginID": a['LoginID'],
                             "country": a['country'],
-                            "Cluster": a['Cluster'],
-                            "SubCluster": a['SubCluster'],
+                            "Cluster" : a["Cluster"],
+                            "SubCluster": a["SubCluster"],
                             "Address": a['Address'],
                             "State": a['State'],
                             "District": a['District'],
@@ -1426,10 +1459,7 @@ WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1''')
                             "Salesofficer": a['Salesofficer'],
                             "SalesExecutive": a['SalesExecutive'],
                             "SalesRepresentative": a['SalesRepresentative'],
-                            "ClusterName" : a["ClusterName"],
-                            "SubClusterName": a["SubClusterName"]
-
-                        })
+                            })
                     log_entry = create_transaction_logNew(
                         request, ManPower_Serializer, 0, '', 219, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ManPowerList})
