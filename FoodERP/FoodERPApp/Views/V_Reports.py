@@ -1418,7 +1418,7 @@ LEFT JOIN M_Cities ON M_Cities.id = A.City_id
 LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
 LEFT JOIN M_Employees On M_Employees.id = MC_EmployeeParties.Employee_id
 LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id
-LEFT JOIN M_PartyDetails X On  A.id=X.Party_id AND X.Group_id = 0
+LEFT JOIN M_PartyDetails X On  A.id=X.Party_id AND X.Group_id is null
 LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id
 LEFT JOIN M_SubCluster On X.SubCluster_id=M_SubCluster.id
 WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
