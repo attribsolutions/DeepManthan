@@ -11,6 +11,7 @@ from ..Serializer.S_Parties import *
 from ..Serializer.S_ItemSale import *
 from ..models import *
 from django.db.models import F, Q
+from ..Views.V_CommFunction import *
 
 
 
@@ -57,7 +58,10 @@ class ShowBatchesForItemView(CreateAPIView):
                             'UnitName':  a['UnitName'],
                             'UnitOptions' : ItemUnitDetails
                         })
+                    log_entry = create_transaction_logNew(request,0, 0,'',272,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
+                log_entry = create_transaction_logNew(request,0, 0,'Stock Not available',272,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GETBatchesForItemInStockAdjustment:'+str(Exception),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
