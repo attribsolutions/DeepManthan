@@ -1753,14 +1753,14 @@ where T_Invoices.InvoiceDate between %s and %s
                 if Party > 0:
                     query += " and Party_id=%s"
 
-                query += " group by TC_InvoiceItems.Item_id ,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Unit_id,TC_InvoiceItems.Rate "   
+                query += " group by M_Parties.id,TC_InvoiceItems.Item_id ,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Unit_id,TC_InvoiceItems.Rate "   
           
                 if Party > 0:
                     RateDiffQuery= T_Invoices.objects.raw(query, [FromDate,ToDate,Party])
                 else:
                     RateDiffQuery= T_Invoices.objects.raw(query, [FromDate,ToDate])
                 
-                
+                # print(RateDiffQuery.query)
                 if RateDiffQuery:
                     for row in RateDiffQuery:
                         diff=row.Rate-row.DDRate
