@@ -104,6 +104,10 @@ DATABASES = {
 
 }
 
+CRONJOBS = [
+    ('*/30 * * * *', 'FoodERPApp.cron.my_cron_job')
+]
+
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -190,16 +194,6 @@ REST_FRAMEWORK = {
      'rest_framework_simplejwt.authentication.JWTAuthentication',
      )
 }
-
-
-# CRONJOBS = [
-#     ('45 * * * *', 'FoodERPApp.cron.AutoStockProcess'),
-# ]
-CRONJOBS = [
-    ('*/15 * * * *', 'FoodERPApp.cron.my_cron_job')
-]
-
-
 
 SIMPLE_JWT = {
 
