@@ -74,3 +74,6 @@ class PartySubPartyCreditlimit(serializers.ModelSerializer):
         
     
 
+class CxDDDiffPartiesSerializer(serializers.Serializer):
+    SupplierID = serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)

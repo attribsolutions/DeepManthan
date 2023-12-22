@@ -405,6 +405,7 @@ urlpatterns = [
             url(r'PartySubParty$',PartySubPartyView.as_view()),
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
             url(r'RetailerandSSDD$',RetailerandSSDDView.as_view()),
+            url(r'CxDDDiffParty$',CxDDDiffPartiesView.as_view()),
             
 # PartyWiseUpdate            
             url(r'PartyWiseUpdate$', PartyWiseUpdateView.as_view()),
