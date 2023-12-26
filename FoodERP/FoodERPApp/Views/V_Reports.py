@@ -365,7 +365,7 @@ TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems
 TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,
 TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,
 T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName, 
-M_Cluster.Name AS ClusterName, M_SubCluster.Name AS SubClusterName 
+M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster 
 FROM TC_InvoiceItems 
 JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id 
 left JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id 
