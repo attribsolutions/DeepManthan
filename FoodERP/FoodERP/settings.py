@@ -27,7 +27,7 @@ ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','11
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 # CRONTAB_DJANGO_SETTINGS_MODULE = 'FoodERP.settings'
 INSTALLED_APPS = [
-    # 'django_crontab',
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -107,7 +107,7 @@ DATABASES = {
 
 CRONJOBS = [
     # ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
-    ('*/1 * * * *', 'FoodERPApp.tasks.my_cron_job'),
+    ('*/1 * * * *', 'FoodERPApp.management.commands.my_cron_job'),
 ]
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
