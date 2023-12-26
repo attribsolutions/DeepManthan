@@ -8,7 +8,7 @@ from models import Transactionlog
 
 class Command(BaseCommand):
     help = 'Your description of the cron job'
-
+    print(help)
     def handle(self, *args, **kwargs):
         # Your cron job logic here
         log_entry = Transactionlog.objects.create(
