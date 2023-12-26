@@ -107,7 +107,7 @@ DATABASES = {
 
 CRONJOBS = [
     # ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
-    ('*/1 * * * *', 'FoodERPApp.tasks.my_cron_job'),
+    ('1 * * * *', 'FoodERPApp.tasks.my_cron_job' ),
 ]
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
