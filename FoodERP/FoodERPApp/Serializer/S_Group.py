@@ -20,3 +20,8 @@ class GroupSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Group
         fields = '__all__'      
+
+class GroupSerializerThird(serializers.ModelSerializer):
+    class Meta:
+        model = M_Group
+        fields = '__all__' 
