@@ -105,7 +105,7 @@ class GroupViewSecond(CreateAPIView):
             with transaction.atomic():
                 Group_data = JSONParser().parse(request)
                 Group_dataByID = M_Group.objects.get(id=id)
-                Group_Serializer = GroupSerializer(
+                Group_Serializer = GroupSerializerThird(
                     Group_dataByID, data=Group_data)
                 if Group_Serializer.is_valid():
                     Group_Serializer.save()
