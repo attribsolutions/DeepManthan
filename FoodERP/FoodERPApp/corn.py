@@ -10,6 +10,7 @@ from .Serializer.S_Reports import *
 from .models import *
 
 def my_cron_job():
+    print("my_cron_job Function Call")
     log_entry = Transactionlog.objects.create(
         TranasactionDate=date.today(),
         User=1, PartyID=1, IPaddress='10.4.5.64', TransactionDetails=1, JsonData=1, TransactionType=1, TransactionID=1

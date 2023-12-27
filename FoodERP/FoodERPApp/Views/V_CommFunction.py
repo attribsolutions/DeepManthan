@@ -141,7 +141,7 @@ def GetOpeningBalance(Party, Customer, Date):
     FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  
     UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
                                     Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
-    print(str(query2.query))
+    # print(str(query2.query))
     query2_serializer = OpeningBalanceSerializer(query2, many=True).data
     OpeningBalance = 0.000
     InvoiceAmount = 0.000
@@ -740,12 +740,12 @@ def ValidationFunForStockTransactions(PartyID, ItemID, TransactionDate):
     for row in q:
         StockAdjustmentDate = row.StockAdjustmentDate
 
-    print(StockAdjustmentDate, TransactionDate)
+    # print(StockAdjustmentDate, TransactionDate)
     if StockAdjustmentDate >= TransactionDate:
-        print('55555')
+        # print('55555')
         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Transaction not allowed', 'Data': []})
     else:
-        print('6666')
+        # print('6666')
         pass
 
 

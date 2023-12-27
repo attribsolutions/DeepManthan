@@ -59,6 +59,7 @@ class M_PartyType(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     IsRetailer = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
+    IsFranchises = models.BooleanField(default=False)
  
     class Meta:
         db_table = 'M_PartyType'
@@ -653,6 +654,7 @@ class M_Items(models.Model):
     StoringCondition = models.CharField(max_length=200,null=True,blank=True)
     Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
+    IsFranchisesItem = models.BooleanField(default=False)
     class Meta:
         db_table = "M_Items"
         
