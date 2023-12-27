@@ -112,9 +112,12 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
+                        
+                        
                         if (Orderdata['DashBoardMode'] == 1):
                             OrderListData.append({
-                                "OrderDate": a['OrderDate']
+                                "OrderDate": a['OrderDate'],
+                                "MobileAppOrderFlag" : a['MobileAppOrderFlag']
                             })
                         else:
                             tcsflagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('IsTCSParty')
@@ -162,7 +165,8 @@ class OrderListFilterView(CreateAPIView):
                                 "SAPResponse": a['SAPResponse'],
                                 "IsConfirm": a['IsConfirm'],
                                 "Inward": inward,
-                                "IsTCSParty":TCSPartyFlag
+                                "IsTCSParty":TCSPartyFlag,
+                                "MobileAppOrderFlag" : a['MobileAppOrderFlag']
                             })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
