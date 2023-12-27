@@ -198,10 +198,10 @@ class GenericSaleReportSerializer(serializers.Serializer):
     TCSAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2)     
-    GroupName = serializers.CharField(max_length=500)
-    SubGroupName = serializers.CharField(max_length=500) 
-    ClusterName = serializers.CharField(max_length=500)
-    SubClusterName = serializers.CharField(max_length=500)
+    Group = serializers.CharField(max_length=500)
+    SubGroup = serializers.CharField(max_length=500) 
+    Cluster = serializers.CharField(max_length=500)
+    SubCluster = serializers.CharField(max_length=500)
      
      
      
