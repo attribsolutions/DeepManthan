@@ -232,8 +232,8 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
     Supplierid = serializers.CharField(max_length=500)
-    ClusterName = serializers.CharField(max_length=500)
-    SubClusterName = serializers.CharField(max_length=500)
+    Cluster = serializers.CharField(max_length=500)
+    SubCluster = serializers.CharField(max_length=500)
     
     
     
