@@ -477,7 +477,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                         p=row.id
                     PartyIDs = p.split(",")
 
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
@@ -493,9 +493,10 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
                                                             LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
                                                             LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade
-                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s AND X.id=%s''')
+                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s'''
 
-                if Party == 0:
+                if Party == "":
+                    ClaimTrackingquery += " "
                     if Employee == 0:
                             ClaimTrackingquery += " "
                     else:
@@ -503,48 +504,51 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 else:
                         ClaimTrackingquery += " and X.id=%s"
 
-
-                if Party == 0:
-                        print('ee')
+                # print(ClaimTrackingquery)
+                if Party == "":
+                        # print('ee')
                         if Employee == 0:
-                            print('ff')
+                            # print('ff')
                             ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
                         else:
-                            print('gg')
+                            # print('gg')
                             ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
                 else:
-                    print('hh')
+                    # print('hh')
                     ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
-
+                # print(ClaimTrackingqueryresults.query)
                 if  ClaimTrackingqueryresults:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
+                    # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingdata})
                     ClaimTrackingList = list()
-                    for a in ClaimTrackingdata:
+                    for a in ClaimTrackingqueryresults:
+                        dd=str(a.CreditNoteUpload)
+                        print(dd)
                         ClaimTrackingList.append({
-                            "Cluster": a['Cluster'],
-                            "SubCluster":a['SubCluster'],
-                            "Party": a['Party_id'],
-                            "PartyName": a['PartyName'],
-                            "FullClaimNo": a['FullClaimNo'],
-                            "ClaimID": a['Claim_id'],
-                            "Date": a['Date'],
-                            "Month": a['Month'],
-                            "Year": a['Year'],
-                            "TypeName": a['TypeName'],
-                            "TypeOfClaimName": a['TypeOfClaimName'],
-                            "ClaimTradeName": a['ClaimTradeName'],
-                            "ClaimAmount": a['ClaimAmount'],
-                            "CreditNotestatus": a['CreditNotestatus'],
-                            "CreditNoteNo": a['CreditNoteNo'],
-                            "CreditNoteDate": a['CreditNoteDate'],
-                            "CreditNoteAmount": a['CreditNoteAmount'],
-                            "ClaimSummaryDate": a['ClaimSummaryDate'],
-                            "CreditNoteUpload": a['CreditNoteUpload'],
-                            "ClaimReceivedSource": a['ClaimReceivedSource'],
+                            "Cluster": a.Cluster,
+                            "SubCluster":a.SubCluster,
+                            "Party": a.Party_id,
+                            "PartyName": a.PartyName,
+                            "FullClaimNo": a.FullClaimNo,
+                            "ClaimID": a.Claim_id,
+                            "Date": a.Date,
+                            "Month": a.Month,
+                            "Year": a.Year,
+                            "TypeName": a.TypeName,
+                            "TypeOfClaimName": a.TypeOfClaimName,
+                            "ClaimTradeName": a.ClaimTradeName,
+                            "ClaimAmount": a.ClaimAmount,
+                            "CreditNotestatus": a.CreditNotestatus,
+                            "CreditNoteNo": a.CreditNoteNo,
+                            "CreditNoteDate": a.CreditNoteDate,
+                            "CreditNoteAmount": a.CreditNoteAmount,
+                            "ClaimSummaryDate": a.ClaimSummaryDate,
+                            "CreditNoteUpload": dd,
+                            "ClaimReceivedSource": a.ClaimReceivedSource,
 
                         })
-                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,a['Party_id'],'',257,0)
+                    log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList})
                 log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'ClaimTrackingList Not available',257,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
