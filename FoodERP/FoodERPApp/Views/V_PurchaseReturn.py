@@ -107,7 +107,7 @@ class PurchaseReturnListView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'PuchaseReturnList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-def primarySourceNAme(ID):
+def primarySourceNAme(ID,returnID):
     if ID is None:
         PrimartSource =''
     else:    
@@ -116,11 +116,11 @@ def primarySourceNAme(ID):
         
         b=q1[0]['PurchaseReturn_id']
        
-        q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat(supl.Name,'-(',cust.Name,')') PrimartSource
+        q2=T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, concat((select FullReturnNumber from T_PurchaseReturn where id= %s  ), ' : ' ,supl.Name,'-(',cust.Name,')') PrimartSource
     FROM T_PurchaseReturn 
     join M_Parties cust on cust.id=T_PurchaseReturn.Customer_id
     join M_Parties supl on supl.id=T_PurchaseReturn.Party_id
-    where T_PurchaseReturn.id=%s''',[b])
+    where T_PurchaseReturn.id=%s''',[returnID,b])
         
         for row in q2:
             PrimartSource = row.PrimartSource
@@ -140,7 +140,7 @@ class PurchaseReturnView(CreateAPIView):
                 
                 if Query.exists():
                     PurchaseReturnSerializer = PurchaseReturnSerializerThird(Query, many=True, context= {'request': request}).data 
-                    
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :PurchaseReturnSerializer})
                     PuchaseReturnList=list()
 
                     for a in PurchaseReturnSerializer:
@@ -192,7 +192,7 @@ class PurchaseReturnView(CreateAPIView):
                                 "ApprovedQuantity":b['ApprovedQuantity'],
                                 "primarySourceID" : b["primarySourceID"],
                                 "ApprovedByCompany" : b["ApprovedByCompany"],
-                                "primarySource" : primarySourceNAme(b["primarySourceID"]),
+                                "primarySource" : primarySourceNAme(b["primarySourceID"],b['SubReturn']),
                                 "ReturnItemImages":ReturnItemImagesList
                             })
                         
