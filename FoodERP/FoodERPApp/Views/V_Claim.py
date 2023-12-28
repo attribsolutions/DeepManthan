@@ -468,6 +468,15 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
+                Party = ClaimTrackingdata['Party']
+                Employee = ClaimTrackingdata['Employee']
+
+                if Employee > 0:
+                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+                    for row in EmpPartys:
+                        p=row.id
+                    PartyIDs = p.split(",")
+
                 ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
@@ -476,16 +485,38 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
-                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id=0
+                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id IS NULL
                                                             Left join M_Cluster on Y.Cluster_id = M_Cluster.id
                                                             left join M_SubCluster on Y.SubCluster_id = M_SubCluster.id
                                                             LEFT JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
                                                             LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
                                                             LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
                                                             LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
-                    
-                if  ClaimTrackingquery:    
+                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade
+                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s AND X.id=%s''')
+
+                if Party == 0:
+                    if Employee == 0:
+                            ClaimTrackingquery += " "
+                    else:
+                            ClaimTrackingquery += " and X.id in %s"
+                else:
+                        ClaimTrackingquery += " and X.id=%s"
+
+
+                if Party == 0:
+                        print('ee')
+                        if Employee == 0:
+                            print('ff')
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
+                        else:
+                            print('gg')
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
+                else:
+                    print('hh')
+                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
+
+                if  ClaimTrackingqueryresults:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
                     ClaimTrackingList = list()
