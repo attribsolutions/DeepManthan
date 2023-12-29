@@ -481,7 +481,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
-                                                            CreditNoteUpload,  ClaimReceivedSource 
+                                                            CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
@@ -515,7 +515,6 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 else:
                     
                     ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
-                
                 if  ClaimTrackingqueryresults:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
@@ -545,6 +544,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "ClaimSummaryDate": a.ClaimSummaryDate,
                             "CreditNoteUpload": dd,
                             "ClaimReceivedSource": a.ClaimReceivedSource,
+                            "Remark":a.Remark
 
                         })
                     log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
@@ -616,15 +616,19 @@ class ClaimTrackingEntryViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, Party_id,M_Parties.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName  
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, T_ClaimTrackingEntry.Party_id, P.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName, M_Cluster.Name Cluster , M_SubCluster.Name SubCluster
 FROM T_ClaimTrackingEntry
 LEFT JOIN M_PartyType ON M_PartyType.id = T_ClaimTrackingEntry.PartyType_id 
-JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id
+JOIN M_Parties P ON P.id=T_ClaimTrackingEntry.Party_id
 JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
 LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
 JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
 JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.id = %s ''', ([id]))
+JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade 
+LEFT JOIN M_PartyDetails X on X.Supplier_id = P.id and X.Group_id IS NULL
+LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id 
+LEFT JOIN M_SubCluster on X.SubCluster_id=M_SubCluster.Id 
+WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
                 # print(ClaimTrackingquery.query)
                 if ClaimTrackingquery:
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(
@@ -659,7 +663,9 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                             "PartyName": a['PartyName'],
                             "FullClaimNo": a['FullClaimNo'],
                             "PartyType": a['PartyType_id'],
-                            "PartyTypeName": a['PartyTypeName']
+                            "PartyTypeName": a['PartyTypeName'],
+                            "Cluster":a['Cluster'],
+                            "SubCluster":a['SubCluster']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
