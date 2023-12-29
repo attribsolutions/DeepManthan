@@ -504,19 +504,18 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 else:
                         ClaimTrackingquery += " and X.id=%s"
 
-                # print(ClaimTrackingquery)
                 if Party == "":
-                        # print('ee')
+                        
                         if Employee == 0:
-                            # print('ff')
+                            
                             ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
                         else:
-                            # print('gg')
+                            
                             ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
                 else:
-                    # print('hh')
+                    
                     ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
-                # print(ClaimTrackingqueryresults.query)
+                
                 if  ClaimTrackingqueryresults:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
@@ -524,8 +523,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     ClaimTrackingList = list()
                     for a in ClaimTrackingqueryresults:
                         dd=str(a.CreditNoteUpload)
-                        print(dd)
                         ClaimTrackingList.append({
+                            "id":a.id,
                             "Cluster": a.Cluster,
                             "SubCluster":a.SubCluster,
                             "Party": a.Party_id,
