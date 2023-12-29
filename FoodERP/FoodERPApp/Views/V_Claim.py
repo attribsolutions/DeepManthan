@@ -468,7 +468,16 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                Party = ClaimTrackingdata['Party']
+                Employee = ClaimTrackingdata['Employee']
+
+                if Employee > 0:
+                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+                    for row in EmpPartys:
+                        p=row.id
+                    PartyIDs = p.split(",")
+
+                ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
@@ -476,44 +485,69 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
-                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id=0
+                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id IS NULL
                                                             Left join M_Cluster on Y.Cluster_id = M_Cluster.id
                                                             left join M_SubCluster on Y.SubCluster_id = M_SubCluster.id
                                                             LEFT JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
                                                             LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
                                                             LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
                                                             LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
+                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade
+                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s'''
+
+                if Party == "":
+                    ClaimTrackingquery += " "
+                    if Employee == 0:
+                            ClaimTrackingquery += " "
+                    else:
+                            ClaimTrackingquery += " and X.id in %s"
+                else:
+                        ClaimTrackingquery += " and X.id=%s"
+
+                if Party == "":
+                        
+                        if Employee == 0:
+                            
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
+                        else:
+                            
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
+                else:
                     
-                if  ClaimTrackingquery:    
+                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
+                
+                if  ClaimTrackingqueryresults:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
+                    # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingdata})
                     ClaimTrackingList = list()
-                    for a in ClaimTrackingdata:
+                    for a in ClaimTrackingqueryresults:
+                        dd=str(a.CreditNoteUpload)
                         ClaimTrackingList.append({
-                            "Cluster": a['Cluster'],
-                            "SubCluster":a['SubCluster'],
-                            "Party": a['Party_id'],
-                            "PartyName": a['PartyName'],
-                            "FullClaimNo": a['FullClaimNo'],
-                            "ClaimID": a['Claim_id'],
-                            "Date": a['Date'],
-                            "Month": a['Month'],
-                            "Year": a['Year'],
-                            "TypeName": a['TypeName'],
-                            "TypeOfClaimName": a['TypeOfClaimName'],
-                            "ClaimTradeName": a['ClaimTradeName'],
-                            "ClaimAmount": a['ClaimAmount'],
-                            "CreditNotestatus": a['CreditNotestatus'],
-                            "CreditNoteNo": a['CreditNoteNo'],
-                            "CreditNoteDate": a['CreditNoteDate'],
-                            "CreditNoteAmount": a['CreditNoteAmount'],
-                            "ClaimSummaryDate": a['ClaimSummaryDate'],
-                            "CreditNoteUpload": a['CreditNoteUpload'],
-                            "ClaimReceivedSource": a['ClaimReceivedSource'],
+                            "id":a.id,
+                            "Cluster": a.Cluster,
+                            "SubCluster":a.SubCluster,
+                            "Party": a.Party_id,
+                            "PartyName": a.PartyName,
+                            "FullClaimNo": a.FullClaimNo,
+                            "ClaimID": a.Claim_id,
+                            "Date": a.Date,
+                            "Month": a.Month,
+                            "Year": a.Year,
+                            "TypeName": a.TypeName,
+                            "TypeOfClaimName": a.TypeOfClaimName,
+                            "ClaimTradeName": a.ClaimTradeName,
+                            "ClaimAmount": a.ClaimAmount,
+                            "CreditNotestatus": a.CreditNotestatus,
+                            "CreditNoteNo": a.CreditNoteNo,
+                            "CreditNoteDate": a.CreditNoteDate,
+                            "CreditNoteAmount": a.CreditNoteAmount,
+                            "ClaimSummaryDate": a.ClaimSummaryDate,
+                            "CreditNoteUpload": dd,
+                            "ClaimReceivedSource": a.ClaimReceivedSource,
 
                         })
-                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,a['Party_id'],'',257,0)
+                    log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList})
                 log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'ClaimTrackingList Not available',257,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
