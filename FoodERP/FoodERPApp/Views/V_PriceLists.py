@@ -116,6 +116,22 @@ class PriceListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                query = M_PriceList.objects.all()
+                if query:
+                    Pricelist_serializer = PriceListSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request, Pricelist_serializer,0,'',284,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Pricelist_serializer})
+                log_entry = create_transaction_logNew(request, Pricelist_serializer,0,'PriceList not available',284,0)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'PriceList not available', 'Data' : []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'PriceList:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
 class PriceListViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
