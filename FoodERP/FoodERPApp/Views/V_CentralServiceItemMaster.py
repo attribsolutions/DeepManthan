@@ -19,10 +19,13 @@ class CentralServiceItemView(CreateAPIView):
             with transaction.atomic():
                 ServiceItem_data = M_CentralServiceItems.objects.all()
                 ServiceItem_Serializer = CentralServiceItemSerializer(ServiceItem_data,many=True)
+                log_entry = create_transaction_logNew(request, ServiceItem_Serializer,0,'',273,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': ServiceItem_Serializer.data})
         except  M_CentralServiceItems.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'Central service item save Data Not available',273,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Central service item save Data Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'GETAllServiceItems:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
    
     def post(self, request):
@@ -32,11 +35,14 @@ class CentralServiceItemView(CreateAPIView):
                 ServiceItem_Serializer = CentralServiceItemSerializer(data=ServiceItem_data)
                 if ServiceItem_Serializer.is_valid():
                     ServiceItem_Serializer.save()
+                    log_entry = create_transaction_logNew(request, ServiceItem_data,0,'',274,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Central service item save Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, ServiceItem_data,0,'CentralServiceItemSave:'+str(ServiceItem_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ServiceItem_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItemSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 class CentralServiceItemViewSecond(CreateAPIView):
@@ -66,10 +72,13 @@ class CentralServiceItemViewSecond(CreateAPIView):
                         "Company":a['Company'],
                         
                     })
+                log_entry = create_transaction_logNew(request, ServiceItem_Serializer,0,'',275,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': ServiceItemList[0]})
         except  M_CentralServiceItems.DoesNotExist:
+            log_entry = create_transaction_logNew(request, ServiceItem_Serializer,0,'',275,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Central Service Item Data Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'GETSingleServiceItem:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
     @transaction.atomic()
@@ -81,11 +90,14 @@ class CentralServiceItemViewSecond(CreateAPIView):
                 ServiceItem_serializer = CentralServiceItemSerializer(ServiceItem_SerializerByID, data=ServiceItem_data)
                 if ServiceItem_serializer.is_valid():
                     ServiceItem_serializer.save()
+                    log_entry = create_transaction_logNew(request, ServiceItem_data,0,'',276,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Central Service Item Updated Successfully','Data' :[]})
                 else:
+                    log_entry = create_transaction_logNew(request, ServiceItem_data,0,'CentralServiceItemUpdated:'+str(ServiceItem_serializer.errors),276,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ServiceItem_serializer.errors, 'Data' :[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItemUpdated:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
         
     @transaction.atomic()
@@ -94,10 +106,13 @@ class CentralServiceItemViewSecond(CreateAPIView):
             with transaction.atomic():
                 Cluster_data = M_CentralServiceItems.objects.get(id=id)
                 Cluster_data.delete()
+                log_entry = create_transaction_logNew(request, {'ClusterID':id},0,'ClusterID:'+str(id),277,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Central Service Item Data Deleted Successfully','Data':[]})
         except M_CentralServiceItems.DoesNotExist:
+            log_entry = create_transaction_logNew(request, {'ClusterID':id},0,'ClusterID:'+str(id),277,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Central Service Item Data Not available', 'Data': []})
         except IntegrityError:   
+            log_entry = create_transaction_logNew(request, {'ClusterID':id},0,'ClusterID:'+str(id),8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Central Service Item Data used in another table', 'Data': []})
                 
                 
@@ -126,9 +141,10 @@ class CentralServiceItemAssignFilterView(CreateAPIView):
                             "PartyName": a['PartyName'],
                             "Rate":a['Rate']
                         })
-                   
+                    log_entry = create_transaction_logNew(request, ServiceItemdata,PartyID,'',278,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ServiceItemList})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'ListOfCentralServiceItemAssign:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
         
@@ -147,9 +163,12 @@ class CentralServiceItemAssignForParty(CreateAPIView):
                     ServiceItemParty_data = MC_CentralServiceItemAssign.objects.filter(Party=id)
                     ServiceItemParty_data.delete()
                     ServiceItem = PartyItems_serializer.save()
+                    log_entry = create_transaction_logNew(request, PartyItems_data,id,'',279,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CentralServiceItem For Party Save Successfully', 'Data': []})
+                log_entry = create_transaction_logNew(request, PartyItems_data,0,'CentralServiceItemAssignSave:'+str(PartyItems_serializer.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyItems_serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItemAssignSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
 
@@ -223,9 +242,11 @@ class CentralServiceItemViewThird(CreateAPIView):
                         "ItemGSTDetails":ItemGSTDetails,
                         "StockDetails":StockDatalist 
                 })   
+                    # log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',280,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CentralServiceItems})
-    
+                # log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',280,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
+            # log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItem:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 

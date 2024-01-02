@@ -103,7 +103,7 @@ class DiscountMastergo(CreateAPIView):
                 
                 if Discountquery:
                     Discountdata = DiscountMasterSerializer(Discountquery, many=True).data
-                    log_entry = create_transaction_logNew(request, Discountdata, Party,'',200,0,FromDate,ToDate,x)
+                    log_entry = create_transaction_logNew(request, Discountdata, Party,'',107,0,FromDate,ToDate,x)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Discountdata})
                 else:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':''})
