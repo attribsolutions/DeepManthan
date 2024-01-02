@@ -300,6 +300,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                         'District': a['DistrictName'],
                         'Party': a['PartyID']
                     })
+                    
                 # q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
                 # q0 = MC_ManagementParties.objects.filter(Employee=EmployeeID).select_related('Party')
                 # print(str(q0.query))
