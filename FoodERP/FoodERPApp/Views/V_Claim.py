@@ -438,13 +438,11 @@ class Listofclaimforclaimtracking(CreateAPIView):
         try:
             with transaction.atomic():
                 ClaimTrackingdata = JSONParser().parse(request)
-                FromDate = ClaimTrackingdata['FromDate']
-                ToDate = ClaimTrackingdata['ToDate']
-                # Year = ClaimTrackingdata['Year']
-                # Month = ClaimTrackingdata['Month']
-                # FromDate = Year+'-'+Month+'-'+'01'
+                Year = ClaimTrackingdata['Year']
+                Month = ClaimTrackingdata['Month']
+                FromDate = Year+'-'+Month+'-'+'01'
                 Claimlistquery = M_Claim.objects.raw(
-                    '''select MC_ReturnReasonwiseMasterClaim.Claim_id As id,SUM(MC_ReturnReasonwiseMasterClaim.ReturnAmount) As ClaimAmount, M_Parties.id As PartyID,M_Parties.Name PartyName,MC_ReturnReasonwiseMasterClaim.PartyType AS PartyTypeID,M_PartyType.Name AS PartyTypeName FROM M_Claim  JOIN MC_ReturnReasonwiseMasterClaim ON MC_ReturnReasonwiseMasterClaim.Claim_id=M_Claim.id  JOIN M_Parties ON M_Parties.id=M_Claim.Customer_id LEFT JOIN M_PartyType ON M_PartyType.id = MC_ReturnReasonwiseMasterClaim.PartyType WHERE M_Claim.Date Between %s AND %s AND MC_ReturnReasonwiseMasterClaim.PartyType !=0  group by id,PartyID,PartyName,PartyType,PartyTypeName ''', ([FromDate],[ToDate]))
+                    '''select MC_ReturnReasonwiseMasterClaim.Claim_id As id,SUM(MC_ReturnReasonwiseMasterClaim.ReturnAmount) As ClaimAmount, M_Parties.id As PartyID,M_Parties.Name PartyName,MC_ReturnReasonwiseMasterClaim.PartyType AS PartyTypeID,M_PartyType.Name AS PartyTypeName FROM M_Claim  JOIN MC_ReturnReasonwiseMasterClaim ON MC_ReturnReasonwiseMasterClaim.Claim_id=M_Claim.id  JOIN M_Parties ON M_Parties.id=M_Claim.Customer_id LEFT JOIN M_PartyType ON M_PartyType.id = MC_ReturnReasonwiseMasterClaim.PartyType WHERE M_Claim.FromDate =%s AND MC_ReturnReasonwiseMasterClaim.PartyType !=0  group by id,PartyID,PartyName,PartyType,PartyTypeName ''', ([FromDate]))
                 # print(Claimlistquery.query)
                 if Claimlistquery:
                     Claimlist = ClaimlistforClaimTrackingSerializer(
