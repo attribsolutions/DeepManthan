@@ -8,6 +8,7 @@ from ..Serializer.S_Employees import *
 from ..Serializer.S_Parties import *
 from ..Serializer.S_ItemSale import *
 from ..models import *
+from ..Views.V_CommFunction import *
 from django.db.models import F, Q
 
 class ItemSaleReportView(CreateAPIView):
@@ -36,10 +37,13 @@ class ItemSaleReportView(CreateAPIView):
 
                 if query:
                     ItemSaleSerializer=ItemSaleReportSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request, Reportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,281,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ItemSaleSerializer})
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})  
+                    log_entry = create_transaction_logNew(request, Reportdata, Party, 'Records Not available',281,0,FromDate,ToDate,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': []})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleReport:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
                                             
                                                                              
@@ -64,9 +68,12 @@ class ItemSaleSupplierDropdownView(CreateAPIView):
                             'id':  a['id'],
                             'Name':  a['Name']
                         })
+                        log_entry = create_transaction_logNew(request, ItemSaleSupplierSerializer,0,'',282,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
+                log_entry = create_transaction_logNew(request, ItemSaleSupplierSerializer,0,'Parties Not available',282,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleSupplierDropdown:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -90,9 +97,15 @@ class ItemSaleItemDropdownView(CreateAPIView):
                     query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items''')  
                 if query:
                     Item_serializer = ItemSaleItemSerializer(query, many=True).data
+                    print("aaaaa")
+                    log_entry = create_transaction_logNew(request, Itemdata,0,'',283,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Item_serializer})
+                print("bbbbbbbb")
+                log_entry = create_transaction_logNew(request, Itemdata,0,'Items Not available ',283,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except Exception as e:
+            print("cccc")
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleItemDropdown:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
         
