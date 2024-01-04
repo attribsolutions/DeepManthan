@@ -203,7 +203,7 @@ class MasterClaimView(CreateAPIView):
 
                                 claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                                 IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
-            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
+            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
             IFNULL((ReturnAmount/PA)*100,0)ClaimAgainstNetSale
             from
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
@@ -236,7 +236,7 @@ class MasterClaimView(CreateAPIView):
                             # for all partyType
                             claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                                 IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
-            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
+            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
             
             IFNULL((ReturnAmount/PA)*100,0)ClaimAgainstNetSale
             from
@@ -276,7 +276,7 @@ class MasterClaimView(CreateAPIView):
     # ===========================================================================================================================================
     #  (Select Item_id from T_Orders JOIN TC_OrderItems ON Order_id = T_Orders.id WHERE Customer_id = %s Group By Item_id)I
                             StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select * from (select 1 as id, I.Item_id,ifnull(PA.PrimaryAmount,0)PrimaryAmount,ifnull(SA.secondaryAmount,0)secondaryAmount,ifnull(RA.ReturnAmount,0)ReturnAmount,
-                                ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
+                                ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
 
             from
             (Select id Item_id from M_Items )I
@@ -371,7 +371,7 @@ order by M_GeneralMaster.id
 
                 printProductwisequery = M_MasterClaim.objects.raw('''
                 select 1 as id, Product,PurchaseAmount,SaleAmount,ReturnAmount,IFNULL((PurchaseAmount-ReturnAmount),0)NetSaleValue,
-                IFNULL(((PurchaseAmount-ReturnAmount)*0.01),0)Budget,ClaimAmount,IFNULL(((ReturnAmount/PurchaseAmount)*100),0)ClaimAgainstNetSale
+                IFNULL(((PurchaseAmount)*0.01),0)Budget,ClaimAmount,IFNULL(((ReturnAmount/PurchaseAmount)*100),0)ClaimAgainstNetSale
                 
                 from (SELECT  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, 
                 sum(ClaimAmount)ClaimAmount
