@@ -209,6 +209,7 @@ class MasterClaimView(CreateAPIView):
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s )PA,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
@@ -242,6 +243,7 @@ class MasterClaimView(CreateAPIView):
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s )PA,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
@@ -281,7 +283,9 @@ class MasterClaimView(CreateAPIView):
             left join
 
 
-            (select TC_InvoiceItems.Item_id,sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            (select TC_InvoiceItems.Item_id,sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices
+            join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s group by Item_id)PA
             on I.Item_id=PA.Item_id
             left join 
