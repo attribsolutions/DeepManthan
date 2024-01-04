@@ -227,7 +227,7 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, data, 0, "initiat",0,0)
+                log_entry = create_transaction_log(request, data, 0, 0, "initiat")
                 payload = json.dumps(data)
                 
                 SAPURL, Token  = GetThirdPartyAPIs(26)
