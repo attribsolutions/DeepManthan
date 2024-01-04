@@ -823,6 +823,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                                             JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
                                             JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
                                             JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
+                                            
                                             JOIN M_Parties A ON A.id= T_Invoices.Party_id
                                             JOIN M_Parties B ON B.id = T_Invoices.Customer_id
                                             JOIN M_States ON M_States.id = B.State_id
@@ -862,6 +863,7 @@ class InvoiceDateExportReportView(CreateAPIView):
 
     FROM TC_InvoiceItems
     JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
+    join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
     JOIN M_Parties A ON A.id= T_Invoices.Party_id
     JOIN M_Parties B ON B.id = T_Invoices.Customer_id
     JOIN M_States ON M_States.id = B.State_id
