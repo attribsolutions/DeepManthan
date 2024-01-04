@@ -209,10 +209,11 @@ class MasterClaimView(CreateAPIView):
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
-            where InvoiceDate between %s and %sand Customer_id=%s )PA,
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
+            where InvoiceDate between %s and %s and Customer_id=%s )PA,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
-            where InvoiceDate between %s and %sand Party_id=%s )SA
+            where InvoiceDate between %s and %s and Party_id=%s )SA
             FROM T_PurchaseReturn
             join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
             join TC_PurchaseReturnItems PRIPS on TC_PurchaseReturnItems.primarySourceID=PRIPS.id
@@ -242,6 +243,7 @@ class MasterClaimView(CreateAPIView):
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s )PA,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
@@ -264,8 +266,7 @@ class MasterClaimView(CreateAPIView):
 
                                 PrimaryAmount = float(a["PrimaryAmount"])
                                 SecondaryAmount = float(a["secondaryAmount"])
-                                ReturnAmount = ReturnAmount + \
-                                    float(a["ReturnAmount"])
+                                ReturnAmount += float(a["ReturnAmount"])
 
                                 stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
                                     "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=0, Party_id=Party, CreatedBy=0)
@@ -282,7 +283,9 @@ class MasterClaimView(CreateAPIView):
             left join
 
 
-            (select TC_InvoiceItems.Item_id,sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            (select TC_InvoiceItems.Item_id,sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices
+            join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s group by Item_id)PA
             on I.Item_id=PA.Item_id
             left join 
@@ -366,18 +369,19 @@ order by M_GeneralMaster.id
 
                         })
 
-                printProductwisequery = M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
-sum(M_MasterClaim.Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
+                printProductwisequery = M_MasterClaim.objects.raw('''
+                select 1 as id, Product,PurchaseAmount,SaleAmount,ReturnAmount,IFNULL((PurchaseAmount-ReturnAmount),0)NetSaleValue,
+                IFNULL(((PurchaseAmount-ReturnAmount)*0.01),0)Budget,ClaimAmount,IFNULL(((ReturnAmount/PurchaseAmount)*100),0)ClaimAgainstNetSale
+                
+                from (SELECT  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, 
+                sum(ClaimAmount)ClaimAmount
 FROM M_MasterClaim
 left join M_Items on M_Items.id=M_MasterClaim.Item_id
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-
-
-
- where FromDate=%s and ToDate=%s and Party_id=%s
- group by M_Group.id''', ([FromDate], [ToDate], [Party]))
+where FromDate=%s and ToDate=%s and Party_id=%s
+group by M_Group.id)a''', ([FromDate], [ToDate], [Party]))
                 ProductwiseMasterClaim = ProductwiseMasterClaimSerializer(
                     printProductwisequery, many=True).data
                 MasterClaimData.append({
