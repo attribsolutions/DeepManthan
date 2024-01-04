@@ -366,8 +366,8 @@ order by M_GeneralMaster.id
                         })
 
                 printProductwisequery = M_MasterClaim.objects.raw('''
-                select 1 as id, Product,PurchaseAmount,SaleAmount,ReturnAmount,(PurchaseAmount-ReturnAmount)NetSaleValue,
-                ((PurchaseAmount-ReturnAmount)*0.01)Budget,ClaimAmount,((ReturnAmount/PurchaseAmount)*100)ClaimAgainstNetSale
+                select 1 as id, Product,PurchaseAmount,SaleAmount,ReturnAmount,IFNULL((PurchaseAmount-ReturnAmount),0)NetSaleValue,
+                IFNULL(((PurchaseAmount-ReturnAmount)*0.01),0)Budget,ClaimAmount,IFNULL(((ReturnAmount/PurchaseAmount)*100),0)ClaimAgainstNetSale
                 
                 from (SELECT  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, 
                 sum(ClaimAmount)ClaimAmount
@@ -377,7 +377,7 @@ left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 where FromDate=%s and ToDate=%s and Party_id=%s
-group by M_Group.id)''', ([FromDate], [ToDate], [Party]))
+group by M_Group.id)a''', ([FromDate], [ToDate], [Party]))
                 ProductwiseMasterClaim = ProductwiseMasterClaimSerializer(
                     printProductwisequery, many=True).data
                 MasterClaimData.append({
