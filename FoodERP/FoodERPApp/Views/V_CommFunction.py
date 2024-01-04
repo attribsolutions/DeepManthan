@@ -13,6 +13,7 @@ from ..Serializer.S_GSTHSNCode import *
 from ..models import *
 from datetime import date
 from ..models import TransactionLogJsonData
+from ..models import M_Settings
 
 
 '''Common Functions List
@@ -67,24 +68,28 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
 
     Authenticated_User = request.user
     User = Authenticated_User.id
+    aa = M_Settings.objects.filter(SystemSetting='TransactionLog - Active and Inactive').values('DefaultValue').first()
 
-    if not User:
-        User = data['UserID']
+    if aa['DefaultValue'] == "1":
+        if not User:
+            User = data['UserID']
+        else:
+            pass
+
+        if not FromDate:
+            log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
+                request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, CustomerID=CustomerID)
+        else:
+            log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
+                request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
+
+        TransactionLogJsonData.objects.create(
+            Transactionlog=log_entry, JsonData=data)
+
+        return log_entry
+
     else:
-        pass
-
-    if not FromDate:
-        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
-            request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, CustomerID=CustomerID)
-    else:
-        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
-            request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
-
-    TransactionLogJsonData.objects.create(
-        Transactionlog=log_entry, JsonData=data)
-
-    return log_entry
-
+        return None
 
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
