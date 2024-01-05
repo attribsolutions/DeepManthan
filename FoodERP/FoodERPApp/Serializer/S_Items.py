@@ -528,5 +528,8 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = ['Group','SubGroup','Item','GroupType']
 
 
-
+class ItemUnitsForMobileAppSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_ItemUnits
+        fields = '__all__'
        
