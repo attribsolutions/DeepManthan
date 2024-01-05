@@ -705,4 +705,19 @@ class ImageUploadsView(CreateAPIView):
             log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
 
-    
+
+class MC_ItemUnitsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self,request):
+        try:
+            with transaction.atomic():
+                query = MC_ItemUnits.objects.all()
+                if query:
+                    ItemUnitsMA_serializer = ItemUnitsForMobileAppSerializer(query, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemUnitsMA_serializer})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Unit not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
