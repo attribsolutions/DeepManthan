@@ -714,10 +714,25 @@ class MC_ItemUnitsView(CreateAPIView):
     def get(self,request):
         try:
             with transaction.atomic():
-                query = MC_ItemUnits.objects.all()
+                query = MC_ItemUnits.objects.raw('''Select MC_ItemUnits.id, BaseUnitQuantity,IsDeleted, IsBase, PODefaultUnit, SODefaultUnit, BaseUnitConversion, Item_id Item, UnitID_id UnitID, M_Units.Name UnitName
+                                                From MC_ItemUnits
+                                                Join M_Units on MC_ItemUnits.UnitID_id = M_Units.id''')
                 if query:
                     ItemUnitsMA_serializer = ItemUnitsForMobileAppSerializer(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemUnitsMA_serializer})
+                    ItemUnitList = list()
+                    for a in ItemUnitsMA_serializer:
+                        ItemUnitList.append({
+                            "BaseUnitQuantity":a['BaseUnitQuantity'],
+                            "IsDeleted":a['IsDeleted'],
+                            "IsBase":a['IsBase'],
+                            "PODefaultUnit":a['PODefaultUnit'],
+                            "SODefaultUnit":a['SODefaultUnit'],
+                            "BaseUnitConversion":a['BaseUnitConversion'],
+                            "Item":a['Item'],
+                            "UnitID":a['UnitID'],
+                            "UnitName":a['UnitName']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemUnitList})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Unit not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
