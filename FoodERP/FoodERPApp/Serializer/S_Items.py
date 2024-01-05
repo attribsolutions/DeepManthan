@@ -528,8 +528,14 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = ['Group','SubGroup','Item','GroupType']
 
 
-class ItemUnitsForMobileAppSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MC_ItemUnits
-        fields = '__all__'
+class ItemUnitsForMobileAppSerializer(serializers.Serializer):
+    BaseUnitQuantity= serializers.DecimalField(max_digits=15, decimal_places=3)
+    IsDeleted= serializers.BooleanField()
+    IsBase= serializers.BooleanField()
+    PODefaultUnit=serializers.BooleanField()
+    SODefaultUnit= serializers.BooleanField()
+    BaseUnitConversion= serializers.CharField(max_length=500)
+    Item= serializers.IntegerField()                            
+    UnitID= serializers.IntegerField()
+    UnitName= serializers.CharField(max_length=500)
        
