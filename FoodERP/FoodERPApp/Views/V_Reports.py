@@ -823,6 +823,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                                             JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
                                             JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
                                             JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
+                                            
                                             JOIN M_Parties A ON A.id= T_Invoices.Party_id
                                             JOIN M_Parties B ON B.id = T_Invoices.Customer_id
                                             JOIN M_States ON M_States.id = B.State_id
@@ -862,6 +863,7 @@ class InvoiceDateExportReportView(CreateAPIView):
 
     FROM TC_InvoiceItems
     JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
+    join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
     JOIN M_Parties A ON A.id= T_Invoices.Party_id
     JOIN M_Parties B ON B.id = T_Invoices.Customer_id
     JOIN M_States ON M_States.id = B.State_id
@@ -1495,6 +1497,7 @@ class ProductAndMarginReportView(CreateAPIView):
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
 round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
 MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg, PIN.BaseUnitQuantity PcsInNo, ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
+ ,M_Items.BaseUnitID_id
  FROM M_Items
  join C_Companies on C_Companies.id=M_Items.Company_id
  left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 1
@@ -1597,8 +1600,8 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
 
                         for x in pricelistquery:
 
-                            query2 = M_MarginMaster.objects.raw('''select 1 as id, GetTodaysDateMargin(%s,%s,%s,0,0)Margin,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 0)RatewithoutGST,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 1)RatewithGST''', (
-                                row.id, today, x.id, row.id, x.id, row.id, x.id))
+                            query2 = M_MarginMaster.objects.raw('''select 1 as id, GetTodaysDateMargin(%s,%s,%s,0,0)Margin,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 0)RatewithoutGST,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 1)RatewithGST,RateCalculationFunction1(0, %s, 0, %s, 0, %s, 0, 0)BaseUnitRatewithoutGST''', (
+                                row.id, today, x.id, row.id, x.id, row.id, x.id,row.id, row.BaseUnitID_id,x.id))
 
                             for a in query2:
                                 # string1 = x['Name']
@@ -1612,7 +1615,10 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                 RateList.append({
 
                                     string2+'RateWithGST': float(a.RatewithGST),
-                                    string2+'RateWithOutGST': float(a.RatewithoutGST)
+                                    string2+'RateWithOutGST': float(a.RatewithoutGST),
+                                    string2+'BaseUnitRateWithOutGST': float(a.BaseUnitRatewithoutGST),
+                                    "PriceListID" : x.id
+
                                 })
 
                         ww = ItemMargins+RateList
