@@ -68,9 +68,9 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
 
     Authenticated_User = request.user
     User = Authenticated_User.id
-    aa = M_Settings.objects.filter(SystemSetting='TransactionLog - Active and Inactive').values('DefaultValue').first()
+    aa = M_Settings.objects.filter(id=31).values('DefaultValue')
 
-    if aa['DefaultValue'] == "1":
+    if aa[0]['DefaultValue'] == "1":
         if not User:
             User = data['UserID']
         else:
