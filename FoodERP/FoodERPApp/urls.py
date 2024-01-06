@@ -447,7 +447,7 @@ urlpatterns = [
             url(r'ItemWiseSave$', ItemWiseSaveView.as_view()),
             url(r'ImageUploads$', ImageUploadsView.as_view()),
             url(r'ImageUploads/([0-9]+)$', ImageUploadsView.as_view()),  #ItemID,ImageType
-            
+            url(r'ItemUnitsForMobileApp$', MC_ItemUnitsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 
