@@ -705,4 +705,35 @@ class ImageUploadsView(CreateAPIView):
             log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
 
-    
+
+class MC_ItemUnitsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self,request):
+        try:
+            with transaction.atomic():
+                query = MC_ItemUnits.objects.raw('''Select MC_ItemUnits.id, BaseUnitQuantity,IsDeleted, IsBase, PODefaultUnit, SODefaultUnit, BaseUnitConversion, Item_id ItemID, UnitID_id Unit_ID, M_Units.Name UnitName
+                                                From MC_ItemUnits
+                                                Join M_Units on MC_ItemUnits.UnitID_id = M_Units.id where IsDeleted=0 order by Item_id ''')
+                if query:
+                    ItemUnitsMA_serializer = ItemUnitsForMobileAppSerializer(query, many=True).data
+                    ItemUnitList = list()
+                    for a in ItemUnitsMA_serializer:
+                        ItemUnitList.append({
+                            "id" : a["id"],
+                            "BaseUnitQuantity":a['BaseUnitQuantity'],
+                            "IsDeleted":a['IsDeleted'],
+                            "IsBase":a['IsBase'],
+                            "PODefaultUnit":a['PODefaultUnit'],
+                            "SODefaultUnit":a['SODefaultUnit'],
+                            "BaseUnitConversion":a['BaseUnitConversion'],
+                            "Item":a['ItemID'],
+                            "UnitID":a['Unit_ID'],
+                            "UnitName":a['UnitName']
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemUnitList})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Unit not available', 'Data' : []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 

@@ -735,8 +735,8 @@ WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
                 log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Deleted Successfully', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,0)
+            log_entry = create_transaction_logNew(request, 0,0,'Claim Tracking Entry Does Not Exist',263,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
