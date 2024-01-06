@@ -535,7 +535,7 @@ class ItemUnitsForMobileAppSerializer(serializers.Serializer):
     PODefaultUnit=serializers.BooleanField()
     SODefaultUnit= serializers.BooleanField()
     BaseUnitConversion= serializers.CharField(max_length=500)
-    Item= serializers.IntegerField()                            
-    UnitID= serializers.IntegerField()
+    ItemID= serializers.IntegerField()                            
+    Unit_ID= serializers.IntegerField()
     UnitName= serializers.CharField(max_length=500)
        
