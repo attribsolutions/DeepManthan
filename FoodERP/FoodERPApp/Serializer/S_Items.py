@@ -529,6 +529,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class ItemUnitsForMobileAppSerializer(serializers.Serializer):
+    id= serializers.IntegerField()
     BaseUnitQuantity= serializers.DecimalField(max_digits=15, decimal_places=3)
     IsDeleted= serializers.BooleanField()
     IsBase= serializers.BooleanField()

@@ -722,6 +722,7 @@ class MC_ItemUnitsView(CreateAPIView):
                     ItemUnitList = list()
                     for a in ItemUnitsMA_serializer:
                         ItemUnitList.append({
+                            "id" : a["id"],
                             "BaseUnitQuantity":a['BaseUnitQuantity'],
                             "IsDeleted":a['IsDeleted'],
                             "IsBase":a['IsBase'],
