@@ -5,6 +5,8 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+
+from FoodERPDBLog.views import create_transaction_logNew2
 from ..Serializer.S_CommFunction import *
 from ..Serializer.S_Mrps import *
 from ..Serializer.S_Margins import *
@@ -65,32 +67,33 @@ def create_transaction_log(request, data, User, PartyID, TransactionDetails, Tra
 
 
 def create_transaction_logNew(request, data, PartyID, TransactionDetails, TransactionType=0, TransactionID=0, FromDate=0, ToDate=0, CustomerID=0):
+    log_entry=create_transaction_logNew2(request, data, PartyID, TransactionDetails, TransactionType, TransactionID, FromDate, ToDate, CustomerID)
+    # Authenticated_User = request.user
+    # User = Authenticated_User.id
+    # aa = M_Settings.objects.filter(id=31).values('DefaultValue')
 
-    Authenticated_User = request.user
-    User = Authenticated_User.id
-    aa = M_Settings.objects.filter(id=31).values('DefaultValue')
+    # if aa[0]['DefaultValue'] == "1":
+    #     if not User:
+    #         User = data['UserID']
+    #     else:
+    #         pass
 
-    if aa[0]['DefaultValue'] == "1":
-        if not User:
-            User = data['UserID']
-        else:
-            pass
+    #     if not FromDate:
+    #         log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
+    #             request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, CustomerID=CustomerID)
+    #     else:
+    #         log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
+    #             request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
 
-        if not FromDate:
-            log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
-                request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, CustomerID=CustomerID)
-        else:
-            log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
-                request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
+    #     TransactionLogJsonData.objects.create(
+    #         Transactionlog=log_entry, JsonData=data)
 
-        TransactionLogJsonData.objects.create(
-            Transactionlog=log_entry, JsonData=data)
+    #     return log_entry
 
-        return log_entry
-
-    else:
-        return None
-
+    # else:
+    #     return None
+    return log_entry
+    
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
     UnitDetails = list()
