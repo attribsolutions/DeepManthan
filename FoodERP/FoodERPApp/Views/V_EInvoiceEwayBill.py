@@ -28,9 +28,8 @@ def generate_Access_Token():
 
     response = requests.request("POST", Auth_URL, headers=headers, data=payload)
     data_dict = json.loads(response.text)
-    # print("Response text:", response.text)
     # access_token = data_dict['access_token']
-    if'access_token' in data_dict:
+    if(response.ok):
         return  '1!'+data_dict['access_token']
     else:
         return  '0!'+str(data_dict)
