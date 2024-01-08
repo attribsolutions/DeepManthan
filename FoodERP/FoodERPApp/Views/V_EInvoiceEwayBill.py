@@ -18,7 +18,7 @@ def generate_Access_Token():
     Auth_URL = "https://pro.mastersindia.co/oauth/access_token"
     dataArray = {
         "username": "a.kiranmali@gmail.com",
-        "password": "Kiran@123",
+        "password": "MastersPassWord@123",
         "client_id": "ihaBcllRnZoJekHqxX",
         "client_secret": "wbx4SxdBdogRDjxxqnUp1Sof",
         "grant_type": "password"
