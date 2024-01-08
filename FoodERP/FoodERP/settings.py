@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # 'activity_log',
 ]
 
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
