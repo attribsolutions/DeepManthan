@@ -386,7 +386,7 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
  JOIN M_Parties on M_Parties.id= T_Invoices.Party_id 
- RIGHT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id
+ LEFT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id
  LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
  LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id 
  WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
