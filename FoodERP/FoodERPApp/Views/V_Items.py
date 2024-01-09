@@ -714,22 +714,23 @@ class MC_ItemUnitsView(CreateAPIView):
     def get(self,request):
         try:
             with transaction.atomic():
-                query = MC_ItemUnits.objects.raw('''Select MC_ItemUnits.id, BaseUnitQuantity,IsDeleted, IsBase, PODefaultUnit, SODefaultUnit, BaseUnitConversion, Item_id Item, UnitID_id UnitID, M_Units.Name UnitName
+                query = MC_ItemUnits.objects.raw('''Select MC_ItemUnits.id, BaseUnitQuantity,IsDeleted, IsBase, PODefaultUnit, SODefaultUnit, BaseUnitConversion, Item_id ItemID, UnitID_id Unit_ID, M_Units.Name UnitName
                                                 From MC_ItemUnits
-                                                Join M_Units on MC_ItemUnits.UnitID_id = M_Units.id''')
+                                                Join M_Units on MC_ItemUnits.UnitID_id = M_Units.id where IsDeleted=0 order by Item_id ''')
                 if query:
                     ItemUnitsMA_serializer = ItemUnitsForMobileAppSerializer(query, many=True).data
                     ItemUnitList = list()
                     for a in ItemUnitsMA_serializer:
                         ItemUnitList.append({
+                            "id" : a["id"],
                             "BaseUnitQuantity":a['BaseUnitQuantity'],
                             "IsDeleted":a['IsDeleted'],
                             "IsBase":a['IsBase'],
                             "PODefaultUnit":a['PODefaultUnit'],
                             "SODefaultUnit":a['SODefaultUnit'],
                             "BaseUnitConversion":a['BaseUnitConversion'],
-                            "Item":a['Item'],
-                            "UnitID":a['UnitID'],
+                            "Item":a['ItemID'],
+                            "UnitID":a['Unit_ID'],
                             "UnitName":a['UnitName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemUnitList})
