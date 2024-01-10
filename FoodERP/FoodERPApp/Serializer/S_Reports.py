@@ -3,7 +3,7 @@ from rest_framework import serializers
 from ..Serializer.S_Pages import *
 from ..Serializer.S_Modules import *
 from ..models import *
-
+from decimal import Decimal
 
 class PartyLedgerReportSerializer(serializers.Serializer):
     
@@ -174,9 +174,9 @@ class GenericSaleReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     HSNCode=serializers.CharField(max_length=100)
     MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInNo = serializers.DecimalField(max_digits=30, decimal_places=20)
-    QtyInKg = serializers.DecimalField(max_digits=30, decimal_places=20)
-    QtyInBox = serializers.DecimalField(max_digits=30, decimal_places=20)
+    QtyInNo = serializers.DecimalField(max_digits=10, decimal_places=2)
+    QtyInKg = serializers.DecimalField(max_digits=10, decimal_places=2)
+    QtyInBox = serializers.DecimalField(max_digits=10, decimal_places=2)
     BasicRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     WithGSTRate=serializers.DecimalField(max_digits=10, decimal_places=2)  
     UnitName=serializers.CharField(max_length=100)
@@ -203,6 +203,12 @@ class GenericSaleReportSerializer(serializers.Serializer):
     Cluster = serializers.CharField(max_length=500)
     SubCluster = serializers.CharField(max_length=500)
      
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['QtyInNo'] = Decimal(representation['QtyInNo']).quantize(Decimal('0.00'))
+        representation['QtyInKg'] = Decimal(representation['QtyInKg']).quantize(Decimal('0.00'))
+        representation['QtyInBox'] = Decimal(representation['QtyInBox']).quantize(Decimal('0.00'))
+        return representation
      
      
 class RetailerDataExportSerializer(serializers.Serializer):

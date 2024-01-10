@@ -358,7 +358,7 @@ class GenericSaleView(CreateAPIView):
                 Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.FullInvoiceNumber,
 T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
 M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
-M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,
+M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,ROUND(TC_InvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(TC_InvoiceItems.QtyInKg, 2) AS QtyInKg,ROUND(TC_InvoiceItems.QtyInBox, 2) AS QtyInBox,
 TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate + ((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage) / 100)) WithGSTRate,
 M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,
 TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,
@@ -386,7 +386,7 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
  JOIN M_Parties on M_Parties.id= T_Invoices.Party_id 
- RIGHT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id
+ LEFT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id
  LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
  LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id 
  WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
