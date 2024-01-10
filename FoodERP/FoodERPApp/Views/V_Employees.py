@@ -117,7 +117,13 @@ class M_EmployeesView(CreateAPIView):
                 if M_Employees_Serializer.is_valid():
                     Employee = M_Employees_Serializer.save()
                     LastInsertID = Employee.id
-                    log_entry = create_transaction_logNew(request,M_Employeesdata,M_Employeesdata['EmployeeParties'][0]['Party'],'TransactionID:'+str(LastInsertID),200,LastInsertID)
+                    #for log
+                    if M_Employeesdata['EmployeeParties'][0]['Party'] == '':
+                        x = 0
+                    else:
+                        x = M_Employeesdata['EmployeeParties'][0]['Party']
+
+                    log_entry = create_transaction_logNew(request,M_Employeesdata,x,'TransactionID:'+str(LastInsertID),200,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Data Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request,M_Employeesdata,0,'EmplyoeeSave:'+str(M_Employees_Serializer.errors),34,0)
