@@ -34,7 +34,6 @@ class SAPInvoiceView(CreateAPIView):
             with transaction.atomic():
                 
                 aa = JSONParser().parse(request)
-                log_entry = create_transaction_logNew(request, aa, 0, "initial",9,0)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 # print(auth_header)
                 if auth_header:
@@ -94,14 +93,24 @@ class SAPInvoiceView(CreateAPIView):
                                     aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
                                 
                                 for bb in aa['InvoiceItems']:
-                                    
-                                    if str(bb['BatchDate']) == "00.00.0000":
-                                        current_date = date.today()
-                                        # Format the date as yyyy-mm-dd             
-                                        BatchDate = current_date.strftime('%Y-%m-%d')
-                                    else:
-                                        BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
+                                    if str(bb['BatchCode']) == '':
+                                        log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],318,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': "Blank BatchCode Is Not Allowed", 'Data': []})
+
+                                    if str(bb['BatchDate']) == '':
+                                        log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],319,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': "Blank BatchDate Is Not Allowed", 'Data': []})
+                                    else:
+                                        if str(bb['BatchDate']) == "00.00.0000":
+                                            current_date = date.today()
+                                            # Format the date as yyyy-mm-dd             
+                                            BatchDate = current_date.strftime('%Y-%m-%d')
+                                        else:
+                                            BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+
+                                    
+                                    
                                     ItemMapping = M_Items.objects.filter(
                                         SAPItemCode=bb['MaterialCode']).values("id")
                                     UnitMapping = M_Units.objects.filter(
@@ -201,8 +210,8 @@ class SAPInvoiceView(CreateAPIView):
                                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data': []})
 
                                 else:
-                                    transaction.set_rollback(True)
                                     log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceSave:'+ str(Invoice_serializer.errors),34,0)
+                                    transaction.set_rollback(True)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
                                     
                             
@@ -227,7 +236,6 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, data, 0, 0, "initiat")
                 payload = json.dumps(data)
                 
                 SAPURL, Token  = GetThirdPartyAPIs(26)
@@ -256,17 +264,18 @@ class SAPOrderView(CreateAPIView):
                     OrderID = int(data['OrderNo'])-5000000
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_log(request, data, 0, 0, data_dict['entry']['content']['m:properties']['d:Stats'])
+                    # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_log(request, data, 0, 0, data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'])
+                        # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_log(request, data, 0, 0, 'Another exception raised from SAP')
+                        # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
+            # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
