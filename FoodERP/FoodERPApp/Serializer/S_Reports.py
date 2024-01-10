@@ -251,6 +251,8 @@ class ReturnReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     Product =serializers.CharField(max_length=100)
     SubProduct =serializers.CharField(max_length=100)
+    ERPItemCode =  serializers.IntegerField()
+    SAPItemCode = serializers.IntegerField()
     MaterialName=serializers.CharField(max_length=100)
     ReturnQtyNos =serializers.DecimalField(max_digits=20, decimal_places=2)
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
