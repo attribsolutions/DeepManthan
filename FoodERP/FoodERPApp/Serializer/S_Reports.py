@@ -175,9 +175,9 @@ class GenericSaleReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     HSNCode=serializers.CharField(max_length=100)
     MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInNo = serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInKg = serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInBox = serializers.DecimalField(max_digits=10, decimal_places=2)
+    QtyInNo = serializers.DecimalField(max_digits=20, decimal_places=6)
+    QtyInKg = serializers.DecimalField(max_digits=20, decimal_places=6)
+    QtyInBox = serializers.DecimalField(max_digits=20, decimal_places=6)
     BasicRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     WithGSTRate=serializers.DecimalField(max_digits=10, decimal_places=2)  
     UnitName=serializers.CharField(max_length=100)
@@ -253,6 +253,10 @@ class ReturnReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     Product =serializers.CharField(max_length=100)
     SubProduct =serializers.CharField(max_length=100)
+
+    ERPItemCode =  serializers.IntegerField()  
+    SAPItemCode = serializers.IntegerField()
+
     MaterialName=serializers.CharField(max_length=100)
     ReturnQtyNos =serializers.DecimalField(max_digits=20, decimal_places=2)
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
