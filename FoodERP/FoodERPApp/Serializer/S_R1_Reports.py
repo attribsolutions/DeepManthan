@@ -167,8 +167,8 @@ class HSN2Serializer2(serializers.Serializer):
 class DocsSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     a=serializers.CharField(max_length=100)
-    MINID=serializers.IntegerField()
-    MAXID=serializers.IntegerField()
+    MINID=serializers.CharField()
+    MAXID=serializers.CharField()
     cnt=FloatDecimalField()
     Cancelledcnt=FloatDecimalField()
 
