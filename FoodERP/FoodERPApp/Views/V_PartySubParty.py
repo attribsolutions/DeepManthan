@@ -182,7 +182,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                            "SkyggeID": a['SubParty']['SkyggeID']
                             })   
                         elif(Type==2): #Supplier
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -196,7 +197,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                            "SkyggeID": a['SubParty']['SkyggeID']
 
                             }) 
                         elif(Type==3 or Type == 5 ):  #Customer
@@ -212,7 +214,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty'],
-                          
+                            "SkyggeID": a['SubParty']['SkyggeID']
                             })
                         else:
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -227,7 +229,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                            "SkyggeID": a['SubParty']['SkyggeID']
                             })
                     log_entry = create_transaction_logNew(request, Partydata,id,'',177,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})
