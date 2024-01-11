@@ -16,7 +16,7 @@ from ..Serializer.S_Reports import *
 from ..models import *
 
 
-class PartyLedgerReportView(CreateAPIView):
+class PartyLedgerReportView(CreateAPIView):  
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
