@@ -568,7 +568,7 @@ class T_OrdersViewSecond(CreateAPIView):
             with transaction.atomic():
                 Orderupdatedata = JSONParser().parse(request)
                 OrderupdateByID = T_Orders.objects.get(id=id)
-
+                Orderupdatedata['IsMobileAppOrder'] = 0
                 for aa in Orderupdatedata['OrderItem']:
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(

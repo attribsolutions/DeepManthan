@@ -308,10 +308,11 @@ class T_MobileAppOrdersView(CreateAPIView):
                             "Supplier": Supplier,
                             "OrderType": 2,
                             "IsConfirm": True,
+                            "IsMobileAppOrder" : 1,
                             "OrderItem" :  Orderitem
 
                         })
-                        
+                        print(Orderdata)
                         # return JsonResponse({ 'Data': Orderdata })
                         Order_serializer = T_OrderSerializer(
                     OrderupdateByID, data=Orderdata[0])
