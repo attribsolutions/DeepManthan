@@ -70,13 +70,13 @@ FROM
             DebitNote,
             CreditNote,
 
-            BasicAmount,
-            BA5,
-            BA12,
-            BA18,
-            GA5,
-            GA12,
-            GA18,
+            ifnull(BasicAmount,0) AS BasicAmount,
+            ifnull(BA5,0) AS BA5,
+            ifnull(BA12,0) AS BA12,
+            ifnull(BA18,0) AS BA18,
+            ifnull(GA5,0) AS GA5,
+            ifnull(GA12,0) AS GA12,
+            ifnull(GA18,0) AS GA18,
             Description
 
     FROM
