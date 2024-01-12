@@ -127,7 +127,82 @@ class T_OrderSerializer(serializers.ModelSerializer):
                     Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
        
  
-        return instance  
+        return instance    
+
+class T_OrderSerializerMobileapp(serializers.ModelSerializer):
+    OrderItem = TC_OrderItemsSerializer(many=True)
+    OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
+    
+    
+    class Meta:
+        model = T_Orders
+        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','POFromDate','POToDate','MobileAppOrderFlag','IsConfirm','OrderItem','OrderTermsAndConditions']
+
+    def create(self, validated_data):
+        OrderItems_data = validated_data.pop('OrderItem')
+        OrderTermsAndConditions_data = validated_data.pop('OrderTermsAndConditions')
+        
+        Order = T_Orders.objects.create(**validated_data)
+        
+        for OrderItem_data in OrderItems_data:
+           TC_OrderItems.objects.create(Order=Order, **OrderItem_data)
+
+        for OrderTermsAndCondition_data in OrderTermsAndConditions_data:
+            TC_OrderTermsAndConditions.objects.create(Order=Order, **OrderTermsAndCondition_data)       
+        
+        return Order
+
+    def update(self, instance, validated_data):
+        
+        # * Order Info
+        
+        instance.OrderDate = validated_data.get(
+            'OrderDate', instance.OrderDate)   
+        instance.DeliveryDate = validated_data.get(
+            'DeliveryDate', instance.DeliveryDate)
+        instance.POFromDate = validated_data.get(
+            'POFromDate', instance.POFromDate)   
+        instance.POToDate = validated_data.get(
+            'POToDate', instance.POToDate)
+        instance.POType = validated_data.get(
+            'POType', instance.POType)          
+        instance.OrderAmount = validated_data.get(
+            'OrderAmount', instance.OrderAmount)
+        instance.Description = validated_data.get(
+            'Description', instance.Description)
+        instance.BillingAddress = validated_data.get(
+            'BillingAddress', instance.BillingAddress)
+        instance.ShippingAddress = validated_data.get(
+            'ShippingAddress', instance.ShippingAddress)
+        instance.UpdatedBy = validated_data.get(
+            'UpdatedBy', instance.UpdatedBy) 
+                
+        instance.save()
+
+        
+        
+        
+        SetFlag=TC_OrderItems.objects.filter(Order=instance).update(IsDeleted=1)    
+
+        for OrderItem_data in validated_data['OrderItem']:
+            OrderItem_data['IsDeleted']=0
+            Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+
+            
+            
+            
+            
+       
+        for OrderTermsAndCondition_data in validated_data['OrderTermsAndConditions']:
+            if(OrderTermsAndCondition_data['IsDeleted'] == 1 ) :
+                SetFlag=TC_OrderTermsAndConditions.objects.filter(Order=instance).update(IsDeleted=1)
+            else:
+                TestExistance=TC_OrderTermsAndConditions.objects.filter(Order=instance ,TermsAndCondition=OrderTermsAndCondition_data['TermsAndCondition'])
+                if TestExistance.count() == 0:
+                    Items = TC_OrderTermsAndConditions.objects.create(Order=instance, **OrderTermsAndCondition_data)
+       
+ 
+        return instance         
 
 class GRNReferanceSerializer(serializers.ModelSerializer):
     class Meta:
