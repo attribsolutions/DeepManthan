@@ -185,7 +185,7 @@ class T_OrderSerializerMobileapp(serializers.ModelSerializer):
         SetFlag=TC_OrderItems.objects.filter(Order=instance).update(IsDeleted=1)    
 
         for OrderItem_data in validated_data['OrderItem']:
-            
+            OrderItem_data['IsDeleted']=0
             Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
 
             
