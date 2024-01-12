@@ -6,7 +6,7 @@ from django.db import transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyItems import *
 from ..models import *
-
+from ..Views.V_CommFunction import *
 
 
 class PartyItemsListView(CreateAPIView):
@@ -70,6 +70,9 @@ class PartyItemsFilterView(CreateAPIView):
                         Itemquery, many=True).data
                     ItemList = list()
                     for a in Items_Serializer:
+                        GST_HSNCodeMaster = GSTHsnCodeMaster(ItemID=a['id'], EffectiveDate=date.today())
+                        GST = GST_HSNCodeMaster.GetTodaysGstHsnCode()
+
                         query=O_BatchWiseLiveStock.objects.filter(Item=a['id'],Party=PartyID,BaseUnitQuantity__gt=0)
                         if query.exists():
                             InStock = True
@@ -86,12 +89,14 @@ class PartyItemsFilterView(CreateAPIView):
                             "SubGroupName": a['SubGroupName'],
                             "InStock":InStock,
                             "MapItem": a['MapItem'],
+                            "GST": GST[0]['GST'], 
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'FetchSingleGETItem:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
 
 class PartyItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
