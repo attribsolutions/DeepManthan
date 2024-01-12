@@ -308,12 +308,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                             "Supplier": Supplier,
                             "OrderType": 2,
                             "IsConfirm": True,
+                           
                             "OrderItem" :  Orderitem
 
                         })
-                        
+                       
                         # return JsonResponse({ 'Data': Orderdata })
-                        Order_serializer = T_OrderSerializer(
+                        Order_serializer = T_OrderSerializerMobileapp(
                     OrderupdateByID, data=Orderdata[0])
                         # Order_serializer = T_OrderSerializer(data=Orderdata[0])
                         if Order_serializer.is_valid():
