@@ -46,9 +46,12 @@ class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
+    # IsMobileAppOrder=serializers.IntegerField()
+    IsMobileAppOrder = serializers.CharField(write_only=True)
+    print('ffffffffffffffffffff')
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','POFromDate','POToDate','MobileAppOrderFlag','IsConfirm','OrderItem','OrderTermsAndConditions']
+        fields = ['IsMobileAppOrder','id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','POFromDate','POToDate','MobileAppOrderFlag','IsConfirm','OrderItem','OrderTermsAndConditions']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
@@ -67,7 +70,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         
         # * Order Info
-        
+        print('ggggggggggggggggggggggggggggg')
         instance.OrderDate = validated_data.get(
             'OrderDate', instance.OrderDate)   
         instance.DeliveryDate = validated_data.get(
@@ -91,29 +94,31 @@ class T_OrderSerializer(serializers.ModelSerializer):
                 
         instance.save()
 
-        # for items in instance.OrderItem.all():
-        #     print(items.IsDeleted)
-        #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
-            
-            
-        # for items in instance.OrderTermsAndConditions.all():
-            
-        #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
-            
+        
+        print(validated_data['IsMobileAppOrder'],'=======================')
+        if(validated_data['IsMobileAppOrder'] == '1'):
+            print('hhhhhhhhhhhhhhh',instance)
+            SetFlag=TC_OrderItems.objects.filter(Order=instance).update(IsDeleted=1)    
 
         for OrderItem_data in validated_data['OrderItem']:
-            if(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
-                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0).update(IsDeleted=1)
-            elif(OrderItem_data['IsDeleted'] == 0 ) :
-                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0)
-                
-                if SetFlag.count() == 0:
-                    OrderItem_data['IsDeleted']=0
-                    Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
-            else: 
-                SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
+            if(validated_data['IsMobileAppOrder'] == '1'):
                 OrderItem_data['IsDeleted']=0
                 Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+
+            else:    
+            
+                if(OrderItem_data['Quantity'] == 0 and OrderItem_data['IsDeleted'] == 1 ) :
+                    SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0).update(IsDeleted=1)
+                elif(OrderItem_data['IsDeleted'] == 0 ) :
+                    SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance,IsDeleted=0)
+                    
+                    if SetFlag.count() == 0:
+                        OrderItem_data['IsDeleted']=0
+                        Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
+                else: 
+                    SetFlag=TC_OrderItems.objects.filter(Item=OrderItem_data['Item'],Order=instance).update(IsDeleted=1)
+                    OrderItem_data['IsDeleted']=0
+                    Items = TC_OrderItems.objects.create(Order=instance, **OrderItem_data)
             
             
             
