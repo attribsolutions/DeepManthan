@@ -1406,8 +1406,7 @@ M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_i
  C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
 A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
-C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, "" AS RSM, "" AS ASM, "" AS Salesofficer,
-"" AS SalesExecutive, "" AS SalesRepresentative, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, X.GM , X.NH, X.RH , X.ASM, X.SE, X.SO, X.SR, X.MT, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty 
 LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
@@ -1455,11 +1454,14 @@ WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
                             "FSSAINo": a['FSSAINo'],
                             "FSSAIExpiry": a['FSSAIExpiry'],
                             "GSTIN": a['GSTIN'],
-                            "RSM": a['RSM'],
+                            "GM": a['GM'],
+                            "NH":a['NH'],
+                            "RH":a['RH'],
                             "ASM": a['ASM'],
-                            "Salesofficer": a['Salesofficer'],
-                            "SalesExecutive": a['SalesExecutive'],
-                            "SalesRepresentative": a['SalesRepresentative'],
+                            "SO": a['SO'],
+                            "SE": a['SE'],
+                            "SR": a['SR'],
+                            "MT":a['MT']
                             })
                     log_entry = create_transaction_logNew(
                         request, ManPower_Serializer, 0, '', 219, 0)
