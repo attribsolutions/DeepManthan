@@ -1406,7 +1406,8 @@ M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_i
  C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
 A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
-C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, X.GM , X.NH, X.RH , X.ASM, X.SE, X.SO, X.SR, X.MT, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, M_Employees_GM.Name AS GM, M_Employees_NH.Name AS NH, M_Employees_RH.Name AS RH,
+M_Employees_ASM.Name AS ASM,M_Employees_SE.Name AS SE,M_Employees_SO.Name AS SO,M_Employees_SR.Name AS SR,M_Employees_MT.Name AS MT, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty 
 LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
@@ -1421,6 +1422,14 @@ LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id
 LEFT JOIN M_PartyDetails X On  A.id=X.Party_id AND X.Group_id is null
 LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id
 LEFT JOIN M_SubCluster On X.SubCluster_id=M_SubCluster.id
+LEFT JOIN M_Employees M_Employees_GM ON M_Employees_GM.id = X.GM
+LEFT JOIN M_Employees M_Employees_NH ON M_Employees_NH.id = X.NH
+LEFT JOIN M_Employees M_Employees_RH ON M_Employees_RH.id = X.RH
+LEFT JOIN M_Employees M_Employees_ASM ON M_Employees_ASM.id = X.ASM
+LEFT JOIN M_Employees M_Employees_SE ON M_Employees_SE.id = X.SE
+LEFT JOIN M_Employees M_Employees_SO ON M_Employees_SO.id = X.SO
+LEFT JOIN M_Employees M_Employees_SR ON M_Employees_SR.id = X.SR
+LEFT JOIN M_Employees M_Employees_MT ON M_Employees_MT.id = X.MT                                                     
 WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
 
                 if query:
