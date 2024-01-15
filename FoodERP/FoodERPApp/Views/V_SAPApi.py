@@ -264,18 +264,18 @@ class SAPOrderView(CreateAPIView):
                     OrderID = int(data['OrderNo'])-5000000
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
+                    log_entry = create_transaction_logNew(request, data, 0, '',321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
+                        log_entry = create_transaction_logNew(request, data, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
+                        log_entry = create_transaction_logNew(request, data, 0, '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -308,10 +308,13 @@ class SAPLedgerView(CreateAPIView):
                 # data_dict = json.loads(json_data)
   
                 if response_json:
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate)+','+'SAPCode:'+str(SAPCode),324,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})       
                 else:
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -398,11 +401,15 @@ class InvoiceToSCMView(CreateAPIView):
                     
                     if (response_json[0]['Status']== False):
                         Msg = response_json[0]['Messag']
+                        log_entry = create_transaction_logNew(request, Reportdata, 0, 'False Status In Response While Invoice Send to SCM ',325,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':Msg, 'Data':payload })  
                     else:
                         Msg = response_json[0]['Messag']
+                        log_entry = create_transaction_logNew(request, Reportdata, 0, '',325,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Msg, 'Data': payload})    
                 else:
+                    log_entry = create_transaction_logNew(request, Reportdata, 0, 'SAPInvoice Not Send To SCM',325,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': payload})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'InvoiceToSCM:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':payload})        
