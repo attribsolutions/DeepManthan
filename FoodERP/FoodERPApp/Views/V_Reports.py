@@ -1378,7 +1378,7 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
                             "PartyID": a['id'],
                             "PartyName": a['PartyName'],
                             "RouteName": a['RouteName'],
-                            "OutStandingBalance": GetOpeningBalance(Party, a['id'], ToDate)
+                            "OutStandingBalance": round(float(GetOpeningBalance(Party, a['id'], ToDate)), 2)
                         })
                     log_entry = create_transaction_logNew(
                         request, Balance_Data, Party, 'To:'+str(ToDate), 218, 0, 0, ToDate, 0)
