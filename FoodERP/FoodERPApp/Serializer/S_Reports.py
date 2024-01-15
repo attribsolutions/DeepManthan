@@ -423,11 +423,14 @@ class ManPowerSerializer(serializers.Serializer):
     FSSAINo = serializers.CharField(max_length=500)
     FSSAIExpiry = serializers.DateField()
     GSTIN = serializers.CharField(max_length=500)
-    RSM = serializers.CharField(max_length=500)
+    GM = serializers.CharField(max_length=500)
+    NH = serializers.CharField(max_length=500)
+    RH = serializers.CharField(max_length=500)
     ASM = serializers.CharField(max_length=500)
-    Salesofficer = serializers.CharField(max_length=500)
-    SalesExecutive = serializers.CharField(max_length=500)
-    SalesRepresentative = serializers.CharField(max_length=500)
+    SO = serializers.CharField(max_length=500)
+    SE = serializers.CharField(max_length=500)
+    SR = serializers.CharField(max_length=500)
+    MT = serializers.CharField(max_length=500)
     
 
 class TCSAmountReportSerializer(serializers.Serializer):
