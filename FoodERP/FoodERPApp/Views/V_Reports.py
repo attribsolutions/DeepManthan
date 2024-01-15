@@ -1212,7 +1212,7 @@ JOIN M_Items ON M_Items.id = TC_CreditDebitNoteItems.Item_id
 JOIN C_Companies ON C_Companies.id = M_Items.Company_id
 JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_CreditDebitNoteItems.Unit_id
 JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_CreditDebitNoteItems.Item_id AND M_GSTHSNCode.IsDeleted=0
+JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_CreditDebitNoteItems.Item_id AND M_GSTHSNCode.IsDeleted=0
 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_CreditDebitNotes.Customer_id AND MC_PartySubParty.Party_id=%s
 LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 LEFT JOIN TC_CreditDebitNoteUploads ON TC_CreditDebitNoteUploads.CRDRNote_id=T_CreditDebitNotes.id
