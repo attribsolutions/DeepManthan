@@ -59,6 +59,7 @@ class M_PartyType(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     IsRetailer = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
+    IsFranchises = models.BooleanField(default=False)
  
     class Meta:
         db_table = 'M_PartyType'
@@ -653,6 +654,7 @@ class M_Items(models.Model):
     StoringCondition = models.CharField(max_length=200,null=True,blank=True)
     Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
+    IsFranchisesItem = models.BooleanField(default=False)
     class Meta:
         db_table = "M_Items"
         
@@ -2227,26 +2229,13 @@ class M_PartyDetails(models.Model):
     SO = models.CharField(max_length=500,null=True)
     SR = models.CharField(max_length=500,null=True)
     MT = models.CharField(max_length=500,null=True)
-    # /NH/RH/ASM/SE/SO/SR/MT
+    
     class Meta:
         db_table = "M_PartyDetails" 
 
 
 
-# class MC_PartyDetailsChild(models.Model):
-#     PartyDetails = models.ForeignKey(M_PartyDetails, related_name='PartyDetailsChild', on_delete=models.CASCADE)
-    
-#     GM = models.ForeignKey(M_Employees, related_name='PartyDetailGM', on_delete=models.PROTECT ,null=True,blank=True)
-#     NH = models.ForeignKey(M_Employees, related_name='PartyDetailNH', on_delete=models.PROTECT ,null=True,blank=True)
-#     RH = models.ForeignKey(M_Employees, related_name='PartyDetailRH', on_delete=models.PROTECT ,null=True,blank=True)
-#     ASM = models.ForeignKey(M_Employees, related_name='PartyDetailASM', on_delete=models.PROTECT ,null=True,blank=True)
-#     SE = models.ForeignKey(M_Employees, related_name='PartyDetailSE', on_delete=models.PROTECT ,null=True,blank=True)
-#     SO = models.ForeignKey(M_Employees, related_name='PartyDetailSO', on_delete=models.PROTECT ,null=True,blank=True)
-#     SR = models.ForeignKey(M_Employees, related_name='PartyDetailSR', on_delete=models.PROTECT ,null=True,blank=True)
-#     MT = models.ForeignKey(M_Employees, related_name='PartyDetailMT', on_delete=models.PROTECT ,null=True,blank=True)
-    
-#     class Meta:
-#         db_table = "MC_PartyDetailsChild" 
+
 
 
 

@@ -117,7 +117,13 @@ class M_EmployeesView(CreateAPIView):
                 if M_Employees_Serializer.is_valid():
                     Employee = M_Employees_Serializer.save()
                     LastInsertID = Employee.id
-                    log_entry = create_transaction_logNew(request,M_Employeesdata,M_Employeesdata['EmployeeParties'][0]['Party'],'TransactionID:'+str(LastInsertID),200,LastInsertID)
+                    #for log
+                    if M_Employeesdata['EmployeeParties'][0]['Party'] == '':
+                        x = 0
+                    else:
+                        x = M_Employeesdata['EmployeeParties'][0]['Party']
+
+                    log_entry = create_transaction_logNew(request,M_Employeesdata,x,'TransactionID:'+str(LastInsertID),200,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Employee Data Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request,M_Employeesdata,0,'EmplyoeeSave:'+str(M_Employees_Serializer.errors),34,0)
@@ -284,7 +290,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
                 JOIN M_States ON M_States.id=M_Parties.State_id
                 JOIN M_Districts ON M_Districts.id=M_Parties.District_id
-                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 AND M_PartyType.IsSCM=1)a
+                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 AND M_PartyType.IsSCM=1 OR M_PartyType.IsFranchises=1)a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
@@ -300,6 +306,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                         'District': a['DistrictName'],
                         'Party': a['PartyID']
                     })
+                    
                 # q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
                 # q0 = MC_ManagementParties.objects.filter(Employee=EmployeeID).select_related('Party')
                 # print(str(q0.query))

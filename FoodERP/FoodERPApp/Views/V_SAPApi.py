@@ -11,7 +11,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
 from django.db import transaction
-
+from ..Views.V_CommFunction import *
 from ..Serializer.S_SAPApi import InvoiceSerializer,InvoiceToSCMSerializer
 from ..Serializer.S_Orders import *
 from ..models import *
@@ -34,7 +34,6 @@ class SAPInvoiceView(CreateAPIView):
             with transaction.atomic():
                 
                 aa = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, aa, 0, 0, "initial")
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 # print(auth_header)
                 if auth_header:
@@ -57,11 +56,11 @@ class SAPInvoiceView(CreateAPIView):
                             CheckIsInwardornot=T_Invoices.objects.raw('''SELECT Invoice_id id,Inward FROM TC_GRNReferences join T_Invoices on Invoice_id=T_Invoices.id where T_Invoices.FullInvoiceNumber = %s ''',[aa["refInvoiceNo"]])
                             if CheckIsInwardornot:
                                 hidedeletedInvoice=T_Invoices.objects.filter(FullInvoiceNumber=aa["refInvoiceNo"]).update(DeletedFromSAP=1)
-                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice already Inwarded')
+                                log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],285,0)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice already Inwarded', 'Data': []})
                             else:
                                 Delete_Invoice=T_Invoices.objects.filter(FullInvoiceNumber=aa["refInvoiceNo"]).delete()
-                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice Delete Successfully')
+                                log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],286,0)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Delete Successfully', 'Data': []})
 
                         else:
@@ -81,27 +80,37 @@ class SAPInvoiceView(CreateAPIView):
                                 if CustomerMapping.exists():
                                     aa['Customer'] = CustomerMapping
                                 else:
-                                    log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Customer Data ')
+                                    log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],287,0)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data': []})
                                 # print('dddddddddd')
                                 if PartyMapping.exists():
                                     aa['Party'] = PartyMapping
                                 else:
-                                    log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Plant Data ')
+                                    log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],288,0)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Plant Data ", 'Data': []})
 
                                 InvoiceDate = datetime.strptime(
                                     aa['InvoiceDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
                                 
                                 for bb in aa['InvoiceItems']:
-                                    
-                                    if str(bb['BatchDate']) == "00.00.0000":
-                                        current_date = date.today()
-                                        # Format the date as yyyy-mm-dd             
-                                        BatchDate = current_date.strftime('%Y-%m-%d')
-                                    else:
-                                        BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
 
+                                    if str(bb['BatchCode']) == '':
+                                        log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],318,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': "Blank BatchCode Is Not Allowed", 'Data': []})
+
+                                    if str(bb['BatchDate']) == '':
+                                        log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],319,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': "Blank BatchDate Is Not Allowed", 'Data': []})
+                                    else:
+                                        if str(bb['BatchDate']) == "00.00.0000":
+                                            current_date = date.today()
+                                            # Format the date as yyyy-mm-dd             
+                                            BatchDate = current_date.strftime('%Y-%m-%d')
+                                        else:
+                                            BatchDate = datetime.strptime(bb['BatchDate'], "%d.%m.%Y").strftime("%Y-%m-%d")
+
+                                    
+                                    
                                     ItemMapping = M_Items.objects.filter(
                                         SAPItemCode=bb['MaterialCode']).values("id")
                                     UnitMapping = M_Units.objects.filter(
@@ -111,7 +120,7 @@ class SAPInvoiceView(CreateAPIView):
                                     if ItemMapping.exists():
                                         bb['Item'] = ItemMapping
                                     else:
-                                        log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Material Code')
+                                        log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],289,0)
                                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
 
                                     if UnitMapping.exists():
@@ -123,11 +132,11 @@ class SAPInvoiceView(CreateAPIView):
                                         if MC_UnitID.exists():
                                             bb['Unit'] = MC_UnitID
                                         else:
-                                            log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Material Code')
-                                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Item Unit  ", 'Data': []})
+                                            log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+ aa["InvoiceNumber"],290,0)
+                                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Item Unit ", 'Data': []})
                                     else:
-                                        log_entry = create_transaction_log(request, aa, 0, 0, 'Invalid Unit Code')
-                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit", 'Data': []})
+                                        log_entry = create_transaction_logNew(request, aa, 0, aa["InvoiceNumber"],291,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit Code", 'Data': []})
                                     # print('hhhhhhhhhhhh')
                                     BaseUnitQuantity = UnitwiseQuantityConversion(
                                         ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 0, 0).GetBaseUnitQuantity()
@@ -197,18 +206,17 @@ class SAPInvoiceView(CreateAPIView):
                                     data=InvoiceData[0])
                                 if Invoice_serializer.is_valid():
                                     Invoice_serializer.save()
-                                    log_entry = create_transaction_log(request, aa, 0, 0, aa["InvoiceNumber"]+" Invoice Save Successfully")
+                                    log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+ aa["InvoiceNumber"],292,0)
                                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data': []})
 
                                 else:
+                                    log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceSave:'+ str(Invoice_serializer.errors),34,0)
                                     transaction.set_rollback(True)
-                                    # log_entry = create_transaction_log(
-                                    #     request, aa, 0, 0, Invoice_serializer.errors)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
                                     
                             
                             else:
-                                log_entry = create_transaction_log(request, aa, 0, 0, 'Invoice already exist')
+                                log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+ aa["InvoiceNumber"],293,0)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice already exist', 'Data': []})
                     
                     else:
@@ -216,6 +224,7 @@ class SAPInvoiceView(CreateAPIView):
                         return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'SAPInvoiceSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
 
 
@@ -227,7 +236,6 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-                log_entry = create_transaction_log(request, data, 0, 0, "initiat")
                 payload = json.dumps(data)
                 
                 SAPURL, Token  = GetThirdPartyAPIs(26)
@@ -256,17 +264,18 @@ class SAPOrderView(CreateAPIView):
                     OrderID = int(data['OrderNo'])-5000000
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_log(request, data, 0, 0, data_dict['entry']['content']['m:properties']['d:Stats'])
+                    log_entry = create_transaction_logNew(request, data, 0, '',321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_log(request, data, 0, 0, data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'])
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
+                        log_entry = create_transaction_logNew(request, data, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
+                        return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_log(request, data, 0, 0, 'Another exception raised from SAP')
+                        log_entry = create_transaction_logNew(request, data, 0, '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -299,10 +308,13 @@ class SAPLedgerView(CreateAPIView):
                 # data_dict = json.loads(json_data)
   
                 if response_json:
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate)+','+'SAPCode:'+str(SAPCode),324,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})       
                 else:
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -389,11 +401,15 @@ class InvoiceToSCMView(CreateAPIView):
                     
                     if (response_json[0]['Status']== False):
                         Msg = response_json[0]['Messag']
+                        log_entry = create_transaction_logNew(request, Reportdata, 0, 'False Status In Response While Invoice Send to SCM ',325,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':Msg, 'Data':payload })  
                     else:
                         Msg = response_json[0]['Messag']
+                        log_entry = create_transaction_logNew(request, Reportdata, 0, '',325,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Msg, 'Data': payload})    
                 else:
+                    log_entry = create_transaction_logNew(request, Reportdata, 0, 'SAPInvoice Not Send To SCM',325,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Not Send', 'Data': payload})  
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'InvoiceToSCM:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':payload})        

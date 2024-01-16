@@ -405,6 +405,7 @@ urlpatterns = [
             url(r'PartySubParty$',PartySubPartyView.as_view()),
             url(r'PartySubPartyList$',PartySubPartyListFilterView.as_view()),
             url(r'RetailerandSSDD$',RetailerandSSDDView.as_view()),
+            url(r'CxDDDiffParty$',CxDDDiffPartiesView.as_view()),
             
 # PartyWiseUpdate            
             url(r'PartyWiseUpdate$', PartyWiseUpdateView.as_view()),
@@ -446,7 +447,7 @@ urlpatterns = [
             url(r'ItemWiseSave$', ItemWiseSaveView.as_view()),
             url(r'ImageUploads$', ImageUploadsView.as_view()),
             url(r'ImageUploads/([0-9]+)$', ImageUploadsView.as_view()),  #ItemID,ImageType
-            
+            url(r'ItemUnitsForMobileApp$', MC_ItemUnitsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
 

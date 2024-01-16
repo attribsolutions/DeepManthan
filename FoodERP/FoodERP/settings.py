@@ -27,6 +27,7 @@ ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','11
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 # CRONTAB_DJANGO_SETTINGS_MODULE = 'FoodERP.settings'
 INSTALLED_APPS = [
+    # 'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,9 +37,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
-    'django_crontab',
+    'FoodERPDBLog.apps.FooderpdblogConfig',
     # 'activity_log',
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -79,7 +81,7 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+# DATABASE_ROUTERS = ['FoodERPDBLog.routers.FoodERPDBLogRouter']
 
 DATABASES = {
     'default': {
@@ -93,19 +95,24 @@ DATABASES = {
             'sql_mode': 'STRICT_TRANS_TABLES', 
         },
     },
+    'transactionlog_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'TransactionLog',     
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',  
+        'HOST': '10.4.5.64',
+        'PORT': '3306' , 
+        'OPTIONS': { 
+            'sql_mode': 'STRICT_TRANS_TABLES', 
+        },
+    },
     
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'transactionlogdb',
-    #     'USER': 'pk',
-    #     'PASSWORD': 'P@ssw0rd', 
-    #     'HOST': '192.168.1.114',
-    #     'PORT': '3306'
-    # }
 
 }
 
 CRONJOBS = [
-    ('*/30 * * * *', 'FoodERPApp.cron.my_cron_job')
+    ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
+    # ('*/1 * * * *', 'FoodERPApp.tasks.my_cron_job' ),
 ]
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from ..Serializer.S_Pages import *
 from ..Serializer.S_Modules import *
 from ..models import *
-
+from decimal import Decimal
 
 class PartyLedgerReportSerializer(serializers.Serializer):
     
@@ -161,6 +161,7 @@ class DamageStocktSerializer(serializers.Serializer):
     
 class GenericSaleReportSerializer(serializers.Serializer):
     
+    SAPPartyID=serializers.IntegerField()
     PartyID=serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     PartyType = serializers.CharField(max_length=500)
@@ -174,9 +175,9 @@ class GenericSaleReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     HSNCode=serializers.CharField(max_length=100)
     MRP=serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInNo = serializers.DecimalField(max_digits=30, decimal_places=20)
-    QtyInKg = serializers.DecimalField(max_digits=30, decimal_places=20)
-    QtyInBox = serializers.DecimalField(max_digits=30, decimal_places=20)
+    QtyInNo = serializers.DecimalField(max_digits=20, decimal_places=6)
+    QtyInKg = serializers.DecimalField(max_digits=20, decimal_places=6)
+    QtyInBox = serializers.DecimalField(max_digits=20, decimal_places=6)
     BasicRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     WithGSTRate=serializers.DecimalField(max_digits=10, decimal_places=2)  
     UnitName=serializers.CharField(max_length=100)
@@ -198,11 +199,18 @@ class GenericSaleReportSerializer(serializers.Serializer):
     TCSAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     RoundOffAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     GrandTotal = serializers.DecimalField(max_digits=10, decimal_places=2)     
-    GroupName = serializers.CharField(max_length=500)
-    SubGroupName = serializers.CharField(max_length=500) 
-    ClusterName = serializers.CharField(max_length=500)
-    SubClusterName = serializers.CharField(max_length=500)
+    Group = serializers.CharField(max_length=500)
+    SubGroup = serializers.CharField(max_length=500) 
+    Cluster = serializers.CharField(max_length=500)
+    SubCluster = serializers.CharField(max_length=500)
      
+    def to_representation(self, instance):
+        # Ensure proper rounding for specific fields
+        representation = super().to_representation(instance)
+        representation['QtyInNo'] = Decimal(representation['QtyInNo']).quantize(Decimal('0.00'))
+        representation['QtyInKg'] = Decimal(representation['QtyInKg']).quantize(Decimal('0.00'))
+        representation['QtyInBox'] = Decimal(representation['QtyInBox']).quantize(Decimal('0.00'))
+        return representation
      
      
 class RetailerDataExportSerializer(serializers.Serializer):
@@ -232,8 +240,8 @@ class RetailerDataExportSerializer(serializers.Serializer):
     Longitude=serializers.CharField(max_length=100)
     SAPPartyCode = serializers.CharField(max_length=500)
     Supplierid = serializers.CharField(max_length=500)
-    ClusterName = serializers.CharField(max_length=500)
-    SubClusterName = serializers.CharField(max_length=500)
+    Cluster = serializers.CharField(max_length=500)
+    SubCluster = serializers.CharField(max_length=500)
     
     
     
@@ -245,6 +253,10 @@ class ReturnReportSerializer(serializers.Serializer):
     CompanyName=serializers.CharField(max_length=100)
     Product =serializers.CharField(max_length=100)
     SubProduct =serializers.CharField(max_length=100)
+
+    ERPItemCode =  serializers.IntegerField()  
+    SAPItemCode = serializers.IntegerField()
+
     MaterialName=serializers.CharField(max_length=100)
     ReturnQtyNos =serializers.DecimalField(max_digits=20, decimal_places=2)
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -411,11 +423,11 @@ class ManPowerSerializer(serializers.Serializer):
     FSSAINo = serializers.CharField(max_length=500)
     FSSAIExpiry = serializers.DateField()
     GSTIN = serializers.CharField(max_length=500)
-    RSM = serializers.CharField(max_length=500)
+    GM = serializers.CharField(max_length=500)
     ASM = serializers.CharField(max_length=500)
-    Salesofficer = serializers.CharField(max_length=500)
-    SalesExecutive = serializers.CharField(max_length=500)
-    SalesRepresentative = serializers.CharField(max_length=500)
+    SE = serializers.CharField(max_length=500)
+    SO = serializers.CharField(max_length=500)
+    SR = serializers.CharField(max_length=500)
     
 
 class TCSAmountReportSerializer(serializers.Serializer):

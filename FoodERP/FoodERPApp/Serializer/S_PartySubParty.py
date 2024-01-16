@@ -33,7 +33,7 @@ class PartySerializer(serializers.ModelSerializer):
     PartySubParty=PartySubPartySerializer(read_only=True) 
     class Meta:
         model =  M_Parties
-        fields = ['id','Name','PartyType','GSTIN','PartyAddress','PartySubParty','PAN']
+        fields = ['id','Name','PartyType','GSTIN','PartyAddress','PartySubParty','PAN','SkyggeID']
         
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,3 +74,6 @@ class PartySubPartyCreditlimit(serializers.ModelSerializer):
         
     
 
+class CxDDDiffPartiesSerializer(serializers.Serializer):
+    SupplierID = serializers.IntegerField()
+    SupplierName = serializers.CharField(max_length=500)

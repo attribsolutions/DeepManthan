@@ -42,7 +42,9 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Party_id=%s ) Order By GSTPercentage  ''', ([FromDate], [ToDate], [Party]))
+ where IsApproved=1 and 
+T_PurchaseReturn.id in (SELECT TC_PurchaseReturnReferences.SubReturn_id FROM FoodERP.T_PurchaseReturn join TC_PurchaseReturnReferences on T_PurchaseReturn.id=TC_PurchaseReturnReferences.PurchaseReturn_id
+where T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s ) Order By GSTPercentage''', ([FromDate], [ToDate], [Party]))
                 else:   # Return Item Summury
                     Q1 = M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
 from M_Parties 
@@ -201,16 +203,17 @@ class MasterClaimView(CreateAPIView):
 
                                 claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                                 IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
-            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
+            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
             IFNULL((ReturnAmount/PA)*100,0)ClaimAgainstNetSale
             from
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
-            where InvoiceDate between %s and %sand Customer_id=%s )PA,
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
+            where InvoiceDate between %s and %s and Customer_id=%s )PA,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
-            where InvoiceDate between %s and %sand Party_id=%s )SA
+            where InvoiceDate between %s and %s and Party_id=%s )SA
             FROM T_PurchaseReturn
             join TC_PurchaseReturnItems on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
             join TC_PurchaseReturnItems PRIPS on TC_PurchaseReturnItems.primarySourceID=PRIPS.id
@@ -233,13 +236,14 @@ class MasterClaimView(CreateAPIView):
                             # for all partyType
                             claimREasonwise = MC_ReturnReasonwiseMasterClaim.objects.raw('''select 1 as id, ItemReason_id,IFNULL(PA,0) PrimaryAmount,IFNULL(SA,0) secondaryAmount,IFNULL(ReturnAmount,0)ReturnAmount ,
                                 IFNULL((PA-ReturnAmount),0)NetPurchaseValue, 
-            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA-ReturnAmount)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
+            (CASE WHEN ItemReason_id=54 THEN IFNULL(((PA)*0.01),0) ELSE 0 END)Budget,IFNULL(ReturnAmount,0) ClaimAmount,
             
             IFNULL((ReturnAmount/PA)*100,0)ClaimAgainstNetSale
             from
             (SELECT TC_PurchaseReturnItems.ItemReason_id,sum(TC_PurchaseReturnItems.ApprovedAmount)ReturnAmount,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s )PA,
             (select sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices 
             join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
@@ -262,8 +266,7 @@ class MasterClaimView(CreateAPIView):
 
                                 PrimaryAmount = float(a["PrimaryAmount"])
                                 SecondaryAmount = float(a["secondaryAmount"])
-                                ReturnAmount = ReturnAmount + \
-                                    float(a["ReturnAmount"])
+                                ReturnAmount += float(a["ReturnAmount"])
 
                                 stock = MC_ReturnReasonwiseMasterClaim(Claim_id=ClaimID, FromDate=FromDate, ToDate=ToDate, PrimaryAmount=a["PrimaryAmount"], SecondaryAmount=a["secondaryAmount"], ReturnAmount=a["ReturnAmount"], NetSaleValue=a[
                                     "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], ItemReason_id=a["ItemReason_id"], PartyType=0, Party_id=Party, CreatedBy=0)
@@ -273,14 +276,16 @@ class MasterClaimView(CreateAPIView):
     # ===========================================================================================================================================
     #  (Select Item_id from T_Orders JOIN TC_OrderItems ON Order_id = T_Orders.id WHERE Customer_id = %s Group By Item_id)I
                             StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select * from (select 1 as id, I.Item_id,ifnull(PA.PrimaryAmount,0)PrimaryAmount,ifnull(SA.secondaryAmount,0)secondaryAmount,ifnull(RA.ReturnAmount,0)ReturnAmount,
-                                ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount-RA.ReturnAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
+                                ifnull((PA.PrimaryAmount-RA.ReturnAmount),0)NetPurchaseValue ,ifnull(((PA.PrimaryAmount)*0.01),0)Budget,IFNULL((RA.ReturnAmount/PA.PrimaryAmount)*100,0)ClaimAgainstNetSale
 
             from
             (Select id Item_id from M_Items )I
             left join
 
 
-            (select TC_InvoiceItems.Item_id,sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            (select TC_InvoiceItems.Item_id,sum(TC_InvoiceItems.Amount)PrimaryAmount from T_Invoices
+            join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
+            join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
             where InvoiceDate between %s and %s and Customer_id=%s group by Item_id)PA
             on I.Item_id=PA.Item_id
             left join 
@@ -364,18 +369,19 @@ order by M_GeneralMaster.id
 
                         })
 
-                printProductwisequery = M_MasterClaim.objects.raw('''SELECT 1 as id,  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, sum(NetSaleValue)NetSaleValue, 
-sum(M_MasterClaim.Budget)Budget, sum(ClaimAmount)ClaimAmount, sum(ClaimAgainstNetSale)ClaimAgainstNetSale
+                printProductwisequery = M_MasterClaim.objects.raw('''
+                select 1 as id, Product,PurchaseAmount,SaleAmount,ReturnAmount,IFNULL((PurchaseAmount-ReturnAmount),0)NetSaleValue,
+                IFNULL(((PurchaseAmount)*0.01),0)Budget,ClaimAmount,IFNULL(((ReturnAmount/PurchaseAmount)*100),0)ClaimAgainstNetSale
+                
+                from (SELECT  M_Group.Name Product, sum(PrimaryAmount)PurchaseAmount, sum(SecondaryAmount)SaleAmount, sum(ReturnAmount)ReturnAmount, 
+                sum(ClaimAmount)ClaimAmount
 FROM M_MasterClaim
 left join M_Items on M_Items.id=M_MasterClaim.Item_id
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-
-
-
- where FromDate=%s and ToDate=%s and Party_id=%s
- group by M_Group.id''', ([FromDate], [ToDate], [Party]))
+where FromDate=%s and ToDate=%s and Party_id=%s
+group by M_Group.id)a''', ([FromDate], [ToDate], [Party]))
                 ProductwiseMasterClaim = ProductwiseMasterClaimSerializer(
                     printProductwisequery, many=True).data
                 MasterClaimData.append({
@@ -466,52 +472,86 @@ class ClaimTrackingEntryListView(CreateAPIView):
                 ClaimTrackingdata = JSONParser().parse(request)
                 Year = ClaimTrackingdata['Year']
                 Month = ClaimTrackingdata['Month']
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
+                Party = ClaimTrackingdata['Party']
+                Employee = ClaimTrackingdata['Employee']
+
+                if Employee > 0:
+                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+                    for row in EmpPartys:
+                        p=row.id
+                    PartyIDs = p.split(",")
+
+                ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
                                                             T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
-                                                            CreditNoteUpload,  ClaimReceivedSource 
+                                                            CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
-                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id=0
+                                                            Left join M_PartyDetails Y on X.id = Y.Party_id and Y.Group_id IS NULL
                                                             Left join M_Cluster on Y.Cluster_id = M_Cluster.id
                                                             left join M_SubCluster on Y.SubCluster_id = M_SubCluster.id
                                                             LEFT JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
                                                             LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
                                                             LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
                                                             LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s ''',([Year],[Month]))
+                                                            LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade
+                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s'''
+
+                if Party == "":
+                    ClaimTrackingquery += " "
+                    if Employee == 0:
+                            ClaimTrackingquery += " "
+                    else:
+                            ClaimTrackingquery += " and X.id in %s"
+                else:
+                        ClaimTrackingquery += " and X.id=%s"
+
+                if Party == "":
+                        
+                        if Employee == 0:
+                            
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
+                        else:
+                            
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
+                else:
                     
-                if  ClaimTrackingquery:    
+                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
+                if  ClaimTrackingqueryresults:    
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
+                    # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingdata})
                     ClaimTrackingList = list()
-                    for a in ClaimTrackingdata:
+                    for a in ClaimTrackingqueryresults:
+                        dd=str(a.CreditNoteUpload)
                         ClaimTrackingList.append({
-                            "Cluster": a['Cluster'],
-                            "SubCluster":a['SubCluster'],
-                            "Party": a['Party_id'],
-                            "PartyName": a['PartyName'],
-                            "FullClaimNo": a['FullClaimNo'],
-                            "ClaimID": a['Claim_id'],
-                            "Date": a['Date'],
-                            "Month": a['Month'],
-                            "Year": a['Year'],
-                            "TypeName": a['TypeName'],
-                            "TypeOfClaimName": a['TypeOfClaimName'],
-                            "ClaimTradeName": a['ClaimTradeName'],
-                            "ClaimAmount": a['ClaimAmount'],
-                            "CreditNotestatus": a['CreditNotestatus'],
-                            "CreditNoteNo": a['CreditNoteNo'],
-                            "CreditNoteDate": a['CreditNoteDate'],
-                            "CreditNoteAmount": a['CreditNoteAmount'],
-                            "ClaimSummaryDate": a['ClaimSummaryDate'],
-                            "CreditNoteUpload": a['CreditNoteUpload'],
-                            "ClaimReceivedSource": a['ClaimReceivedSource'],
+                            "id":a.id,
+                            "Cluster": a.Cluster,
+                            "SubCluster":a.SubCluster,
+                            "Party": a.Party_id,
+                            "PartyName": a.PartyName,
+                            "FullClaimNo": a.FullClaimNo,
+                            "ClaimID": a.Claim_id,
+                            "Date": a.Date,
+                            "Month": a.Month,
+                            "Year": a.Year,
+                            "TypeName": a.TypeName,
+                            "TypeOfClaimName": a.TypeOfClaimName,
+                            "ClaimTradeName": a.ClaimTradeName,
+                            "ClaimAmount": a.ClaimAmount,
+                            "CreditNotestatus": a.CreditNotestatus,
+                            "CreditNoteNo": a.CreditNoteNo,
+                            "CreditNoteDate": a.CreditNoteDate,
+                            "CreditNoteAmount": a.CreditNoteAmount,
+                            "ClaimSummaryDate": a.ClaimSummaryDate,
+                            "CreditNoteUpload": dd,
+                            "ClaimReceivedSource": a.ClaimReceivedSource,
+                            "Remark":a.Remark
 
                         })
-                    log_entry = create_transaction_logNew(request, ClaimTrackingdata,a['Party_id'],'',257,0)
+                    log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList})
                 log_entry = create_transaction_logNew(request, ClaimTrackingdata,0,'ClaimTrackingList Not available',257,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
@@ -580,15 +620,19 @@ class ClaimTrackingEntryViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, Party_id,M_Parties.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName  
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, T_ClaimTrackingEntry.Party_id, P.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName, M_Cluster.Name Cluster , M_SubCluster.Name SubCluster
 FROM T_ClaimTrackingEntry
 LEFT JOIN M_PartyType ON M_PartyType.id = T_ClaimTrackingEntry.PartyType_id 
-JOIN M_Parties ON M_Parties.id=T_ClaimTrackingEntry.Party_id
+JOIN M_Parties P ON P.id=T_ClaimTrackingEntry.Party_id
 JOIN M_GeneralMaster a ON a.id = T_ClaimTrackingEntry.Type
 LEFT JOIN M_GeneralMaster b ON b.id = T_ClaimTrackingEntry.TypeOfClaim
 JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
 JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
-JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_ClaimTrackingEntry.id = %s ''', ([id]))
+JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade 
+LEFT JOIN M_PartyDetails X on X.Supplier_id = P.id and X.Group_id IS NULL
+LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id 
+LEFT JOIN M_SubCluster on X.SubCluster_id=M_SubCluster.Id 
+WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
                 # print(ClaimTrackingquery.query)
                 if ClaimTrackingquery:
                     ClaimTrackingdata = ClaimTrackingSerializerSecond(
@@ -623,7 +667,9 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                             "PartyName": a['PartyName'],
                             "FullClaimNo": a['FullClaimNo'],
                             "PartyType": a['PartyType_id'],
-                            "PartyTypeName": a['PartyTypeName']
+                            "PartyTypeName": a['PartyTypeName'],
+                            "Cluster":a['Cluster'],
+                            "SubCluster":a['SubCluster']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingList[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available ', 'Data': []})
@@ -689,8 +735,8 @@ JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade WHERE T_Claim
                 log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Deleted Successfully', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,0)
+            log_entry = create_transaction_logNew(request, 0,0,'Claim Tracking Entry Does Not Exist',263,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Claim Tracking Entry Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

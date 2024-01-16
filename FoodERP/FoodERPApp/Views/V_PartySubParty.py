@@ -182,7 +182,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                            "SkyggeID": a['SubParty']['SkyggeID']
                             })   
                         elif(Type==2): #Supplier
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -196,7 +197,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                            "SkyggeID": a['SubParty']['SkyggeID']
 
                             }) 
                         elif(Type==3 or Type == 5 ):  #Customer
@@ -212,7 +214,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty'],
-                          
+                            "SkyggeID": a['SubParty']['SkyggeID']
                             })
                         else:
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
@@ -227,7 +229,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "PAN":a['SubParty']['PAN'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
-                            "IsTCSParty":a['IsTCSParty']
+                            "IsTCSParty":a['IsTCSParty'],
+                            "SkyggeID": a['SubParty']['SkyggeID']
                             })
                     log_entry = create_transaction_logNew(request, Partydata,id,'',177,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ListData})
@@ -291,4 +294,35 @@ class RetailerandSSDDView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'RetailerandSSDD:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
-        
+
+
+class CxDDDiffPartiesView(CreateAPIView):        
+
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self,request):
+        try:
+            with transaction.atomic():
+                query = M_Parties.objects.raw('''SELECT  MC_PartySubParty.id, B.id SupplierID, B.NAME AS SupplierName
+                                    FROM MC_PartySubParty 
+                                    JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
+                                    JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
+                                    JOIN M_PartyType ON M_PartyType.id = A.PartyType_id
+                                    WHERE M_PartyType.id = 15 GROUP BY SupplierID''')
+                if query:
+                    CxDDDiffParties_Serializer = CxDDDiffPartiesSerializer(query, many=True).data
+                    CxDDDiffPartiesList=list()
+                    for a in CxDDDiffParties_Serializer:
+                        CxDDDiffPartiesList.append({
+                            "SupplierID":a['SupplierID'],
+                            "SupplierName":a['SupplierName']
+                        })
+                    log_entry = create_transaction_logNew(request, CxDDDiffParties_Serializer,0,'',273,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :CxDDDiffPartiesList})
+                log_entry = create_transaction_logNew(request, CxDDDiffParties_Serializer,0,'CxParty not available',273,0)                    
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'CxParty not available', 'Data' : []})
+        except Exception as e:
+                log_entry = create_transaction_logNew(request, 0,0,'GETCxParty:'+str(Exception(e)),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})

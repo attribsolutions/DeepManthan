@@ -5,6 +5,8 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+
+from FoodERPDBLog.views import create_transaction_logNew2
 from ..Serializer.S_CommFunction import *
 from ..Serializer.S_Mrps import *
 from ..Serializer.S_Margins import *
@@ -13,6 +15,7 @@ from ..Serializer.S_GSTHSNCode import *
 from ..models import *
 from datetime import date
 from ..models import TransactionLogJsonData
+from ..models import M_Settings
 
 
 '''Common Functions List
@@ -64,28 +67,33 @@ def create_transaction_log(request, data, User, PartyID, TransactionDetails, Tra
 
 
 def create_transaction_logNew(request, data, PartyID, TransactionDetails, TransactionType=0, TransactionID=0, FromDate=0, ToDate=0, CustomerID=0):
+    log_entry=create_transaction_logNew2(request, data, PartyID, TransactionDetails, TransactionType, TransactionID, FromDate, ToDate, CustomerID)
+    # Authenticated_User = request.user
+    # User = Authenticated_User.id
+    # aa = M_Settings.objects.filter(id=31).values('DefaultValue')
 
-    Authenticated_User = request.user
-    User = Authenticated_User.id
+    # if aa[0]['DefaultValue'] == "1":
+    #     if not User:
+    #         User = data['UserID']
+    #     else:
+    #         pass
 
-    if not User:
-        User = data['UserID']
-    else:
-        pass
+    #     if not FromDate:
+    #         log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
+    #             request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, CustomerID=CustomerID)
+    #     else:
+    #         log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
+    #             request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
 
-    if not FromDate:
-        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
-            request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, CustomerID=CustomerID)
-    else:
-        log_entry = Transactionlog.objects.create(TranasactionDate=date.today(), User=User, PartyID=PartyID, IPaddress=get_client_ip(
-            request), TransactionDetails=TransactionDetails, JsonData=0, TransactionType=TransactionType, TransactionID=TransactionID, FromDate=FromDate, ToDate=ToDate, CustomerID=CustomerID)
+    #     TransactionLogJsonData.objects.create(
+    #         Transactionlog=log_entry, JsonData=data)
 
-    TransactionLogJsonData.objects.create(
-        Transactionlog=log_entry, JsonData=data)
+    #     return log_entry
 
+    # else:
+    #     return None
     return log_entry
-
-
+    
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
     UnitDetails = list()
@@ -141,7 +149,7 @@ def GetOpeningBalance(Party, Customer, Date):
     FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  
     UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
                                     Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
-    print(str(query2.query))
+    # print(str(query2.query))
     query2_serializer = OpeningBalanceSerializer(query2, many=True).data
     OpeningBalance = 0.000
     InvoiceAmount = 0.000
@@ -740,12 +748,12 @@ def ValidationFunForStockTransactions(PartyID, ItemID, TransactionDate):
     for row in q:
         StockAdjustmentDate = row.StockAdjustmentDate
 
-    print(StockAdjustmentDate, TransactionDate)
+    # print(StockAdjustmentDate, TransactionDate)
     if StockAdjustmentDate >= TransactionDate:
-        print('55555')
+        # print('55555')
         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Transaction not allowed', 'Data': []})
     else:
-        print('6666')
+        # print('6666')
         pass
 
 
