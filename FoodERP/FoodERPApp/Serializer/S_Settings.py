@@ -31,8 +31,5 @@ class PartiesSettingSerializer(serializers.ModelSerializer):
         fields = ['Value','Setting','Company','Party','CreatedBy','Image']
         
         
-class SettingsSerializer(serializers.ModelSerializer):
-    class Meta :
-        model= M_Settings
-        fields = '__all__'
+
         

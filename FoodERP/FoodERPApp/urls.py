@@ -149,8 +149,6 @@ from .Views.V_CentralServiceItemMaster import *
 
 from .Views.V_PartyDetails import *
 
-from .Views.V_Settings import *
-
 
 urlpatterns = [
     
@@ -685,8 +683,7 @@ urlpatterns = [
               
               url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
  
-#Settings
-              url(r'SettingsData$',SettingsView.as_view()),
+
                   
 
 
