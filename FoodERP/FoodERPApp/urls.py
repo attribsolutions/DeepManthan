@@ -149,6 +149,8 @@ from .Views.V_CentralServiceItemMaster import *
 
 from .Views.V_PartyDetails import *
 
+from .Views.V_Settings import *
+
 
 urlpatterns = [
     
@@ -682,7 +684,9 @@ urlpatterns = [
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
               
               url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
-            
+ 
+#Settings
+              url(r'SettingsData$',SettingsView.as_view()),
                   
 
 
