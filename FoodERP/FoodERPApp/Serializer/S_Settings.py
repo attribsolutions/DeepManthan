@@ -30,3 +30,6 @@ class PartiesSettingSerializer(serializers.ModelSerializer):
         model =  M_PartySettingsDetails
         fields = ['Value','Setting','Company','Party','CreatedBy','Image']
         
+        
+
+        
