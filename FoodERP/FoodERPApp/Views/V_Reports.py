@@ -1427,7 +1427,7 @@ LEFT JOIN M_Employees M_Employees_SE ON M_Employees_SE.id = X.SE
 LEFT JOIN M_Employees M_Employees_SO ON M_Employees_SO.id = X.SO
 LEFT JOIN M_Employees M_Employees_SR ON M_Employees_SR.id = X.SR
                                                      
-WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
+WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
 
                 if query:
                     ManPower_Serializer = ManPowerSerializer(query, many=True).data
