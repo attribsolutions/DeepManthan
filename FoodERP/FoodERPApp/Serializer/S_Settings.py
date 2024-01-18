@@ -48,3 +48,6 @@ class SettingsSerializer(serializers.ModelSerializer):
         a = M_Settings.objects.create(**validated_data)
         MC_SettingsDetails.objects.create(SettingID=a, **SettingDetailsData)
         return a
+
+
+
