@@ -688,7 +688,7 @@ urlpatterns = [
 
               url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
             
-                
+              url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
 
 
