@@ -44,10 +44,26 @@ class SettingsSerializer(serializers.ModelSerializer):
         fields = ['SystemSetting', 'Description', 'IsActive', 'IsPartyRelatedSetting', 'DefaultValue', 'SettingDetails']
 
     def create(self, validated_data):
+        print(validated_data)
         SettingDetailsData = validated_data.pop('SettingDetails')
         a = M_Settings.objects.create(**validated_data)
         MC_SettingsDetails.objects.create(SettingID=a, **SettingDetailsData)
         return a
+    
 
 
 
+class MC_SettingsDetailsSerializerSecond (serializers.ModelSerializer):
+    class Meta:
+        model = MC_SettingsDetails
+        fields = ['id','Value','IsDeleted','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Company']
+
+class SettingsSerializerSecond(serializers.ModelSerializer):
+    SettingDetails = MC_SettingsDetailsSerializerSecond(many=True)
+
+    class Meta:
+        model = M_Settings
+        fields = ['id','SystemSetting', 'Description', 'IsActive', 'IsPartyRelatedSetting', 'DefaultValue', 'SettingDetails']
+        
+    
+    
