@@ -8,7 +8,6 @@ from ..Serializer.S_Settings import *
 from ..models import *
 
 
-
 class SettingsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
@@ -26,4 +25,3 @@ class SettingsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Settings_data_serializer.errors, 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-       
