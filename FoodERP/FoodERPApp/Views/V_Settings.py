@@ -26,44 +26,63 @@ class SettingsView(CreateAPIView):
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-      
+
 class SystemSettingsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+    
     @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
                 query = M_Settings.objects.filter(id=id)
-                print(query.query)
                 Settings_data = SettingsSerializerSecond(query, many=True).data
-                SettingsList=list()
+                SettingsList = list()
 
                 for a in Settings_data:
-                    SettingsList.append({
-                        "id": a['id'],
-                        "SystemSetting": a['SystemSetting'],
-                        "Description": a['Description'],
-                        "IsActive": a['IsActive'],
-                        "IsPartyRelatedSetting": a['IsPartyRelatedSetting'],
-                        "DefaultValue": a['DefaultValue'],
-                        "Value": a['SettingDetails'][0]['Value'],
-                        "IsDeleted": a['SettingDetails'][0]['IsDeleted'],
-                        "CreatedBy": a['SettingDetails'][0]['CreatedBy'],
-                        "CreatedOn": a['SettingDetails'][0]['CreatedOn'],
-                        "UpdatedBy": a['SettingDetails'][0]['UpdatedBy'],
-                        "UpdatedOn": a['SettingDetails'][0]['UpdatedOn'],
-                        "Company": a['SettingDetails'][0]['Company'],
-                        
+                    Settingdata_List = a.get('SettingDetails', [])
+
+                    if Settingdata_List:
+                        Setting_Info = Settingdata_List[0]
+                        SettingsList.append({
+                            "id": a['id'],
+                            "SystemSetting": a['SystemSetting'],
+                            "Description": a['Description'],
+                            "IsActive": a['IsActive'],
+                            "IsPartyRelatedSetting": a['IsPartyRelatedSetting'],
+                            "DefaultValue": a['DefaultValue'],
+                            "Value": Setting_Info.get('Value'),
+                            "IsDeleted": Setting_Info.get('IsDeleted'),
+                            "CreatedBy": Setting_Info.get('CreatedBy'),
+                            "CreatedOn": Setting_Info.get('CreatedOn'),
+                            "UpdatedBy": Setting_Info.get('UpdatedBy'),
+                            "UpdatedOn": Setting_Info.get('UpdatedOn'),
+                            "Company": Setting_Info.get('Company'),
+                        })
+                    else:
+                        SettingsList.append({
+                            "id": a['id'],
+                            "SystemSetting": a['SystemSetting'],
+                            "Description": a['Description'],
+                            "IsActive": a['IsActive'],
+                            "IsPartyRelatedSetting": a['IsPartyRelatedSetting'],
+                            "DefaultValue": a['DefaultValue'],
+                            "Value": "",
+                            "IsDeleted": "",
+                            "CreatedBy": "",
+                            "CreatedOn": "",
+                            "UpdatedBy": '',
+                            "UpdatedOn": "",
+                            "Company": "",
                         })
 
-                
+                if SettingsList:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SettingsList[0]})
-                
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Settings data Not available ', 'Data': []})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Settings data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
-          
-        
+
+
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
