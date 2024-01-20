@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'FoodERPApp.apps.FooderpappConfig',
     'FoodERPDBLog.apps.FooderpdblogConfig',
+    'SweetPOS.apps.SweetposConfig',
     # 'activity_log',
 ]
 
@@ -82,14 +83,42 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 # DATABASE_ROUTERS = ['FoodERPDBLog.routers.FoodERPDBLogRouter']
+# DATABASE_ROUTERS = [
+#     'FoodERPDBLog.routers.FoodERPDBLogRouter',
+#     'SweetPOS.routers.SweetPOSRouter',
+# ]
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'FoodERP',     
+#         'USER': 'pk',
+#         'PASSWORD': 'P@ssw0rd',  
+#         'HOST': '10.4.5.64',
+#         'PORT': '3306' , 
+#         'OPTIONS': { 
+#             'sql_mode': 'STRICT_TRANS_TABLES', 
+#         },
+#     },
+#     'transactionlog_db': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'TransactionLog',     
+#         'USER': 'pk',
+#         'PASSWORD': 'P@ssw0rd',  
+#         'HOST': '10.4.5.64',
+#         'PORT': '3306' , 
+#         'OPTIONS': { 
+#             'sql_mode': 'STRICT_TRANS_TABLES', 
+#         },
+#     },
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FoodERP',     
+        'NAME': 'devfooderp20240117',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '192.168.1.114',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -97,10 +126,21 @@ DATABASES = {
     },
     'transactionlog_db': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TransactionLog',     
+        'NAME': 'transactionlog20240103',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '192.168.1.114',
+        'PORT': '3306' , 
+        'OPTIONS': { 
+            'sql_mode': 'STRICT_TRANS_TABLES', 
+        },
+    },
+    'sweetpos_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sweetpos20240110',     
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',  
+        'HOST': '192.168.1.114',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
