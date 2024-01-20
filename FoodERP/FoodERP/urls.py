@@ -22,6 +22,7 @@ from django.conf import settings
 urlpatterns = [
 #    path('admin/', admin.site.urls),
     path('', include('FoodERPApp.urls')),
+    path('SweetPOS/', include('SweetPOS.urls')),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 =  'FoodERPApp.Views.V_Errorhandler.custom404'
