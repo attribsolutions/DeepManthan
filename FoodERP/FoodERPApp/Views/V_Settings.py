@@ -94,3 +94,48 @@ class SystemSettingsView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data used in another table', 'Data': []})
+        
+    
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Settings_Data = JSONParser().parse(request)
+                
+                query = M_Settings.objects.get(id=id)
+
+                Settings_data_serializer = SettingsSerializerSecond(query, data=Settings_Data)
+                if Settings_data_serializer.is_valid():
+                    Settings_data_serializer.save()
+                    
+                    Setting_Details_Data = Settings_Data.get('SettingDetails', [])
+                    
+                    q = MC_SettingsDetails.objects.filter(SettingID=query).update(IsDeleted=1)
+
+                    for Setting_Details in Setting_Details_Data:
+                        Setting_ID = Setting_Details.get('id', None)
+                        query2 = None
+                        
+                        if Setting_ID:
+                            query2 = MC_SettingsDetails.objects.filter(id=Setting_ID, SettingID=query).first()
+                        else:
+                            Setting_Details['SettingID'] = query.id
+
+                        Setting_details_serializer = MC_SettingsDetailsSerializerSecond(query2, data=Setting_Details)
+                        if Setting_details_serializer.is_valid():
+                            Setting_details_serializer.save()
+                        else:
+                            transaction.set_rollback(True)
+                            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Setting_details_serializer.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Settings Data Updated Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Settings_data_serializer.errors, 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+
+
+
+
+
+  
