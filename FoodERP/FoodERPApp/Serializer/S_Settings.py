@@ -37,21 +37,21 @@ class MC_SettingsDetailsSerializer(serializers.ModelSerializer):
         fields = ['Value','IsDeleted','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Company']
 
 class SettingsSerializer(serializers.ModelSerializer):
-    SettingDetails = MC_SettingsDetailsSerializer(write_only=True)
+    SettingDetails = MC_SettingsDetailsSerializer(many=True)
 
     class Meta:
         model = M_Settings
         fields = ['SystemSetting', 'Description', 'IsActive', 'IsPartyRelatedSetting', 'DefaultValue', 'SettingDetails']
 
+
     def create(self, validated_data):
-        print(validated_data)
         SettingDetailsData = validated_data.pop('SettingDetails')
         a = M_Settings.objects.create(**validated_data)
-        MC_SettingsDetails.objects.create(SettingID=a, **SettingDetailsData)
-        return a
-    
 
+        for i in SettingDetailsData:
+            MC_SettingsDetails.objects.create(SettingID=a, **i)
 
+        return a     
 
 class MC_SettingsDetailsSerializerSecond (serializers.ModelSerializer):
     class Meta:
