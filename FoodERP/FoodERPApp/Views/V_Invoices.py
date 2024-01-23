@@ -75,7 +75,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         
                     for b in OrderItemQuery:
                         Customer=b.CustomerID
-                        Item= b.ItemID
+                        Item= b.ItemID 
                         
                         obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
     from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
