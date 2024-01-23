@@ -262,7 +262,7 @@ class InvoiceView(CreateAPIView):
             with transaction.atomic():
                 mulInvoicedata = JSONParser().parse(request)
                 LastIDs=[]
-                for Invoicedata in mulInvoicedata['InvoiceData']:
+                for Invoicedata in mulInvoicedata['InvoiceDataa']:
                     Party = Invoicedata['Party']
                     InvoiceDate = Invoicedata['InvoiceDate']
                 
