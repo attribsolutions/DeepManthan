@@ -42,7 +42,8 @@ class SystemSettingsView(CreateAPIView):
                     Settingdata_List = a.get('SettingDetails', [])
 
                     if Settingdata_List:
-                        Setting_Info = Settingdata_List[0]
+                        Setting_Info = Settingdata_List[-1]
+
                         SettingsList.append({
                             "id": a['id'],
                             "SystemSetting": a['SystemSetting'],
@@ -51,7 +52,7 @@ class SystemSettingsView(CreateAPIView):
                             "IsPartyRelatedSetting": a['IsPartyRelatedSetting'],
                             "DefaultValue": a['DefaultValue'],
                             "Value": Setting_Info.get('Value'),
-                            "IsDeleted": Setting_Info.get('IsDeleted'),
+                            "IsDeleted": Setting_Info.get('IsDeleted'), 
                             "CreatedBy": Setting_Info.get('CreatedBy'),
                             "CreatedOn": Setting_Info.get('CreatedOn'),
                             "UpdatedBy": Setting_Info.get('UpdatedBy'),
@@ -82,18 +83,17 @@ class SystemSettingsView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
-
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Settings_data = M_Settings.objects.get(id=id)
-                Settings_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Settings Data Deleted Successfully','Data':[]})
-        except M_SubCluster.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data Not available', 'Data': []})
-        except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data used in another table', 'Data': []})
+    # @transaction.atomic()
+    # def delete(self, request, id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             Settings_data = M_Settings.objects.get(id=id)
+    #             Settings_data.delete()
+    #             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Settings Data Deleted Successfully','Data':[]})
+    #     except M_SubCluster.DoesNotExist:
+    #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data Not available', 'Data': []})
+    #     except IntegrityError:   
+    #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data used in another table', 'Data': []})
         
     
     @transaction.atomic()
