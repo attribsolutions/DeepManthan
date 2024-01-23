@@ -30,3 +30,39 @@ class PartiesSettingSerializer(serializers.ModelSerializer):
         model =  M_PartySettingsDetails
         fields = ['Value','Setting','Company','Party','CreatedBy','Image']
         
+        
+class MC_SettingsDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_SettingsDetails
+        fields = ['Value','IsDeleted','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Company']
+
+class SettingsSerializer(serializers.ModelSerializer):
+    SettingDetails = MC_SettingsDetailsSerializer(many=True)
+
+    class Meta:
+        model = M_Settings
+        fields = ['SystemSetting', 'Description', 'IsActive', 'IsPartyRelatedSetting', 'DefaultValue', 'SettingDetails']
+
+
+    def create(self, validated_data):
+        SettingDetailsData = validated_data.pop('SettingDetails')
+        a = M_Settings.objects.create(**validated_data)
+
+        for i in SettingDetailsData:
+            MC_SettingsDetails.objects.create(SettingID=a, **i)
+
+        return a     
+
+class MC_SettingsDetailsSerializerSecond (serializers.ModelSerializer):
+    class Meta:
+        model = MC_SettingsDetails
+        fields = ['id','Value','IsDeleted','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Company','SettingID']
+
+class SettingsSerializerSecond(serializers.ModelSerializer):
+    SettingDetails = MC_SettingsDetailsSerializerSecond(read_only=True,many=True)
+
+    class Meta:
+        model = M_Settings
+        fields = ['id','SystemSetting', 'Description', 'IsActive', 'IsPartyRelatedSetting', 'DefaultValue', 'SettingDetails']
+        
+   

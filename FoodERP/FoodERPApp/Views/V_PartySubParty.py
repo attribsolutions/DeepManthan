@@ -195,6 +195,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "Name": a['Party']['Name'],
                             "GSTIN": a['Party']['GSTIN'],
                             "PAN":a['SubParty']['PAN'],
+                            "PartyTypeID":a['Party']['PartyType']['id'],
                             "FSSAINo" : FSSAINo,
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty'],
