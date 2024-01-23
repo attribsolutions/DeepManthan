@@ -27,138 +27,147 @@ class OrderDetailsForInvoice(CreateAPIView):
             with transaction.atomic():
                
                 Orderdata = JSONParser().parse(request)
-                FromDate = Orderdata['FromDate']
+                # FromDate = Orderdata['FromDate']
                 Party = Orderdata['Party']
-                Customer = Orderdata['Customer']
+                # Customer = Orderdata['Customer']
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
-                OrderItemDetails = list()
+                
                 Orderdata = list()
-               
-
-                if POOrderIDs != '':
-                    OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
-                    OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                    OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                    OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                else:
-                    query = T_Orders.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
-                    Serializedata = OrderserializerforInvoice(query,many=True).data
-                    Order_list = list()
-                    for x in Serializedata:
-                        Order_list.append(x['id'])
+                
+                
+                # if POOrderIDs != '':
+                #     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
+                #     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
+                #     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
+                #     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
+                # else:
+                #     query = T_Orders.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
+                #     Serializedata = OrderserializerforInvoice(query,many=True).data
+                #     Order_list = list()
+                #     for x in Serializedata:
+                #         Order_list.append(x['id'])
                         
-                    OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
-                    OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
-                    OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                    OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
+                #     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
+                #     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
+                #     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
+                #     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
                        
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
-                for b in OrderItemSerializedata:
-                    
-                    Item= b['Item']['id']
-                    obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0,IsDamagePieces=0)
-                    # print(obatchwisestockquery.query)     
-                    
-                    if obatchwisestockquery == "":
-                        StockQtySerialize_data =[]
-                    else:   
-                        StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
+                for OrderID in Order_list: 
+                    OrderItemDetails = list()
+                    OrderItemQuery=TC_OrderItems.objects.raw('''SELECT TC_OrderItems.id,M_Items.id ItemID,M_Items.Name ItemName,TC_OrderItems.Quantity ,MRP_id,MRPValue,Rate,Unit_id,
+    MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_OrderItems.BaseUnitQuantity,
+    TC_OrderItems.GST_id,M_GSTHSNCode.HSNCode,TC_OrderItems.GSTPercentage,M_MarginMaster.id MarginID,M_MarginMaster.Margin,TC_OrderItems.BasicAmount,
+    TC_OrderItems.GSTAmount,TC_OrderItems.CGST,TC_OrderItems.SGST,TC_OrderItems.IGST,TC_OrderItems.CGSTPercentage,TC_OrderItems.SGSTPercentage,
+    TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName,M_Parties.PAN,MC_PartySubParty.IsTCSParty,
+    T_Orders.OrderDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber
+
+
+    FROM TC_OrderItems
+    join T_Orders on T_Orders.id=TC_OrderItems.Order_id
+    join M_Parties on M_Parties.id=T_Orders.Customer_id
+    join MC_PartySubParty on MC_PartySubParty.SubParty_id = M_Parties.id and MC_PartySubParty.Party_id=%s
+    join M_Items on M_Items.id=TC_OrderItems.Item_id
+    join MC_ItemUnits on MC_ItemUnits.id=TC_OrderItems.Unit_id
+    join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
+    left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
+    where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
                         
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':StockQtySerialize_data})
-    
+                    for b in OrderItemQuery:
+                        Customer=b.CustomerID
+                        Item= b.ItemID
+                        
+                        obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, 389, UnitID, 0, 0, MRP, 0)Rate
+    from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
+    O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
+    (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
+    (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
+    ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitID
+    from O_BatchWiseLiveStock 
+    join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
+
+    join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
+    join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
+    join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
+    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Item,Party])
+                        # print(obatchwisestockquery.query)     
                         stockDatalist = list()
-                        for d in StockQtySerialize_data:
-                            Rate=RateCalculationFunction(d['LiveBatche']['id'],d['Item']['id'],Customer,0,d['Unit']["UnitID"]["id"],0,0).RateWithGST()
-                           
-                            if(d['LiveBatche']['MRP']['id'] is None):
-                                MRPValue=d['LiveBatche']['MRPValue']
-                            else:
-                                MRPValue=d['LiveBatche']['MRP']['MRP']
-                            
-                            if(d['LiveBatche']['GST']['id'] is None):
-                                GSTPercentage=d['LiveBatche']['GSTPercentage']
-                            else:
-                                GSTPercentage=d['LiveBatche']['GST']['GSTPercentage']
-                            
-                            stockDatalist.append({
-                                "id": d['id'],
-                                "Item":d['Item']['id'],
-                                "BatchDate":d['LiveBatche']['BatchDate'],
-                                "BatchCode":d['LiveBatche']['BatchCode'],
-                                "SystemBatchDate":d['LiveBatche']['SystemBatchDate'],
-                                "SystemBatchCode":d['LiveBatche']['SystemBatchCode'],
-                                "LiveBatche" : d['LiveBatche']['id'],
-                                "LiveBatcheMRPID" : d['LiveBatche']['MRP']['id'],
-                                "LiveBatcheGSTID" : d['LiveBatche']['GST']['id'],
-                                "Rate":Rate[0]["NoRatewithOutGST"],
-                                "MRP" : MRPValue,
-                                "GST" : GSTPercentage,
-                                "UnitName":d['Unit']['BaseUnitConversion'], 
-                                "BaseUnitQuantity":d['BaseUnitQuantity'],
-                                  
-                                })
-                    # query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                    # # print(query.query)
-                    # if query.exists():
-                    #     Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
-                    #     UnitDetails = list()
-                    #     for c in Unitdata:
-                           
-                    #         UnitDetails.append({
-                    #         "Unit": c['id'],
-                    #         "UnitName": c['BaseUnitConversion'],
-                    #         "ConversionUnit": c['BaseUnitQuantity'],
-                    #         "Unitlabel": c['UnitID']['Name'],
-                            
-                    #     })
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
-                    # =====================Current Discount================================================
-                    TodaysDiscount = DiscountMaster(
-                        b['Item']['id'], Party, date.today(),Customer).GetTodaysDateDiscount()
+                        if not obatchwisestockquery:
+                            stockDatalist =[]
+                        else:   
+                            for d in obatchwisestockquery:
+                                stockDatalist.append({
+                                    "id": d.id,
+                                    "Item":d.ItemID,
+                                    "BatchDate":d.BatchDate,
+                                    "BatchCode":d.BatchCode,
+                                    "SystemBatchDate":d.SystemBatchDate,
+                                    "SystemBatchCode":d.SystemBatchCode,
+                                    "LiveBatche" : d.LiveBatcheid,
+                                    "LiveBatcheMRPID" : d.LiveBatcheMRPID,
+                                    "LiveBatcheGSTID" : d.LiveBatcheGSTID,
+                                    "Rate":round(d.Rate,2),
+                                    "MRP" : d.MRP,
+                                    "GST" : d.GST,
+                                    "UnitName":d.BaseUnitConversion, 
+                                    "BaseUnitQuantity":d.BaseUnitQuantity,
+                                    
+                                    })
+                        
+                        # =====================Current Discount================================================
+                        TodaysDiscount = DiscountMaster(
+                            b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
 
-                    DiscountType = TodaysDiscount[0]['DiscountType']
-                    Discount = TodaysDiscount[0]['TodaysDiscount']
+                        DiscountType = TodaysDiscount[0]['DiscountType']
+                        Discount = TodaysDiscount[0]['TodaysDiscount']
 
-                    OrderItemDetails.append({
-                         
-                        "id": b['id'],
-                        "Item": b['Item']['id'],
-                        "ItemName": b['Item']['Name'],
-                        "Quantity": b['Quantity'],
-                        "MRP": b['MRP']['id'],
-                        "MRPValue": b['MRPValue'],
-                        "Rate": b['Rate'],
-                        "Unit": b['Unit']['id'],
-                        "UnitName": b['Unit']['BaseUnitConversion'],
-                        "DeletedMCUnitsUnitID": b['Unit']['UnitID']['id'],
-                        "ConversionUnit": b['Unit']['BaseUnitQuantity'],
-                        "BaseUnitQuantity": b['BaseUnitQuantity'],
-                        "GST": b['GST']['id'],
-                        "HSNCode": b['GST']['HSNCode'],
-                        "GSTPercentage": b['GSTPercentage'],
-                        "Margin": b['Margin']['id'],
-                        "MarginValue": b['Margin']['Margin'],
-                        "BasicAmount": b['BasicAmount'],
-                        "GSTAmount": b['GSTAmount'],
-                        "CGST": b['CGST'],
-                        "SGST": b['SGST'],
-                        "IGST": b['IGST'],
-                        "CGSTPercentage": b['CGSTPercentage'],
-                        "SGSTPercentage": b['SGSTPercentage'],
-                        "IGSTPercentage": b['IGSTPercentage'],
-                        "Amount": b['Amount'],
-                        "DiscountType" : DiscountType,
-                        "Discount" : Discount,
-                        "UnitDetails":UnitDropdown(b['Item']['id'],Customer,0),
-                        "StockDetails":stockDatalist
+                        OrderItemDetails.append({
+                            
+                            "id": b.id,
+                            "Item": b.ItemID,
+                            "ItemName": b.ItemName,
+                            "Quantity": b.Quantity,
+                            "MRP": b.MRP_id,
+                            "MRPValue": b.MRPValue,
+                            "Rate": b.Rate,
+                            "Unit": b.Unit_id,
+                            "UnitName": b.BaseUnitConversion,
+                            "DeletedMCUnitsUnitID": b.MUnitID,
+                            "ConversionUnit": b.ConversionUnit,
+                            "BaseUnitQuantity": b.BaseUnitQuantity,
+                            "GST": b.GST_id,
+                            "HSNCode": b.HSNCode,
+                            "GSTPercentage": b.GSTPercentage,
+                            "Margin": b.MarginID,
+                            "MarginValue": b.Margin,
+                            "BasicAmount": b.BasicAmount,
+                            "GSTAmount": b.GSTAmount,
+                            "CGST": b.CGST,
+                            "SGST": b.SGST,
+                            "IGST": b.IGST,
+                            "CGSTPercentage": b.CGSTPercentage,
+                            "SGSTPercentage": b.SGSTPercentage,
+                            "IGSTPercentage": b.IGSTPercentage,
+                            "Amount": b.Amount,
+                            "DiscountType" : DiscountType,
+                            "Discount" : Discount,
+                            "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
+                            "StockDetails":stockDatalist
+                        })
+                    Orderdata.append({
+                        "OrderIDs":OrderID,
+                        "OrderDate" :  b.OrderDate,
+                        "CustomerName" : b.CustomerName,
+                        "IsTCSParty" : b.IsTCSParty,
+                        "CustomerPAN" : b.PAN,
+                        "CustomerGSTIN" : b.GSTIN,
+                        "CustomerID" : Customer,
+                        "OrderNumber" : b.FullOrderNumber,
+                        "OrderItemDetails":OrderItemDetails
                     })
-                Orderdata.append({
-                    "OrderIDs":Order_list,
-                    "OrderItemDetails":OrderItemDetails
-                   })  
+
             log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,Customer)         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'OrderDetailsForInvoice:'+str (Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -251,44 +260,54 @@ class InvoiceView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Invoicedata = JSONParser().parse(request)
-                Party = Invoicedata['Party']
-                InvoiceDate = Invoicedata['InvoiceDate']
-             
-                # ==========================Get Max Invoice Number=====================================================
-                a = GetMaxNumber.GetInvoiceNumber(Party,InvoiceDate)
-                Invoicedata['InvoiceNumber'] = a
-                b = GetPrifix.GetInvoicePrifix(Party)
-                Invoicedata['FullInvoiceNumber'] = b+""+str(a)
-                #================================================================================================== 
-                InvoiceItems = Invoicedata['InvoiceItems']
-                O_BatchWiseLiveStockList=list()
-                for InvoiceItem in InvoiceItems:
-                    # print(InvoiceItem['Quantity'])
-                    BaseUnitQuantity=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                    InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
-                    QtyInNo=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
-                    InvoiceItem['QtyInNo'] =  float(QtyInNo)
-                    QtyInKg=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
-                    InvoiceItem['QtyInKg'] =  float(QtyInKg)
-                    QtyInBox=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
-                    InvoiceItem['QtyInBox'] = float(QtyInBox)
+                mulInvoicedata = JSONParser().parse(request)
+                LastIDs=[]
+                for Invoicedata in mulInvoicedata['InvoiceData']:
+                    Party = Invoicedata['Party']
+                    InvoiceDate = Invoicedata['InvoiceDate']
+                
+                    # ==========================Get Max Invoice Number=====================================================
+                    a = GetMaxNumber.GetInvoiceNumber(Party,InvoiceDate)
+                    Invoicedata['InvoiceNumber'] = a
+                    b = GetPrifix.GetInvoicePrifix(Party)
+                    Invoicedata['FullInvoiceNumber'] = b+""+str(a)
+                    #================================================================================================== 
+                    InvoiceItems = Invoicedata['InvoiceItems']
+                    O_BatchWiseLiveStockList=list()
+                    for InvoiceItem in InvoiceItems:
+                        # print(InvoiceItem['Quantity'])
+                        BaseUnitQuantity=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                        InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                        QtyInNo=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                        InvoiceItem['QtyInNo'] =  float(QtyInNo)
+                        QtyInKg=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                        InvoiceItem['QtyInKg'] =  float(QtyInKg)
+                        QtyInBox=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                        InvoiceItem['QtyInBox'] = float(QtyInBox)
+                        
+                        O_BatchWiseLiveStockList.append({
+                            "Quantity" : InvoiceItem['BatchID'],
+                            "Item" : InvoiceItem['Item'],
+                            "BaseUnitQuantity" : InvoiceItem['BaseUnitQuantity']
+                        })
+                    Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
+                    Invoice_serializer = InvoiceSerializer(data=Invoicedata)
                     
-                    O_BatchWiseLiveStockList.append({
-                        "Quantity" : InvoiceItem['BatchID'],
-                        "Item" : InvoiceItem['Item'],
-                        "BaseUnitQuantity" : InvoiceItem['BaseUnitQuantity']
-                    })
-                Invoicedata.update({"obatchwiseStock":O_BatchWiseLiveStockList}) 
-                Invoice_serializer = InvoiceSerializer(data=Invoicedata)
-                if Invoice_serializer.is_valid():
-                    Invoice = Invoice_serializer.save()
-                    LastInsertId = Invoice.id
-                    log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','TransactionID':LastInsertId, 'Data':[]})
-                log_entry = create_transaction_logNew(request, Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
-                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
+                    if Invoice_serializer.is_valid():
+                        Invoice = Invoice_serializer.save()
+                        LastInsertId = Invoice.id
+                        LastIDs.append(Invoice.id)
+                        log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
+                    else:
+                        transaction.set_rollback(True)
+                        # print(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
+                        # log_entry = create_transaction_logNew(request, Invoicedata, Party, str(Invoice_serializer.errors),34,0,0,0,Invoicedata['Customer'])
+                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
+                        
+                
+            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
         except Exception as e:
+            
             log_entry = create_transaction_logNew(request, 0, 0,'InvoiceSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
     
