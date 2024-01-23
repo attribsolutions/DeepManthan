@@ -163,10 +163,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 PartyID = Order_serializer.data['Customer']
                                 
                                 log_entry = create_transaction_logNew(request, data, Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
-                                # log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Save Successfully',149,OrderID)    
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
                             log_entry = create_transaction_logNew(request, data, Supplier,  Order_serializer.errors,161,OrderID,0,0,Customer)
-                            # log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,161,0)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         # print('bbbbbbbbbb')
@@ -174,8 +172,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            # log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
-            log_entry = create_transaction_logNew(request, data, 0,e,33,0,0,0,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MobileAppOrderSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -323,17 +320,15 @@ class T_MobileAppOrdersView(CreateAPIView):
                             Customer = Order_serializer.data['Customer']
                             
                             log_entry = create_transaction_logNew(request, data, Supplier, 'MobileAppOrder Update Successfully',150,OrderID,0,0,Customer)
-                            # log_entry = create_transaction_log(request, Orderdata, 0, Supplier, 'MobileAppOrder Update Successfully',150,OrderID)    
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Update Successfully', 'FoodERPOrderID': OrderID})
                         log_entry = create_transaction_logNew(request, data, Supplier, Order_serializer.errors,162,OrderID,0,0,Customer)
-                        # log_entry = create_transaction_log(request, Orderdata, 0, 0, Order_serializer.errors,162,0)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         # print('bbbbbbbbbb')
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            # log_entry = create_transaction_log(request, Orderdata, 0, 0, Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,  e,162,0)
             # print('ccccccccccccccccccc')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
@@ -371,16 +366,16 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
                         id = data['FoodERPOrderID']
                         Order_Data = T_Orders.objects.get(id=id)
                         Order_Data.delete()
-                        log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,'MobileAPPOrder Deleted Successfully',151,0)
+                        log_entry = create_transaction_logNew(request, {'OrderID':id}, 0,'MobileAPPOrder Deleted Successfully',151,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Deleted Successfully'})
         except T_Orders.DoesNotExist:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,'Record Not available',163,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MobileAPPOrder Not available',163,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0,0, 'This Order is used in another Transaction ',163,0)
+            log_entry = create_transaction_logNew(request, 0,0,'This Order is used in another Transaction ',163,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Order is used in another Transaction'})
         except Exception as e:
-            log_entry = create_transaction_log(request, {'OrderID':id}, 0, 0,Exception(e),163,0)
+            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),163,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class NewProductSendToMobileAppView(CreateAPIView):
@@ -452,15 +447,15 @@ where M_Items.id=%s''',([today],[today],[id]))
                 
                 # print('==============================',response_json['success'])
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,152)
+                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json,152,0)
                     for a in response_json['data']:
                         query = M_Items.objects.filter(id=id).update(SkyggeProductID =a['productId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],164)
+                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],164,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json, 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,164)
+            log_entry = create_transaction_logNew(request, 0, 0,response_json,164,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
     @transaction.atomic()
@@ -519,15 +514,15 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                 response_json=json.loads(response.text)
                 
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],153)
+                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],153,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     # print('aaaaaaaaaaaaaaaaa')
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],165)
+                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],165,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,165)
+            log_entry = create_transaction_logNew(request, 0, 0,'ProductSendToMobileAppUpdate:'+str(Exception(e)),165,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                
         
     @transaction.atomic()
@@ -556,14 +551,14 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                 response = requests.request("DELETE", url, headers=headers, data=payload)
                 response_json=json.loads(response.text)
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_log(request, payload, 0, 0,response_json,154)
+                    log_entry = create_transaction_logNew(request, payload, 0, 0,response_json,154,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
+                    log_entry = create_transaction_logNew(request, payload, 0, 0,response_json,166,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})     
             
         except Exception as e:
-            log_entry = create_transaction_log(request, payload, 0, 0,response_json,166)
+            log_entry = create_transaction_logNew(request, 0, 0,'ProductSendToMobileAppDelete:'+str(Exception(e)),166,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
         
 class NewRetailerSendToMobileAppView(CreateAPIView):
@@ -631,16 +626,15 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 response_json=json.loads(response.text)
                 # print(response_json)
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],155)
-                    # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],155)
+                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],155,0)
                     for a in response_json['data']:
                         query = M_Parties.objects.filter(id=a['externalMappingId']).update(SkyggeID =a['outletId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],167)
+                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],167,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,167)
+            log_entry = create_transaction_logNew(request,0,0,'RetailerSendToMobileAppSave:'+str(Exception(e)),167,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
         
     @transaction.atomic()
@@ -700,14 +694,14 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 response_json=json.loads(response.text)
                 # print('======================',response_json)
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],156)
+                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],156,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json['message'],168)
+                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],168,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})    
             
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload_json_data, 0, 0,response_json,168)
+            log_entry = create_transaction_logNew(request, 0, 0,'RetailerSendToMobileAppUpdate:'+str(Exception(e)),168,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
             
     @transaction.atomic()
@@ -739,14 +733,14 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 response_json=json.loads(response.text)
                 
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],157)
+                    log_entry = create_transaction_logNew(request, payload, 0,response_json['message'],157)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_log(request, payload, 0, 0,response_json['message'],169)
+                    log_entry = create_transaction_logNew(request, payload, 0,response_json['message'],169)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            # log_entry = create_transaction_log(request, payload, 0, 0,response_json,169)
+            log_entry = create_transaction_logNew(request, 0, 0,'RetailerSendToMobileAppDelete:'+str(Exception(e)),169,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
         
         
@@ -842,12 +836,13 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                 "GSTNumber":Retailer.GSTIN
                             })
                         else:
-                            log_entry = create_transaction_log(request, Retailer_serializer.errors, 0,'fail to Added Retailer From MobileApp ',170,0)
+                            log_entry = create_transaction_logNew(request, Retailer_serializer.errors, 0,'fail to Added Retailer From MobileApp ',170,0)
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
                     log_entry = create_transaction_logNew(request,inserted_retailerlist,0,'Retailer Added From MobileApp Successfully',158,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,'RetailerAddedFromMobileApp:'+str(e),170,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
         
         
@@ -908,14 +903,15 @@ class RetailerUpdateFromMobileAppview(CreateAPIView):
                         Retailer_serializer = RetailerUpdateFromMobileAppSerializer(PartiesdataByID, data=aa)
                         if Retailer_serializer.is_valid():
                             Retailer = Retailer_serializer.save()
-                            log_entry = create_transaction_log(request, aa, 0, 0,'Retailer Updated From Mobile App Successfully',159)
+                            log_entry = create_transaction_logNew(request, aa, 0,'Retailer Updated From Mobile App Successfully',159,0)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })
                         else:
+                            log_entry = create_transaction_logNew(request, aa, 0,'RetailerUpdatedFromMobileApp:'+str(Retailer_serializer.errors),171,0)
                             transaction.set_rollback(True)
-                            log_entry = create_transaction_log(request, aa, 0, 0,'fail to  Updated retailer From MobileApp ',171)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
                     # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })                        
         except Exception as e:
+            log_entry = create_transaction_logNew(request, aa, 0,'RetailerUpdatedFromMobileApp:'+str(e),171,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
 
 class RetailerDeleteFromMobileApp(CreateAPIView):
@@ -941,12 +937,12 @@ class RetailerDeleteFromMobileApp(CreateAPIView):
                     user = authenticate(request, username=username, password=password)
                     M_Partiesdata = M_Parties.objects.get(id=id)
                     M_Partiesdata.delete()
-                    log_entry = create_transaction_log(request, id, 0, 0,'Retailer  Deleted Successfully',160)
+                    log_entry = create_transaction_logNew(request, id, 0,'Retailer  Deleted Successfully',160,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Retailer  Deleted Successfully'})
         except M_Parties.DoesNotExist:
-            log_entry = create_transaction_log(request, id, 0, 0,'Retailer Not available',172)
+            log_entry = create_transaction_logNew(request, 0, 0,'Retailer Not available',172,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer Not available'})
         except IntegrityError:
-            log_entry = create_transaction_log(request, id, 0, 0,'Retailer used in another table',172)
+            log_entry = create_transaction_logNew(request, 0, 0,'Retailer used in another table',172,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer used in another table'})              
                  

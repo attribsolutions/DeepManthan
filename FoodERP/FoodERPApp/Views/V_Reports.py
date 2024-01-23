@@ -380,17 +380,16 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  left JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id 
  JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id 
  JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id 
- 
+
  LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
  LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
  JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
  LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
- JOIN M_Parties on M_Parties.id= T_Invoices.Party_id 
- LEFT JOIN M_PartyDetails on  M_Parties.Id=M_PartyDetails.Party_id
+ LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
  LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
  LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id 
- WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([Party_list,FromDate,ToDate,Party_list]))
+ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([FromDate,ToDate,Party_list]))
                 if Genericdataquery:
                     GenericSaleData = list()
                     GenericSaleSerializer = GenericSaleReportSerializer(
@@ -1428,7 +1427,7 @@ LEFT JOIN M_Employees M_Employees_SE ON M_Employees_SE.id = X.SE
 LEFT JOIN M_Employees M_Employees_SO ON M_Employees_SO.id = X.SO
 LEFT JOIN M_Employees M_Employees_SR ON M_Employees_SR.id = X.SR
                                                      
-WHERE M_PartyType.id IN(9,10,15,17) AND C.IsDefault = 1 ''')
+WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
 
                 if query:
                     ManPower_Serializer = ManPowerSerializer(query, many=True).data

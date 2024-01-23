@@ -150,6 +150,9 @@ from .Views.V_CentralServiceItemMaster import *
 from .Views.V_PartyDetails import *
 
 
+from .Views.V_Settings import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -680,10 +683,12 @@ urlpatterns = [
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
               url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
-              
+              url(r'SettingsDataSave$',SettingsView.as_view()), 
+             
+
               url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
             
-                  
+              url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
 
 
