@@ -110,7 +110,8 @@ class SystemSettingsView(CreateAPIView):
                     
                     Setting_Details_Data = Settings_Data.get('SettingDetails', [])
                     
-                    q = MC_SettingsDetails.objects.filter(SettingID=query).update(IsDeleted=1)
+                    if Setting_Details_Data:
+                        q = MC_SettingsDetails.objects.filter(SettingID=query).update(IsDeleted=1)
 
                     for Setting_Details in Setting_Details_Data:
                         Setting_ID = Setting_Details.get('id', None)
