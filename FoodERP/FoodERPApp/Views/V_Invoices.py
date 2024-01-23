@@ -60,7 +60,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     TC_OrderItems.GST_id,M_GSTHSNCode.HSNCode,TC_OrderItems.GSTPercentage,M_MarginMaster.id MarginID,M_MarginMaster.Margin,TC_OrderItems.BasicAmount,
     TC_OrderItems.GSTAmount,TC_OrderItems.CGST,TC_OrderItems.SGST,TC_OrderItems.IGST,TC_OrderItems.CGSTPercentage,TC_OrderItems.SGSTPercentage,
     TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName,M_Parties.PAN,MC_PartySubParty.IsTCSParty,
-    T_Orders.OrderDate,M_Parties.id CustomerID,M_Parties.GSTIN
+    T_Orders.OrderDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber
 
 
     FROM TC_OrderItems
@@ -162,6 +162,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "CustomerPAN" : b.PAN,
                         "CustomerGSTIN" : b.GSTIN,
                         "CustomerID" : Customer,
+                        "OrderNumber" : b.FullOrderNumber,
                         "OrderItemDetails":OrderItemDetails
                     })
 
