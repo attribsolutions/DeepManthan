@@ -368,6 +368,7 @@ T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS `Group`, MC_SubG
 M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster 
 FROM TC_InvoiceItems 
 JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id 
+JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id
 left JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id 
 left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  JOIN M_Parties A ON A.id = T_Invoices.Party_id 
@@ -379,7 +380,7 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  left JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id 
  JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id 
  JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id 
- JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id AND MC_PartySubParty.Party_id IN %s
+ 
  LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
  LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
  JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
@@ -544,7 +545,7 @@ on I.Item_id=SalesReturn.Item_id
 
 left join (SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
-WHERE ReturnDate = %s AND Customer_id = %s  GROUP BY Item_id)PurchesReturn
+WHERE ReturnDate = %s AND Customer_id = %s and TC_PurchaseReturnItems.ItemReason_id in(SELECT DefaultValue FROM M_Settings where id=14) GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id
 
 Left join (Select Item_id,SUM(BaseUnitQuantity)StockEntry  from T_Stock where IsStockAdjustment=0 and StockDate= DATE_SUB(  %s, INTERVAL 1 DAY ) AND Party_id=%s GROUP BY Item_id)StockEntry 
