@@ -82,10 +82,10 @@ class OrderDetailsForInvoice(CreateAPIView):
     O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
     (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
     (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
-    ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitID
+    ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitIDD,M_Items.BaseUnitID_id UnitID
     from O_BatchWiseLiveStock 
     join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
-
+    join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
     join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
