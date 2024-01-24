@@ -75,21 +75,21 @@ class OrderDetailsForInvoice(CreateAPIView):
                         
                     for b in OrderItemQuery:
                         Customer=b.CustomerID
-                        Item= b.ItemID
+                        Item= b.ItemID 
                         
-                        obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, 389, UnitID, 0, 0, MRP, 0)Rate
+                        obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
     from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
     O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
     (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
     (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
-    ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitID
+    ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitIDD,M_Items.BaseUnitID_id UnitID
     from O_BatchWiseLiveStock 
     join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
-
+    join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
     join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
-    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Item,Party])
+    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])
                         # print(obatchwisestockquery.query)     
                         stockDatalist = list()
                         if not obatchwisestockquery:
