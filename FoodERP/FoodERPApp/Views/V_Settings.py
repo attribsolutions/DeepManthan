@@ -38,26 +38,28 @@ class SystemSettingsView(CreateAPIView):
                 Settings_data = SettingsSerializerSecond(query, many=True).data
                 SettingsList = list()
 
-                for a in Settings_data:
-                    Settingdata_List = a.get('SettingDetails', [])
+                if Settings_data:
+                    a=Settings_data[0]
+                    if Settings_data[0]['SettingDetails'] :
+                        for Setting_Info in Settings_data[0]['SettingDetails'] : 
+                            
+                            if Setting_Info['IsDeleted'] == False:
+                                SettingsList.append({
+                                    "id": a['id'],
+                                    "SystemSetting": a['SystemSetting'],
+                                    "Description": a['Description'],
+                                    "IsActive": a['IsActive'],
+                                    "IsPartyRelatedSetting": a['IsPartyRelatedSetting'],
+                                    "DefaultValue": a['DefaultValue'],
+                                    "Value": Setting_Info.get('Value'),
+                                    "IsDeleted": Setting_Info.get('IsDeleted'),
+                                    "CreatedBy": Setting_Info.get('CreatedBy'),
+                                    "CreatedOn": Setting_Info.get('CreatedOn'),
+                                    "UpdatedBy": Setting_Info.get('UpdatedBy'),
+                                    "UpdatedOn": Setting_Info.get('UpdatedOn'),
+                                    "Company": Setting_Info.get('Company'),
+                                })
 
-                    if Settingdata_List:
-                        Setting_Info = Settingdata_List[0]
-                        SettingsList.append({
-                            "id": a['id'],
-                            "SystemSetting": a['SystemSetting'],
-                            "Description": a['Description'],
-                            "IsActive": a['IsActive'],
-                            "IsPartyRelatedSetting": a['IsPartyRelatedSetting'],
-                            "DefaultValue": a['DefaultValue'],
-                            "Value": Setting_Info.get('Value'),
-                            "IsDeleted": Setting_Info.get('IsDeleted'),
-                            "CreatedBy": Setting_Info.get('CreatedBy'),
-                            "CreatedOn": Setting_Info.get('CreatedOn'),
-                            "UpdatedBy": Setting_Info.get('UpdatedBy'),
-                            "UpdatedOn": Setting_Info.get('UpdatedOn'),
-                            "Company": Setting_Info.get('Company'),
-                        })
                     else:
                         SettingsList.append({
                             "id": a['id'],
@@ -75,25 +77,23 @@ class SystemSettingsView(CreateAPIView):
                             "Company": "",
                         })
 
-                if SettingsList:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SettingsList[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SettingsList})
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Settings data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
-
-    @transaction.atomic()
-    def delete(self, request, id=0):
-        try:
-            with transaction.atomic():
-                Settings_data = M_Settings.objects.get(id=id)
-                Settings_data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Settings Data Deleted Successfully','Data':[]})
-        except M_SubCluster.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data Not available', 'Data': []})
-        except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data used in another table', 'Data': []})
+    # @transaction.atomic()
+    # def delete(self, request, id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             Settings_data = M_Settings.objects.get(id=id)
+    #             Settings_data.delete()
+    #             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Settings Data Deleted Successfully','Data':[]})
+    #     except M_SubCluster.DoesNotExist:
+    #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data Not available', 'Data': []})
+    #     except IntegrityError:   
+    #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Settings Data used in another table', 'Data': []})
         
     
     @transaction.atomic()
