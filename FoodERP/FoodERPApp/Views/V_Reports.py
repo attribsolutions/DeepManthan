@@ -544,7 +544,7 @@ on I.Item_id=SalesReturn.Item_id
 
 left join (SELECT Item_id,SUM(BaseUnitQuantity) PurchesReturnQuantity,sum(Amount) PurchesReturnValue   
 FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id      
-WHERE ReturnDate = %s AND Customer_id = %s and TC_PurchaseReturnItems.ItemReason_id in(SELECT DefaultValue FROM M_Settings where id=14) GROUP BY Item_id)PurchesReturn
+WHERE ReturnDate = %s AND Customer_id = %s and ((TC_PurchaseReturnItems.ItemReason_id IN (SELECT DefaultValue FROM M_Settings WHERE id = 14) and T_PurchaseReturn.Mode =3) OR(T_PurchaseReturn.Mode =2)) GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id
 
 Left join (Select Item_id,SUM(BaseUnitQuantity)StockEntry  from T_Stock where IsStockAdjustment=0 and StockDate= DATE_SUB(  %s, INTERVAL 1 DAY ) AND Party_id=%s GROUP BY Item_id)StockEntry 
