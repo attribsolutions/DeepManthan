@@ -1449,6 +1449,7 @@ class T_PurchaseReturn(models.Model):
     ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT,null=True,blank=True)
     IsApproved=models.BooleanField(default=False)
     Mode = models.IntegerField() # 1- SalesReturn 2-PurchaseReturn 3- Salesconsoldatedpurchasereturn
+    ASMApprovalImgUpload = models.FileField(upload_to="Images\ReturnASMApprovalImgUpload",default="",null=True,blank=True)
     
     class Meta:
         db_table = "T_PurchaseReturn"
