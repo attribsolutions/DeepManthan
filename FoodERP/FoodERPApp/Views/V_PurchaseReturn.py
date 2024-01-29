@@ -795,9 +795,10 @@ class SalesReturnItemApproveView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)
                 ReturnID = PurchaseReturndata['ReturnID']
                 CreatedBy = PurchaseReturndata['UserID']  
+                IsApprovedflag= PurchaseReturndata['IsApproved'] 
                 ReturnItem = PurchaseReturndata['ReturnItem']
                 # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'', 'Data':PurchaseReturndata})
-                aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=1)
+                aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=IsApprovedflag)
                 Partyquery = T_PurchaseReturn.objects.filter(id=ReturnID).values('Party')
                 Party = Partyquery[0]["Party"]
                 item = ""
