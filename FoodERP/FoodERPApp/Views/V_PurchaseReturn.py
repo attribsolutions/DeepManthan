@@ -995,4 +995,35 @@ class PurchaseReturnPrintView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'PurchaseReturnPrint:'+str(Exception(e)),33,0 )
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})      
+
+
+class ReturnImageUpdate(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    parser_classes = [MultiPartParser]
+    
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Imagedata = request.data
+                '''Image Upload Code End''' 
+                avatar = request.FILES.getlist('ASMApprovalImgUpload')
+                for file in avatar:
+                    Imagedata['ASMApprovalImgUpload']=file
+                '''Image Upload Code End'''
+                ImageByID = T_PurchaseReturn.objects.get(id=id)
+                Image_serializer = ImageSerializer(
+                    ImageByID, data=Imagedata)
+                if Image_serializer.is_valid():
+                    Image_serializer.save()
+                    # log_entry = create_transaction_logNew(request, Imagedata,0,'BankID:'+str(id),194,id)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Image Updated Successfully','Data' :[]})
+                else:
+                    # log_entry = create_transaction_logNew(request, Imagedata,0,'BankEdit:'+str(Bank_serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Image_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            # log_entry = create_transaction_logNew(request, 0,0,'BankEdit:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+          
