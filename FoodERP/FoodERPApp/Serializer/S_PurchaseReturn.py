@@ -328,3 +328,8 @@ class ReturnApproveQtySerializer(serializers.ModelSerializer):
                 O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
 
         return BatchID
+    
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_PurchaseReturn
+        fields = ['ASMApprovalImgUpload']
