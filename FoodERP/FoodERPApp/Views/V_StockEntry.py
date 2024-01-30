@@ -169,6 +169,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             p=row.id
                         PartyIDs = p.split(",")
                 else : 
+                        PartyID=Party;
                         PartyIDs= Party  
                 
                 Stockquery='''SELECT M_Parties.id DistributorID,M_Parties.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
