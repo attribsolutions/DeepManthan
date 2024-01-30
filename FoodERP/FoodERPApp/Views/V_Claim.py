@@ -470,8 +470,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
         try:
             with transaction.atomic():
                 ClaimTrackingdata = JSONParser().parse(request)
-                Year = ClaimTrackingdata['Year']
-                Month = ClaimTrackingdata['Month']
+                FromDate = ClaimTrackingdata['FromDate']
+                ToDate = ClaimTrackingdata['ToDate']
                 Party = ClaimTrackingdata['Party']
                 Employee = ClaimTrackingdata['Employee']
 
@@ -482,7 +482,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     PartyIDs = p.split(",")
 
                 ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
-                                                            T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
+                                                            T_ClaimTrackingEntry.Date,  T_ClaimTrackingEntry.Month, 
+                                                            T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
                                                             CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark
@@ -497,8 +498,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
                                                             LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
                                                             LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade
-                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s'''
-
+                                                            WHERE T_ClaimTrackingEntry.Date between %s and %s'''
+                # print(ClaimTrackingquery)
                 if Party == "":
                     ClaimTrackingquery += " "
                     if Employee == 0:
@@ -512,14 +513,14 @@ class ClaimTrackingEntryListView(CreateAPIView):
                         
                         if Employee == 0:
                             
-                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [FromDate, ToDate])
                         else:
                             
-                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [FromDate, ToDate, PartyIDs])
                 else:
                     
-                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
-                if  ClaimTrackingqueryresults:    
+                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[FromDate,ToDate,Party])
+                if  ClaimTrackingqueryresults: 
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingdata})
@@ -730,8 +731,7 @@ WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Claimtrackingdata = T_ClaimTrackingEntry.objects.get(id=id)
-                Claimtrackingdata.delete()
+                Claimtrackingdata = T_ClaimTrackingEntry.objects.filter(id=id).update(IsDeleted=1)
                 log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Deleted Successfully', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
