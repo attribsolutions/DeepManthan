@@ -1018,7 +1018,7 @@ class ReturnImageUpdate(CreateAPIView):
                 if Image_serializer.is_valid():
                     Image_serializer.save()
                     # log_entry = create_transaction_logNew(request, Imagedata,0,'BankID:'+str(id),194,id)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Image Updated Successfully','Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Upload Successfully','Data' :[]})
                 else:
                     # log_entry = create_transaction_logNew(request, Imagedata,0,'BankEdit:'+str(Bank_serializer.errors),34,0)
                     transaction.set_rollback(True)
