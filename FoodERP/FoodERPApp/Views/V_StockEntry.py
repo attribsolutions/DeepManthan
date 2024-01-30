@@ -194,7 +194,7 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id= MC_PartyItems.Party_id
 JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
 join M_Parties on M_Parties.id =MC_PartyItems.Party_id
-where O_BatchWiseLiveStock.BaseUnitQuantity >0   order by M_Group.id, MC_SubGroup.id ,M_Items.id'''    
+where O_BatchWiseLiveStock.BaseUnitQuantity >0 and O_BatchWiseLiveStock.Item_id =6   order by M_Group.id, MC_SubGroup.id ,M_Items.id,M_Parties.id'''    
                 
                 if Party == "":
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, (today,PartyIDs))
@@ -221,7 +221,7 @@ where O_BatchWiseLiveStock.BaseUnitQuantity >0   order by M_Group.id, MC_SubGrou
 # JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
 # join M_Parties on M_Parties.id =MC_PartyItems.Party_id
 # where O_BatchWiseLiveStock.BaseUnitQuantity >0   order by M_Group.id, MC_SubGroup.id ,M_Items.id ''',(Unit,today,PartyIDs))
-                # print(str(Itemquery.query))
+                print(str(Itemquery.query))
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
