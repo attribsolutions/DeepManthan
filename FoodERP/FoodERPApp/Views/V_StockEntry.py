@@ -162,6 +162,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 today = date.today() 
                 
                 if Party == "":
+                    PartyID=0;
                     if Employee > 0:
                         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                         for row in EmpPartys:
@@ -272,7 +273,7 @@ where O_BatchWiseLiveStock.BaseUnitQuantity >0   order by M_Group.id, MC_SubGrou
                             "GST" : row.GSTPercentage
                         })
                     
-                    log_entry = create_transaction_logNew(request, StockReportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
+                    log_entry = create_transaction_logNew(request, StockReportdata, PartyID , 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'PartyLiveStock:'+str(Exception(e)),33,0)
