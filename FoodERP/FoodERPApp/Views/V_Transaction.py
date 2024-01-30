@@ -124,8 +124,8 @@ class TransactionJsonView(CreateAPIView):
                            Transactionlog.TransactionType, Transactionlog.TransactionID, 
                            Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
                            Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS TransactionlogJsondata
-                    FROM Transactionlog
-                    left JOIN TransactionLogJsonData 
+                    FROM TransactionLog.L_Transactionlog Transactionlog
+                    left JOIN  TransactionLog.L_TransactionLogJsonData TransactionLogJsonData 
                     ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
                     WHERE Transactionlog.id = %s
                 ''',[id])
