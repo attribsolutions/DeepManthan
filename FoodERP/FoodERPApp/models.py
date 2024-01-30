@@ -1717,7 +1717,8 @@ class TC_ReceiptInvoices(models.Model):
     CRDRNote = models.ForeignKey(T_CreditDebitNotes, related_name='CRDRInvoices', on_delete=models.CASCADE,null=True)
     Invoice = models.ForeignKey(T_Invoices, related_name='RInvoice', on_delete=models.PROTECT,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts, related_name='ReceiptInvoices', on_delete=models.CASCADE,null=True)
-
+    Return = models.ForeignKey(T_PurchaseReturn, related_name='CRDRReturn', on_delete=models.PROTECT,null=True)
+    
     class Meta:
         db_table = "TC_ReceiptInvoices"
 
