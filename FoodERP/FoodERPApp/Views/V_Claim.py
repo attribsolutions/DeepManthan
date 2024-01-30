@@ -731,8 +731,7 @@ WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Claimtrackingdata = T_ClaimTrackingEntry.objects.get(id=id)
-                Claimtrackingdata.delete()
+                Claimtrackingdata = T_ClaimTrackingEntry.objects.filter(id=id).update(IsDeleted=1)
                 log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Deleted Successfully', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
