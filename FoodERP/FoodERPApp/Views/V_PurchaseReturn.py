@@ -98,7 +98,8 @@ class PurchaseReturnListView(CreateAPIView):
                             "IsApproved" :a["IsApproved"],
                             "Comment" :a["Comment"],
                             "Status" :Status,
-                            "Mode":a["Mode"]
+                            "Mode":a["Mode"],
+                            "ASMApprovalImgUpload":a["ASMApprovalImgUpload"]
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
