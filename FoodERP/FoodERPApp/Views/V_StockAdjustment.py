@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-
+from django.db import connection
 from ..Serializer.S_Orders import Mc_ItemUnitSerializerThird
 from ..Serializer.S_StockAdjustment import *
 from ..Serializer.S_Parties import *
@@ -65,3 +65,29 @@ class ShowBatchesForItemView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GETBatchesForItemInStockAdjustment:'+str(Exception),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+
+
+
+class GetStockCountForPartyView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                StockData = JSONParser().parse(request)
+                FromDate = StockData['FromDate']
+                PartyID = StockData['PartyID']
+
+                Stockquery=''' select GetStockEffectiveTransactionCountFromDateForPartyID(%s, %s)'''
+
+                with connection.cursor() as cursor:
+                    # Execute the raw query and fetch the results
+                    cursor.execute(Stockquery, [FromDate, PartyID])
+                    StockResult = cursor.fetchone()[0]
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockResult})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
