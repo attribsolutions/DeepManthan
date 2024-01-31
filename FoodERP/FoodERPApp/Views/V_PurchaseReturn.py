@@ -91,6 +91,7 @@ class PurchaseReturnListView(CreateAPIView):
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
+                            "PartyTypeID": a['Party']['PartyType'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount": a['RoundOffAmount'],
                             "CreatedBy": a['CreatedBy'],
@@ -98,7 +99,8 @@ class PurchaseReturnListView(CreateAPIView):
                             "IsApproved" :a["IsApproved"],
                             "Comment" :a["Comment"],
                             "Status" :Status,
-                            "Mode":a["Mode"]
+                            "Mode":a["Mode"],
+                            "ASMApprovalImgUpload":a["ASMApprovalImgUpload"]
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
@@ -1018,7 +1020,7 @@ class ReturnImageUpdate(CreateAPIView):
                 if Image_serializer.is_valid():
                     Image_serializer.save()
                     # log_entry = create_transaction_logNew(request, Imagedata,0,'BankID:'+str(id),194,id)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Image Updated Successfully','Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Upload Successfully','Data' :[]})
                 else:
                     # log_entry = create_transaction_logNew(request, Imagedata,0,'BankEdit:'+str(Bank_serializer.errors),34,0)
                     transaction.set_rollback(True)
