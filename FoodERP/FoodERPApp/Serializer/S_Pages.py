@@ -160,5 +160,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
             
             return instance   
     
-
-        
+class FieldValidationsSerializerSecond(serializers.ModelSerializer):
+    class Meta:
+        model = M_FieldValidations
+        fields = '__all__'       
