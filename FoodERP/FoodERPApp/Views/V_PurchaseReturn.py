@@ -66,7 +66,14 @@ class PurchaseReturnListView(CreateAPIView):
                     ReturnListData = list()
                     for a in Return_serializer:
                         q0=TC_PurchaseReturnReferences.objects.filter(SubReturn=a['id'])
-                       
+                        q1= TC_ReceiptInvoices.objects.filter(Return=a['id'])
+                        
+                        if q1.count() > 0:
+                            IsCreditNoteCreated = 1
+                        else:    
+                            IsCreditNoteCreated = 0 
+                        
+                        
                         if q0.count() > 0:
                             IsSendToSS = 1
                         else:
@@ -100,7 +107,8 @@ class PurchaseReturnListView(CreateAPIView):
                             "Comment" :a["Comment"],
                             "Status" :Status,
                             "Mode":a["Mode"],
-                            "ASMApprovalImgUpload":a["ASMApprovalImgUpload"]
+                            "ASMApprovalImgUpload":a["ASMApprovalImgUpload"],
+                            "IsCreditNoteCreated" : IsCreditNoteCreated
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
