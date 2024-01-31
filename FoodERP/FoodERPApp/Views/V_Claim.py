@@ -486,7 +486,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
-                                                            CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark
+                                                            CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark,T_ClaimTrackingEntry.IsDeleted
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
@@ -549,7 +549,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "ClaimSummaryDate": a.ClaimSummaryDate,
                             "CreditNoteUpload": dd,
                             "ClaimReceivedSource": a.ClaimReceivedSource,
-                            "Remark":a.Remark
+                            "Remark":a.Remark,
+                            "IsDeleted":a.IsDeleted
 
                         })
                     log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
