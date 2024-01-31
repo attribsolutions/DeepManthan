@@ -338,3 +338,86 @@ class FieldValidationsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Field Validations Not Available', 'Data': []})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})  
+        
+        
+class FieldValidationsViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request ):
+        try:
+            with transaction.atomic():
+                Field_data = JSONParser().parse(request)
+                Field_Validations_serializer = FieldValidationsSerializerSecond(data=Field_data)
+                if Field_Validations_serializer.is_valid():
+                    Field_Validations_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Field Data Uploaded Successfully', 'Data': []})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Field_Validations_serializer.errors, 'Data': []})
+        except Exception as e:
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
+    @transaction.atomic()
+    def get(self, request ):
+        try:
+            with transaction.atomic():
+                
+                Field_data = M_FieldValidations.objects.all()
+         
+                Field_Validations_serializer = FieldValidationsSerializerSecond(Field_data,many=True)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Field_Validations_serializer.data})
+        except  M_FieldValidations.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  ' Field Data Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+    
+class FieldValidationsViewThird(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Field_data = M_FieldValidations.objects.get(id=id)
+                Field_Validations_serializer = FieldValidationsSerializerSecond(Field_data)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Field_Validations_serializer.data})
+        except  M_FieldValidations.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Field Data Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Field_data = JSONParser().parse(request)
+                Field_dataByID = M_FieldValidations.objects.get(id=id)
+                Field_Validations_serializer = FieldValidationsSerializerSecond(
+                    Field_dataByID, data=Field_data)
+                if Field_Validations_serializer.is_valid():
+                    Field_Validations_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Field Data Updated Successfully','Data' :[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Field_Validations_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+
+        
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Field_data = M_FieldValidations.objects.get(id=id)
+                Field_data.delete()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Field Data Deleted Successfully','Data':[]})
+        except M_FieldValidations.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Field Data Not available', 'Data': []})
+        except IntegrityError:   
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Field Data used in another table', 'Data': []})
+        
