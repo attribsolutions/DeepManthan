@@ -1447,7 +1447,7 @@ class T_PurchaseReturn(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='ReturnCustomer', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, related_name='ReturnParty', on_delete=models.PROTECT)
     ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT,null=True,blank=True)
-    IsApproved=models.BooleanField(default=False)
+    IsApproved=models.IntegerField(default=0)
     Mode = models.IntegerField() # 1- SalesReturn 2-PurchaseReturn 3- Salesconsoldatedpurchasereturn
     ASMApprovalImgUpload = models.FileField(upload_to="Images\ReturnASMApprovalImgUpload",default="",null=True,blank=True)
     
