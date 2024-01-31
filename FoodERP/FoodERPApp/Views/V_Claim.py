@@ -43,7 +43,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
  where IsApproved=1 and 
-T_PurchaseReturn.id in (SELECT TC_PurchaseReturnReferences.SubReturn_id FROM FoodERP.T_PurchaseReturn join TC_PurchaseReturnReferences on T_PurchaseReturn.id=TC_PurchaseReturnReferences.PurchaseReturn_id
+T_PurchaseReturn.id in (SELECT TC_PurchaseReturnReferences.SubReturn_id FROM T_PurchaseReturn join TC_PurchaseReturnReferences on T_PurchaseReturn.id=TC_PurchaseReturnReferences.PurchaseReturn_id
 where T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s ) Order By GSTPercentage''', ([FromDate], [ToDate], [Party]))
                 else:   # Return Item Summury
                     Q1 = M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 

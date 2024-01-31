@@ -347,29 +347,3 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
 
         return instance        
         
-                    
-# class MC_SettingsDetailsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = MC_SettingsDetails
-#         fields = ['Value','IsDeleted','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Company']
-
-# class SettingsSerializer(serializers.ModelSerializer):
-#     SettingDetails = MC_SettingsDetailsSerializer(read_only=True)
-
-#     class Meta:
-#         model = M_Settings
-#         fields = ['SystemSetting', 'Description', 'IsActive', 'IsPartyRelatedSetting', 'DefaultValue', 'SettingDetails']
-
-#     def create(self, validated_data):
-#         aa = validated_data.pop('SettingDetails', None)
-#         bb = M_Settings.objects.create(**validated_data)
-
-#         if aa:
-#             MC_SettingsDetails.objects.create(SettingID=bb, **aa)
-
-#         return bb
-  
-
-
-
-  
