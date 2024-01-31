@@ -51,11 +51,11 @@ from M_Parties
 join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
 where Party_id = %s''', ([Party]))
 
-                    q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,'' ReturnDate,'' FullReturnNumber,'' CustomerName,ItemName,
+                    q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,'' ReturnDate, FullReturnNumber,'' CustomerName,ItemName,
 MRP,Quantity,GST,Rate,TaxableAmount,
  Amount, CGST, SGST, ApprovedQuantity,  Discount, DiscountAmount, DiscountType 
  from
-(SELECT M_Items.id,M_Items.Name ItemName,sum(ApprovedBasicAmount)TaxableAmount,(MRPValue)MRP,sum(Quantity)Quantity,ApprovedGSTPercentage GST,ApprovedRate Rate,
+(SELECT FullReturnNumber, M_Items.id,M_Items.Name ItemName,sum(ApprovedBasicAmount)TaxableAmount,(MRPValue)MRP,sum(Quantity)Quantity,ApprovedGSTPercentage GST,ApprovedRate Rate,
  sum(ApprovedAmount)Amount, sum(ApprovedCGST)CGST,sum(ApprovedSGST)SGST, sum(ApprovedByCompany)ApprovedQuantity,  ifnull(Discount,0)Discount, ifnull(sum(ApprovedDiscountAmount),0)DiscountAmount,DiscountType
 
 FROM T_PurchaseReturn
@@ -65,12 +65,15 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc ,Item_id desc )j ''', ([FromDate], [ToDate], [Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by FullReturnNumber, Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc ,Item_id desc )j ''', ([FromDate], [ToDate], [Party]))
 
                 if q0:
                     ClaimSummaryData = list()
                     M_Parties_serializer = PartyDetailSerializer(
                         Q1, many=True).data
+                    for a in M_Parties_serializer:
+                        Full_Return_Numbers = T_PurchaseReturn.objects.filter(Customer=Party).values_list('FullReturnNumber', flat=True)
+                        a['FullReturnNumbers'] = ', '.join(Full_Return_Numbers)
                     ClaimSummary_serializer = ClaimSummarySerializer(
                         q0, many=True).data
                     # M_Parties_serializer.append({
