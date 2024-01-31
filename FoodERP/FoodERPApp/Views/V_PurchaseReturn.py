@@ -91,6 +91,7 @@ class PurchaseReturnListView(CreateAPIView):
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
+                            "PartyTypeID": a['Party']['PartyType'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount": a['RoundOffAmount'],
                             "CreatedBy": a['CreatedBy'],
