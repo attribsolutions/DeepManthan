@@ -217,6 +217,8 @@ urlpatterns = [
             url(r'PageAccess$', H_PageAccessView.as_view()),
             url(r'ControlTypes$', ControlTypeMasterView.as_view()),
             url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
+            url(r'FieldValidations$', FieldValidationsViewSecond.as_view()),
+            url(r'FieldValidations/([0-9]+)$', FieldValidationsViewThird.as_view()),
     
 # Company 
             url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
