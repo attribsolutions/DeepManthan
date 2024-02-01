@@ -555,7 +555,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "CreditNoteUpload": dd,
                             "ClaimReceivedSource": a.ClaimReceivedSource,
                             "Remark":a.Remark,
-                            "IsDeleted":a.IsDeleted
+                            "IsRecordDeleted":a.IsDeleted
 
                         })
                     log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
