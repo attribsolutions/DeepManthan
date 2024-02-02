@@ -6,7 +6,7 @@ class PartiesSerializer(serializers.ModelSerializer):
        
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','MobileNo']       
+        fields = ['id','Name','GSTIN','PAN','Email','MobileNo','PartyType']       
 
 class Partyaddress(serializers.ModelSerializer):
     class Meta:
@@ -347,11 +347,3 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
 
         return instance        
         
-                    
-
-   
-  
-
-
-
-  

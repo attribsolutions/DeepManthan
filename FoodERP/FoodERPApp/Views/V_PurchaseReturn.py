@@ -66,7 +66,14 @@ class PurchaseReturnListView(CreateAPIView):
                     ReturnListData = list()
                     for a in Return_serializer:
                         q0=TC_PurchaseReturnReferences.objects.filter(SubReturn=a['id'])
-                       
+                        q1= TC_ReceiptInvoices.objects.filter(Return=a['id'])
+                        
+                        if q1.count() > 0:
+                            IsCreditNoteCreated = 1
+                        else:    
+                            IsCreditNoteCreated = 0 
+                        
+                        
                         if q0.count() > 0:
                             IsSendToSS = 1
                         else:
@@ -91,6 +98,7 @@ class PurchaseReturnListView(CreateAPIView):
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
+                            "PartyTypeID": a['Party']['PartyType'],
                             "GrandTotal": a['GrandTotal'],
                             "RoundOffAmount": a['RoundOffAmount'],
                             "CreatedBy": a['CreatedBy'],
@@ -98,7 +106,9 @@ class PurchaseReturnListView(CreateAPIView):
                             "IsApproved" :a["IsApproved"],
                             "Comment" :a["Comment"],
                             "Status" :Status,
-                            "Mode":a["Mode"]
+                            "Mode":a["Mode"],
+                            "ASMApprovalImgUpload":a["ASMApprovalImgUpload"],
+                            "IsCreditNoteCreated" : IsCreditNoteCreated
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
@@ -362,10 +372,13 @@ class PurchaseReturnView(CreateAPIView):
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
                     if Mode == str(1): #SalesReturn
-                        log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),239,LastInsertID,0,0,PurchaseReturndata['Customer'])
+                        
+                        log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Customer:'+str(PurchaseReturndata['Customer'])+','+'TransactionID:'+str(LastInsertID),239,LastInsertID,0,0,PurchaseReturndata['Customer'])
                     elif Mode == str(2): #PurchaseReturn
+                        
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,PurchaseReturndata['Customer'],'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,Party)
                     elif Mode == str(3):
+                        
                         log_entry = create_transaction_logNew(request, PurchaseReturndata,Party,'ReturnDate:'+PurchaseReturndata['ReturnDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertID),53,LastInsertID,0,0,PurchaseReturndata['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
                 else:
@@ -795,9 +808,10 @@ class SalesReturnItemApproveView(CreateAPIView):
                 PurchaseReturndata = JSONParser().parse(request)
                 ReturnID = PurchaseReturndata['ReturnID']
                 CreatedBy = PurchaseReturndata['UserID']  
+                IsApprovedflag= PurchaseReturndata['IsApproved'] 
                 ReturnItem = PurchaseReturndata['ReturnItem']
                 # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':'', 'Data':PurchaseReturndata})
-                aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=1)
+                aa=T_PurchaseReturn.objects.filter(id=ReturnID).update(IsApproved=IsApprovedflag)
                 Partyquery = T_PurchaseReturn.objects.filter(id=ReturnID).values('Party')
                 Party = Partyquery[0]["Party"]
                 item = ""
@@ -995,4 +1009,35 @@ class PurchaseReturnPrintView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'PurchaseReturnPrint:'+str(Exception(e)),33,0 )
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})      
+
+
+class ReturnImageUpdate(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    parser_classes = [MultiPartParser]
+    
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Imagedata = request.data
+                '''Image Upload Code End''' 
+                avatar = request.FILES.getlist('ASMApprovalImgUpload')
+                for file in avatar:
+                    Imagedata['ASMApprovalImgUpload']=file
+                '''Image Upload Code End'''
+                ImageByID = T_PurchaseReturn.objects.get(id=id)
+                Image_serializer = ImageSerializer(
+                    ImageByID, data=Imagedata)
+                if Image_serializer.is_valid():
+                    Image_serializer.save()
+                    log_entry = create_transaction_logNew(request, Imagedata,0,'ReturnImageID:'+str(id),326,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ReturnImage Upload Successfully','Data' :[]})
+                else:
+                    log_entry = create_transaction_logNew(request, Imagedata,0,'ReturnImageEdit:'+str(Image_serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Image_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'ReturnImagedata:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+    
+          

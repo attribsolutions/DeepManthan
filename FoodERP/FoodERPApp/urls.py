@@ -150,6 +150,9 @@ from .Views.V_CentralServiceItemMaster import *
 from .Views.V_PartyDetails import *
 
 
+from .Views.V_Settings import *
+
+
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
@@ -214,6 +217,8 @@ urlpatterns = [
             url(r'PageAccess$', H_PageAccessView.as_view()),
             url(r'ControlTypes$', ControlTypeMasterView.as_view()),
             url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
+            url(r'FieldValidations$', FieldValidationsViewSecond.as_view()),
+            url(r'FieldValidations/([0-9]+)$', FieldValidationsViewThird.as_view()),
     
 # Company 
             url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
@@ -561,6 +566,7 @@ urlpatterns = [
             url(r'SalesReturnconsolidateItem$', SalesReturnconsolidatePurchaseReturnView.as_view()),
             url(r'ReturnItemApprove$', SalesReturnItemApproveView.as_view()),
             url(r'PurchaseReturnPrint/([0-9]+)$', PurchaseReturnPrintView.as_view()),
+            url(r'ReturnImageUpdate/([0-9]+)$', ReturnImageUpdate.as_view()),
             
                     
 # Single Invoice details view api for Sales Return, CreditDebitnot
@@ -647,6 +653,7 @@ urlpatterns = [
             
 # StockAdjustment
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
+            url(r'GetStockCountForParty$',GetStockCountForPartyView.as_view()),
             
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
@@ -680,10 +687,12 @@ urlpatterns = [
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
               url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
-              
+              url(r'SettingsDataSave$',SettingsView.as_view()), 
+             
+
               url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
             
-                  
+              url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
 
 

@@ -88,13 +88,13 @@ class TransactionTypeView(CreateAPIView):
                 where_clause = " AND ".join(conditions) if conditions else ""
 
 
-                Transactionquery_sql = f'''SELECT Transactionlog.id, Transactiontime as TransactionDate, concat(M_Employees.Name,' (',M_Users.LoginName,')') UserName, IPaddress, M_TransactionType.Name as TransactionType, TransactionID, A.Name PartyName, B.Name AS CustomerName,TransactionDetails
-FROM Transactionlog 
-LEFT JOIN M_Users ON Transactionlog.User = M_Users.id
+                Transactionquery_sql = f'''SELECT X.id, Transactiontime as TransactionDate, concat(M_Employees.Name,' (',M_Users.LoginName,')') UserName, IPaddress, M_TransactionType.Name as TransactionType, TransactionID, A.Name PartyName, B.Name AS CustomerName,TransactionDetails
+FROM TransactionLog.L_Transactionlog X
+LEFT JOIN M_Users ON X.User = M_Users.id
 LEFT JOIN M_Employees ON M_Users.Employee_id = M_Employees.id
 LEFT JOIN M_TransactionType ON TransactionType = M_TransactionType.id
-LEFT JOIN M_Parties A ON Transactionlog.PartyID = A.id 
-LEFT JOIN M_Parties B ON Transactionlog.CustomerID = B.id
+LEFT JOIN M_Parties A ON X.PartyID = A.id 
+LEFT JOIN M_Parties B ON X.CustomerID = B.id
 WHERE Transactiontime BETWEEN %s AND %s'''
                 if where_clause:
                     Transactionquery_sql += f' AND {where_clause}'
@@ -124,8 +124,8 @@ class TransactionJsonView(CreateAPIView):
                            Transactionlog.TransactionType, Transactionlog.TransactionID, 
                            Transactionlog.FromDate, Transactionlog.ToDate, Transactionlog.CustomerID, 
                            Transactionlog.JsonData,  TransactionLogJsonData.JsonData AS TransactionlogJsondata
-                    FROM Transactionlog
-                    left JOIN TransactionLogJsonData 
+                    FROM TransactionLog.L_Transactionlog Transactionlog
+                    left JOIN  TransactionLog.L_TransactionLogJsonData TransactionLogJsonData 
                     ON Transactionlog.id = TransactionLogJsonData.Transactionlog_id 
                     WHERE Transactionlog.id = %s
                 ''',[id])

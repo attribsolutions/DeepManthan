@@ -13,6 +13,7 @@ from io import BytesIO
 from PIL import Image
 from .V_CommFunction import *
 
+
 class ClaimSummaryView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -43,7 +44,7 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
  where IsApproved=1 and 
-T_PurchaseReturn.id in (SELECT TC_PurchaseReturnReferences.SubReturn_id FROM FoodERP.T_PurchaseReturn join TC_PurchaseReturnReferences on T_PurchaseReturn.id=TC_PurchaseReturnReferences.PurchaseReturn_id
+T_PurchaseReturn.id in (SELECT TC_PurchaseReturnReferences.SubReturn_id FROM T_PurchaseReturn join TC_PurchaseReturnReferences on T_PurchaseReturn.id=TC_PurchaseReturnReferences.PurchaseReturn_id
 where T_PurchaseReturn.ReturnDate between %s and %s and T_PurchaseReturn.Customer_id=%s ) Order By GSTPercentage''', ([FromDate], [ToDate], [Party]))
                 else:   # Return Item Summury
                     Q1 = M_Parties.objects.raw('''select M_Parties.id ,M_Parties.Name PartyName,M_Parties.MobileNo, MC_PartyAddress.Address ,MC_PartyAddress.FSSAINo,M_Parties.GSTIN 
@@ -51,11 +52,11 @@ from M_Parties
 join MC_PartyAddress on M_Parties.id=MC_PartyAddress.Party_id and IsDefault=1
 where Party_id = %s''', ([Party]))
 
-                    q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,'' ReturnDate,'' FullReturnNumber,'' CustomerName,ItemName,
+                    q0 = T_PurchaseReturn.objects.raw('''SELECT 1 as id,'' ReturnDate, FullReturnNumber,'' CustomerName,ItemName,
 MRP,Quantity,GST,Rate,TaxableAmount,
  Amount, CGST, SGST, ApprovedQuantity,  Discount, DiscountAmount, DiscountType 
  from
-(SELECT M_Items.id,M_Items.Name ItemName,sum(ApprovedBasicAmount)TaxableAmount,(MRPValue)MRP,sum(Quantity)Quantity,ApprovedGSTPercentage GST,ApprovedRate Rate,
+(SELECT FullReturnNumber, M_Items.id,M_Items.Name ItemName,sum(ApprovedBasicAmount)TaxableAmount,(MRPValue)MRP,sum(Quantity)Quantity,ApprovedGSTPercentage GST,ApprovedRate Rate,
  sum(ApprovedAmount)Amount, sum(ApprovedCGST)CGST,sum(ApprovedSGST)SGST, sum(ApprovedByCompany)ApprovedQuantity,  ifnull(Discount,0)Discount, ifnull(sum(ApprovedDiscountAmount),0)DiscountAmount,DiscountType
 
 FROM T_PurchaseReturn
@@ -65,14 +66,18 @@ join M_Parties  on M_Parties.id=T_PurchaseReturn.Customer_id
 
 join M_Items on M_Items.id=TC_PurchaseReturnItems.Item_id
 
-where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc ,Item_id desc )j ''', ([FromDate], [ToDate], [Party]))
+where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_PurchaseReturn.Customer_id=%s ) group by FullReturnNumber, Item_id,ApprovedGSTPercentage,ApprovedRate,MRPValue ,Discount,DiscountType Order By ApprovedGSTPercentage desc ,Item_id desc )j ''', ([FromDate], [ToDate], [Party]))
 
                 if q0:
                     ClaimSummaryData = list()
                     M_Parties_serializer = PartyDetailSerializer(
                         Q1, many=True).data
+                    for a in M_Parties_serializer:
+                            Full_Return_Numbers = T_PurchaseReturn.objects.filter( IsApproved=1,ReturnDate__range=[FromDate, ToDate],Customer=Party ).values_list('FullReturnNumber', flat=True)
+                            a['FullReturnNumbers'] = ', '.join(Full_Return_Numbers)
                     ClaimSummary_serializer = ClaimSummarySerializer(
                         q0, many=True).data
+                    
                     # M_Parties_serializer.append({
                     #           "ClaimSummaryItemDetails": ClaimSummary_serializer
                     #           })
@@ -470,8 +475,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
         try:
             with transaction.atomic():
                 ClaimTrackingdata = JSONParser().parse(request)
-                Year = ClaimTrackingdata['Year']
-                Month = ClaimTrackingdata['Month']
+                FromDate = ClaimTrackingdata['FromDate']
+                ToDate = ClaimTrackingdata['ToDate']
                 Party = ClaimTrackingdata['Party']
                 Employee = ClaimTrackingdata['Employee']
 
@@ -482,10 +487,11 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     PartyIDs = p.split(",")
 
                 ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
-                                                            T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, a.Name TypeName,
+                                                            T_ClaimTrackingEntry.Date,  T_ClaimTrackingEntry.Month, 
+                                                            T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
                                                             CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
-                                                            CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark
+                                                            CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark,T_ClaimTrackingEntry.IsDeleted
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
                                                             LEFT JOIN M_Parties X ON X.id=T_ClaimTrackingEntry.Party_id 
@@ -497,8 +503,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
                                                             LEFT JOIN M_GeneralMaster c ON c.id = T_ClaimTrackingEntry.ClaimCheckBy
                                                             LEFT JOIN M_GeneralMaster d ON d.id = T_ClaimTrackingEntry.CreditNotestatus
                                                             LEFT JOIN M_PriceList ON M_PriceList.id=T_ClaimTrackingEntry.ClaimTrade
-                                                            WHERE T_ClaimTrackingEntry.Year =%s AND T_ClaimTrackingEntry.Month =%s'''
-
+                                                            WHERE T_ClaimTrackingEntry.Date between %s and %s'''
+                # print(ClaimTrackingquery)
                 if Party == "":
                     ClaimTrackingquery += " "
                     if Employee == 0:
@@ -512,14 +518,14 @@ class ClaimTrackingEntryListView(CreateAPIView):
                         
                         if Employee == 0:
                             
-                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month])
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [FromDate, ToDate])
                         else:
                             
-                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [Year, Month, PartyIDs])
+                            ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery, [FromDate, ToDate, PartyIDs])
                 else:
                     
-                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[Year,Month,Party])
-                if  ClaimTrackingqueryresults:    
+                    ClaimTrackingqueryresults = T_ClaimTrackingEntry.objects.raw(ClaimTrackingquery,[FromDate,ToDate,Party])
+                if  ClaimTrackingqueryresults: 
                     # return JsonResponse({'query':  str(Itemsquery.query)})
                     # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingdata})
@@ -548,7 +554,8 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "ClaimSummaryDate": a.ClaimSummaryDate,
                             "CreditNoteUpload": dd,
                             "ClaimReceivedSource": a.ClaimReceivedSource,
-                            "Remark":a.Remark
+                            "Remark":a.Remark,
+                            "IsRecordDeleted":a.IsDeleted
 
                         })
                     log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)
@@ -730,8 +737,7 @@ WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
-                Claimtrackingdata = T_ClaimTrackingEntry.objects.get(id=id)
-                Claimtrackingdata.delete()
+                Claimtrackingdata = T_ClaimTrackingEntry.objects.filter(id=id).update(IsDeleted=1)
                 log_entry = create_transaction_logNew(request, 0,0,'ClaimTrackingEntryDeleted:'+str(id),263,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Claim Tracking Entry Deleted Successfully', 'Data': []})
         except T_ClaimTrackingEntry.DoesNotExist:
