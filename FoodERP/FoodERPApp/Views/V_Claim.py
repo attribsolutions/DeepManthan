@@ -13,6 +13,7 @@ from io import BytesIO
 from PIL import Image
 from .V_CommFunction import *
 
+
 class ClaimSummaryView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -72,10 +73,11 @@ where IsApproved=1 and  T_PurchaseReturn.ReturnDate between %s and %s and (T_Pur
                     M_Parties_serializer = PartyDetailSerializer(
                         Q1, many=True).data
                     for a in M_Parties_serializer:
-                        Full_Return_Numbers = T_PurchaseReturn.objects.filter(Customer=Party).values_list('FullReturnNumber', flat=True)
-                        a['FullReturnNumbers'] = ', '.join(Full_Return_Numbers)
+                            Full_Return_Numbers = T_PurchaseReturn.objects.filter( IsApproved=1,ReturnDate__range=[FromDate, ToDate],Customer=Party ).values_list('FullReturnNumber', flat=True)
+                            a['FullReturnNumbers'] = ', '.join(Full_Return_Numbers)
                     ClaimSummary_serializer = ClaimSummarySerializer(
                         q0, many=True).data
+                    
                     # M_Parties_serializer.append({
                     #           "ClaimSummaryItemDetails": ClaimSummary_serializer
                     #           })
@@ -553,7 +555,7 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "CreditNoteUpload": dd,
                             "ClaimReceivedSource": a.ClaimReceivedSource,
                             "Remark":a.Remark,
-                            "IsDeleted":a.IsDeleted
+                            "IsRecordDeleted":a.IsDeleted
 
                         })
                     log_entry = create_transaction_logNew(request, ClaimTrackingList,a.Party_id,'',257,0)

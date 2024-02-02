@@ -1027,14 +1027,14 @@ class ReturnImageUpdate(CreateAPIView):
                     ImageByID, data=Imagedata)
                 if Image_serializer.is_valid():
                     Image_serializer.save()
-                    # log_entry = create_transaction_logNew(request, Imagedata,0,'BankID:'+str(id),194,id)
+                    log_entry = create_transaction_logNew(request, Imagedata,0,'ReturnImageID:'+str(id),326,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ReturnImage Upload Successfully','Data' :[]})
                 else:
-                    # log_entry = create_transaction_logNew(request, Imagedata,0,'BankEdit:'+str(Bank_serializer.errors),34,0)
+                    log_entry = create_transaction_logNew(request, Imagedata,0,'ReturnImageEdit:'+str(Image_serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Image_serializer.errors, 'Data' :[]})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, 0,0,'BankEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'ReturnImagedata:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
           
