@@ -36,29 +36,29 @@ class SweetPosRoleAccessView(CreateAPIView):
                                         From devfooderp20240103.M_Parties A
                                         Left Join sweetpos.M_SweetPOSRoleAccess B on A.id = B.Division
                                         where A.PartyType_id = 19''')
-                RoleAccess_serializer = SPOSRoleAccessSerializer(RoleAccessData, many=True).data
+                RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': RoleAccess_serializer})
         except  M_SweetPOSRoleAccess.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'RoleAccess Not available', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
-# class SPosRoleAccessUpdateView(CreateAPIView):        
-#     @transaction.atomic()
-#     def put(self, request, id=0):
-#         try:
-#             with transaction.atomic():
-#                 SPOSRoleAccessdata = JSONParser().parse(request)
-#                 SPOSRoleAccessByID = M_SweetPOSRoleAccess.objects.get(id=id)
-#                 SPOSRoleAccess_serializer = SPOSRoleAccessSerializer(SPOSRoleAccessByID, data=SPOSRoleAccessdata)
-#                 if SPOSRoleAccess_serializer.is_valid():
-#                     SPOSRoleAccessData = SPOSRoleAccess_serializer.save()
-#                     SPOSRoleAccessData.save(using='sweetpos_db')
-#                     # SPOSRoleAccess_serializer.save()
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SPOSRoleAccess Updated Successfully','Data' :[]})
-#                 else:
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SPOSRoleAccess_serializer.errors, 'Data' :[]})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+class SPosRoleAccessUpdateView(CreateAPIView):        
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                SPOSRoleAccessdata = JSONParser().parse(request)
+                SPOSRoleAccessByID = M_SweetPOSRoleAccess.objects.get(id=id)
+                SPOSRoleAccess_serializer = SPOSRoleAccessSerializer(SPOSRoleAccessByID, data=SPOSRoleAccessdata)
+                if SPOSRoleAccess_serializer.is_valid():
+                    SPOSRoleAccessData = SPOSRoleAccess_serializer.save()
+                    SPOSRoleAccessData.save(using='sweetpos_db')
+                    # SPOSRoleAccess_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SPOSRoleAccess Updated Successfully','Data' :[]})
+                else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SPOSRoleAccess_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
     
