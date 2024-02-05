@@ -85,8 +85,11 @@ class PurchaseReturnListView(CreateAPIView):
                         elif a["IsApproved"] == 1: 
                             
                             Status = "Approved" 
-                        else:
-                            Status = "Open"    
+                        elif a["IsApproved"] == 2:
+                            Status = "Reject"
+                        else:    
+                            Status = "Open" 
+
                         ReturnListData.append({
                             "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
