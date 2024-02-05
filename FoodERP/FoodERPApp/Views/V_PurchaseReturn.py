@@ -85,8 +85,11 @@ class PurchaseReturnListView(CreateAPIView):
                         elif a["IsApproved"] == 1: 
                             
                             Status = "Approved" 
-                        else:
-                            Status = "Open"    
+                        elif a["IsApproved"] == 2:
+                            Status = "Reject"
+                        else:    
+                            Status = "Open" 
+
                         ReturnListData.append({
                             "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
@@ -902,7 +905,7 @@ class SalesReturnItemApproveView(CreateAPIView):
                 PurchaseReturn_Serializer = ReturnApproveQtySerializer(data=PurchaseReturndata)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn_Serializer.save()
-                    log_entry = create_transaction_logNew(request, PurchaseReturndata, 0, 'Supplier:'+str(Party),60,0)
+                    log_entry = create_transaction_logNew(request, PurchaseReturndata, 0, 'ReturnID:'+str(ReturnID),60,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Return Item Approve Successfully','Data':[]})
                 else:
                     log_entry = create_transaction_logNew(request, PurchaseReturndata, 0,'ReturnItemApprove:'+str(PurchaseReturn_Serializer.errors),34,0 )
