@@ -22,7 +22,7 @@ class SweetPosRoleAccessView(CreateAPIView):
                     if RoleAccess_serializer.is_valid():
                         SPOSRoleAccessData = RoleAccess_serializer.save()
                         SPOSRoleAccessData.save(using='sweetpos_db')
-                        # response_data.append(RoleAccess_serializer.data)
+                        response_data.append(RoleAccess_serializer.data)
                     else:
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccess_serializer.errors, 'Data':[]})
