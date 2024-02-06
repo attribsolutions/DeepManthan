@@ -314,6 +314,7 @@ class PartiesSettingsDetailsView(CreateAPIView):
     a.Description,
 	a.IsPartyRelatedSetting,
     a.DefaultValue,
+    a.IsActive,
     b.Value CompanyValue,
     c.Value PartyValue,
     (CASE WHEN a.IsPartyRelatedSetting = 1 THEN 
@@ -329,7 +330,8 @@ FROM
             M_Settings.SystemSetting AS SystemSetting,
             M_Settings.Description AS Description,
             M_Settings.DefaultValue AS DefaultValue,
-            M_Settings.IsPartyRelatedSetting AS IsPartyRelatedSetting
+            M_Settings.IsPartyRelatedSetting AS IsPartyRelatedSetting,
+            M_Settings.IsActive AS IsActive
     FROM
         M_Settings
     WHERE
@@ -343,7 +345,7 @@ FROM
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image,M_PartySettingsDetails.id AS ImageID FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
                 
-                # print(query.query)
+                # print(query)
                 a = PartiesSettingsDetailsListSerializer(query, many=True,context= {'request': request}).data
                 log_entry = create_transaction_logNew(request,a, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
