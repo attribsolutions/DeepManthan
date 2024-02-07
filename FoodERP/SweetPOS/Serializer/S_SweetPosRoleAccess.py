@@ -1,5 +1,6 @@
+from SweetPOS.models import M_SweetPOSRoleAccess
 from rest_framework import serializers
-from ..models import *
+
 
 class SPOSRoleAccessSerializer(serializers.ModelSerializer):
     class Meta:
