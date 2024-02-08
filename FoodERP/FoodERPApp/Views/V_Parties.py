@@ -345,7 +345,6 @@ FROM
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image,M_PartySettingsDetails.id AS ImageID FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
                 
-                # print(query)
                 a = PartiesSettingsDetailsListSerializer(query, many=True,context= {'request': request}).data
                 log_entry = create_transaction_logNew(request,a, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
