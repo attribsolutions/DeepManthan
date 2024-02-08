@@ -97,8 +97,10 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
     UnitDetails = list()
-    ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0)
-    ItemUnitqueryserialize = ItemUnitSerializer(ItemUnitquery, many=True).data
+    ItemUnitquery = MC_ItemUnits.objects.filter(
+        Item=ItemID, IsDeleted=0)
+    ItemUnitqueryserialize = ItemUnitSerializer(
+        ItemUnitquery, many=True).data
 
     RateMcItemUnit = ""
     q = M_Parties.objects.filter(id=PartyForRate).select_related(
@@ -107,19 +109,13 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
     for d in ItemUnitqueryserialize:
         if (d['PODefaultUnit'] == True):
             RateMcItemUnit = d['id']
-        
-        
-        qRate= M_MarginMaster.objects.raw( '''select RateCalculationFunction1(0, %s, %s, 0, %s, 0, 0, 0)Rate''',(ItemID,PartyForRate,d['id']))
-        
         if(q[0]['PartyType__IsSCM'] == 1):
             CalculatedRateusingMRPMargin = RateCalculationFunction(
                 0, ItemID, PartyForRate, 0, 0, d['id'], 0).RateWithGST()
             Rate = CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
         else:
-            Rate = qRate
+            Rate = 0
 
-        
-        
         q0 = MC_ItemUnits.objects.filter(
             Item=ItemID, UnitID=1, IsDeleted=0).values("BaseUnitQuantity")
 
