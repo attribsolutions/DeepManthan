@@ -17,37 +17,33 @@ class SweetPosRoleAccessView(CreateAPIView):
                 SPOSRoleAccessdata = JSONParser().parse(request)
                 response_data = []
                 
-                for a in SPOSRoleAccessdata:
-                    query = M_SweetPOSRoleAccess.objects.filter(Division=a['Division'])
-                    # print(str(queryaa.query))
-                    # print('-----------------------------------------------------')
-                    if query:
-                        print('pppppppppp')     
-                        RoleAccess_serializer = SPOSRoleAccessSerializer(query, data=a)
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SeewtPosRoleAccess Save Successfully', 'Data':[]})
-                        #     print(RoleAccess_serializer)
+                for data in SPOSRoleAccessdata:
+                    if 'Division' in data and M_SweetPOSRoleAccess.objects.filter(Division=data['Division']).exists():
+                        # Object exists, update it\
+                        
+                        obj = M_SweetPOSRoleAccess.objects.get(Division=data['Division'])
+                        
+                        for key, value in data.items():
+                           setattr(obj, key, value)
+                        obj.save()
+                        
                     else:
-                        print('bbb')
-                        RoleAccess_serializer = SPOSRoleAccessSerializer(data=a)
-                    # else:
-                    #         print('ssssssssssss')
-                            # transaction.set_rollback(True)
-                            # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  RoleAccess_serializer.errors, 'Data':[]})
+                        
+                        # Object doesn't exist, create it
+                        obj = M_SweetPOSRoleAccess(**data)
+                        obj.save()
+                        # return obj
                     
-                    if RoleAccess_serializer.is_valid():
-                            SPOSRoleAccessData = RoleAccess_serializer.save(using='sweetpos_db')
-                            response_data.append(RoleAccess_serializer.data)
-                            
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SeewtPosRoleAccess Save Successfully', 'Data':[]}) 
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  list(e), 'Data':[]})
         
     @transaction.atomic()
     def get(self, request):
         try:
             with transaction.atomic():
                 RoleAccessData = M_SweetPOSRoleAccess.objects.raw('''Select A.id, A.Name, B.*
-                                        From devfooderp20240208.M_Parties A
+                                        From FoodERP.M_Parties A
                                         Left Join sweetpos.M_SweetPOSRoleAccess B on A.id = B.Division
                                         where A.PartyType_id = 19''')
                 RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data

@@ -1628,7 +1628,7 @@ class T_CreditDebitNotes(models.Model):
     NoteReason = models.ForeignKey(M_GeneralMaster,related_name='NoteReason', on_delete=models.PROTECT,blank=True, null=True)
     NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
-    PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.DO_NOTHING,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
     IsDeleted = models.BooleanField(default=False)
  
@@ -1717,7 +1717,7 @@ class TC_ReceiptInvoices(models.Model):
     CRDRNote = models.ForeignKey(T_CreditDebitNotes, related_name='CRDRInvoices', on_delete=models.CASCADE,null=True)
     Invoice = models.ForeignKey(T_Invoices, related_name='RInvoice', on_delete=models.PROTECT,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts, related_name='ReceiptInvoices', on_delete=models.CASCADE,null=True)
-    Return = models.ForeignKey(T_PurchaseReturn, related_name='CRDRReturn', on_delete=models.PROTECT,null=True)
+    Return = models.ForeignKey(T_PurchaseReturn, related_name='CRDRReturn', on_delete=models.DO_NOTHING,null=True)
     
     class Meta:
         db_table = "TC_ReceiptInvoices"
