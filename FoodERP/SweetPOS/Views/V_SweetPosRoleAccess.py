@@ -43,7 +43,7 @@ class SweetPosRoleAccessView(CreateAPIView):
         try:
             with transaction.atomic():
                 RoleAccessData = M_SweetPOSRoleAccess.objects.raw('''Select A.id, A.Name, B.*
-                                        From devfooderp20240208.M_Parties A
+                                        From FoodERP.M_Parties A
                                         Left Join sweetpos.M_SweetPOSRoleAccess B on A.id = B.Division
                                         where A.PartyType_id = 19''')
                 RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data
