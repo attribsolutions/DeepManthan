@@ -13,6 +13,7 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
     Description = serializers.CharField(max_length=500)
     CompanyValue = serializers.CharField(max_length=500)
     DefaultValue = serializers.CharField(max_length=500)
+    IsActive = serializers.BooleanField()
     PartyValue = serializers.CharField(max_length=500)
     IsPartyRelatedSetting=serializers.IntegerField()
     Value  = serializers.CharField(max_length=500)
@@ -51,12 +52,17 @@ class SettingsSerializer(serializers.ModelSerializer):
         for i in SettingDetailsData:
             MC_SettingsDetails.objects.create(SettingID=a, **i)
 
-        return a     
+        return a    
+    
+
 
 class MC_SettingsDetailsSerializerSecond (serializers.ModelSerializer):
+
     class Meta:
         model = MC_SettingsDetails
         fields = ['id','Value','IsDeleted','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Company','SettingID']
+        
+      
 
 class SettingsSerializerSecond(serializers.ModelSerializer):
     SettingDetails = MC_SettingsDetailsSerializerSecond(read_only=True,many=True)
