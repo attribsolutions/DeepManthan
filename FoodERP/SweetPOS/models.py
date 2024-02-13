@@ -22,9 +22,23 @@ class M_SweetPOSRoleAccess(models.Model):
     IsGiveSweetPOSUpdate = models.BooleanField(default=False)
     IsSweetPOSAutoUpdate = models.BooleanField(default=False)
     IsSweetPOSServiceAutoUpdate = models.BooleanField(default=False)
-    IsEayBillUploadExist = models.BooleanField(default=False)
+    IsEayBillUploadExist = models.BooleanField(default=False)      
+        
+    class Meta:
+        db_table = "M_SweetPOSRoleAccess"       
+        
         
     
+class M_SweetPOSLogin(models.Model):
+        UserName=models.CharField(max_length=50)
+        DivisionID=models.IntegerField()
+        ClientID=models.IntegerField()  
+        MacID   =models.IntegerField()
+        ExePath=models.CharField(max_length=200)  
+        ExeVersion=models.CharField(max_length=30)
+        CreatedOn=models.DateTimeField(auto_now_add=True)
+        
+        class Meta:
+            db_table="M_SweetPOSLogin"
+        
     
-    class Meta:
-        db_table = "M_SweetPOSRoleAccess"
