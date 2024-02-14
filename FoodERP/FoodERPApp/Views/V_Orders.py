@@ -645,7 +645,7 @@ class EditOrderView(CreateAPIView):
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
                
-                if (q2[0]['IsRetailer'] == 0 and q2[0]['IsSCM'] == 1):
+                if (q2[0]['IsRetailer'] == 0 ):
                     PartyItem = Customer
                     
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
