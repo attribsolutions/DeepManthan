@@ -424,10 +424,13 @@ class ManPowerSerializer(serializers.Serializer):
     FSSAIExpiry = serializers.DateField()
     GSTIN = serializers.CharField(max_length=500)
     GM = serializers.CharField(max_length=500)
+    NSM =  serializers.CharField(max_length=500)
+    RSM =  serializers.CharField(max_length=500)
     ASM = serializers.CharField(max_length=500)
     SE = serializers.CharField(max_length=500)
     SO = serializers.CharField(max_length=500)
     SR = serializers.CharField(max_length=500)
+    MT =  serializers.CharField(max_length=500)
     
 
 class TCSAmountReportSerializer(serializers.Serializer):
