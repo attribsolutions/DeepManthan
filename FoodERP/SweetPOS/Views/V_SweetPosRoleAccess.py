@@ -21,23 +21,18 @@ class SweetPosRoleAccessView(CreateAPIView):
                 response_data = []
                 
                 for data in SPOSRoleAccessdata:
-                    # pdb.set_trace()
+                    
                     if 'Party' in data and M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(Party=data['Party']).exists():
-                        # Object exists, update it\
-                        
                         obj = M_SweetPOSRoleAccess.objects.using('sweetpos_db').get(Party=data['Party'])
-                        
                         for key, value in data.items():
                            setattr(obj, key, value)
                         obj.save()
                         
                     else:
-                        # pdb.set_trace()
-                        print(data)
+                       
                         obj = M_SweetPOSRoleAccess(**data)
-                        
                         obj.save()
-                        # return obj
+                        
                     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
         except Exception as e:
