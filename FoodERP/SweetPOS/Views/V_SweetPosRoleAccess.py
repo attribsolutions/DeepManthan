@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+import pdb
 
 
 class SweetPosRoleAccessView(CreateAPIView):
@@ -49,6 +50,7 @@ class SweetPosRoleAccessView(CreateAPIView):
                 #     results = cursor.fetchall()
                 #     for result in results:
                 #         print(result,result[1])
+                
                 RoleAccessData = M_SweetPOSRoleAccess.objects.raw('''Select A.id, A.Name,A.id Party, B.*
                                         From devfooderp20240214.M_Parties A
                                         Left Join sweetpos.M_SweetPOSRoleAccess B on A.id = B.Party
@@ -56,7 +58,7 @@ class SweetPosRoleAccessView(CreateAPIView):
                 print(RoleAccessData)                        
                 RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data
                 # for a in RoleAccessData:
-                #     print(a)
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': RoleAccess_serializer})
         except  M_SweetPOSRoleAccess.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'RoleAccess Not available', 'Data': []})
