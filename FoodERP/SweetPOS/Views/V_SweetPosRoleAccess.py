@@ -1,13 +1,10 @@
-from FoodERPApp.models import DBNameFun
 from ..models import *
 from ..Serializer.S_SweetPosRoleAccess import *
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from rest_framework.parsers import JSONParser
-import pdb
 
 
 class SweetPosRoleAccessView(CreateAPIView):
@@ -26,12 +23,12 @@ class SweetPosRoleAccessView(CreateAPIView):
                         obj = M_SweetPOSRoleAccess.objects.using('sweetpos_db').get(Party=data['Party'])
                         for key, value in data.items():
                            setattr(obj, key, value)
-                        obj.save()
+                        obj.save(using='sweetpos_db')
                         
                     else:
                        
                         obj = M_SweetPOSRoleAccess(**data)
-                        obj.save()
+                        obj.save(using='sweetpos_db')
                         
                     
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
