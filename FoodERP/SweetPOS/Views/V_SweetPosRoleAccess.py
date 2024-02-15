@@ -54,10 +54,10 @@ class SweetPosRoleAccessView(CreateAPIView):
                                         Left Join sweetpos.M_SweetPOSRoleAccess B on A.id = B.Division
                                         where A.PartyType_id = 19''')
                 print(RoleAccessData)                        
-                # RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data
-                for a in RoleAccessData:
-                    print(a)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': a})
+                RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data
+                # for a in RoleAccessData:
+                #     print(a)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': RoleAccess_serializer})
         except  M_SweetPOSRoleAccess.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'RoleAccess Not available', 'Data': []})
         except Exception as e:

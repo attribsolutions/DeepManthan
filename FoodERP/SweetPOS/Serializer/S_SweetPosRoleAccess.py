@@ -28,7 +28,11 @@ class SPOSRoleAccessSerializerSecond(serializers.Serializer):
     IsGiveSweetPOSUpdate = serializers.BooleanField()
     IsSweetPOSAutoUpdate = serializers.BooleanField()
     IsSweetPOSServiceAutoUpdate = serializers.BooleanField()
-    IsEayBillUploadExist = serializers.BooleanField()       
+    IsEWayBillUploadExist = serializers.BooleanField() 
+    TopRows = serializers.IntegerField()
+    Query  = serializers.CharField(max_length=500)
+    TouchSaleHistoryRows = serializers.IntegerField()
+    LicenseValidTill  =  serializers.DateField()
 
 class SPOSLog_inSerializer(serializers.ModelSerializer):
         class Meta:
