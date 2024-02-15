@@ -42,21 +42,15 @@ class SweetPosRoleAccessView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                # Get a cursor object
-                # with connection.cursor() as cursor:
-                #     raw_query = "SELECT 1 id,DBNameFun('default')DB "
-                #     cursor.execute(raw_query)
-                #     results = cursor.fetchall()
-                #     for result in results:
-                #         print(result,result[1])
+                
                 
                 RoleAccessData = M_SweetPOSRoleAccess.objects.raw('''Select A.id, A.Name,A.id Party, B.*
                                         From FoodERP.M_Parties A
                                         Left Join SweetPOS.M_SweetPOSRoleAccess B on A.id = B.Party
                                         where A.PartyType_id = 19''')
-                print(RoleAccessData)                        
+                                        
                 RoleAccess_serializer = SPOSRoleAccessSerializerSecond(RoleAccessData, many=True).data
-                # for a in RoleAccessData:
+                
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': RoleAccess_serializer})
         except  M_SweetPOSRoleAccess.DoesNotExist:
