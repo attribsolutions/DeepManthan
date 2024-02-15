@@ -2,12 +2,24 @@ from django.db import models
 from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
+from django.db import connection
+
 # from activity_log.models import UserMixin
 
 # Create your models here.
 
 # def make_extra_data(request, response):
 #     return str(request.META)
+
+def DBNameFun(a):
+                
+    with connection.cursor() as cursor:
+                    raw_query = "SELECT 1 id,DBNameFun(%s)DB "
+                    cursor.execute(raw_query,[a])
+                    results = cursor.fetchall()
+                    for result in results:
+                        return result[1]
+
 
 def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 

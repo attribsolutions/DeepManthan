@@ -1,4 +1,4 @@
-from SweetPOS.models import M_SweetPOSRoleAccess
+from SweetPOS.models import *
 from rest_framework import serializers
 
 
@@ -14,7 +14,8 @@ class SPOSRoleAccessSerializerSecond(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField()
     UpdatedOn = serializers.DateTimeField()
-    Division = serializers.IntegerField()
+    DivisionID = serializers.IntegerField()
+    Party = serializers.IntegerField()
     IsAddNewItem = serializers.BooleanField()
     IsImportItems = serializers.BooleanField()
     IsImportGroups = serializers.BooleanField()
@@ -28,4 +29,13 @@ class SPOSRoleAccessSerializerSecond(serializers.Serializer):
     IsGiveSweetPOSUpdate = serializers.BooleanField()
     IsSweetPOSAutoUpdate = serializers.BooleanField()
     IsSweetPOSServiceAutoUpdate = serializers.BooleanField()
-    IsEayBillUploadExist = serializers.BooleanField()       
+    IsEWayBillUploadExist = serializers.BooleanField() 
+    TopRows = serializers.IntegerField()
+    Query  = serializers.CharField(max_length=500)
+    TouchSaleHistoryRows = serializers.IntegerField()
+    LicenseValidTill  =  serializers.DateField()
+
+class SPOSLog_inSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = M_SweetPOSLogin
+            fields = '__all__'
