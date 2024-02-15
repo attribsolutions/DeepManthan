@@ -21,17 +21,21 @@ class SweetPosRoleAccessView(CreateAPIView):
                 response_data = []
                 
                 for data in SPOSRoleAccessdata:
-                    if 'Division' in data and M_SweetPOSRoleAccess.objects.filter(Division=data['Division']).exists():
+                    
+                    if 'Party' in data and M_SweetPOSRoleAccess.objects.filter(Party=data['Party']).exists():
                         # Object exists, update it\
                         
-                        obj = M_SweetPOSRoleAccess.objects.get(Division=data['Division'])
+                        obj = M_SweetPOSRoleAccess.objects.get(Party=data['Party'])
                         
                         for key, value in data.items():
                            setattr(obj, key, value)
                         obj.save()
                         
                     else:
+                        # pdb.set_trace()
+                        
                         obj = M_SweetPOSRoleAccess(**data)
+                        
                         obj.save()
                         # return obj
                     
