@@ -15,7 +15,7 @@ class SweetPosRoleAccessView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
-        try:
+        try:  
             with transaction.atomic():
                 SPOSRoleAccessdata = JSONParser().parse(request)
                 response_data = []
