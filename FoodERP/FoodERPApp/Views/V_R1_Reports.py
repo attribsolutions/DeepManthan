@@ -251,16 +251,16 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 Docsdata1 = Docs2Serializer2(Docsquery2, many=True).data
                 
                 
-                response_data = [
-                    {"B2Bdata":  B2Bdata1 + B2Bdata2},
-                    {"B2CLdata": B2CLdata1 + B2CLdata2},
-                    {"B2CSdata":  B2CSdata1 + B2CSdata2},
-                    {"CDNRdata": CDNRdata1 + CDNRdata2},
-                    {"CDNURdata":  CDNURdata1 + CDNURdata2},
-                    {"EXEMPdata": EXEMPdata1 + EXEMPdata2},
-                    {"HSNdata":  HSNdata1 + HSNdata2},
-                    {"Docsdata": Docsdata1 + Docsdata2}
-                ]
+                response_data = {
+                    "B2Bdata":  B2Bdata1 + B2Bdata2,
+                    "B2CLdata": B2CLdata1 + B2CLdata2,
+                    "B2CSdata":  B2CSdata1 + B2CSdata2,
+                    "CDNRdata": CDNRdata1 + CDNRdata2,
+                    "CDNURdata":  CDNURdata1 + CDNURdata2,
+                    "EXEMPdata": EXEMPdata1 + EXEMPdata2,
+                    "HSNdata":  HSNdata1 + HSNdata2,
+                    "Docsdata": Docsdata1 + Docsdata2
+                }
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
