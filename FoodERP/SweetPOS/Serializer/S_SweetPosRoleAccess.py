@@ -1,4 +1,4 @@
-from SweetPOS.models import M_SweetPOSRoleAccess
+from SweetPOS.models import *
 from rest_framework import serializers
 
 
@@ -29,3 +29,8 @@ class SPOSRoleAccessSerializerSecond(serializers.Serializer):
     IsSweetPOSAutoUpdate = serializers.BooleanField()
     IsSweetPOSServiceAutoUpdate = serializers.BooleanField()
     IsEayBillUploadExist = serializers.BooleanField()       
+
+class SPOSLog_inSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = M_SweetPOSLogin
+            fields = '__all__'
