@@ -2,12 +2,24 @@ from django.db import models
 from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
+from django.db import connection
+
 # from activity_log.models import UserMixin
 
 # Create your models here.
 
 # def make_extra_data(request, response):
 #     return str(request.META)
+
+def DBNameFun(a):
+                
+    with connection.cursor() as cursor:
+                    raw_query = "SELECT 1 id,DBNameFun(%s)DB "
+                    cursor.execute(raw_query,[a])
+                    results = cursor.fetchall()
+                    for result in results:
+                        return result[1]
+
 
 def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
@@ -1628,7 +1640,7 @@ class T_CreditDebitNotes(models.Model):
     NoteReason = models.ForeignKey(M_GeneralMaster,related_name='NoteReason', on_delete=models.PROTECT,blank=True, null=True)
     NoteType = models.ForeignKey(M_GeneralMaster,on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties,related_name='NoteParty', on_delete=models.PROTECT)
-    PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.PROTECT,blank=True, null=True)
+    PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.DO_NOTHING,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
     IsDeleted = models.BooleanField(default=False)
  
@@ -1717,7 +1729,7 @@ class TC_ReceiptInvoices(models.Model):
     CRDRNote = models.ForeignKey(T_CreditDebitNotes, related_name='CRDRInvoices', on_delete=models.CASCADE,null=True)
     Invoice = models.ForeignKey(T_Invoices, related_name='RInvoice', on_delete=models.PROTECT,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts, related_name='ReceiptInvoices', on_delete=models.CASCADE,null=True)
-    Return = models.ForeignKey(T_PurchaseReturn, related_name='CRDRReturn', on_delete=models.PROTECT,null=True)
+    Return = models.ForeignKey(T_PurchaseReturn, related_name='CRDRReturn', on_delete=models.DO_NOTHING,null=True)
     
     class Meta:
         db_table = "TC_ReceiptInvoices"
