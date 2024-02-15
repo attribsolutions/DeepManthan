@@ -83,12 +83,12 @@ class GSTR3BDownloadView(CreateAPIView):
                                             WHERE  Party_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s   group by M_States.id''',([Party],[FromDate],[ToDate]))
                 Query3data = Query3Serializer(query3, many=True).data
         
-                response_data = [
-                    {"DOSAISLTRCdata":  DOSAISLTRCdata },
-                    {"EgibleITCdata": EgibleITCdata },
-                    {"DetailsOfInterStateSupplies":  Query3data }
+                response_data = {
+                    "DOSAISLTRCdata":  DOSAISLTRCdata ,
+                    "EgibleITCdata": EgibleITCdata ,
+                    "DetailsOfInterStateSupplies":  Query3data 
                   
-                ]
+                }
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
