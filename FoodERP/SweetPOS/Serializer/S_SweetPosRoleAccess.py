@@ -11,9 +11,9 @@ class SPOSRoleAccessSerializerSecond(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
     CreatedBy = serializers.IntegerField()
-    CreatedOn = serializers.DateTimeField()
+    
     UpdatedBy = serializers.IntegerField()
-    UpdatedOn = serializers.DateTimeField()
+    
     DivisionID = serializers.IntegerField()
     Party = serializers.IntegerField()
     IsAddNewItem = serializers.BooleanField()
