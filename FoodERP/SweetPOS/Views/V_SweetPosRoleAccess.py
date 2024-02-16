@@ -30,10 +30,10 @@ class SweetPosRoleAccessView(CreateAPIView):
                         obj = M_SweetPOSRoleAccess(**data)
                         obj.save(using='sweetpos_db')
                         
-                log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata['Party'],'',346,0)   
+                # log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata['Party'],'',346,0)   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'SweetPosRoleAccess Save:'+str(list(e)),33,0)
+            # log_entry = create_transaction_logNew(request, 0,0,'SweetPosRoleAccess Save:'+str(list(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  list(e), 'Data':[]})
         
     @transaction.atomic()
