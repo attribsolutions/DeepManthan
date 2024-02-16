@@ -66,17 +66,21 @@ class SPOSLog_inView(CreateAPIView):
             
             with transaction.atomic():
                 SPOSLog_in_data = JSONParser().parse(request)
-                DivisionID = SPOSLog_in_data['DivisionID']
-                SPOSLog_in_data_serializer = SPOSLog_inSerializer(data=SPOSLog_in_data)
-                if SPOSLog_in_data_serializer.is_valid():
-                    SPOSLog_in_data_serializer.save()
-                    
-                    responce=M_SweetPOSRoleAccess.objects.get(Division=DivisionID)
-                    responce_serializer=SPOSRoleAccessSerializer(responce).data
+                Division = SPOSLog_in_data['DivisionID']
+                # SPOSLog_in_data_serializer = SPOSLog_inSerializer(data=SPOSLog_in_data)
+                obj = M_SweetPOSLogin(**SPOSLog_in_data)
+                obj.save(using='sweetpos_db')
+                
+                
+                # if SPOSLog_in_data_serializer.is_valid():
+                #     instance = SPOSLog_in_data_serializer.save()
+                #     instance.save(using='sweetpos_db')
+                responce=M_SweetPOSRoleAccess.objects.using('sweetpos_db').get(DivisionID=Division)
+                responce_serializer=SPOSRoleAccessSerializer(responce).data
 
-                    return JsonResponse({"Success":True,"status_code":200,"msg":"Loged In Successfully..!","RoleAccess": responce_serializer})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SPOSLog_in_data_serializer.errors, 'Data': []})
+                return JsonResponse({"Success":True,"status_code":200,"msg":"Loged In Successfully..!","RoleAccess": responce_serializer})
+                # else:
+                #     transaction.set_rollback(True)
+                #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SPOSLog_in_data_serializer.errors, 'Data': []})
         except Exception as e:
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
