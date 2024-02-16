@@ -34,7 +34,7 @@ class PartyCustomerMappingView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyCustomerMapping_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PartyMasterSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'Party Customer Mapping Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -58,7 +58,7 @@ LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_Part
                 log_entry = create_transaction_logNew(request,0,Party_Serializer.data[0]['Party_id'],'Party Does Not Exist',341,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Party not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PartyEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'GET Party Customer Mapping:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -84,7 +84,7 @@ class PartyItemMappingMasterView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemsMapping_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'Party Item Mapping Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
@@ -100,7 +100,7 @@ class PartyItemMappingMasterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,0,0,'Item Does Not Exist',343,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'GET Party Item Mapping:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -125,7 +125,7 @@ class PartyUnitMappingMasterUnitsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  UnitsMapping_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'UnitEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'Party Mapping Unit Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -142,7 +142,7 @@ class PartyUnitMappingMasterUnitsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,0,0,'Unit Does Not Exist',345,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Unit not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'UnitEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'GET Party Mapping Unit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
