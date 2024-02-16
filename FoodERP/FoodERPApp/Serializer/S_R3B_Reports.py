@@ -10,26 +10,26 @@ class FloatDecimalField(serializers.Field):
 '''Details of Outward Supplies and inward supplies liable to reverse charge'''
 class DOSAISLTRCSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    A = serializers.CharField(max_length=100)
-    Taxablevalue=FloatDecimalField()
-    IGST=FloatDecimalField()
-    CGST=FloatDecimalField()
-    SGST=FloatDecimalField()
-    Cess=FloatDecimalField()
+    NatureOfSupplies = serializers.CharField(max_length=100)
+    TotalTaxableValue=FloatDecimalField()
+    IntegratedTax=FloatDecimalField()
+    CentralTax=FloatDecimalField()
+    State_UTTax=FloatDecimalField()
+    Cess =FloatDecimalField()
     
     
 class EligibleITCSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    A = serializers.CharField(max_length=100)
-    IGST=FloatDecimalField()
-    CGST=FloatDecimalField()
-    SGST=FloatDecimalField()
+    Details = serializers.CharField(max_length=100)
+    IntegratedTax=FloatDecimalField()
+    CentralTax=FloatDecimalField()
+    State_UTTax=FloatDecimalField()
     Cess=FloatDecimalField()
 
 
 class Query3Serializer (serializers.Serializer):
     # id = serializers.IntegerField()
-    states = serializers.CharField(max_length=100)
-    Taxablevalue=FloatDecimalField()
-    IGST=FloatDecimalField()
+    PlaceOfSupplyState_UT = serializers.CharField(max_length=100)
+    TaxableValue=FloatDecimalField()
+    AmountOfIntegratedTax=FloatDecimalField()
      
