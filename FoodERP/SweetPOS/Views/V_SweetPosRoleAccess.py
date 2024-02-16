@@ -69,6 +69,7 @@ class SPOSLog_inView(CreateAPIView):
                 Division = SPOSLog_in_data['DivisionID']
                 # SPOSLog_in_data_serializer = SPOSLog_inSerializer(data=SPOSLog_in_data)
                 obj = M_SweetPOSLogin(**SPOSLog_in_data)
+                print(obj)
                 obj.save(using='sweetpos_db')
                 
                 
