@@ -8,14 +8,14 @@ class FloatDecimalField(serializers.Field):
     
 class B2BSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    GSTIN = serializers.CharField(max_length=100)
-    Name = serializers.CharField(max_length=100)
-    FullInvoiceNumber=serializers.CharField(max_length=100)
+    GSTIN_UINOfRecipient = serializers.CharField(max_length=100)
+    ReceiverName = serializers.CharField(max_length=100)
+    InvoiceNumber=serializers.CharField(max_length=100)
     InvoiceDate=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    aa=serializers.CharField(max_length=100)
+    InvoiceValue=FloatDecimalField()
+    PlaceOfSupply=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
+    ApplicableOfTaxRate=serializers.CharField(max_length=100)
     InvoiceType=serializers.CharField(max_length=100)
     ECommerceGSTIN=serializers.CharField(max_length=100)
     Rate=FloatDecimalField()
@@ -32,11 +32,11 @@ class B2BSerializer2(serializers.Serializer):
     
 class B2CLSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    FullInvoiceNumber=serializers.CharField(max_length=100)
+    InvoiceNumber=serializers.CharField(max_length=100)
     InvoiceDate=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    aa=serializers.CharField(max_length=100)
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
+    InvoiceValue=FloatDecimalField()
+    PlaceOfSupply=serializers.CharField(max_length=100)
+    ApplicableOfTaxRate=serializers.CharField(max_length=100)
     ECommerceGSTIN=serializers.CharField(max_length=100)
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField()
@@ -47,15 +47,15 @@ class B2CLSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
     NoOfInvoices  = serializers.IntegerField()
     TotalInvoiceValue =FloatDecimalField() 
-    TaxableValue =FloatDecimalField()  
+    # TaxableValue =FloatDecimalField()  
       
 #################################################################################################################    
 
 class B2CSSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     Type=serializers.CharField(max_length=100)
-    aa=serializers.CharField(max_length=100)
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
+    PlaceOfSupply=serializers.CharField(max_length=100)
+    ApplicableOfTaxRate=serializers.CharField(max_length=100)
     ECommerceGSTIN=serializers.CharField(max_length=100)
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField()
@@ -63,35 +63,35 @@ class B2CSSerializer(serializers.Serializer):
     
 class B2CSSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
-    TaxableValue =FloatDecimalField() 
-    CessAmount=serializers.CharField(max_length=100)   
+    TotalTaxableValue =FloatDecimalField() 
+    TotalCess =serializers.CharField(max_length=100)   
     
 ################################################################################################################    
 
 class CDNRSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    GSTIN = serializers.CharField(max_length=100)
-    Name = serializers.CharField(max_length=100)
-    FullNoteNumber=serializers.CharField(max_length=100)
-    CRDRNoteDate=serializers.CharField(max_length=100)
+    GSTIN_UINOfRecipient = serializers.CharField(max_length=100)
+    ReceiverName = serializers.CharField(max_length=100)
+    NoteNumber=serializers.CharField(max_length=100)
+    NoteDate=serializers.CharField(max_length=100)
     NoteTypeName=serializers.CharField(max_length=100)
-    NoteType_id=serializers.IntegerField()
-    aa=serializers.CharField(max_length=100)
+    # NoteType_id=serializers.IntegerField()
+    PlaceOfSupply=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
-    NoteSupplyType=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
+    NoteValue =serializers.CharField(max_length=100)
+    # GrandTotal=FloatDecimalField()
+    ApplicableOfTaxRate=serializers.CharField(max_length=100)
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
     
 class CDNRSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
-    NoofRecipients = serializers.IntegerField()
+    NoOfRecipients = serializers.IntegerField()
     NoOfNotes  = serializers.IntegerField()
     TotalInvoiceValue =FloatDecimalField()
     TotalTaxableValue =FloatDecimalField()
-    CessAmount=serializers.IntegerField()
+    TotalCess=serializers.IntegerField()
     
     
 #####################################################################################################################        
@@ -100,12 +100,12 @@ class CDNRSerializer2(serializers.Serializer):
 class CDNURSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     URType=serializers.CharField(max_length=100)
-    FullNoteNumber=serializers.CharField(max_length=100)
-    CRDRNoteDate=serializers.CharField(max_length=100)
+    NoteNumber=serializers.CharField(max_length=100)
+    NoteDate=serializers.CharField(max_length=100)
     NoteType=serializers.CharField(max_length=100)
-    aa=serializers.CharField(max_length=100)
-    GrandTotal=FloatDecimalField()
-    ApplicableofTaxRate=serializers.CharField(max_length=100)
+    PlaceOfSupply=serializers.CharField(max_length=100)
+    NoteValue=FloatDecimalField()
+    ApplicableOfTaxRate=serializers.CharField(max_length=100)
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)
@@ -114,21 +114,24 @@ class CDNURSerializer(serializers.Serializer):
 class CDNURSerializer2(serializers.Serializer):
    # id = serializers.IntegerField()
     NoOfNotes  = serializers.IntegerField()
-    TotalInvoiceValue =FloatDecimalField()
+    TotalNoteValue =FloatDecimalField()
     TotalTaxableValue =FloatDecimalField()
-    CessAmount=serializers.IntegerField()   
+    TotalCess=serializers.IntegerField()   
     
 ################################################################################################################    
        
 class EXEMPSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
     Description=serializers.CharField(max_length=100)
-    Total=FloatDecimalField()
+    NilRatedSupplies=FloatDecimalField()
+    Exempted_OtherThanNilRatedNonGSTSupply=serializers.CharField(max_length=100)
+    NonGSTSupplies=serializers.CharField(max_length=100)
+    # Total=FloatDecimalField()
     
     
 class EXEMP2Serializer2(serializers.Serializer):
     # id = serializers.IntegerField()
-    AA=serializers.CharField(max_length=100)
+    # AA=serializers.CharField(max_length=100)
     TotalNilRatedSupplies=FloatDecimalField()
     TotalExemptedSupplies=serializers.CharField(max_length=100)
     TotalNonGSTSupplies=serializers.CharField(max_length=100)
@@ -137,7 +140,7 @@ class EXEMP2Serializer2(serializers.Serializer):
     
 class HSNSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    HSNCode=serializers.CharField(max_length=100)
+    HSN=serializers.CharField(max_length=100)
     Description=serializers.CharField(max_length=100)
     UQC=serializers.CharField(max_length=100)
     TotalQuantity=FloatDecimalField()
@@ -151,36 +154,36 @@ class HSNSerializer(serializers.Serializer):
     
 class HSN2Serializer2(serializers.Serializer):
     # id = serializers.IntegerField()
-    NoofHSN=serializers.CharField(max_length=100)
-    a=serializers.CharField(max_length=100)
-    b=serializers.CharField(max_length=100)
-    c=serializers.CharField(max_length=100)
+    NoOfHSN=serializers.CharField(max_length=100)
+    # a=serializers.CharField(max_length=100)
+    # b=serializers.CharField(max_length=100)
+    # c=serializers.CharField(max_length=100)
     TotalValue=FloatDecimalField()
-    TaxableValue=FloatDecimalField()
-    IntegratedTaxAmount=FloatDecimalField()
-    CentralTaxAmount=FloatDecimalField()
-    StateUTTaxAmount=FloatDecimalField()
-    CessAmount=serializers.CharField(max_length=100)    
+    TotalTaxableValue=FloatDecimalField()
+    TotalIntegratedTaxAmount=FloatDecimalField()
+    TotalCentralTaxAmount=FloatDecimalField()
+    TotalStateUTTaxAmount=FloatDecimalField()
+    TotalCessAmount=serializers.CharField(max_length=100)    
     
 #######################################################################################################    
     
 class DocsSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    a=serializers.CharField(max_length=100)
-    MINID=serializers.CharField()
-    MAXID=serializers.CharField()
-    cnt=FloatDecimalField()
-    Cancelledcnt=FloatDecimalField()
+    NatureOfDocument=serializers.CharField(max_length=100)
+    Sr_No_From=serializers.CharField()
+    Sr_No_To=serializers.CharField()
+    TotalNumber=FloatDecimalField()
+    Cancelled=FloatDecimalField()
 
 
 
 class Docs2Serializer2(serializers.Serializer):
     # id = serializers.IntegerField()
-    AA=serializers.CharField(max_length=100)
-    bb=serializers.CharField(max_length=100)
-    cc=serializers.CharField(max_length=100)
-    cnt=serializers.IntegerField()
-    Cancelledcnt=serializers.IntegerField()
+    # AA=serializers.CharField(max_length=100)
+    # bb=serializers.CharField(max_length=100)
+    # cc=serializers.CharField(max_length=100)
+    TotalNumbers=serializers.IntegerField()
+    TotalCancelled=serializers.IntegerField()
    
      
     
