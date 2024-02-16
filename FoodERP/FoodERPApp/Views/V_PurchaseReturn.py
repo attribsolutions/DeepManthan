@@ -66,9 +66,12 @@ class PurchaseReturnListView(CreateAPIView):
                     ReturnListData = list()
                     for a in Return_serializer:
                         q0=TC_PurchaseReturnReferences.objects.filter(SubReturn=a['id'])
-                        q1= TC_ReceiptInvoices.objects.filter(Return=a['id'])
-                        
-                        if q1.count() > 0:
+                        q1= TC_ReceiptInvoices.objects.raw(''' select 1 id,count(*)cnt from TC_ReceiptInvoices 
+join T_CreditDebitNotes on T_CreditDebitNotes.id=TC_ReceiptInvoices.CRDRNote_id
+where TC_ReceiptInvoices.Return_id=%s and T_CreditDebitNotes.IsDeleted=0 ''' ,[a['id']])
+                        for countrow in q1:
+                            p=countrow.cnt
+                        if p > 0:
                             IsCreditNoteCreated = 1
                         else:    
                             IsCreditNoteCreated = 0 
