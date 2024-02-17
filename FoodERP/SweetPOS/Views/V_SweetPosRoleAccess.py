@@ -6,6 +6,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
+
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -33,6 +34,7 @@ def BasicAuthenticationfunction(request):
     return user
 
 
+
 class SweetPosRoleAccessView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
@@ -56,7 +58,9 @@ class SweetPosRoleAccessView(CreateAPIView):
                         obj = M_SweetPOSRoleAccess(**data)
                         obj.save(using='sweetpos_db')
                         
+
                 # log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata['Party'],'',346,0)    
+
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0,0,'SweetPosRoleAccess Save:'+str(list(e)),33,0)
@@ -98,6 +102,7 @@ class SPOSLog_inView(CreateAPIView):
                 SPOSLog_in_data = JSONParser().parse(request)
                 # pdb.set_trace()
                 Division = SPOSLog_in_data['DivisionID']
+
                 user=BasicAuthenticationfunction(request)
                     
                 if user is not None:
@@ -116,6 +121,7 @@ class SPOSLog_inView(CreateAPIView):
                     # else:
                     #     transaction.set_rollback(True)
                     #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SPOSLog_in_data_serializer.errors, 'Data': []})
+
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'SweetPOSLogin:'+str(Exception(e)),33,0)
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})

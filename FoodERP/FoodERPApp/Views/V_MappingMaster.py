@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
+from ..Views.V_CommFunction import *
+
 
 class PartyCustomerMappingView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -21,14 +23,18 @@ class PartyCustomerMappingView(CreateAPIView):
                 PartyCustomerMapping_Serializer = PartyMasterMappingSerializer(data=PartyCustomerMappingMaster_data,many=True)
                 if PartyCustomerMapping_Serializer.is_valid():
                     id = PartyCustomerMapping_Serializer.data[0]['Party']
+                    
                     Partycustomerdata = M_PartyCustomerMappingMaster.objects.filter(Party=id)
                     Partycustomerdata.delete()
                     PartyCustomerMapping_Serializer.save()
+                    log_entry = create_transaction_logNew(request, PartyCustomerMappingMaster_data,id,'',340,0,0,PartyCustomerMapping_Serializer.data[0]['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyMaster Save Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, PartyCustomerMappingMaster_data,id,'PartyMasterSave:'+str(PartyCustomerMapping_Serializer.errors),34,0,0,PartyCustomerMapping_Serializer.data[0]['Customer'])
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyCustomerMapping_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'Party Customer Mapping Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -47,9 +53,12 @@ LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_Part
                 # print(str(query.query))
                 if query:
                     Party_Serializer = PartyCustomerMappingSerializerSecond(query,many=True).data
+                    log_entry = create_transaction_logNew(request, Party_Serializer,Party_Serializer[0]['Party_id'],'',341,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Party_Serializer})
+                log_entry = create_transaction_logNew(request,0,Party_Serializer.data[0]['Party_id'],'Party Does Not Exist',341,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Party not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GET Party Customer Mapping:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -68,11 +77,14 @@ class PartyItemMappingMasterView(CreateAPIView):
                     ItemsMappingdata = M_ItemMappingMaster.objects.filter(Party=id)
                     ItemsMappingdata.delete()
                     ItemsMapping_Serializer.save()
+                    log_entry = create_transaction_logNew(request, ItemsMappingMaster_data,id,'',342,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Items Save Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, ItemsMappingMaster_data,id,'ItemSave:'+str(ItemsMapping_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemsMapping_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'Party Item Mapping Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
@@ -83,9 +95,12 @@ class PartyItemMappingMasterView(CreateAPIView):
                 
                 if query:
                     ItemsMapping_Serializer = ItemMappingMasterSerializerSecond(query,many=True).data
+                    log_entry = create_transaction_logNew(request, ItemsMapping_Serializer,0,'',343,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemsMapping_Serializer})
+                log_entry = create_transaction_logNew(request,0,0,'Item Does Not Exist',343,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Item not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GET Party Item Mapping:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -103,11 +118,14 @@ class PartyUnitMappingMasterUnitsView(CreateAPIView):
                     UnitsMappingdata = M_UnitMappingMaster.objects.filter(Party=id)
                     UnitsMappingdata.delete()
                     UnitsMapping_Serializer.save()
+                    log_entry = create_transaction_logNew(request, UnitsMappingMaster_data,id,'',344,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Units Save Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, UnitsMappingMaster_data,id,'UnitSave:'+str(UnitsMapping_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  UnitsMapping_Serializer.errors, 'Data':[]})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'Party Mapping Unit Save:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -119,9 +137,12 @@ class PartyUnitMappingMasterUnitsView(CreateAPIView):
 
                 if query:
                     UnitsMapping_Serializer = UnitsMappingSerializerSecond(query,many=True).data
+                    log_entry = create_transaction_logNew(request, UnitsMapping_Serializer,0,'',345,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :UnitsMapping_Serializer})
+                log_entry = create_transaction_logNew(request,0,0,'Unit Does Not Exist',345,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Unit not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GET Party Mapping Unit:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
