@@ -95,7 +95,7 @@ class GSTR3BDownloadView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
 
     
 
