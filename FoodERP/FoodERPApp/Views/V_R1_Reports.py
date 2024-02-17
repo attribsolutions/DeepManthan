@@ -36,7 +36,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 B2B2 = B2BSerializer(B2Bquery, many=True).data
                 
-                B2Bquery1 = T_Invoices.objects.raw('''SELECT 1 as id, count(DISTINCT Customer_id) AS NoofRecipients,
+                B2Bquery1 = T_Invoices.objects.raw('''SELECT 1 as id, count(DISTINCT Customer_id) AS NoOfRecipients,
                     count(*) AS NoOfInvoices, sum(T_Invoices.GrandTotal+T_Invoices.TCSAmount) AS TotalInvoiceValue
                     FROM T_Invoices JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
                     WHERE T_Invoices.Party_id = %s AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN !=''
