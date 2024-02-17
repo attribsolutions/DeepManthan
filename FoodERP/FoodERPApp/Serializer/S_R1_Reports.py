@@ -332,9 +332,7 @@ class DocsSerializer(serializers.Serializer):
         representation ['Total Number'] = representation.pop('TotalNumber')
         representation ['Cancelled'] = representation.pop('Cancelled')
         return representation
-
-
-
+  
 class Docs2Serializer2(serializers.Serializer):
     # id = serializers.IntegerField()
     # AA=serializers.CharField(max_length=100)
@@ -348,8 +346,6 @@ class Docs2Serializer2(serializers.Serializer):
         representation ['Total Numbers'] = representation.pop('TotalNumbers')
         representation ['Total Cancelled'] = representation.pop('TotalCancelled')
         return representation
-   
-     
-    
+
 
    

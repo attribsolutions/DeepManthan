@@ -5,8 +5,7 @@ from rest_framework import serializers
 class FloatDecimalField(serializers.Field):
     def to_representation(self, value):
         return float(value)
-
-    
+  
 '''Details of Outward Supplies and inward supplies liable to reverse charge'''
 class DOSAISLTRCSerializer(serializers.Serializer):
     NatureOfSupplies = serializers.CharField(max_length=100)
@@ -56,4 +55,4 @@ class Query3Serializer (serializers.Serializer):
         representation ['Place Of Supply State / UT'] = representation.pop('PlaceOfSupplyState_UT')
         representation ['Taxable Value'] = representation.pop('TaxableValue')
         representation ['Amount Of Integrated Tax'] = representation.pop('AmountOfIntegratedTax')
-        return representation
+        return representation  
