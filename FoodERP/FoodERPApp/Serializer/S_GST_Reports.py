@@ -16,6 +16,17 @@ class GSTWiseSerializer(serializers.Serializer):
     GSTAmount=FloatDecimalField()
     TotalValue=FloatDecimalField()
     
+        
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        representation['GST Percentage'] = representation.pop('GSTPercentage')
+        representation['Taxable Value'] = representation.pop('TaxableValue')
+        representation['CGST'] = representation.pop('CGST')
+        representation['SGST'] = representation.pop('SGST')
+        representation['IGST'] = representation.pop('IGST')
+        representation['GST Amount'] = representation.pop('GSTAmount')
+        representation['Total Value'] = representation.pop('TotalValue')
+        return representation
     
     def to_representation(self, instance):
         # get representation from ModelSerializer
@@ -42,13 +53,25 @@ class GSTWiseSerializer(serializers.Serializer):
   
     
 class GSTWiseSerializer2(serializers.Serializer):
-    id = serializers.CharField(max_length=500)
+    # id = serializers.CharField(max_length=500)
     TotalTaxableValue =FloatDecimalField()
     TotalCGST =FloatDecimalField()
     TotalSGST =FloatDecimalField()
     TotalIGST =FloatDecimalField()
     TotalGSTAmount =FloatDecimalField()
     GrandTotal =FloatDecimalField()
+    
+        
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        representation['Total Taxable Value'] = representation.pop('TotalTaxableValue')
+        representation['Total CGST'] = representation.pop('TotalCGST')
+        representation['Total SGST'] = representation.pop('TotalSGST')
+        representation['Total IGST'] = representation.pop('TotalIGST')
+        representation['Total GST Amount'] = representation.pop('TotalGSTAmount')
+        representation['Grand Total'] = representation.pop('GrandTotal')
+        return representation
+    
     
     def to_representation(self, instance):
         # get representation from ModelSerializer
