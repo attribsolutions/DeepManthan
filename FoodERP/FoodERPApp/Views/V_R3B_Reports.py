@@ -81,10 +81,10 @@ class GSTR3BDownloadView(CreateAPIView):
                                             SELECT 1 as id, '(1)   As per section 17(5) of CGST//SGST Act' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
                                             SELECT 1 as id, '(2)   Others' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess''',([Party],[FromDate],[ToDate]))
-                EgibleITC = EligibleITCSerializer(EligibleITCquery, many=True).data
+                EligibleITC = EligibleITCSerializer(EligibleITCquery, many=True).data
                 
-                if not EgibleITC:
-                    EgibleITC = [{
+                if not EligibleITC:
+                    EligibleITC = [{
                                     'Details': None,
                                     'Integrated Tax': None,
                                     'Central Tax': None,
