@@ -90,7 +90,7 @@ class GSTR3BDownloadView(CreateAPIView):
                                     'Central Tax': None,
                                     'State / UT Tax': None,
                                     'Cess': None
-                                }]
+                                }]    
      
         
         
