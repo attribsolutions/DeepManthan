@@ -1,4 +1,3 @@
-
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -36,13 +35,37 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 B2B2 = B2BSerializer(B2Bquery, many=True).data
                 
-                B2Bquery1 = T_Invoices.objects.raw('''SELECT 1 as id, count(DISTINCT Customer_id) AS NoofRecipients,
+                
+                B2Bquery1 = T_Invoices.objects.raw('''SELECT 1 as id, count(DISTINCT Customer_id) AS NoOfRecipients,
                     count(*) AS NoOfInvoices, sum(T_Invoices.GrandTotal+T_Invoices.TCSAmount) AS TotalInvoiceValue
                     FROM T_Invoices JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
                     WHERE T_Invoices.Party_id = %s AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN !=''
                     ''', (Party, FromDate, ToDate))
                 
                 B2B1 = B2BSerializer2(B2Bquery1, many=True).data
+                
+                if not B2B1:
+                    B2B1 = [{
+                             'No Of Recipients': None,
+                             'No Of Invoices': None, 
+                             'Total Invoice Value': None
+                             }]
+                    
+                if not B2B2:
+                    B2B2 = [{
+                             'GSTIN / UIN Of Recipient': None, 
+                             'Receiver Name': None,
+                             'Invoice Number': None, 
+                             'Invoice Date' : None,
+                             'Invoice Value': None, 
+                             'Place Of Supply': None, 
+                             'Reverse Charge': None, 
+                             'Applicable Of TaxRate': None,
+                             'Invoice Type':None, 
+                             'ECommerceGSTIN': None,
+                             'Rate': None, 
+                             'Taxable Value': None,
+                             'Cess Amount': None }]
                 
                 # Example data for the second sheet B2CL
                 B2CLquery = T_Invoices.objects.raw('''SELECT T_Invoices.id, T_Invoices.FullInvoiceNumber AS InvoiceNumber, T_Invoices.InvoiceDate,
@@ -72,6 +95,26 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 B2CL1 = B2CLSerializer2(B2CLquery2, many=True).data
                 
+                # Check if B2CL is empty
+                if not B2CL1:
+                    B2CL1 = [{
+                                'No. Of Invoices': None, 
+                                'Total Invoice Value': None
+                                }]
+                    
+                if not B2CL2:
+                    B2CL2 = [{
+                                'Invoice Number': None, 
+                                'Invoice Date': None,
+                                'Invoice Value': None, 
+                                'Place Of Supply': None, 
+                                'Applicable Of TaxRate': None,
+                                'ECommerce GSTIN': None, 
+                                'Rate': None,
+                                'Taxable Value': None,
+                                'Cess Amount': None
+                                }]
+                    
                 # Example data for the third sheet B2CS  
                 B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply, 
                                                    '' ApplicableOfTaxRate ,TC_InvoiceItems.GSTPercentage Rate,
@@ -98,6 +141,22 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                 
                 B2CS1 = B2CSSerializer2(B2CSquery2, many=True).data
                 
+                if not B2B1:
+                    B2B1 = [{
+                             'Total Taxable Value': None,
+                             'Total Cess': None
+                             }]
+                    
+                if not B2CS2:
+                    B2CS2 = [{
+                             'Type': None, 
+                             'Place Of Supply': None,
+                             'Applicable Of TaxRate': None, 
+                             'ECommerce GSTIN': None, 
+                             'Rate': None, 
+                             'Taxable Value': None,
+                             'Cess Amount': None }]
+                
                 # Example data for the four sheet CDNR 
                 CDNRquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,M_Parties.Name AS ReceiverName,
                                                            T_CreditDebitNotes.FullNoteNumber AS NoteNumber,T_CreditDebitNotes.CRDRNoteDate AS NoteDate,M_GeneralMaster.Name NoteTypeName,
@@ -122,6 +181,30 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         WHERE Party_id=%s and T_CreditDebitNotes.CRDRNoteDate BETWEEN  %s  AND %s AND M_Parties.GSTIN != ''  Group by T_CreditDebitNotes.id)A''',([Party],[FromDate],[ToDate]))
                                 
                 CDNR1 = CDNRSerializer2(CDNRquery2, many=True).data
+                
+                if not CDNR1:
+                    CDNR1 = [{
+                             'No. Of Recipients': None,
+                             'No. Of Notes': None,
+                             'Total Invoice Value': None,
+                             'Total Taxable Value': None,
+                             'Total Cess': None
+                             }]
+                    
+                if not CDNR2:
+                    CDNR2 = [{
+                             'GSTIN / UIN Of Recipient': None, 
+                             'Receiver Name': None,
+                             'Note Number': None, 
+                             'Note Date': None, 
+                             'Note Type Name': None, 
+                             'Place Of Supply': None, 
+                             'Reverse Charge': None,
+                             'Note Value': None,
+                             'Applicable Of TaxRate': None,
+                             'Rate': None, 
+                             'Taxable Value': None,
+                             'Cess Amount': None }]
                 
                 # Example data for the five sheet CDNUR 
                 CDNURquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id,'' URType, T_CreditDebitNotes.FullNoteNumber AS NoteNumber,T_CreditDebitNotes.CRDRNoteDate AS NoteDate, 
@@ -149,6 +232,27 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 %s AND  %s AND M_Parties.GSTIN = '' Group by T_CreditDebitNotes.id)A''',([Party],[FromDate],[ToDate]))
                     
                 CDNUR1 = CDNURSerializer2(CDNURquery2, many=True).data
+                
+                if not CDNUR1:
+                    CDNUR1 = [{
+                             'No. Of Notes': None,
+                             'Total Note Value': None,
+                             'Total Taxable Value': None,
+                             'Total Cess': None
+                             }]
+                    
+                if not CDNUR2:
+                    CDNUR2 = [{
+                             'UR Type': None,
+                             'Note Number': None, 
+                             'Note Date': None, 
+                             'Note Type': None, 
+                             'Place Of Supply': None, 
+                             'Note Value': None,
+                             'Applicable Of TaxRate': None,
+                             'Rate': None, 
+                             'Taxable Value': None,
+                             'Cess Amount': None }]
                 
                 # Example data for the six sheet CDNUR
                 EXEMPquery = T_Invoices.objects.raw('''SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total
@@ -214,6 +318,22 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             
                 EXEMP1 = EXEMP2Serializer2(EXEMPquery2, many=True).data
                 
+                   
+                if not EXEMP1:
+                    EXEMP1 = [{
+                             'Total Nil Rated Supplies': None,
+                             'Total Exempted Supplies': None,
+                             'Total Non GST Supplies': None
+                             }]
+                    
+                if not EXEMP2:
+                    EXEMP2 = [{
+                             'Description': None,
+                             'Nil Rated Supplies': None,
+                             'Exempted Other Than NilRated Non GST Supply': None,
+                             'Non GST Supplies': None
+                             }]
+                
                 # Example data for the seven sheet HSN 
                 HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount
                         FROM T_Invoices 
@@ -232,6 +352,30 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN  %s AND  %s  Group by id, M_GSTHSNCode.HSNCode,M_Items.Name)A''',([Party],[FromDate],[ToDate]))
             
                 HSN1 = HSN2Serializer2(HSNquery2, many=True).data
+                
+                if not HSN1:
+                    HSN1 = [{
+                             'No. Of HSN': None,
+                             'Total Value': None,
+                             'Total Invoice Value': None,
+                             'Total Integrated Tax Amount': None,
+                             'Total Central Tax Amount': None,
+                             'Total State UT Tax Amount': None,
+                             'Total Cess Amount': None,
+                             }]
+                    
+                if not HSN2:
+                    HSN2 = [{
+                             'HSN': None, 
+                             'Description': None,
+                             'UQC': None, 
+                             'Total Quantity': None, 
+                             'Total Value': None, 
+                             'Taxable Value': None, 
+                             'Integrated Tax Amount': None,
+                             'Central Tax Amount': None,
+                             'State UT Tax Amount': None,
+                             'Cess Amount': None }]
                 
                 # Example data for the eight sheet Docs  
                 Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, 'Invoices for outward supply' NatureOfDocument,MIN(T_Invoices.InvoiceNumber)Sr_No_From,max(T_Invoices.InvoiceNumber)Sr_No_To ,count(*)TotalNumber,(SELECT count(*)cnt from T_DeletedInvoices  where Party =%s and T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s ) Cancelled ,'1' b
@@ -261,6 +405,20 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                            
                 Docs1 = Docs2Serializer2(Docsquery2, many=True).data
                 
+                if not Docs1:
+                    Docs1 = [{
+                             'Total Numbers': None,
+                             'Total Cancelled': None,
+                             }]
+                    
+                if not Docs2:
+                    Docs2 = [{
+                             'Nature Of Document': None,
+                             'Sr. No. From': None,
+                             'Sr. No. To': None,
+                             'Total Number': None,
+                             'Cancelled': None
+                             }]
                 
                 response_data = {
                     "B2B":  B2B1 + B2B2,
@@ -270,10 +428,11 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     "CDNUR":  CDNUR1 + CDNUR2,
                     "EXEMP": EXEMP1 + EXEMP2,
                     "HSN":  HSN1 + HSN2,
-                    "Docs": Docs1 + Docs2
+                    "Docs": Docs1 + Docs2 
                 }
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+             

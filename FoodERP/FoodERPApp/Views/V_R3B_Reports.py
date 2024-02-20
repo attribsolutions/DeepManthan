@@ -38,6 +38,16 @@ class GSTR3BDownloadView(CreateAPIView):
                                             SELECT 1 as id, '(e) Non-GST Outward supplies' NatureOfSupplies, 0 TotalTaxableValue,0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                                                     
                 DOSAISLTRC = DOSAISLTRCSerializer(query, many=True).data
+                
+                if not DOSAISLTRC:
+                    DOSAISLTRC = [{
+                                    'Nature Of Supplies': None,
+                                    'Total Taxable Value': None,
+                                    'Integrated Tax': None,
+                                    'Central Tax': None,
+                                    'State / UT Tax': None,
+                                    'Cess': None
+                                }]
        
         
                 
@@ -71,7 +81,16 @@ class GSTR3BDownloadView(CreateAPIView):
                                             SELECT 1 as id, '(1)   As per section 17(5) of CGST//SGST Act' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
                                             SELECT 1 as id, '(2)   Others' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess''',([Party],[FromDate],[ToDate]))
-                EgibleITC = EligibleITCSerializer(EligibleITCquery, many=True).data
+                EligibleITC = EligibleITCSerializer(EligibleITCquery, many=True).data
+                
+                if not EligibleITC:
+                    EligibleITC = [{
+                                    'Details': None,
+                                    'Integrated Tax': None,
+                                    'Central Tax': None,
+                                    'State / UT Tax': None,
+                                    'Cess': None
+                                }]    
      
         
         
@@ -84,10 +103,17 @@ class GSTR3BDownloadView(CreateAPIView):
                                             JOIN M_States ON M_Parties.State_id=M_States.id
                                             WHERE  Party_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s   group by M_States.id''',([Party],[FromDate],[ToDate]))
                 Query3 = Query3Serializer(query3, many=True).data
+                
+                if not Query3:
+                    Query3 = [{
+                                    'Place Of Supply State / UT': None,
+                                    'Taxable Value': None,
+                                    'Amount Of Integrated Tax': None
+                                }]
         
                 response_data = {
                     "DOSAISLTRC":  DOSAISLTRC ,
-                    "EgibleITC": EgibleITC ,
+                    "EligibleITC": EligibleITC ,
                     "DetailsOfInterStateSupplies":  Query3 
                   
                 }
@@ -95,7 +121,7 @@ class GSTR3BDownloadView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
 
     
 
