@@ -113,7 +113,7 @@ class GSTR3BDownloadView(CreateAPIView):
         
                 response_data = {
                     "DOSAISLTRC":  DOSAISLTRC ,
-                    "EgibleITC": EgibleITC ,
+                    "EligibleITC": EligibleITC ,
                     "DetailsOfInterStateSupplies":  Query3 
                   
                 }

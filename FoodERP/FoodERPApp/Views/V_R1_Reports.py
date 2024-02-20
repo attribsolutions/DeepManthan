@@ -1,4 +1,3 @@
-
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -57,6 +56,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'GSTIN / UIN Of Recipient': None, 
                              'Receiver Name': None,
                              'Invoice Number': None, 
+                             'Invoice Date' : None,
                              'Invoice Value': None, 
                              'Place Of Supply': None, 
                              'Reverse Charge': None, 
@@ -143,18 +143,16 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 if not B2B1:
                     B2B1 = [{
-                             'No. Of Invoices': None,
-                             'Total Invoice Value': None
+                             'Total Taxable Value': None,
+                             'Total Cess': None
                              }]
                     
                 if not B2CS2:
                     B2CS2 = [{
-                             'Invoice Number': None, 
-                             'Invoice Date': None,
-                             'Invoice Value': None, 
-                             'Place Of Supply': None, 
-                             'Applicable Of TaxRate': None,
-                             'ECommerceGSTIN': None,
+                             'Type': None, 
+                             'Place Of Supply': None,
+                             'Applicable Of TaxRate': None, 
+                             'ECommerce GSTIN': None, 
                              'Rate': None, 
                              'Taxable Value': None,
                              'Cess Amount': None }]
@@ -245,12 +243,11 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     
                 if not CDNUR2:
                     CDNUR2 = [{
-                             'Receiver Name': None,
+                             'UR Type': None,
                              'Note Number': None, 
                              'Note Date': None, 
-                             'Note Type Name': None, 
+                             'Note Type': None, 
                              'Place Of Supply': None, 
-                             'Reverse Charge': None,
                              'Note Value': None,
                              'Applicable Of TaxRate': None,
                              'Rate': None, 
