@@ -487,10 +487,11 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     PartyIDs = p.split(",")
 
                 ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
-                                                            T_ClaimTrackingEntry.Date,  T_ClaimTrackingEntry.Month, 
+                                                            T_ClaimTrackingEntry.Date, MONTHNAME(T_ClaimTrackingEntry.Date) AS MonthName, 
                                                             T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
-                                                            CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
+                                                            d.Name AS CreditNoteStatus,
+                                                            CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
                                                             CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark,T_ClaimTrackingEntry.IsDeleted
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
@@ -541,13 +542,13 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "FullClaimNo": a.FullClaimNo,
                             "ClaimID": a.Claim_id,
                             "Date": a.Date,
-                            "Month": a.Month,
+                            "Month": a.MonthName,
                             "Year": a.Year,
                             "TypeName": a.TypeName,
                             "TypeOfClaimName": a.TypeOfClaimName,
                             "ClaimTradeName": a.ClaimTradeName,
                             "ClaimAmount": a.ClaimAmount,
-                            "CreditNotestatus": a.CreditNotestatus,
+                            "CreditNoteStatus": a.CreditNoteStatus,
                             "CreditNoteNo": a.CreditNoteNo,
                             "CreditNoteDate": a.CreditNoteDate,
                             "CreditNoteAmount": a.CreditNoteAmount,
