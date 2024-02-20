@@ -198,12 +198,11 @@ class CDNURSerializer(serializers.Serializer):
         
     def to_representation(self, obj):
         representation = super().to_representation(obj)
-        representation ['Receiver Name'] = representation.pop('ReceiverName')
+        representation ['UR Type'] = representation.pop('URType')
         representation ['Note Number'] = representation.pop('NoteNumber')
         representation ['Note Date'] = representation.pop('NoteDate')
-        representation ['Note Type Name'] = representation.pop('NoteTypeName')
+        representation ['Note Type'] = representation.pop('NoteType')
         representation ['Place Of Supply'] = representation.pop('PlaceOfSupply')
-        representation ['Reverse Charge'] = representation.pop('ReverseCharge')
         representation ['Note Value'] = representation.pop('NoteValue')
         representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate')
         representation ['Rate'] = representation.pop('Rate')
