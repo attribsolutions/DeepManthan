@@ -71,19 +71,19 @@ class T_SPOSInvoices(models.Model):
     
     # Hide Flag is temporary 
     Hide = models.BooleanField(default=False)
-    # ImportFromExcel= models.BooleanField(default=False)
-    # DeletedFromSAP = models.BooleanField(default=False)
+    ImportFromExcel= models.BooleanField(default=False)
+    DeletedFromSAP = models.BooleanField(default=False)
     class Meta:
         db_table = "T_SPOSInvoices"
 
 
 class TC_SPOSInvoiceItems(models.Model):
-    
-    SaleItemID = models.IntegerField(),
-    ClientID = models.IntegerField(),
-    ClientSaleItemID = models.IntegerField(),
-    ClientSaleID = models.IntegerField(),
-    ERPItemID = models.IntegerField(),
+    SaleItemID = models.IntegerField()
+    ClientID = models.IntegerField()
+    ClientSaleItemID = models.IntegerField()
+    ClientSaleID = models.IntegerField()
+    ERPItemID = models.IntegerField()
+    POSItemID = models.IntegerField()
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
     BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3)
     MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
@@ -106,7 +106,7 @@ class TC_SPOSInvoiceItems(models.Model):
     BatchCode = models.CharField(max_length=500)
     CreatedOn = models.DateTimeField(auto_now_add=True)
     # GST = models.ForeignKey(M_GSTHSNCode, related_name='InvoiceItemGST',null=True,on_delete=models.PROTECT)
-    Invoice = models.ForeignKey(T_SPOSInvoices, related_name='InvoiceItems', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_SPOSInvoices, related_name='SaleItems', on_delete=models.CASCADE)
     Item = models.IntegerField()
     # LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT,null=True,blank=True)
     # MRP = models.ForeignKey(M_MRPMaster, related_name='InvoiceItemMRP', on_delete=models.PROTECT,null=True,blank=True)
