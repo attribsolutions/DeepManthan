@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from FoodERPApp.models import *
 
 class SubGroupSerializer(serializers.ModelSerializer):
@@ -12,4 +13,5 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Group
         fields = '__all__'
+
 
