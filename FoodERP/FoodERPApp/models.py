@@ -667,6 +667,7 @@ class M_Items(models.Model):
     Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
     IsFranchisesItem = models.BooleanField(default=False)
+    CItemID = models.IntegerField(default=False,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         
