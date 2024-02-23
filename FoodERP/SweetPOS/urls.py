@@ -13,5 +13,7 @@ urlpatterns = [
     url(r'Lspos$', SPOSLog_inView.as_view()),
     url(r'ItemGroupandSubgroup$', ItemGroupandSubgroupView.as_view()),
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
+    url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
+    
     
 ]
