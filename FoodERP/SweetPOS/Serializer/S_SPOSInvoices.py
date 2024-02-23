@@ -7,23 +7,25 @@ class SPOSInvoiceItemsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TC_SPOSInvoiceItems
-        fields = '__all__'
+        fields = [ 'SaleItemID', 'ClientID', 'ClientSaleItemID', 'ClientSaleID', 'ERPItemID', 'POSItemID', 'Quantity', 'BaseUnitQuantity', 'MRPValue', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode', 'Item', 'Unit', 'QtyInNo', 'QtyInKg', 'QtyInBox']
 
 
 
 class SPOSInvoiceSerializer(serializers.ModelSerializer):
-    InvoiceItems = SPOSInvoiceItemsSerializer(many=True)
+    SaleItems = SPOSInvoiceItemsSerializer(many=True)
     
     class Meta:
         model = T_SPOSInvoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = '__all__'
 
     def create(self, validated_data):
-        InvoiceItems_data = validated_data.pop('InvoiceItems')
+        
+        InvoiceItems_data = validated_data.pop('SaleItems')
         
         InvoiceID = T_SPOSInvoices.objects.create(**validated_data)
         
         for InvoiceItem_data in InvoiceItems_data:
+            
             InvoiceItemID =TC_SPOSInvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
             
         
