@@ -637,7 +637,7 @@ class ClaimTrackingEntryViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, T_ClaimTrackingEntry.Party_id, P.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName, M_Cluster.Name Cluster , M_SubCluster.Name SubCluster
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload,  CreditNoteUpload as FileName, Claim_id, T_ClaimTrackingEntry.Party_id, P.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName, M_Cluster.Name Cluster , M_SubCluster.Name SubCluster
 FROM T_ClaimTrackingEntry
 LEFT JOIN M_PartyType ON M_PartyType.id = T_ClaimTrackingEntry.PartyType_id 
 JOIN M_Parties P ON P.id=T_ClaimTrackingEntry.Party_id
@@ -679,6 +679,7 @@ WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
                             "CreditNoteAmount": a['CreditNoteAmount'],
                             "ClaimSummaryDate": a['ClaimSummaryDate'],
                             "CreditNoteUpload": a['CreditNoteUpload'],
+                            "FileName" : a['FileName'],
                             "Claim": a['Claim_id'],
                             "Party": a['Party_id'],
                             "PartyName": a['PartyName'],
