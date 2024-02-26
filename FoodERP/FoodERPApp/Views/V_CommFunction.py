@@ -104,12 +104,12 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
     RateMcItemUnit = ""
     q = M_Parties.objects.filter(id=PartyForRate).select_related(
-        "PartyType").values("PartyType__IsSCM")
+        "PartyType").values("PartyType__IsSCM","PartyType__IsFranchises")
 
     for d in ItemUnitqueryserialize:
         if (d['PODefaultUnit'] == True):
             RateMcItemUnit = d['id']
-        if(q[0]['PartyType__IsSCM'] == 1):
+        if(q[0]['PartyType__IsSCM'] == 1 or q[0]['PartyType__IsFranchises'] == 1 ):
             CalculatedRateusingMRPMargin = RateCalculationFunction(
                 0, ItemID, PartyForRate, 0, 0, d['id'], 0).RateWithGST()
             Rate = CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
