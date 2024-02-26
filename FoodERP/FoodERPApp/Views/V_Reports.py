@@ -1393,7 +1393,6 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
 
 
 class ManPowerReportView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
 
@@ -1444,7 +1443,7 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                             "FEParty_id": a['FEParty_id'],
                             "PartyName": a['PartyName'],
                             "PartyActive": a['PartyActive'],
-                            "PartyCreation":a['CreatedOn'],
+                            "PartyCreation":a['PartyCreation'],
                             "PartyType": a['PartyType'],
                             "Email": a['Email'],
                             "PAN":a['PAN'],
