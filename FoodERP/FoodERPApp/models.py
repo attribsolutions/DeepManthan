@@ -11,6 +11,17 @@ from django.db import connection
 # def make_extra_data(request, response):
 #     return str(request.META)
 
+def CustomPrint(value):
+    printvalue=M_Settings.objects.raw('''select 1 id,IsActive from M_settings where id=%s''',([39]))  
+    for row in printvalue:
+       printvalue=row.IsActive
+    if printvalue is True:
+       
+        print(value)      
+    else:
+       
+        print()
+
 def DBNameFun(a):
                 
     with connection.cursor() as cursor:
