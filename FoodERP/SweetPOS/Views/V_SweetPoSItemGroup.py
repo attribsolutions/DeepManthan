@@ -69,3 +69,54 @@ class ItemGroupandSubgroupView(CreateAPIView):
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
+
+
+class ItemListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+    
+    def get(self, request):
+        try:
+            user = BasicAuthenticationfunction(request)
+            if user is not None:
+                query = """SELECT i.id AS CItemID, i.BarCode, 
+                            GSTHsnCodeMaster(i.id, CURDATE(), 3) AS HSNCode,
+                            i.Name, i.SAPItemCode AS ItemCode,  
+                            GSTHsnCodeMaster(i.id, CURDATE(), 2) AS GST,
+                            GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL) AS Rate,
+                            i.BaseUnitID_id AS UnitID, 
+                            i.IsFranchisesItem,  
+                            GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL) AS FoodERPMRP,
+                            subgroup.id AS ItemGroupID
+                            FROM M_Items AS i
+                            LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id"""
+                            
+                with connection.cursor() as cursor:
+                    cursor.execute(query)
+                    rows = cursor.fetchall()
+
+                response_data = {"status": True, "status_code": 200, "count": len(rows), "data": [] }
+                for row in rows:
+                    item_data = {
+                        "CItemID": row[0],
+                        "BarCode": row[1],
+                        "HSNCode": row[2],
+                        "Name": row[3],
+                        "ItemCode": row[4],
+                        "GST": row[5],
+                        "Rate": row[6],
+                        "UnitID": row[7],
+                        "ISChitaleSupplier": True,  
+                        "IsFranchisesPOSItem": row[8],
+                        "UnitConversion": "",         
+                        "FoodERPMRP": row[9],
+                        "ItemGroupID": row[10],
+                        "FranchisesItemCode": ""      
+                    }
+                    response_data["data"].append(item_data)
+
+                return Response(response_data)
+            else:
+                return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
+        except Exception as e:
+            return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
