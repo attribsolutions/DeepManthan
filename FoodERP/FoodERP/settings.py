@@ -83,10 +83,10 @@ WSGI_APPLICATION = 'FoodERP.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 # DATABASE_ROUTERS = ['FoodERPDBLog.routers.FoodERPDBLogRouter']
-# DATABASE_ROUTERS = [
-#     'FoodERPDBLog.routers.FoodERPDBLogRouter',
-#     'SweetPOS.routers.SweetPOSRouter',
-# ]
+DATABASE_ROUTERS = [
+    'FoodERPDBLog.routers.FoodERPDBLogRouter',
+    'SweetPOS.routers.SweetPOSRouter',
+]
 
 # DATABASES = {
 #     'default': {

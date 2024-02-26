@@ -8,6 +8,7 @@ from ..Serializer.S_R3B_Reports import *
 from ..models import  *
 from django.http import HttpResponse
 
+
 class GSTR3BDownloadView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
    
@@ -18,82 +19,109 @@ class GSTR3BDownloadView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Party = Orderdata['Party']
+           
         
-                query = T_Invoices.objects.raw('''SELECT 1 as id, '(a) Outward Taxable  supplies  (other than zero rated, nil rated and exempted)' A,sum(TC_InvoiceItems.BasicAmount) Taxablevalue,SUM(TC_InvoiceItems.IGST) IGST,sum(TC_InvoiceItems.CGST) CGST, SUM(TC_InvoiceItems.SGST)SGST,'0'Cess
+                query = T_Invoices.objects.raw('''SELECT 1 as id, '(a) Outward Taxable  supplies  (other than zero rated, nil rated and exempted)' NatureOfSupplies,sum(TC_InvoiceItems.BasicAmount) TotalTaxableValue,SUM(TC_InvoiceItems.IGST) IntegratedTax,sum(TC_InvoiceItems.CGST) CentralTax, SUM(TC_InvoiceItems.SGST)State_UTTax,'0'Cess
                                             FROM T_Invoices
                                             JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                                             WHERE Party_id=%s AND  T_Invoices.InvoiceDate BETWEEN %s AND %s and  TC_InvoiceItems.GSTPercentage != 0
                                             UNION 
-                                            SELECT 1 as id, '(b) Outward Taxable  supplies  (zero rated )' A, 0 Taxablevalue,0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(b) Outward Taxable  supplies  (zero rated )' NatureOfSupplies, 0 TotalTaxableValue,0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id,'(c) Other Outward Taxable  supplies (Nil rated, exempted)' A,sum(TC_InvoiceItems.BasicAmount) Taxablevalue,SUM(TC_InvoiceItems.IGST) IGST,sum(TC_InvoiceItems.CGST) CGST, SUM(TC_InvoiceItems.SGST)SGST,'0'Cess
+                                            SELECT 1 as id,'(c) Other Outward Taxable  supplies (Nil rated, exempted)' NatureOfSupplies,sum(TC_InvoiceItems.BasicAmount) TotalTaxableValue,SUM(TC_InvoiceItems.IGST) IntegratedTax,sum(TC_InvoiceItems.CGST) CentralTax, SUM(TC_InvoiceItems.SGST)State_UTTax,'0'Cess
                                             FROM T_Invoices
                                             JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                                             WHERE  Party_id=%s AND T_Invoices.InvoiceDate BETWEEN  %s AND %s AND TC_InvoiceItems.GSTPercentage = 0
                                             UNION 
-                                            SELECT 1 as id, '(d) Inward supplies (liable to reverse charge) ' A, 0 Taxablevalue,0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(d) Inward supplies (liable to reverse charge) ' NatureOfSupplies, 0 TotalTaxableValue,0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION 
-                                            SELECT 1 as id, '(e) Non-GST Outward supplies' A, 0 Taxablevalue,0 IGST,0 CGST, 0 SGST,0 Cess''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                                            SELECT 1 as id, '(e) Non-GST Outward supplies' NatureOfSupplies, 0 TotalTaxableValue,0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                                                     
-                DOSAISLTRCdata = DOSAISLTRCSerializer(query, many=True).data
- 
+                DOSAISLTRC = DOSAISLTRCSerializer(query, many=True).data
+                
+                if not DOSAISLTRC:
+                    DOSAISLTRC = [{
+                                    'Nature Of Supplies': None,
+                                    'Total Taxable Value': None,
+                                    'Integrated Tax': None,
+                                    'Central Tax': None,
+                                    'State / UT Tax': None,
+                                    'Cess': None
+                                }]
+       
         
                 
 ################################## 4.EligibleITC #############################################################################
 
-                EligibleITCquery = T_Invoices.objects.raw('''SELECT 1 as id, '(A) ITC Available (Whether in full or part)' A,0 IGST,0 CGST, 0 SGST,0 Cess
+                EligibleITCquery = T_Invoices.objects.raw('''SELECT 1 as id, '(A) ITC Available (Whether in full or part)' Details,0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id,  '(1)   Import of goods ' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id,  '(1)   Import of goods ' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(2)   Import of services' A,0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(2)   Import of services' Details,0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(3)   Inward supplies liable to reverse charge(other than 1 &2 above)' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(3)   Inward supplies liable to reverse charge(other than 1 &2 above)' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(4)   Inward supplies from ISD' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(4)   Inward supplies from ISD' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(5)   All other ITC' A,IFNULL(SUM(TC_InvoiceItems.IGST),0) IGST,IFNULL(sum(TC_InvoiceItems.CGST),0) CGST, IFNULL(SUM(TC_InvoiceItems.SGST),0) SGST,'0'Cess
+                                            SELECT 1 as id, '(5)   All other ITC' Details,IFNULL(SUM(TC_InvoiceItems.IGST),0) IntegratedTax,IFNULL(sum(TC_InvoiceItems.CGST),0) CentralTax, IFNULL(SUM(TC_InvoiceItems.SGST),0) State_UTTax,'0'Cess
                                             FROM T_Invoices
                                             JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                                             WHERE  T_Invoices.Customer_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s
                                             UNION
-                                            SELECT 1 as id, ' (B) ITC Reversed' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, ' (B) ITC Reversed' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(1)   As per Rule 42 & 43 of SGST/CGST rules ' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(1)   As per Rule 42 & 43 of SGST/CGST rules ' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(2)   Others' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(C) Net ITC Available (A)-(B)' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(C) Net ITC Available (A)-(B)' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, ' (D) Ineligible ITC' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, ' (D) Ineligible ITC' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(1)   As per section 17(5) of CGST//SGST Act' A, 0 IGST,0 CGST, 0 SGST,0 Cess
+                                            SELECT 1 as id, '(1)   As per section 17(5) of CGST//SGST Act' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess
                                             UNION
-                                            SELECT 1 as id, '(2)   Others' A, 0 IGST,0 CGST, 0 SGST,0 Cess''',([Party],[FromDate],[ToDate]))
-                EgibleITCdata = EligibleITCSerializer(EligibleITCquery, many=True).data
+                                            SELECT 1 as id, '(2)   Others' Details, 0 IntegratedTax,0 CentralTax, 0 State_UTTax,0 Cess''',([Party],[FromDate],[ToDate]))
+                EligibleITC = EligibleITCSerializer(EligibleITCquery, many=True).data
+                
+                if not EligibleITC:
+                    EligibleITC = [{
+                                    'Details': None,
+                                    'Integrated Tax': None,
+                                    'Central Tax': None,
+                                    'State / UT Tax': None,
+                                    'Cess': None
+                                }]    
      
         
         
 #####################   3.2 Of the supplies shown in 3.1 (a), details of inter-state supplies made to unregistered persons, composition taxable person and UIN holders#################################################
         
-                query3 = T_Invoices.objects.raw('''SELECT 1 as id, concat(M_States.StateCode,'-',M_States.Name)states ,sum(TC_InvoiceItems.BasicAmount) Taxablevalue,SUM(TC_InvoiceItems.IGST) IGST
+                query3 = T_Invoices.objects.raw('''SELECT 1 as id, concat(M_States.StateCode,'-',M_States.Name) PlaceOfSupplyState_UT ,sum(TC_InvoiceItems.BasicAmount) TaxableValue,SUM(TC_InvoiceItems.IGST) AmountOfIntegratedTax
                                             FROM T_Invoices
                                             JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                                             JOIN M_Parties ON M_Parties.id=T_Invoices.Customer_id
                                             JOIN M_States ON M_Parties.State_id=M_States.id
                                             WHERE  Party_id=%s AND T_Invoices.InvoiceDate BETWEEN %s AND %s   group by M_States.id''',([Party],[FromDate],[ToDate]))
-                Query3data = Query3Serializer(query3, many=True).data
+                Query3 = Query3Serializer(query3, many=True).data
+                
+                if not Query3:
+                    Query3 = [{
+                                    'Place Of Supply State / UT': None,
+                                    'Taxable Value': None,
+                                    'Amount Of Integrated Tax': None
+                                }]
         
                 response_data = {
-                    "DOSAISLTRCdata":  DOSAISLTRCdata ,
-                    "EgibleITCdata": EgibleITCdata ,
-                    "DetailsOfInterStateSupplies":  Query3data 
+                    "DOSAISLTRC":  DOSAISLTRC ,
+                    "EligibleITC": EligibleITC ,
+                    "DetailsOfInterStateSupplies":  Query3 
                   
                 }
-                
+              
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
 
     
 
