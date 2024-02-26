@@ -402,6 +402,7 @@ class ManPowerSerializer(serializers.Serializer):
     FEParty_id = serializers.IntegerField(allow_null=True)
     PartyName = serializers.CharField(max_length=500)
     PartyActive = serializers.BooleanField(default=True)
+    CreatedOn = serializers.DateTimeField()
     PartyType = serializers.CharField(max_length=500)
     Email = serializers.CharField(max_length=500)
     PAN = serializers.CharField(max_length=500)
