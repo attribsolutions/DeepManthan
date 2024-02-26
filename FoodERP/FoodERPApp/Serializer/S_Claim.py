@@ -128,6 +128,7 @@ class ClaimTrackingSerializerSecond(serializers.Serializer):
     CreditNoteAmount	= serializers.DecimalField(max_digits=20, decimal_places=2)
     ClaimSummaryDate = serializers.DateField()	
     CreditNoteUpload = serializers.SerializerMethodField()
+    FileName = serializers.CharField(max_length=500)
     Claim_id = serializers.IntegerField()
     Party_id= serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
@@ -141,8 +142,8 @@ class ClaimTrackingSerializerSecond(serializers.Serializer):
             media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.id}/2"  # Replace with your actual media URL prefix from settings
             return media_url
         return None
- 
-
+    
+  
     
     
    
