@@ -402,7 +402,7 @@ class ManPowerSerializer(serializers.Serializer):
     FEParty_id = serializers.IntegerField(allow_null=True)
     PartyName = serializers.CharField(max_length=500)
     PartyActive = serializers.BooleanField(default=True)
-    CreatedOn = serializers.DateTimeField()
+    PartyCreation = serializers.DateTimeField()
     PartyType = serializers.CharField(max_length=500)
     Email = serializers.CharField(max_length=500)
     PAN = serializers.CharField(max_length=500)
@@ -442,13 +442,6 @@ class TCSAmountReportSerializer(serializers.Serializer):
     Total = serializers.DecimalField(max_digits=20, decimal_places=2)
     PartyID = serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
-
-
-
-
-
-
-
 
 
 
