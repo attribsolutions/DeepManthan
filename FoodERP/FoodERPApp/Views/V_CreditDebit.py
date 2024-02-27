@@ -254,6 +254,11 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRInvoices": CRDRInvoices,
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
+
+                else:
+                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'',328,0,0,0,a['Customer']['id'])
+
+                if query:                   
                     log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'',85,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
                 log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
