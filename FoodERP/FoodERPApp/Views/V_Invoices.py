@@ -436,6 +436,11 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
+
+                else:
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Print",327,0)
+
+                if InvoiceQuery:    
                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Single Invoice",50,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Not available",50,0,0,0,a['Customer']['id'])
