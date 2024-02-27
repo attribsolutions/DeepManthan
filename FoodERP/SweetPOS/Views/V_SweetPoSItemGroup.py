@@ -88,9 +88,11 @@ class ItemListView(CreateAPIView):
                             i.IsFranchisesItem,  
                             GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL) AS FoodERPMRP,
                             subgroup.id AS ItemGroupID
-                            FROM M_Items AS i
-                            LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id"""
-                            
+                        FROM M_Items AS i
+                        LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id
+                        LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
+                        WHERE M_ChannelWiseItems.PartyType_id = 19"""
+                        
                 with connection.cursor() as cursor:
                     cursor.execute(query)
                     rows = cursor.fetchall()
