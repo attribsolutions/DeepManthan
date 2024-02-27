@@ -1393,7 +1393,6 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
 
 
 class ManPowerReportView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
 
@@ -1401,7 +1400,7 @@ class ManPowerReportView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, 
+                query = MC_PartySubParty.objects.raw('''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, A.CreatedOn AS PartyCreation,
 M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
  C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
@@ -1444,6 +1443,7 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                             "FEParty_id": a['FEParty_id'],
                             "PartyName": a['PartyName'],
                             "PartyActive": a['PartyActive'],
+                            "PartyCreation":a['PartyCreation'],
                             "PartyType": a['PartyType'],
                             "Email": a['Email'],
                             "PAN":a['PAN'],

@@ -297,7 +297,7 @@ class InvoiceView(CreateAPIView):
                         Invoice = Invoice_serializer.save()
                         LastInsertId = Invoice.id
                         LastIDs.append(Invoice.id)
-                        log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
+                        log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId)+','+'FullInvoiceNumber:'+Invoicedata['FullInvoiceNumber'],4,LastInsertId,0,0, Invoicedata['Customer'])
                     else:
                         transaction.set_rollback(True)
                         # print(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
