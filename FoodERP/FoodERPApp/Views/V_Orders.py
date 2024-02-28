@@ -397,9 +397,9 @@ class T_OrdersView(CreateAPIView):
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
                 OrderDate = Orderdata['OrderDate']
-
+                Supplier  = Orderdata['Supplier']
                 '''Get Max Order Number'''
-                a = GetMaxNumber.GetOrderNumber(Division, OrderType, OrderDate)
+                a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
                 
                 for aa in Orderdata['OrderItem']:
