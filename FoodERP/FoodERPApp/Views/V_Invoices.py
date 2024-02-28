@@ -318,13 +318,17 @@ class InvoiceViewSecond(CreateAPIView):
         try:
             
             with transaction.atomic():
-                
-                if characters is not None:
-                    A = "InvoicePrint"
+                if characters:
+                    if characters == "P":
+                        A = "InvoicePrint"
+
+                    else:
+                        A = "InvoiceEdit"
 
                 else:
-                    A = "InvoiceEdit"
-                
+                    A = "Action is not defined"
+                print(characters)
+                print(id)
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
