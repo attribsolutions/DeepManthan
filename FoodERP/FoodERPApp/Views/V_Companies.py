@@ -113,7 +113,7 @@ class C_CompaniesView(CreateAPIView):
                         "State": 22,
                         "District": 26,
                         "Taluka": 0,
-                        "City": 0,
+                        "City": "",
                         "GSTIN": Companiesdata['GSTIN'],
                         "MkUpMkDn": False,
                         "isActive": True,
@@ -140,6 +140,7 @@ class C_CompaniesView(CreateAPIView):
                     "EmployeeType": 2,
                     "State": 22,
                     "District": 26,
+                    "City": "",
                     "EmployeeParties": [
                         {"Party":  ""}
                         ]
@@ -166,9 +167,6 @@ class C_CompaniesView(CreateAPIView):
                     ]
                 }
 
-                
-                
-                
                 Companies_Serializer = C_CompanySerializer(data=Companiesdata)
                 
                 AdminDivisionDatalist_Serializer=M_PartySerializer(data=AdminDivisionDatalist[0])
@@ -177,23 +175,25 @@ class C_CompaniesView(CreateAPIView):
                 
                 UserRegistration_Serializer = UserRegistrationSerializer(data=UserJSON)
                 
-                
-
                 if Companies_Serializer.is_valid() and AdminDivisionDatalist_Serializer.is_valid() and Employee_Serializer.is_valid() and UserRegistration_Serializer.is_valid():
-                    
                     Companies_Serializer.save()
+                    # print(Companies_Serializer)
                     CompanyID=Companies_Serializer.data['id']
                     
+                    
                     AdminDivisionDatalist_Serializer.save()
+                    # print(AdminDivisionDatalist_Serializer)
                     partyID=AdminDivisionDatalist_Serializer.data['id']
                     M_Parties.objects.filter(id=partyID).update(Company=CompanyID)
 
                     Employee_Serializer.save()
+                    # print(Employee_Serializer)
                     EmployeeID=Employee_Serializer.data['id']
                     M_Employees.objects.filter(id=EmployeeID).update(Company=CompanyID)
                     MC_EmployeeParties.objects.filter(Employee=EmployeeID).update(Party=partyID)
 
                     UserRegistration_Serializer.save()
+                    # print(UserRegistration_Serializer)
                     UserID=UserRegistration_Serializer.data['id']
                     M_Users.objects.filter(id=UserID).update(Employee=EmployeeID)
                     MC_UserRoles.objects.filter(User=UserID).update(Party=partyID)
