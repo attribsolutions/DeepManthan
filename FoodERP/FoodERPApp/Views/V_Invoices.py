@@ -448,7 +448,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
-                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], A,50,0,0,0,a['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], A+','+"InvoiceID:"+str(id),50,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Not available",50,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
