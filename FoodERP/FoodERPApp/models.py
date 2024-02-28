@@ -12,7 +12,7 @@ from django.db import connection
 #     return str(request.META)
 
 def CustomPrint(value):
-    printvalue=M_Settings.objects.raw('''select 1 id,IsActive from M_settings where id=%s''',([39]))  
+    printvalue=M_Settings.objects.raw('''select 1 id,IsActive from M_Settings where id=%s''',([39]))  
     for row in printvalue:
        printvalue=row.IsActive
     if printvalue is True:
