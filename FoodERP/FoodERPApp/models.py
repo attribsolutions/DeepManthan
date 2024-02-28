@@ -11,6 +11,17 @@ from django.db import connection
 # def make_extra_data(request, response):
 #     return str(request.META)
 
+def CustomPrint(value):
+    printvalue=M_Settings.objects.raw('''select 1 id,IsActive from M_settings where id=%s''',([39]))  
+    for row in printvalue:
+       printvalue=row.IsActive
+    if printvalue is True:
+       
+        print(value)      
+    else:
+       
+        print()
+
 def DBNameFun(a):
                 
     with connection.cursor() as cursor:
@@ -667,6 +678,7 @@ class M_Items(models.Model):
     Budget = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
     IsFranchisesItem = models.BooleanField(default=False)
+    CItemID = models.IntegerField(default=False,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         

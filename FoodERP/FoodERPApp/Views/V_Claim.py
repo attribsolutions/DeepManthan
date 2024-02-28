@@ -12,6 +12,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 from .V_CommFunction import *
+import calendar
 
 
 class ClaimSummaryView(CreateAPIView):
@@ -487,10 +488,11 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     PartyIDs = p.split(",")
 
                 ClaimTrackingquery = '''SELECT T_ClaimTrackingEntry.id, X.id Party_id, M_Cluster.Name Cluster, M_SubCluster.Name SubCluster, X.Name PartyName, T_ClaimTrackingEntry.FullClaimNo, Claim_id,
-                                                            T_ClaimTrackingEntry.Date,  T_ClaimTrackingEntry.Month, 
+                                                            T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, 
                                                             T_ClaimTrackingEntry.Year, a.Name TypeName,
                                                             b.Name TypeOfClaimName, M_PriceList.Name ClaimTradeName,  ClaimAmount,
-                                                            CreditNotestatus, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
+                                                            d.Name AS CreditNoteStatus,
+                                                            CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, 
                                                             CreditNoteUpload,  ClaimReceivedSource , T_ClaimTrackingEntry.Remark,T_ClaimTrackingEntry.IsDeleted
                                                             FROM T_ClaimTrackingEntry
                                                             LEFT JOIN M_PartyType ON M_PartyType.id= T_ClaimTrackingEntry.PartyType_id
@@ -530,8 +532,16 @@ class ClaimTrackingEntryListView(CreateAPIView):
                     # ClaimTrackingdata = ClaimTrackingSerializerSecond(ClaimTrackingquery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ClaimTrackingdata})
                     ClaimTrackingList = list()
+                    
                     for a in ClaimTrackingqueryresults:
-                        dd=str(a.CreditNoteUpload)
+                        dd = str(a.CreditNoteUpload)
+                        month_name = a.Month.lower()  
+                        
+                        if month_name.isdigit() and int(month_name) in range(1, 13):
+                           month_name = calendar.month_name[int(month_name)]
+                        else:
+                            month_name = "Unknown"
+                            
                         ClaimTrackingList.append({
                             "id":a.id,
                             "Cluster": a.Cluster,
@@ -541,13 +551,13 @@ class ClaimTrackingEntryListView(CreateAPIView):
                             "FullClaimNo": a.FullClaimNo,
                             "ClaimID": a.Claim_id,
                             "Date": a.Date,
-                            "Month": a.Month,
+                            "Month": month_name,
                             "Year": a.Year,
                             "TypeName": a.TypeName,
                             "TypeOfClaimName": a.TypeOfClaimName,
                             "ClaimTradeName": a.ClaimTradeName,
                             "ClaimAmount": a.ClaimAmount,
-                            "CreditNotestatus": a.CreditNotestatus,
+                            "CreditNoteStatus": a.CreditNoteStatus,
                             "CreditNoteNo": a.CreditNoteNo,
                             "CreditNoteDate": a.CreditNoteDate,
                             "CreditNoteAmount": a.CreditNoteAmount,
@@ -627,7 +637,7 @@ class ClaimTrackingEntryViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload, Claim_id, T_ClaimTrackingEntry.Party_id, P.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName, M_Cluster.Name Cluster , M_SubCluster.Name SubCluster
+                ClaimTrackingquery = T_ClaimTrackingEntry.objects.raw('''SELECT T_ClaimTrackingEntry.id, T_ClaimTrackingEntry.Date, T_ClaimTrackingEntry.Month, T_ClaimTrackingEntry.Year, ClaimReceivedSource, T_ClaimTrackingEntry.Type,a.Name TypeName, ClaimTrade,M_PriceList.Name ClaimTradeName,TypeOfClaim,b.Name TypeOfClaimName, ClaimAmount, Remark, ClaimCheckBy,c.Name As ClaimCheckByName,CreditNotestatus, d.Name As CreditNotestatusName, CreditNoteNo, CreditNoteDate, CreditNoteAmount, ClaimSummaryDate, CreditNoteUpload,  CreditNoteUpload as FileName, Claim_id, T_ClaimTrackingEntry.Party_id, P.Name PartyName,T_ClaimTrackingEntry.FullClaimNo,T_ClaimTrackingEntry.PartyType_id,M_PartyType.Name PartyTypeName, M_Cluster.Name Cluster , M_SubCluster.Name SubCluster
 FROM T_ClaimTrackingEntry
 LEFT JOIN M_PartyType ON M_PartyType.id = T_ClaimTrackingEntry.PartyType_id 
 JOIN M_Parties P ON P.id=T_ClaimTrackingEntry.Party_id
@@ -669,6 +679,7 @@ WHERE T_ClaimTrackingEntry.id=%s ''', ([id]))
                             "CreditNoteAmount": a['CreditNoteAmount'],
                             "ClaimSummaryDate": a['ClaimSummaryDate'],
                             "CreditNoteUpload": a['CreditNoteUpload'],
+                            "FileName" : a['FileName'],
                             "Claim": a['Claim_id'],
                             "Party": a['Party_id'],
                             "PartyName": a['PartyName'],
