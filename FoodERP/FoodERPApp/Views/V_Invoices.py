@@ -314,9 +314,17 @@ class InvoiceView(CreateAPIView):
 class InvoiceViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, id=0):
+    def get(self, request, id=0,characters=None):
         try:
+            
             with transaction.atomic():
+                
+                if characters is not None:
+                    A = "InvoicePrint"
+
+                else:
+                    A = "InvoiceEdit"
+                
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
@@ -392,7 +400,7 @@ class InvoiceViewSecond(CreateAPIView):
                         
                         
                         query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
-                        BanksSerializer=PartyBanksSerializer(query, many=True).data
+                        BanksSerializer= PartyBanksSerializer(query, many=True).data
                         BankData=list()
                         for e in BanksSerializer:
                             if e['IsDefault'] == 1:
@@ -436,7 +444,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
-                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Single Invoice",50,0,0,0,a['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], A,50,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Not available",50,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
