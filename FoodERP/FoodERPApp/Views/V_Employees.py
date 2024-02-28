@@ -368,14 +368,18 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     Employee=id).values('Party')
                 if query.exists():
                     q2 = M_Parties.objects.filter(id__in=query)
-                    Parties_serializer = DivisionsSerializer(
+                    Parties_serializer = DivisionsSerializerSecond(
                         q2, many=True).data
                     Partylist = list()
                     for a in Parties_serializer:
                         Partylist.append({
                             'id':  a['id'],
                             'Name':  a['Name'],
-                            'SAPPartyCode':a['SAPPartyCode']
+                            'SAPPartyCode':a['SAPPartyCode'],
+                            'Latitude': a['Latitude'],
+                            'Longitude' : a['Longitude'],
+                            'MobileNo' :a['MobileNo'],
+                            'Address' :a['Address']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
