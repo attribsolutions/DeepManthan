@@ -12,7 +12,7 @@ from django.db import connection
 #     return str(request.META)
 
 def CustomPrint(value):
-    printvalue=M_Settings.objects.raw('''select 1 id,IsActive from M_settings where id=%s''',([39]))  
+    printvalue=M_Settings.objects.raw('''select 1 id,IsActive from M_Settings where id=%s''',([39]))  
     for row in printvalue:
        printvalue=row.IsActive
     if printvalue is True:
@@ -83,6 +83,7 @@ class M_PartyType(models.Model):
     IsRetailer = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
     IsFranchises = models.BooleanField(default=False)
+    SAPIndicator = models.CharField(max_length=20)
  
     class Meta:
         db_table = 'M_PartyType'
@@ -243,7 +244,7 @@ class M_Employees(models.Model):
     District = models.ForeignKey(M_Districts, related_name='EmployeesDistrict', on_delete=models.PROTECT)
     EmployeeType = models.ForeignKey(M_EmployeeTypes, related_name='EmployeeType', on_delete=models.PROTECT)
     State = models.ForeignKey(M_States, related_name='EmployeesState', on_delete=models.PROTECT)
-    City = models.ForeignKey(M_Cities, related_name='EmployeesCity', on_delete=models.PROTECT)
+    City = models.ForeignKey(M_Cities, related_name='EmployeesCity', on_delete=models.PROTECT,blank=True, null=True)
     PIN = models.CharField(max_length=500,null=True,blank=True)
   
     class Meta:
@@ -679,6 +680,7 @@ class M_Items(models.Model):
     SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
     IsFranchisesItem = models.BooleanField(default=False)
     CItemID = models.IntegerField(default=False,null=True,blank=True)
+    SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         
