@@ -142,9 +142,3 @@ class ClaimTrackingSerializerSecond(serializers.Serializer):
             media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.id}/2"  # Replace with your actual media URL prefix from settings
             return media_url
         return None
-    
-  
-    
-    
-   
-        
