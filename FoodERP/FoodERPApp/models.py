@@ -83,6 +83,7 @@ class M_PartyType(models.Model):
     IsRetailer = models.BooleanField(default=False)
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
     IsFranchises = models.BooleanField(default=False)
+    SAPIndicator = models.CharField(max_length=20)
  
     class Meta:
         db_table = 'M_PartyType'
@@ -679,6 +680,7 @@ class M_Items(models.Model):
     SkyggeProductID=models.IntegerField(default=False,null=True,blank=True)
     IsFranchisesItem = models.BooleanField(default=False)
     CItemID = models.IntegerField(default=False,null=True,blank=True)
+    SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
     class Meta:
         db_table = "M_Items"
         
