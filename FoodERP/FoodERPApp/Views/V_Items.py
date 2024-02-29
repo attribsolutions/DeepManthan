@@ -623,6 +623,7 @@ class ItemWiseUpdateView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
+
 class ItemWiseSaveView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
