@@ -26,26 +26,17 @@ class TargetUploadsView(CreateAPIView):
         serializer.validated_data['SheetNo'] = next_sheet_no
     
         serializer.save()
-
+        
     def post(self, request):
         try:
-            month = request.data.get('Month')
-            year = request.data.get('Year')
-            party = request.data.get('Party')
-            item = request.data.get('Item')
-            target_quantity = request.data.get('TargetQuantity')
+            request_data = request.data 
             
-            data = {
-                'Month': month,
-                'Year': year,
-                'Party': party,
-                'Item': item,
-                'TargetQuantity': target_quantity,
-            }
+            for data in request_data:
+                
+                serializer = self.get_serializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
 
-            serializer = self.get_serializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
             
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'TargetUploads Data Uploaded Successfully', 'Data': []})
         except Exception as e:
