@@ -10,37 +10,43 @@ from django.db.models import Q
 from datetime import datetime
 from django.db import connection
 from django.db.models import Max
+from django.db import transaction
 
 
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TargetUploadsSerializer 
-    
-    @transaction.atomic()
-    def perform_create(self, serializer):
-       
-        max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
-        
-        next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
-  
-        serializer.validated_data['SheetNo'] = next_sheet_no
-    
-        serializer.save()
-        
-    def post(self, request):
-        try:
-            request_data = request.data 
-            
-            for data in request_data:
-                
-                serializer = self.get_serializer(data=data)
-                serializer.is_valid(raise_exception=True)
-                self.perform_create(serializer)
+    serializer_class = TargetUploadsSerializer  
+    sheet_no_updated = False
 
-            
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'TargetUploads Data Uploaded Successfully', 'Data': []})
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        try:
+            request_data = request.data  
+
+            if not self.sheet_no_updated: 
+                max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
+                
+                next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
+                
+                self.sheet_no_updated = True 
+                
+                
+                request_data[0]['SheetNo'] = next_sheet_no
+
+                
+                serializer_first = self.get_serializer(data=request_data[0])
+                serializer_first.is_valid(raise_exception=True)
+                
+                serializer_first.save()
+
+                for data in request_data[1:]:
+                    data['SheetNo'] = next_sheet_no
+
+            serializer_others = self.get_serializer(data=request_data[1:], many=True)
+            serializer_others.is_valid(raise_exception=True)
+
+            serializer_others.save()
+
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
-
-  
