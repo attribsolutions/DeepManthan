@@ -236,7 +236,54 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-                payload = json.dumps(data)
+                OrderID = data["Order"]
+                payload = list()
+                Items =list()
+                query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode Customer,T_Orders.OrderDate DocDate,
+                                           M_PartyType.SAPIndicator Indicator,
+TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.Name Unit,
+(case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
+
+from T_Orders 
+join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+join M_Parties S on S.id=T_Orders.Supplier_id
+join M_Parties C on C.id=T_Orders.Customer_id
+join M_PartyType on M_PartyType.id=C.PartyType_id
+join M_Items on M_Items.id=TC_OrderItems.Item_id
+join M_Units on M_Units.id=M_Items.SAPUnitID
+where T_Orders.id=%s''',[OrderID])
+                
+                for row in query:
+                    Date=datetime.strptime(row.DocDate, '%Y-%m-%d')
+                    Customer  =str(row.Customer),
+                    DocDate = Date.strftime('%d.%m.%Y'),
+                    Indicator = str(row.Indicator),
+                    OrderNo = str(row.id),
+                    Items.append({
+                                            "OrderNo": str(row.id),
+                                            "ItemNo": str(row.ItemNo),
+                                            "Material": str(row.Material),
+                                            "Quantity": str(row.Quantity),
+                                            "Unit": str(row.Unit),
+                                            "Plant": str(row.Plant),
+                                            "Batch": ""
+                                        
+                                        })
+                
+                payload.append({
+
+                        "Customer": Customer,
+                        "DocDate": DocDate,
+                        "Indicator": Indicator,
+                        "OrderNo": OrderNo,
+                        "Stats": "1",
+                        "CancelFlag": "",
+                        "OrderItemSet": Items       
+
+
+                })
+                
+                
                 
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
