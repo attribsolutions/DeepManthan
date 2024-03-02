@@ -2264,10 +2264,19 @@ class M_PartyDetails(models.Model):
         db_table = "M_PartyDetails" 
 
 
+class T_TargetUploads(models.Model):
+    
+    Month = models.IntegerField(default=False)
+    Year = models.IntegerField(default=False)
+    Party = models.ForeignKey(M_Parties, related_name='TargetUploadsParty',  on_delete=models.PROTECT )
+    Item =  models.ForeignKey(M_Items, related_name='TargetUploadsItem', on_delete=models.PROTECT)
+    TargetQuantity = models.DecimalField(max_digits=10, decimal_places=2)
+    SheetNo = models.IntegerField(default=False)
+    CreatedBy = models.IntegerField(default=False)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
 
-
-
-
+    class Meta:
+        db_table = "T_TargetUploads"
 
 
 
