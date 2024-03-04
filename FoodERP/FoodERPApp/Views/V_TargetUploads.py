@@ -16,7 +16,7 @@ from rest_framework.response import Response
 
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TargetUploadsSerializer  
+    serializer_class = TargetUploadsOneSerializer  
     sheet_no_updated = False
 
     @transaction.atomic
@@ -48,7 +48,7 @@ class TargetUploadsView(CreateAPIView):
 
         except Exception as e:
 
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
 class GetTargetUploadsView(CreateAPIView):
@@ -81,6 +81,6 @@ class GetTargetUploadsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
             return Response({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
-
-
-
+        
+        
+   
