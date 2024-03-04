@@ -699,6 +699,8 @@ urlpatterns = [
 #TargetUploads
               url(r'TargetUploads$',TargetUploadsView.as_view()), 
               url(r'GetTargetUploads$',GetTargetUploadsView.as_view()),
+              
+              
              
 
 
