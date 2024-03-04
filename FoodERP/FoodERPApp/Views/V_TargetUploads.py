@@ -14,6 +14,7 @@ from django.db import transaction
 from rest_framework.response import Response
 
 
+
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TargetUploadsOneSerializer  
@@ -65,22 +66,41 @@ class GetTargetUploadsView(CreateAPIView):
                                                         GROUP BY SheetNo
                                                         """)
                 TargetrList = list()
-                if query:  
+                if query:
                     TargetSerializer = TargetUploadsSerializer(query, many=True).data
                     for a in TargetSerializer:
                         TargetrList.append({
-                            "Month": a['Month'],
-                            "Year": a['Year'],
-                            "PartyID": a['Party']['id'],  
-                            "PartyName": a['Party']['Name'],  
-                            "SheetNo": a['SheetNo']
-                        })    
+                                "Month": a['Month'],
+                                "Year": a['Year'],
+                                "PartyID": a['Party']['id'],  
+                                "PartyName": a['Party']['Name'],  
+                                "SheetNo": a['SheetNo']
+                            })    
 
                     return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
                 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            return Response({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return Response({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+        
+       
+class DeleteTargetSheetView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                
+                sheet_no = request.data.get('SheetNo')
+                deleted_count, _ = T_TargetUploads.objects.filter(SheetNo=sheet_no).delete()
+
+                if deleted_count > 0:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'SheetNo {sheet_no} deleted successfully', 'Data': []})
+                else:
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': f'No entries found with SheetNo {sheet_no}', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
         
    

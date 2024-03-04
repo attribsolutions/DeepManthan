@@ -699,6 +699,10 @@ urlpatterns = [
 #TargetUploads
               url(r'TargetUploads$',TargetUploadsView.as_view()), 
               url(r'Gettargetupload$',GetTargetUploadsView.as_view()),
+              url(r'DeleteTargetSheet$',DeleteTargetSheetView.as_view()),
+         
+              
+             
            
               
               
