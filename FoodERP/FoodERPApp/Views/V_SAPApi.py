@@ -313,7 +313,8 @@ where T_Orders.id=%s''',[OrderID])
                 index = a.find('entry')
 
                 if index != -1:
-                    OrderID = int(data['Order'])-5000000
+                    OrderID = int(OrderNo)-5000000
+                    print(OrderID)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
                     log_entry = create_transaction_logNew(request, data, 0, '',321,0)
