@@ -239,7 +239,7 @@ class SAPOrderView(CreateAPIView):
                 OrderID = data["Order"]
                 payload = list()
                 Items =list()
-                query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode Customer,T_Orders.OrderDate DocDate,
+                query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
                                            M_PartyType.SAPIndicator Indicator,
 TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.Name Unit,
 (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
@@ -254,16 +254,18 @@ join M_Units on M_Units.id=M_Items.SAPUnitID
 where T_Orders.id=%s''',[OrderID])
                 
                 for row in query:
-                    Date=datetime.strptime(row.DocDate, '%Y-%m-%d')
-                    Customer  =str(row.Customer),
-                    DocDate = Date.strftime('%d.%m.%Y'),
-                    Indicator = str(row.Indicator),
-                    OrderNo = str(row.id),
+                    
+                    date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
+                    Customer  =str(row.CustomerID)
+                    
+                    DocDate = date_obj.strftime('%d.%m.%Y')
+                    Indicator = str(row.Indicator)
+                    OrderNo = str(row.id)
                     Items.append({
                                             "OrderNo": str(row.id),
                                             "ItemNo": str(row.ItemNo),
                                             "Material": str(row.Material),
-                                            "Quantity": str(row.Quantity),
+                                            "Quantity": str(round(row.Quantity,3)),
                                             "Unit": str(row.Unit),
                                             "Plant": str(row.Plant),
                                             "Batch": ""
