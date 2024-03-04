@@ -287,7 +287,7 @@ where T_Orders.id=%s''',[OrderID])
                 
                 aa=json.dumps(payload[0])
                 
-                
+                print(aa)
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
                 url = SAPURL
