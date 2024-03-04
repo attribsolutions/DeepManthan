@@ -285,6 +285,7 @@ where T_Orders.id=%s''',[OrderID])
 
                 })
                 
+                aa=json.dumps(payload[0])
                 
                 
                 SAPURL, Token  = GetThirdPartyAPIs(26)
@@ -297,8 +298,9 @@ where T_Orders.id=%s''',[OrderID])
                     'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
                 }
                
-                response = requests.request(
-                    "POST", url, headers=headers, data=payload)
+                
+                
+                response = requests.request("POST", url, headers=headers, data=aa)
                 # Convert XML to OrderedDict
                 data_dict = xmltodict.parse(response.text)
                 # Convert OrderedDict to JSON string
@@ -307,10 +309,11 @@ where T_Orders.id=%s''',[OrderID])
                 data_dict = json.loads(json_data)
                 # print(data_dict)
                 a = str(data_dict)
+                
                 index = a.find('entry')
 
                 if index != -1:
-                    OrderID = int(data['OrderNo'])-5000000
+                    OrderID = int(data['Order'])-5000000
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
                     log_entry = create_transaction_logNew(request, data, 0, '',321,0)
