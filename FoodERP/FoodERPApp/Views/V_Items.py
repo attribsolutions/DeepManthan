@@ -594,7 +594,7 @@ class ItemWiseUpdateView(CreateAPIView):
                 
                 query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
-                                                            M_Items.Length, M_Items.StoringCondition
+                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
                                                             LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id and IsDeleted=0
@@ -622,7 +622,7 @@ class ItemWiseUpdateView(CreateAPIView):
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
+        
 class ItemWiseSaveView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
@@ -632,24 +632,29 @@ class ItemWiseSaveView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Item_data = JSONParser().parse(request) 
-                Type = Item_data['Type']
-                UpdatedData = Item_data['UpdatedData']
+                Item_data = JSONParser().parse(request)
+                type = Item_data['Type']
+                Updated_data = Item_data['UpdatedData']
                 
-                for a in UpdatedData: 
+                for a in Updated_data: 
                     if 'ItemID' in a:
-                        item_id = a['ItemID']
-                    if (Type == 'ShelfLife'):
-                        query = MC_ItemShelfLife.objects.filter(Item=a['ItemID']).update(Days=a['Value1'])
-                    elif(Type == 'Group'):
-                        query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(Group=a['Value1'],SubGroup=a['Value2'])                   
-                    else:
-                        query = M_Items.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
-                        
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
+                        Item_id = a['ItemID']
+                        if type == 'ShelfLife':
+                            shelf_life_days = a['Value1']
+                            query = MC_ItemShelfLife.objects.filter(Item=Item_id).update(Days=shelf_life_days)
+                        elif type == 'Group':
+                            group = a['Value1']
+                            subgroup = a['Value2']
+                            query = MC_ItemGroupDetails.objects.filter(Item=Item_id).update(Group=group, SubGroup=subgroup)
+                        else:
+                            update_data = {type: a['Value1']}
+                            query = M_Items.objects.filter(id=Item_id).update(**update_data)
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': type + ' Update Successfully', 'Data': [] })
         except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
+
 
 class ImageUploadsView(CreateAPIView):
     
