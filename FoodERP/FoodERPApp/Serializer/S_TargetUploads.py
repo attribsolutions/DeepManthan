@@ -2,6 +2,14 @@ from rest_framework import serializers
 from ..models import *
 from datetime import datetime
 
+
+
+class TargetUploadsOneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_TargetUploads
+        fields = '__all__'
+
+
 class PartySerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
