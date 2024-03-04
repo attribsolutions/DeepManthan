@@ -14,3 +14,7 @@ class TargetUploadsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
+
+
+

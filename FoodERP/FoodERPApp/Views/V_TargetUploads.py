@@ -74,7 +74,7 @@ class GetTargetUploadsView(CreateAPIView):
                             "PartyID": a['Party']['id'],  
                             "PartyName": a['Party']['Name'],  
                             "SheetNo": a['SheetNo']
-                        })
+                        })    
 
                     return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
                 
