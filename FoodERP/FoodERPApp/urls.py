@@ -152,6 +152,8 @@ from .Views.V_PartyDetails import *
 
 from .Views.V_Settings import *
 
+from .Views.V_TargetUploads import *
+
 
 urlpatterns = [
     
@@ -694,7 +696,17 @@ urlpatterns = [
             
               url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
-
+#TargetUploads
+              url(r'TargetUploads$',TargetUploadsView.as_view()), 
+              url(r'Gettargetupload$',GetTargetUploadsView.as_view()),
+              url(r'DeleteTargetSheet$',DeleteTargetSheetView.as_view()),
+         
+              
+             
+           
+              
+              
+             
 
 
 
