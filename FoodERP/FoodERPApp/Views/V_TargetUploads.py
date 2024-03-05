@@ -69,11 +69,11 @@ class GetTargetUploadsView(CreateAPIView):
                                                         JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
                                                         GROUP BY Party_id,SheetNo
                                                         """)
-                TargetrList = list()
+                TargetList = list()
                 if query:
                     TargetSerializer = TargetUploadsSerializer(query, many=True).data
                     for a in TargetSerializer:
-                        TargetrList.append({
+                        TargetList.append({
                                 "Month": a['Month'],
                                 "Year": a['Year'],
                                 "PartyID": a['Party']['id'],  
@@ -81,7 +81,7 @@ class GetTargetUploadsView(CreateAPIView):
                                 "SheetNo": a['SheetNo']
                             })    
 
-                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
+                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
             return Response({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
@@ -95,11 +95,11 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = T_TargetUploads.objects.filter(SheetNo=SheetNo)
-                TargetrList=list()
+                TargetList=list()
                 if query:
                     Targetrdata = TargetUploadsSerializer(query, many=True).data
                     for a in Targetrdata:
-                        TargetrList.append({
+                        TargetList.append({
                                 "Month": a['Month'],
                                 "Year": a['Year'],
                                 "PartyID": a['Party']['id'],  
@@ -110,7 +110,7 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
                                 "SheetNo": a['SheetNo']
                             })    
                      
-                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
+                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
@@ -121,18 +121,21 @@ class DeleteTargetSheetView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def delete(self, request):
+    def delete(self, request, id=0):
         try:
             with transaction.atomic():
                 sheet_no = request.data.get('SheetNo')
                 party_id = request.data.get('PartyID')
-
+                
                 deleted_count, _ = T_TargetUploads.objects.filter(SheetNo=sheet_no, Party_id=party_id).delete()
 
                 if deleted_count > 0:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'Records for PartyID {party_id} in SheetNo {sheet_no} deleted successfully', 'Data': []})
+                    party_name = M_Parties.objects.get(id=party_id).Name 
+                    msg = f'Records for Party {party_name} with SheetNo {sheet_no} deleted successfully'
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': msg, 'Data': []})
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': f'No entries found for PartyID {party_id} in SheetNo {sheet_no}', 'Data': []})
+                    msg = f'No entries found for PartyID {party_id} with SheetNo {sheet_no}'
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': msg, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
