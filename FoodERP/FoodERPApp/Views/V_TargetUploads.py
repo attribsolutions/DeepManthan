@@ -85,35 +85,34 @@ class GetTargetUploadsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
             return Response({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
-
         
+
 class GetTargetUploadsBySheetNoView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    @transaction.atomic()
     
-    def get(self, request, SheetNo):
+    def get(self, request, SheetNo, PartyID):
         try:
-            with transaction.atomic():
-                query = T_TargetUploads.objects.filter(SheetNo=SheetNo)
-                TargetList=list()
-                if query:
-                    Targetrdata = TargetUploadsSerializer(query, many=True).data
-                    for a in Targetrdata:
-                        TargetList.append({
-                                "Month": a['Month'],
-                                "Year": a['Year'],
-                                "PartyID": a['Party']['id'],  
-                                "PartyName": a['Party']['Name'], 
-                                "ItemID" : a['Item']['id'],
-                                "ItemName" : a['Item']['Name'],
-                                "TargetQuantity" : a['TargetQuantity'],
-                                "SheetNo": a['SheetNo']
-                            })    
-                     
-                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
+            query = T_TargetUploads.objects.filter(SheetNo=SheetNo, Party_id=PartyID)
+            TargetList = []
+            if query:
+                Targetrdata = TargetUploadsSerializer(query, many=True).data
+                for a in Targetrdata:
+                    TargetList.append({
+                            "Month": a['Month'],
+                            "Year": a['Year'],
+                            "PartyID": a['Party']['id'],  
+                            "PartyName": a['Party']['Name'], 
+                            "ItemID" : a['Item']['id'],
+                            "ItemName" : a['Item']['Name'],
+                            "TargetQuantity" : a['TargetQuantity'],
+                            "SheetNo": a['SheetNo']
+                        })    
+
+                return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
 
 
 
