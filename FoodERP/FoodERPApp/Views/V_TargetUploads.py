@@ -114,30 +114,24 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
-
-
-class DeleteTargetSheetView(CreateAPIView):
+class DeleteTargetRecordsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def delete(self, request, id=0):
+    def delete(self, request):
         try:
             with transaction.atomic():
-                sheet_no = request.data.get('SheetNo')
-                party_id = request.data.get('PartyID')
-                
-                deleted_count, _ = T_TargetUploads.objects.filter(SheetNo=sheet_no, Party_id=party_id).delete()
-
-                if deleted_count > 0:
-                    party_name = M_Parties.objects.get(id=party_id).Name 
-                    msg = f'Records for Party {party_name} with SheetNo {sheet_no} deleted successfully'
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': msg, 'Data': []})
-                else:
-                    msg = f'No entries found for PartyID {party_id} with SheetNo {sheet_no}'
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': msg, 'Data': []})
+                target_data = JSONParser().parse(request)
+                months = target_data.get('Month', '').split(',')
+                years = target_data.get('Year', '').split(',')
+                party_ids = target_data.get('Party', '').split(',')
+             
+                T_TargetUploads.objects.filter(Month__in=months,Year__in=years, Party__in=party_ids).delete()
+             
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Targets Delete Successfully', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
-        
-        
-   
+ 
