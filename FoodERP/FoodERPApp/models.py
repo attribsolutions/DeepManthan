@@ -2270,7 +2270,7 @@ class T_TargetUploads(models.Model):
     Year = models.IntegerField(default=False)
     Party = models.ForeignKey(M_Parties, related_name='TargetUploadsParty',  on_delete=models.PROTECT )
     Item =  models.ForeignKey(M_Items, related_name='TargetUploadsItem', on_delete=models.PROTECT)
-    TargetQuantity = models.DecimalField(max_digits=10, decimal_places=2)
+    TargetQuantity = models.DecimalField(max_digits=20, decimal_places=3)
     SheetNo = models.IntegerField(default=False)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
