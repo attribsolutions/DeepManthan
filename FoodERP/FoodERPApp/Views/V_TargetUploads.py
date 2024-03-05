@@ -116,23 +116,26 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
+
 class DeleteTargetSheetView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def delete(self, request, id=0):
+    def delete(self, request):
         try:
             with transaction.atomic():
-                
                 sheet_no = request.data.get('SheetNo')
-                deleted_count, _ = T_TargetUploads.objects.filter(SheetNo=sheet_no).delete()
+                party_id = request.data.get('PartyID')
+
+                deleted_count, _ = T_TargetUploads.objects.filter(SheetNo=sheet_no, Party_id=party_id).delete()
 
                 if deleted_count > 0:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'SheetNo {sheet_no} deleted successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'Records for PartyID {party_id} in SheetNo {sheet_no} deleted successfully', 'Data': []})
                 else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': f'No entries found with SheetNo {sheet_no}', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': f'No entries found for PartyID {party_id} in SheetNo {sheet_no}', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
         
         
    
