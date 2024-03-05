@@ -15,6 +15,7 @@ from rest_framework.response import Response
 
 
 
+
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TargetUploadsOneSerializer  
@@ -26,30 +27,33 @@ class TargetUploadsView(CreateAPIView):
             request_data = request.data  
             if not self.sheet_no_updated:
 
-                max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
- 
-                next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
+                    max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
+    
+                    next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
 
-                self.sheet_no_updated = True
+                    self.sheet_no_updated = True
 
-                request_data[0]['SheetNo'] = next_sheet_no
+                    request_data[0]['SheetNo'] = next_sheet_no
 
-                serializer_first = self.get_serializer(data=request_data[0])
-                serializer_first.is_valid(raise_exception=True)
-                serializer_first.save()
+                    serializer_first = self.get_serializer(data=request_data[0])
+                    serializer_first.is_valid(raise_exception=True)
+                    serializer_first.save()
 
-                for data in request_data[1:]:
-                    data['SheetNo'] = next_sheet_no
+                    for data in request_data[1:]:
+                        data['SheetNo'] = next_sheet_no
 
-            serializer_others = self.get_serializer(data=request_data[1:], many=True)
-            serializer_others.is_valid(raise_exception=True)
-            serializer_others.save()
-
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
-
+                    serializer_others = self.get_serializer(data=request_data[1:], many=True)
+                    serializer_others.is_valid(raise_exception=True)
+                    serializer_others.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
+            else:
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data': []})
         except Exception as e:
-
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+        
 
 
 class GetTargetUploadsView(CreateAPIView):
@@ -78,12 +82,37 @@ class GetTargetUploadsView(CreateAPIView):
                             })    
 
                     return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
-                
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
             return Response({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+
         
-       
+class GetTargetUploadsBySheetNoView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    
+    def get(self, request, SheetNo):
+        try:
+            with transaction.atomic():
+                query = T_TargetUploads.objects.filter(SheetNo=SheetNo)
+                TargetrList=list()
+                if query:
+                    Targetrdata = TargetUploadsSerializer(query, many=True).data
+                    for a in Targetrdata:
+                        TargetrList.append({
+                                "Month": a['Month'],
+                                "Year": a['Year'],
+                                "PartyID": a['Party']['id'],  
+                                "PartyName": a['Party']['Name'],  
+                                "SheetNo": a['SheetNo']
+                            })    
+                     
+                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
 class DeleteTargetSheetView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
