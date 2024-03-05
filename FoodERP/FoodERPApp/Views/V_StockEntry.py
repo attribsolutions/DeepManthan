@@ -233,11 +233,11 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                         p2 += (SubCluster,)
                     
                     if Group:
-                        where_clause += " AND M_Group.id = {Group}"
+                        where_clause += " AND M_Group.id = %s"
                         p2 += (Group,)
                     
                     if SubGroup:
-                        where_clause += " AND M_Group.id = {SubGroup} "
+                        where_clause += " AND MC_SubGroup.id = %s "
                         p2 += (SubGroup,)
                     
                     Stockquery=f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
