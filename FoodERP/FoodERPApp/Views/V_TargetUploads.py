@@ -103,7 +103,10 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
                                 "Month": a['Month'],
                                 "Year": a['Year'],
                                 "PartyID": a['Party']['id'],  
-                                "PartyName": a['Party']['Name'],  
+                                "PartyName": a['Party']['Name'], 
+                                "ItemID" : a['Item']['id'],
+                                "ItemName" : a['Item']['Name'],
+                                "TargetQuantity" : a['TargetQuantity'],
                                 "SheetNo": a['SheetNo']
                             })    
                      
