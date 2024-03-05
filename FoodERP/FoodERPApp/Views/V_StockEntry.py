@@ -305,6 +305,3 @@ order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'PartyLiveStock:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
-
-
-

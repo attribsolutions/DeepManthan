@@ -236,8 +236,58 @@ class SAPOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                 data = JSONParser().parse(request)
-                payload = json.dumps(data)
+                OrderID = data["Order"]
+                payload = list()
+                Items =list()
+                query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
+                                           M_PartyType.SAPIndicator Indicator,
+TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.Name Unit,
+(case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
+
+from T_Orders 
+join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+join M_Parties S on S.id=T_Orders.Supplier_id
+join M_Parties C on C.id=T_Orders.Customer_id
+join M_PartyType on M_PartyType.id=C.PartyType_id
+join M_Items on M_Items.id=TC_OrderItems.Item_id
+join M_Units on M_Units.id=M_Items.SAPUnitID
+where T_Orders.id=%s''',[OrderID])
                 
+                for row in query:
+                    
+                    date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
+                    Customer  =str(row.CustomerID)
+                    
+                    DocDate = date_obj.strftime('%d.%m.%Y')
+                    Indicator = str(row.Indicator)
+                    OrderNo = str(row.id)
+                    Items.append({
+                                            "OrderNo": str(row.id),
+                                            "ItemNo": str(row.ItemNo),
+                                            "Material": str(row.Material),
+                                            "Quantity": str(round(row.Quantity,3)),
+                                            "Unit": str(row.Unit),
+                                            "Plant": str(row.Plant),
+                                            "Batch": ""
+                                        
+                                        })
+                
+                payload.append({
+
+                        "Customer": Customer,
+                        "DocDate": DocDate,
+                        "Indicator": Indicator,
+                        "OrderNo": OrderNo,
+                        "Stats": "1",
+                        "CancelFlag": "",
+                        "OrderItemSet": Items       
+
+
+                })
+                
+                aa=json.dumps(payload[0])
+                
+                print(aa)
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
                 url = SAPURL
@@ -248,8 +298,9 @@ class SAPOrderView(CreateAPIView):
                     'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
                 }
                
-                response = requests.request(
-                    "POST", url, headers=headers, data=payload)
+                
+                
+                response = requests.request("POST", url, headers=headers, data=aa)
                 # Convert XML to OrderedDict
                 data_dict = xmltodict.parse(response.text)
                 # Convert OrderedDict to JSON string
@@ -258,10 +309,12 @@ class SAPOrderView(CreateAPIView):
                 data_dict = json.loads(json_data)
                 # print(data_dict)
                 a = str(data_dict)
+                
                 index = a.find('entry')
 
                 if index != -1:
-                    OrderID = int(data['OrderNo'])-5000000
+                    OrderID = int(OrderNo)-5000000
+                    print(OrderID)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
                     log_entry = create_transaction_logNew(request, data, 0, '',321,0)
