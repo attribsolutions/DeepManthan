@@ -67,7 +67,7 @@ class GetTargetUploadsView(CreateAPIView):
                                                         M_Parties.Name, SheetNo
                                                         FROM T_TargetUploads
                                                         JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
-                                                        GROUP BY SheetNo
+                                                        GROUP BY Party_id,SheetNo
                                                         """)
                 TargetrList = list()
                 if query:
