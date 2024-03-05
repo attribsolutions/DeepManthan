@@ -160,13 +160,11 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 IsDamagePieces=StockReportdata['IsDamagePieces']
                 Employee = StockReportdata['Employee']
                 Cluster = StockReportdata['Cluster']
-               
                 SubCluster = StockReportdata['SubCluster']
                 Group = StockReportdata['Group']
                 SubGroup = StockReportdata['SubGroup']
                 
-                today = date.today() 
-                                
+                today = date.today()                 
                 if Party == "":
                     PartyID=0;
                     if Employee > 0:
@@ -174,25 +172,24 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                         for row in EmpPartys:
                             p=row.id
                         PartyIDs = p.split(",")
+                    where_clause = ""
+                    p1 = (today,PartyIDs)
+                    if Cluster and SubCluster:
+                        where_clause += " AND M_Cluster.id = %s AND M_SubCluster.id = %s"
+                        p1 += (Cluster,SubCluster)
+                    elif Cluster and Group:
+                        where_clause += " AND M_Cluster.id = %s AND M_Group.id = %s"
+                        p1 += (Cluster,Group)
+                    elif Cluster:
+                        where_clause += " AND M_Cluster.id = %s"
+                        p1 += (Cluster,)
+                    elif Group and SubGroup:
+                        where_clause += " AND M_Group.id = %s AND MC_SubGroup.id = %s"
+                        p1 += (Group,SubGroup)
+                    elif Group:
+                        where_clause += " AND M_Group.id = %s"
+                        p1 += (Group,)
                     
-              
-                where_clause = ""                
-                
-                if Cluster:
-                    where_clause += " AND M_Cluster.id =%s"                 
-                    aa = (today, PartyIDs,Cluster)
-                    
-                elif SubCluster:
-                    where_clause += " AND M_SubCluster.id = %s"
-                    aa = (today, PartyIDs,SubCluster)
-                elif Group:
-                    where_clause += " AND M_Group.id = %s"
-                    aa = (today, PartyIDs,Group)
-                elif SubGroup:
-                    where_clause += " AND MC_SubGroup.id = %s"
-                    aa = (today, PartyIDs,SubGroup)
-                    
-                if Party == "":        
                     Stockquery=f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
 sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,
@@ -216,12 +213,32 @@ LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
 group by A.id, M_GroupType.id,
 M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
-order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''                
-                        
+order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
+
+                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p1)
                 else : 
-                    PartyID=Party
+                    PartyID=Party;
                     PartyIDs= Party  
-                
+
+                    where_clause = ""
+                    p2 = (today, Unit, [PartyIDs])
+
+                    if Cluster and SubCluster:
+                        where_clause += " AND M_Cluster.id = %s AND M_SubCluster.id = %s"
+                        p2 += (Cluster,SubCluster)
+                    elif Cluster and Group:
+                        where_clause += " AND M_Cluster.id = %s AND M_Group.id = %s"
+                        p2 += (Cluster,Group)
+                    elif Cluster:
+                        where_clause += " AND M_Cluster.id = %s"
+                        p2 += (Cluster,)
+                    elif Group and SubGroup:
+                        where_clause += " AND M_Group.id = %s AND MC_SubGroup.id = %s"
+                        p2 += (Group,SubGroup)
+                    elif Group:
+                        where_clause += " AND M_Group.id = %s"
+                        p2 += (Group,)
+                    
                     Stockquery=f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
     ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
     O_BatchWiseLiveStock.BaseUnitQuantity Qty ,
@@ -243,19 +260,15 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
     LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
     LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
     WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
-    order by M_Group.id, MC_SubGroup.id ,M_Items.id,M_Parties.id   '''       
-            
-            
-            if Party == "":
-                        Itemquery = MC_PartyItems.objects.raw(Stockquery, (aa))
-            else :
-                        Itemquery = MC_PartyItems.objects.raw(Stockquery, (aa))
-            # print(str(Itemquery))
-        
-            if not Itemquery:
+    order by M_Group.id, MC_SubGroup.id ,M_Items.id,A.id   '''    
+                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
+                    
+                # print(str(Itemquery.query))
+                
+                if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
-            else:
+                else:
                     ItemList = list()
                     for row in Itemquery:
                         
@@ -273,7 +286,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                             UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,4,0).ConvertintoSelectedUnit()
                             StockUnit = 'Box'
                         
-                    
+                       
                         SaleableStockValue = round((float(SaleableStockActualQty) * float(row.Rate)),2)
                         SaleableStockTaxValue =round((float(SaleableStockValue)*(float(row.GSTPercentage)/100)),2)
                         UnSaleableStockValue = round((float(UnSaleableStockActualQty) * float(row.Rate)),2)
@@ -302,13 +315,12 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                             "Stockvaluewithtax" : SaleableStockValue+SaleableStockTaxValue+UnSaleableStockValue+UnSaleableStockTaxValue,
                             "Unit":StockUnit,
                             "GST" : row.GSTPercentage,
-                            "Cluster": row.Cluster,
+                            "Cluster" : row.Cluster,
                             "SubCluster": row.SubCluster
                         })
                     
                     log_entry = create_transaction_logNew(request, StockReportdata, PartyID , 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})
-                # return JsonResponse({'StatusCode': 204, 'Status': True,  'Message':'dfdfsd', 'Data': []})     
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'PartyLiveStock:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
