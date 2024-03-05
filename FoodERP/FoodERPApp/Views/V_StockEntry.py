@@ -159,8 +159,14 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 Unit = StockReportdata['Unit']
                 IsDamagePieces=StockReportdata['IsDamagePieces']
                 Employee = StockReportdata['Employee']
-                today = date.today() 
-                
+
+                Cluster = StockReportdata['Cluster']
+                SubCluster = StockReportdata['SubCluster']
+                Group = StockReportdata['Group']
+                SubGroup = StockReportdata['SubGroup']
+
+                today = date.today()                 
+
                 if Party == "":
                     PartyID=0;
                     if Employee > 0:
@@ -168,8 +174,28 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                         for row in EmpPartys:
                             p=row.id
                         PartyIDs = p.split(",")
+
+                    where_clause = ""
+                    p1 = (today,PartyIDs)
+                    if Cluster:
+                        where_clause += " AND M_Cluster.id = %s"
+                        p1 += (Cluster,)
+                      
+                    if SubCluster:
+                        where_clause += " AND M_SubCluster.id = %s "
+                        p1 += (SubCluster,)
+            
+                    if Group:
+                        where_clause += " AND M_Group.id = %s"
+                        p1 += (Group,)
                         
-                        Stockquery='''SELECT M_Parties.id DistributorID,M_Parties.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+                    if SubGroup:
+                        where_clause += " AND MC_SubGroup.id = %s "
+                        p1 += (SubGroup,)
+                        
+                    
+                    Stockquery=f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
 sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,
 ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
@@ -194,8 +220,29 @@ order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                 else : 
                     PartyID=Party;
                     PartyIDs= Party  
-                
-                    Stockquery='''SELECT M_Parties.id DistributorID,M_Parties.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+
+
+                    where_clause = ""
+                    p2 = (today, Unit, [PartyIDs])
+
+                    if Cluster:
+                        where_clause += " AND M_Cluster.id = %s "
+                        p2 += (Cluster,)
+                    
+                    if SubCluster:
+                        where_clause += " AND M_SubCluster.id = %s "
+                        p2 += (SubCluster,)
+                    
+                    if Group:
+                        where_clause += " AND M_Group.id = {Group}"
+                        p2 += (Group,)
+                    
+                    if SubGroup:
+                        where_clause += " AND M_Group.id = {SubGroup} "
+                        p2 += (SubGroup,)
+                    
+                    Stockquery=f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+
     ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
     O_BatchWiseLiveStock.BaseUnitQuantity Qty ,
     ifnull((case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
@@ -216,38 +263,7 @@ order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                     
                     
                     
-                    
-                if Party == "":
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, (today,PartyIDs))
-                else :
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, (today,Unit,[PartyIDs]))
-                
-                
-                
 
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                # print(str(Itemquery.query))
-                
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
