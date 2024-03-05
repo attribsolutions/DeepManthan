@@ -53,39 +53,41 @@ class TargetUploadsView(CreateAPIView):
             
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
-        
-
 
 class GetTargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def post(self, request, id=0):
         try:
-            with transaction.atomic():
-                query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, Month, Year, Party_id, 
-                                                        M_Parties.Name, SheetNo
-                                                        FROM T_TargetUploads
-                                                        JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
-                                                        GROUP BY Party_id,SheetNo
-                                                        """)
-                TargetList = list()
-                if query:
-                    TargetSerializer = TargetUploadsSerializer(query, many=True).data
-                    for a in TargetSerializer:
-                        TargetList.append({
-                                "Month": a['Month'],
-                                "Year": a['Year'],
-                                "PartyID": a['Party']['id'],  
-                                "PartyName": a['Party']['Name'],  
-                                "SheetNo": a['SheetNo']
-                            })    
+            TargetData = JSONParser().parse(request)       
+            month = TargetData['Month']   
+            year=  TargetData['Year']  
+            party_id=TargetData['Party']
+            
+            query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                                                    M_Parties.Name, SheetNo
+                                                    FROM T_TargetUploads
+                                                    JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                                                    WHERE Month = %s AND Year = %s AND Party_id = %s""", [month, year, party_id])
 
-                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
+            TargetList = []
+            for a in query:
+                TargetList.append({
+                    "Month": a.Month,
+                    "Year": a.Year,
+                    "PartyID": a.Party_id,  
+                    "PartyName": a.Name,  
+                    "SheetNo": a.SheetNo
+                })
+
+            if TargetList:
+                return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
+            else:
+                return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            return Response({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
-        
+            return Response({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
 
 class GetTargetUploadsBySheetNoView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
