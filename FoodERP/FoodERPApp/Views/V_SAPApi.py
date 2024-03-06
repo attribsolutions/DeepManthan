@@ -241,7 +241,7 @@ class SAPOrderView(CreateAPIView):
                 Items =list()
                 query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
                                            M_PartyType.SAPIndicator Indicator,
-TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.Name Unit,
+TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
 (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
 
 from T_Orders 
@@ -287,7 +287,7 @@ where T_Orders.id=%s''',[OrderID])
                 
                 jsonbody=json.dumps(payload[0])
                 
-                # print(jsonbody)
+                print(jsonbody)
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
                 url = SAPURL
