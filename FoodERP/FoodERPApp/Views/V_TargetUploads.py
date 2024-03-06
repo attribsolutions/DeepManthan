@@ -13,9 +13,6 @@ from django.db.models import Max
 from django.db import transaction
 from rest_framework.response import Response
 
-
-
-
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TargetUploadsOneSerializer  
@@ -26,33 +23,32 @@ class TargetUploadsView(CreateAPIView):
         try:
             request_data = request.data  
             if not self.sheet_no_updated:
+                existing_sheet = T_TargetUploads.objects.filter(Month=request_data[0]['Month'], Year=request_data[0]['Year']).first()
+                if existing_sheet:
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Sheet for this month and year already exists', 'Data': []})
 
-                    max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
-    
-                    next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
+                max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
+                next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
+                self.sheet_no_updated = True
+                request_data[0]['SheetNo'] = next_sheet_no
 
-                    self.sheet_no_updated = True
+                serializer_first = self.get_serializer(data=request_data[0])
+                serializer_first.is_valid(raise_exception=True)
+                serializer_first.save()
 
-                    request_data[0]['SheetNo'] = next_sheet_no
+                for data in request_data[1:]:
+                    data['SheetNo'] = next_sheet_no
 
-                    serializer_first = self.get_serializer(data=request_data[0])
-                    serializer_first.is_valid(raise_exception=True)
-                    serializer_first.save()
-
-                    for data in request_data[1:]:
-                        data['SheetNo'] = next_sheet_no
-
-                    serializer_others = self.get_serializer(data=request_data[1:], many=True)
-                    serializer_others.is_valid(raise_exception=True)
-                    serializer_others.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
+                serializer_others = self.get_serializer(data=request_data[1:], many=True)
+                serializer_others.is_valid(raise_exception=True)
+                serializer_others.save()
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
             else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data': []})
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet already uploaded for this month and year', 'Data': []})
         except Exception as e:
-            
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data':[]})
+
 
 class GetTargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -62,15 +58,29 @@ class GetTargetUploadsView(CreateAPIView):
         try:
             TargetData = JSONParser().parse(request)       
             month = TargetData['Month']   
-            year=  TargetData['Year']  
-            party_id=TargetData['Party']
-            
-            query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, Month, Year, Party_id, 
-                                                    M_Parties.Name, SheetNo
-                                                    FROM T_TargetUploads
-                                                    JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
-                                                    WHERE Month = %s AND Year = %s AND Party_id = %s""", [month, year, party_id])
+            year = TargetData['Year']  
+            party_id = TargetData['Party'] 
 
+            if party_id:
+                query = T_TargetUploads.objects.raw(
+                    """SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                       M_Parties.Name, SheetNo
+                       FROM T_TargetUploads
+                       JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                       WHERE Month = %s AND Year = %s AND Party_id = %s
+                       GROUP BY Party_id, SheetNo""",
+                    [month, year, party_id]
+                )
+            else:
+                query = T_TargetUploads.objects.raw(
+                    """SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                       M_Parties.Name, SheetNo
+                       FROM T_TargetUploads
+                       JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                       WHERE Month = %s AND Year = %s
+                       GROUP BY Party_id, SheetNo""",
+                    [month, year]
+                )
             TargetList = []
             for a in query:
                 TargetList.append({
