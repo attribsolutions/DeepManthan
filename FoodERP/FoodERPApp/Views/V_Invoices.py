@@ -321,10 +321,11 @@ class InvoiceViewSecond(CreateAPIView):
                 if characters:
                     if characters == "P":
                         A = "InvoicePrint"
+                        B = 50
 
                     else:
                         A = "InvoiceEdit"
-
+                        B = 351
                 else:
                     A = "Action is not defined"
                 print(characters)
@@ -448,9 +449,9 @@ class InvoiceViewSecond(CreateAPIView):
                             "BankData":BankData
                                                         
                         })
-                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], A+','+"InvoiceID:"+str(id),50,0,0,0,a['Customer']['id'])
+                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], A+','+"InvoiceID:"+str(id),int(B),0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Not available",50,0,0,0,a['Customer']['id'])
+                log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a['Party']['id'], "Invoice Not available",int(B),0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(Exception(e)),33,0)
