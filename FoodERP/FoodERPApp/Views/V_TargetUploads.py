@@ -62,10 +62,11 @@ class GetTargetUploadsView(CreateAPIView):
             party_id=TargetData['Party']
             
             query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, Month, Year, Party_id, 
-                                                    M_Parties.Name, SheetNo
-                                                    FROM T_TargetUploads
-                                                    JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
-                                                    WHERE Month = %s AND Year = %s AND Party_id = %s""", [month, year, party_id])
+                                      M_Parties.Name, SheetNo
+                                      FROM T_TargetUploads
+                                      JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                                      WHERE Month = %s AND Year = %s AND Party_id = %s
+                                      GROUP BY Party_id, SheetNo""", [month, year, party_id])
 
             TargetList = []
             for a in query:
