@@ -285,9 +285,9 @@ where T_Orders.id=%s''',[OrderID])
 
                 })
                 
-                aa=json.dumps(payload[0])
+                jsonbody=json.dumps(payload[0])
                 
-                print(aa)
+                # print(jsonbody)
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
                 url = SAPURL
@@ -300,7 +300,7 @@ where T_Orders.id=%s''',[OrderID])
                
                 
                 
-                response = requests.request("POST", url, headers=headers, data=aa)
+                response = requests.request("POST", url, headers=headers, data=jsonbody)
                 # Convert XML to OrderedDict
                 data_dict = xmltodict.parse(response.text)
                 # Convert OrderedDict to JSON string
@@ -314,18 +314,18 @@ where T_Orders.id=%s''',[OrderID])
 
                 if index != -1:
                     OrderID = int(OrderNo)-5000000
-                    print(OrderID)
+                    # print(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_logNew(request, aa, 0, '',321,0)
+                    log_entry = create_transaction_logNew(request, jsonbody, 0, '',321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_logNew(request, aa, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_logNew(request, aa, 0, '',323,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, 0, '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)
