@@ -50,51 +50,9 @@ class TargetUploadsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
             else:
                 transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': f'Records for Party {PartyName} with this month and year has already been created.', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
-
-# class TargetUploadsView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     TargetSerializer = TargetUploadsOneSerializer
-#     SheetNoUpdated = False
-
-#     @transaction.atomic
-#     def post(self, request, *args, **kwargs):
-#         try:
-#             with transaction.atomic():
-#                 request_data = request.data
-          
-#             if not self.SheetNoUpdated:
-#                 ExistingParties = set()  # To keep track of already processed party IDs
-#                 for record in request_data:
-#                     party_id = record.get('Party')
-#                     if party_id not in ExistingParties:
-#                         ExistingSheet = T_TargetUploads.objects.filter(Month=record['Month'], Year=record['Year'], Party=party_id).first()
-#                         if ExistingSheet:
-#                             PartyName = M_Parties.objects.get(id=request_data[0]['Party']).Name 
-#                             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': f'Records for Party {PartyName} with this month and year has already been created.', 'Data': []})
-#                         ExistingParties.add(party_id)
-
-#                 MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
-#                 NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
-#                 self.SheetNoUpdated = True
-
-#                 for record in request_data:
-#                     record['SheetNo'] = NextSheetNo
-
-#                 TargetSerializer = self.TargetSerializer(data=request_data, many=True)
-#                 TargetSerializer.is_valid(raise_exception=True)
-#                 TargetSerializer.save()
-
-#                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
-#             else:
-#                 transaction.set_rollback(True)
-#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet already uploaded for this month and year', 'Data': []})
-#         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
 
 
 class GetTargetUploadsView(CreateAPIView):
