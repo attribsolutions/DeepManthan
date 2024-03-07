@@ -14,125 +14,141 @@ from django.db import transaction
 from rest_framework.response import Response
 
 
-
-
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TargetUploadsOneSerializer  
-    sheet_no_updated = False
+    TargetSerializer = TargetUploadsOneSerializer
+    SheetNoUpdated = False
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
-            request_data = request.data  
-            if not self.sheet_no_updated:
+            with transaction.atomic():
+                request_data = request.data
+          
+            if not self.SheetNoUpdated:
+                ExistingSheet = T_TargetUploads.objects.filter(Month=request_data[0]['Month'], Year=request_data[0]['Year'], Party= request_data[0]['Party']).first()
+                if ExistingSheet:
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': []})
+   
+                MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
+                NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
+                self.SheetNoUpdated = True
 
-                    max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
-    
-                    next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
+                request_data[0]['SheetNo'] = NextSheetNo
 
-                    self.sheet_no_updated = True
+                TargetSerializerOne = self.TargetSerializer(data=request_data[0])
+                TargetSerializerOne.is_valid(raise_exception=True)
+                TargetSerializerOne.save()
 
-                    request_data[0]['SheetNo'] = next_sheet_no
+                for data in request_data[1:]:
+                    data['SheetNo'] = NextSheetNo
 
-                    serializer_first = self.get_serializer(data=request_data[0])
-                    serializer_first.is_valid(raise_exception=True)
-                    serializer_first.save()
+                TargetSerializerTwo = self.TargetSerializer(data=request_data[1:], many=True)
+                TargetSerializerTwo.is_valid(raise_exception=True)
+                TargetSerializerTwo.save()
 
-                    for data in request_data[1:]:
-                        data['SheetNo'] = next_sheet_no
-
-                    serializer_others = self.get_serializer(data=request_data[1:], many=True)
-                    serializer_others.is_valid(raise_exception=True)
-                    serializer_others.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
             else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data': []})
+                transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': []})
         except Exception as e:
-            
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
-        
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
 class GetTargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def post(self, request, id=0):
         try:
-            with transaction.atomic():
-                query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, Month, Year, Party_id, 
-                                                        M_Parties.Name, SheetNo
-                                                        FROM T_TargetUploads
-                                                        JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
-                                                        GROUP BY Party_id,SheetNo
-                                                        """)
-                TargetrList = list()
-                if query:
-                    TargetSerializer = TargetUploadsSerializer(query, many=True).data
-                    for a in TargetSerializer:
-                        TargetrList.append({
-                                "Month": a['Month'],
-                                "Year": a['Year'],
-                                "PartyID": a['Party']['id'],  
-                                "PartyName": a['Party']['Name'],  
-                                "SheetNo": a['SheetNo']
-                            })    
+            TargetData = JSONParser().parse(request)       
+            month = TargetData['Month']   
+            year = TargetData['Year']  
+            party_id = TargetData['Party'] 
 
-                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
+            if party_id:
+                query = T_TargetUploads.objects.raw(
+                    """SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                       M_Parties.Name, SheetNo
+                       FROM T_TargetUploads
+                       JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                       WHERE Month = %s AND Year = %s AND Party_id = %s
+                       GROUP BY Party_id, SheetNo""",
+                    [month, year, party_id]
+                )
+            else:
+                query = T_TargetUploads.objects.raw(
+                    """SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                       M_Parties.Name, SheetNo
+                       FROM T_TargetUploads
+                       JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                       WHERE Month = %s AND Year = %s
+                       GROUP BY Party_id, SheetNo""",
+                    [month, year]
+                )
+            TargetList = []
+            for a in query:
+                TargetList.append({
+                    "Month": a.Month,
+                    "Year": a.Year,
+                    "PartyID": a.Party_id,  
+                    "PartyName": a.Name,  
+                    "SheetNo": a.SheetNo
+                })
+
+            if TargetList:
+                return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
+            else:
+                return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            return Response({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+            return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
-        
+
 class GetTargetUploadsBySheetNoView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    @transaction.atomic()
     
-    def get(self, request, SheetNo):
+    def get(self, request, SheetNo, PartyID):
         try:
-            with transaction.atomic():
-                query = T_TargetUploads.objects.filter(SheetNo=SheetNo)
-                TargetrList=list()
-                if query:
-                    Targetrdata = TargetUploadsSerializer(query, many=True).data
-                    for a in Targetrdata:
-                        TargetrList.append({
-                                "Month": a['Month'],
-                                "Year": a['Year'],
-                                "PartyID": a['Party']['id'],  
-                                "PartyName": a['Party']['Name'], 
-                                "ItemID" : a['Item']['id'],
-                                "ItemName" : a['Item']['Name'],
-                                "TargetQuantity" : a['TargetQuantity'],
-                                "SheetNo": a['SheetNo']
-                            })    
-                     
-                    return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetrList})
+            query = T_TargetUploads.objects.filter(SheetNo=SheetNo, Party_id=PartyID)
+            TargetList = []
+            if query:
+                Targetrdata = TargetUploadsSerializer(query, many=True).data
+                for a in Targetrdata:
+                    TargetList.append({
+                            "Month": a['Month'],
+                            "Year": a['Year'],
+                            "PartyID": a['Party']['id'],  
+                            "PartyName": a['Party']['Name'], 
+                            "ItemID" : a['Item']['id'],
+                            "ItemName" : a['Item']['Name'],
+                            "TargetQuantity" : a['TargetQuantity'],
+                            "SheetNo": a['SheetNo']
+                        })    
+
+                return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
-class DeleteTargetSheetView(CreateAPIView):
+class DeleteTargetRecordsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def delete(self, request, id=0):
+    def delete(self, request):
         try:
             with transaction.atomic():
-                
-                sheet_no = request.data.get('SheetNo')
-                deleted_count, _ = T_TargetUploads.objects.filter(SheetNo=sheet_no).delete()
-
-                if deleted_count > 0:
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'SheetNo {sheet_no} deleted successfully', 'Data': []})
-                else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': f'No entries found with SheetNo {sheet_no}', 'Data': []})
+                target_data = JSONParser().parse(request)
+                months = target_data.get('Month', '').split(',')
+                years = target_data.get('Year', '').split(',')
+                party_ids = target_data.get('Party', '').split(',')
+             
+                T_TargetUploads.objects.filter(Month__in=months,Year__in=years, Party__in=party_ids).delete()
+             
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Targets Delete Successfully', 'Data': []})
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-        
-        
-   
+
+ 
