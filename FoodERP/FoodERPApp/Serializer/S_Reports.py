@@ -165,6 +165,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
     PartyID=serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     PartyType = serializers.CharField(max_length=500)
+    ImportFromExcel = serializers.BooleanField()
     FullInvoiceNumber=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
     CustomerID=serializers.IntegerField()
@@ -210,6 +211,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
         representation['QtyInNo'] = Decimal(representation['QtyInNo']).quantize(Decimal('0.00'))
         representation['QtyInKg'] = Decimal(representation['QtyInKg']).quantize(Decimal('0.00'))
         representation['QtyInBox'] = Decimal(representation['QtyInBox']).quantize(Decimal('0.00'))
+        representation ['Data Upload / FE2 Billing'] = "Data Upload" if representation['ImportFromExcel'] else "FE2 Billing"
         return representation
      
      

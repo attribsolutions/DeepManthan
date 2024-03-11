@@ -13,42 +13,47 @@ from django.db.models import Max
 from django.db import transaction
 from rest_framework.response import Response
 
+
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TargetUploadsOneSerializer  
-    sheet_no_updated = False
+    TargetSerializer = TargetUploadsOneSerializer
+    SheetNoUpdated = False
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
-            request_data = request.data  
-            if not self.sheet_no_updated:
-                existing_sheet = T_TargetUploads.objects.filter(Month=request_data[0]['Month'], Year=request_data[0]['Year']).first()
-                if existing_sheet:
-                    return JsonResponse({'StatusCode': 409, 'Status': False, 'Message': 'Sheet for this month and year already exists', 'Data': []})
+            with transaction.atomic():
+                request_data = request.data
+          
+            if not self.SheetNoUpdated:
+                ExistingSheet = T_TargetUploads.objects.filter(Month=request_data[0]['Month'], Year=request_data[0]['Year'], Party= request_data[0]['Party']).first()
+                if ExistingSheet:
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': []})
+   
+                MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
+                NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
+                self.SheetNoUpdated = True
 
-                max_sheet_no = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
-                next_sheet_no = max_sheet_no + 1 if max_sheet_no is not None else 1
-                self.sheet_no_updated = True
-                request_data[0]['SheetNo'] = next_sheet_no
+                request_data[0]['SheetNo'] = NextSheetNo
 
-                serializer_first = self.get_serializer(data=request_data[0])
-                serializer_first.is_valid(raise_exception=True)
-                serializer_first.save()
+                TargetSerializerOne = self.TargetSerializer(data=request_data[0])
+                TargetSerializerOne.is_valid(raise_exception=True)
+                TargetSerializerOne.save()
 
                 for data in request_data[1:]:
-                    data['SheetNo'] = next_sheet_no
+                    data['SheetNo'] = NextSheetNo
 
-                serializer_others = self.get_serializer(data=request_data[1:], many=True)
-                serializer_others.is_valid(raise_exception=True)
-                serializer_others.save()
+                TargetSerializerTwo = self.TargetSerializer(data=request_data[1:], many=True)
+                TargetSerializerTwo.is_valid(raise_exception=True)
+                TargetSerializerTwo.save()
+
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': []})
             else:
                 transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet already uploaded for this month and year', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data':[]})
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
 
 class GetTargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -58,16 +63,29 @@ class GetTargetUploadsView(CreateAPIView):
         try:
             TargetData = JSONParser().parse(request)       
             month = TargetData['Month']   
-            year=  TargetData['Year']  
-            party_id=TargetData['Party']
-            
-            query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, Month, Year, Party_id, 
-                                      M_Parties.Name, SheetNo
-                                      FROM T_TargetUploads
-                                      JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
-                                      WHERE Month = %s AND Year = %s AND Party_id = %s
-                                      GROUP BY Party_id, SheetNo""", [month, year, party_id])
+            year = TargetData['Year']  
+            party_id = TargetData['Party'] 
 
+            if party_id:
+                query = T_TargetUploads.objects.raw(
+                    """SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                       M_Parties.Name, SheetNo
+                       FROM T_TargetUploads
+                       JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                       WHERE Month = %s AND Year = %s AND Party_id = %s
+                       GROUP BY Party_id, SheetNo""",
+                    [month, year, party_id]
+                )
+            else:
+                query = T_TargetUploads.objects.raw(
+                    """SELECT T_TargetUploads.id, Month, Year, Party_id, 
+                       M_Parties.Name, SheetNo
+                       FROM T_TargetUploads
+                       JOIN M_Parties ON M_Parties.id = T_TargetUploads.Party_id
+                       WHERE Month = %s AND Year = %s
+                       GROUP BY Party_id, SheetNo""",
+                    [month, year]
+                )
             TargetList = []
             for a in query:
                 TargetList.append({
@@ -83,7 +101,7 @@ class GetTargetUploadsView(CreateAPIView):
             else:
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            return Response({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
 class GetTargetUploadsBySheetNoView(CreateAPIView):
