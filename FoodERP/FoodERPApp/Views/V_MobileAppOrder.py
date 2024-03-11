@@ -570,6 +570,7 @@ class NewRetailerSendToMobileAppView(CreateAPIView):
             with transaction.atomic():
                 Orderdata = JSONParser().parse(request)
                 RetailerID = Orderdata['RetailerID']
+                DistributorID= Orderdata['DistributorID']
                 RetailerID_list = RetailerID.split(",")
                 # print(RetailerID_list)
                 RetailerData=list()
@@ -581,7 +582,7 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
- where cust.PartyType_id=11 and cust.id in %s''',([RetailerID_list]))
+ where MC_PartySubParty.Party_id= %s and  cust.PartyType_id=11 and cust.id in %s''',(DistributorID,RetailerID_list))
                 # print(q0.query)
                 for row in q0:
                     # print(row) 
@@ -608,17 +609,18 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 payload={
                     "outlets" : RetailerData
                 }
-                
+                # print(payload)
                 # url = "http://webapp.theskygge.com/fmcg_middleware/outlets/add"
                 SkyggeURL, Token  = GetThirdPartyAPIs(21)
                 url = SkyggeURL
-
+                # print(url)
                 headers = {
                             'SecureToken': Token,
                             'Content-Type': 'application/json'
                           }
-                
+                # print('8(((((888(((((((8((((((((8(((((((((((((((((((((8',payload)
                 payload_json_data = json.dumps(payload)
+                
                 # print(payload_json_data)
                 response = requests.request(
                     "POST", url, headers=headers, data=payload_json_data)
@@ -643,6 +645,7 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
             with transaction.atomic():
                 Orderdata = JSONParser().parse(request)
                 RetailerID = Orderdata['RetailerID']
+                DistributorID= Orderdata['DistributorID']
                 RetailerID_list = RetailerID.split(",")
                 RetailerData=list()
                 today = date.today()
@@ -653,8 +656,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
  join M_Parties dist on dist.id=MC_PartySubParty.Party_id
  join M_Parties cust on cust.id=MC_PartySubParty.SubParty_id
  left join MC_PartyAddress on cust.id = MC_PartyAddress.Party_id and MC_PartyAddress.IsDefault=0
- where cust.PartyType_id=11 and cust.id in %s''',[RetailerID_list])
-              
+ where MC_PartySubParty.Party_id= %s and cust.PartyType_id=11 and cust.id in %s''',(DistributorID,RetailerID_list))
+                # print(q0.query)
                 for row in q0:
                     # print(row.isActive)
                     RetailerData.append({
@@ -676,7 +679,7 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                            
                             
                         })
-
+                # print('333333333',RetailerData)
                 payload={
                     "outlets" : RetailerData
                 }
