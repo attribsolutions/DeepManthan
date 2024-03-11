@@ -251,7 +251,7 @@ join M_Parties C on C.id=T_Orders.Customer_id
 join M_PartyType on M_PartyType.id=C.PartyType_id
 join M_Items on M_Items.id=TC_OrderItems.Item_id
 join M_Units on M_Units.id=M_Items.SAPUnitID
-where IsDeleted = 0 T_Orders.id=%s''',[OrderID])
+where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                 
                 for row in query:
                     
