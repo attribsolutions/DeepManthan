@@ -624,9 +624,6 @@ class ItemWiseUpdateView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
-
-
-
 class ItemWiseSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -639,7 +636,6 @@ class ItemWiseSaveView(CreateAPIView):
                 Updated_data = Item_data ['UpdatedData']
                 Created_By = request.user.id 
                 
-
                 for a in Updated_data:
                     ItemID = a.get('ItemID')
                     
@@ -648,35 +644,32 @@ class ItemWiseSaveView(CreateAPIView):
                     
                     if ItemType == 'ShelfLife':
                         ShelfLifeDays = a.get('Value1')
-                        try:
-                            query1 = MC_ItemShelfLife.objects.get(Item_id=ItemID)
+                        query1 = MC_ItemShelfLife.objects.filter(Item_id=ItemID).first()
+                        if query1:
                             query1.Days = ShelfLifeDays
                             query1.save()
-                        except ObjectDoesNotExist:
+                        else:
                             MC_ItemShelfLife.objects.create(Item_id=ItemID, Days=ShelfLifeDays, CreatedBy=Created_By, UpdatedBy=Created_By) 
-                    
+
                     elif ItemType == 'Group':   
                         GroupID = a.get('Value1')
                         SubGroupID = a.get('Value2')
                         GroupTypeID = a.get('GroupTypeID')  
-                        try:
-                            query2 = MC_ItemGroupDetails.objects.get(Item_id=ItemID)
+                        query2 = MC_ItemGroupDetails.objects.filter(Item_id=ItemID).first()
+                        if query2:
                             query2.Group_id = GroupID
                             query2.SubGroup_id = SubGroupID
                             query2.GroupType_id = GroupTypeID  
                             query2.save()
-                        except ObjectDoesNotExist:
+                        else:
                             MC_ItemGroupDetails.objects.create(Item_id=ItemID, Group_id=GroupID, SubGroup_id=SubGroupID, GroupType_id=GroupTypeID)  
                     
                     else:
-                        try:
-                            M_Items.objects.filter(id=ItemID).update(**{ItemType: a.get('Value1')})  
-                        except ObjectDoesNotExist:
-                            return JsonResponse({'StatusCode': 404, 'Status': True, 'Message': 'Item not found', 'Data': []})
-
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'{ItemType} updated successfully', 'Data': []})
+                        M_Items.objects.filter(id=ItemID).update(**{ItemType: a.get('Value1')})  
+                        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'{ItemType} Updated Successfully', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 500, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 500, 'Status': True, 'Message': Exception(e), 'Data': []})
         
 
 class ImageUploadsView(CreateAPIView):
