@@ -6,7 +6,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from rest_framework.parsers import JSONParser
-
 from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
@@ -14,7 +13,11 @@ from ..models import *
 from django.db.models import F
 from django.db import connections
 from django.views import View
-from rest_framework.parsers import JSONParser
+from django.core.exceptions import ObjectDoesNotExist
+
+
+
+
 
 
 
@@ -591,17 +594,15 @@ class ItemWiseUpdateView(CreateAPIView):
                 Type = Item_data['Type']
                 GroupTypeID = Item_data['GroupType']
                 
-                
                 query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
                                                             M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID
                                                             FROM M_Items
-                                                            LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
-                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id and IsDeleted=0
+                                                            LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and  MC_ItemGroupDetails.GroupType_id= %s
+                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id AND IsDeleted=0
                                                             LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                                                            ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID])
-                       
+                                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id  
+                                                            ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID]) 
                 
                 Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
                 ItemListData = list() 
@@ -615,46 +616,61 @@ class ItemWiseUpdateView(CreateAPIView):
                                 "SubGroupID": a['SubGroupID'],
                                 "SubGroupName": a['SubGroupName'],
                                  Type: a.get(Type)
-                        
-                        })
+                         })
                         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-        
-class ItemWiseSaveView(CreateAPIView):
 
+
+class ItemWiseSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
-                Item_data = JSONParser().parse(request)
-                type = Item_data['Type']
-                Updated_data = Item_data['UpdatedData']
+                Item_data  = JSONParser().parse(request)
+                ItemType = Item_data ['Type']
+                Updated_data = Item_data ['UpdatedData']
+                Created_By = request.user.id 
                 
-                for a in Updated_data: 
-                    if 'ItemID' in a:
-                        Item_id = a['ItemID']
-                        if type == 'ShelfLife':
-                            shelf_life_days = a['Value1']
-                            query = MC_ItemShelfLife.objects.filter(Item=Item_id).update(Days=shelf_life_days)
-                        elif type == 'Group':
-                            group = a['Value1']
-                            subgroup = a['Value2']
-                            query = MC_ItemGroupDetails.objects.filter(Item=Item_id).update(Group=group, SubGroup=subgroup)
+                for a in Updated_data:
+                    ItemID = a.get('ItemID')
+                    
+                    if ItemID is None:
+                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'ItemID is required', 'Data': []})
+                    
+                    if ItemType == 'ShelfLife':
+                        ShelfLifeDays = a.get('Value1')
+                        query1 = MC_ItemShelfLife.objects.filter(Item_id=ItemID).first()
+                        if query1:
+                            query1.Days = ShelfLifeDays
+                            query1.save()
                         else:
-                            update_data = {type: a['Value1']}
-                            query = M_Items.objects.filter(id=Item_id).update(**update_data)
-                
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': type + ' Update Successfully', 'Data': [] })
+                            MC_ItemShelfLife.objects.create(Item_id=ItemID, Days=ShelfLifeDays, CreatedBy=Created_By, UpdatedBy=Created_By) 
+
+                    elif ItemType == 'Group':   
+                        GroupID = a.get('Value1')
+                        SubGroupID = a.get('Value2')
+                        GroupTypeID = a.get('GroupTypeID')  
+                        query2 = MC_ItemGroupDetails.objects.filter(Item_id=ItemID).first()
+                        if query2:
+                            query2.Group_id = GroupID
+                            query2.SubGroup_id = SubGroupID
+                            query2.GroupType_id = GroupTypeID  
+                            query2.save()
+                        else:
+                            MC_ItemGroupDetails.objects.create(Item_id=ItemID, Group_id=GroupID, SubGroup_id=SubGroupID, GroupType_id=GroupTypeID)  
+                    
+                    else:
+                        M_Items.objects.filter(id=ItemID).update(**{ItemType: a.get('Value1')})  
+                        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'{ItemType} Updated Successfully', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
-
+            return JsonResponse({'StatusCode': 500, 'Status': True, 'Message': Exception(e), 'Data': []})
+        
 
 class ImageUploadsView(CreateAPIView):
     
