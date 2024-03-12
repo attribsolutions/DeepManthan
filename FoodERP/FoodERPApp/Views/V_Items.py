@@ -13,7 +13,7 @@ from ..models import *
 from django.db.models import F
 from django.db import connections
 from django.views import View
-from django.core.exceptions import ObjectDoesNotExist
+from ..Views.V_CommFunction import *
 
 
 
@@ -617,10 +617,11 @@ class ItemWiseUpdateView(CreateAPIView):
                                 "SubGroupName": a['SubGroupName'],
                                  Type: a.get(Type)
                          })
-                        
+                log_entry = create_transaction_logNew(request, Item_data, 0,f'Type: {Type}',349,0)       
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemWiseBulkUpdate:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
@@ -644,7 +645,7 @@ class ItemWiseSaveView(CreateAPIView):
                     
                     if ItemType == 'ShelfLife':
                         ShelfLifeDays = a.get('Value1')
-                        query1 = MC_ItemShelfLife.objects.filter(Item_id=ItemID).first()
+                        query1 = MC_ItemShelfLife.objects.get(Item_id=ItemID)
                         if query1:
                             query1.Days = ShelfLifeDays
                             query1.save()
@@ -655,7 +656,7 @@ class ItemWiseSaveView(CreateAPIView):
                         GroupID = a.get('Value1')
                         SubGroupID = a.get('Value2')
                         GroupTypeID = a.get('GroupTypeID')  
-                        query2 = MC_ItemGroupDetails.objects.filter(Item_id=ItemID).first()
+                        query2 = MC_ItemGroupDetails.objects.get(Item_id=ItemID)
                         if query2:
                             query2.Group_id = GroupID
                             query2.SubGroup_id = SubGroupID
@@ -667,8 +668,10 @@ class ItemWiseSaveView(CreateAPIView):
                     else:
                         M_Items.objects.filter(id=ItemID).update(**{ItemType: a.get('Value1')})  
                         
+                log_entry = create_transaction_logNew(request, Item_data, 0, f'Type: {ItemType} ItemID: {ItemID}', 350, 0)       
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'{ItemType} Updated Successfully', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemDataSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 500, 'Status': True, 'Message': Exception(e), 'Data': []})
         
 
