@@ -79,7 +79,7 @@ class ItemListView(CreateAPIView):
         try:
             user = BasicAuthenticationfunction(request)
             if user is not None:
-                query = f"""SELECT i.id AS CItemID, i.BarCode, 
+                query = f"""SELECT i.CItemID, i.BarCode, 
                 GSTHsnCodeMaster(i.id, CURDATE(), 3) AS HSNCode,
                 i.Name, i.SAPItemCode AS ItemCode,  
                 GSTHsnCodeMaster(i.id, CURDATE(), 2) AS GST,
