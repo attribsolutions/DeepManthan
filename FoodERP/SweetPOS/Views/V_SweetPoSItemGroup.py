@@ -79,16 +79,16 @@ class ItemListView(CreateAPIView):
         try:
             user = BasicAuthenticationfunction(request)
             if user is not None:
-
-                query = f"""SELECT i.CItemID AS CItemID, ifnull(i.BarCode,"")AS BarCode, 
-                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3),"") AS HSNCode,
-                i.Name, ifnull(i.SAPItemCode,"") AS ItemCode,  
-                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 2),"") AS GST,
-                ifnull(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),"") AS Rate,
-                ifnull(i.BaseUnitID_id,"") AS UnitID, 
-                ifnull(i.IsFranchisesItem,"")AS IsFranchisesItem,  
-                ifnull(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),"") AS FoodERPMRP,
-                ifnull(subgroup.id,"") AS ItemGroupID
+                
+                query = f"""SELECT i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,
+                i.Name, i.SAPItemCode AS ItemCode,  
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
+                ifnull(i.BaseUnitID_id,0) AS UnitID, 
+                i.IsFranchisesItem,  
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
+                ifnull(subgroup.id,0) AS ItemGroupID
                 FROM M_Items AS i
                 LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
