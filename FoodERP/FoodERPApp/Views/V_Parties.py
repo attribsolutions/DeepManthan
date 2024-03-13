@@ -70,42 +70,59 @@ class M_PartiesFilterView(CreateAPIView):
                 IsRetailer = Logindata['IsRetailer']
 
                 if (RoleID == 1):  # SuperAdmin
-
+                    
                     q1 = M_PartyType.objects.filter(Company=CompanyID)
                     query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
 
                 elif(IsSCMCompany == 0):  # Admin
-
-                    q1 = M_PartyType.objects.filter(
+                    if(RoleID == 2 and IsSCMCompany == 0):
+                        CustomPrint("shruti")
+                        q0 = C_Companies.objects.filter(
+                        CompanyGroup=CompanyGroupID)
+                    
+                        q1 = M_PartyType.objects.filter(
+                         Company__in=q0, IsRetailer=0, IsSCM=IsSCMCompany)
+                    
+                        query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
+                    else:
+                        q1 = M_PartyType.objects.filter(
                         Company=CompanyID, IsRetailer=0)
-                    query = M_Parties.objects.filter(
-                        Company=CompanyID, PartyType__IsRetailer=0,IsApprovedParty=0).select_related("PartyType")
+                   
+                        query = M_Parties.objects.filter(
+                        Company=CompanyID, PartyType__IsRetailer=0,IsApprovedParty=0).select_related("PartyType")                   
+                   
 
                 elif(RoleID == 2 and IsSCMCompany == 1):  # SCM Company Admin
-
+                   
                     q0 = C_Companies.objects.filter(
                         CompanyGroup=CompanyGroupID)
-
+                    
                     q1 = M_PartyType.objects.filter(
-                        Company__in=q0, IsRetailer=0, IsSCM=1)
+                         Company__in=q0, IsRetailer=0, IsSCM=IsSCMCompany)
+                    
                     query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
+                    
 
                 else:
-
+                   
                     q = M_Roles.objects.filter(id=RoleID).values("isSCMRole")
-
+                    # CustomPrint(q.query)
                     if q[0]['isSCMRole'] == 1:
                         
                         if IsRetailer == 1:
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
                             query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=1,IsApprovedParty=0).select_related("PartyType")
+                            
                         else:
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values("SubParty")
                             query = M_Parties.objects.filter(id__in=q0, PartyType__IsRetailer=0,IsApprovedParty=0).select_related("PartyType")    
-
+                           
                     else:
                         q0 = MC_PartySubParty.objects.filter(Party=PartyID)
+                       
                         query = M_Parties.objects.filter(id__in=q0,IsApprovedParty=0)
+                        
+                       
                 # if PartyID == 0:
 
                 #     if(RoleID == 1 ):
@@ -118,10 +135,11 @@ class M_PartiesFilterView(CreateAPIView):
 
                 # print((query.query))
                 if not query:
+                   
                     log_entry = create_transaction_logNew(request, Logindata, PartyID, "List Not available",90,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
-
+                    
                     M_Parties_serializer = M_PartiesSerializerSecond(
                         query, many=True).data
                     log_entry = create_transaction_logNew(request, Logindata,PartyID ,'Company:'+str(CompanyID),90,0)
