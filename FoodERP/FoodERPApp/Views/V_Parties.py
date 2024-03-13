@@ -75,16 +75,7 @@ class M_PartiesFilterView(CreateAPIView):
                     query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
 
                 elif(IsSCMCompany == 0):  # Admin
-                    if(RoleID == 2 and IsSCMCompany == 0):
-                        CustomPrint("shruti")
-                        q0 = C_Companies.objects.filter(
-                        CompanyGroup=CompanyGroupID)
-                    
-                        q1 = M_PartyType.objects.filter(
-                         Company__in=q0, IsRetailer=0, IsSCM=IsSCMCompany)
-                    
-                        query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
-                    else:
+                                        
                         q1 = M_PartyType.objects.filter(
                         Company=CompanyID, IsRetailer=0)
                    
