@@ -645,7 +645,7 @@ class ItemWiseSaveView(CreateAPIView):
                     
                     if ItemType == 'ShelfLife':
                         ShelfLifeDays = a.get('Value1')
-                        query1 = MC_ItemShelfLife.objects.get(Item_id=ItemID)
+                        query1 = MC_ItemShelfLife.objects.filter(Item_id=ItemID).first()
                         if query1:
                             query1.Days = ShelfLifeDays
                             query1.save()
@@ -656,7 +656,7 @@ class ItemWiseSaveView(CreateAPIView):
                         GroupID = a.get('Value1')
                         SubGroupID = a.get('Value2')
                         GroupTypeID = a.get('GroupTypeID')  
-                        query2 = MC_ItemGroupDetails.objects.get(Item_id=ItemID)
+                        query2 = MC_ItemGroupDetails.objects.filter(Item_id=ItemID).first()
                         if query2:
                             query2.Group_id = GroupID
                             query2.SubGroup_id = SubGroupID
