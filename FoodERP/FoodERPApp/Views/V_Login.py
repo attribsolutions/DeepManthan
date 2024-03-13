@@ -130,6 +130,7 @@ class UserListViewSecond(CreateAPIView):
                     for a in Usersdata_Serializer:
                         RoleData = list()
                         UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s  ''',[id])
+                        
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
@@ -177,6 +178,8 @@ class UserListViewSecond(CreateAPIView):
                         'UpdatedOn': a["UpdatedOn"],
                         'Employee': a["Employee"]["id"],
                         'EmployeeName': a["Employee"]["Name"],
+                        'EmployeeMobile': a["Employee"]["Mobile"],
+                        'EmployeeEmail': a["Employee"]["email"],
                         'UserRole': RoleData,
 
                     })
@@ -382,14 +385,13 @@ class GetEmployeeViewForUserCreation(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name FROM M_Employees where M_Employees.id 
+                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name, M_Employees.Mobile as EmployeeMobile, M_Employees.email as EmployeeEmail   FROM M_Employees where M_Employees.id 
 NOT IN (SELECT Employee_id From M_Users) ''')
                 if not query:
                     log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"Employees Not available",146,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
                 else:
-                    M_Employees_Serializer = EmployeeSerializerForUserCreation(
-                        query, many=True).data
+                    M_Employees_Serializer = EmployeeSerializerForUserCreation(query, many=True).data
                     log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"GetEmployeeForUserCreation",146,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
         except Exception:
