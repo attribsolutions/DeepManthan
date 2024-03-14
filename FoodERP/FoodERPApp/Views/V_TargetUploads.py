@@ -47,8 +47,8 @@ class TargetUploadsView(CreateAPIView):
                     WHERE T_TargetUploads.id = party_id AND M_Parties.PartyType_id = party_type_id;"""
                 RateData = {
                     'item_id': request_data[0]['Item'],
-                    'party_id': request_data[0]['Party'],
-                    'party_type_id': request_data[0]['PartyType']
+                    'party_id': request_data[0]['Party']
+                    
                 }
 
                 query = T_TargetUploads.objects.raw(RateQuery, RateData)[0].RateWithGST
