@@ -79,22 +79,21 @@ class ItemListView(CreateAPIView):
         try:
             user = BasicAuthenticationfunction(request)
             if user is not None:
-                query = f"""SELECT i.CItemID, i.BarCode, 
-                GSTHsnCodeMaster(i.id, CURDATE(), 3) AS HSNCode,
+                
+                query = f"""SELECT i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,
                 i.Name, i.SAPItemCode AS ItemCode,  
-                GSTHsnCodeMaster(i.id, CURDATE(), 2) AS GST,
-                ifnull(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),"") AS Rate,
-                i.BaseUnitID_id AS UnitID, 
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
+                ifnull(i.BaseUnitID_id,0) AS UnitID, 
                 i.IsFranchisesItem,  
-                ifnull(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),"") AS FoodERPMRP,
-                ifnull(subgroup.id,"") AS ItemGroupID
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
+                ifnull(subgroup.id,0) AS ItemGroupID
                 FROM M_Items AS i
                 LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
-
                 join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id=(SELECT Party from SweetPOS.M_SweetPOSRoleAccess where Divisionid={DivisionID})
-                WHERE M_ChannelWiseItems.PartyType_id = 19 """
-                print(query)   
+                WHERE M_ChannelWiseItems.PartyType_id = 19 """                  
                 with connection.cursor() as cursor:
                     cursor.execute(query)
                     rows = cursor.fetchall()
