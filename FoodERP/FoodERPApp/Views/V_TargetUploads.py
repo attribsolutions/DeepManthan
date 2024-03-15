@@ -26,39 +26,45 @@ class TargetUploadsView(CreateAPIView):
                 request_data = request.data
           
             if not self.SheetNoUpdated:
-                ExistingSheet = T_TargetUploads.objects.filter(Month=request_data[0]['Month'], Year=request_data[0]['Year'], Party=request_data[0]['Party']).first()
+                ExistingSheet = T_TargetUploads.objects.filter( Month=request_data[0]['Month'], Year=request_data[0]['Year'], Party=request_data[0]['Party'] ).first()
                 
                 if ExistingSheet:
-                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': []  })
+                    return JsonResponse({'StatusCode': 226,'Status': True,'Message': 'Sheet has already been created.','Data': [] })
    
                 MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
                 NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
                 self.SheetNoUpdated = True
 
                 request_data[0]['SheetNo'] = NextSheetNo
-
-                TargetSerializerOne = self.TargetSerializer(data=request_data[0])
-                TargetSerializerOne.is_valid(raise_exception=True)
-                TargetSerializerOne.save()
-              
                 ItemID = request_data[0]['Item']
                 PartyID = request_data[0]['Party']
 
-                query = T_TargetUploads.objects.raw("""SELECT RateCalculationFunction1(0, %s, %s, 2, 0, 0, 0, 1) AS RateWithGST
+                query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, RateCalculationFunction1(0, %s, %s, 2, 0, 0, 0, 1) AS RateWithGST
                                                         FROM T_TargetUploads 
-                                                        WHERE Party_id = %s;""",[ItemID, PartyID, PartyID])[0].RateWithGST
+                                                        WHERE Party_id = %s;""",[ItemID, PartyID, PartyID])
 
-                request_data[0]['RateWithGST'] = query
+                if query:
+                    request_data[0]['RateWithGST'] = query[0].RateWithGST
+                else:
+                    request_data[0]['RateWithGST'] = None
+
                 TargetSerializerOne = self.TargetSerializer(data=request_data[0])
                 TargetSerializerOne.is_valid(raise_exception=True)
                 TargetSerializerOne.save()
+                
+                for data in request_data[1:]:
+                    data['SheetNo'] = NextSheetNo
+        
+                TargetSerializerTwo = self.TargetSerializer(data=request_data[1:], many=True)
+                TargetSerializerTwo.is_valid(raise_exception=True)
+                TargetSerializerTwo.save()
 
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Target Data Uploaded Successfully', 'Data': [] })
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Target Data Uploaded Successfully','Data': [] })
             else:
                 transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': [] })
+                return JsonResponse({'StatusCode': 406,'Status': True,'Message': 'Sheet has already been created.','Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
+            return JsonResponse({'StatusCode': 400,'Status': True, 'Message': str(e),'Data': [] })
 
 
 class GetTargetUploadsView(CreateAPIView):
