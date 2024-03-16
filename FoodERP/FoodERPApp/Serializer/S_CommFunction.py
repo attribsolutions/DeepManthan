@@ -12,7 +12,7 @@ class UnitSerializerSecond(serializers.ModelSerializer):
         model = M_Units
         fields = ['id','Name','SAPUnit']
 
-class ItemSerializerSecond(serializers.ModelSerializer):
+class ItemSerializerSecondd(serializers.ModelSerializer):
     BaseUnitID = UnitSerializerSecond()
     class Meta:
         model = M_Items
