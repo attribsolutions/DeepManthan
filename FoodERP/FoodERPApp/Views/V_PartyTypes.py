@@ -35,7 +35,7 @@ class PartyTypeListView(CreateAPIView):
                         if(IsSCM == 0):
                         
                             q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")                            
-                            q0=C_Companies.objects.filter(IsSCM=IsSCM,CompanyGroup=q[0]['CompanyGroup']).values('id')                           
+                            q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')                           
                             query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))                           
                             p=0
                         else:                        
