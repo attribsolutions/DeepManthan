@@ -55,42 +55,47 @@ class SPOSInvoiceView(CreateAPIView):
                             
                             for InvoiceItem in InvoiceItems:
                                 queryforItem=M_Items.objects.filter(CItemID=InvoiceItem['ERPItemID']).values('id')
+                                
+                                    
                                 if not queryforItem:
-                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
+                                    ItemId= 33
+                                    # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                                 else:
-                                    if InvoiceItem['UnitID'] == 1:
-                                        unit=2
-                                    else: 
-                                        unit=1    
-                                        
-                                    quryforunit=MC_ItemUnits.objects.filter(Item=queryforItem[0]['id'],IsDeleted=0,UnitID=unit).values('id')
+                                    ItemId=queryforItem[0]['id']
+                                
+                                if InvoiceItem['UnitID'] == 1:
+                                    unit=2
+                                else: 
+                                    unit=1    
                                     
-                                    InvoiceItem['Unit'] = quryforunit[0]['id']
-                                    InvoiceItem['GSTPercentage'] = InvoiceItem['GST']
-                                    InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
-                                    
-                                    InvoiceItem['MRPValue'] = InvoiceItem['Rate']
-                                    InvoiceItem['TaxType'] = 'GST'
-                                    InvoiceItem['GSTAmount'] = 0
-                                    InvoiceItem['DiscountType'] = 2
-                                    InvoiceItem['Discount'] = 0
-                                    InvoiceItem['DiscountAmount'] = 0
-                                    InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
-                                    InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
-                                    InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
-                                    InvoiceItem['Item'] = queryforItem[0]['id']
-                                    InvoiceItem['IGST'] = InvoiceItem['IGSTRate']
-                                    InvoiceItem['BatchCode'] = '0'
-                                    InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
+                                quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
+                                
+                                InvoiceItem['Unit'] = quryforunit[0]['id']
+                                InvoiceItem['GSTPercentage'] = InvoiceItem['GST']
+                                InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
+                                
+                                InvoiceItem['MRPValue'] = InvoiceItem['Rate']
+                                InvoiceItem['TaxType'] = 'GST'
+                                InvoiceItem['GSTAmount'] = 0
+                                InvoiceItem['DiscountType'] = 2
+                                InvoiceItem['Discount'] = 0
+                                InvoiceItem['DiscountAmount'] = 0
+                                InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
+                                InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
+                                InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
+                                InvoiceItem['Item'] = ItemId
+                                InvoiceItem['IGST'] = InvoiceItem['IGSTRate']
+                                InvoiceItem['BatchCode'] = '0'
+                                InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
                                     
 
-                                BaseUnitQuantity=UnitwiseQuantityConversion(queryforItem[0]['id'],InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
+                                BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                                 InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
-                                QtyInNo=UnitwiseQuantityConversion(queryforItem[0]['id'],InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                                QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
                                 InvoiceItem['QtyInNo'] =  float(QtyInNo)
-                                QtyInKg=UnitwiseQuantityConversion(queryforItem[0]['id'],InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
+                                QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
                                 InvoiceItem['QtyInKg'] =  float(QtyInKg)
-                                QtyInBox=UnitwiseQuantityConversion(queryforItem[0]['id'],InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
+                                QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
                                 InvoiceItem['QtyInBox'] = float(QtyInBox)
                                
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
