@@ -701,6 +701,8 @@ urlpatterns = [
               url(r'Gettargetupload$',GetTargetUploadsView.as_view()),
               url(r'GetTargetUploadsBySheetNo/([0-9]+)/([0-9]+)$',GetTargetUploadsBySheetNoView.as_view()), #SheetNo/PartyID     
               url(r'DeleteTargetRecords$',DeleteTargetRecordsView.as_view()),
+              url(r'TargetVSAchievement$', TargetVSAchievementView.as_view()),
+          
          
               
              
