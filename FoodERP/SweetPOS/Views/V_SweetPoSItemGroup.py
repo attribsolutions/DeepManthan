@@ -41,25 +41,27 @@ class ItemGroupandSubgroupView(CreateAPIView):
             user = BasicAuthenticationfunction(request)
             if user is not None:
                 groups = M_Group.objects.all()
-                response_data = {"status": True, "status_code": 200, "count": groups.count(),"data": [] }
+                response_data = {"status": True, "status_code": 200, "count": groups.count(),"data": [] }              
                 
                 for group in groups:
+                    sequence = group.Sequence if group.Sequence is not None else 0.00
                     group_data = {
                         "CompanyName": group.Name,
                         "POSCompanyID": group.id,
                         "CompanyDisplayName": group.Name,
-                        "CompanyDisplayIndex": group.Sequence,
+                        "CompanyDisplayIndex":sequence,
                         "IsActive": True,
                         "Itemsgroup": []
                     }
                     subgroups = MC_SubGroup.objects.filter(Group=group)
                     for subgroup in subgroups:
+                        sequence = group.Sequence if subgroup.Sequence is not None else 0.00
                         subgroup_data = {
                             "GroupID": subgroup.id,
                             "ItemName": None, 
                             "GroupName": subgroup.Name,
                             "GroupDisplayName": subgroup.Name,
-                            "GroupDisplayIndex": subgroup.Sequence,
+                            "GroupDisplayIndex": sequence,
                             "IsActive": True,
                         }
                         group_data["Itemsgroup"].append(subgroup_data)
