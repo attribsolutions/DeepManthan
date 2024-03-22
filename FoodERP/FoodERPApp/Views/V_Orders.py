@@ -39,9 +39,10 @@ class OrderListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
+                
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Customer = Orderdata['Customer']
@@ -173,8 +174,9 @@ class OrderListFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Orderdata, x, "Order List Not Found",28,0,FromDate,ToDate,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'OrderList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class OrderListFilterViewSecond(CreateAPIView):
