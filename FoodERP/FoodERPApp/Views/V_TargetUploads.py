@@ -12,59 +12,76 @@ from django.db import connection
 from django.db.models import Max
 from django.db import transaction
 from rest_framework.response import Response
+from ..Views.V_CommFunction import *
+
 
 
 class TargetUploadsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    TargetSerializer = TargetUploadsOneSerializer
-    SheetNoUpdated = False
-
+        
     @transaction.atomic
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         try:
             with transaction.atomic():
-                request_data = request.data
-          
-            if not self.SheetNoUpdated:
-                ExistingSheet = T_TargetUploads.objects.filter( Month=request_data[0]['Month'], Year=request_data[0]['Year'], Party=request_data[0]['Party'] ).first()
-                
+                TargetDataDetails = JSONParser().parse(request)
+                Month = TargetDataDetails[0]['Month']
+                Year = TargetDataDetails[0]['Year']
+
+                ExistingSheet = T_TargetUploads.objects.filter(Month=Month, Year=Year)
                 if ExistingSheet:
-                    return JsonResponse({'StatusCode': 226,'Status': True,'Message': 'Sheet has already been created.','Data': [] })
-   
-                MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
-                NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
-                self.SheetNoUpdated = True
-
-                request_data[0]['SheetNo'] = NextSheetNo
-                ItemID = request_data[0]['Item']
-                PartyID = request_data[0]['Party']
-
-                query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, RateCalculationFunction1(0, %s, %s, 2, 0, 0, 0, 1) AS RateWithGST
-                                                        FROM T_TargetUploads 
-                                                        WHERE Party_id = %s;""",[ItemID, PartyID, PartyID])
-
-                if query:
-                    request_data[0]['RateWithGST'] = query[0].RateWithGST
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': [] })
                 else:
-                    request_data[0]['RateWithGST'] = None
-
-                TargetSerializerOne = self.TargetSerializer(data=request_data[0])
-                TargetSerializerOne.is_valid(raise_exception=True)
-                TargetSerializerOne.save()
+                    MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
+                    NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
                 
-                for data in request_data[1:]:
-                    data['SheetNo'] = NextSheetNo
-        
-                TargetSerializerTwo = self.TargetSerializer(data=request_data[1:], many=True)
-                TargetSerializerTwo.is_valid(raise_exception=True)
-                TargetSerializerTwo.save()
+                for TargetData in TargetDataDetails:
+                    TargetData['SheetNo'] = NextSheetNo
+                    ItemID = TargetData['Item']
+                    Party = TargetData['Party']
+                    TargetQuantity = TargetData['TargetQuantity']
+                    Unit = TargetData['Unit']
+                    
+                    Item = M_Items.objects.filter(id=ItemID).first()
+                    if Item is not None:
+                        BaseUnitID = Item.BaseUnitID_id
+                        BaseUnitQuantity = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, BaseUnitID, 0).GetBaseUnitQuantity()
+                        TargetData['TargetQuantityInBaseUnit'] = float(BaseUnitQuantity)
+                    else:
+                        TargetData['TargetQuantityInBaseUnit'] = None
+                        
+                    query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, RateCalculationFunction1(0, %s, %s, 1, 0, 0, 0, 1) AS RateWithGST FROM T_TargetUploads""", [ItemID, Party])
+                    
+                    if query:
+                        Rate = query[0].RateWithGST
+                        TargetData['Rate'] = float(Rate)
+                        Amount = float(BaseUnitQuantity) * float(Rate) 
+                        Amount = round(Amount, 2)
+                        TargetData['Amount'] = Amount
+                    else:
+                        TargetData['Rate'] = None
+                        TargetData['Amount'] = None
 
-                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Target Data Uploaded Successfully','Data': [] })
-            else:
-                transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406,'Status': True,'Message': 'Sheet has already been created.','Data': []})
+                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 1, 0).ConvertintoSelectedUnit()
+                    TargetData['QtyInNo'] = float(QtyInNo)
+
+                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 2, 0).ConvertintoSelectedUnit()
+                    TargetData['QtyInKg'] = float(QtyInKg)
+
+                    QtyInBox = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 4, 0).ConvertintoSelectedUnit()
+                    TargetData['QtyInBox'] = float(QtyInBox)
+              
+                TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails,  many=True)
+                if TargetSerializer.is_valid():
+                    TargetSerializer.save()
+                    log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetSheetUploaded', 353, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': [] })
+                else:
+                    log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
         except Exception as e:
-            return JsonResponse({'StatusCode': 400,'Status': True, 'Message': str(e),'Data': [] })
+            log_entry = create_transaction_logNew(request, 0, 0, 'TargetDataUpload: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
 
 
 class GetTargetUploadsView(CreateAPIView):
@@ -109,10 +126,13 @@ class GetTargetUploadsView(CreateAPIView):
                 })
 
             if TargetList:
+                log_entry = create_transaction_logNew(request, TargetData,party_id,'',354,0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
             else:
+                log_entry = create_transaction_logNew(request,0,0,'TargetData Does Not Exist',354,0)
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'TargetData:'+str(Exception(e)),33,0)
             return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
@@ -136,10 +156,12 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
                             "TargetQuantity" : a['TargetQuantity'],
                             "SheetNo": a['SheetNo']
                         })    
-
+                log_entry = create_transaction_logNew(request, Targetrdata,0,'',355,0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetList})
+            log_entry = create_transaction_logNew(request,0,0,'Targetrdata Does Not Exist',355,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'Targetrdata:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
@@ -156,11 +178,13 @@ class DeleteTargetRecordsView(CreateAPIView):
                 party_ids = target_data.get('Party', '').split(',')
              
                 T_TargetUploads.objects.filter(Month__in=months,Year__in=years, Party__in=party_ids).delete()
-             
+                log_entry = create_transaction_logNew(request, target_data,party_ids,f'Month: {months} Year: {years} Party: {party_ids}Deleted Successfully',356,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Targets Delete Successfully', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_logNew(request, 0,0,'Targets Data used in another table',8,0)     
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'TargetsNotDeleted:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
@@ -190,7 +214,6 @@ class TargetVSAchievementView(CreateAPIView):
                                                 LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                                                 WHERE M_Group.GroupType_id = 1 AND M_PartyDetails.Group_id IS NULL
                                                 AND T_TargetUploads.Month = %s AND T_TargetUploads.Year = %s AND T_TargetUploads.Party_id = %s''', [Month, Year, Party])
-            
             TargetAchievementList = []
             for a in query:
                 TargetAchievementList.append({
@@ -205,13 +228,15 @@ class TargetVSAchievementView(CreateAPIView):
                     "Cluster": a.Cluster,
                     "SubCluster": a.SubCluster,
                     "SheetNo": a.SheetNo
+                    
                 })
                 
             if TargetAchievementList:
+                log_entry = create_transaction_logNew(request, TargetData,0,'',357,0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetAchievementList})
             else:
+                log_entry = create_transaction_logNew(request,0,0,'TargetData Does Not Exist',357,0)
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'SubClusterDeleted:'+str(Exception(e)),33,0)
             return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
-      
