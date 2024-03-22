@@ -20,6 +20,7 @@ class ItemSerializerSecondd(serializers.ModelSerializer):
              
 class OpeningBalanceSerializer(serializers.Serializer):
     
+    id= serializers.IntegerField()
     TransactionDate = serializers.DateField()
     InvoiceAmount=serializers.DecimalField(max_digits=30, decimal_places=3)  
     ReceiptAmount=serializers.DecimalField(max_digits=30, decimal_places=3)  
