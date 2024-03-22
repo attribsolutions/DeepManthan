@@ -134,14 +134,14 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
 
 def GetOpeningBalance(Party, Customer, Date):
-    today = date.today()
-    query = MC_PartySubPartyOpeningBalance.objects.filter(
-        Party=Party, SubParty=Customer, Year=today.year).values('OpeningBalanceAmount')
+    # today = date.today()
+    # query = MC_PartySubPartyOpeningBalance.objects.filter(
+    #     Party=Party, SubParty=Customer, Year=today.year).values('OpeningBalanceAmount')
 
-    if query:
-        OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
-    else:
-        OpeningBalanceAmt = 0
+    # if query:
+    #     OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
+    # else:
+    #     OpeningBalanceAmt = 0
     query2 = T_Invoices.objects.raw(''' SELECT id, TransactionDate, InvoiceAmount, ReceiptAmount FROM 
     ( SELECT 1 as id ,Date AS TransactionDate, 
     OpeningBalanceAmount AS InvoiceAmount,
