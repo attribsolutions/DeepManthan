@@ -1016,6 +1016,7 @@ class  MC_PartySubParty(models.Model):
         
 class  MC_PartySubPartyOpeningBalance(models.Model):
     Year = models.CharField(max_length=50,blank=True, null=True)
+    Date = models.DateField()
     OpeningBalanceAmount = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
