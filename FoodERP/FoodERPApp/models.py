@@ -38,14 +38,6 @@ def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
  
 
-def jsonbodyfromrequest(request):
-    body_unicode = request.body.decode('utf-8')
-    body_data = json.loads(body_unicode)
-    if body_data:
-        return body_data
-    else:
-        return 0
-
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
