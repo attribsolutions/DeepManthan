@@ -24,9 +24,10 @@ class T_MobileAppOrdersView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                data = JSONParser().parse(request)
+                
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 if auth_header:
                     
@@ -172,8 +173,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'MobileAppOrderSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
+            log_entry = create_transaction_logNew(request, data, 0,'MobileAppOrderSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 

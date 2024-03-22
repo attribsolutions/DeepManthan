@@ -38,14 +38,6 @@ def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
  
 
-def jsonbodyfromrequest(request):
-    body_unicode = request.body.decode('utf-8')
-    body_data = json.loads(body_unicode)
-    if body_data:
-        return body_data
-    else:
-        return 0
-
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -1024,6 +1016,7 @@ class  MC_PartySubParty(models.Model):
         
 class  MC_PartySubPartyOpeningBalance(models.Model):
     Year = models.CharField(max_length=50,blank=True, null=True)
+    Date = models.DateField()
     OpeningBalanceAmount = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
