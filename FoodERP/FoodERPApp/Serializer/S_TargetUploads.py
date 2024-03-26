@@ -31,6 +31,9 @@ class TargetAchievementSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Month = serializers.IntegerField()
     Year =serializers.IntegerField()
+    TargetQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Quantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)    
     PartyID = serializers.IntegerField()
     PartyName = serializers.CharField(max_length=200)
     ItemName = serializers.CharField(max_length=200)
@@ -38,5 +41,5 @@ class TargetAchievementSerializer(serializers.Serializer):
     ItemSubGroup = serializers.CharField(max_length=200)
     Cluster = serializers.CharField(max_length=200)
     SubCluster = serializers.CharField(max_length=200)
-    SheetNo = serializers.IntegerField()
+    SAPPartyCode=serializers.CharField(max_length=20)
 
