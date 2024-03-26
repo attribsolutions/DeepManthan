@@ -1,3 +1,5 @@
+import json
+from xml.dom import ValidationErr
 from django.db import models
 from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
@@ -35,6 +37,7 @@ def DBNameFun(a):
 def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
  
+
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -1013,6 +1016,7 @@ class  MC_PartySubParty(models.Model):
         
 class  MC_PartySubPartyOpeningBalance(models.Model):
     Year = models.CharField(max_length=50,blank=True, null=True)
+    Date = models.DateField()
     OpeningBalanceAmount = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1140,9 +1144,11 @@ class TC_GRNReferences(models.Model):
     GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
     Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
     Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
-
     class Meta:
-        db_table = "TC_GRNReferences"              
+        db_table = "TC_GRNReferences"   
+        unique_together = [['Invoice']] 
+
+                  
         
         
 class M_BillOfMaterial(models.Model):
@@ -2271,9 +2277,16 @@ class T_TargetUploads(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='TargetUploadsParty',  on_delete=models.PROTECT )
     Item =  models.ForeignKey(M_Items, related_name='TargetUploadsItem', on_delete=models.PROTECT)
     TargetQuantity = models.DecimalField(max_digits=20, decimal_places=3)
+    TargetQuantityInBaseUnit = models.DecimalField(max_digits=20, decimal_places=3)
     SheetNo = models.IntegerField(default=False)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
+    Unit = models.IntegerField(default=False)
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    Amount = models.DecimalField(max_digits=20, decimal_places=2)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "T_TargetUploads"

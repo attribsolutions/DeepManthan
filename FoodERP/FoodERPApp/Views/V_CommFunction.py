@@ -134,33 +134,52 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
 
 def GetOpeningBalance(Party, Customer, Date):
-    today = date.today()
-    query = MC_PartySubPartyOpeningBalance.objects.filter(
-        Party=Party, SubParty=Customer, Year=today.year).values('OpeningBalanceAmount')
+    # today = date.today()
+    # query = MC_PartySubPartyOpeningBalance.objects.filter(
+    #     Party=Party, SubParty=Customer, Year=today.year).values('OpeningBalanceAmount')
 
-    if query:
-        OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
-    else:
-        OpeningBalanceAmt = 0
-    query2 = T_Invoices.objects.raw(''' SELECT '0' id, TransactionDate, InvoiceAmount, ReceiptAmount FROM 
-    ( SELECT T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount 
+    # if query:
+    #     OpeningBalanceAmt = query[0]['OpeningBalanceAmount']
+    # else:
+    #     OpeningBalanceAmt = 0
+    query2 = T_Invoices.objects.raw(''' SELECT id, TransactionDate, InvoiceAmount, ReceiptAmount FROM 
+    ( SELECT 1 as id ,Date AS TransactionDate, 
+    OpeningBalanceAmount AS InvoiceAmount,
+    0 AS ReceiptAmount
+    FROM MC_PartySubPartyOpeningBalance 
+    WHERE Party_id=%s AND SubParty_id =%s  AND Date <= %s
+    
+    UNION ALL
+        
+    SELECT 2 as id ,T_Invoices.InvoiceDate AS TransactionDate, T_Invoices.GrandTotal AS InvoiceAmount, 0 AS ReceiptAmount 
     FROM T_Invoices WHERE T_Invoices.Party_id=%s AND T_Invoices.Customer_id =%s  AND InvoiceDate <= %s  
-    UNION ALL SELECT T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount 
+    UNION ALL 
+    
+    SELECT 3 as id ,T_Receipts.ReceiptDate AS TransactionDate, 0 AS InvoiceAmount,T_Receipts.AmountPaid AS ReceiptAmount 
     FROM T_Receipts WHERE  T_Receipts.Party_id=%s AND T_Receipts.Customer_id = %s AND T_Receipts.ReceiptDate <= %s  AND T_Receipts.ReceiptMode_id!=36 AND T_Receipts.ReceiptType_id=29  
-    UNION ALL SELECT T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal End) AS InvoiceAmount , (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
-                                    Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
+    UNION ALL 
+    
+    SELECT 4 as id ,T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal else 0 End) AS InvoiceAmount ,
+    (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal else 0 End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
+                                    Party], [Customer], [Date],[Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
     # print(str(query2.query))
     query2_serializer = OpeningBalanceSerializer(query2, many=True).data
     OpeningBalance = 0.000
     InvoiceAmount = 0.000
     ReceiptAmount = 0.000
-
+    
     for a in query2_serializer:
-        InvoiceAmount = InvoiceAmount + float(a['InvoiceAmount'] or 0)
-        ReceiptAmount = ReceiptAmount + float(a['ReceiptAmount'] or 0)
-    # print(self.OpeningBalanceAmt,InvoiceAmount,ReceiptAmount)
+        
+        InvoiceAmount =  float(a['InvoiceAmount'] or 0)
+        ReceiptAmount =  float(a['ReceiptAmount'] or 0)
+        if a['id'] == 1:
+            OpeningBalance = 0
+        
+        
+        OpeningBalance = (float(OpeningBalance) + InvoiceAmount) - ReceiptAmount
+        
 
-    OpeningBalance = (float(OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount
+    # OpeningBalance = (float(OpeningBalanceAmt) + InvoiceAmount) - ReceiptAmount
     return OpeningBalance
 
 
