@@ -21,9 +21,10 @@ class TargetUploadsView(CreateAPIView):
         
     @transaction.atomic
     def post(self, request):
+        TargetDataDetails = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                TargetDataDetails = JSONParser().parse(request)
+                
                 Month = TargetDataDetails[0]['Month']
                 Year = TargetDataDetails[0]['Year']
 
@@ -39,28 +40,35 @@ class TargetUploadsView(CreateAPIView):
                     ItemID = TargetData['Item']
                     Party = TargetData['Party']
                     TargetQuantity = TargetData['TargetQuantity']
-                    Unit = TargetData['Unit']
+                    Unit = TargetData['UnitId']
                     
-                    Item = M_Items.objects.filter(id=ItemID).first()
-                    if Item is not None:
-                        BaseUnitID = Item.BaseUnitID_id
-                        BaseUnitQuantity = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, BaseUnitID, 0).GetBaseUnitQuantity()
-                        TargetData['TargetQuantityInBaseUnit'] = float(BaseUnitQuantity)
-                    else:
-                        TargetData['TargetQuantityInBaseUnit'] = None
+                    Item = M_Items.objects.filter(id=ItemID).values("BaseUnitID","Name")
+                    
+                    BaseUnitID = Item[0]["BaseUnitID"]
+                    BaseUnitQuantity = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, BaseUnitID, 0).GetBaseUnitQuantity()
+                    TargetData['TargetQuantityInBaseUnit'] = float(BaseUnitQuantity)
+                    
                         
-                    query = T_TargetUploads.objects.raw("""SELECT T_TargetUploads.id, RateCalculationFunction1(0, %s, %s, 1, 0, 0, 0, 1) AS RateWithGST FROM T_TargetUploads""", [ItemID, Party])
+                    query = T_TargetUploads.objects.raw("""SELECT 1 as id, RateCalculationFunction1(0, %s, %s, %s, 0, 0, 0, 1) AS RateWithGST """, [ItemID, Party,BaseUnitID])
+                    
                     
                     if query:
-                        Rate = query[0].RateWithGST
+                         
+                        for row in query:
+                            Rate = row.RateWithGST
+                        
                         TargetData['Rate'] = float(Rate)
-                        Amount = float(BaseUnitQuantity) * float(Rate) 
+                        
+                        Amount = float(BaseUnitQuantity) * float(Rate)
+                        
                         Amount = round(Amount, 2)
                         TargetData['Amount'] = Amount
+                        
                     else:
-                        TargetData['Rate'] = None
-                        TargetData['Amount'] = None
-
+                        BaseUnitID = Item[0]["Name"]
+                        log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
+                    
                     QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 1, 0).ConvertintoSelectedUnit()
                     TargetData['QtyInNo'] = float(QtyInNo)
 
@@ -69,18 +77,21 @@ class TargetUploadsView(CreateAPIView):
 
                     QtyInBox = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 4, 0).ConvertintoSelectedUnit()
                     TargetData['QtyInBox'] = float(QtyInBox)
-              
-                TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails,  many=True)
+                
+                TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails , many=True)
                 if TargetSerializer.is_valid():
                     TargetSerializer.save()
+                    
                     log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetSheetUploaded', 353, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Target Data Uploaded Successfully', 'Data': [] })
                 else:
+                   
                     log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'TargetDataUpload: ' + str(e), 33, 0)
+            print('ccccc')
+            log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload: ' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
 
 
@@ -199,64 +210,44 @@ class TargetVSAchievementView(CreateAPIView):
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
 
-            query = T_TargetUploads.objects.raw(f'''Select 1 id,Month,Year,TargetQuantity,Round(Quantity,2)Quantity,Amount,M_Items.Name ItemName,M_Group.Name ItemGroupName,
-            MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
-            M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.id PartyID,M_Parties.Name PartyName from
-            ( select  A.Month,A.Year,TargetQuantity,Quantity,Amount,A.item_id,A.Party_id Party from
-            (select Party_id,item_id,Sum(TargetQuantity) TargetQuantity,Month,Year from T_TargetUploads
-            where  Party_id={Party} and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year )A
-            left join
-            (select Month(invoiceDate) Month , year(invoiceDate) Year,customer_id ,item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount
-            from T_Invoices
-            join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
-            where  customer_id={Party} and Month(invoiceDate)={Month} and year(invoiceDate)={Year} group by item_id,customer_id,Month,Year
-            )B
-            ON B.item_id=A.item_id  
-            union
-            select  B.Month,B.Year,TargetQuantity,Quantity ,Amount,B.item_id,B.customer_id Party from
-            (select Party_id,item_id,Sum(TargetQuantity) TargetQuantity,Month,Year from T_TargetUploads
-            where  Party_id={Party} and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year  )A
-            right join
-            (select Month(invoiceDate) Month , year(invoiceDate) Year, customer_id ,item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount
-            from T_Invoices
-            join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
-            where  customer_id={Party} and Month(invoiceDate)={Month} and year(invoiceDate)={Year} group by item_id,customer_id,Month ,Year
-            )B
-            ON B.item_id=A.item_id )C
-            join  M_Items ON M_Items.id=C.Item_id
-            join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
-            join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
-            join  MC_SubGroup ON MC_SubGroup.id=MC_ItemGroupDetails.SubGroup_id
-            join M_PartyDetails ON M_PartyDetails.Party_id=C.Party
-            join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
-            join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
-            join M_Parties  ON M_Parties.id=C.Party 
-            where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null''')
-            TargetAchievementList = []   
-            if query:   
-                for a in query:
-                    TargetAchievementList.append({
+            query = T_TargetUploads.objects.raw('''SELECT T_TargetUploads.id , Month, Year, T_TargetUploads.Party_id AS PartyID,
+                                                M_Parties.Name AS PartyName, M_Items.Name AS ItemName, M_Group.Name AS ItemGroup,
+                                                MC_SubGroup.Name AS ItemSubGroup, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster,
+                                                SheetNo
+                                                FROM T_TargetUploads 
+                                                JOIN M_Parties ON T_TargetUploads.Party_id = M_Parties.id
+                                                JOIN M_Items ON T_TargetUploads.Item_id = M_Items.id
+                                                LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+                                                LEFT JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.id
+                                                LEFT JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id
+                                                LEFT JOIN M_PartyDetails ON M_PartyDetails.Party_id = M_Parties.id
+                                                LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
+                                                LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+                                                WHERE M_Group.GroupType_id = 1 AND M_PartyDetails.Group_id IS NULL
+                                                AND T_TargetUploads.Month = %s AND T_TargetUploads.Year = %s AND T_TargetUploads.Party_id = %s''', [Month, Year, Party])
+            TargetAchievementList = []
+            for a in query:
+                TargetAchievementList.append({
                     "id": a.id,
                     "Month": a.Month,
                     "Year": a.Year,
-                    "TargetQuantity": a.TargetQuantity,
-                    "Quantity":a.Quantity,
-                    "Amount":a.Amount,
                     "PartyID": a.PartyID,
                     "PartyName": a.PartyName,
                     "ItemName": a.ItemName,
-                    "ItemGroup": a.ItemGroupName,
-                    "ItemSubGroup": a.SubGroupName,
-                    "Cluster": a.ClusterName,
-                    "SubCluster": a.SubClusterName,
-                    "SAPPartyCode":a.SAPPartyCode   
+                    "ItemGroup": a.ItemGroup,
+                    "ItemSubGroup": a.ItemSubGroup,
+                    "Cluster": a.Cluster,
+                    "SubCluster": a.SubCluster,
+                    "SheetNo": a.SheetNo
+                    
                 })
-           
+                
+            if TargetAchievementList:
                 log_entry = create_transaction_logNew(request, TargetData,0,'',357,0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetAchievementList})
             else:
                 log_entry = create_transaction_logNew(request,0,0,'TargetData Does Not Exist',357,0)
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'SubClusterDeleted:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'SubClusterDeleted:'+str(Exception(e)),33,0)
             return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
