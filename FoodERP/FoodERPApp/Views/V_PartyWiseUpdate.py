@@ -98,7 +98,7 @@ class PartyWiseUpdateView(CreateAPIView):
                         
                         elif (Type == 'OpeningBalance'):
                             query = MC_PartySubPartyOpeningBalance.objects.filter(Party_id=a['Party']['id'],SubParty_id=a['SubParty']['id']).values('OpeningBalanceAmount','Date')
-                            print(query)
+                           
                             if not query:
                                 OpeningBalance = 0.00                              
                                 OpeningBalanceDate= ""
