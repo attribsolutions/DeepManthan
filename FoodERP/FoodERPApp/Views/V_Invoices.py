@@ -928,14 +928,17 @@ class InvoiceBulkDeleteView(CreateAPIView):
                 invoice_ids = invoice_data.get('Invoice_ID', '').split(',')
                 
                 if not invoice_ids:
+                    log_entry = create_transaction_logNew(request, invoice_data, 0,'No Invoice IDs provided',352,0)
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No Invoice IDs provided', 'Data': []})
                 
                 T_Invoices.objects.filter(id__in=invoice_ids).delete()
-             
+                log_entry = create_transaction_logNew(request, invoice_data, 0,f'Invoice_ID: {invoice_ids}Deleted Successfully',352,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bulk Invoices Delete Successfully', 'Data': []})
         except IntegrityError:
+            log_entry = create_transaction_logNew(request, 0,0,'InvoiceIDs used in another table',8,0)     
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'InvoiceIDsNotDeleted:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
