@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.db import connection
-
+import datetime
 # from activity_log.models import UserMixin
 
 # Create your models here.
@@ -23,6 +23,19 @@ def CustomPrint(value):
     else:
        
         print()
+def GetYear(TDate):
+    date = datetime.datetime.strptime(TDate, "%Y-%m-%d").date()
+    #initialize the current year
+    year_of_date=date.year     
+    #initialize the current financial year start date
+    financial_year_start_date = datetime.datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
+    if date<financial_year_start_date:           
+        fs=  str(financial_year_start_date.year-1)+'-04-01'            
+        fe=  str(financial_year_start_date.year)+'-03-31'        
+    else:
+        fs= str(financial_year_start_date.year)+ '-04-01'           
+        fe= str(financial_year_start_date.year+1)+'-03-31'     
+    return fs,fe
 
 def DBNameFun(a):
                 
@@ -2274,6 +2287,7 @@ class T_TargetUploads(models.Model):
     
     Month = models.IntegerField(default=False)
     Year = models.IntegerField(default=False)
+    Fy=models.CharField(max_length=500,null=True)
     Party = models.ForeignKey(M_Parties, related_name='TargetUploadsParty',  on_delete=models.PROTECT )
     Item =  models.ForeignKey(M_Items, related_name='TargetUploadsItem', on_delete=models.PROTECT)
     TargetQuantity = models.DecimalField(max_digits=20, decimal_places=3)
@@ -2295,7 +2309,7 @@ class T_TargetUploads(models.Model):
 
 	
 class M_FinancialYearFirstTransactionLog(models.Model):
-    FinancialYear = models.IntegerField(default=False)
+    FinancialYear = models.CharField(max_length=500,null=True)
     Party = models.IntegerField(default=False)
     Flag =  models.BooleanField(default=False) 
 

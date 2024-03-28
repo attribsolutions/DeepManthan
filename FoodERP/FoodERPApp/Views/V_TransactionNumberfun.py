@@ -1,22 +1,22 @@
 from ..models import *
 from ..Serializer.S_Orders import *
 from datetime import date 
-import datetime
-import pdb
+# import datetime
+# import pdb
 
-def GetYear(TDate):
-    date = datetime.datetime.strptime(TDate, "%Y-%m-%d").date()
-    #initialize the current year
-    year_of_date=date.year     
-    #initialize the current financial year start date
-    financial_year_start_date = datetime.datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
-    if date<financial_year_start_date:           
-        fs=  str(financial_year_start_date.year-1)+'-04-01'            
-        fe=  str(financial_year_start_date.year)+'-03-31'           
-    else:
-        fs= str(financial_year_start_date.year)+ '-04-01'           
-        fe= str(financial_year_start_date.year+1)+'-03-31'
-    return fs,fe   
+# def GetYear(TDate):
+#     date = datetime.datetime.strptime(TDate, "%Y-%m-%d").date()
+#     #initialize the current year
+#     year_of_date=date.year     
+#     #initialize the current financial year start date
+#     financial_year_start_date = datetime.datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
+#     if date<financial_year_start_date:           
+#         fs=  str(financial_year_start_date.year-1)+'-04-01'            
+#         fe=  str(financial_year_start_date.year)+'-03-31'           
+#     else:
+#         fs= str(financial_year_start_date.year)+ '-04-01'           
+#         fe= str(financial_year_start_date.year+1)+'-03-31'
+#     return fs,fe   
 class GetMaxNumber:
 
     def GetOrderNumber(*args):
