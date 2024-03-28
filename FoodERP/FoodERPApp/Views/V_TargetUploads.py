@@ -40,7 +40,7 @@ class TargetUploadsView(CreateAPIView):
                     ItemID = TargetData['Item']
                     Party = TargetData['Party']
                     TargetQuantity = TargetData['TargetQuantity']
-                    Unit = TargetData['UnitId']
+                    Unit = TargetData['Unit']
                     
                     Item = M_Items.objects.filter(id=ItemID).values("BaseUnitID","Name")
                     
@@ -65,7 +65,7 @@ class TargetUploadsView(CreateAPIView):
                         TargetData['Amount'] = Amount
                         
                     else:
-                        BaseUnitID = Item[0]["Name"]
+                        # ItemName = Item[0]["Name"]
                         log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
                     
@@ -90,7 +90,7 @@ class TargetUploadsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
         except Exception as e:
-            print('ccccc')
+            
             log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload: ' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
 
@@ -208,9 +208,13 @@ class TargetVSAchievementView(CreateAPIView):
             TargetData = request.data
             Month = TargetData.get('Month')
             Year = TargetData.get('Year')
-            Party = TargetData.get('Party')
+            Party = TargetData.get('Party')           
+             
 
-            query = T_TargetUploads.objects.raw(f'''Select 1 id,Month,Year,TargetQuantity,Round(Quantity,2)Quantity,Amount,M_Items.Name ItemName,M_Group.Name ItemGroupName,
+            query = T_TargetUploads.objects.raw(f'''Select 1 id,Month,Year,CASE 
+            WHEN Month >= 4 THEN CONCAT(Year, '-', Year + 1)
+            ELSE CONCAT(Year - 1, '-', Year)
+            END AS FY,TargetQuantity,Round(Quantity,2)Quantity,Amount,M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.id PartyID,M_Parties.Name PartyName from
             ( select  A.Month,A.Year,TargetQuantity,Quantity,Amount,A.item_id,A.Party_id Party from
@@ -250,6 +254,7 @@ class TargetVSAchievementView(CreateAPIView):
                     "id": a.id,
                     "Month": a.Month,
                     "Year": a.Year,
+                    "Fy":a.FY,
                     "TargetQuantity": a.TargetQuantity,
                     "Quantity":a.Quantity,
                     "Amount":a.Amount,
