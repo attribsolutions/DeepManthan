@@ -189,7 +189,7 @@ class DeleteTargetRecordsView(CreateAPIView):
                 party_ids = target_data.get('Party', '').split(',')
              
                 T_TargetUploads.objects.filter(Month__in=months,Year__in=years, Party__in=party_ids).delete()
-                log_entry = create_transaction_logNew(request, target_data,party_ids,f'Month: {months} Year: {years} Party: {party_ids}Deleted Successfully',356,0)
+                log_entry = create_transaction_logNew(request, target_data,0,f'Month: {months} Year: {years} Party: {party_ids}Deleted Successfully',356,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Targets Delete Successfully', 'Data': []})
         except IntegrityError:
             log_entry = create_transaction_logNew(request, 0,0,'Targets Data used in another table',8,0)     
