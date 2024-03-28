@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +14,7 @@ from ..Serializer.S_Invoices import InvoiceSerializerSecond
 
 from ..Serializer.S_Reports import *
 from ..models import *
+from datetime import datetime, timedelta
 
 
 class PartyLedgerReportView(CreateAPIView):  
@@ -136,12 +137,12 @@ FROM
                     TotalDebitNote = 0
                     TotalTCS = 0
                     for a in PartyLedgerSerializedata:
-                        
+                        Openingba=Opening
                         if a['Flag'] == 0 :
                             temp=0
-                            Opening= 0
+                            Openingba= 0
                         if temp == 0:
-                            temp = (float(Opening) + float(a['InvoiceAmount'])) - (
+                            temp = (float(Openingba) + float(a['InvoiceAmount'])) - (
                                 float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
                         else:
                             temp = (temp + float(a['InvoiceAmount'])) - \
