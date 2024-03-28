@@ -136,9 +136,10 @@ FROM
                     TotalDebitNote = 0
                     TotalTCS = 0
                     for a in PartyLedgerSerializedata:
+                        
                         if a['Flag'] == 0 :
                             temp=0
-                            Opening= a['InvoiceAmount']
+                            Opening= 0
                         if temp == 0:
                             temp = (float(Opening) + float(a['InvoiceAmount'])) - (
                                 float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
