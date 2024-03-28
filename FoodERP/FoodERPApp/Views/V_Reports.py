@@ -119,8 +119,7 @@ FROM
                     date_format = "%Y-%m-%d"
 
                     # Convert the string to a date object
-                    date_object = datetime.strptime(
-                        FromDate, date_format).date()
+                    date_object = datetime.strptime(FromDate, date_format).date()
                     previous_date = date_object - timedelta(days=1)
                     Opening = GetOpeningBalance(Party, Customer, previous_date)
                     Closing = GetOpeningBalance(Party, Customer, ToDate)
