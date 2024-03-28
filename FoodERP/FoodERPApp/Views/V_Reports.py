@@ -103,7 +103,7 @@ FROM
             FROM MC_PartySubPartyOpeningBalance
             WHERE
              MC_PartySubPartyOpeningBalance.Date BETWEEN %s AND %s AND Party_id = %s
-            AND Customer_id = %s   
+            AND SubParty_id = %s   
 
     ) q
             ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer,FromDate, ToDate, Party, Customer])
