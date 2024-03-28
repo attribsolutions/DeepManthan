@@ -40,7 +40,7 @@ class TargetUploadsView(CreateAPIView):
                     ItemID = TargetData['Item']
                     Party = TargetData['Party']
                     TargetQuantity = TargetData['TargetQuantity']
-                    Unit = TargetData['UnitId']
+                    Unit = TargetData['Unit']
                     
                     Item = M_Items.objects.filter(id=ItemID).values("BaseUnitID","Name")
                     
@@ -65,7 +65,7 @@ class TargetUploadsView(CreateAPIView):
                         TargetData['Amount'] = Amount
                         
                     else:
-                        BaseUnitID = Item[0]["Name"]
+                        # ItemName = Item[0]["Name"]
                         log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
                     
@@ -90,7 +90,7 @@ class TargetUploadsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
         except Exception as e:
-            print('ccccc')
+            
             log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload: ' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
 
