@@ -2210,7 +2210,7 @@ class T_ClaimTrackingEntry(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='ClaimTrackingParty', on_delete=models.PROTECT) 
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
-    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
+    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.DO_NOTHING,blank=True, null=True) 
     IsDeleted = models.BooleanField(default=False)
 
     
@@ -2294,3 +2294,10 @@ class T_TargetUploads(models.Model):
 
 
 	
+class M_FinancialYearFirstTransactionLog(models.Model):
+    FinancialYear = models.IntegerField(default=False)
+    Party = models.IntegerField(default=False)
+    Flag =  models.BooleanField(default=False) 
+
+    class Meta:
+        db_table = "M_FinancialYearFirstTransactionLog"
