@@ -30,197 +30,83 @@ class PartyLedgerReportView(CreateAPIView):
                 Party = Orderdata['Party']
 
                 query = T_Invoices.objects.raw('''SELECT
-    1 id,
-    InvoiceDate,
-    BillNo,
-    BankName,
-    BranchName,
-    ChequeDate,
-    DocumentNo,
-    ReceiptMode,
-    InvoiceAmount,
-    TotalTCS,
-    ReceiptAmt,
-    CashReceiptAmt,
-    DebitNote,
-    CreditNote,
-    Flag,
-    BasicAmount,
-    BA5,
-    BA12,
-    BA18,
-    GA5,
-    GA12,
-    GA18,
-    Description
+    1 id,InvoiceDate,BillNo,BankName,BranchName,ChequeDate,DocumentNo,ReceiptMode,InvoiceAmount,TotalTCS,
+    ReceiptAmt,CashReceiptAmt,DebitNote,CreditNote,Flag,BasicAmount,BA5,BA12,BA18,GA5,GA12,GA18,Description
 FROM
-    ((SELECT
-        InvoiceDate,
-            BillNo,
-            BankName,
-            BranchName,
-            ChequeDate,
-            DocumentNo,
-            ReceiptMode,
-            InvoiceAmount,
-            TotalTCS,
-            ReceiptAmt,
-            CashReceiptAmt,
-            Flag,
-            DebitNote,
-            CreditNote,
+    (
+        (   
+            SELECT InvoiceDate,BillNo,BankName,BranchName,ChequeDate,DocumentNo,ReceiptMode,InvoiceAmount,
+            TotalTCS,ReceiptAmt,CashReceiptAmt,Flag,DebitNote,CreditNote,ifnull(BasicAmount,0) AS BasicAmount,
+            ifnull(BA5,0) AS BA5,ifnull(BA12,0) AS BA12,ifnull(BA18,0) AS BA18,ifnull(GA5,0) AS GA5,
+            ifnull(GA12,0) AS GA12,ifnull(GA18,0) AS GA18,Description
+            
+            FROM
+                (SELECT InvoiceDate,T_Invoices.id,FullInvoiceNumber BillNo,"" AS BankName,"" AS BranchName,
+                "" AS ChequeDate,"" AS DocumentNo,"" AS ReceiptMode,GrandTotal InvoiceAmount,TCSAmount TotalTCS,
+                0 AS ReceiptAmt,0 AS CashReceiptAmt,1 AS Flag,0 AS DebitNote,0 AS CreditNote,"" AS Description
+                FROM T_Invoices WHERE InvoiceDate BETWEEN %s AND %s AND Party_id = %s AND Customer_id = %s) a
+                
+                LEFT JOIN 
+                
+                (SELECT Invoice_id,SUM(BasicAmount) AS BasicAmount,
+                SUM(CASE WHEN GSTPercentage = 5 THEN BasicAmount ELSE 0 END) AS BA5,
+                SUM(CASE WHEN GSTPercentage = 12 THEN BasicAmount ELSE 0 END) AS BA12,
+                SUM(CASE WHEN GSTPercentage = 18 THEN BasicAmount ELSE 0 END) AS BA18,
+                SUM(CASE WHEN GSTPercentage = 5 THEN GSTAmount ELSE 0 END) AS GA5,
+                SUM(CASE WHEN GSTPercentage = 12 THEN GSTAmount ELSE 0 END) AS GA12,
+                SUM(CASE WHEN GSTPercentage = 18 THEN GSTAmount ELSE 0 END) AS GA18
+                FROM TC_InvoiceItems GROUP BY Invoice_id) b 
+            
+            ON a.id = b.Invoice_id
+        )
 
-            ifnull(BasicAmount,0) AS BasicAmount,
-            ifnull(BA5,0) AS BA5,
-            ifnull(BA12,0) AS BA12,
-            ifnull(BA18,0) AS BA18,
-            ifnull(GA5,0) AS GA5,
-            ifnull(GA12,0) AS GA12,
-            ifnull(GA18,0) AS GA18,
-            Description
-
-    FROM
-        (SELECT
-        InvoiceDate,
-            T_Invoices.id,
-            FullInvoiceNumber BillNo,
-            "" AS BankName,
-            "" AS BranchName,
-            "" AS ChequeDate,
-            "" AS DocumentNo,
-            "" AS ReceiptMode,
-            GrandTotal InvoiceAmount,
-            TCSAmount TotalTCS,
-            0 AS ReceiptAmt,
-            0 AS CashReceiptAmt,
-            1 AS Flag,
-            0 AS DebitNote,
-            0 AS CreditNote,
-            "" AS Description
-    FROM
-        T_Invoices
-    WHERE
-        InvoiceDate BETWEEN %s AND %s
-            AND Party_id = %s
-            AND Customer_id = %s) a
-    LEFT JOIN (SELECT
-        Invoice_id,
-            SUM(BasicAmount) AS BasicAmount,
-
-            SUM(CASE
-                WHEN GSTPercentage = 5 THEN BasicAmount
-                ELSE 0
-            END) AS BA5,
-            SUM(CASE
-                WHEN GSTPercentage = 12 THEN BasicAmount
-                ELSE 0
-            END) AS BA12,
-            SUM(CASE
-                WHEN GSTPercentage = 18 THEN BasicAmount
-                ELSE 0
-            END) AS BA18,
-            SUM(CASE
-                WHEN GSTPercentage = 5 THEN GSTAmount
-                ELSE 0
-            END) AS GA5,
-            SUM(CASE
-                WHEN GSTPercentage = 12 THEN GSTAmount
-                ELSE 0
-            END) AS GA12,
-            SUM(CASE
-                WHEN GSTPercentage = 18 THEN GSTAmount
-                ELSE 0
-            END) AS GA18
-    FROM
-        TC_InvoiceItems
-    GROUP BY Invoice_id) b ON a.id = b.Invoice_id)
-
-    UNION
-    SELECT
-        ReceiptDate InvoiceDate,
-            FullReceiptNumber BillNo,
-            M_Bank.Name AS BankName,
-            MC_PartyBanks.BranchName AS BranchName,
-            ChequeDate ChequeDate,
-            DocumentNo DocumentNo,
-            M_GeneralMaster.Name AS ReceiptMode,
-            0 AS InvoiceAmount,
-            0 as TotalTCS,
-            CASE
-                WHEN ReceiptMode_id = 31 THEN 0
-                ELSE AmountPaid
-            END ReceiptAmt,
-            CASE
-                WHEN ReceiptMode_id = 31 THEN AmountPaid
-                ELSE 0
-            END CashReceiptAmt,
-            2 AS Flag,
-            0 AS DebitNote,
-            0 AS CreditNote,
-            0 AS BasicAmount,
-            0 AS BA5,
-            0 AS BA12,
-            0 AS BA18,
-            0 AS GA5,
-            0 AS GA12,
-            0 AS GA18,
-            Description
-    FROM
-        T_Receipts
-    LEFT JOIN MC_PartyBanks ON MC_PartyBanks.id = T_Receipts.Bank_id
-    LEFT JOIN M_Bank ON M_Bank.id = MC_PartyBanks.Bank_id
-    INNER JOIN M_GeneralMaster ON M_GeneralMaster.id = T_Receipts.ReceiptMode_id
-    WHERE
-        ReceiptDate BETWEEN %s AND %s
+        UNION
+            SELECT ReceiptDate InvoiceDate,FullReceiptNumber BillNo,M_Bank.Name AS BankName,MC_PartyBanks.BranchName AS BranchName,
+            ChequeDate ChequeDate,DocumentNo DocumentNo,M_GeneralMaster.Name AS ReceiptMode,0 AS InvoiceAmount,0 as TotalTCS,
+            CASE WHEN ReceiptMode_id = 31 THEN 0 ELSE AmountPaid END ReceiptAmt,
+            CASE WHEN ReceiptMode_id = 31 THEN AmountPaid ELSE 0 END CashReceiptAmt,
+            2 AS Flag,0 AS DebitNote,0 AS CreditNote,0 AS BasicAmount,0 AS BA5,0 AS BA12,0 AS BA18,0 AS GA5,0 AS GA12,
+            0 AS GA18,Description
+            FROM T_Receipts
+            LEFT JOIN MC_PartyBanks ON MC_PartyBanks.id = T_Receipts.Bank_id
+            LEFT JOIN M_Bank ON M_Bank.id = MC_PartyBanks.Bank_id
+            INNER JOIN M_GeneralMaster ON M_GeneralMaster.id = T_Receipts.ReceiptMode_id
+            WHERE ReceiptDate BETWEEN %s AND %s
             AND T_Receipts.Party_id = %s
             AND T_Receipts.Customer_id = %s
 
-            UNION
-            SELECT
-        CRDRNoteDate InvoiceDate,
-            FullNoteNumber BillNo,
-            "" AS BankName,
-            "" AS BranchName,
-            "" AS ChequeDate,
-            "" AS DocumentNo,
-            "" AS ReceiptMode,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN T_CreditDebitNotes.GrandTotal
-                ELSE 0
-            END) AS InvoiceAmount,
+        UNION
+            SELECT CRDRNoteDate InvoiceDate,FullNoteNumber BillNo,"" AS BankName,"" AS BranchName,"" AS ChequeDate,
+            "" AS DocumentNo,"" AS ReceiptMode,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN T_CreditDebitNotes.GrandTotal ELSE 0 END) AS InvoiceAmount,
             0 AS TotalTCS,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 0
-                ELSE T_CreditDebitNotes.GrandTotal
-            END) ReceiptAmt,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 0 ELSE T_CreditDebitNotes.GrandTotal END) ReceiptAmt,
             0 AS CashReceiptAmt,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 3
-                ELSE 4
-            END) AS Flag,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38  OR T_CreditDebitNotes.NoteType_id =40 THEN T_CreditDebitNotes.GrandTotal
-                ELSE 0
-            END) AS DebitNote,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 OR T_CreditDebitNotes.NoteType_id =40 THEN 0
-                ELSE T_CreditDebitNotes.GrandTotal
-            END) CreditNote,
-            0 AS BasicAmount,
-            0 AS BA5,
-            0 AS BA12,
-            0 AS BA18,
-            0 AS GA5,
-            0 AS GA12,
-            0 AS GA18,
-            "" AS Description
-    FROM
-        T_CreditDebitNotes
-    WHERE
-        T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
-            AND Party_id = %s
-            AND Customer_id = %s and IsDeleted=0) q
-ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 3 ELSE 4 END) AS Flag,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38  OR T_CreditDebitNotes.NoteType_id =40 THEN T_CreditDebitNotes.GrandTotal ELSE 0 END) AS DebitNote,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 OR T_CreditDebitNotes.NoteType_id =40 THEN 0 ELSE T_CreditDebitNotes.GrandTotal END) CreditNote,
+            0 AS BasicAmount,0 AS BA5, 0 AS BA12, 0 AS BA18, 0 AS GA5, 0 AS GA12, 0 AS GA18, "" AS Description
+            FROM T_CreditDebitNotes
+            WHERE
+             T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND Party_id = %s
+            AND Customer_id = %s and IsDeleted=0
+
+        UNION
+            SELECT Date InvoiceDate,"" BillNo,"" AS BankName,"" AS BranchName,"" AS ChequeDate,
+            "" AS DocumentNo,"" AS ReceiptMode,
+            OpeningBalanceAmount AS InvoiceAmount,0 AS TotalTCS,
+            0 AS ReceiptAmt,0 AS CashReceiptAmt,
+            0 AS Flag,
+            0 AS DebitNote,
+            0 AS CreditNote,
+            0 AS BasicAmount,0 AS BA5, 0 AS BA12, 0 AS BA18, 0 AS GA5, 0 AS GA12, 0 AS GA18, "OpeningBalance" AS Description
+            FROM MC_PartySubPartyOpeningBalance
+            WHERE
+             MC_PartySubPartyOpeningBalance.Date BETWEEN %s AND %s AND Party_id = %s
+            AND SubParty_id = %s   
+
+    ) q
+            ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer,FromDate, ToDate, Party, Customer])
 
                 if not query:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'Report Not Found', 206, 0)
@@ -233,8 +119,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                     date_format = "%Y-%m-%d"
 
                     # Convert the string to a date object
-                    date_object = datetime.strptime(
-                        FromDate, date_format).date()
+                    date_object = datetime.strptime(FromDate, date_format).date()
                     previous_date = date_object - timedelta(days=1)
                     Opening = GetOpeningBalance(Party, Customer, previous_date)
                     Closing = GetOpeningBalance(Party, Customer, ToDate)
@@ -251,6 +136,10 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                     TotalDebitNote = 0
                     TotalTCS = 0
                     for a in PartyLedgerSerializedata:
+                        
+                        if a['Flag'] == 0 :
+                            temp=0
+                            Opening= 0
                         if temp == 0:
                             temp = (float(Opening) + float(a['InvoiceAmount'])) - (
                                 float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
