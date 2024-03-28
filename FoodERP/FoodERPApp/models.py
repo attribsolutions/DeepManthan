@@ -2294,3 +2294,10 @@ class T_TargetUploads(models.Model):
 
 
 	
+class M_FinancialYearFirstTransactionLog(models.Model):
+    FinancialYear = models.IntegerField(default=False)
+    Party = models.IntegerField(default=False)
+    Flag =  models.BooleanField(default=False) 
+
+    class Meta:
+        db_table = "M_FinancialYearFirstTransactionLog"
