@@ -189,7 +189,7 @@ class DeleteTargetRecordsView(CreateAPIView):
                 party_ids = target_data.get('Party', '').split(',')
              
                 T_TargetUploads.objects.filter(Month__in=months,Year__in=years, Party__in=party_ids).delete()
-                log_entry = create_transaction_logNew(request, target_data,party_ids,f'Month: {months} Year: {years} Party: {party_ids}Deleted Successfully',356,0)
+                log_entry = create_transaction_logNew(request, target_data,0,f'Month: {months} Year: {years} Party: {party_ids}Deleted Successfully',356,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Targets Delete Successfully', 'Data': []})
         except IntegrityError:
             log_entry = create_transaction_logNew(request, 0,0,'Targets Data used in another table',8,0)     
@@ -208,9 +208,13 @@ class TargetVSAchievementView(CreateAPIView):
             TargetData = request.data
             Month = TargetData.get('Month')
             Year = TargetData.get('Year')
-            Party = TargetData.get('Party')
+            Party = TargetData.get('Party')           
+             
 
-            query = T_TargetUploads.objects.raw(f'''Select 1 id,Month,Year,TargetQuantity,Round(Quantity,2)Quantity,Amount,M_Items.Name ItemName,M_Group.Name ItemGroupName,
+            query = T_TargetUploads.objects.raw(f'''Select 1 id,Month,Year,CASE 
+            WHEN Month >= 4 THEN CONCAT(Year, '-', Year + 1)
+            ELSE CONCAT(Year - 1, '-', Year)
+            END AS FY,TargetQuantity,Round(Quantity,2)Quantity,Amount,M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.id PartyID,M_Parties.Name PartyName from
             ( select  A.Month,A.Year,TargetQuantity,Quantity,Amount,A.item_id,A.Party_id Party from
@@ -250,6 +254,7 @@ class TargetVSAchievementView(CreateAPIView):
                     "id": a.id,
                     "Month": a.Month,
                     "Year": a.Year,
+                    "Fy":a.FY,
                     "TargetQuantity": a.TargetQuantity,
                     "Quantity":a.Quantity,
                     "Amount":a.Amount,

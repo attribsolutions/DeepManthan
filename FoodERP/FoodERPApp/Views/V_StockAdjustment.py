@@ -12,9 +12,12 @@ from ..Serializer.S_ItemSale import *
 from ..models import *
 from django.db.models import F, Q
 from ..Views.V_CommFunction import *
+from datetime import datetime
+from django.db.models import F, Value, CharField
+from django.db.models.functions import ConcatPair
 
 
-
+ 
 class ShowBatchesForItemView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -88,6 +91,36 @@ class GetStockCountForPartyView(CreateAPIView):
                     StockResult = cursor.fetchone()[0]
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockResult})
 
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+   
+    @transaction.atomic()
+    def post(self, request):
+        try:
+                with transaction.atomic():
+                    StockData = JSONParser().parse(request)
+                    FromDate = StockData['FromDate']
+                    PartyID = StockData['PartyID']
+                    query= M_Settings.objects.filter(id=40).values('IsActive') 
+                    IsActive = query[0]['IsActive']                                    
+                    if(IsActive==1):
+                        Return_year= GetYear(FromDate)                              
+                        fs,fe=Return_year 
+                        year_fs = datetime.strptime(fs, '%Y-%m-%d').year
+                        year_fe= datetime.strptime(fe, '%Y-%m-%d').year
+                        concatenated_year = str(year_fs) + '-' + str(year_fe)                        
+                        query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
+                        if (query1==0):
+                            with connection.cursor() as cursor:
+                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
+                                result = cursor.fetchone()[0]
+                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': result})
+                        else: 
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': 0})
+                        
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
