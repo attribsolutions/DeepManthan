@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime 
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
