@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.db import connection
-import datetime
+from datetime import datetime 
 # from activity_log.models import UserMixin
 
 # Create your models here.
