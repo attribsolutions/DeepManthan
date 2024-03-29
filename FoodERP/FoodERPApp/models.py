@@ -2287,7 +2287,6 @@ class T_TargetUploads(models.Model):
     
     Month = models.IntegerField(default=False)
     Year = models.IntegerField(default=False)
-    Fy=models.CharField(max_length=500,null=True)
     Party = models.ForeignKey(M_Parties, related_name='TargetUploadsParty',  on_delete=models.PROTECT )
     Item =  models.ForeignKey(M_Items, related_name='TargetUploadsItem', on_delete=models.PROTECT)
     TargetQuantity = models.DecimalField(max_digits=20, decimal_places=3)
