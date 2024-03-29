@@ -69,13 +69,13 @@ class TargetUploadsView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
                     
-                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 1, 0).ConvertintoSelectedUnit()
+                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 1, 0).ConvertintoSelectedUnit()
                     TargetData['QtyInNo'] = float(QtyInNo)
 
-                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 2, 0).ConvertintoSelectedUnit()
+                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 2, 0).ConvertintoSelectedUnit()
                     TargetData['QtyInKg'] = float(QtyInKg)
 
-                    QtyInBox = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, 0, 0, 4, 0).ConvertintoSelectedUnit()
+                    QtyInBox = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 4, 0).ConvertintoSelectedUnit()
                     TargetData['QtyInBox'] = float(QtyInBox)
                 
                 TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails , many=True)
