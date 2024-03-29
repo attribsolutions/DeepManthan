@@ -41,13 +41,21 @@ class TargetUploadsView(CreateAPIView):
                     Party = TargetData['Party']
                     TargetQuantity = TargetData['TargetQuantity']
                     Unit = TargetData['Unit']
-                    
+                    print(Unit)
                     Item = M_Items.objects.filter(id=ItemID).values("BaseUnitID","Name")
                     
                     BaseUnitID = Item[0]["BaseUnitID"]
                     BaseUnitQuantity = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, BaseUnitID, 0).GetBaseUnitQuantity()
                     TargetData['TargetQuantityInBaseUnit'] = float(BaseUnitQuantity)
+                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 2, 0).ConvertintoSelectedUnit()
+                    TargetData['QtyInNo'] = float(QtyInNo)
+
+                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 1, 0).ConvertintoSelectedUnit()
                     
+                    TargetData['QtyInKg'] = float(QtyInKg)
+
+                    QtyInBox = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 4, 0).ConvertintoSelectedUnit()
+                    TargetData['QtyInBox'] = float(QtyInBox)
                         
                     query = T_TargetUploads.objects.raw("""SELECT 1 as id, RateCalculationFunction1(0, %s, %s, %s, 0, 0, 0, 1) AS RateWithGST """, [ItemID, Party,BaseUnitID])
                     
@@ -69,14 +77,7 @@ class TargetUploadsView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
                     
-                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 1, 0).ConvertintoSelectedUnit()
-                    TargetData['QtyInNo'] = float(QtyInNo)
 
-                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 2, 0).ConvertintoSelectedUnit()
-                    TargetData['QtyInKg'] = float(QtyInKg)
-
-                    QtyInBox = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 4, 0).ConvertintoSelectedUnit()
-                    TargetData['QtyInBox'] = float(QtyInBox)
                 
                 TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails , many=True)
                 if TargetSerializer.is_valid():
