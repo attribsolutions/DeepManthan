@@ -244,7 +244,7 @@ class TargetVSAchievementView(CreateAPIView):
                         where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id
                         )B
                         
-                        ON B.item_id=A.item_id  
+                        ON B.item_id=A.item_id  and A.Party_id=B.customer_id
                     
                 union
                         
@@ -253,7 +253,7 @@ class TargetVSAchievementView(CreateAPIView):
                         
                         (select Party_id,item_id,Sum(QtyInKg) TargetQuantity,Sum(Amount) TargetAmount
                         from T_TargetUploads
-                        where  Party_id in({Party}) and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year  )A
+                        where  Party_id in({Party}) and Month={Month} and Year={Year} group by item_id,Party_id  )A
                         
                         right join
                         
@@ -263,7 +263,7 @@ class TargetVSAchievementView(CreateAPIView):
                         where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id
                         )B
                         
-                        ON B.item_id=A.item_id 
+                        ON B.item_id=A.item_id and A.Party_id=B.customer_id
                 )C
             join  M_Items ON M_Items.id=C.Item_id
             join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
@@ -273,7 +273,7 @@ class TargetVSAchievementView(CreateAPIView):
             join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
             join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
             join M_Parties  ON M_Parties.id=C.Party 
-            where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null''')
+            where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null order by M_Parties.Name,M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''')
             TargetAchievementList = []   
             # print(query)
             if query:   
