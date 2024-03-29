@@ -124,3 +124,30 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
+        
+        
+
+class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            TransactionData = JSONParser().parse(request)
+            TransactionDate = TransactionData['TransactionDate']
+            PartyID = TransactionData['PartyID']
+            
+            BackDateTransactionQuery='''SELECT CheckStockEntryDateAndNotAllowedBackdatedTransaction(%s, %s)'''
+
+            with connection.cursor() as cursor:
+                cursor.execute(BackDateTransactionQuery, [TransactionDate, PartyID])
+                result = cursor.fetchone()[0]
+
+            if result: 
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Transaction': bool(result)})
+            else:  
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Transaction': bool(result)})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
