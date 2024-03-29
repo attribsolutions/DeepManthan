@@ -232,7 +232,7 @@ class TargetVSAchievementView(CreateAPIView):
                 ( select  A.Month,A.Year,IFNULL(TargetQuantity,0)TargetQuantity,IFNULL(Quantity,0)Quantity,IFNULL(Amount,0)Amount,A.item_id,A.Party_id Party,IFNULL(TargetAmount,0)TargetAmount 
                     from
                         
-                        (select Party_id,item_id,Sum(TargetQuantity) TargetQuantity,Month,Year,Sum(Amount) TargetAmount 
+                        (select Party_id,item_id,Sum(QtyInKg) TargetQuantity,Month,Year,Sum(Amount) TargetAmount 
                         from T_TargetUploads
                         where  Party_id in({Party}) and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year )A
                         
@@ -241,7 +241,7 @@ class TargetVSAchievementView(CreateAPIView):
                         (select Month(invoiceDate) Month , year(invoiceDate) Year,customer_id ,item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount
                         from T_Invoices
                         join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
-                        where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} group by item_id,customer_id,Month,Year
+                        where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id,Month,Year
                         )B
                         
                         ON B.item_id=A.item_id  
@@ -251,7 +251,7 @@ class TargetVSAchievementView(CreateAPIView):
                 select  B.Month,B.Year,IFNULL(TargetQuantity,0)TargetQuantity,IFNULL(Quantity,0)Quantity ,IFNULL(Amount,0) Amount,B.item_id,B.customer_id Party ,IFNULL(TargetAmount,0)TargetAmount
                     from
                         
-                        (select Party_id,item_id,Sum(TargetQuantity) TargetQuantity,Month,Year,Sum(Amount) TargetAmount
+                        (select Party_id,item_id,Sum(QtyInKg) TargetQuantity,Month,Year,Sum(Amount) TargetAmount
                         from T_TargetUploads
                         where  Party_id in({Party}) and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year  )A
                         
@@ -260,7 +260,7 @@ class TargetVSAchievementView(CreateAPIView):
                         (select Month(invoiceDate) Month , year(invoiceDate) Year, customer_id ,item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount
                         from T_Invoices
                         join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
-                        where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} group by item_id,customer_id,Month ,Year
+                        where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id,Month ,Year
                         )B
                         
                         ON B.item_id=A.item_id 
