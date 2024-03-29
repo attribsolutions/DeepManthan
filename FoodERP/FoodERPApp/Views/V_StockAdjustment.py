@@ -1,20 +1,19 @@
 from django.http import JsonResponse
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from rest_framework.parsers import JSONParser
 from django.db import connection
+
+from ..Views.V_TransactionNumberfun import GetYear
 from ..Serializer.S_Orders import Mc_ItemUnitSerializerThird
 from ..Serializer.S_StockAdjustment import *
 from ..Serializer.S_Parties import *
 from ..Serializer.S_ItemSale import *
 from ..models import *
-from django.db.models import F, Q
 from ..Views.V_CommFunction import *
 from datetime import datetime
-from django.db.models import F, Value, CharField
-from django.db.models.functions import ConcatPair
 
 
  
