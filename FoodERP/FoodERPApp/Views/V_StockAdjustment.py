@@ -67,8 +67,6 @@ class ShowBatchesForItemView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GETBatchesForItemInStockAdjustment:'+str(Exception),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
-
 
 
 class GetStockCountForPartyView(CreateAPIView):
@@ -93,12 +91,14 @@ class GetStockCountForPartyView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
+        
 class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
    
     @transaction.atomic()
     def post(self, request):
         try:
+
                 with transaction.atomic():
                     StockData = JSONParser().parse(request)
                     FromDate = StockData['FromDate']
@@ -131,6 +131,7 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
         
         
 
+
 class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -148,9 +149,9 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
                 result = cursor.fetchone()[0]
 
             if result: 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Transaction': bool(result)})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': bool(result)})
             else:  
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Transaction': bool(result)})
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
