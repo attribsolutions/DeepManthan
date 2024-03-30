@@ -98,31 +98,39 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         try:
-            with transaction.atomic():
-                StockData = JSONParser().parse(request)
-                FromDate = StockData['FromDate']
-                PartyID = StockData['PartyID']
-                query = M_Settings.objects.filter(id=40).values('IsActive') 
-                IsActive = query[0]['IsActive']                                    
-                if IsActive == 1:
-                    Return_year = GetYear(FromDate)                              
-                    fs, fe = Return_year 
-                    year_fs = datetime.strptime(fs, '%Y-%m-%d').year
-                    year_fe = datetime.strptime(fe, '%Y-%m-%d').year
-                    concatenated_year = f"{year_fs}-{year_fe}"                        
-                    query1 = M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID, FinancialYear=concatenated_year).count()                                                
-                    if query1 == 0:
-                        with connection.cursor() as cursor:
-                            cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
-                            result = cursor.fetchone()[0]
-                            Result = True if result == 1 else False 
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Result})
-                    else: 
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': False})
-                        
+
+                with transaction.atomic():
+                    StockData = JSONParser().parse(request)
+                    FromDate = StockData['FromDate']
+                    PartyID = StockData['PartyID']
+                    query= M_Settings.objects.filter(id=40).values('DefaultValue') 
+                    IsActive = query[0]['DefaultValue']                                    
+                    print(IsActive)
+                    if(IsActive == '1'):
+                        print('aaaaaaaaaaaaaaaaaa')
+                        Return_year= GetYear(FromDate)  
+                        print(Return_year)                            
+                        fs,fe=Return_year 
+                        year_fs = datetime.strptime(fs, '%Y-%m-%d').year
+                        year_fe= datetime.strptime(fe, '%Y-%m-%d').year
+                        concatenated_year = str(year_fs) + '-' + str(year_fe)                        
+                        query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
+                        if (query1==0):
+                            with connection.cursor() as cursor:
+                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
+                                result = cursor.fetchone()[0]
+                                Result = True if result == 1 else False
+                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Result})
+                        else: 
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})
+                    else:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})   
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-     
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': False})
+        
+        
+        
+
 
 class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
