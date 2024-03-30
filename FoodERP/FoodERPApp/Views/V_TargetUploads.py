@@ -77,7 +77,7 @@ class TargetUploadsView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
                     
-
+                    
                 
                 TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails , many=True)
                 if TargetSerializer.is_valid():

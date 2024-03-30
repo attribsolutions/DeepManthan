@@ -116,9 +116,9 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                             with connection.cursor() as cursor:
                                 cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
                                 result = cursor.fetchone()[0]
-                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': result})
+                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':bool(result)})
                         else: 
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': 0})
+                            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': '', 'Data': bool(result)})
                         
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -143,9 +143,9 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
                 result = cursor.fetchone()[0]
 
             if result: 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Transaction': bool(result)})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': bool(result)})
             else:  
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Transaction': bool(result)})
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
