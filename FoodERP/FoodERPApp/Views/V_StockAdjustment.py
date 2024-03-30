@@ -118,8 +118,7 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                                 result = cursor.fetchone()[0]
                                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':bool(result)})
                         else: 
-                            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': '', 'Data': bool(result)})
-                        
+                            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': '', 'Data': bool(result)})    
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
