@@ -119,7 +119,8 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                             with connection.cursor() as cursor:
                                 cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
                                 result = cursor.fetchone()[0]
-                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': result})
+                                Result = True if result == 1 else False
+                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Result})
                         else: 
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})
                     else:
