@@ -142,8 +142,8 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'FinancialYearFirstTransaction:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': False})
-   
 
+ 
 class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -151,37 +151,20 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
     def post(self, request):
         try:
             TransactionData = JSONParser().parse(request)
-            PartyID = TransactionData['PartyID']
-            TransactionId = TransactionData['TransactionId']
-            TransactionMode = TransactionData['TransactionMode']
             TransactionDate = TransactionData['TransactionDate']
-
-            if not TransactionDate:
-                if TransactionMode == 'PurchaseReturn':
-                    transaction = T_PurchaseReturn.objects.get(id=TransactionId)
-                    TransactionDate = transaction.ReturnDate
-                elif TransactionMode == 'SalesReturn':
-                    transaction = T_PurchaseReturn.objects.get(id=TransactionId) 
-                    TransactionDate = transaction.ReturnDate 
-                elif TransactionMode == 'GRN':
-                    transaction = T_GRNs.objects.get(id=TransactionId)
-                    TransactionDate = transaction.GRNDate
-                elif TransactionMode == 'Invoice':
-                    transaction = T_Invoices.objects.get(id=TransactionId)
-                    TransactionDate = transaction.InvoiceDate 
+            PartyID = TransactionData['PartyID']
             
             BackDateTransactionQuery='''SELECT CheckStockEntryDateAndNotAllowedBackdatedTransaction(%s, %s)'''
-
+            
             with connection.cursor() as cursor:
                 cursor.execute(BackDateTransactionQuery, [TransactionDate, PartyID])
                 result = cursor.fetchone()[0]
-
             if result: 
                 log_entry = create_transaction_logNew(request,TransactionData, PartyID,f'Transactions Allowed for Party: {PartyID} Date: {TransactionDate}',360,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': bool(result)})
-            else: 
-                log_entry = create_transaction_logNew(request,TransactionData, 0,f'Backdated transactions not allowed for Party: {PartyID} Date: {TransactionDate}',360,0) 
+            else:  
+                log_entry = create_transaction_logNew(request,TransactionData, PartyID,f'Backdated transactions not allowed for Party: {PartyID} Date: {TransactionDate}',360,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'TransactionData:'+str((e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'TransactionData:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
