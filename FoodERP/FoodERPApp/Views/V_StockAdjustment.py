@@ -103,10 +103,13 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                     StockData = JSONParser().parse(request)
                     FromDate = StockData['FromDate']
                     PartyID = StockData['PartyID']
-                    query= M_Settings.objects.filter(id=40).values('IsActive') 
-                    IsActive = query[0]['IsActive']                                    
-                    if(IsActive==1):
-                        Return_year= GetYear(FromDate)                              
+                    query= M_Settings.objects.filter(id=40).values('DefaultValue') 
+                    IsActive = query[0]['DefaultValue']                                    
+                    print(IsActive)
+                    if(IsActive == '1'):
+                        print('aaaaaaaaaaaaaaaaaa')
+                        Return_year= GetYear(FromDate)  
+                        print(Return_year)                            
                         fs,fe=Return_year 
                         year_fs = datetime.strptime(fs, '%Y-%m-%d').year
                         year_fe= datetime.strptime(fe, '%Y-%m-%d').year
@@ -118,10 +121,11 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                                 result = cursor.fetchone()[0]
                                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': result})
                         else: 
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': 0})
-                        
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})
+                    else:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})   
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': False})
         
         
         
