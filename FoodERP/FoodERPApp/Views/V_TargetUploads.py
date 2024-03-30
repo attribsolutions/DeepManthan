@@ -211,6 +211,8 @@ class TargetVSAchievementView(CreateAPIView):
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
             Employee = TargetData.get('Employee')            
+            
+            PartyDetails= Party
              
             if Employee > 0 and Party == 0:
                     EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
@@ -219,12 +221,11 @@ class TargetVSAchievementView(CreateAPIView):
                     Party_ID = p.split(",")
                     dd=Party_ID[:-1] 
                     Party=', '.join(dd)
-                    
-
-            query = T_TargetUploads.objects.raw(f'''
             
+
             Select 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
             (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,
+
             TargetQuantity,Round(Quantity,2)Quantity,Amount,TargetAmount,
             M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
@@ -281,7 +282,6 @@ class TargetVSAchievementView(CreateAPIView):
                 for a in query:
                     TargetAchievementList.append({
                     "id": a.id,
-                    
                     "Year": a.Year,
                     "Fy":a.FY,
                     "TargetQuantity": a.TargetQuantity,
@@ -297,12 +297,11 @@ class TargetVSAchievementView(CreateAPIView):
                     "SubCluster": a.SubClusterName,
                     "SAPPartyCode":a.SAPPartyCode   
                 })
-           
-                log_entry = create_transaction_logNew(request, TargetData,0,'',357,0)
+                log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetAchievementList})
             else:
-                log_entry = create_transaction_logNew(request,0,0,'TargetData Does Not Exist',357,0)
+                log_entry = create_transaction_logNew(request,0,0,'TargetVSAchievement Does Not Exist',357,0)
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'SubClusterDeleted:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'TargetVSAchievement:'+str(e),33,0)
             return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
