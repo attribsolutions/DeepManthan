@@ -657,6 +657,7 @@ urlpatterns = [
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
             url(r'GetStockCountForParty$',GetStockCountForPartyView.as_view()),
             url(r'CheckStockEntryForFYFirstTransaction$',CheckStockEntryForFYFirstTransactionView.as_view()),
+            url(r'CheckStockEntryDateAndNotAllowedBackdatedTransaction$',CheckStockEntryDateAndNotAllowedBackdatedTransactionView.as_view()),
             
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
