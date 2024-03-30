@@ -121,7 +121,7 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                         print(query1)
                         if (query1==0):
                             with connection.cursor() as cursor:
-                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s, %s)", [FromDate, PartyID,concatenated_year])
+                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s, %s, %s)", [FromDate, PartyID,concatenated_year,year_fs])
                                 result = cursor.fetchone()[0]
                                  
                                 if result == 1: 
