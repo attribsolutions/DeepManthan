@@ -67,8 +67,6 @@ class ShowBatchesForItemView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GETBatchesForItemInStockAdjustment:'+str(Exception),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
-
 
 
 class GetStockCountForPartyView(CreateAPIView):
@@ -93,37 +91,38 @@ class GetStockCountForPartyView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
+        
 class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
    
     @transaction.atomic()
     def post(self, request):
         try:
-                with transaction.atomic():
-                    StockData = JSONParser().parse(request)
-                    FromDate = StockData['FromDate']
-                    PartyID = StockData['PartyID']
-                    query= M_Settings.objects.filter(id=40).values('IsActive') 
-                    IsActive = query[0]['IsActive']                                    
-                    if(IsActive==1):
-                        Return_year= GetYear(FromDate)                              
-                        fs,fe=Return_year 
-                        year_fs = datetime.strptime(fs, '%Y-%m-%d').year
-                        year_fe= datetime.strptime(fe, '%Y-%m-%d').year
-                        concatenated_year = str(year_fs) + '-' + str(year_fe)                        
-                        query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
-                        if (query1==0):
-                            with connection.cursor() as cursor:
-                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
-                                result = cursor.fetchone()[0]
-                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':bool(result)})
-                        else: 
-                            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': '', 'Data': bool(result)})    
+            with transaction.atomic():
+                StockData = JSONParser().parse(request)
+                FromDate = StockData['FromDate']
+                PartyID = StockData['PartyID']
+                query = M_Settings.objects.filter(id=40).values('IsActive') 
+                IsActive = query[0]['IsActive']                                    
+                if IsActive == 1:
+                    Return_year = GetYear(FromDate)                              
+                    fs, fe = Return_year 
+                    year_fs = datetime.strptime(fs, '%Y-%m-%d').year
+                    year_fe = datetime.strptime(fe, '%Y-%m-%d').year
+                    concatenated_year = f"{year_fs}-{year_fe}"                        
+                    query1 = M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID, FinancialYear=concatenated_year).count()                                                
+                    if query1 == 0:
+                        with connection.cursor() as cursor:
+                            cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
+                            result = cursor.fetchone()[0]
+                            Result = True if result == 1 else False 
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Result})
+                    else: 
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': False})
+                        
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-        
-        
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+     
 
 class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
