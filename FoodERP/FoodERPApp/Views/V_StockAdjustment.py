@@ -101,6 +101,7 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
     def post(self, request):
         try:
 
+
                 with transaction.atomic():
                     StockData = JSONParser().parse(request)
                     FromDate = StockData['FromDate']
@@ -138,8 +139,13 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                             log_entry = create_transaction_logNew(request,StockData, PartyID, f'Date: {FromDate}',359,0)
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})
                     else:
+
+            
                         log_entry = create_transaction_logNew(request,StockData, PartyID, f'Date: {FromDate}',359,0)
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})   
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})
+                else:
+                    log_entry = create_transaction_logNew(request,StockData, PartyID, f'Date: {FromDate}',359,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})   
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'FinancialYearFirstTransaction:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': False})
@@ -155,8 +161,24 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
     def post(self, request):
         try:
             TransactionData = JSONParser().parse(request)
-            TransactionDate = TransactionData['TransactionDate']
             PartyID = TransactionData['PartyID']
+            TransactionId = TransactionData['TransactionId']
+            TransactionMode = TransactionData['TransactionMode']
+            TransactionDate = TransactionData['TransactionDate']
+
+            if not TransactionDate:
+                if TransactionMode == 'PurchaseReturn':
+                    transaction = T_PurchaseReturn.objects.get(id=TransactionId)
+                    TransactionDate = transaction.ReturnDate
+                elif TransactionMode == 'SalesReturn':
+                    transaction = T_PurchaseReturn.objects.get(id=TransactionId) 
+                    TransactionDate = transaction.ReturnDate 
+                elif TransactionMode == 'GRN':
+                    transaction = T_GRNs.objects.get(id=TransactionId)
+                    TransactionDate = transaction.GRNDate
+                elif TransactionMode == 'Invoice':
+                    transaction = T_Invoices.objects.get(id=TransactionId)
+                    TransactionDate = transaction.InvoiceDate 
             
             BackDateTransactionQuery='''SELECT CheckStockEntryDateAndNotAllowedBackdatedTransaction(%s, %s)'''
 
@@ -169,12 +191,8 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': bool(result)})
             else: 
                 log_entry = create_transaction_logNew(request,TransactionData, 0,f'Backdated transactions not allowed for Party: {PartyID} Date: {TransactionDate}',360,0) 
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'TransactionData:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
-        
-        
-        
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
