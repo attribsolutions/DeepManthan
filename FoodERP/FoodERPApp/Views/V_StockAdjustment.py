@@ -86,9 +86,11 @@ class GetStockCountForPartyView(CreateAPIView):
                     # Execute the raw query and fetch the results
                     cursor.execute(Stockquery, [FromDate, PartyID])
                     StockResult = cursor.fetchone()[0]
+                log_entry = create_transaction_logNew(request,StockData, 0,'',358,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockResult})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'StockData:'+str((e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
@@ -107,7 +109,6 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                     IsActive = query[0]['DefaultValue']                                    
                     print(IsActive)
                     if(IsActive == '1'):
-                        print('aaaaaaaaaaaaaaaaaa')
                         Return_year= GetYear(FromDate)  
                         print(Return_year)                            
                         fs,fe=Return_year 
@@ -115,17 +116,29 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                         year_fe= datetime.strptime(fe, '%Y-%m-%d').year
                         concatenated_year = str(year_fs) + '-' + str(year_fe)                        
                         query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
-                        if (query1 == 0):
+                        if (query1==0):
                             with connection.cursor() as cursor:
                                 cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
                                 result = cursor.fetchone()[0]
-                                Result = True if result == 1 else False
-                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Result})
+                                 
+                                if result == 1: 
+                                    Message = ""
+                                    Result = True
+                                    StatusCode = 200
+                                else: 
+                                    Result = False 
+                                    Message = "Please Enter Stock"
+                                    StatusCode = 400
+                                log_entry = create_transaction_logNew(request,StockData, PartyID,f'Date: {FromDate}',359,0)
+                                return JsonResponse({'StatusCode': StatusCode, 'Status': True, 'Message': Message, 'Data': Result})
                         else: 
+                            log_entry = create_transaction_logNew(request,StockData, PartyID, f'Date: {FromDate}',359,0)
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})
                     else:
+                        log_entry = create_transaction_logNew(request,StockData, PartyID, f'Date: {FromDate}',359,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': True})   
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'FinancialYearFirstTransaction:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': False})
         
         
@@ -149,10 +162,16 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
                 result = cursor.fetchone()[0]
 
             if result: 
+                log_entry = create_transaction_logNew(request,TransactionData, PartyID,f'Transactions Allowed for Party: {PartyID} Date: {TransactionDate}',360,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': bool(result)})
-            else:  
+            else: 
+                log_entry = create_transaction_logNew(request,TransactionData, 0,f'Backdated transactions not allowed for Party: {PartyID} Date: {TransactionDate}',360,0) 
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'TransactionData:'+str((e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+        
+        
         
