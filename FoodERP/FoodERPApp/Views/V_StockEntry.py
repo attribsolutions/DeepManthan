@@ -1,11 +1,10 @@
-import datetime
+from datetime import timedelta
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from rest_framework.parsers import JSONParser
-from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Challan import *
@@ -90,7 +89,7 @@ class StockEntryPageView(CreateAPIView):
                     
                     O_LiveBatchesList.append({
                     
-                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "ItemExpiryDate":date.today()+ timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "GST": a['GST'],
                     "MRPValue" :a["MRPValue"],
