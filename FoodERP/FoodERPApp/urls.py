@@ -705,7 +705,8 @@ urlpatterns = [
               url(r'DeleteTargetRecords$',DeleteTargetRecordsView.as_view()),
               url(r'TargetVSAchievement$', TargetVSAchievementView.as_view()),
           
-         
+#Logs
+              url(r'LogTransaction$',LogTransactionView.as_view()),           
               
              
            
