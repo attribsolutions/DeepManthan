@@ -114,11 +114,14 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                         fs,fe=Return_year 
                         year_fs = datetime.strptime(fs, '%Y-%m-%d').year
                         year_fe= datetime.strptime(fe, '%Y-%m-%d').year
-                        concatenated_year = str(year_fs) + '-' + str(year_fe)                        
+                        print('------',year_fs,year_fe)
+                        concatenated_year = str(year_fs) + '-' + str(year_fe)   
+                        print(concatenated_year)                     
                         query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
+                        print(query1)
                         if (query1==0):
                             with connection.cursor() as cursor:
-                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
+                                cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s, %s)", [FromDate, PartyID,concatenated_year])
                                 result = cursor.fetchone()[0]
                                  
                                 if result == 1: 
