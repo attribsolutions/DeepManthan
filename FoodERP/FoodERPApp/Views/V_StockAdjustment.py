@@ -115,7 +115,7 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                         year_fe= datetime.strptime(fe, '%Y-%m-%d').year
                         concatenated_year = str(year_fs) + '-' + str(year_fe)                        
                         query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
-                        if (query1==0):
+                        if (query1 == 0):
                             with connection.cursor() as cursor:
                                 cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s)", [FromDate, PartyID])
                                 result = cursor.fetchone()[0]
