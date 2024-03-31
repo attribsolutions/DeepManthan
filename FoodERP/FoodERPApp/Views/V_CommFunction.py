@@ -806,7 +806,7 @@ class LogTransactionView(CreateAPIView):
             ToDate = LogData['ToDate']
             CustomerID = LogData['CustomerID']
         
-            LogEntry = create_transaction_logNew(request, LogData, PartyID, 'Important Notification', 0, TransactionID, FromDate, ToDate, CustomerID)
+            LogEntry = create_transaction_logNew(request, LogData, PartyID, 'Important Notification', 361, TransactionID, FromDate, ToDate, CustomerID)
             
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': {'LogEntryID': LogEntry.id}})
         except Exception as e:
