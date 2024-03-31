@@ -791,3 +791,24 @@ def TransactionDateLogFun(PartyID, ItemID, inputTransactionDate, inputStockAdjus
     else:
         q1 = L_TransactionDateLog.objects.create(OldestTrnDate=inputTransactionDate, NewestTrnDate=inputTransactionDate,
                                                  StockAdjustmentDate=inputStockAdjustmentDate, Party=PartyID, Item=ItemID)
+
+
+class LogTransactionView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            LogData = JSONParser().parse(request)
+            PartyID = LogData['PartyID']
+            TransactionID = LogData['TransactionID']
+            FromDate = LogData['FromDate']
+            ToDate = LogData['ToDate']
+            CustomerID = LogData['CustomerID']
+        
+            LogEntry = create_transaction_logNew(request, LogData, PartyID, 'Important Notification', 361, TransactionID, FromDate, ToDate, CustomerID)
+            
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': {'LogEntryID': LogEntry.id}})
+        except Exception as e:
+            transaction.set_rollback(True)  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': None})
