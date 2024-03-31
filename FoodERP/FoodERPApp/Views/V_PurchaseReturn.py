@@ -502,10 +502,10 @@ class ReturnItemAddView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_Items.objects.filter(id=id)
+                query = M_Items.objects.filter(id=id).values('id','Name')
                 if query.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Itemsdata = ItemSerializerSecond(query, many=True).data
+                    Itemsdata = M_ItemsSerializer02(query, many=True).data
                     # return JsonResponse({'query':  Itemsdata})
                     Itemlist = list()
                     InvoiceItems=list()
