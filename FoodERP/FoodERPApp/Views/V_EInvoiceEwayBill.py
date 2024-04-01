@@ -249,20 +249,20 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         if(Query.count() > 0):
                             
                             StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
-                            log_entry = create_transaction_logNew(request,0,0,'E-Invoice Upload Successfully',362,0 )
+                            log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,'E-Invoice Upload Successfully',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1 })
                         else:
                            
                             InvoiceID=T_Invoices.objects.get(id=id)
                             Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
-                            log_entry = create_transaction_logNew(request,0,0,f'E-Invoice Upload Successfully  of InvoiceID: {InvoiceID}',362,0 )
+                            log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-Invoice Upload Successfully  of InvoiceID: {InvoiceID}',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1})
                     else:
-                        log_entry = create_transaction_logNew(request, 0,0, data_dict['results']['errorMessage'], 92,0)
+                        log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results']['errorMessage'], 92,0)
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
                     
                 else:
-                    log_entry = create_transaction_logNew(request,0,0, aa[1],362,0) 
+                    log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0, aa[1],362,0) 
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-Invoice Upload:'+str((e)),33,0)
@@ -428,23 +428,23 @@ class Uploaded_EwayBill(CreateAPIView):
                                     if(Query.count() > 0):
                                         
                                         StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
-                                        log_entry = create_transaction_logNew(request,0,0,'E-WayBill Upload Successfully',363,0 )
+                                        log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,'E-WayBill Upload Successfully',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                     else:
                                         InvoiceID=T_Invoices.objects.get(id=id)
                                         Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
-                                        log_entry = create_transaction_logNew(request,0,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
+                                        log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                 else:
                                     # print('hhhhhhh')
-                                    log_entry = create_transaction_logNew(request, 0,0, data_dict['results'], 363,0)
+                                    log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results'], 363,0)
                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                             else:
-                                log_entry = create_transaction_logNew(request, 0,0, distance_dict['results'], 363,0)
+                                log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, distance_dict['results'], 363,0)
                                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
                             
                     else:
-                        log_entry = create_transaction_logNew(request,0,0, aa[1],363,0) 
+                        log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0, aa[1],363,0) 
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)

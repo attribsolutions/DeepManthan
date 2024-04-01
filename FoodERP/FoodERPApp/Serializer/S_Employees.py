@@ -105,4 +105,41 @@ class ManagementEmployeeParties(serializers.ModelSerializer):
         model =  MC_ManagementParties
         fields = '__all__'
    
-    
+
+
+class PartyEmpDetailsSerializer(serializers.Serializer):
+    EmpName = serializers.CharField(max_length=500)
+    EmpAddress = serializers.CharField(max_length=500)
+    EmpMobile = serializers.CharField(max_length=20) 
+    EmpEmail = serializers.EmailField()
+    DOB = serializers.DateField()
+    EmpPAN = serializers.CharField(max_length=50) 
+    AadharNo = serializers.CharField(max_length=20) 
+    EmpPIN = serializers.CharField(max_length=10)  
+    EmpDistrict = serializers.CharField(max_length=100)
+    EmpState = serializers.CharField(max_length=100)
+    EmpType = serializers.CharField(max_length=20)
+    PartyName = serializers.CharField(max_length=500)
+    PartyType = serializers.CharField(max_length=500)
+    PartyAddress = serializers.CharField(max_length=500)
+    FSSAINo = serializers.CharField(max_length=200)
+    FSSAIExipry =serializers.CharField(max_length=200)
+    PartyPIN = serializers.IntegerField()
+    PartyEmail = serializers.EmailField()
+    MobileNo = serializers.CharField(max_length=20)  
+    AlternateContactNo = serializers.CharField(max_length=20)  
+    SAPPartyCode = serializers.CharField(max_length=20)  
+    GSTIN = serializers.CharField(max_length=20)  
+    PartyPAN = serializers.CharField(max_length=20) 
+    PartyCity = serializers.CharField(max_length=100)
+    PartyDistrict = serializers.CharField(max_length=50) 
+    PartyState = serializers.CharField(max_length=100)
+    IsDivision = serializers.BooleanField()
+    MkUpMkDn = serializers.BooleanField()
+    IsPartyActive = serializers.BooleanField()
+    Latitude = serializers.CharField(max_length=100) 
+    Longitude = serializers.CharField(max_length=100)
+    LoginName = serializers.CharField(max_length=500)
+
+        
+                      
