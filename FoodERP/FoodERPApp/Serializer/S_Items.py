@@ -8,6 +8,11 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
         model = M_Items
         fields = '__all__'
 
+class M_ItemsSerializer02(serializers.ModelSerializer):
+    class Meta:
+        model = M_Items
+        fields = ['id','Name']        
+
 class ItemsSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)

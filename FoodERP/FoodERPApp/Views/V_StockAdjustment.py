@@ -104,20 +104,20 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                 StockData = JSONParser().parse(request)
                 FromDate = StockData['FromDate']
                 PartyID = StockData['PartyID']
-                query= M_Settings.objects.filter(id=40).values('DefaultValue') 
+                query= M_Settings.objects.filter(id=41).values('DefaultValue') 
                 IsActive = query[0]['DefaultValue']                                    
-                print(IsActive)
+                
                 if(IsActive == '1'):
                     Return_year= GetYear(FromDate)  
-                    print(Return_year)                            
+                                         
                     fs,fe=Return_year 
                     year_fs = datetime.strptime(fs, '%Y-%m-%d').year
                     year_fe= datetime.strptime(fe, '%Y-%m-%d').year
-                    print('------',year_fs,year_fe)
+                    
                     concatenated_year = str(year_fs) + '-' + str(year_fe)   
-                    print(concatenated_year)                     
+                                        
                     query1= M_FinancialYearFirstTransactionLog.objects.filter(Party=PartyID,FinancialYear=concatenated_year).count()                                                
-                    print(query1)
+                    
                     if (query1==0):
                         with connection.cursor() as cursor:
                             cursor.execute("SELECT CheckStockEntryForFinancialYearFirstTransaction(%s, %s, %s, %s)", [FromDate, PartyID,concatenated_year,year_fs])
