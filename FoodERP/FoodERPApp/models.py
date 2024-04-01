@@ -1841,7 +1841,7 @@ class T_Stock(models.Model):
     IsSaleable= models.BooleanField(default=False)
     BatchCode = models.CharField(max_length=500,blank=True,null=True)
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
-    Difference = models.DecimalField(max_digits=20, decimal_places=2,blank=True,null=True)
+    Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
     class Meta:
         db_table="T_Stock"        
