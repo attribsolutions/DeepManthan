@@ -249,21 +249,24 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         if(Query.count() > 0):
                             
                             StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
+                            log_entry = create_transaction_logNew(request,0,0,'E-Invoice Upload Successfully',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1 })
                         else:
                            
                             InvoiceID=T_Invoices.objects.get(id=id)
                             Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
+                            log_entry = create_transaction_logNew(request,0,0,f'E-Invoice Upload Successfully  of InvoiceID: {InvoiceID}',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1})
                     else:
-                        
+                        log_entry = create_transaction_logNew(request, 0,0, data_dict['results']['errorMessage'], 92,0)
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
                     
                 else:
-                    
+                    log_entry = create_transaction_logNew(request,0,0, aa[1],362,0) 
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'E-Invoice Upload:'+str((e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
 class Uploaded_EwayBill(CreateAPIView):
@@ -275,6 +278,7 @@ class Uploaded_EwayBill(CreateAPIView):
             with transaction.atomic():
                 Query=T_Invoices.objects.filter(id=id).values('Vehicle')
                 if (Query[0]['Vehicle']) is None:
+                    log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
                 else:
                     # print('bbbbbbbbbb')
@@ -424,21 +428,27 @@ class Uploaded_EwayBill(CreateAPIView):
                                     if(Query.count() > 0):
                                         
                                         StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                        log_entry = create_transaction_logNew(request,0,0,'E-WayBill Upload Successfully',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                     else:
                                         InvoiceID=T_Invoices.objects.get(id=id)
                                         Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
+                                        log_entry = create_transaction_logNew(request,0,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                 else:
                                     # print('hhhhhhh')
+                                    log_entry = create_transaction_logNew(request, 0,0, data_dict['results'], 363,0)
                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                             else:
+                                log_entry = create_transaction_logNew(request, 0,0, distance_dict['results'], 363,0)
                                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
                             
                     else:
+                        log_entry = create_transaction_logNew(request,0,0, aa[1],363,0) 
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class Cancel_EwayBill(CreateAPIView):
@@ -485,16 +495,20 @@ class Cancel_EwayBill(CreateAPIView):
                         if(Query.count() > 0):
                             
                             StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())
+                            log_entry = create_transaction_logNew(request,0,0,'E-WayBill Cancel Successfully',364,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Cancel Successfully', 'Data': [] })
                         else:
-                              
+                            log_entry = create_transaction_logNew(request,0,0,'E-WayBill Data Invalid',364,0 ) 
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Data Invalid', 'Data': [] })
                     else:
+                        log_entry = create_transaction_logNew(request, 0,0, data_dict['results']['message'], 364,0)
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['message'], 'Data': [] })
                 else:
+                    log_entry = create_transaction_logNew(request,0,0, aa[1],364,0) 
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Cancel:'+str((e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class Cancel_EInvoice(CreateAPIView):
@@ -540,15 +554,19 @@ class Cancel_EInvoice(CreateAPIView):
                         if(Query.count() > 0):
                             
                             StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
+                            log_entry = create_transaction_logNew(request,0,0,'E-Invoice Cancel Successfully',365,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Cancel Successfully', 'Data': [] })
                         else:
-                              
+                            log_entry = create_transaction_logNew(request,0,0,'E-InvoiceData Invalid',365,0 )   
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Data Invalid', 'Data': [] })
                     else:
+                        log_entry = create_transaction_logNew(request, 0,0, data_dict['results']['errorMessage'], 92,0)
                         return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': [] })
                 else:
+                    log_entry = create_transaction_logNew(request,0,0, aa[1],365,0) 
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'E-Invoice Cancel:'+str((e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
