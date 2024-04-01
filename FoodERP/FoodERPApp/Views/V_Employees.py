@@ -380,7 +380,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             'Longitude' : a['Longitude'],
                             'MobileNo' :a['MobileNo'],
                             'Address' :a['Address'],
-                            'PartyType' :a['PartyType']
+                            'PartyType' :a['PartyType']['Name']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
