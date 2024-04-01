@@ -129,7 +129,7 @@ class CheckStockEntryForFYFirstTransactionView(CreateAPIView):
                                 StatusCode = 200
                             else: 
                                 Result = False 
-                                Message = "Please Enter Stock"
+                                Message = "Please enter the stock for all products to enable transactions in the financial year (2024-2025)."
                                 StatusCode = 400
                             log_entry = create_transaction_logNew(request,StockData, PartyID,f'Date: {FromDate}',359,0)
                             return JsonResponse({'StatusCode': StatusCode, 'Status': True, 'Message': Message, 'Data': Result})
