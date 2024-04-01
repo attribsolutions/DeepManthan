@@ -1413,7 +1413,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id and IsDeleted=0
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
- JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0"""
+ JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0 where  M_Items.IsFranchisesItem=0"""
                 
                 if IsSCM == '0':
                     query += " "
@@ -1425,8 +1425,8 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
-                    query += " where "
-                    query += "M_Items.id in %s "
+                    
+                    query += " AND M_Items.id in %s "
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
                     if IsSCM == '0':
@@ -1435,17 +1435,17 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
                 elif any(SubGroupID):
-                    query += " where "
-                    query += "M_Group.id in %s and MC_SubGroup.id in %s"
+                    
+                    query += " AND M_Group.id in %s and MC_SubGroup.id in %s"
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID,SubGroupID])
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID,SubGroupID])
                 elif any(GroupID):
-                    query += " where "
-                    query += "M_Group.id in %s "
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
+                    
+                    query += " AND M_Group.id in %s "
+                    query += "order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID])
                     else:
