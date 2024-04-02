@@ -250,6 +250,9 @@ urlpatterns = [
             url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesFilterView.as_view()),
             url(r'ManagementEmpParties$', ManagementEmployeePartiesSaveView.as_view()),
             url(r'ManagementEmpParties/([0-9]+)$', ManagementEmployeePartiesSaveView.as_view()),
+            url(r'PartiesEmpAllDetails/([0-9]+)$', PartiesEmpAllDetailsView.as_view()),
+          
+       
          
 
 # Order All APIs

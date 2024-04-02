@@ -33,10 +33,11 @@ class PartyaddressSecond(serializers.ModelSerializer):
         fields = ['Address']
         
 class DivisionsSerializerSecond(serializers.ModelSerializer):
+    PartyType=PartyTypeSerializer(read_only=True)
     Address = serializers.CharField(source='PartyAddress.first.Address')
     class Meta:
         model =  M_Parties
-        fields = ['id', 'Name', 'SAPPartyCode', 'Latitude', 'Longitude', 'MobileNo', 'Address']
+        fields = ['id', 'Name', 'SAPPartyCode', 'Latitude', 'Longitude', 'MobileNo', 'Address' ,'PartyType']
         
     # def to_representation(self, instance):
     #     # get representation from ModelSerializer
