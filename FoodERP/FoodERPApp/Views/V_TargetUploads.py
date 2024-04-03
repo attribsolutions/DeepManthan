@@ -30,27 +30,29 @@ class TargetUploadsView(CreateAPIView):
 
                 ExistingSheet = T_TargetUploads.objects.filter(Month=Month, Year=Year)
                 if ExistingSheet:
-                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Sheet has already been created.', 'Data': [] })
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Target Data has already been uploaded for the Month :'+ str(Month) +', Year :'+ str(Year), 'Data': [] })
                 else:
                     MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
                     NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
                 
                 for TargetData in TargetDataDetails:
+                    
                     TargetData['SheetNo'] = NextSheetNo
                     ItemID = TargetData['Item']
                     Party = TargetData['Party']
                     TargetQuantity = TargetData['TargetQuantity']
                     Unit = TargetData['Unit']
-                    print(Unit)
+                    
                     Item = M_Items.objects.filter(id=ItemID).values("BaseUnitID","Name")
                     
+                    TargetData['ItemName'] = Item[0]["Name"]
                     BaseUnitID = Item[0]["BaseUnitID"]
                     BaseUnitQuantity = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, BaseUnitID, 0).GetBaseUnitQuantity()
                     TargetData['TargetQuantityInBaseUnit'] = float(BaseUnitQuantity)
-                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 2, 0).ConvertintoSelectedUnit()
+                    QtyInNo = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 1, 0).ConvertintoSelectedUnit()
                     TargetData['QtyInNo'] = float(QtyInNo)
 
-                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 1, 0).ConvertintoSelectedUnit()
+                    QtyInKg = UnitwiseQuantityConversion(ItemID, TargetQuantity, 0, Unit, 0, 2, 0).ConvertintoSelectedUnit()
                     
                     TargetData['QtyInKg'] = float(QtyInKg)
 
@@ -58,7 +60,6 @@ class TargetUploadsView(CreateAPIView):
                     TargetData['QtyInBox'] = float(QtyInBox)
                         
                     query = T_TargetUploads.objects.raw("""SELECT 1 as id, RateCalculationFunction1(0, %s, %s, %s, 0, 0, 0, 1) AS RateWithGST """, [ItemID, Party,BaseUnitID])
-                    
                     
                     if query:
                          
@@ -74,10 +75,11 @@ class TargetUploadsView(CreateAPIView):
                         
                     else:
                         # ItemName = Item[0]["Name"]
-                        log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
-                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': TargetSerializer.errors, 'Data': [] })
+                        # log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload:' + str(TargetSerializer.errors), 34, 0)
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':' TargetSerializer.errors', 'Data': [] })
                     
                     
+                # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': '', 'Data': TargetDataDetails })
                 
                 TargetSerializer = TargetUploadsOneSerializer(data=TargetDataDetails , many=True)
                 if TargetSerializer.is_valid():
@@ -93,7 +95,7 @@ class TargetUploadsView(CreateAPIView):
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': (e), 'Data': [] })
 
 
 class GetTargetUploadsView(CreateAPIView):
