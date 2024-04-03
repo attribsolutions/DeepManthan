@@ -1676,6 +1676,7 @@ class T_CreditDebitNotes(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.DO_NOTHING,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
     IsDeleted = models.BooleanField(default=False)
+    ImportFromExcel = models.IntegerField()
  
     class Meta:
         db_table = "T_CreditDebitNotes"
