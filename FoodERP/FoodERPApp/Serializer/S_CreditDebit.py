@@ -23,7 +23,7 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
     class Meta :
         model= T_CreditDebitNotes
-        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'CreatedBy', 'UpdatedBy', 'Customer','NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices']
+        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'CreatedBy', 'UpdatedBy', 'Customer','NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','CRDRInvoices','ImportFromExcel']
         
     def create(self, validated_data):
         CRDRNoteItems_data = validated_data.pop('CRDRNoteItems')
@@ -41,6 +41,26 @@ class CreditDebitNoteSerializer(serializers.ModelSerializer):
     
     
     
+class CreditDebitNoteExcelSerializer(serializers.ModelSerializer):
+    
+    CRDRNoteItems = CreditDebitNoteItemSerializer(many=True)
+    class Meta :
+        model= T_CreditDebitNotes
+        fields = ['CRDRNoteDate', 'NoteNo', 'FullNoteNumber', 'NoteReason', 'GrandTotal', 'RoundOffAmount', 'Narration', 'CreatedBy', 'UpdatedBy', 'Customer','NoteType', 'Party', 'PurchaseReturn', 'Receipt','CRDRNoteItems','ImportFromExcel']
+        
+    def create(self, validated_data):
+        CRDRNoteItems_data = validated_data.pop('CRDRNoteItems')
+        
+        
+        CreditDebitNoteID = T_CreditDebitNotes.objects.create(**validated_data)
+        
+        for CRDRNoteItem_data in CRDRNoteItems_data:
+            CRDRNoteItem =TC_CreditDebitNoteItems.objects.create(CRDRNote=CreditDebitNoteID, **CRDRNoteItem_data)
+       
+            
+            
+        return CreditDebitNoteID 
+
 class CreditDebitNoteUploadsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_CreditDebitNoteUploads
