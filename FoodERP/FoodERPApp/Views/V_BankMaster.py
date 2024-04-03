@@ -130,11 +130,14 @@ class BankView(CreateAPIView):
             with transaction.atomic():
                 Bankdata = M_Bank.objects.get(id=id)
                 Bank_serializer = BankSerializer(Bankdata)
+                log_entry = create_transaction_logNew(request, Bank_serializer,0,f'Bank:{id}',367,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Bank_serializer.data})
         except  M_Bank.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'Bank not available',367,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Bank Not available', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,f'Bank:{id}'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
     @transaction.atomic()
     def put(self, request, id=0):

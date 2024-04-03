@@ -273,8 +273,6 @@ class PurchaseReturnView(CreateAPIView):
                 Date = PurchaseReturndata['ReturnDate']
                 Mode = PurchaseReturndata['Mode'] 
                 customerid=PurchaseReturndata['Customer']
-                
-                               
                
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 
@@ -282,7 +280,9 @@ class PurchaseReturnView(CreateAPIView):
                
                 print(PurchaseReturndata['ReturnNo'])
                 if Mode == 1: # Sales Return
-                    d= 'SRN'
+                    # d= 'SRN'
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party)
+                  
                     
                 else:
                     d = GetPrifix.GetPurchaseReturnPrifix(customerid)
