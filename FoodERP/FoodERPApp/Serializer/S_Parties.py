@@ -259,7 +259,7 @@ class M_PartiesSerializerFourth(serializers.Serializer):
 class UpdatePartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
-        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','Creditprefix','Debitprefix']
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','Creditprefix','Debitprefix','PurchaseReturnprefix']
         
 class UpdatePartyAddressSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()

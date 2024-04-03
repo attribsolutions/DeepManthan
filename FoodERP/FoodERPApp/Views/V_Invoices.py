@@ -536,6 +536,7 @@ class InvoiceNoView(CreateAPIView):
                         InvoiceList.append({
                             "Invoice":a['id'],
                             "FullInvoiceNumber":a['FullInvoiceNumber'],
+                            "InvoiceDate" :a['InvoiceDate']
                         })
                     log_entry = create_transaction_logNew(request, InVoice_Data, x,'InvoiceNoList',36,0,0,0,Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
