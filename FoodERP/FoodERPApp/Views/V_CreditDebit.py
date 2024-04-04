@@ -66,7 +66,8 @@ class CreditDebitNoteListView(CreateAPIView):
                             "Narration": a['Narration'],
                             "CreatedOn": a['CreatedOn'],
                             "IsRecordDeleted" : a["IsDeleted"],
-                            "CRDRNoteUploads" : a["CRDRNoteUploads"]
+                            "CRDRNoteUploads" : a["CRDRNoteUploads"],
+                            "ImportFromExcel" : a["ImportFromExcel"]
                         })
                     #for log
                     if Customer == '':
