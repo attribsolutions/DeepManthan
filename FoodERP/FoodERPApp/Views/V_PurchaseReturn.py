@@ -24,9 +24,10 @@ class PurchaseReturnListView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Returndata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Returndata = JSONParser().parse(request)
+                
                 FromDate = Returndata['FromDate']
                 ToDate = Returndata['ToDate']
                 Customer = Returndata['CustomerID']
@@ -273,8 +274,6 @@ class PurchaseReturnView(CreateAPIView):
                 Date = PurchaseReturndata['ReturnDate']
                 Mode = PurchaseReturndata['Mode'] 
                 customerid=PurchaseReturndata['Customer']
-                
-                               
                
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 
@@ -282,7 +281,9 @@ class PurchaseReturnView(CreateAPIView):
                
                 print(PurchaseReturndata['ReturnNo'])
                 if Mode == 1: # Sales Return
-                    d= 'SRN'
+                    # d= 'SRN'
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party)
+                  
                     
                 else:
                     d = GetPrifix.GetPurchaseReturnPrifix(customerid)
@@ -515,9 +516,9 @@ class ReturnItemAddView(CreateAPIView):
                 query = M_Items.objects.raw('''select id ,name ,
                                                 round(GetTodaysDateMRP(%s,curdate(),2,0,0),2)MRPValue,
                                                 round(GSTHsnCodeMaster(%s,curdate(),2),2)GSTPercentage,
-                                                GetTodaysDateMRP(1,curdate(),1,0,0)MRPID,
-                                                GSTHsnCodeMaster(1,curdate(),1)GSTID
-                                                from M_Items where id =%s''',[id,id,id])
+                                                GetTodaysDateMRP(%s,curdate(),1,0,0)MRPID,
+                                                GSTHsnCodeMaster(%s,curdate(),1)GSTID
+                                                from M_Items where id =%s''',[id,id,id,id,id])
                 
                 if query:
                     # return JsonResponse({'query':  str(Itemsquery.query)})
