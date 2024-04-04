@@ -279,7 +279,7 @@ class PurchaseReturnView(CreateAPIView):
                 
                 PurchaseReturndata['ReturnNo'] = str(c)               
                
-                if (Mode == str(1) or Mode== str(3)): # Sales Return                    
+                if (Mode == str(1)): # Sales Return                    
                     # d= 'SRN'
                     d = GetPrifix.GetPurchaseReturnPrifix(Party)                    
                 else :                   
