@@ -399,7 +399,7 @@ class PartiesEmpAllDetailsView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = M_Employees.objects.raw('''SELECT 1 as id, M_Employees.Name EmpName, M_Employees.Address EmpAddress, Mobile EmpMobile, M_Employees.email EmpEmail, DOB, M_Employees.PAN EmpPAN, AadharNo, M_Employees.PIN EmpPIN, C1.Name EmpCity, D1.Name EmpDistrict, S1.Name EmpState, 
-                                                        M_EmployeeTypes.Name EmpType,
+                                                        M_EmployeeTypes.Name EmpType, M_Parties.id PartyID,
                                                         M_Parties.Name PartyName, M_PartyType.Name PartyType, MC_PartyAddress.Address PartyAddress, FSSAINo, FSSAIExipry, MC_PartyAddress.PIN PartyPIN, M_Parties.email PartyEmail, MobileNo, AlternateContactNo, SAPPartyCode, GSTIN, M_Parties.PAN PartyPAN, 
                                                         C2.Name PartyCity, D2.Name PartyDistrict, S2.Name PartyState, M_Parties.IsDivision, MkUpMkDn, M_Parties.isActive IsPartyActive, Latitude, Longitude,
                                                         M_Users.LoginName
@@ -434,6 +434,7 @@ class PartiesEmpAllDetailsView(CreateAPIView):
                             "EmpDistrict":a['EmpDistrict'],
                             "EmpState" : a['EmpState'],
                             "EmpType":a['EmpType'],
+                            "PartyID" :a['PartyID'],
                             "PartyName":a['PartyName'],
                             "PartyType":a['PartyType'],
                             "PartyAddress" :a['PartyAddress'],
