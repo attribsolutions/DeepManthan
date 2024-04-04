@@ -551,7 +551,8 @@ urlpatterns = [
             
             url(r'Uploaded_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Uploaded_CreditDebitNotes_EInvoice.as_view()),
             url(r'Cancel_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Cancel_CreditDebitNotes_EInvoice.as_view()),
-            
+            url(r'BulkCreditNote$', CreditDebitNoteExcelView.as_view()),
+            url(r'BulkCreditNoteDelete$', CreditDebitNoteExcelView.as_view()),
 
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),  

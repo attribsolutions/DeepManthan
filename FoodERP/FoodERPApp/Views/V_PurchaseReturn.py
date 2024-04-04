@@ -24,9 +24,10 @@ class PurchaseReturnListView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Returndata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Returndata = JSONParser().parse(request)
+                
                 FromDate = Returndata['FromDate']
                 ToDate = Returndata['ToDate']
                 Customer = Returndata['CustomerID']
@@ -515,9 +516,9 @@ class ReturnItemAddView(CreateAPIView):
                 query = M_Items.objects.raw('''select id ,name ,
                                                 round(GetTodaysDateMRP(%s,curdate(),2,0,0),2)MRPValue,
                                                 round(GSTHsnCodeMaster(%s,curdate(),2),2)GSTPercentage,
-                                                GetTodaysDateMRP(1,curdate(),1,0,0)MRPID,
-                                                GSTHsnCodeMaster(1,curdate(),1)GSTID
-                                                from M_Items where id =%s''',[id,id,id])
+                                                GetTodaysDateMRP(%s,curdate(),1,0,0)MRPID,
+                                                GSTHsnCodeMaster(%s,curdate(),1)GSTID
+                                                from M_Items where id =%s''',[id,id,id,id,id])
                 
                 if query:
                     # return JsonResponse({'query':  str(Itemsquery.query)})
