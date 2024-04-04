@@ -278,15 +278,15 @@ class PurchaseReturnView(CreateAPIView):
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
                 
                 PurchaseReturndata['ReturnNo'] = str(c)               
-                
-                if (int(Mode) == 1 or int(Mode) == 3): # Sales Return
-                   
+               
+                if (Mode == str(1) or Mode== str(3)): # Sales Return                    
                     # d= 'SRN'
-                    d = GetPrifix.GetPurchaseReturnPrifix(Party)  
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party)                    
                 else :                   
                     d = GetPrifix.GetPurchaseReturnPrifix(customerid)                   
                  
                 PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
+                
                 item = ""
                 
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
