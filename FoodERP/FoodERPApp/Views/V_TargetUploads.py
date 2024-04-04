@@ -232,8 +232,8 @@ class TargetVSAchievementView(CreateAPIView):
             FROM
   
   (SELECT I.Party_id,I.Item,TargetQuantity,TargetAmount,Quantity,Amount,CRNoteQuantity,CRNoteAmount,Month,Year from 
-  (SELECT Item,Party Party_id from (select distinct Item_id Item  from M_ChannelWiseItems where PartyType_id  in (9,10))s ,
-(SELECT id Party, Name from M_Parties where M_Parties.Id in{(Party)} and id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
+  (SELECT Item,Party Party_id from (select distinct Item_id Item  from M_ChannelWiseItems where PartyType_id =(9))s ,
+(SELECT id Party, Name from M_Parties where PartyType_id=(9) and id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
 
 left join 
   
@@ -287,7 +287,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
                     "SAPPartyCode":a.SAPPartyCode   
                 })
            
-                log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
+                # log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetAchievementList})
             else:
                 log_entry = create_transaction_logNew(request,0,0,'TargetVSAchievement Does Not Exist',357,0)
