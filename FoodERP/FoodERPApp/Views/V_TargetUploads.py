@@ -281,7 +281,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
                     "TargetQuantityInKG": a.TargetQuantityInKG,
                     "TargetAmountWithGST" : a.TargetAmount,
                     "AchQuantityInKG":a.AchQuantity,
-                    "AmountWithGST":a.AchAmount,
+                    "AchAmountWithGST":a.AchAmount,
                     "CreditNoteQuantityInKG" : a.CRNoteQuantity,
                     "CreditNoteAmountWithGST" :a.CRNoteAmount,
                     "PartyID": a.PartyID,
