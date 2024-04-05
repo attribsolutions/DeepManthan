@@ -13,7 +13,7 @@ from django.db.models import Max
 from django.db import transaction
 from rest_framework.response import Response
 from ..Views.V_CommFunction import *
-
+import calendar
 
 
 class TargetUploadsView(CreateAPIView):
@@ -30,7 +30,9 @@ class TargetUploadsView(CreateAPIView):
 
                 ExistingSheet = T_TargetUploads.objects.filter(Month=Month, Year=Year)
                 if ExistingSheet:
-                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Target Data has already been uploaded for the Month :'+ str(Month) +', Year :'+ str(Year), 'Data': [] })
+                    month_name = calendar.month_name[Month]
+                    message = f"Target Data has already been uploaded for {month_name} {Year}"
+                    return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': message, 'Data': [] })
                 else:
                     MaxSheetNo = T_TargetUploads.objects.aggregate(Max('SheetNo'))['SheetNo__max']
                     NextSheetNo = MaxSheetNo + 1 if MaxSheetNo is not None else 1
@@ -95,7 +97,7 @@ class TargetUploadsView(CreateAPIView):
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': (e), 'Data': [] })
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': [] })
 
 
 class GetTargetUploadsView(CreateAPIView):
@@ -286,7 +288,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
                       
                 })
            
-                # log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
+                log_entry = create_transaction_logNew(request,TargetData, 0, f'TargetVSAchievement of Month: {Month} Year: {Year} Employee: {Employee}', 357, 0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetAchievementList})
             else:
                 log_entry = create_transaction_logNew(request,0,0,'TargetVSAchievement Does Not Exist',357,0)
