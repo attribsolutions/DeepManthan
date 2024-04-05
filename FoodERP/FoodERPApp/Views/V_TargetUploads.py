@@ -250,7 +250,7 @@ left join
  on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
  
  left join 
-(SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.Quantity)CRNoteQuantity,Sum(Amount)CRNoteAmount
+(SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.QtyInKg)CRNoteQuantity,Sum(Amount)CRNoteAmount
 FROM T_CreditDebitNotes
 JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
 WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
@@ -270,17 +270,20 @@ join M_Parties  ON M_Parties.id=D.Party_id
   where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
             ''')
             TargetAchievementList = []   
-            # print(query)
+            
             if query:   
                 for a in query:
+                    
                     TargetAchievementList.append({
                     "id": a.id,
                     "Year": a.Year,
                     "Fy":a.FY,
-                    "TargetQuantity": a.TargetQuantity,
-                    "TargetAmount" : a.TargetAmount,
-                    "Quantity":a.Quantity,
-                    "Amount":a.Amount,
+                    "TargetQuantityInKG": a.TargetQuantityInKG,
+                    "TargetAmountWithGST" : a.TargetAmount,
+                    "AchQuantityInKG":a.AchQuantity,
+                    "AmountWithGST":a.AchAmount,
+                    "CreditNoteQuantityInKG" : a.CRNoteQuantity,
+                    "CreditNoteAmountWithGST" :a.CRNoteAmount,
                     "PartyID": a.PartyID,
                     "PartyName": a.PartyName,
                     "ItemName": a.ItemName,
