@@ -232,8 +232,8 @@ class TargetVSAchievementView(CreateAPIView):
             FROM
   
   (SELECT I.Party_id,I.Item,TargetQuantity,TargetAmount,Quantity,Amount,CRNoteQuantity,CRNoteAmount,Month,Year from 
-  (SELECT Item,Party Party_id from (select distinct Item_id Item  from M_ChannelWiseItems where PartyType_id =(9))s ,
-(SELECT id Party, Name from M_Parties where PartyType_id=(9) and id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
+  (SELECT Item,Party Party_id from (select distinct Item_id Item  from M_ChannelWiseItems where PartyType_id =9)s ,
+(SELECT id Party, Name from M_Parties where PartyType_id in (9) and id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
 
 left join 
   
@@ -263,10 +263,8 @@ join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
 join M_Parties  ON M_Parties.id=D.Party_id
   where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
             ''')
-
-
             TargetAchievementList = []   
-            # print(query)
+           
             if query:   
                 for a in query:
                     TargetAchievementList.append({
@@ -284,7 +282,8 @@ join M_Parties  ON M_Parties.id=D.Party_id
                     "ItemSubGroup": a.SubGroupName,
                     "Cluster": a.ClusterName,
                     "SubCluster": a.SubClusterName,
-                    "SAPPartyCode":a.SAPPartyCode   
+                    "SAPPartyCode":a.SAPPartyCode 
+                      
                 })
            
                 # log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
