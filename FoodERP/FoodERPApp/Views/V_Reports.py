@@ -1404,7 +1404,7 @@ round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,round(GSTHsnCodeMaster(M_Item
 MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg, PIN.BaseUnitQuantity PcsInNo, ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  ,M_Items.BaseUnitID_id
  FROM M_Items
- join C_Companies on C_Companies.id=M_Items.Company_id
+ join C_Companies on C_Companies.id=M_Items.Company_id 
  left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 1
  left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
  left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
@@ -1413,8 +1413,8 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id and IsDeleted=0
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
- JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0 where  M_Items.IsFranchisesItem=0"""
-                
+ JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0 """
+                # print(query.query)
                 if IsSCM == '0':
                     query += " "
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
@@ -1425,26 +1425,27 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
-                    
-                    query += " AND M_Items.id in %s "
+                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += "  AND M_Items.id in %s "
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
                     if IsSCM == '0':
+                       
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
                 elif any(SubGroupID):
-                    
-                    query += " AND M_Group.id in %s and MC_SubGroup.id in %s"
+                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += "  AND M_Group.id in %s and MC_SubGroup.id in %s"
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID,SubGroupID])
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID,SubGroupID])
                 elif any(GroupID):
-                    
-                    query += " AND M_Group.id in %s "
+                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += "  AND M_Group.id in %s "
                     query += "order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID])
@@ -1454,7 +1455,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 
                 
-                # print(ItemQuery.query)
+                    # print(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
