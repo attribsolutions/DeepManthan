@@ -241,6 +241,7 @@ class PurchaseReturnView(CreateAPIView):
     @transaction.atomic()
     def post(self, request,format=None):
         try:
+            
             with transaction.atomic():
                 
                 '''Image Upload Code start'''
@@ -271,20 +272,23 @@ class PurchaseReturnView(CreateAPIView):
                 # PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
-                Mode = PurchaseReturndata['Mode']
-                
-
+                Mode = PurchaseReturndata['Mode'] 
+                customerid=PurchaseReturndata['Customer']
+               
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
-                PurchaseReturndata['ReturnNo'] = str(c)
-                if Mode == 1: # Sales Return
-                    d= 'SRN'
-                else:
-                    d = GetPrifix.GetPurchaseReturnPrifix(Party)
-                    
+                
+                PurchaseReturndata['ReturnNo'] = str(c)               
+               
+                if (Mode == str(1)): # Sales Return                    
+                    # d= 'SRN'
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party)                    
+                else :                   
+                    d = GetPrifix.GetPurchaseReturnPrifix(customerid)                   
+                 
                 PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
-
+                
                 item = ""
-
+                
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
@@ -299,7 +303,7 @@ class PurchaseReturnView(CreateAPIView):
                         img['Image']=file 
                        
                     '''Image Upload Code End'''
-                    
+            
                     SaleableItemReason=MC_SettingsDetails.objects.filter(SettingID=14).values('Value')
                     value_str = SaleableItemReason[0]['Value']
                     # Split the string by ',' and convert the resulting substrings to integers
@@ -311,6 +315,7 @@ class PurchaseReturnView(CreateAPIView):
                              
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                    
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()

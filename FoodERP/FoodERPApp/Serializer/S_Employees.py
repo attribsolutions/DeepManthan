@@ -119,6 +119,7 @@ class PartyEmpDetailsSerializer(serializers.Serializer):
     EmpDistrict = serializers.CharField(max_length=100)
     EmpState = serializers.CharField(max_length=100)
     EmpType = serializers.CharField(max_length=20)
+    PartyID = serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     PartyType = serializers.CharField(max_length=500)
     PartyAddress = serializers.CharField(max_length=500)

@@ -213,72 +213,62 @@ class TargetVSAchievementView(CreateAPIView):
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
             Employee = TargetData.get('Employee')            
-            
-            PartyDetails= Party
- 
+             
             if Employee > 0 and Party == 0:
                     EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                     for row in EmpPartys:
                         p=row.id
                     Party_ID = p.split(",")
-                    dd=Party_ID[:-1] 
+                    dd=Party_ID[:-1]
                     Party=', '.join(dd)
-
-            query = T_TargetUploads.objects.raw(f'''
-            
-            Select 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
-            (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,
-
-            TargetQuantity,Round(Quantity,2)Quantity,Amount,TargetAmount,
-            M_Items.Name ItemName,M_Group.Name ItemGroupName,
-            MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
-            M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.id PartyID,M_Parties.Name PartyName 
-            from
-                ( select  A.Month,A.Year,IFNULL(TargetQuantity,0)TargetQuantity,IFNULL(Quantity,0)Quantity,IFNULL(Amount,0)Amount,A.item_id,A.Party_id Party,IFNULL(TargetAmount,0)TargetAmount 
-                    from
-                        
-                        (select Party_id,item_id,Sum(TargetQuantity) TargetQuantity,Month,Year,Sum(Amount) TargetAmount 
-                        from T_TargetUploads
-                        where  Party_id in({Party}) and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year )A
-                        
-                        left join
-                        
-                        (select Month(invoiceDate) Month , year(invoiceDate) Year,customer_id ,item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount
-                        from T_Invoices
-                        join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
-                        where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} group by item_id,customer_id,Month,Year
-                        )B
-                        
-                        ON B.item_id=A.item_id  
                     
-                union
-                        
-                select  B.Month,B.Year,IFNULL(TargetQuantity,0)TargetQuantity,IFNULL(Quantity,0)Quantity ,IFNULL(Amount,0) Amount,B.item_id,B.customer_id Party ,IFNULL(TargetAmount,0)TargetAmount
-                    from
-                        
-                        (select Party_id,item_id,Sum(TargetQuantity) TargetQuantity,Month,Year,Sum(Amount) TargetAmount
-                        from T_TargetUploads
-                        where  Party_id in({Party}) and Month={Month} and Year={Year} group by item_id,Party_id,Month,Year  )A
-                        
-                        right join
-                        
-                        (select Month(invoiceDate) Month , year(invoiceDate) Year, customer_id ,item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount
-                        from T_Invoices
-                        join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
-                        where  customer_id in({Party}) and Month(invoiceDate)={Month} and year(invoiceDate)={Year} group by item_id,customer_id,Month ,Year
-                        )B
-                        
-                        ON B.item_id=A.item_id 
-                )C
-            join  M_Items ON M_Items.id=C.Item_id
-            join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
-            join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
-            join  MC_SubGroup ON MC_SubGroup.id=MC_ItemGroupDetails.SubGroup_id
-            join M_PartyDetails ON M_PartyDetails.Party_id=C.Party
-            join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
-            join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
-            join M_Parties  ON M_Parties.id=C.Party 
-            where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null''')
+            query = T_TargetUploads.objects.raw(f'''
+            SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
+            (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,ItemID, M_Items.Name ItemName,M_Group.Name ItemGroupName,
+            MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
+            M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.Name PartyName ,
+            Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
+            Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
+            FROM
+  
+  (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CRNoteQuantity,CRNoteAmount,Month,Year 
+  from 
+(SELECT ItemID,Party Party_id from (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id =9)s ,
+(SELECT id Party, Name from M_Parties where id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE SubParty_id in ({Party}) 
+and  Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
+
+left join 
+  
+  (select  Month,Year,Party_id,Item_id,Sum(QtyInKg) TargetQuantity,Sum(Amount) TargetAmount from T_TargetUploads
+   where  Month={Month} and Year={Year} group by Item_id,Party_id )A
+   on I.ItemID = A.Item_id and I.Party_id = A.Party_id
+            
+left join 
+(select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount from T_Invoices
+ join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
+ where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id )B
+ on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
+ 
+ left join 
+(SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.Quantity)CRNoteQuantity,Sum(Amount)CRNoteAmount
+FROM T_CreditDebitNotes
+JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
+WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
+on I.ItemID = C.Item_id and I.Party_id = C.Customer_id 
+
+WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
+Order By I.Party_id,ItemID)D
+
+join  M_Items ON M_Items.id=D.ItemID
+join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
+join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
+join  MC_SubGroup ON MC_SubGroup.id=MC_ItemGroupDetails.SubGroup_id
+join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
+join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
+join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
+join M_Parties  ON M_Parties.id=D.Party_id
+  where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
+            ''')
             TargetAchievementList = []   
             # print(query)
             if query:   
@@ -298,10 +288,11 @@ class TargetVSAchievementView(CreateAPIView):
                     "ItemSubGroup": a.SubGroupName,
                     "Cluster": a.ClusterName,
                     "SubCluster": a.SubClusterName,
-                    "SAPPartyCode":a.SAPPartyCode   
+                    "SAPPartyCode":a.SAPPartyCode 
+                      
                 })
            
-                log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
+                # log_entry = create_transaction_logNew(request,TargetData, PartyDetails, f'TargetVSAchievement of Month: {Month} Year: {Year} Party: {PartyDetails} Employee: {Employee}', 357, 0)
                 return Response({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TargetAchievementList})
             else:
                 log_entry = create_transaction_logNew(request,0,0,'TargetVSAchievement Does Not Exist',357,0)
