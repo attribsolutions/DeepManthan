@@ -224,36 +224,42 @@ class TargetVSAchievementView(CreateAPIView):
                     
             query = T_TargetUploads.objects.raw(f'''
             SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
-            (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,Item, M_Items.Name ItemName,M_Group.Name ItemGroupName,
+            (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,ItemID, M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.Name PartyName ,
             Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
             Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
             FROM
   
-  (SELECT I.Party_id,I.Item,TargetQuantity,TargetAmount,Quantity,Amount,CRNoteQuantity,CRNoteAmount,Month,Year from 
-  (SELECT Item,Party Party_id from (select distinct Item_id Item  from M_ChannelWiseItems where PartyType_id =9)s ,
-(SELECT id Party, Name from M_Parties where PartyType_id in (9) and id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
+  (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CRNoteQuantity,CRNoteAmount,Month,Year 
+  from 
+(SELECT ItemID,Party Party_id from (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id =9)s ,
+(SELECT id Party, Name from M_Parties where id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE SubParty_id in ({Party}) 
+and  Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
 
 left join 
   
   (select  Month,Year,Party_id,Item_id,Sum(QtyInKg) TargetQuantity,Sum(Amount) TargetAmount from T_TargetUploads
-   where  Month={Month} and Year={Year} group by item_id,Party_id )A
-   on I.Item = A.Item_id and I.Party_id = A.Party_id
+   where  Month={Month} and Year={Year} group by Item_id,Party_id )A
+   on I.ItemID = A.Item_id and I.Party_id = A.Party_id
             
 left join 
 (select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount from T_Invoices
  join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
  where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id )B
- on I.Item = B.Item_id and I.Party_id = B.Customer_id
+ on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
+ 
  left join 
 (SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.Quantity)CRNoteQuantity,Sum(Amount)CRNoteAmount
 FROM T_CreditDebitNotes
 JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
 WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
-on I.Item = C.Item_id and I.Party_id = C.Customer_id WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
-Order By I.Party_id,Item)D
-join  M_Items ON M_Items.id=D.Item
+on I.ItemID = C.Item_id and I.Party_id = C.Customer_id 
+
+WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
+Order By I.Party_id,ItemID)D
+
+join  M_Items ON M_Items.id=D.ItemID
 join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
 join  MC_SubGroup ON MC_SubGroup.id=MC_ItemGroupDetails.SubGroup_id
@@ -264,7 +270,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
   where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
             ''')
             TargetAchievementList = []   
-           
+            # print(query)
             if query:   
                 for a in query:
                     TargetAchievementList.append({
