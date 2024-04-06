@@ -180,9 +180,9 @@ class T_MobileAppOrdersView(CreateAPIView):
 
     @transaction.atomic()
     def put(self, request,id=0):
+        data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 # print(auth_header)
                 if auth_header:
@@ -329,9 +329,9 @@ class T_MobileAppOrdersView(CreateAPIView):
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,  e,162,0)
+            log_entry = create_transaction_logNew(request, data, 0,  str(e),162,0)
             # print('ccccccccccccccccccc')
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class T_MobileAppOrdersDeleteView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -339,9 +339,9 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 # print(auth_header)
                 if auth_header:
@@ -376,7 +376,7 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0,0,'This Order is used in another Transaction ',163,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Order is used in another Transaction'})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),163,0)
+            log_entry = create_transaction_logNew(request, data, 0,str(e),163,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 class NewProductSendToMobileAppView(CreateAPIView):
@@ -457,13 +457,13 @@ where M_Items.id=%s''',([today],[today],[id]))
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,response_json,164,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            
         
     @transaction.atomic()
     def put(self, request,id=0):
+        Productdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Productdata = JSONParser().parse(request)
                 ProductID = Productdata['products']
                 ProductID_list = ProductID.split(",")
                 # print(ProductID_list)
@@ -523,8 +523,8 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ProductSendToMobileAppUpdate:'+str(Exception(e)),165,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                
+            log_entry = create_transaction_logNew(request,Productdata, 0,'ProductSendToMobileAppUpdate:'+str(e),165,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                
         
     @transaction.atomic()
     def delete(self, request,id=0):
@@ -559,17 +559,17 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})     
             
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ProductSendToMobileAppDelete:'+str(Exception(e)),166,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+            log_entry = create_transaction_logNew(request, 0, 0,'ProductSendToMobileAppDelete:'+str(e),166,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
         
 class NewRetailerSendToMobileAppView(CreateAPIView):
     permission_classes = (IsAuthenticated,)        
 
     @transaction.atomic()
     def post(self, request,id=0):
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
                 RetailerID = Orderdata['RetailerID']
                 DistributorID= Orderdata['DistributorID']
                 RetailerID_list = RetailerID.split(",")
@@ -637,14 +637,14 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                     log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],167,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'RetailerSendToMobileAppSave:'+str(Exception(e)),167,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
+            log_entry = create_transaction_logNew(request,Orderdata,0,'RetailerSendToMobileAppSave:'+str(e),167,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            
         
     @transaction.atomic()
     def put(self, request,id=0):
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
                 RetailerID = Orderdata['RetailerID']
                 DistributorID= Orderdata['DistributorID']
                 RetailerID_list = RetailerID.split(",")
@@ -705,8 +705,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})    
             
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'RetailerSendToMobileAppUpdate:'+str(Exception(e)),168,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'RetailerSendToMobileAppUpdate:'+str(e),168,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            
             
     @transaction.atomic()
     def delete(self, request,id=0):
@@ -744,8 +744,8 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'RetailerSendToMobileAppDelete:'+str(Exception(e)),169,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            log_entry = create_transaction_logNew(request, 0, 0,'RetailerSendToMobileAppDelete:'+str(e),169,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
         
         
         
@@ -755,9 +755,9 @@ class RetailerAddFromMobileAppview(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 if auth_header:
                     # Parsing the authorization header
@@ -846,8 +846,8 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                     log_entry = create_transaction_logNew(request,inserted_retailerlist,0,'Retailer Added From MobileApp Successfully',158,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'RetailerAddedFromMobileApp:'+str(e),170,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e })
+            log_entry = create_transaction_logNew(request,data,0,'RetailerAddedFromMobileApp:'+str(e),170,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e) })
         
         
         
@@ -857,9 +857,9 @@ class RetailerUpdateFromMobileAppview(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                data = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
                 if auth_header:
                     # Parsing the authorization header
@@ -915,8 +915,8 @@ class RetailerUpdateFromMobileAppview(CreateAPIView):
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
                     # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })                        
         except Exception as e:
-            log_entry = create_transaction_logNew(request, aa, 0,'RetailerUpdatedFromMobileApp:'+str(e),171,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []}) 
+            log_entry = create_transaction_logNew(request, data, 0,'RetailerUpdatedFromMobileApp:'+str(e),171,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []}) 
 
 class RetailerDeleteFromMobileApp(CreateAPIView):
     permission_classes = (IsAuthenticated,)
