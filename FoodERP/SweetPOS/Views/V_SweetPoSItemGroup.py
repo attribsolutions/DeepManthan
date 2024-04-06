@@ -82,7 +82,7 @@ class ItemListView(CreateAPIView):
             user = BasicAuthenticationfunction(request)
             if user is not None:
                 
-                query = f"""SELECT i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
+                query = f"""SELECT i.id AS FoodERPID, i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,
                 i.Name, i.SAPItemCode AS ItemCode,  
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
@@ -103,19 +103,20 @@ class ItemListView(CreateAPIView):
                 response_data = {"status": True, "status_code": 200, "count": len(rows), "data": [] }
                 for row in rows:
                     item_data = {
-                        "CItemID": row[0],
-                        "BarCode": row[1],
-                        "HSNCode": row[2],
-                        "Name": row[3],
-                        "ItemCode": row[4],
-                        "GST": row[5],
-                        "Rate": row[6],
-                        "UnitID": row[7],
+                        "FoodERPID": row[0],
+                        "CItemID": row[1],
+                        "BarCode": row[2],
+                        "HSNCode": row[3],
+                        "Name": row[4],
+                        "ItemCode": row[5],
+                        "GST": row[6],
+                        "Rate": row[7],
+                        "UnitID": row[8],
                         "ISChitaleSupplier": True,  
-                        "IsFranchisesPOSItem": row[8],
+                        "IsFranchisesPOSItem": row[9],
                         "UnitConversion": "",         
-                        "FoodERPMRP": row[9],
-                        "ItemGroupID": row[10],
+                        "FoodERPMRP": row[10],
+                        "ItemGroupID": row[11],
                         "FranchisesItemCode": ""      
                     }
                     response_data["data"].append(item_data)
