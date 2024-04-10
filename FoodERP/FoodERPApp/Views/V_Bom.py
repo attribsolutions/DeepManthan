@@ -18,9 +18,9 @@ class BOMListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request,id=0):
+        BillOfMaterialdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                BillOfMaterialdata = JSONParser().parse(request)
                 FromDate = BillOfMaterialdata['FromDate']
                 ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
@@ -60,7 +60,7 @@ class BOMListFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class M_BOMsView(CreateAPIView):
 
@@ -69,9 +69,9 @@ class M_BOMsView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        BillOfMaterial = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                BillOfMaterial = JSONParser().parse(request)
                 ReferenceBOMID = BillOfMaterial['ReferenceBom']
                 Boms_Serializer = M_BOMSerializer(data=BillOfMaterial)
                 if Boms_Serializer.is_valid():
@@ -83,7 +83,7 @@ class M_BOMsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class M_BOMsViewSecond(RetrieveAPIView):
 
@@ -179,7 +179,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})    
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
     @transaction.atomic()
     def delete(self, request, id=0,Company=0):
