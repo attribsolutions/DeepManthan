@@ -307,7 +307,7 @@ class RetailerDataView(CreateAPIView):
                 Retailerdata = JSONParser().parse(request)
                 Party = Retailerdata['Party']
                 if(Party == 0):
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, MC_PartySubParty.CreatedOn AS PartyCreation, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -324,7 +324,7 @@ JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
 JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 ''')
                 else:
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, MC_PartySubParty.CreatedOn AS PartyCreation, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -345,6 +345,11 @@ WHERE MC_PartySubParty.Party_id=%s''', [Party])
                     RetailerExportData = list()
                     RetailerExportSerializer = RetailerDataExportSerializer(
                         query, many=True).data
+                    for retailer in RetailerExportSerializer:
+                        PartyDateTime =datetime.strptime(retailer['PartyCreation'], "%Y-%m-%d %H:%M:%S")
+                        PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
+                        retailer['PartyCreation'] = PartyCreation
+                        
                     RetailerExportData.append(
                         {"ReportExportSerializerDetails": RetailerExportSerializer})
                     log_entry = create_transaction_logNew(
@@ -1329,12 +1334,14 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                     ManPowerList = list()
 
                     for a in ManPower_Serializer:
+                        PartyDateTime = datetime.strptime(a['PartyCreation'], "%Y-%m-%dT%H:%M:%S.%f")
+                        PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
                         ManPowerList.append({
                             "SAPCode": a['SAPCode'],
                             "FEParty_id": a['FEParty_id'],
                             "PartyName": a['PartyName'],
                             "PartyActive": a['PartyActive'],
-                            "PartyCreation":a['PartyCreation'],
+                            "PartyCreation":PartyCreation,
                             "PartyType": a['PartyType'],
                             "Email": a['Email'],
                             "PAN":a['PAN'],
