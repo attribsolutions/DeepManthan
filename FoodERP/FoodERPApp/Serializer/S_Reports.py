@@ -221,6 +221,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     SupplierName=serializers.CharField(max_length=500)
     Name = serializers.CharField(max_length=500)
     isActive=serializers.BooleanField()
+    PartyCreation = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     Email = serializers.CharField(max_length=200)
     MobileNo=serializers.CharField()
     AlternateContactNo=serializers.CharField(max_length=500)
