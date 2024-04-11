@@ -17,6 +17,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 import jwt
 from .V_CommFunction import create_transaction_logNew
+from django.db.models import Q
 
 # Create your views here.
 
@@ -230,46 +231,95 @@ class UserLoginView(RetrieveAPIView):
     permission_classes = ()
     authentication_classes = ()
 
-    serializer_class = UserLoginSerializer
+    # serializer_class = UserLoginSerializer
 
     def post(self, request):
         aa = request.data.get('LoginName')
         LoginName = str(aa)
-        findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
-        where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        # findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
+        # where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        find_user = M_Users.objects.filter(
+                    Q(isLoginUsingEmail=1, Employee__email=LoginName) |
+                    Q(isLoginUsingMobile=1, Employee__Mobile=LoginName) |
+                    Q(LoginName=LoginName)).values( 'id', 'LoginName')
         
-        if not findUser:
-            
-            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
-        
-        FindUserSerializer_data = FindUserSerializer(findUser, many=True).data
-        
-        a = {
-            "LoginName": FindUserSerializer_data[0]['LoginName'],
-            "password": request.data.get('password')
-        }
-        
-        serializer = UserLoginSerializer(data=a)
-        
-        if serializer.is_valid():
-        
-            response = {
-                'Status': True,
-                'StatusCode': status.HTTP_200_OK,
-                'Message': 'User logged in  successfully',
-                'token': serializer.data['token'],
-                'refreshtoken': serializer.data['refreshtoken'],
-                'UserID': serializer.data['UserID']
-            }
-            
-            status_code = status.HTTP_200_OK
-            log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
-            return Response(response, status=status_code)
+        # employee = find_user.Employee
+        if find_user:
+            login_name=find_user[0]['LoginName']
+            password=request.data.get('password')
+            user = authenticate(LoginName=login_name, password=password)
+            if user:
+                # If user is authenticated, generate JWT token
+                update_last_login(None, user)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "Status": True,
+                    "StatusCode": 200,
+                    "Message": "User logged in  successfully",
+                    'refreshtoken': str(refresh),
+                    'token': str(refresh.access_token),
+                    "UserID": find_user[0]['id']
+                }, status=status.HTTP_200_OK)
+                
+            else:
+                return Response({'StatusCode': 401, 'Status': True, 'Message': 'Invalid credentials', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+
         else:
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        # if not find_user:
+            
+        #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
+        
+        # # FindUserSerializer_data = FindUserSerializer(find_user, many=True).data
+        
+        # a = {
+        #     "LoginName": find_user[0]['LoginName'],
+        #     "password": request.data.get('password')
+        # }
+        
+        # serializer = UserLoginSerializer(data=a)
+        
+        # if serializer.is_valid():
+        
+        #     response = {
+        #         'Status': True,
+        #         'StatusCode': status.HTTP_200_OK,
+        #         'Message': 'User logged in  successfully',
+        #         'token': serializer.data['token'],
+        #         'refreshtoken': serializer.data['refreshtoken'],
+        #         'UserID': serializer.data['UserID']
+        #     }
+            
+        #     status_code = status.HTTP_200_OK
+        #     log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
+        #     return Response(response, status=status_code)
+        # else:
          
-            # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
-            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
+        #     # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
+        #     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
+        #     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
 
 
 class ChangePasswordView(RetrieveAPIView):
@@ -409,53 +459,31 @@ class GetUserDetailsView(APIView):
         
         '''New code Date 26/07/2023'''
         
-        user = M_Users.objects.filter(id=UserId).values('Employee','LoginName')
-        employee = M_Employees.objects.filter(id=user[0]['Employee']).values('Company','Name')
-        company = C_Companies.objects.filter(id=employee[0]['Company']).values('Name','IsSCM','CompanyGroup')
+        # user = M_Users.objects.select_related(M_Employees).prefetch_related.values('Employee', 'LoginName').get(id=UserId)
+        
+        # employee = M_Employees.objects.values('Company','Name').get(id=user['Employee'])
+        # company = C_Companies.objects.values ('Name','IsSCM','CompanyGroup').get(id=employee['Company'])
+        
+        # user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+        # user = M_Users.objects.select_related('Employee').get(id=UserId)
+        user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+        employee = user.Employee
+        company = employee.Company
+        companygroup = company.CompanyGroup
+        
+       
         a = list()
         a.append({
             "UserID": UserId,
-            "UserName":user[0]["LoginName"],
-            "EmployeeID": user[0]["Employee"],
-            "EmployeeName": employee[0]["Name"],
-            "CompanyID": employee[0]["Company"],
-            "CompanyName": company[0]["Name"],
-            "IsSCMCompany": company[0]["IsSCM"],
-            "CompanyGroup": company[0]["CompanyGroup"]
+            "UserName":user.LoginName,
+            "EmployeeID": employee.id,
+            "EmployeeName": employee.Name,
+            "CompanyID": company.id,
+            "CompanyName": company.Name,
+            "IsSCMCompany": company.IsSCM,
+            "CompanyGroup": companygroup.id
         })
         
-        
-        '''Previous  code'''
-        
-        # Userdata = M_Users.objects.filter(id=UserId)
-
-        # UserSerializer = UserListSerializerforgetdata(Userdata, many=True).data
-
-        # Employee = M_Employees.objects.filter(id=UserSerializer[0]['Employee'])
-        # EmployeeSerializer = M_EmployeesSerializerforgetdata(Employee, many=True).data
-
-        # Company = C_Companies.objects.filter(id=EmployeeSerializer[0]['Company'])
-        # CompanySerializer = C_CompanySerializer(Company, many=True).data
-
-        # request.session['UserID'] = UserId
-        # request.session['UserName'] = UserSerializer[0]["LoginName"]
-        # request.session['EmployeeID'] = UserSerializer[0]["Employee"]
-        # request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
-        # request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
-        # request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
-        # print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
-
-        # a = list()
-        # a.append({
-        #     "UserID": UserId,
-        #     "UserName":UserSerializer[0]["LoginName"],
-        #     "EmployeeID": UserSerializer[0]["Employee"],
-        #     "CompanyID": EmployeeSerializer[0]["Company"],
-        #     "CompanyName": CompanySerializer[0]["Name"],
-        #     "IsSCMCompany": CompanySerializer[0]["IsSCM"],
-        #     "CompanyGroup": CompanySerializer[0]["CompanyGroup"]
-
-        # })
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
 
 
