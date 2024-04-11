@@ -635,6 +635,7 @@ urlpatterns = [
             url(r'OutStandingBalance$', OutStandingBalanceView.as_view()),
             url(r'ManPowerReport$', ManPowerReportView.as_view()),
             url(r'TCSAmountReport$', TCSAmountReportView.as_view()),
+            url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
             
             
             
@@ -695,11 +696,7 @@ urlpatterns = [
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
               url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
-              url(r'SettingsDataSave$',SettingsView.as_view()), 
-             
-
-              url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
-            
+              url(r'SettingsDataSave$',SettingsView.as_view()),  
               url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
 #TargetUploads
