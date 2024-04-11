@@ -409,20 +409,29 @@ class GetUserDetailsView(APIView):
         
         '''New code Date 26/07/2023'''
         
-        user = M_Users.objects.values('Employee', 'LoginName').get(id=UserId)
+        # user = M_Users.objects.select_related(M_Employees).prefetch_related.values('Employee', 'LoginName').get(id=UserId)
         
-        employee = M_Employees.objects.values('Company','Name').get(id=user['Employee'])
-        company = C_Companies.objects.values ('Name','IsSCM','CompanyGroup').get(id=employee['Company'])
+        # employee = M_Employees.objects.values('Company','Name').get(id=user['Employee'])
+        # company = C_Companies.objects.values ('Name','IsSCM','CompanyGroup').get(id=employee['Company'])
+        
+        # user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+        # user = M_Users.objects.select_related('Employee').get(id=UserId)
+        user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+        employee = user.Employee
+        company = employee.Company
+        companygroup = company.CompanyGroup
+        
+       
         a = list()
         a.append({
             "UserID": UserId,
-            "UserName":user["LoginName"],
-            "EmployeeID": user["Employee"],
-            "EmployeeName": employee["Name"],
-            "CompanyID": employee["Company"],
-            "CompanyName": company["Name"],
-            "IsSCMCompany": company["IsSCM"],
-            "CompanyGroup": company["CompanyGroup"]
+            "UserName":user.LoginName,
+            "EmployeeID": employee.id,
+            "EmployeeName": employee.Name,
+            "CompanyID": company.id,
+            "CompanyName": company.Name,
+            "IsSCMCompany": company.IsSCM,
+            "CompanyGroup": companygroup.id
         })
         
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
