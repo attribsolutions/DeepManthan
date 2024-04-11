@@ -290,7 +290,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
                 JOIN M_States ON M_States.id=M_Parties.State_id
                 JOIN M_Districts ON M_Districts.id=M_Parties.District_id
-                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 AND M_PartyType.IsSCM=1 OR M_PartyType.IsFranchises=1)a
+                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 )a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
