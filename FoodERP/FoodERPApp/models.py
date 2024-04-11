@@ -2318,6 +2318,7 @@ class M_FinancialYearFirstTransactionLog(models.Model):
         
         
 class M_RateMaster(models.Model):
+    
     EffectiveDate = models.DateField()
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
     CommonID = models.IntegerField(null=True,blank=True)
