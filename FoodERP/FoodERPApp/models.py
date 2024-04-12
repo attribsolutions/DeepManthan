@@ -788,7 +788,7 @@ class M_MRPMaster(models.Model):
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
 
     class Meta:
-        db_table = "M_MRPMaster"
+        db_table = "M_MRPMaster"      
 
 class M_MarginMaster(models.Model):
     CommonID = models.IntegerField(null=True,blank=True)
@@ -2315,3 +2315,24 @@ class M_FinancialYearFirstTransactionLog(models.Model):
 
     class Meta:
         db_table = "M_FinancialYearFirstTransactionLog"
+        
+        
+class M_RateMaster(models.Model):
+    
+    EffectiveDate = models.DateField()
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    CommonID = models.IntegerField(null=True,blank=True)
+    IsDeleted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Company = models.ForeignKey(C_Companies, related_name='RateCompany', on_delete=models.PROTECT)
+    # '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
+    # Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.PROTECT,null=True,blank=True)
+    Item = models.ForeignKey(M_Items, related_name='ItemRateDetails', on_delete=models.CASCADE)
+    # 'Customer means M_Parties ID'
+    # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
+
+    class Meta:
+        db_table = "M_RateMaster"        

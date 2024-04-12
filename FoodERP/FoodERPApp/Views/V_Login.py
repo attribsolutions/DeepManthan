@@ -17,6 +17,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 import jwt
 from .V_CommFunction import create_transaction_logNew
+from django.db.models import Q
 
 # Create your views here.
 
@@ -230,46 +231,95 @@ class UserLoginView(RetrieveAPIView):
     permission_classes = ()
     authentication_classes = ()
 
-    serializer_class = UserLoginSerializer
+    # serializer_class = UserLoginSerializer
 
     def post(self, request):
         aa = request.data.get('LoginName')
         LoginName = str(aa)
-        findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
-        where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        # findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
+        # where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        find_user = M_Users.objects.filter(
+                    Q(isLoginUsingEmail=1, Employee__email=LoginName) |
+                    Q(isLoginUsingMobile=1, Employee__Mobile=LoginName) |
+                    Q(LoginName=LoginName)).values( 'id', 'LoginName')
         
-        if not findUser:
-            
-            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
-        
-        FindUserSerializer_data = FindUserSerializer(findUser, many=True).data
-        
-        a = {
-            "LoginName": FindUserSerializer_data[0]['LoginName'],
-            "password": request.data.get('password')
-        }
-        
-        serializer = UserLoginSerializer(data=a)
-        
-        if serializer.is_valid():
-        
-            response = {
-                'Status': True,
-                'StatusCode': status.HTTP_200_OK,
-                'Message': 'User logged in  successfully',
-                'token': serializer.data['token'],
-                'refreshtoken': serializer.data['refreshtoken'],
-                'UserID': serializer.data['UserID']
-            }
-            
-            status_code = status.HTTP_200_OK
-            log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
-            return Response(response, status=status_code)
+        # employee = find_user.Employee
+        if find_user:
+            login_name=find_user[0]['LoginName']
+            password=request.data.get('password')
+            user = authenticate(LoginName=login_name, password=password)
+            if user:
+                # If user is authenticated, generate JWT token
+                update_last_login(None, user)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "Status": True,
+                    "StatusCode": 200,
+                    "Message": "User logged in  successfully",
+                    'refreshtoken': str(refresh),
+                    'token': str(refresh.access_token),
+                    "UserID": find_user[0]['id']
+                }, status=status.HTTP_200_OK)
+                
+            else:
+                return Response({'StatusCode': 401, 'Status': True, 'Message': 'Invalid credentials', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+
         else:
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        # if not find_user:
+            
+        #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
+        
+        # # FindUserSerializer_data = FindUserSerializer(find_user, many=True).data
+        
+        # a = {
+        #     "LoginName": find_user[0]['LoginName'],
+        #     "password": request.data.get('password')
+        # }
+        
+        # serializer = UserLoginSerializer(data=a)
+        
+        # if serializer.is_valid():
+        
+        #     response = {
+        #         'Status': True,
+        #         'StatusCode': status.HTTP_200_OK,
+        #         'Message': 'User logged in  successfully',
+        #         'token': serializer.data['token'],
+        #         'refreshtoken': serializer.data['refreshtoken'],
+        #         'UserID': serializer.data['UserID']
+        #     }
+            
+        #     status_code = status.HTTP_200_OK
+        #     log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
+        #     return Response(response, status=status_code)
+        # else:
          
-            # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
-            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
+        #     # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
+        #     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
+        #     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
 
 
 class ChangePasswordView(RetrieveAPIView):
