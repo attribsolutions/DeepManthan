@@ -154,6 +154,8 @@ from .Views.V_Settings import *
 
 from .Views.V_TargetUploads import *
 
+from .Views.V_Rates import *
+
 
 urlpatterns = [
     
@@ -521,10 +523,15 @@ urlpatterns = [
             url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
     
 # GetMRP 
+            
             url(r'GetMRP$',GETMrpDetails.as_view()),
             url(r'GetMargin$',GETMarginDetails.as_view()),
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
-            
+#GetRate    
+            url(r'Rates$',M_RatesView.as_view()),        
+            url(r'GetRate',GETRateDetails.as_view()),
+            url(r'DeleteRate/([0-9]+)$',M_RatesViewSecond.as_view()),
+            url(r'DeleteRateOnList/([0-9]+)$',M_RatesViewThird.as_view()),
 # BankMaster
             url(r'Bank/([0-9]+)$', BankView.as_view()),
             url(r'Bank$', BankView.as_view()),
