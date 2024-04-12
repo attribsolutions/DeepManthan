@@ -98,7 +98,7 @@ class GETRateDetails(CreateAPIView):
                             "Name": a.Name,
                             "CurrentRate":a.MRates,
                             "CurrentDate":current_date,
-                            "Rate": a.MRates
+                            "Rate": ""
                         })
                        
                     log_entry = create_transaction_logNew(request,ItemList, 0,'',367,0)
