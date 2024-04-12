@@ -96,7 +96,7 @@ class GETRateDetails(CreateAPIView):
                             "id":a.id,
                             "Item":a.id,
                             "Name": a.Name,
-                            "CurrentRate":a.id,
+                            "CurrentRate":a.MRates,
                             "CurrentDate":current_date,
                             "Rate": a.MRates
                         })
