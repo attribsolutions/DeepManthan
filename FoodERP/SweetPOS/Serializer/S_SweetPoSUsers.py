@@ -11,3 +11,5 @@ class RolesSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_SweetPOSRoles
         fields = '__all__'
+        
+        
