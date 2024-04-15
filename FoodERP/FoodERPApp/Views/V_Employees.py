@@ -203,8 +203,8 @@ where M_Employees.id= %s''', [id])
                     log_entry = create_transaction_logNew(request,M_Employees_Serializer,0,'',201,id)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'SingleGETEmplyoees:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,0,0,'SingleGETEmplyoees:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -225,8 +225,8 @@ where M_Employees.id= %s''', [id])
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeEdit:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeEdit:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -290,7 +290,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
                 JOIN M_States ON M_States.id=M_Parties.State_id
                 JOIN M_Districts ON M_Districts.id=M_Parties.District_id
-                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 AND M_PartyType.IsSCM=1 OR M_PartyType.IsFranchises=1)a
+                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 )a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
@@ -379,9 +379,92 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             'Latitude': a['Latitude'],
                             'Longitude' : a['Longitude'],
                             'MobileNo' :a['MobileNo'],
-                            'Address' :a['Address']
+                            'Address' :a['Address'],
+                            'PartyType' :a['PartyType']['Name']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+
+
+class PartiesEmpAllDetailsView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self,request,id=0):
+        try:
+            with transaction.atomic():
+                query = M_Employees.objects.raw('''SELECT 1 as id, M_Employees.Name EmpName, M_Employees.Address EmpAddress, Mobile EmpMobile, M_Employees.email EmpEmail, DOB, M_Employees.PAN EmpPAN, AadharNo, M_Employees.PIN EmpPIN, C1.Name EmpCity, D1.Name EmpDistrict, S1.Name EmpState, 
+                                                        M_EmployeeTypes.Name EmpType, M_Parties.id PartyID,
+                                                        M_Parties.Name PartyName, M_PartyType.Name PartyType, MC_PartyAddress.Address PartyAddress, FSSAINo, FSSAIExipry, MC_PartyAddress.PIN PartyPIN, M_Parties.email PartyEmail, MobileNo, AlternateContactNo, SAPPartyCode, GSTIN, M_Parties.PAN PartyPAN, 
+                                                        C2.Name PartyCity, D2.Name PartyDistrict, S2.Name PartyState, M_Parties.IsDivision, MkUpMkDn, M_Parties.isActive IsPartyActive, Latitude, Longitude,
+                                                        M_Users.LoginName
+                                                        FROM M_Employees 
+                                                        JOIN M_EmployeeTypes on EmployeeType_id = M_EmployeeTypes.id
+                                                        LEFT JOIN MC_EmployeeParties ON Employee_id = M_Employees.id
+                                                        LEFT JOIN M_Parties ON Party_id = M_Parties.id
+                                                        JOIN M_PartyType ON PartyType_id = M_PartyType.id
+                                                        LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_PartyAddress.IsDefault = 1
+                                                        LEFT JOIN M_Cities C1 ON M_Employees.City_id = C1.id
+                                                        LEFT JOIN M_Cities C2 ON M_Parties.City_id = C2.id
+                                                        JOIN M_Districts D1 ON M_Parties.District_id = D1.id
+                                                        JOIN M_Districts D2 ON M_Employees.District_id = D2.id
+                                                        JOIN M_States S1 ON M_Parties.State_id = S1.id
+                                                        JOIN M_States S2 ON M_Employees.State_id = S2.id
+                                                        LEFT JOIN M_Users ON M_Users.Employee_id = M_Employees.id
+                                                        WHERE M_Parties.id IN (SELECT Party_id FROM MC_ManagementParties WHERE Employee_id = %s)''',[id])  
+                
+                if query:
+                    PartyEmpDetails_Serializer = PartyEmpDetailsSerializer(query, many=True).data
+                    PartyEmpList = list()
+                    for a in PartyEmpDetails_Serializer:
+                        PartyEmpList.append({
+                            "EmpName" : a['EmpName'],
+                            "EmpAddress":a['EmpAddress'],
+                            "EmpMobile":a['EmpMobile'],
+                            "EmpEmail":a['EmpEmail'],
+                            "DOB":a['DOB'],
+                            "EmpPAN":a['EmpPAN'],
+                            "AadharNo":a['AadharNo'],
+                            "EmpPIN":a['EmpPIN'],
+                            "EmpDistrict":a['EmpDistrict'],
+                            "EmpState" : a['EmpState'],
+                            "EmpType":a['EmpType'],
+                            "PartyID" :a['PartyID'],
+                            "PartyName":a['PartyName'],
+                            "PartyType":a['PartyType'],
+                            "PartyAddress" :a['PartyAddress'],
+                            "FSSAINo" :a['FSSAINo'],
+                            "FSSAIExpiry" :a['FSSAIExipry'],
+                            "PartyPIN" :a['PartyPIN'],
+                            "PartyEmail":a['PartyEmail'],
+                            "MobileNo":a['MobileNo'],
+                            "AlternateContactNo":a['AlternateContactNo'],
+                            "SAPPartyCode":a['SAPPartyCode'],
+                            "GSTIN":a['GSTIN'],
+                            "PartyPAN":a['PartyPAN'],
+                            "PartyCity" : a['PartyCity'],
+                            "PartyDistrict":a['PartyDistrict'],
+                            "PartyState":a['PartyState'],
+                            "IsDivision":a['IsDivision'],
+                            "MkUpMkDn":a['MkUpMkDn'],
+                            "IsPartyActive":a['IsPartyActive'],
+                            "Latitude":a['Latitude'],
+                            "Longitude":a['Longitude'],
+                            "LoginName" : a['LoginName']
+                        })
+                    log_entry = create_transaction_logNew(request,PartyEmpDetails_Serializer,0,f'Party Details of EmployeeID: {id}',366,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyEmpList})
+                else:
+                    log_entry = create_transaction_logNew(request,PartyEmpDetails_Serializer,0,'Employee not found',366,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employee not found', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,'PartyEmpDetails:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+          
+   

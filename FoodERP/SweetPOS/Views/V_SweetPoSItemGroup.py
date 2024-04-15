@@ -41,25 +41,27 @@ class ItemGroupandSubgroupView(CreateAPIView):
             user = BasicAuthenticationfunction(request)
             if user is not None:
                 groups = M_Group.objects.all()
-                response_data = {"status": True, "status_code": 200, "count": groups.count(),"data": [] }
+                response_data = {"status": True, "status_code": 200, "count": groups.count(),"data": [] }              
                 
                 for group in groups:
+                    sequence = group.Sequence if group.Sequence is not None else 0.00
                     group_data = {
                         "CompanyName": group.Name,
                         "POSCompanyID": group.id,
                         "CompanyDisplayName": group.Name,
-                        "CompanyDisplayIndex": group.Sequence,
+                        "CompanyDisplayIndex":sequence,
                         "IsActive": True,
                         "Itemsgroup": []
                     }
                     subgroups = MC_SubGroup.objects.filter(Group=group)
                     for subgroup in subgroups:
+                        sequence = group.Sequence if subgroup.Sequence is not None else 0.00
                         subgroup_data = {
                             "GroupID": subgroup.id,
                             "ItemName": None, 
                             "GroupName": subgroup.Name,
                             "GroupDisplayName": subgroup.Name,
-                            "GroupDisplayIndex": subgroup.Sequence,
+                            "GroupDisplayIndex": sequence,
                             "IsActive": True,
                         }
                         group_data["Itemsgroup"].append(subgroup_data)
@@ -75,24 +77,25 @@ class ItemListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
     
-    def get(self, request):
+    def get(self, request,DivisionID=0):
         try:
             user = BasicAuthenticationfunction(request)
             if user is not None:
-                query = """SELECT i.id AS CItemID, i.BarCode, 
-                            GSTHsnCodeMaster(i.id, CURDATE(), 3) AS HSNCode,
-                            i.Name, i.SAPItemCode AS ItemCode,  
-                            GSTHsnCodeMaster(i.id, CURDATE(), 2) AS GST,
-                            GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL) AS Rate,
-                            i.BaseUnitID_id AS UnitID, 
-                            i.IsFranchisesItem,  
-                            GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL) AS FoodERPMRP,
-                            subgroup.id AS ItemGroupID
-                        FROM M_Items AS i
-                        LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id
-                        LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
-                        WHERE M_ChannelWiseItems.PartyType_id = 19"""
-                        
+                
+                query = f"""SELECT i.id AS FoodERPID, i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,
+                i.Name, i.SAPItemCode AS ItemCode,  
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
+                ifnull(i.BaseUnitID_id,0) AS UnitID, 
+                i.IsFranchisesItem,  
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
+                ifnull(subgroup.id,0) AS ItemGroupID
+                FROM M_Items AS i
+                LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id
+                LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
+                join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id=(SELECT Party from SweetPOS.M_SweetPOSRoleAccess where Divisionid={DivisionID})
+                WHERE M_ChannelWiseItems.PartyType_id = 19 """                  
                 with connection.cursor() as cursor:
                     cursor.execute(query)
                     rows = cursor.fetchall()
@@ -100,19 +103,20 @@ class ItemListView(CreateAPIView):
                 response_data = {"status": True, "status_code": 200, "count": len(rows), "data": [] }
                 for row in rows:
                     item_data = {
-                        "CItemID": row[0],
-                        "BarCode": row[1],
-                        "HSNCode": row[2],
-                        "Name": row[3],
-                        "ItemCode": row[4],
-                        "GST": row[5],
-                        "Rate": row[6],
-                        "UnitID": row[7],
+                        "FoodERPID": row[0],
+                        "CItemID": row[1],
+                        "BarCode": row[2],
+                        "HSNCode": row[3],
+                        "Name": row[4],
+                        "ItemCode": row[5],
+                        "GST": row[6],
+                        "Rate": row[7],
+                        "UnitID": row[8],
                         "ISChitaleSupplier": True,  
-                        "IsFranchisesPOSItem": row[8],
+                        "IsFranchisesPOSItem": row[9],
                         "UnitConversion": "",         
-                        "FoodERPMRP": row[9],
-                        "ItemGroupID": row[10],
+                        "FoodERPMRP": row[10],
+                        "ItemGroupID": row[11],
                         "FranchisesItemCode": ""      
                     }
                     response_data["data"].append(item_data)

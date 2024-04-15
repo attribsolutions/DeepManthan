@@ -241,7 +241,7 @@ class SAPOrderView(CreateAPIView):
                 Items =list()
                 query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
                                            M_PartyType.SAPIndicator Indicator,
-TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.Name Unit,
+TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
 (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
 
 from T_Orders 
@@ -251,7 +251,7 @@ join M_Parties C on C.id=T_Orders.Customer_id
 join M_PartyType on M_PartyType.id=C.PartyType_id
 join M_Items on M_Items.id=TC_OrderItems.Item_id
 join M_Units on M_Units.id=M_Items.SAPUnitID
-where T_Orders.id=%s''',[OrderID])
+where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                 
                 for row in query:
                     
@@ -285,9 +285,9 @@ where T_Orders.id=%s''',[OrderID])
 
                 })
                 
-                aa=json.dumps(payload[0])
+                jsonbody=json.dumps(payload[0])
                 
-                print(aa)
+                print(jsonbody)
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
                 url = SAPURL
@@ -300,7 +300,7 @@ where T_Orders.id=%s''',[OrderID])
                
                 
                 
-                response = requests.request("POST", url, headers=headers, data=aa)
+                response = requests.request("POST", url, headers=headers, data=jsonbody)
                 # Convert XML to OrderedDict
                 data_dict = xmltodict.parse(response.text)
                 # Convert OrderedDict to JSON string
@@ -314,18 +314,18 @@ where T_Orders.id=%s''',[OrderID])
 
                 if index != -1:
                     OrderID = int(OrderNo)-5000000
-                    print(OrderID)
+                    # print(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_logNew(request, data, 0, '',321,0)
+                    log_entry = create_transaction_logNew(request, jsonbody, 0, '',321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_logNew(request, data, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_logNew(request, data, 0, '',323,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, 0, '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)

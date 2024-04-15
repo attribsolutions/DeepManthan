@@ -1,4 +1,4 @@
-import datetime
+
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -13,6 +13,7 @@ from ..Serializer.S_Invoices import *
 from ..Serializer.S_Bom import *
 from ..models import *
 from django.db.models import *
+from datetime import datetime, timedelta 
 
 # GRN List API
 
@@ -170,7 +171,7 @@ class T_GRNView(CreateAPIView):
                     
                     O_LiveBatchesList.append({
                     
-                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "ItemExpiryDate":date.today()+ timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],

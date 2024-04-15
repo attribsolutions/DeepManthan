@@ -117,3 +117,29 @@ class TC_SPOSInvoiceItems(models.Model):
 
     class Meta:
         db_table = "TC_SPOSInvoiceItems"    
+
+
+class M_SweetPOSUser(models.Model):
+    CompanyID=models.IntegerField()
+    DivisionID=models.IntegerField()
+    LoginName=models.CharField(max_length=100)
+    Password=models.CharField(max_length=50)
+    RoleID=models.IntegerField()  
+    IsActive =models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table="M_SweetPOSUser"
+
+class M_SweetPOSRoles(models.Model):
+    Name=models.CharField(max_length=100)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+            db_table="M_SweetPOSRoles"

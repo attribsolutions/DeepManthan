@@ -154,6 +154,8 @@ from .Views.V_Settings import *
 
 from .Views.V_TargetUploads import *
 
+from .Views.V_Rates import *
+
 
 urlpatterns = [
     
@@ -250,6 +252,9 @@ urlpatterns = [
             url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesFilterView.as_view()),
             url(r'ManagementEmpParties$', ManagementEmployeePartiesSaveView.as_view()),
             url(r'ManagementEmpParties/([0-9]+)$', ManagementEmployeePartiesSaveView.as_view()),
+            url(r'PartiesEmpAllDetails/([0-9]+)$', PartiesEmpAllDetailsView.as_view()),
+          
+       
          
 
 # Order All APIs
@@ -518,10 +523,15 @@ urlpatterns = [
             url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
     
 # GetMRP 
+            
             url(r'GetMRP$',GETMrpDetails.as_view()),
             url(r'GetMargin$',GETMarginDetails.as_view()),
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
-            
+#GetRate    
+            url(r'Rates$',M_RatesView.as_view()),        
+            url(r'GetRate',GETRateDetails.as_view()),
+            url(r'DeleteRate/([0-9]+)$',M_RatesViewSecond.as_view()),
+            url(r'DeleteRateOnList/([0-9]+)$',M_RatesViewThird.as_view()),
 # BankMaster
             url(r'Bank/([0-9]+)$', BankView.as_view()),
             url(r'Bank$', BankView.as_view()),
@@ -548,7 +558,8 @@ urlpatterns = [
             
             url(r'Uploaded_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Uploaded_CreditDebitNotes_EInvoice.as_view()),
             url(r'Cancel_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Cancel_CreditDebitNotes_EInvoice.as_view()),
-            
+            url(r'BulkCreditNote$', CreditDebitNoteExcelView.as_view()),
+            url(r'BulkCreditNoteDelete$', CreditDebitNoteExcelView.as_view()),
 
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),  
@@ -631,6 +642,7 @@ urlpatterns = [
             url(r'OutStandingBalance$', OutStandingBalanceView.as_view()),
             url(r'ManPowerReport$', ManPowerReportView.as_view()),
             url(r'TCSAmountReport$', TCSAmountReportView.as_view()),
+            url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
             
             
             
@@ -656,6 +668,8 @@ urlpatterns = [
 # StockAdjustment
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
             url(r'GetStockCountForParty$',GetStockCountForPartyView.as_view()),
+            url(r'CheckStockEntryForFYFirstTransaction$',CheckStockEntryForFYFirstTransactionView.as_view()),
+            url(r'CheckStockEntryDateAndNotAllowedBackdatedTransaction$',CheckStockEntryDateAndNotAllowedBackdatedTransactionView.as_view()),
             
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
@@ -689,11 +703,7 @@ urlpatterns = [
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
               url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
-              url(r'SettingsDataSave$',SettingsView.as_view()), 
-             
-
-              url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
-            
+              url(r'SettingsDataSave$',SettingsView.as_view()),  
               url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
 #TargetUploads
@@ -701,7 +711,10 @@ urlpatterns = [
               url(r'Gettargetupload$',GetTargetUploadsView.as_view()),
               url(r'GetTargetUploadsBySheetNo/([0-9]+)/([0-9]+)$',GetTargetUploadsBySheetNoView.as_view()), #SheetNo/PartyID     
               url(r'DeleteTargetRecords$',DeleteTargetRecordsView.as_view()),
-         
+              url(r'TargetVSAchievement$', TargetVSAchievementView.as_view()),
+          
+#Logs
+              url(r'LogTransaction$',LogTransactionView.as_view()),           
               
              
            

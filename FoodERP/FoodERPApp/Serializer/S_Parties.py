@@ -33,10 +33,11 @@ class PartyaddressSecond(serializers.ModelSerializer):
         fields = ['Address']
         
 class DivisionsSerializerSecond(serializers.ModelSerializer):
+    PartyType=PartyTypeSerializer(read_only=True)
     Address = serializers.CharField(source='PartyAddress.first.Address')
     class Meta:
         model =  M_Parties
-        fields = ['id', 'Name', 'SAPPartyCode', 'Latitude', 'Longitude', 'MobileNo', 'Address']
+        fields = ['id', 'Name', 'SAPPartyCode', 'Latitude', 'Longitude', 'MobileNo', 'Address' ,'PartyType']
         
     # def to_representation(self, instance):
     #     # get representation from ModelSerializer
@@ -258,7 +259,7 @@ class M_PartiesSerializerFourth(serializers.Serializer):
 class UpdatePartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
-        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','Creditprefix','Debitprefix']
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','Creditprefix','Debitprefix','PurchaseReturnprefix']
         
 class UpdatePartyAddressSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()

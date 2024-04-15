@@ -17,6 +17,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 import jwt
 from .V_CommFunction import create_transaction_logNew
+from django.db.models import Q,F
+
 
 # Create your views here.
 
@@ -130,6 +132,7 @@ class UserListViewSecond(CreateAPIView):
                     for a in Usersdata_Serializer:
                         RoleData = list()
                         UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s  ''',[id])
+                        
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
@@ -177,6 +180,8 @@ class UserListViewSecond(CreateAPIView):
                         'UpdatedOn': a["UpdatedOn"],
                         'Employee': a["Employee"]["id"],
                         'EmployeeName': a["Employee"]["Name"],
+                        'EmployeeMobile': a["Employee"]["Mobile"],
+                        'EmployeeEmail': a["Employee"]["email"],
                         'UserRole': RoleData,
 
                     })
@@ -227,46 +232,95 @@ class UserLoginView(RetrieveAPIView):
     permission_classes = ()
     authentication_classes = ()
 
-    serializer_class = UserLoginSerializer
+    # serializer_class = UserLoginSerializer
 
     def post(self, request):
         aa = request.data.get('LoginName')
         LoginName = str(aa)
-        findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
-        where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        # findUser = M_Users.objects.raw('''SELECT M_Employees.id id,M_Employees.Name EmployeeName,M_Users.id UserID,M_Users.LoginName  FROM M_Employees join M_Users on M_Employees.id=M_Users.Employee_id
+        # where (M_Users.isLoginUsingEmail=1 and M_Employees.email = %s) OR (M_Users.isLoginUsingMobile=1 and  M_Employees.Mobile=%s) OR (M_Users.LoginName=%s) ''', ([LoginName], [LoginName], [LoginName]))
+        find_user = M_Users.objects.filter(
+                    Q(isLoginUsingEmail=1, Employee__email=LoginName) |
+                    Q(isLoginUsingMobile=1, Employee__Mobile=LoginName) |
+                    Q(LoginName=LoginName)).values( 'id', 'LoginName')
         
-        if not findUser:
-            
-            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
-        
-        FindUserSerializer_data = FindUserSerializer(findUser, many=True).data
-        
-        a = {
-            "LoginName": FindUserSerializer_data[0]['LoginName'],
-            "password": request.data.get('password')
-        }
-        
-        serializer = UserLoginSerializer(data=a)
-        
-        if serializer.is_valid():
-        
-            response = {
-                'Status': True,
-                'StatusCode': status.HTTP_200_OK,
-                'Message': 'User logged in  successfully',
-                'token': serializer.data['token'],
-                'refreshtoken': serializer.data['refreshtoken'],
-                'UserID': serializer.data['UserID']
-            }
-            
-            status_code = status.HTTP_200_OK
-            log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
-            return Response(response, status=status_code)
+        # employee = find_user.Employee
+        if find_user:
+            login_name=find_user[0]['LoginName']
+            password=request.data.get('password')
+            user = authenticate(LoginName=login_name, password=password)
+            if user:
+                # If user is authenticated, generate JWT token
+                update_last_login(None, user)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "Status": True,
+                    "StatusCode": 200,
+                    "Message": "User logged in  successfully",
+                    'refreshtoken': str(refresh),
+                    'token': str(refresh.access_token),
+                    "UserID": find_user[0]['id']
+                }, status=status.HTTP_200_OK)
+                
+            else:
+                return Response({'StatusCode': 401, 'Status': True, 'Message': 'Invalid credentials', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+
         else:
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        # if not find_user:
+            
+        #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []})
+        
+        # # FindUserSerializer_data = FindUserSerializer(find_user, many=True).data
+        
+        # a = {
+        #     "LoginName": find_user[0]['LoginName'],
+        #     "password": request.data.get('password')
+        # }
+        
+        # serializer = UserLoginSerializer(data=a)
+        
+        # if serializer.is_valid():
+        
+        #     response = {
+        #         'Status': True,
+        #         'StatusCode': status.HTTP_200_OK,
+        #         'Message': 'User logged in  successfully',
+        #         'token': serializer.data['token'],
+        #         'refreshtoken': serializer.data['refreshtoken'],
+        #         'UserID': serializer.data['UserID']
+        #     }
+            
+        #     status_code = status.HTTP_200_OK
+        #     log_entry = create_transaction_logNew(request,serializer.data,0,"Login Successfully",140,0)
+        #     return Response(response, status=status_code)
+        # else:
          
-            # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
-            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
+        #     # log_entry = create_transaction_logNew(request, serializer.data,0,"Incorrect LoginName and Password",141,0)
+        #     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Incorrect LoginName and Password ', 'Data': []})
+        #     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': serializer.errors['non_field_errors'][0], 'Data': []})
 
 
 class ChangePasswordView(RetrieveAPIView):
@@ -341,33 +395,76 @@ class UserPartiesForLoginPage(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
-    serializer_class = M_UserPartiesSerializer
+    # serializer_class = M_UserPartiesSerializer
 
     @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType,M_Parties.UploadSalesDatafromExcelParty
+                # query = MC_EmployeeParties.objects.raw(
+                #     '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType,M_Parties.UploadSalesDatafromExcelParty
 
-                     FROM  MC_UserRoles
-                     JOIN M_Users on M_Users.id=MC_UserRoles.User_id
-                     left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
-                     left join MC_PartyAddress on MC_PartyAddress.Party_id=M_Parties.id and MC_PartyAddress.IsDefault=1
-                     left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
-                     Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
-                     WHERE M_Users.Employee_id=%s ''', [id])
+                #      FROM  MC_UserRoles
+                #      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
+                #      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
+                #      left join MC_PartyAddress on MC_PartyAddress.Party_id=M_Parties.id and MC_PartyAddress.IsDefault=1
+                #      left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
+                #      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
+                #      WHERE M_Users.Employee_id=%s ''', [id])
+                
+                query =  ( MC_UserRoles.objects.select_related('User', 'Party', 'Role')
+                            .filter(User__Employee_id=id)
+                            .annotate(
+                                RoleName=F('Role__Name'),
+                                PartyName=F('Party__Name'),
+                                IsSCMPartyType=F('Party__PartyType__IsSCM'),
+                                GSTIN=F('Party__GSTIN'),
+                                FSSAINo=F('Party__PartyAddress__FSSAINo'),
+                                FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
+                                PartyTypeID=F('Party__PartyType_id'),
+                                PartyType=F('Party__PartyType__Name'),
+                                UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty')
+                            )
+                            .values(
+                                'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee',
+                                'Party__SAPPartyCode', 'IsSCMPartyType', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
+                                'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelParty'
+                            ))
+                        
                 # UserID = request.user.id
                 # print(str(query.query))
                 if not query:
                     log_entry = create_transaction_logNew(request,0,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = self.serializer_class(
-                        query, many=True).data
+                    # M_UserParties_Serializer = self.serializer_class(
+                    #     query, many=True).data
+                    UserPartiesData = list()
+                    for item in query:
+                        
+                        UserPartiesData.append({
+
+                            "id" : item['id'],
+                            "Role" : item['Role_id'],
+                            "RoleName" : item['RoleName'],
+                            "Party_id" :item['Party_id'],
+                            "PartyName" : item['PartyName'],
+                            "Employee_id" : id,
+                            "SAPPartyCode" :item['Party__SAPPartyCode'],
+                            "IsSCMPartyType" :item['IsSCMPartyType'],
+                            "GSTIN":item['GSTIN'],
+                            "FSSAINo": item['FSSAINo'],
+                            "FSSAIExipry" :item['FSSAIExpiry'],
+                            "PartyTypeID":item['PartyTypeID'],
+                            "PartyType":item['PartyType'],
+                            "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelParty']
+                        })
+
                     
-                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0 ,"PartyDropdownforloginpage",145,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
+                    
+                    
+                    log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserPartiesData})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0 ,'PartyDropdownforloginpage:'+str(e),34,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
@@ -382,14 +479,13 @@ class GetEmployeeViewForUserCreation(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name FROM M_Employees where M_Employees.id 
+                query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name, M_Employees.Mobile as EmployeeMobile, M_Employees.email as EmployeeEmail   FROM M_Employees where M_Employees.id 
 NOT IN (SELECT Employee_id From M_Users) ''')
                 if not query:
                     log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"Employees Not available",146,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
                 else:
-                    M_Employees_Serializer = EmployeeSerializerForUserCreation(
-                        query, many=True).data
+                    M_Employees_Serializer = EmployeeSerializerForUserCreation(query, many=True).data
                     log_entry = create_transaction_logNew(request,{"UserID":id},0 ,"GetEmployeeForUserCreation",146,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Employees_Serializer})
         except Exception:
@@ -407,53 +503,31 @@ class GetUserDetailsView(APIView):
         
         '''New code Date 26/07/2023'''
         
-        user = M_Users.objects.filter(id=UserId).values('Employee','LoginName')
-        employee = M_Employees.objects.filter(id=user[0]['Employee']).values('Company','Name')
-        company = C_Companies.objects.filter(id=employee[0]['Company']).values('Name','IsSCM','CompanyGroup')
+        # user = M_Users.objects.select_related(M_Employees).prefetch_related.values('Employee', 'LoginName').get(id=UserId)
+        
+        # employee = M_Employees.objects.values('Company','Name').get(id=user['Employee'])
+        # company = C_Companies.objects.values ('Name','IsSCM','CompanyGroup').get(id=employee['Company'])
+        
+        # user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+        # user = M_Users.objects.select_related('Employee').get(id=UserId)
+        user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+        employee = user.Employee
+        company = employee.Company
+        companygroup = company.CompanyGroup
+        
+       
         a = list()
         a.append({
             "UserID": UserId,
-            "UserName":user[0]["LoginName"],
-            "EmployeeID": user[0]["Employee"],
-            "EmployeeName": employee[0]["Name"],
-            "CompanyID": employee[0]["Company"],
-            "CompanyName": company[0]["Name"],
-            "IsSCMCompany": company[0]["IsSCM"],
-            "CompanyGroup": company[0]["CompanyGroup"]
+            "UserName":user.LoginName,
+            "EmployeeID": employee.id,
+            "EmployeeName": employee.Name,
+            "CompanyID": company.id,
+            "CompanyName": company.Name,
+            "IsSCMCompany": company.IsSCM,
+            "CompanyGroup": companygroup.id
         })
         
-        
-        '''Previous  code'''
-        
-        # Userdata = M_Users.objects.filter(id=UserId)
-
-        # UserSerializer = UserListSerializerforgetdata(Userdata, many=True).data
-
-        # Employee = M_Employees.objects.filter(id=UserSerializer[0]['Employee'])
-        # EmployeeSerializer = M_EmployeesSerializerforgetdata(Employee, many=True).data
-
-        # Company = C_Companies.objects.filter(id=EmployeeSerializer[0]['Company'])
-        # CompanySerializer = C_CompanySerializer(Company, many=True).data
-
-        # request.session['UserID'] = UserId
-        # request.session['UserName'] = UserSerializer[0]["LoginName"]
-        # request.session['EmployeeID'] = UserSerializer[0]["Employee"]
-        # request.session['CompanyID'] = EmployeeSerializer[0]["Company"]
-        # request.session['IsSCMCompany'] = CompanySerializer[0]["IsSCM"]
-        # request.session['CompanyGroup'] = CompanySerializer[0]["CompanyGroup"]
-        # print(request.session.get('UserName'),request.session.get('IsSCMCompany'),request.session.get('CompanyGroup'))
-
-        # a = list()
-        # a.append({
-        #     "UserID": UserId,
-        #     "UserName":UserSerializer[0]["LoginName"],
-        #     "EmployeeID": UserSerializer[0]["Employee"],
-        #     "CompanyID": EmployeeSerializer[0]["Company"],
-        #     "CompanyName": CompanySerializer[0]["Name"],
-        #     "IsSCMCompany": CompanySerializer[0]["IsSCM"],
-        #     "CompanyGroup": CompanySerializer[0]["CompanyGroup"]
-
-        # })
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
 
 

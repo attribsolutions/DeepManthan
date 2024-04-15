@@ -1,15 +1,18 @@
 from ..models import *
 from ..Serializer.S_Orders import *
-from datetime import date 
-import datetime
-import pdb
+from datetime import datetime 
+from django.db.models.functions import Coalesce
+
+
+# import datetime
+# import pdb
 
 def GetYear(TDate):
-    date = datetime.datetime.strptime(TDate, "%Y-%m-%d").date()
+    date = datetime.strptime(TDate, "%Y-%m-%d").date()
     #initialize the current year
     year_of_date=date.year     
     #initialize the current financial year start date
-    financial_year_start_date = datetime.datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
+    financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
     if date<financial_year_start_date:           
         fs=  str(financial_year_start_date.year-1)+'-04-01'            
         fe=  str(financial_year_start_date.year)+'-03-31'           
@@ -192,25 +195,38 @@ class GetMaxNumber:
         #                 a=int(max_number)
         #                 a=a+1
         Return_year= GetYear(args[1])       
-        fs,fe=Return_year  
-        MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0],InvoiceDate__range=(fs,fe)).values('InvoiceNumber').order_by('-id')[:1]        
+        fs,fe=Return_year 
+        
+
+        
+
+        MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0],InvoiceDate__range=(fs,fe)).values('InvoiceNumber').order_by('-id')[:1] 
+             
         max_number = T_DeletedInvoices.objects.filter(Party=args[0],InvoiceDate__range=(fs,fe)).aggregate(max_number=Max('InvoiceNumber'))['max_number']      
-       
-        if(MaxInvoiceNumber or max_number):
-            CustomPrint('hh')
-            max_invoice = int(MaxInvoiceNumber[0]['InvoiceNumber']) if MaxInvoiceNumber[0]['InvoiceNumber'] else 0
-            CustomPrint(max_invoice)
-            max_deleted = int(max_number) if max_number else 0
-            CustomPrint(max_deleted)
+        
+        
+        if MaxInvoiceNumber or max_number:
+            
+            if(MaxInvoiceNumber):   
+                max_invoice = int(MaxInvoiceNumber[0]['InvoiceNumber'])            
+            else:
+                max_invoice = 0
+
+            if(max_number):    
+                max_deleted = int(max_number)         
+            else: 
+                max_deleted =0
+
             if max_invoice > max_deleted:
-                a = max_invoice + 1
-                CustomPrint(a)
+                a = max_invoice + 1                
             else:
                 a = max_deleted + 1
-                CustomPrint(a)
+                
         else:  
-            CustomPrint('hhh1')      
-            a = 1              
+             
+            a = 1  
+
+                    
         return a
     
 

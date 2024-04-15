@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -14,213 +14,99 @@ from ..Serializer.S_Invoices import InvoiceSerializerSecond
 
 from ..Serializer.S_Reports import *
 from ..models import *
+from datetime import datetime, timedelta
 
 
 class PartyLedgerReportView(CreateAPIView):  
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-
-                Orderdata = JSONParser().parse(request)
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Customer = Orderdata['Customer']
                 Party = Orderdata['Party']
 
                 query = T_Invoices.objects.raw('''SELECT
-    1 id,
-    InvoiceDate,
-    BillNo,
-    BankName,
-    BranchName,
-    ChequeDate,
-    DocumentNo,
-    ReceiptMode,
-    InvoiceAmount,
-    TotalTCS,
-    ReceiptAmt,
-    CashReceiptAmt,
-    DebitNote,
-    CreditNote,
-    Flag,
-    BasicAmount,
-    BA5,
-    BA12,
-    BA18,
-    GA5,
-    GA12,
-    GA18,
-    Description
+    1 id,InvoiceDate,BillNo,BankName,BranchName,ChequeDate,DocumentNo,ReceiptMode,InvoiceAmount,TotalTCS,
+    ReceiptAmt,CashReceiptAmt,DebitNote,CreditNote,Flag,BasicAmount,BA5,BA12,BA18,GA5,GA12,GA18,Description
 FROM
-    ((SELECT
-        InvoiceDate,
-            BillNo,
-            BankName,
-            BranchName,
-            ChequeDate,
-            DocumentNo,
-            ReceiptMode,
-            InvoiceAmount,
-            TotalTCS,
-            ReceiptAmt,
-            CashReceiptAmt,
-            Flag,
-            DebitNote,
-            CreditNote,
+    (
+        (   
+            SELECT InvoiceDate,BillNo,BankName,BranchName,ChequeDate,DocumentNo,ReceiptMode,InvoiceAmount,
+            TotalTCS,ReceiptAmt,CashReceiptAmt,Flag,DebitNote,CreditNote,ifnull(BasicAmount,0) AS BasicAmount,
+            ifnull(BA5,0) AS BA5,ifnull(BA12,0) AS BA12,ifnull(BA18,0) AS BA18,ifnull(GA5,0) AS GA5,
+            ifnull(GA12,0) AS GA12,ifnull(GA18,0) AS GA18,Description
+            
+            FROM
+                (SELECT InvoiceDate,T_Invoices.id,FullInvoiceNumber BillNo,"" AS BankName,"" AS BranchName,
+                "" AS ChequeDate,"" AS DocumentNo,"" AS ReceiptMode,GrandTotal InvoiceAmount,TCSAmount TotalTCS,
+                0 AS ReceiptAmt,0 AS CashReceiptAmt,1 AS Flag,0 AS DebitNote,0 AS CreditNote,"" AS Description
+                FROM T_Invoices WHERE InvoiceDate BETWEEN %s AND %s AND Party_id = %s AND Customer_id = %s) a
+                
+                LEFT JOIN 
+                
+                (SELECT Invoice_id,SUM(BasicAmount) AS BasicAmount,
+                SUM(CASE WHEN GSTPercentage = 5 THEN BasicAmount ELSE 0 END) AS BA5,
+                SUM(CASE WHEN GSTPercentage = 12 THEN BasicAmount ELSE 0 END) AS BA12,
+                SUM(CASE WHEN GSTPercentage = 18 THEN BasicAmount ELSE 0 END) AS BA18,
+                SUM(CASE WHEN GSTPercentage = 5 THEN GSTAmount ELSE 0 END) AS GA5,
+                SUM(CASE WHEN GSTPercentage = 12 THEN GSTAmount ELSE 0 END) AS GA12,
+                SUM(CASE WHEN GSTPercentage = 18 THEN GSTAmount ELSE 0 END) AS GA18
+                FROM TC_InvoiceItems GROUP BY Invoice_id) b 
+            
+            ON a.id = b.Invoice_id
+        )
 
-            ifnull(BasicAmount,0) AS BasicAmount,
-            ifnull(BA5,0) AS BA5,
-            ifnull(BA12,0) AS BA12,
-            ifnull(BA18,0) AS BA18,
-            ifnull(GA5,0) AS GA5,
-            ifnull(GA12,0) AS GA12,
-            ifnull(GA18,0) AS GA18,
-            Description
-
-    FROM
-        (SELECT
-        InvoiceDate,
-            T_Invoices.id,
-            FullInvoiceNumber BillNo,
-            "" AS BankName,
-            "" AS BranchName,
-            "" AS ChequeDate,
-            "" AS DocumentNo,
-            "" AS ReceiptMode,
-            GrandTotal InvoiceAmount,
-            TCSAmount TotalTCS,
-            0 AS ReceiptAmt,
-            0 AS CashReceiptAmt,
-            1 AS Flag,
-            0 AS DebitNote,
-            0 AS CreditNote,
-            "" AS Description
-    FROM
-        T_Invoices
-    WHERE
-        InvoiceDate BETWEEN %s AND %s
-            AND Party_id = %s
-            AND Customer_id = %s) a
-    LEFT JOIN (SELECT
-        Invoice_id,
-            SUM(BasicAmount) AS BasicAmount,
-
-            SUM(CASE
-                WHEN GSTPercentage = 5 THEN BasicAmount
-                ELSE 0
-            END) AS BA5,
-            SUM(CASE
-                WHEN GSTPercentage = 12 THEN BasicAmount
-                ELSE 0
-            END) AS BA12,
-            SUM(CASE
-                WHEN GSTPercentage = 18 THEN BasicAmount
-                ELSE 0
-            END) AS BA18,
-            SUM(CASE
-                WHEN GSTPercentage = 5 THEN GSTAmount
-                ELSE 0
-            END) AS GA5,
-            SUM(CASE
-                WHEN GSTPercentage = 12 THEN GSTAmount
-                ELSE 0
-            END) AS GA12,
-            SUM(CASE
-                WHEN GSTPercentage = 18 THEN GSTAmount
-                ELSE 0
-            END) AS GA18
-    FROM
-        TC_InvoiceItems
-    GROUP BY Invoice_id) b ON a.id = b.Invoice_id)
-
-    UNION
-    SELECT
-        ReceiptDate InvoiceDate,
-            FullReceiptNumber BillNo,
-            M_Bank.Name AS BankName,
-            MC_PartyBanks.BranchName AS BranchName,
-            ChequeDate ChequeDate,
-            DocumentNo DocumentNo,
-            M_GeneralMaster.Name AS ReceiptMode,
-            0 AS InvoiceAmount,
-            0 as TotalTCS,
-            CASE
-                WHEN ReceiptMode_id = 31 THEN 0
-                ELSE AmountPaid
-            END ReceiptAmt,
-            CASE
-                WHEN ReceiptMode_id = 31 THEN AmountPaid
-                ELSE 0
-            END CashReceiptAmt,
-            2 AS Flag,
-            0 AS DebitNote,
-            0 AS CreditNote,
-            0 AS BasicAmount,
-            0 AS BA5,
-            0 AS BA12,
-            0 AS BA18,
-            0 AS GA5,
-            0 AS GA12,
-            0 AS GA18,
-            Description
-    FROM
-        T_Receipts
-    LEFT JOIN MC_PartyBanks ON MC_PartyBanks.id = T_Receipts.Bank_id
-    LEFT JOIN M_Bank ON M_Bank.id = MC_PartyBanks.Bank_id
-    INNER JOIN M_GeneralMaster ON M_GeneralMaster.id = T_Receipts.ReceiptMode_id
-    WHERE
-        ReceiptDate BETWEEN %s AND %s
+        UNION
+            SELECT ReceiptDate InvoiceDate,FullReceiptNumber BillNo,M_Bank.Name AS BankName,MC_PartyBanks.BranchName AS BranchName,
+            ChequeDate ChequeDate,DocumentNo DocumentNo,M_GeneralMaster.Name AS ReceiptMode,0 AS InvoiceAmount,0 as TotalTCS,
+            CASE WHEN ReceiptMode_id = 31 THEN 0 ELSE AmountPaid END ReceiptAmt,
+            CASE WHEN ReceiptMode_id = 31 THEN AmountPaid ELSE 0 END CashReceiptAmt,
+            2 AS Flag,0 AS DebitNote,0 AS CreditNote,0 AS BasicAmount,0 AS BA5,0 AS BA12,0 AS BA18,0 AS GA5,0 AS GA12,
+            0 AS GA18,Description
+            FROM T_Receipts
+            LEFT JOIN MC_PartyBanks ON MC_PartyBanks.id = T_Receipts.Bank_id
+            LEFT JOIN M_Bank ON M_Bank.id = MC_PartyBanks.Bank_id
+            INNER JOIN M_GeneralMaster ON M_GeneralMaster.id = T_Receipts.ReceiptMode_id
+            WHERE ReceiptDate BETWEEN %s AND %s
             AND T_Receipts.Party_id = %s
             AND T_Receipts.Customer_id = %s
 
-            UNION
-            SELECT
-        CRDRNoteDate InvoiceDate,
-            FullNoteNumber BillNo,
-            "" AS BankName,
-            "" AS BranchName,
-            "" AS ChequeDate,
-            "" AS DocumentNo,
-            "" AS ReceiptMode,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN T_CreditDebitNotes.GrandTotal
-                ELSE 0
-            END) AS InvoiceAmount,
+        UNION
+            SELECT CRDRNoteDate InvoiceDate,FullNoteNumber BillNo,"" AS BankName,"" AS BranchName,"" AS ChequeDate,
+            "" AS DocumentNo,"" AS ReceiptMode,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN T_CreditDebitNotes.GrandTotal ELSE 0 END) AS InvoiceAmount,
             0 AS TotalTCS,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 0
-                ELSE T_CreditDebitNotes.GrandTotal
-            END) ReceiptAmt,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 0 ELSE T_CreditDebitNotes.GrandTotal END) ReceiptAmt,
             0 AS CashReceiptAmt,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 3
-                ELSE 4
-            END) AS Flag,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38  OR T_CreditDebitNotes.NoteType_id =40 THEN T_CreditDebitNotes.GrandTotal
-                ELSE 0
-            END) AS DebitNote,
-            (CASE
-                WHEN T_CreditDebitNotes.NoteType_id = 38 OR T_CreditDebitNotes.NoteType_id =40 THEN 0
-                ELSE T_CreditDebitNotes.GrandTotal
-            END) CreditNote,
-            0 AS BasicAmount,
-            0 AS BA5,
-            0 AS BA12,
-            0 AS BA18,
-            0 AS GA5,
-            0 AS GA12,
-            0 AS GA18,
-            "" AS Description
-    FROM
-        T_CreditDebitNotes
-    WHERE
-        T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
-            AND Party_id = %s
-            AND Customer_id = %s and IsDeleted=0) q
-ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer])
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 or T_CreditDebitNotes.NoteType_id = 40 THEN 3 ELSE 4 END) AS Flag,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38  OR T_CreditDebitNotes.NoteType_id =40 THEN T_CreditDebitNotes.GrandTotal ELSE 0 END) AS DebitNote,
+            (CASE WHEN T_CreditDebitNotes.NoteType_id = 38 OR T_CreditDebitNotes.NoteType_id =40 THEN 0 ELSE T_CreditDebitNotes.GrandTotal END) CreditNote,
+            0 AS BasicAmount,0 AS BA5, 0 AS BA12, 0 AS BA18, 0 AS GA5, 0 AS GA12, 0 AS GA18, "" AS Description
+            FROM T_CreditDebitNotes
+            WHERE
+             T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND Party_id = %s
+            AND Customer_id = %s and IsDeleted=0
+
+        UNION
+            SELECT Date InvoiceDate,"" BillNo,"" AS BankName,"" AS BranchName,"" AS ChequeDate,
+            "" AS DocumentNo,"" AS ReceiptMode,
+            OpeningBalanceAmount AS InvoiceAmount,0 AS TotalTCS,
+            0 AS ReceiptAmt,0 AS CashReceiptAmt,
+            0 AS Flag,
+            0 AS DebitNote,
+            0 AS CreditNote,
+            0 AS BasicAmount,0 AS BA5, 0 AS BA12, 0 AS BA18, 0 AS GA5, 0 AS GA12, 0 AS GA18, "OpeningBalance" AS Description
+            FROM MC_PartySubPartyOpeningBalance
+            WHERE
+             MC_PartySubPartyOpeningBalance.Date BETWEEN %s AND %s AND Party_id = %s
+            AND SubParty_id = %s   
+
+    ) q
+            ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer, FromDate, ToDate, Party, Customer,FromDate, ToDate, Party, Customer])
 
                 if not query:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'Report Not Found', 206, 0)
@@ -233,8 +119,7 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                     date_format = "%Y-%m-%d"
 
                     # Convert the string to a date object
-                    date_object = datetime.strptime(
-                        FromDate, date_format).date()
+                    date_object = datetime.strptime(FromDate, date_format).date()
                     previous_date = date_object - timedelta(days=1)
                     Opening = GetOpeningBalance(Party, Customer, previous_date)
                     Closing = GetOpeningBalance(Party, Customer, ToDate)
@@ -251,8 +136,12 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                     TotalDebitNote = 0
                     TotalTCS = 0
                     for a in PartyLedgerSerializedata:
+                        Openingba=Opening
+                        if a['Flag'] == 0 :
+                            temp=0
+                            Openingba= 0
                         if temp == 0:
-                            temp = (float(Opening) + float(a['InvoiceAmount'])) - (
+                            temp = (float(Openingba) + float(a['InvoiceAmount'])) - (
                                 float(a['ReceiptAmt'])+float(a['CashReceiptAmt']))
                         else:
                             temp = (temp + float(a['InvoiceAmount'])) - \
@@ -338,18 +227,17 @@ ORDER BY InvoiceDate , Flag , BillNo ''', [FromDate, ToDate, Party, Customer, Fr
                     FromDate)+','+'To:'+str(ToDate), 206, 0, FromDate, ToDate, Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'PartyLedgerReport'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew( request, Orderdata, 0, 'PartyLedgerReport'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class GenericSaleView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Genericdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Genericdata = JSONParser().parse(request)
                 FromDate = Genericdata['FromDate']
                 ToDate = Genericdata['ToDate']
                 Party = Genericdata['Party']
@@ -399,25 +287,23 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
                     log_entry = create_transaction_logNew(request, Genericdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 207, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GenericSaleSerializer})
                 else:
-                    log_entry = create_transaction_logNew(
-                        request, Genericdata, 0, 'Report Not available', 207, 0)
+                    log_entry = create_transaction_logNew(request, Genericdata, 0, 'Report Not available', 207, 0,  FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'GenericSale:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Genericdata, 0, 'GenericSale:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class RetailerDataView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Retailerdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Retailerdata = JSONParser().parse(request)
                 Party = Retailerdata['Party']
                 if(Party == 0):
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, MC_PartySubParty.CreatedOn AS PartyCreation, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -434,7 +320,7 @@ JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
 JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 ''')
                 else:
-                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+                    query = M_Parties.objects.raw('''SELECT M_Parties.id, Supplier.Name SupplierName,M_Parties.Name, M_Parties.isActive, MC_PartySubParty.CreatedOn AS PartyCreation, M_Parties.Email, M_Parties.MobileNo, M_Parties.AlternateContactNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_Parties.GSTIN, M_Parties.PAN,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Routes.Name RouteName,C_Companies.Name CompanyName,M_PartyType.Name PartyTypeName, M_PriceList.Name PriceListName, M_Parties.Latitude, M_Parties.Longitude,M_Parties.SAPPartyCode,M_Routes.id Routeid,Supplier.id Supplierid,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty
 JOIN M_Parties Supplier  ON Supplier.id= MC_PartySubParty.Party_id
 JOIN M_Parties  ON M_Parties.id= MC_PartySubParty.SubParty_id
@@ -455,6 +341,11 @@ WHERE MC_PartySubParty.Party_id=%s''', [Party])
                     RetailerExportData = list()
                     RetailerExportSerializer = RetailerDataExportSerializer(
                         query, many=True).data
+                    for retailer in RetailerExportSerializer:
+                        PartyDateTime =datetime.strptime(retailer['PartyCreation'], "%Y-%m-%d %H:%M:%S")
+                        PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
+                        retailer['PartyCreation'] = PartyCreation
+                        
                     RetailerExportData.append(
                         {"ReportExportSerializerDetails": RetailerExportSerializer})
                     log_entry = create_transaction_logNew(
@@ -465,9 +356,8 @@ WHERE MC_PartySubParty.Party_id=%s''', [Party])
                         request, Retailerdata, Party, 'Report Not available ', 208, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'RetailerData:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Retailerdata, 0, 'RetailerData:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 # ================================Stock Processing ================================
 
@@ -476,9 +366,9 @@ class StockProcessingView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Orderdata = JSONParser().parse(request)
                 start_date_str = Orderdata['FromDate']
                 end_date_str = Orderdata['ToDate']
                 Party = Orderdata['Party']
@@ -572,14 +462,12 @@ OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0
                                                     "ClosingBalance"], ActualStock=0, StockAdjustment=a["StockAdjustment"], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
-                log_entry = create_transaction_logNew(
-                    request, Orderdata, Party, '', 209, 0, start_date_str, end_date_str, 0)
+                log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Process Successfully', 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'StockProcessing:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew( request, Orderdata, 0, 'StockProcessing:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 # ======================================STOCK REPORT=================================
 
@@ -588,10 +476,9 @@ class StockReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-
-                Orderdata = JSONParser().parse(request)
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
@@ -654,17 +541,14 @@ FROM
                 })
 
                 if StockreportQuery:
-                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(
-                        FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
-                    log_entry = create_transaction_logNew(
-                        request, Orderdata, Party, 'Report Not Found', 210, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'Recort Not Found', 210, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'StockReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
 # select I.Item_id,I.ItemName,InvoiveQuantity,InvoiceMRP,GRNQuantity,GRNMRP,StockQuantity,StockMRP,SalesReturnQuantity,SalesReturnMRP,PurchesReturnQuantity,PurchesReturnMRP from
@@ -749,9 +633,9 @@ class PurchaseGSTReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Customer = Reportdata['Party']
@@ -788,22 +672,20 @@ class PurchaseGSTReportView(CreateAPIView):
                             FromDate)+'To:'+str(ToDate), 211, 0, FromDate, ToDate, 0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PurchaseGSTData[0]})
                     else:
-                        log_entry = create_transaction_logNew(
-                            request, Reportdata, Customer, '', 211, 0)
+                        log_entry = create_transaction_logNew(request, Reportdata, Customer, '', 211, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'PurchaseGSTReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'PurchaseGSTReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class InvoiceDateExportReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
@@ -861,7 +743,6 @@ class InvoiceDateExportReportView(CreateAPIView):
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Party])      
                 else: 
                     Invoicequery= '''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo, M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
-
     FROM TC_InvoiceItems
     JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
     join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
@@ -969,22 +850,22 @@ class InvoiceDateExportReportView(CreateAPIView):
                         request, Reportdata, 0, 'Report Not available', 212, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'InvoiceDateExportReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'InvoiceDateExportReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DeletedInvoiceDateExportReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
-                query = T_DeletedInvoices.objects.raw('''SELECT TC_DeletedInvoiceItems.id,T_DeletedInvoices.Party AS SupplierID,A.Name SupplierName,T_DeletedInvoices.FullInvoiceNumber As InvoiceNumber,T_DeletedInvoices.InvoiceDate,T_DeletedInvoices.Customer As CustomerID,B.Name CustomerName,TC_DeletedInvoiceItems.Item AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_DeletedInvoiceItems.MRPValue AS MRP,TC_DeletedInvoiceItems.QtyInNo,TC_DeletedInvoiceItems.QtyInKg,TC_DeletedInvoiceItems.QtyInBox,TC_DeletedInvoiceItems.Rate AS BasicRate,(TC_DeletedInvoiceItems.Rate +((TC_DeletedInvoiceItems.Rate * TC_DeletedInvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_DeletedInvoiceItems.DiscountType, TC_DeletedInvoiceItems.Discount,TC_DeletedInvoiceItems.DiscountAmount,TC_DeletedInvoiceItems.BasicAmount As TaxableValue,TC_DeletedInvoiceItems.CGST,TC_DeletedInvoiceItems.CGSTPercentage,TC_DeletedInvoiceItems.SGST,TC_DeletedInvoiceItems.SGSTPercentage,TC_DeletedInvoiceItems.IGST,TC_DeletedInvoiceItems.IGSTPercentage,TC_DeletedInvoiceItems.GSTPercentage,TC_DeletedInvoiceItems.GSTAmount,TC_DeletedInvoiceItems.Amount AS TotalValue,T_DeletedInvoices.TCSAmount,T_DeletedInvoices.RoundOffAmount,T_DeletedInvoices.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_DeletedInvoiceUploads.Irn, TC_DeletedInvoiceUploads.AckNo,TC_DeletedInvoiceUploads.EwayBillNo
+                query = T_DeletedInvoices.objects.raw('''SELECT TC_DeletedInvoiceItems.id,T_DeletedInvoices.Party AS SupplierID,A.Name SupplierName,T_DeletedInvoices.FullInvoiceNumber As InvoiceNumber,T_DeletedInvoices.InvoiceDate,T_DeletedInvoices.Customer As CustomerID,B.Name CustomerName,TC_DeletedInvoiceItems.Item AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_DeletedInvoiceItems.MRPValue AS MRP,TC_DeletedInvoiceItems.QtyInNo,TC_DeletedInvoiceItems.QtyInKg,TC_DeletedInvoiceItems.QtyInBox,TC_DeletedInvoiceItems.Rate AS BasicRate,(TC_DeletedInvoiceItems.Rate +((TC_DeletedInvoiceItems.Rate * TC_DeletedInvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_DeletedInvoiceItems.DiscountType, TC_DeletedInvoiceItems.Discount,TC_DeletedInvoiceItems.DiscountAmount,TC_DeletedInvoiceItems.BasicAmount As TaxableValue,TC_DeletedInvoiceItems.CGST,TC_DeletedInvoiceItems.CGSTPercentage,TC_DeletedInvoiceItems.SGST,TC_DeletedInvoiceItems.SGSTPercentage,TC_DeletedInvoiceItems.IGST,TC_DeletedInvoiceItems.IGSTPercentage,TC_DeletedInvoiceItems.GSTPercentage,TC_DeletedInvoiceItems.GSTAmount,TC_DeletedInvoiceItems.Amount AS TotalValue,T_DeletedInvoices.TCSAmount,T_DeletedInvoices.RoundOffAmount,T_DeletedInvoices.GrandTotal,M_Routes.Name AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_DeletedInvoiceUploads.Irn, TC_DeletedInvoiceUploads.AckNo,TC_DeletedInvoiceUploads.EwayBillNo,
+ M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
 FROM TC_DeletedInvoiceItems
 JOIN T_DeletedInvoices ON T_DeletedInvoices.Invoice =TC_DeletedInvoiceItems.Invoice
 JOIN M_Parties A ON A.id= T_DeletedInvoices.Party
@@ -998,34 +879,35 @@ JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_DeletedInvoices.Customer AND MC_PartySubParty.Party_id=%s
 LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 LEFT JOIN TC_DeletedInvoiceUploads on TC_DeletedInvoiceUploads.Invoice= T_DeletedInvoices.id
+JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+
 WHERE T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s AND  T_DeletedInvoices.Party=%s ''', ([Party], [FromDate], [ToDate], [Party]))
 
                 if query:
                     DeletedInvoiceExportData = list()
-                    DeletedInvoiceExportSerializer = InvoiceDataExportSerializer(
-                        query, many=True).data
+                    DeletedInvoiceExportSerializer = InvoiceDataExportSerializer(query, many=True).data
                     DeletedInvoiceExportData.append(
                         {"DeletedInvoiceExportSerializerDetails": DeletedInvoiceExportSerializer})
                     log_entry = create_transaction_logNew(
                         request, Reportdata, Party, 'From:'+str(FromDate)+'To:'+str(ToDate), 213, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DeletedInvoiceExportData[0]})
                 else:
-                    log_entry = create_transaction_logNew(
-                        request, Reportdata, 0, 'Report Not available', 213, 0)
+                    log_entry = create_transaction_logNew(request, Reportdata, 0, 'Report Not available', 213, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'DeletedInvoiceDateExportReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'DeletedInvoiceDateExportReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class StockDamageReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        Damagedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Damagedata = JSONParser().parse(request)
                 FromDate = Damagedata['FromDate']
                 ToDate = Damagedata['ToDate']
                 PartyID = Damagedata['PartyID']
@@ -1053,16 +935,16 @@ class StockDamageReportView(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class ReturnReportDownloadView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
@@ -1081,18 +963,17 @@ class ReturnReportDownloadView(CreateAPIView):
                         request, Reportdata, 0, 'Report Not available', 214, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'ReturnReportDownload:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'ReturnReportDownload:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class MaterialRegisterDownloadView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
@@ -1183,18 +1064,17 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                         request, Reportdata, Party, 'Records Not available', 215, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'MaterialRegister:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'MaterialRegister:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class CreditDebitExportReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
@@ -1289,18 +1169,17 @@ WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.P
                         request, Reportdata, 0, 'Report Not available', 216, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'CreditDebitExportReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'CreditDebitExportReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class ReceiptDataExportReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
@@ -1339,9 +1218,8 @@ class ReceiptDataExportReportView(CreateAPIView):
                         request, Reportdata, Party, 'Report Not available', 217, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'ReceiptDataExportReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'ReceiptDataExportReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
 class OutStandingBalanceView(CreateAPIView):
@@ -1351,9 +1229,9 @@ class OutStandingBalanceView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Balance_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Balance_Data = JSONParser().parse(request)
                 Party = Balance_Data['PartyID']
                 Route = Balance_Data['RouteID']
                 ToDate = Balance_Data['Date']
@@ -1388,9 +1266,8 @@ LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id WHERE MC_PartySubP
                     request, Balance_Data, Party, 'Report Not Found', 218, 0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'OutStandingBalanceReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Balance_Data, 0, 'OutStandingBalanceReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class ManPowerReportView(CreateAPIView):
@@ -1439,12 +1316,14 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                     ManPowerList = list()
 
                     for a in ManPower_Serializer:
+                        PartyDateTime = datetime.strptime(a['PartyCreation'], "%Y-%m-%dT%H:%M:%S.%f")
+                        PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
                         ManPowerList.append({
                             "SAPCode": a['SAPCode'],
                             "FEParty_id": a['FEParty_id'],
                             "PartyName": a['PartyName'],
                             "PartyActive": a['PartyActive'],
-                            "PartyCreation":a['PartyCreation'],
+                            "PartyCreation":PartyCreation,
                             "PartyType": a['PartyType'],
                             "Email": a['Email'],
                             "PAN":a['PAN'],
@@ -1483,9 +1362,8 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                     request, ManPower_Serializer, 0, 'Report Not Found', 219, 0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'ManPowerReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'ManPowerReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class ProductAndMarginReportView(CreateAPIView):
@@ -1493,9 +1371,9 @@ class ProductAndMarginReportView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                data = JSONParser().parse(request)
                 today = date.today()
                 IsSCM = data['IsSCM']
                 PartyID = data['Party']
@@ -1514,7 +1392,7 @@ round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,round(GSTHsnCodeMaster(M_Item
 MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg, PIN.BaseUnitQuantity PcsInNo, ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  ,M_Items.BaseUnitID_id
  FROM M_Items
- join C_Companies on C_Companies.id=M_Items.Company_id
+ join C_Companies on C_Companies.id=M_Items.Company_id 
  left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 1
  left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
  left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
@@ -1523,8 +1401,8 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id and IsDeleted=0
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
- JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0"""
-                
+ JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0 """
+                # print(query.query)
                 if IsSCM == '0':
                     query += " "
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
@@ -1535,27 +1413,28 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
-                    query += " where "
-                    query += "M_Items.id in %s "
+                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += "  AND M_Items.id in %s "
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
                     if IsSCM == '0':
+                       
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
                 elif any(SubGroupID):
-                    query += " where "
-                    query += "M_Group.id in %s and MC_SubGroup.id in %s"
+                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += "  AND M_Group.id in %s and MC_SubGroup.id in %s"
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID,SubGroupID])
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID,SubGroupID])
                 elif any(GroupID):
-                    query += " where "
-                    query += "M_Group.id in %s "
-                    query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
+                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += "  AND M_Group.id in %s "
+                    query += "order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,GroupID])
                     else:
@@ -1564,7 +1443,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 
                 
-                # print(ItemQuery.query)
+                    # print(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1678,9 +1557,8 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                 log_entry = create_transaction_logNew(request, ItemsList, 0, "Report Not Available", 106, 0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Item Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(
-                request, 0, 0, 'ProductAndMarginReport:'+str(Exception(e)), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, data, 0, 'ProductAndMarginReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 #             SELECT M_Items.id FE2ItemID,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,'2023-12-05',3)HSNCode,C_Companies.Name Company,isActive,
@@ -1708,9 +1586,9 @@ class TCSAmountReportView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        TCSAmountData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                TCSAmountData = JSONParser().parse(request)
                 FromDate = TCSAmountData['FromDate']
                 ToDate = TCSAmountData['ToDate']
                 Party = TCSAmountData['Party']
@@ -1745,16 +1623,16 @@ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.TCSAmount > 0 AND 
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TSCAMountList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'TCSAmountReport:'+str(Exception),33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, TCSAmountData, 0,'TCSAmountReport:'+str(e),33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 class CxDDDiffReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     @transaction.atomic()
     def post(self, request):
+        Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Data = JSONParser().parse(request)
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']
                 Party = Data['Party']
@@ -1798,9 +1676,11 @@ where T_Invoices.InvoiceDate between %s and %s
                             "SumofDiff" : round(diff*row.Quantity,2),
                             "SupplierName" : row.SupplierName
                         })
+                        log_entry = create_transaction_logNew(request, Data, Party, '', 366, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceData})
                 else:
+                    log_entry = create_transaction_logNew(request, Data, 0, "Report Not Available", 366, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []})      
         except Exception as e:
-            
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Data, 0, 'CxDDDiffReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

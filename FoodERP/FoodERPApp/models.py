@@ -1,9 +1,11 @@
+import json
+from xml.dom import ValidationErr
 from django.db import models
 from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.db import connection
-
+from datetime import datetime 
 # from activity_log.models import UserMixin
 
 # Create your models here.
@@ -21,6 +23,19 @@ def CustomPrint(value):
     else:
        
         print()
+# def GetYear(TDate):
+#     date = datetime.strptime(TDate, "%Y-%m-%d").date()
+#     #initialize the current year
+#     year_of_date=date.year     
+#     #initialize the current financial year start date
+#     financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
+#     if date<financial_year_start_date:           
+#         fs=  str(financial_year_start_date.year-1)+'-04-01'            
+#         fe=  str(financial_year_start_date.year)+'-03-31'        
+#     else:
+#         fs= str(financial_year_start_date.year)+ '-04-01'           
+#         fe= str(financial_year_start_date.year+1)+'-03-31'     
+#     return fs,fe
 
 def DBNameFun(a):
                 
@@ -35,6 +50,7 @@ def DBNameFun(a):
 def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
  
+
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -772,7 +788,7 @@ class M_MRPMaster(models.Model):
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
 
     class Meta:
-        db_table = "M_MRPMaster"
+        db_table = "M_MRPMaster"      
 
 class M_MarginMaster(models.Model):
     CommonID = models.IntegerField(null=True,blank=True)
@@ -1013,6 +1029,7 @@ class  MC_PartySubParty(models.Model):
         
 class  MC_PartySubPartyOpeningBalance(models.Model):
     Year = models.CharField(max_length=50,blank=True, null=True)
+    Date = models.DateField()
     OpeningBalanceAmount = models.DecimalField(blank=True, null=True,max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField(blank=True, null=True)
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1140,9 +1157,11 @@ class TC_GRNReferences(models.Model):
     GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
     Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
     Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
-
     class Meta:
-        db_table = "TC_GRNReferences"              
+        db_table = "TC_GRNReferences"   
+        unique_together = [['Invoice']] 
+
+                  
         
         
 class M_BillOfMaterial(models.Model):
@@ -1657,6 +1676,7 @@ class T_CreditDebitNotes(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.DO_NOTHING,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
     IsDeleted = models.BooleanField(default=False)
+    ImportFromExcel = models.BooleanField(default=False)
  
     class Meta:
         db_table = "T_CreditDebitNotes"
@@ -1822,7 +1842,7 @@ class T_Stock(models.Model):
     IsSaleable= models.BooleanField(default=False)
     BatchCode = models.CharField(max_length=500,blank=True,null=True)
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
-    Difference = models.DecimalField(max_digits=20, decimal_places=2,blank=True,null=True)
+    Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
     class Meta:
         db_table="T_Stock"        
@@ -2204,7 +2224,7 @@ class T_ClaimTrackingEntry(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='ClaimTrackingParty', on_delete=models.PROTECT) 
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
-    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
+    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.DO_NOTHING,blank=True, null=True) 
     IsDeleted = models.BooleanField(default=False)
 
     
@@ -2271,9 +2291,16 @@ class T_TargetUploads(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='TargetUploadsParty',  on_delete=models.PROTECT )
     Item =  models.ForeignKey(M_Items, related_name='TargetUploadsItem', on_delete=models.PROTECT)
     TargetQuantity = models.DecimalField(max_digits=20, decimal_places=3)
+    TargetQuantityInBaseUnit = models.DecimalField(max_digits=20, decimal_places=3)
     SheetNo = models.IntegerField(default=False)
     CreatedBy = models.IntegerField(default=False)
     CreatedOn = models.DateTimeField(auto_now_add=True)
+    Unit = models.IntegerField(default=False)
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    Amount = models.DecimalField(max_digits=20, decimal_places=2)
+    QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
+    QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "T_TargetUploads"
@@ -2281,3 +2308,31 @@ class T_TargetUploads(models.Model):
 
 
 	
+class M_FinancialYearFirstTransactionLog(models.Model):
+    FinancialYear = models.CharField(max_length=500,null=True)
+    Party = models.IntegerField(default=False)
+    Flag =  models.BooleanField(default=False) 
+
+    class Meta:
+        db_table = "M_FinancialYearFirstTransactionLog"
+        
+        
+class M_RateMaster(models.Model):
+    
+    EffectiveDate = models.DateField()
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    CommonID = models.IntegerField(null=True,blank=True)
+    IsDeleted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Company = models.ForeignKey(C_Companies, related_name='RateCompany', on_delete=models.PROTECT)
+    # '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
+    # Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.PROTECT,null=True,blank=True)
+    Item = models.ForeignKey(M_Items, related_name='ItemRateDetails', on_delete=models.CASCADE)
+    # 'Customer means M_Parties ID'
+    # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
+
+    class Meta:
+        db_table = "M_RateMaster"        
