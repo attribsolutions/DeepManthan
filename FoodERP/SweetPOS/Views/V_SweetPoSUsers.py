@@ -115,7 +115,7 @@ class SweetPOSRolesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
     @transaction.atomic()
-    def post(self, request ):
+    def get(self, request ):
         try:
             with transaction.atomic():
                 role_data = M_SweetPOSRoles.objects.all()
@@ -127,4 +127,4 @@ class SweetPOSRolesView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
