@@ -2,7 +2,7 @@ import base64
 from ..models import *
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
-from rest_framework.generics import ListAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
@@ -112,25 +112,27 @@ class SweetPOSUsersSecondView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})  
 
 
-class SweetPOSRolesView(ListAPIView ):
+class SweetPOSRolesView(APIView ):
     permission_classes = (IsAuthenticated,)
-    queryset = M_SweetPOSRoles.objects.all()
-    serializer_class = RolesSerializer
+   
     
     @transaction.atomic()
     def get(self, request, *args, **kwargs ):
         try:
-            with transaction.atomic():
-                queryset = self.get_queryset()
-                serializer = self.get_serializer(queryset, many=True)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': serializer.data})
+            role_data = M_SweetPOSRoles.objects.all()
+            role_data_serializer = RolesSerializer(role_data, many=True).data
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': role_data_serializer})
+        except M_SweetPOSRoles.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Role Not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
                 # role_data = M_SweetPOSRoles.objects.all()
                 # role_data_serializer = RolesSerializer(role_data,many=True).data
                 # log_entry = create_transaction_logNew(request, role_data,0,'',377,0)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': role_data_serializer})
-        except  M_SweetPOSRoles.DoesNotExist:
+        # except  M_SweetPOSRoles.DoesNotExist:
             # log_entry = create_transaction_logNew(request,0,0,'Role Data Does Not Exist',377,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
-        except Exception as e:
+            # return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
+        # except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+            # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
