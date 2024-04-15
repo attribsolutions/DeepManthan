@@ -25,14 +25,14 @@ class CategoryTypeView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, CategoryType_serializer,0,'CategoryType Not available',300,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Category Type Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GETAllCategoryTypes:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllCategoryTypes:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
+        CategoryType_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                CategoryType_data = JSONParser().parse(request)
                 CategoryType_serializer = CategoryTypeSerializer(data=CategoryType_data)
             if CategoryType_serializer.is_valid():
                 CategoryType_serializer.save()
@@ -43,8 +43,8 @@ class CategoryTypeView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CategoryType_serializer.errors, 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'CategoryTypeSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,CategoryType_data, 0,'CategoryTypeSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 
 class CategoryTypeViewSecond(CreateAPIView):
@@ -64,14 +64,14 @@ class CategoryTypeViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request,'',0,'CategoryType Does Not Exist',302,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Category Type Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GETSingleCategoryType:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0, 0,'GETSingleCategoryType:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
     @transaction.atomic()
     def put(self, request, id=0):
+        CategoryTypedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                CategoryTypedata = JSONParser().parse(request)
                 CategoryTypedatadataByID = M_CategoryType.objects.get(id=id)
                 CategoryType_serializer = CategoryTypeSerializer(
                     CategoryTypedatadataByID, data=CategoryTypedata)
@@ -84,8 +84,8 @@ class CategoryTypeViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CategoryType_serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'CategoryTypeEdit:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,CategoryTypedata,0,'CategoryTypeEdit:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
     @transaction.atomic()
     def delete(self, request, id=0):
