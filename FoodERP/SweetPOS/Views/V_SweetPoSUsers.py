@@ -2,6 +2,7 @@ import base64
 from ..models import *
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
@@ -111,7 +112,7 @@ class SweetPOSUsersSecondView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})  
 
 
-class SweetPOSRolesView(CreateAPIView):
+class SweetPOSRolesView(RetrieveAPIView ):
     permission_classes = (IsAuthenticated,)
     
     @transaction.atomic()
