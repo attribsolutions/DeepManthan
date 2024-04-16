@@ -102,7 +102,7 @@ class M_PagesViewSecond(RetrieveAPIView):
     'UpdatedBy',
     'UpdatedOn'
 )
-                print(HPagesdata.query)
+                
                 if not HPagesdata:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:    
@@ -137,7 +137,7 @@ class M_PagesViewSecond(RetrieveAPIView):
 
                         
                         # MasterPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT MC_PageFieldMaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,MC_PageFieldMaster.ControlType_id,M_ControlTypeMaster.Name CName, FieldValidation_id,M_FieldValidations.Name FName,M_FieldValidations.RegularExpression,Alignment FROM MC_PageFieldMaster JOIN M_ControlTypeMaster on M_ControlTypeMaster.id=MC_PageFieldMaster.ControlType_id JOIN M_FieldValidations on M_FieldValidations.id=MC_PageFieldMaster.FieldValidation_id where MC_PageFieldMaster.Page_id=%s''', [bb])
-                        MasterPageFieldQuery = MC_PageFieldMaster.objects.filter(Page_id=id).select_related(
+                        MasterPageFieldQuery = MC_PageFieldMaster.objects.filter(Page_id=bb).select_related(
     'ControlType', 'FieldValidation'
 ).values(
     'id',
@@ -166,8 +166,8 @@ class M_PagesViewSecond(RetrieveAPIView):
                         MC_PageFieldMasterListData = list()
                         for c in MasterPageFieldQuery:
                             
-                            # FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
-                            # FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
+                            FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType__id'])
+                            FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
                            
                             MC_PageFieldMasterListData.append({
                                 
@@ -186,7 +186,7 @@ class M_PagesViewSecond(RetrieveAPIView):
                                 "RegularExpression":c['FieldValidation__RegularExpression'],
                                 "InValidMsg":c['InValidMsg'],
                                 "Alignment":c['Alignment'],
-                                # "FieldValidationlist":FieldValidations_Serializer
+                                "FieldValidationlist":FieldValidations_Serializer
                                 
                             })
                         
