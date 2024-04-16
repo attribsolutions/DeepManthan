@@ -6,6 +6,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Pages import *
 from ..models import M_Pages
+from django.db.models import OuterRef, Subquery
 
 
 class M_PageTypeView(CreateAPIView):
@@ -68,27 +69,63 @@ class M_PagesViewSecond(RetrieveAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,p.IsEditPopuporComponent,p.CountLabel,p.ShowCountLabel,RP.Name RelatedPageName,M_PageType.Name PageTypeName FROM M_Pages p join H_Modules m on p.Module_id= m.ID left join M_Pages RP on p.RelatedPageID=RP.id join M_PageType on M_PageType.id= p.pagetype where p.id= %s''', [id])
-                
+                # HPagesdata = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,p.IsEditPopuporComponent,p.CountLabel,p.ShowCountLabel,RP.Name RelatedPageName,M_PageType.Name PageTypeName 
+                # FROM M_Pages p 
+                # join H_Modules m on p.Module_id= m.ID 
+                # left join M_Pages RP on p.RelatedPageID=RP.id 
+                # join M_PageType on M_PageType.id= p.pagetype where p.id= %s''', [id])
+                subquery = M_PageType.objects.filter(id=OuterRef('PageType')).values('Name')[:1]
+                subquery1 = M_Pages.objects.filter(id=OuterRef('RelatedPageID')).values('Name')[:1]
+                HPagesdata = M_Pages.objects.select_related('Module').filter(id=id
+                ).annotate(PageTypeName=Subquery(subquery)).annotate(RelatedPageName=Subquery(subquery1)).values(
+    'id',
+    'Name',
+    'PageHeading',
+    'PageDescription',
+    'PageDescriptionDetails',
+    'isActive',
+    'DisplayIndex',
+    'Icon',
+    'ActualPagePath',
+    'Module__id',
+    'Module__Name',
+    'PageType',
+    'PageTypeName',
+    'RelatedPageID',
+    'RelatedPageName',
+    'IsDivisionRequired',
+    'IsEditPopuporComponent',
+    'CountLabel',
+    'ShowCountLabel',
+    'CreatedBy',
+    'CreatedOn',
+    'UpdatedBy',
+    'UpdatedOn'
+)
+                print(HPagesdata.query)
                 if not HPagesdata:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:    
                     PageListData = list()
-                    HPagesserialize_data = M_PagesSerializer(
-                        HPagesdata, many=True).data
-                    for a in HPagesserialize_data:
+                    # HPagesserialize_data = M_PagesSerializer(
+                    #     HPagesdata, many=True).data
+                    for a in HPagesdata:
                         # bb=MC_PagePageAccess.objects.filter(PageID=id)
-                        bb = MC_PagePageAccess.objects.raw('''SELECT MC_PagePageAccess.Access_id id,H_PageAccess.Name Name 
-FROM MC_PagePageAccess 
-join H_PageAccess on H_PageAccess.ID=MC_PagePageAccess.Access_id 
-where MC_PagePageAccess.Page_id=%s''', [id])
-                        MC_PagePageAccess_data = MC_PagePageAccessSerializer(
-                            bb, many=True).data
+#                         bb = MC_PagePageAccess.objects.raw('''SELECT MC_PagePageAccess.Access_id id,H_PageAccess.Name Name 
+# FROM MC_PagePageAccess 
+# join H_PageAccess on H_PageAccess.ID=MC_PagePageAccess.Access_id 
+# where MC_PagePageAccess.Page_id=%s''', [id])
+                        bb = MC_PagePageAccess.objects.filter(Page_id=id).select_related('Access').values(
+                                                'Access_id',
+                                                'Access__Name'
+                                            )
+                        # MC_PagePageAccess_data = MC_PagePageAccessSerializer(
+                        #     bb, many=True).data
                         PageAccessListData = list()
-                        for b in MC_PagePageAccess_data:
+                        for b in bb:
                             PageAccessListData.append({
-                                "AccessID": b['id'],
-                                "AccessName": b['Name']
+                                "AccessID": b['Access_id'],
+                                "AccessName": b['Access__Name']
                             })
                         # bb=id
                         aa=M_Pages.objects.filter(id=id).values('RelatedPageID')
@@ -99,14 +136,35 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                             bb= aa[0]['RelatedPageID']
 
                         
-                        MasterPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT MC_PageFieldMaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,MC_PageFieldMaster.ControlType_id,M_ControlTypeMaster.Name CName, FieldValidation_id,M_FieldValidations.Name FName,M_FieldValidations.RegularExpression,Alignment FROM MC_PageFieldMaster JOIN M_ControlTypeMaster on M_ControlTypeMaster.id=MC_PageFieldMaster.ControlType_id JOIN M_FieldValidations on M_FieldValidations.id=MC_PageFieldMaster.FieldValidation_id where MC_PageFieldMaster.Page_id=%s''', [bb])
+                        # MasterPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT MC_PageFieldMaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,MC_PageFieldMaster.ControlType_id,M_ControlTypeMaster.Name CName, FieldValidation_id,M_FieldValidations.Name FName,M_FieldValidations.RegularExpression,Alignment FROM MC_PageFieldMaster JOIN M_ControlTypeMaster on M_ControlTypeMaster.id=MC_PageFieldMaster.ControlType_id JOIN M_FieldValidations on M_FieldValidations.id=MC_PageFieldMaster.FieldValidation_id where MC_PageFieldMaster.Page_id=%s''', [bb])
+                        MasterPageFieldQuery = MC_PageFieldMaster.objects.filter(Page_id=id).select_related(
+    'ControlType', 'FieldValidation'
+).values(
+    'id',
+    'ControlID',
+    'FieldLabel',
+    'IsCompulsory',
+    'DefaultSort',
+    'ListPageSeq',
+    'ShowInListPage',
+    'ShowInDownload',
+    'DownloadDefaultSelect',
+    'InValidMsg',
+    'ControlType__id',
+    'ControlType__Name',
+    'FieldValidation__id',
+    'FieldValidation__Name',
+    'FieldValidation__RegularExpression',
+    'Alignment'
+)
+                        print(MasterPageFieldQuery.query)
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(PageFieldQuery.query)})
 
-                        MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
-                            MasterPageFieldQuery, many=True).data
+                        # MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
+                        #     MasterPageFieldQuery, many=True).data
                         
                         MC_PageFieldMasterListData = list()
-                        for c in MC_PageFieldMaster_data:
+                        for c in MasterPageFieldQuery:
                             
                             # FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
                             # FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
@@ -114,18 +172,18 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                             MC_PageFieldMasterListData.append({
                                 
                                 "ControlID":  c['ControlID'],
-                                "ControlType":  c['ControlType_id'],
-                                "ControlTypeName":c['CName'],
+                                "ControlType":  c['ControlType__id'],
+                                "ControlTypeName":c['ControlType__Name'],
                                 "FieldLabel": c['FieldLabel'],
                                 "IsCompulsory":c['IsCompulsory'],
                                 "DefaultSort":c['DefaultSort'],      
-                                "FieldValidation": c['FieldValidation_id'], 
-                                "FieldValidationName":c['FName'],      
+                                "FieldValidation": c['FieldValidation__id'], 
+                                "FieldValidationName":c['FieldValidation__Name'],      
                                 "ListPageSeq": c['ListPageSeq'],
                                 "ShowInListPage": c['ShowInListPage'],
                                 "ShowInDownload": c['ShowInDownload'],
                                 "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
-                                "RegularExpression":c['RegularExpression'],
+                                "RegularExpression":c['FieldValidation__RegularExpression'],
                                 "InValidMsg":c['InValidMsg'],
                                 "Alignment":c['Alignment'],
                                 # "FieldValidationlist":FieldValidations_Serializer
@@ -135,13 +193,33 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                         MC_PageFieldListData = list()
                         
                         if(a['PageType']== 2):
-                            ListPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT MC_PageFieldMaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,MC_PageFieldMaster.ControlType_id,M_ControlTypeMaster.Name CName, FieldValidation_id,M_FieldValidations.Name FName,M_FieldValidations.RegularExpression,Alignment FROM MC_PageFieldMaster JOIN M_ControlTypeMaster on M_ControlTypeMaster.id=MC_PageFieldMaster.ControlType_id JOIN M_FieldValidations on M_FieldValidations.id=MC_PageFieldMaster.FieldValidation_id where MC_PageFieldMaster.Page_id=%s''', [id])
-                           
-                            MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
-                                ListPageFieldQuery, many=True).data
+                            # ListPageFieldQuery = MC_PageFieldMaster.objects.raw('''SELECT MC_PageFieldMaster.id, ControlID, FieldLabel, IsCompulsory, DefaultSort, ListPageSeq, ShowInListPage, ShowInDownload, DownloadDefaultSelect,InValidMsg,MC_PageFieldMaster.ControlType_id,M_ControlTypeMaster.Name CName, FieldValidation_id,M_FieldValidations.Name FName,M_FieldValidations.RegularExpression,Alignment FROM MC_PageFieldMaster JOIN M_ControlTypeMaster on M_ControlTypeMaster.id=MC_PageFieldMaster.ControlType_id JOIN M_FieldValidations on M_FieldValidations.id=MC_PageFieldMaster.FieldValidation_id where MC_PageFieldMaster.Page_id=%s''', [id])
+                            ListPageFieldQuery = (
+    MC_PageFieldMaster.objects
+    .filter(Page_id=id)
+    .select_related('ControlType', 'FieldValidation')
+    .values(
+        'id',
+        'ControlID',
+        'FieldLabel',
+        'IsCompulsory',
+        'DefaultSort',
+        'ListPageSeq',
+        'ShowInListPage',
+        'ShowInDownload',
+        'DownloadDefaultSelect',
+        'InValidMsg',
+        'ControlType__Name',
+        'FieldValidation__Name',
+        'FieldValidation__RegularExpression',
+        'Alignment'
+    )
+)
+                            # MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
+                            #     ListPageFieldQuery, many=True).data
                             
                             
-                            for c in MC_PageFieldMaster_data:
+                            for c in ListPageFieldQuery:
                                 FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
                                 FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
                                 
@@ -174,8 +252,8 @@ where MC_PagePageAccess.Page_id=%s''', [id])
                             "PageHeading": a['PageHeading'],
                             "PageDescription": a['PageDescription'],
                             "PageDescriptionDetails": a['PageDescriptionDetails'],
-                            "Module": a['ModuleID'],
-                            "ModuleName": a['ModuleName'],
+                            "Module": a['Module__id'],
+                            "ModuleName": a['Module__Name'],
                             "isActive": a['isActive'],
                             "DisplayIndex": a['DisplayIndex'],
                             "Icon": a['Icon'],
