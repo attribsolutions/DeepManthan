@@ -90,10 +90,6 @@ class SweetPOSUsersSecondView(CreateAPIView):
                 with connection.cursor() as cursor:
                     cursor.execute(query, [id])
                     row = cursor.fetchone()
-                    
-                if row is None:
-                    log_entry = create_transaction_logNew(request, 0, 0, 'User data does not exist', 373, 0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User data not available', 'Data': []})
 
                 user_data = {
                     "id": row[0],
@@ -109,10 +105,10 @@ class SweetPOSUsersSecondView(CreateAPIView):
                     "UpdatedOn": row[10],
                     "RoleName": row[11],
                 }
-                log_entry = create_transaction_logNew(request, user_data, 0, '', 373, 0)
+                log_entry = create_transaction_logNew(request, user_data, 0, '', 374, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': user_data})
         except M_SweetPOSUser.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0, 0, 'User data does not exist', 373, 0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'User data not available', 374, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User data not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'GETUser:' + str(e), 33, 0)
