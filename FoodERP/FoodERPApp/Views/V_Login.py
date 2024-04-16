@@ -17,7 +17,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 import jwt
 from .V_CommFunction import create_transaction_logNew
-from django.db.models import Q,F
+from django.db.models import *
 
 
 # Create your views here.
@@ -424,11 +424,14 @@ class UserPartiesForLoginPage(CreateAPIView):
                                 PartyTypeID=F('Party__PartyType_id'),
                                 PartyType=F('Party__PartyType__Name'),
                                 UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty')
-                            )
+                            ).annotate(
+                                IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
+                                UploadSalesDatafromExcelPartyInt=Case(When(UploadSalesDatafromExcelParty=True, then=Value(1)),default=Value(0),output_field=IntegerField())
+    )
                             .values(
                                 'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee',
-                                'Party__SAPPartyCode', 'IsSCMPartyType', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                                'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelParty'
+                                'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
+                                'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt'
                             ))
                         
                 # UserID = request.user.id
@@ -451,13 +454,13 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "PartyName" : item['PartyName'],
                             "Employee_id" : id,
                             "SAPPartyCode" :item['Party__SAPPartyCode'],
-                            "IsSCMPartyType" :item['IsSCMPartyType'],
+                            "IsSCMPartyType" :item['IsSCMPartyTypeInt'],
                             "GSTIN":item['GSTIN'],
                             "FSSAINo": item['FSSAINo'],
                             "FSSAIExipry" :item['FSSAIExpiry'],
                             "PartyTypeID":item['PartyTypeID'],
                             "PartyType":item['PartyType'],
-                            "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelParty']
+                            "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt']
                         })
 
                     
