@@ -157,7 +157,7 @@ class M_PagesViewSecond(RetrieveAPIView):
     'FieldValidation__RegularExpression',
     'Alignment'
 )
-                        print(MasterPageFieldQuery.query)
+                        
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(PageFieldQuery.query)})
 
                         # MC_PageFieldMaster_data = MC_PageFieldMasterSerializerSecond(
@@ -209,7 +209,9 @@ class M_PagesViewSecond(RetrieveAPIView):
         'ShowInDownload',
         'DownloadDefaultSelect',
         'InValidMsg',
+        'ControlType__id',
         'ControlType__Name',
+        'FieldValidation__id',
         'FieldValidation__Name',
         'FieldValidation__RegularExpression',
         'Alignment'
@@ -220,24 +222,24 @@ class M_PagesViewSecond(RetrieveAPIView):
                             
                             
                             for c in ListPageFieldQuery:
-                                FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType_id'])
+                                FieldValidationsdata = M_FieldValidations.objects.filter(ControlType=c['ControlType__id'])
                                 FieldValidations_Serializer = FieldValidationsSerializer(FieldValidationsdata, many=True).data
                                 
                                 MC_PageFieldListData.append({
                                     
                                     "ControlID":  c['ControlID'],
-                                    "ControlType":  c['ControlType_id'],
-                                    "ControlTypeName":c['CName'],
+                                    "ControlType":  c['ControlType__id'],
+                                    "ControlTypeName":c['ControlType__Name'],
                                     "FieldLabel": c['FieldLabel'],
                                     "IsCompulsory":c['IsCompulsory'],
                                     "DefaultSort":c['DefaultSort'],      
-                                    "FieldValidation": c['FieldValidation_id'], 
-                                    "FieldValidationName":c['FName'],      
+                                    "FieldValidation": c['FieldValidation__id'], 
+                                    "FieldValidationName":c['FieldValidation__Name'],      
                                     "ListPageSeq": c['ListPageSeq'],
                                     "ShowInListPage": c['ShowInListPage'],
                                     "ShowInDownload": c['ShowInDownload'],
                                     "ShownloadDefaultSelect":c['DownloadDefaultSelect'],
-                                    "RegularExpression":c['RegularExpression'],
+                                    "RegularExpression":c['FieldValidation__RegularExpression'],
                                     "InValidMsg":c['InValidMsg'],
                                     "Alignment":c['Alignment'],
                                     "FieldValidationlist":FieldValidations_Serializer
