@@ -83,7 +83,7 @@ class SweetPOSUsersSecondView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                raw_query = """SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
+                raw_query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
                                 FROM sweetpos.M_SweetPOSUser SU
                                 JOIN sweetpos.M_SweetPOSRoles  ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
                                 WHERE SU.id = %s"""
@@ -117,6 +117,7 @@ class SweetPOSUsersSecondView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'GETUser:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
 
     @transaction.atomic()
     def put(self, request, id=0):
