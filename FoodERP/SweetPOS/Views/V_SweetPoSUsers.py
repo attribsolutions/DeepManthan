@@ -44,7 +44,7 @@ class SweetPOSUsersView(CreateAPIView):
             with transaction.atomic():
                 query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
                             FROM sweetpos.M_SweetPOSUser SU
-                            JOIN sweetpos.M_SweetPOSRoles  ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id"""
+                            JOIN sweetpos.M_SweetPOSRoles ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id"""
 
             with connection.cursor() as cursor:
                 cursor.execute(query)
@@ -83,12 +83,12 @@ class SweetPOSUsersSecondView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                raw_query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
-                                FROM sweetpos.M_SweetPOSUser SU
-                                JOIN sweetpos.M_SweetPOSRoles  ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
-                                WHERE SU.id = %s"""
+                query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
+                            FROM sweetpos.M_SweetPOSUser SU
+                            JOIN sweetpos.M_SweetPOSRoles  ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
+                            WHERE SU.id = %s"""
                 with connection.cursor() as cursor:
-                    cursor.execute(raw_query, [id])
+                    cursor.execute(query, [id])
                     row = cursor.fetchone()
                     
                 if row is None:
