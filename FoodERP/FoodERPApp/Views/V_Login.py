@@ -17,7 +17,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 import jwt
 from .V_CommFunction import create_transaction_logNew
-from django.db.models import Q
+from django.db.models import Q,F
+
 
 # Create your views here.
 
@@ -394,33 +395,76 @@ class UserPartiesForLoginPage(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
-    serializer_class = M_UserPartiesSerializer
+    # serializer_class = M_UserPartiesSerializer
 
     @transaction.atomic()
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_EmployeeParties.objects.raw(
-                    '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType,M_Parties.UploadSalesDatafromExcelParty
+                # query = MC_EmployeeParties.objects.raw(
+                #     '''SELECT  MC_UserRoles.id,MC_UserRoles.Party_id,MC_UserRoles.Role_id Role,M_Roles.Name AS RoleName,M_Parties.Name AS PartyName ,M_Users.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN,MC_PartyAddress.FSSAINo,MC_PartyAddress.FSSAIExipry,M_PartyType.id PartyTypeID,M_PartyType.Name PartyType,M_Parties.UploadSalesDatafromExcelParty
 
-                     FROM  MC_UserRoles
-                     JOIN M_Users on M_Users.id=MC_UserRoles.User_id
-                     left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
-                     left join MC_PartyAddress on MC_PartyAddress.Party_id=M_Parties.id and MC_PartyAddress.IsDefault=1
-                     left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
-                     Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
-                     WHERE M_Users.Employee_id=%s ''', [id])
+                #      FROM  MC_UserRoles
+                #      JOIN M_Users on M_Users.id=MC_UserRoles.User_id
+                #      left JOIN M_Parties on M_Parties.id=MC_UserRoles.Party_id
+                #      left join MC_PartyAddress on MC_PartyAddress.Party_id=M_Parties.id and MC_PartyAddress.IsDefault=1
+                #      left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
+                #      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
+                #      WHERE M_Users.Employee_id=%s ''', [id])
+                
+                query =  ( MC_UserRoles.objects.select_related('User', 'Party', 'Role')
+                            .filter(User__Employee_id=id)
+                            .annotate(
+                                RoleName=F('Role__Name'),
+                                PartyName=F('Party__Name'),
+                                IsSCMPartyType=F('Party__PartyType__IsSCM'),
+                                GSTIN=F('Party__GSTIN'),
+                                FSSAINo=F('Party__PartyAddress__FSSAINo'),
+                                FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
+                                PartyTypeID=F('Party__PartyType_id'),
+                                PartyType=F('Party__PartyType__Name'),
+                                UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty')
+                            )
+                            .values(
+                                'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee',
+                                'Party__SAPPartyCode', 'IsSCMPartyType', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
+                                'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelParty'
+                            ))
+                        
                 # UserID = request.user.id
                 # print(str(query.query))
                 if not query:
                     log_entry = create_transaction_logNew(request,0,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = self.serializer_class(
-                        query, many=True).data
+                    # M_UserParties_Serializer = self.serializer_class(
+                    #     query, many=True).data
+                    UserPartiesData = list()
+                    for item in query:
+                        
+                        UserPartiesData.append({
+
+                            "id" : item['id'],
+                            "Role" : item['Role_id'],
+                            "RoleName" : item['RoleName'],
+                            "Party_id" :item['Party_id'],
+                            "PartyName" : item['PartyName'],
+                            "Employee_id" : id,
+                            "SAPPartyCode" :item['Party__SAPPartyCode'],
+                            "IsSCMPartyType" :item['IsSCMPartyType'],
+                            "GSTIN":item['GSTIN'],
+                            "FSSAINo": item['FSSAINo'],
+                            "FSSAIExipry" :item['FSSAIExpiry'],
+                            "PartyTypeID":item['PartyTypeID'],
+                            "PartyType":item['PartyType'],
+                            "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelParty']
+                        })
+
                     
-                    log_entry = create_transaction_logNew(request,M_UserParties_Serializer,0 ,"PartyDropdownforloginpage",145,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
+                    
+                    
+                    log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserPartiesData})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0 ,'PartyDropdownforloginpage:'+str(e),34,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
