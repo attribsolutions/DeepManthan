@@ -161,13 +161,14 @@ class SweetPOSRolesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                role_data = M_SweetPOSRoles.objects.all()
+                role_data = M_SweetPOSRoles.objects.raw('''SELECT S.id, S.Name, S.CreatedBy, S.CreatedOn, S.UpdatedBy, S.UpdatedOn
+FROM sweetpos.m_sweetposroles S''')
                 role_data_serializer = RolesSerializer(role_data,many=True).data
-                # log_entry = create_transaction_logNew(request, role_data,0,'',377,0)
+                log_entry = create_transaction_logNew(request, role_data,0,'',377,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': role_data_serializer})
         except  M_SweetPOSRoles.DoesNotExist:
-            # log_entry = create_transaction_logNew(request,0,0,'Role Data Does Not Exist',377,0)
+            log_entry = create_transaction_logNew(request,0,0,'Role Data Does Not Exist',377,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})  
