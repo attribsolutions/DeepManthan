@@ -28,7 +28,7 @@ class SweetPOSUsersView(CreateAPIView):
                 if User_data_serializer .is_valid():
                     User_data_serializer .save()
                     log_entry = create_transaction_logNew(request, User_data,0,'',372,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Data Uploaded Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'User Data Save Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, User_data,0,'UserSave:'+str(User_data_serializer.errors),34,0)
                     transaction.set_rollback(True)
@@ -115,7 +115,7 @@ class SweetPOSRolesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
     @transaction.atomic()
-    def get(self, request ):
+    def get(self, request):
         try:
             with transaction.atomic():
                 role_data = M_SweetPOSRoles.objects.all()
@@ -127,4 +127,4 @@ class SweetPOSRolesView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})  
