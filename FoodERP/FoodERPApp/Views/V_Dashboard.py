@@ -24,10 +24,17 @@ class DashBoardView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = T_Invoices.objects.filter(Party_id = id, InvoiceDate = date.today()).count()
-                query1 = T_GRNs.objects.filter(Customer_id = id,GRNDate = date.today()).count()
-                query2 = T_Orders.objects.filter(Supplier_id = id, OrderDate = date.today()).count()
-                query3 = T_Orders.objects.filter(Supplier_id = id,MobileAppOrderFlag=1, OrderDate = date.today()).count()
+                # query = T_Invoices.objects.filter(Party_id = id, InvoiceDate = date.today()).count()
+                query = (T_Invoices.objects.filter(Party_id=id, InvoiceDate=date.today())
+                                .aggregate(count=Count('id')))['count']
+                # query1 = T_GRNs.objects.filter(Customer_id = id,GRNDate = date.today()).count()
+                # query2 = T_Orders.objects.filter(Supplier_id = id, OrderDate = date.today()).count()
+                # query3 = T_Orders.objects.filter(Supplier_id = id,MobileAppOrderFlag=1, OrderDate = date.today()).count()
+                query1 = T_GRNs.objects.filter(Customer_id = id,GRNDate = date.today()).aggregate(count=Count('id'))['count']
+                query2 = T_Orders.objects.filter(Supplier_id = id, OrderDate = date.today()).aggregate(count=Count('id'))['count']
+                query3 = T_Orders.objects.filter(Supplier_id = id,MobileAppOrderFlag=1, OrderDate = date.today()).aggregate(count=Count('id'))['count']
+
+                
                 Invoice_list = list() 
                 Invoice_list.append({
                         "OrderCount": query2,

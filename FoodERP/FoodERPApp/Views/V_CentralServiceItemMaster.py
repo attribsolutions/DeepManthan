@@ -25,13 +25,13 @@ class CentralServiceItemView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0,0,'Central service item save Data Not available',273,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Central service item save Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'GETAllServiceItems:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,'GETAllServiceItems:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
    
     def post(self, request):
+        ServiceItem_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ServiceItem_data = JSONParser().parse(request)
                 ServiceItem_Serializer = CentralServiceItemSerializer(data=ServiceItem_data)
                 if ServiceItem_Serializer.is_valid():
                     ServiceItem_Serializer.save()
@@ -42,8 +42,8 @@ class CentralServiceItemView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ServiceItem_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItemSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, ServiceItem_data,0,'CentralServiceItemSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 class CentralServiceItemViewSecond(CreateAPIView):
     
@@ -78,14 +78,14 @@ class CentralServiceItemViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request, ServiceItem_Serializer,0,'',275,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Central Service Item Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'GETSingleServiceItem:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,'GETSingleServiceItem:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
     @transaction.atomic()
     def put(self, request, id=0):
+        ServiceItem_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ServiceItem_data = JSONParser().parse(request)
                 ServiceItem_SerializerByID = M_CentralServiceItems.objects.get(id=id)
                 ServiceItem_serializer = CentralServiceItemSerializer(ServiceItem_SerializerByID, data=ServiceItem_data)
                 if ServiceItem_serializer.is_valid():
@@ -97,8 +97,8 @@ class CentralServiceItemViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ServiceItem_serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItemUpdated:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            log_entry = create_transaction_logNew(request, ServiceItem_data,0,'CentralServiceItemUpdated:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
         
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -122,9 +122,9 @@ class CentralServiceItemAssignFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        ServiceItemdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ServiceItemdata = JSONParser().parse(request)
                 PartyID=ServiceItemdata['PartyID'] 
                 CompanyID=ServiceItemdata['CompanyID']
                 ServiceItemquery= MC_CentralServiceItemAssign.objects.raw('''SELECT distinct M_CentralServiceItems.id,M_CentralServiceItems.Name,ifnull(MC_CentralServiceItemAssign.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,(CASE WHEN MC_CentralServiceItemAssign.Rate IS NOT NULL AND MC_CentralServiceItemAssign.Rate <> 0 THEN MC_CentralServiceItemAssign.Rate ELSE M_CentralServiceItems.Rate END )AS Rate FROM M_CentralServiceItems LEFT JOIN MC_CentralServiceItemAssign ON MC_CentralServiceItemAssign.CentralServiceItem_id=M_CentralServiceItems.id AND MC_CentralServiceItemAssign.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_CentralServiceItemAssign.Party_id where M_CentralServiceItems.Company_id =%s''',([PartyID],[CompanyID]))
@@ -144,8 +144,8 @@ class CentralServiceItemAssignFilterView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, ServiceItemdata,PartyID,'',278,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ServiceItemList})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'ListOfCentralServiceItemAssign:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            log_entry = create_transaction_logNew(request, ServiceItemdata,0,'ListOfCentralServiceItemAssign:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
         
         
 class CentralServiceItemAssignForParty(CreateAPIView):
@@ -154,9 +154,9 @@ class CentralServiceItemAssignForParty(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        PartyItems_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                PartyItems_data = JSONParser().parse(request)
                 PartyItems_serializer = MC_CentralServiceItemAssignSerializerSecond(data=PartyItems_data, many=True)
                 if PartyItems_serializer.is_valid():
                     id = PartyItems_serializer.data[0]['Party']
@@ -168,8 +168,8 @@ class CentralServiceItemAssignForParty(CreateAPIView):
                 log_entry = create_transaction_logNew(request, PartyItems_data,0,'CentralServiceItemAssignSave:'+str(PartyItems_serializer.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyItems_serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItemAssignSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            log_entry = create_transaction_logNew(request, PartyItems_data, 0,'CentralServiceItemAssignSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
         
 
 class CentralServiceItemViewThird(CreateAPIView):
@@ -179,9 +179,9 @@ class CentralServiceItemViewThird(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        PurchaseReturndata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                PurchaseReturndata = JSONParser().parse(request)
                 ItemID = PurchaseReturndata['ItemID']
                 BatchCode = PurchaseReturndata['BatchCode']
                 CustomerID =PurchaseReturndata['Customer']
@@ -247,6 +247,6 @@ class CentralServiceItemViewThird(CreateAPIView):
                 # log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',280,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, 0,0,'CentralServiceItem:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+            # log_entry = create_transaction_logNew(request,PurchaseReturndata,0,'CentralServiceItem:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
 

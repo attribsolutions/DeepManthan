@@ -21,8 +21,8 @@ urlpatterns = [
     
     #User
     url(r'SPOSUsers$', SweetPOSUsersView.as_view()),
-    url(r'SPOSUsers/([0-9]+)$', SweetPOSUsersSecondView.as_view()),
-    url(r'SPOSRoles$', SweetPOSRolesView.as_view()),
+    url(r'SPOSUsers/([0-9]+)$', SweetPOSUsersSecondView.as_view()),    
+    url(r'sposroleslist$', SweetPOSRolesView.as_view()),
 
     
     
