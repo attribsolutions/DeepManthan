@@ -16,9 +16,9 @@ class ChallanItemsView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request, id=0 ):
+        ChallanitemsData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ChallanitemsData = JSONParser().parse(request)
                 Company=ChallanitemsData['Company']
                 Query = MC_BillOfMaterialItems.objects.filter(BOM__IsVDCItem=1,BOM__Company=Company).select_related('BOM','Item').values('Item').distinct()
                 ItemList = list()
@@ -29,16 +29,16 @@ class ChallanItemsView(CreateAPIView):
                 Itemsdata = M_ItemsSerializer01(Itemsquery,many=True).data    
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':Itemsdata})      
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 class ChallanItemStockView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request, id=0 ):
+        ChallanItemData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ChallanItemData = JSONParser().parse(request)
                 Item = ChallanItemData['Item']
                 Party = ChallanItemData['Party']
                         
@@ -75,16 +75,17 @@ class ChallanItemStockView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': stockDatalist})           
         except Exception as e:
             
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+        
 class ChallanView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Challandata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Challandata = JSONParser().parse(request)
                 GRN = Challandata['GRN']
                 if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
@@ -217,9 +218,9 @@ class ChallanListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Challandata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Challandata = JSONParser().parse(request)
                 FromDate = Challandata['FromDate']
                 ToDate = Challandata['ToDate']
                 Customer = Challandata['Customer']
@@ -248,4 +249,4 @@ class ChallanListFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
