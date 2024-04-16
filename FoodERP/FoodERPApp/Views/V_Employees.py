@@ -366,12 +366,27 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
             with transaction.atomic():
                 query = MC_ManagementParties.objects.filter(
                     Employee=id).values('Party')
-                if query.exists():
-                    q2 = M_Parties.objects.filter(id__in=query)
-                    Parties_serializer = DivisionsSerializerSecond(
-                        q2, many=True).data
+                if query:
+                    # q2 = M_Parties.objects.filter(id__in=query)
+                    # Parties_serializer = DivisionsSerializerSecond(
+                    #     q2, many=True).data
+                    query =  ( M_Parties.objects
+                            .filter(id__in=query,PartyAddress__IsDefault=1)
+                            .annotate(
+                                Address=F('PartyAddress__Address'),
+                               PartyTypeName=F('PartyType_id__Name'),
+                                
+                            )
+                            .values(
+                                'id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
+                                'PartyTypeName'
+                            ))
+                    
+                    
+                    
                     Partylist = list()
-                    for a in Parties_serializer:
+                    for a in query:
+                        
                         Partylist.append({
                             'id':  a['id'],
                             'Name':  a['Name'],
@@ -380,7 +395,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             'Longitude' : a['Longitude'],
                             'MobileNo' :a['MobileNo'],
                             'Address' :a['Address'],
-                            'PartyType' :a['PartyType']['Name']
+                            'PartyType' :a['PartyTypeName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
