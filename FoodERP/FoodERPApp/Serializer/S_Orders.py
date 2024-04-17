@@ -318,6 +318,7 @@ class OrderEditserializer(serializers.Serializer):
     MRP_id=serializers.IntegerField() 
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    VRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     Unit_id=serializers.IntegerField() 
     UnitName=serializers.CharField(max_length=100)
     BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
