@@ -43,8 +43,8 @@ class SweetPOSUsersView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
-                            FROM sweetpos.M_SweetPOSUser SU
-                            JOIN sweetpos.M_SweetPOSRoles ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id"""
+                            FROM SweetPOS.M_SweetPOSUser SU
+                            JOIN SweetPOS.M_SweetPOSRoles ON SweetPOS.SU.RoleID = SweetPOS.M_SweetPOSRoles.id"""
 
             with connection.cursor() as cursor:
                 cursor.execute(query)
@@ -84,8 +84,8 @@ class SweetPOSUsersSecondView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
-                            FROM sweetpos.M_SweetPOSUser SU
-                            JOIN sweetpos.M_SweetPOSRoles  ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
+                            FROM SweetPOS.M_SweetPOSUser SU
+                            JOIN SweetPOS.M_SweetPOSRoles  ON SweetPOS.SU.RoleID = SweetPOS.M_SweetPOSRoles.id
                             WHERE SU.id = %s"""
                 with connection.cursor() as cursor:
                     cursor.execute(query, [id])
@@ -162,7 +162,7 @@ class SweetPOSRolesView(CreateAPIView):
         try:
             with transaction.atomic():
                 role_data = M_SweetPOSRoles.objects.raw('''SELECT S.id, S.Name, S.CreatedBy, S.CreatedOn, S.UpdatedBy, S.UpdatedOn
-FROM sweetpos.m_sweetposroles S''')
+FROM SweetPOS.M_SweetPOSRoles S''')
                 role_data_serializer = RolesSerializer(role_data,many=True).data
                 log_entry = create_transaction_logNew(request, role_data,0,'',377,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': role_data_serializer})
