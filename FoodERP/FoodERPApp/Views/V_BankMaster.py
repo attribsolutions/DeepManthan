@@ -121,7 +121,7 @@ class BankView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Bank_serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Bank_data,0,'BankSave:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'BankSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
     
     @transaction.atomic()
@@ -156,7 +156,7 @@ class BankView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Bank_serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Bankdata,0,'BankEdit:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'BankEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
     
 
