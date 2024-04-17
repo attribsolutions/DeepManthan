@@ -198,17 +198,22 @@ class OrderListFilterViewSecond(CreateAPIView):
 
                 #for log
                 if OrderType == 3:
-                    x = Customer
-                    if Supplier == '':
-                        z = 0
+                    
+                    if (Supplier == ''):
+                        supplier = 0
+                        customer=Customer
                     else:
-                        z = Supplier
+                        supplier = Supplier
+                        customer=0
                 else:
-                    x = Supplier
-                    if Customer == '':
-                        z = 0
+                    
+                    if (Customer == ''):
+                        customer = 0
+                        supplier=Supplier
                     else:
-                        z = Customer
+                        customer= Customer
+                        supplier=0
+                    
 
                 if(OrderType == 3):  # OrderType - 3 for GRN STP Showing Invoices for Making GRN
                     if(Supplier == ''):
@@ -391,7 +396,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                         "Percentage": Percentage,
 
                     })
-                log_entry = create_transaction_logNew(request, Orderdata, z,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,x)
+                log_entry = create_transaction_logNew(request, Orderdata, customer,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,supplier)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
             log_entry = create_transaction_logNew(request, Orderdata, z, "Order Not available",28,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
