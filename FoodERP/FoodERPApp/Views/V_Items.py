@@ -157,6 +157,7 @@ class M_ItemsFilterView(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
                             # "UnitDetails":UnitDetails
+                            "UnitDetails": UnitDropdown(a['id'], PartyID, 0),
                         })    
                         
                     log_entry = create_transaction_logNew(request, Logindata, x,'',102,0)

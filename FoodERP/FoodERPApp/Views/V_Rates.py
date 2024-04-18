@@ -49,10 +49,8 @@ class M_RatesView(CreateAPIView):
                 M_Ratesdata = JSONParser().parse(request)
                 
                 a=MaxValueMaster(M_RateMaster,'CommonID')
-                jsondata=a.GetMaxValue()  
-                print('jsondata',jsondata)         
-                additionaldata= list()
-                print(M_Ratesdata)
+                jsondata=a.GetMaxValue() 
+                additionaldata= list()                
                 for b in M_Ratesdata:                    
                     b.update({'CommonID': jsondata})                   
                     additionaldata.append(b)                
@@ -80,26 +78,38 @@ class GETRateDetails(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                EffectiveDate = request.data['EffectiveDate']
-                MRates=M_RateMaster.objects.raw(f''' SELECT id, GetTodaysDateRate(id,'{EffectiveDate}')MRates,Name FROM M_Items''')
-                
+                EffectiveDate = request.data['EffectiveDate'] 
+                CompanyID = request.data['CompanyID']            
+                MRates=M_RateMaster.objects.raw(f'''SELECT 1  id,ifnull(MAX(M_RateMaster.id),0) AS RateMasterID,
+                                                    M_Items.id AS ItemID,
+                                                    GetTodaysDateRate(M_Items.id, '{EffectiveDate}',2) AS MRates,
+                                                    MAX(M_Items.Name) AS Name 
+                                                    FROM M_Items LEFT JOIN  M_RateMaster ON M_RateMaster.Item_id = M_Items.id 
+                                                    JOIN  MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id   where M_Items.Company_id={CompanyID}                                                                                              
+                                                    GROUP BY  M_Items.id''')  
+                print(MRates.query)
+                           
                 if not MRates:
+                    
                     log_entry = create_transaction_logNew(request, EffectiveDate, 0, "Items Not available",367,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
+                    
                     current_date = datetime.now().date()                      
                     ItemList = []  
                               
-                    if MRates:   
+                    if MRates: 
+                        
                         for a in MRates:
                             ItemList.append({
-                            "id":a.id,
-                            "Item":a.id,
+                            "id":a.RateMasterID,
+                            "Item":a.ItemID,
                             "Name": a.Name,
                             "CurrentRate":a.MRates,
                             "CurrentDate":current_date,
                             "Rate": ""
                         })
+                            
                        
                     log_entry = create_transaction_logNew(request,ItemList, 0,'',367,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
@@ -116,7 +126,9 @@ class M_RatesViewSecond(CreateAPIView):
     def delete(self, request, id=0):
         try:
             with transaction.atomic():
+                
                 Ratedata = M_RateMaster.objects.filter(id=id).update(IsDeleted=1)
+                
                 # MRPdata.delete()
                 log_entry = create_transaction_logNew(request, {'RateID':id}, 0, 'RateID:'+str(id),368,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Deleted Successfully','DeleteID':id,'Data':[]})
