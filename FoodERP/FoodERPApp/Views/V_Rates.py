@@ -82,11 +82,13 @@ class GETRateDetails(CreateAPIView):
                 CompanyID = request.data['CompanyID']            
                 MRates=M_RateMaster.objects.raw(f'''SELECT 1  id,ifnull(MAX(M_RateMaster.id),0) AS RateMasterID,
                                                     M_Items.id AS ItemID,
-                                                    GetTodaysDateRate(M_Items.id, '{EffectiveDate}') AS MRates,
+                                                    GetTodaysDateRate(M_Items.id, '{EffectiveDate}',2) AS MRates,
                                                     MAX(M_Items.Name) AS Name 
                                                     FROM M_Items LEFT JOIN  M_RateMaster ON M_RateMaster.Item_id = M_Items.id 
                                                     JOIN  MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id   where M_Items.Company_id={CompanyID}                                                                                              
-                                                    GROUP BY  M_Items.id''')                
+                                                    GROUP BY  M_Items.id''')  
+                print(MRates.query)
+                           
                 if not MRates:
                     
                     log_entry = create_transaction_logNew(request, EffectiveDate, 0, "Items Not available",367,0)
