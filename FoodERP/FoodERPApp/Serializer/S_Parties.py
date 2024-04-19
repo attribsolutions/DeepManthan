@@ -110,7 +110,6 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         PartySubPartys=validated_data.pop('PartySubParty')
         cluster_id = validated_data.pop('Cluster', None)
         sub_cluster_id = validated_data.pop('SubCluster', None)
-        print(cluster_id,sub_cluster_id)
         
         PartyID= M_Parties.objects.create(**validated_data)
         
@@ -133,8 +132,8 @@ class M_PartiesSerializer(serializers.ModelSerializer):
 
 
         if cluster_id is not None and sub_cluster_id is not None:
-            cluster_instance = M_Cluster.objects.get(pk=cluster_id)
-            sub_cluster_instance = M_SubCluster.objects.get(pk=sub_cluster_id)
+            cluster_instance = M_Cluster.objects.get(id=cluster_id)
+            sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
             M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
         
         return PartyID
@@ -229,7 +228,8 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PriceList=PriceListSerializerSecond()
     PartyPrefix = PartyPrefixsSerializer(many=True)
     MCSubParty = PartySubPartySerializer3(many=True)
-
+    Cluster = serializers.SerializerMethodField()
+    SubCluster = serializers.SerializerMethodField()
 
     class Meta:
         model =  M_Parties
@@ -244,6 +244,18 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
         if not ret.get("Longitude", None):
             ret["Longitude"] = None    
         return ret    
+    
+    def get_Cluster(self, instance):
+        party_details = M_PartyDetails.objects.filter(Party=instance).first()
+        if party_details:
+            return party_details.Cluster.Name if party_details.Cluster else None
+        return None
+
+    def get_SubCluster(self, instance):
+        party_details = M_PartyDetails.objects.filter(Party=instance).first()
+        if party_details:
+            return party_details.SubCluster.Name if party_details.SubCluster else None
+        return None
 
 class M_PartiesSerializerThird(serializers.Serializer):
     
