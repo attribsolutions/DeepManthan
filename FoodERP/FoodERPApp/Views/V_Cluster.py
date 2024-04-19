@@ -305,8 +305,7 @@ class SubClusterViewsecond(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'SubClusterDeleted:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})   
-
-        
+       
 
 class GetSubClusterOnclusterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -316,13 +315,13 @@ class GetSubClusterOnclusterView(CreateAPIView):
             with transaction.atomic():
                 SubCluster_data = M_SubCluster.objects.filter(Cluster=id)
                 SubCluster_data_serializer = SubClusterSerializer(SubCluster_data,many=True).data
-                log_entry = create_transaction_logNew(request, SubCluster_data,0,'',339,0)
+                # log_entry = create_transaction_logNew(request, SubCluster_data,0,'',339,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SubCluster_data_serializer})
         except  M_SubCluster.DoesNotExist:
-            log_entry = create_transaction_logNew(request,0,0,'SubCluster Does Not Exist',339,0)
+            # log_entry = create_transaction_logNew(request,0,0,'SubCluster Does Not Exist',339,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'SubCluster Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GetSubClusterOncluster:'+str(e),33,0)
+            # log_entry = create_transaction_logNew(request, 0, 0,'GetSubClusterOncluster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})  
 
 
