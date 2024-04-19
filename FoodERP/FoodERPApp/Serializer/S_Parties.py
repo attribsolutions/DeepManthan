@@ -218,23 +218,34 @@ class PartySubPartySerializer3(serializers.ModelSerializer):
         model = MC_PartySubParty
         fields = ['Party','SubParty','Creditlimit','Route','Distance']
 
+class ClusterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Cluster
+        fields = ['id','Name']
+
+class SubClusterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_SubCluster
+        fields = ['id','Name']
+
 class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializerSecond(many=True)
     City=CitiesSerializerSecond()
     District= DistrictSerializerSecond()
     State= StateSerializerSecond()
     Company = CompanySerializerSecond()
+    Cluster= ClusterSerializer(read_only=True)
+    SubCluster=SubClusterSerializer(read_only=True)
     PartyType = PartyTypeSerializerSecond()
     PriceList=PriceListSerializerSecond()
     PartyPrefix = PartyPrefixsSerializer(many=True)
     MCSubParty = PartySubPartySerializer3(many=True)
-    Cluster = serializers.SerializerMethodField()
-    SubCluster = serializers.SerializerMethodField()
-
+    
+    
     class Meta:
         model =  M_Parties
         fields = '__all__'
-        
+    
     def to_representation(self, instance):
         # get representation from ModelSerializer
         ret = super(M_PartiesSerializerSecond, self).to_representation(instance)
@@ -243,19 +254,25 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
             ret["Latitude"] = None  
         if not ret.get("Longitude", None):
             ret["Longitude"] = None    
-        return ret    
-    
-    def get_Cluster(self, instance):
-        party_details = M_PartyDetails.objects.filter(Party=instance).first()
-        if party_details:
-            return party_details.Cluster.Name if party_details.Cluster else None
-        return None
 
-    def get_SubCluster(self, instance):
-        party_details = M_PartyDetails.objects.filter(Party=instance).first()
+        party_details = M_PartyDetails.objects.filter(Party=instance.id).first()
+
         if party_details:
-            return party_details.SubCluster.Name if party_details.SubCluster else None
-        return None
+            cluster = party_details.Cluster
+            subcluster = party_details.SubCluster
+
+            if cluster:
+                ret['Cluster'] = ClusterSerializer(cluster).data
+            else:
+                ret['Cluster'] = {'id': None, 'Name': None}
+
+            if subcluster:
+                ret['SubCluster'] = SubClusterSerializer(subcluster).data
+            else:
+                ret['SubCluster'] = {'id': None, 'Name': None}
+
+        return ret    
+
 
 class M_PartiesSerializerThird(serializers.Serializer):
     
