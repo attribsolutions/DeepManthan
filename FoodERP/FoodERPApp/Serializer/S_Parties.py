@@ -96,8 +96,8 @@ class M_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializer(many=True)
     PartyPrefix = PartyPrefixsSerializer(many=True)
     PartySubParty = MC_PartySubPartySerializer(many=True)
-    Cluster = serializers.IntegerField(read_only=True)  
-    SubCluster = serializers.IntegerField(read_only=True)
+    Cluster = serializers.IntegerField(write_only=True)  
+    SubCluster = serializers.IntegerField(write_only=True)
 
     class Meta:
         model =  M_Parties
@@ -110,6 +110,7 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         PartySubPartys=validated_data.pop('PartySubParty')
         cluster_id = validated_data.pop('Cluster', None)
         sub_cluster_id = validated_data.pop('SubCluster', None)
+        print(cluster_id,sub_cluster_id)
         
         PartyID= M_Parties.objects.create(**validated_data)
         
@@ -132,8 +133,10 @@ class M_PartiesSerializer(serializers.ModelSerializer):
 
 
         if cluster_id is not None and sub_cluster_id is not None:
-            M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_id, SubCluster=sub_cluster_id)      
-    
+            cluster_instance = M_Cluster.objects.get(pk=cluster_id)
+            sub_cluster_instance = M_SubCluster.objects.get(pk=sub_cluster_id)
+            M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
+        
         return PartyID
     
             
