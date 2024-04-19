@@ -666,7 +666,7 @@ class EditOrderView(CreateAPIView):
                 # Is Not Retailer but is SSDD Order
                
                 if (q2[0]['IsRetailer'] == 0 ):
-                    PartyItem = Customer                   
+                    PartyItem = Customer                                       
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
@@ -680,7 +680,7 @@ a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a
 ,
 (select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
-group by Item_id)StockQuantity , Round(GetTodaysDateRate(a.Item_id, %s),2) AS VRate                  
+group by Item_id)StockQuantity , Round(GetTodaysDateRate(a.Item_id, %s,2),2) AS VRate                  
                 from
 (select * from (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
 WHERE `MC_PartyItems`.`Party_id` = %s AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) and 
@@ -705,7 +705,7 @@ left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 
 Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[PartyItem], [Party],[PartyItem], [OrderID]))
-                    
+                   
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
