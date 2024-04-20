@@ -216,7 +216,7 @@ class TargetVSAchievementView(CreateAPIView):
             Party = TargetData.get('Party')
             Employee = TargetData.get('Employee')            
              
-            if Employee > 0 and Party == 0:
+            if Employee > 0 and Party == '0':
                     EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                     for row in EmpPartys:
                         p=row.id
@@ -230,14 +230,14 @@ class TargetVSAchievementView(CreateAPIView):
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.Name PartyName ,
             Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
-            Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
+            Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CXQuantity,0),3)CXQuantity,
+            Round(IFNULL(CXAmount,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
             FROM
   
-  (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CRNoteQuantity,CRNoteAmount,Month,Year 
+  (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,Month,Year 
   from 
 (SELECT ItemID,Party Party_id from (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id =9)s ,
-(SELECT id Party, Name from M_Parties where id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE SubParty_id in ({Party}) 
-and  Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
+(SELECT id Party, Name from M_Parties where id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE   Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
 
 left join 
   
@@ -258,6 +258,13 @@ JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebi
 WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
 on I.ItemID = C.Item_id and I.Party_id = C.Customer_id 
 
+left join
+(select Party_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)CXQuantity,Sum(Amount)CxAmount from T_Invoices
+ join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
+ join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id = 15
+ where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,Party_id )D
+ on I.ItemID = D.Item_id and I.Party_id = D.Party_id
+
 WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
 Order By I.Party_id,ItemID)D
 
@@ -272,7 +279,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
   where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
             ''')
             TargetAchievementList = []   
-            
+            # print(query.query)
             if query:   
                 for a in query:
                     
@@ -284,6 +291,8 @@ join M_Parties  ON M_Parties.id=D.Party_id
                     "TargetAmountWithGST" : a.TargetAmount,
                     "AchQuantityInKG":a.AchQuantity,
                     "AchAmountWithGST":a.AchAmount,
+                    "CXQuantityInKG":a.CXQuantity,
+                    "CXAmountWithGST":a.CXAmount,
                     "CreditNoteQuantityInKG" : a.CRNoteQuantity,
                     "CreditNoteAmountWithGST" :a.CRNoteAmount,
                     "PartyID": a.PartyID,
@@ -304,4 +313,4 @@ join M_Parties  ON M_Parties.id=D.Party_id
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'TargetVSAchievement:'+str(e),33,0)
-            return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return Response({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
