@@ -216,7 +216,7 @@ class TargetVSAchievementView(CreateAPIView):
             Party = TargetData.get('Party')
             Employee = TargetData.get('Employee')            
              
-            if Employee > 0 and Party == '0':
+            if Employee > 0 and Party == 0:
                     EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                     for row in EmpPartys:
                         p=row.id
