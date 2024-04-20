@@ -313,4 +313,4 @@ join M_Parties  ON M_Parties.id=D.Party_id
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'TargetVSAchievement:'+str(e),33,0)
-            return Response({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
