@@ -2328,6 +2328,7 @@ class M_RateMaster(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='RateCompany', on_delete=models.PROTECT)
+    UnitID = models.IntegerField(default=False)
     # '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
     # Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.PROTECT,null=True,blank=True)
     Item = models.ForeignKey(M_Items, related_name='ItemRateDetails', on_delete=models.CASCADE)
