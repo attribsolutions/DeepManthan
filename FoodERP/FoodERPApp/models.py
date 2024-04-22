@@ -2335,4 +2335,26 @@ class M_RateMaster(models.Model):
     # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
 
     class Meta:
-        db_table = "M_RateMaster"        
+        db_table = "M_RateMaster"       
+        
+
+class M_SAPCustomerLedger(models.Model):
+    CompanyCode = models.CharField(max_length=500, null=True)
+    DocumentNo = models.IntegerField()
+    FiscalYear = models.CharField(max_length=500, null=True)
+    DocumentType = models.CharField(max_length=500, null=True)
+    PostingDate = models.DateField()
+    DocumentDesc = models.CharField(max_length=500, null=True)
+    CustomerCode = models.IntegerField()
+    CustomerName = models.CharField(max_length=500, null=True)
+    DebitCredit = models.CharField(max_length=500, null=True)
+    Amount = models.IntegerField()
+    ItemText = models.CharField(max_length=500, null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    FileDate = models.DateField()
+
+    class Meta:
+        db_table = "M_SAPCustomerLedger"
