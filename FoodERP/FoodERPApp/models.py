@@ -2339,15 +2339,15 @@ class M_RateMaster(models.Model):
         
 
 class M_SAPCustomerLedger(models.Model):
-    CompanyCode = models.CharField(max_length=500, null=True)
+    CompanyCode = models.CharField(max_length=50)
     DocumentNo = models.IntegerField()
-    FiscalYear = models.CharField(max_length=500, null=True)
-    DocumentType = models.CharField(max_length=500, null=True)
+    FiscalYear = models.CharField(max_length=50)
+    DocumentType = models.CharField(max_length=50)
     PostingDate = models.DateField()
-    DocumentDesc = models.CharField(max_length=500, null=True)
+    DocumentDesc = models.CharField(max_length=500)
     CustomerCode = models.IntegerField()
-    CustomerName = models.CharField(max_length=500, null=True)
-    DebitCredit = models.CharField(max_length=500, null=True)
+    CustomerName = models.CharField(max_length=200)
+    DebitCredit = models.CharField(max_length=200)
     Amount = models.IntegerField()
     ItemText = models.CharField(max_length=500, null=True)
     CreatedBy = models.IntegerField()
