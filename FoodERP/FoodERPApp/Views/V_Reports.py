@@ -380,12 +380,12 @@ class StockProcessingView(CreateAPIView):
                 current_date = start_date
                 while current_date <= end_date:
                     Date = current_date.strftime("%Y-%m-%d")
-                    # print(Date)
+                    # CustomPrint(Date)
                     # StockDeleteQuery  = O_DateWiseLiveStock.objects.raw('''DELETE FROM O_DateWiseLiveStock WHERE StockDate=%s AND Party_id=%s''',([Date],[Party]))
                     StockDeleteQuery = O_DateWiseLiveStock.objects.filter(
                         Party_id=Party, StockDate=Date)
                     StockDeleteQuery.delete()
-                    # print(StockDeleteQuery.query)
+                    # CustomPrint(StockDeleteQuery.query)
                     StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,
                     round(OpeningBalance,3) OpeningBalance,
                     round(GRN,3) GRN,
@@ -452,10 +452,10 @@ where
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 ''',
                                                                         ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
 
-                    # print(StockProcessQuery)
+                    # CustomPrint(StockProcessQuery)
                     serializer = StockProcessingReportSerializer(
                         StockProcessQuery, many=True).data
-                    # print(serializer)
+                    # CustomPrint(serializer)
                     for a in serializer:
 
                         stock = O_DateWiseLiveStock(StockDate=Date, OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a[
@@ -526,7 +526,7 @@ FROM
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
 		ON A.Item_id = D.Item_id ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                # print(StockreportQuery)
+                # CustomPrint(StockreportQuery)
                 serializer = StockReportSerializer(
                     StockreportQuery, many=True).data
 
@@ -664,7 +664,7 @@ class PurchaseGSTReportView(CreateAPIView):
                     if query:
                         PurchaseGSTSerializer = PurchaseGSTReportSerializer(
                             query, many=True).data
-                        # print(PurchaseGSTSerializer)
+                        # CustomPrint(PurchaseGSTSerializer)
                         PurchaseGSTData = list()
                         PurchaseGSTData.append(
                             {"PurchaseGSTDetails": PurchaseGSTSerializer})
@@ -951,7 +951,7 @@ class ReturnReportDownloadView(CreateAPIView):
                 Party_list = Party.split(",")
                 query = T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, T_PurchaseReturn.ReturnDate,B.Name CustomerName,D.Name CustomerType,C_Companies.Name CompanyName, M_Group.Name Product,MC_SubGroup.Name SubProduct, M_Items.id AS ERPItemCode, M_Items.SAPItemCode, M_Items.Name MaterialName,TC_PurchaseReturnItems.Quantity ReturnQtyNos,TC_PurchaseReturnItems.MRPValue,TC_PurchaseReturnItems.Rate, TC_PurchaseReturnItems.BasicAmount,TC_PurchaseReturnItems.GSTPercentage, TC_PurchaseReturnItems.GSTAmount, TC_PurchaseReturnItems.Amount,TC_PurchaseReturnItems.Discount,TC_PurchaseReturnItems.DiscountAmount,TC_PurchaseReturnItems.DiscountType,TC_PurchaseReturnItems.BatchDate, TC_PurchaseReturnItems.BatchCode,M_GeneralMaster.Name ReasonForReturn,TC_PurchaseReturnItems.ApprovedQuantity ApprovedQuantityInNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,M_Routes.Name RouteName,A.Name SupplierName,C.Name SupplierType,T_PurchaseReturn.FullReturnNumber,ApprovedByCompany,FinalApprovalDate,ApprovedRate,ApprovedBasicAmount,ApprovedGSTPercentage,ApprovedCGST,ApprovedIGST,ApprovedSGST,ApprovedCGSTPercentage,ApprovedSGSTPercentage,ApprovedIGSTPercentage,ApprovedGSTAmount,ApprovedAmount,ApprovedDiscountAmount FROM TC_PurchaseReturnItems JOIN T_PurchaseReturn ON T_PurchaseReturn.id =TC_PurchaseReturnItems.PurchaseReturn_id JOIN M_Parties A ON A.id= T_PurchaseReturn.Party_id JOIN M_Parties B ON B.id = T_PurchaseReturn.Customer_id JOIN M_PartyType C  ON C.id= A.PartyType_id JOIN M_PartyType D ON D.id= B.PartyType_id Left JOIN MC_PartyAddress ON MC_PartyAddress.Party_id=B.id AND MC_PartyAddress.IsDefault=1 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = B.id  Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id JOIN M_Items ON M_Items.id = TC_PurchaseReturnItems.Item_id LEFT JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id JOIN M_GeneralMaster ON M_GeneralMaster.id = TC_PurchaseReturnItems.ItemReason_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE T_PurchaseReturn.ReturnDate BETWEEN %s AND %s AND  (T_PurchaseReturn.Party_id IN %s OR T_PurchaseReturn.Customer_id IN %s)  Order by T_PurchaseReturn.ReturnDate,T_PurchaseReturn.Customer_id  ''', ([
                                                       FromDate, ToDate, Party_list,Party_list]))
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query:
                     ReturnSerializer = ReturnReportSerializer(
                         query, many=True).data
@@ -1026,7 +1026,7 @@ SELECT 5 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.
 JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
 JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Party_id
 WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s and ((TC_PurchaseReturnItems.ItemReason_id IN (SELECT DefaultValue FROM M_Settings WHERE id = 14) and T_PurchaseReturn.Mode =3) OR(T_PurchaseReturn.Mode =2)))a order by TransactionDate, CreatedOn ''', ([FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item, DefaultValues, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item]))
-                # print(query)
+                # CustomPrint(query)
                 if query:
                     MaterialRegisterList = MaterialRegisterSerializerView(
                         query, many=True).data
@@ -1101,7 +1101,7 @@ JOIN M_GeneralMaster C ON C.id = T_CreditDebitNotes.NoteType_id
 LEFT JOIN M_GeneralMaster D ON D.id = T_CreditDebitNotes.NoteReason_id
 
 WHERE T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.IsDeleted=0 AND NoteType_id IN %s ''', ([Party], [FromDate], [ToDate], [Party], NoteType_list))
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query:
                     InvoiceExportData = list()
                     InvoiceExportSerializer = CreditDebitDataExportSerializer(
@@ -1187,7 +1187,7 @@ class ReceiptDataExportReportView(CreateAPIView):
                 if(Party) > 0:
                     query = T_Receipts.objects.raw(
                         '''SELECT T_Receipts.id, T_Receipts.Party_id AS SupplierID, A.Name SupplierName, T_Receipts.FullReceiptNumber AS ReceiptNumber, T_Receipts.ReceiptDate, T_Receipts.Customer_id AS CustomerID,B.Name CustomerName,C.Name As ReceiptTypeName,D.Name As ReceiptModeName,E.Name As BankName,F.Name As DepositorBankName,AmountPaid,T_Receipts.Description,ChequeDate,DocumentNo FROM T_Receipts JOIN  M_GeneralMaster C ON C.id=T_Receipts.ReceiptType_id JOIN  M_GeneralMaster D ON D.id=T_Receipts.ReceiptMode_id LEFT JOIN M_Bank E ON E.id=T_Receipts.Bank_id LEFT JOIN M_Bank F ON F.id=T_Receipts.DepositorBank_id JOIN M_Parties A on A.id= T_Receipts.Party_id JOIN M_Parties B on B.id = T_Receipts.Customer_id WHERE T_Receipts.ReceiptDate BETWEEN %s AND %s AND T_Receipts.Party_id=%s Order By id desc''', ([FromDate], [ToDate], [Party]))
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query:
                     ReceiptExportData = list()
                     ReceiptExportSerializer = ReceiptDataExportSerializer(
@@ -1314,7 +1314,7 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                 if query:
                     ManPower_Serializer = ManPowerSerializer(query, many=True).data
                     ManPowerList = list()
-
+                    CustomPrint(query)
                     for a in ManPower_Serializer:
                         PartyDateTime = datetime.strptime(a['PartyCreation'], "%Y-%m-%dT%H:%M:%S.%f")
                         PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
@@ -1402,7 +1402,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0 """
-                # print(query.query)
+                # CustomPrint(query.query)
                 if IsSCM == '0':
                     query += " "
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
@@ -1443,7 +1443,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                 
                 
                 
-                    # print(ItemQuery.query)
+                    # CustomPrint(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1482,7 +1482,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                     pp=(i.CalculationPath).split(',')
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
                          
-                        # print(pricelistquery.query) 
+                        # CustomPrint(pricelistquery.query) 
 
 
                             
@@ -1660,7 +1660,7 @@ where T_Invoices.InvoiceDate between %s and %s
                 else:
                     RateDiffQuery= T_Invoices.objects.raw(query, [FromDate,ToDate])
                 
-                # print(RateDiffQuery.query)
+                # CustomPrint(RateDiffQuery.query)
                 if RateDiffQuery:
                     for row in RateDiffQuery:
                         diff=row.Rate-row.DDRate

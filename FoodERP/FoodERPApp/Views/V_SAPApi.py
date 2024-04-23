@@ -35,7 +35,7 @@ class SAPInvoiceView(CreateAPIView):
                 
                 aa = JSONParser().parse(request)
                 auth_header = request.META.get('HTTP_AUTHORIZATION')
-                # print(auth_header)
+                # CustomPrint(auth_header)
                 if auth_header:
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
@@ -68,21 +68,21 @@ class SAPInvoiceView(CreateAPIView):
                         
                             DuplicateCheck = T_Invoices.objects.filter(
                                 FullInvoiceNumber=aa["InvoiceNumber"])
-                            # print('aaaaaaa')
+                            # CustomPrint('aaaaaaa')
                             if(DuplicateCheck.count() == 0):
                                     
-                                # print('bbbbbb')   
+                                # CustomPrint('bbbbbb')   
                                 CustomerMapping = M_Parties.objects.filter(
                                     SAPPartyCode=aa['CustomerID']).values("id")
                                 PartyMapping = M_Parties.objects.filter(
                                     SAPPartyCode=aa['Plant']).values("id")
-                                # print('ccccccccc')
+                                # CustomPrint('ccccccccc')
                                 if CustomerMapping.exists():
                                     aa['Customer'] = CustomerMapping
                                 else:
                                     log_entry = create_transaction_logNew(request, aa, 0, 'SAPInvoiceID:'+aa["InvoiceNumber"],287,0)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Customer Data ", 'Data': []})
-                                # print('dddddddddd')
+                                # CustomPrint('dddddddddd')
                                 if PartyMapping.exists():
                                     aa['Party'] = PartyMapping
                                 else:
@@ -124,10 +124,10 @@ class SAPInvoiceView(CreateAPIView):
                                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Material Code", 'Data': []})
 
                                     if UnitMapping.exists():
-                                        # print('gggggggggg')
+                                        # CustomPrint('gggggggggg')
                                         MC_UnitID = MC_ItemUnits.objects.filter(
                                             UnitID=UnitMapping[0]["id"], Item=ItemMapping[0]["id"], IsDeleted=0).values("id")
-                                        # print(MC_UnitID)
+                                        # CustomPrint(MC_UnitID)
 
                                         if MC_UnitID.exists():
                                             bb['Unit'] = MC_UnitID
@@ -137,7 +137,7 @@ class SAPInvoiceView(CreateAPIView):
                                     else:
                                         log_entry = create_transaction_logNew(request, aa, 0, aa["InvoiceNumber"],291,0)
                                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Invalid Unit Code", 'Data': []})
-                                    # print('hhhhhhhhhhhh')
+                                    # CustomPrint('hhhhhhhhhhhh')
                                     BaseUnitQuantity = UnitwiseQuantityConversion(
                                         ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 0, 0).GetBaseUnitQuantity()
                                     QtyInNo = UnitwiseQuantityConversion(
@@ -146,7 +146,7 @@ class SAPInvoiceView(CreateAPIView):
                                         ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                     QtyInBox = UnitwiseQuantityConversion(
                                         ItemMapping[0]["id"], bb['Quantity'], MC_UnitID[0]["id"], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                                    # print('iiiiiiiiiii')
+                                    # CustomPrint('iiiiiiiiiii')
                                     InvoiceItems.append({
 
                                         "Item": ItemMapping[0]["id"],
@@ -183,7 +183,7 @@ class SAPInvoiceView(CreateAPIView):
                                         "QtyInBox": float(QtyInBox)
                                     })
 
-                                # print(InvoiceItems)    
+                                # CustomPrint(InvoiceItems)    
                                 InvoiceData = list()
                                 InvoiceData.append({
 
@@ -200,7 +200,7 @@ class SAPInvoiceView(CreateAPIView):
                                     "InvoiceItems": InvoiceItems
 
                                 })
-                                # print(InvoiceData[0])
+                                # CustomPrint(InvoiceData[0])
 
                                 Invoice_serializer = InvoiceSerializer(
                                     data=InvoiceData[0])
@@ -287,7 +287,7 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                 
                 jsonbody=json.dumps(payload[0])
                 
-                print(jsonbody)
+                # CustomPrint(jsonbody)
                 SAPURL, Token  = GetThirdPartyAPIs(26)
                 # url = "http://cbms4prdapp.chitalebandhu.net.in:8000/sap/opu/odata/sap/ZCBM_OD_SD_CSCMFOODERP_SRV/OrderHeaderSet"
                 url = SAPURL
@@ -307,14 +307,14 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                 json_data = json.dumps(data_dict)
                 # Convert JSON string to Python dictionary
                 data_dict = json.loads(json_data)
-                # print(data_dict)
+                # CustomPrint(data_dict)
                 a = str(data_dict)
                 
                 index = a.find('entry')
 
                 if index != -1:
                     OrderID = int(OrderNo)-5000000
-                    # print(jsonbody)
+                    # CustomPrint(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
                     log_entry = create_transaction_logNew(request, jsonbody, 0, '',321,0)
@@ -449,8 +449,8 @@ class InvoiceToSCMView(CreateAPIView):
                     response = requests.request("POST", url, headers=headers, data=payload)
                     corrected_response_text = '[' + response.text.replace('Array', '') + ']'
                     response_json = json.loads(corrected_response_text)
-                    # print(response_json[0]['Status'])
-                    # print(response_json[0]['Messag'])
+                    # CustomPrint(response_json[0]['Status'])
+                    # CustomPrint(response_json[0]['Messag'])
                     
                     if (response_json[0]['Status']== False):
                         Msg = response_json[0]['Messag']
