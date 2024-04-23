@@ -42,7 +42,7 @@ class DivisionsView(CreateAPIView):
 
 #     # Get the session variable
 #     my_var = session.get('my_var', None)
-#     print(my_var)
+#     CustomPrint(my_var)
 #     return render(request, 'index.html', {'my_var': my_var})
 
 
@@ -55,7 +55,7 @@ class M_PartiesFilterView(CreateAPIView):
     def post(self, request):
 
         session = SessionStore(session_key=request.session.session_key)
-        # print('bbbbbbbbbbbbbbbbb', session.get('UserName'))
+        # CustomPrint('bbbbbbbbbbbbbbbbb', session.get('UserName'))
         try:
             with transaction.atomic():
 
@@ -124,7 +124,7 @@ class M_PartiesFilterView(CreateAPIView):
                 # else:
                 #     query=MC_PartySubParty.objects.filter(Party=PartyID)
 
-                # print((query.query))
+                # CustomPrint((query.query))
                 if not query:
                    
                     log_entry = create_transaction_logNew(request, Logindata, PartyID, "List Not available",90,0)
@@ -191,7 +191,7 @@ class M_PartiesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Parties_data = M_Parties.objects.filter(id=id)
-                # print(str( M_Parties_data.query))
+                # CustomPrint(str( M_Parties_data.query))
                 if not M_Parties_data:
                     log_entry = create_transaction_logNew(request, {'PartyID':id}, 0, "Party Not available",93,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})

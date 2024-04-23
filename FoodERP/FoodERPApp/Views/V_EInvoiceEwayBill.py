@@ -184,7 +184,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     a= datetime.strptime(Invoice['document_date'], "%Y-%m-%d")
                     c = a+timedelta(days=1)
                     d=c.date()
-                    print(d)
+                    # CustomPrint(d)
                     document_period_details.append({
                         'invoice_period_start_date': Invoice['document_date'],
                         # 'invoice_period_end_date': c.date()
@@ -228,7 +228,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         "ewaybill_details": ewaybill_details[0],
                         "item_list": InvoiceItemDetails
                     })
-                    # print(InvoiceData)
+                    # CustomPrint(InvoiceData)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': InvoiceData[0]})
                     EInvoice_URL = 'https://pro.mastersindia.co/generateEinvoice'
                     payload1 = json.dumps(InvoiceData[0])
@@ -241,7 +241,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         "POST", EInvoice_URL, headers=headers, data=payload1)
                     
                     data_dict = json.loads(response.text)
-                    # print(data_dict)
+                    # CustomPrint(data_dict)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                         Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
@@ -281,20 +281,20 @@ class Uploaded_EwayBill(CreateAPIView):
                     log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
                 else:
-                    # print('bbbbbbbbbb')
+                    # CustomPrint('bbbbbbbbbb')
                     access_token = generate_Access_Token()
                     aa=access_token.split('!')
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
     # =======================================================================================
                     
                     if(aa[0] == '1'):
-                        # print('ccccccccccc')
+                        # CustomPrint('ccccccccccc')
                         access_token=aa[1]
                         ItemQuery = T_Invoices.objects.filter(id=id)
                         InvoiceUploadSerializer = InvoicegovUploadSerializer(
                             ItemQuery, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceUploadSerializer})
-                        # print('qqqqqqqqqqq')
+                        # CustomPrint('qqqqqqqqqqq')
                         InvoiceData = list()
                         InvoiceItemDetails = list()
                         Total_assessable_value = 0
@@ -405,7 +405,7 @@ class Uploaded_EwayBill(CreateAPIView):
                                     'email' : Invoice['Party']['Email'],
                                     'itemList': InvoiceItemDetails
                                 })
-                                # print('ddddddddddddd')
+                                # CustomPrint('ddddddddddddd')
                                 E_Way_Bill_URL = 'https://pro.mastersindia.co/ewayBillsGenerate'
                                 
                                 payload = json.dumps(InvoiceData[0])
@@ -413,16 +413,16 @@ class Uploaded_EwayBill(CreateAPIView):
                                 headers = {
                                     'Content-Type': 'application/json',
                                 }
-                                # print(payload)
+                                # CustomPrint(payload)
                             
                                 response = requests.request(
                                     "POST", E_Way_Bill_URL, headers=headers, data=payload)
 
                                 data_dict = json.loads(response.text)
-                                # print('ffffffffffffff')
-                                # print(data_dict)
+                                # CustomPrint('ffffffffffffff')
+                                # CustomPrint(data_dict)
                                 if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                                    # print('ggggggg')
+                                    # CustomPrint('ggggggg')
                                     Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                                     
                                     if(Query.count() > 0):
@@ -436,7 +436,7 @@ class Uploaded_EwayBill(CreateAPIView):
                                         log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                 else:
-                                    # print('hhhhhhh')
+                                    # CustomPrint('hhhhhhh')
                                     log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results'], 363,0)
                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                             else:

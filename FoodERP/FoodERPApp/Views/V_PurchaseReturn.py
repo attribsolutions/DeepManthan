@@ -61,7 +61,7 @@ class PurchaseReturnListView(CreateAPIView):
           
                 query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
                 
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query:
                     Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
                     ReturnListData = list()
@@ -517,7 +517,7 @@ class ReturnItemAddView(CreateAPIView):
                                                 GSTHsnCodeMaster(%s,curdate(),1)GSTID,
                                                 GetTodaysDateRate(%s,curdate(),1)RateID
                                                 from M_Items where id =%s''',[id,id,id,id,id,id,id])
-                # print(query.query)
+                # CustomPrint(query.query)
                 
                 if query:
                     # return JsonResponse({'query':  str(Itemsquery.query)})
@@ -667,7 +667,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     
                     for ad in StockQtySerialize_data:
                         Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
-                        # print(Rate)
+                        # CustomPrint(Rate)
 
                         if(ad['LiveBatche']['MRP']['id'] is None):
                             MRPValue=ad['LiveBatche']['MRPValue']
@@ -779,7 +779,7 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                     for b in PurchaseReturnSerializer:
                         Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
                         Imagequery = TC_PurchaseReturnItemImages.objects.filter(PurchaseReturnItem_id=b['id'])
-                        # print(query.query)
+                        # CustomPrint(query.query)
                         ReturnItemImages = list()
                         if Imagequery.exists():
                             ReturnImagesdata = PurchaseReturnItemImageSerializer2(Imagequery, many=True).data

@@ -92,7 +92,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.save()
 
         # for items in instance.OrderItem.all():
-        #     print(items.IsDeleted)
+        #     CustomPrint(items.IsDeleted)
         #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
             
             

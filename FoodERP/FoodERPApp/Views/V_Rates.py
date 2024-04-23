@@ -87,7 +87,7 @@ class GETRateDetails(CreateAPIView):
                                                     FROM M_Items LEFT JOIN  M_RateMaster ON M_RateMaster.Item_id = M_Items.id 
                                                     JOIN  MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id   where M_Items.Company_id={CompanyID}                                                                                              
                                                     GROUP BY  M_Items.id''')  
-                print(MRates.query)
+                # CustomPrint(MRates.query)
                            
                 if not MRates:
                     
@@ -155,7 +155,7 @@ class M_RatesViewThird(CreateAPIView):
         # return JsonResponse({'StatusCode': 200, 'Status': True,'Data':MRP_Serializer})
         for a in Rate_Serializer:
             deletedID = a['id'] 
-            # print(deletedID)
+            # CustomPrint(deletedID)
             try:
                 with transaction.atomic():
                     Ratedata = M_RateMaster.objects.filter(id=deletedID).update(IsDeleted=1)

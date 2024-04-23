@@ -90,7 +90,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
     where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])
-                        # print(obatchwisestockquery.query)     
+                        # CustomPrint(obatchwisestockquery.query)     
                         stockDatalist = list()
                         if not obatchwisestockquery:
                             stockDatalist =[]
@@ -192,7 +192,7 @@ class InvoiceListFilterView(CreateAPIView):
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
-                # print(query.query)
+                # CustomPrint(query.query)
                 # for log
                 if(Customer == ''):
                     x = 0
@@ -220,7 +220,7 @@ class InvoiceListFilterView(CreateAPIView):
                                 IsTCSParty = ""
                             else:
                                 IsTCSParty= query2[0]['IsTCSParty']    
-                            # print(str(query2.query))    
+                            # CustomPrint(str(query2.query))    
                             InvoiceListData.append({
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
@@ -275,7 +275,7 @@ class InvoiceView(CreateAPIView):
                     InvoiceItems = Invoicedata['InvoiceItems']
                     O_BatchWiseLiveStockList=list()
                     for InvoiceItem in InvoiceItems:
-                        # print(InvoiceItem['Quantity'])
+                        # CustomPrint(InvoiceItem['Quantity'])
                         BaseUnitQuantity=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
                         InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
                         QtyInNo=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
@@ -300,7 +300,7 @@ class InvoiceView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId)+','+'FullInvoiceNumber:'+Invoicedata['FullInvoiceNumber'],4,LastInsertId,0,0, Invoicedata['Customer'])
                     else:
                         transaction.set_rollback(True)
-                        # print(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
+                        # CustomPrint(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
                         # log_entry = create_transaction_logNew(request, Invoicedata, Party, str(Invoice_serializer.errors),34,0,0,0,Invoicedata['Customer'])
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                         
@@ -328,8 +328,8 @@ class InvoiceViewSecond(CreateAPIView):
                         B = 351
                 else:
                     A = "Action is not defined"
-                print(characters)
-                print(id)
+                # CustomPrint(characters)
+                # CustomPrint(id)
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
@@ -467,7 +467,7 @@ class InvoiceViewSecond(CreateAPIView):
                 
                 for a in Invoicedataserializer[0]['InvoiceItems']:
                     BaseUnitQuantity11=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                    # print(a['LiveBatch'])
+                    # CustomPrint(a['LiveBatch'])
                     if a['LiveBatch'] is None:
                         pass
                     else:
@@ -566,7 +566,7 @@ class InvoiceViewThird(CreateAPIView):
                         for b in a['InvoiceItems']:
                             ChildItem= b['Item']['id']
                             Unitquery = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
-                            # print(query.query)
+                            # CustomPrint(query.query)
                             if Unitquery.exists():
                                 Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
                                 ItemUnitDetails = list()
@@ -578,7 +578,7 @@ class InvoiceViewThird(CreateAPIView):
                                 })
                                     
                             MRPquery = M_MRPMaster.objects.filter(Item_id=ChildItem).order_by('-id')[:3] 
-                            # print(query.query)
+                            # CustomPrint(query.query)
                             if MRPquery.exists():
                                 MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                                 ItemMRPDetails = list()
@@ -590,7 +590,7 @@ class InvoiceViewThird(CreateAPIView):
                                 })
                                     
                             GSTquery = M_GSTHSNCode.objects.filter(Item_id=ChildItem).order_by('-id')[:3] 
-                            # print(query.query)
+                            # CustomPrint(query.query)
                             if GSTquery.exists():
                                 Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
                                 ItemGSTDetails = list()
@@ -687,10 +687,10 @@ class BulkInvoiceView(CreateAPIView):
                             else:
                                 # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Customer Data Mapping Missing",37,0)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
-                            # print(aa['Customer'])
+                            # CustomPrint(aa['Customer'])
                             for bb in aa['InvoiceItems']:
-                                print(bb)
-                                print('----------------------------------------')
+                                # CustomPrint(bb)
+                                # CustomPrint('----------------------------------------')
                                 ItemMapping=M_ItemMappingMaster.objects.filter(MapItem=bb['Item'],Party=aa['Party']).values("Item")
                                 if ItemMapping.count() > 0:
                                     bb['Item']=ItemMapping[0]['Item']
@@ -718,10 +718,10 @@ class BulkInvoiceView(CreateAPIView):
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
                                 
                             # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':aa })    
-                            print(aa)
+                            # CustomPrint(aa)
                             Invoice_serializer = BulkInvoiceSerializer(data=aa)
                             if Invoice_serializer.is_valid():
-                                # print(Invoice_serializer)
+                                # CustomPrint(Invoice_serializer)
                                 Invoice_serializer.save()
                                 pass
                             else:
@@ -784,7 +784,7 @@ class InvoiceViewEditView(CreateAPIView):
                 query1 = TC_InvoicesReferences.objects.filter(Invoice=id).values('Order')
                 Orderdata = list()
                 query = T_Invoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle_id')
-                # print(query.query)
+                # CustomPrint(query.query)
                 Customer=query[0]['Customer']
                 InvoiceDate=query[0]['InvoiceDate']
                 Vehicle=query[0]['Vehicle_id']
@@ -801,7 +801,7 @@ class InvoiceViewEditView(CreateAPIView):
                         seen_item_ids.add(item_id)  # Add the current Item_id to the set of seen Item_ids
                         batchquery = TC_InvoiceItems.objects.filter(Item=item_id,Invoice = id).values('LiveBatch_id')
                         LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
-                        # print(LiveBatchIDlist)
+                        # CustomPrint(LiveBatchIDlist)
                         stockquery=O_LiveBatches.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity FROM O_LiveBatches JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(id,LiveBatchIDlist))
                 
                         InvocieEditStock=InvoiceEditStockSerializer(stockquery,many=True).data
@@ -885,7 +885,7 @@ class InvoiceViewEditView(CreateAPIView):
                 InvoiceItems = Invoicedata['InvoiceItems']
                 O_BatchWiseLiveStockList=list()
                 for InvoiceItem in InvoiceItems:
-                    # print(InvoiceItem['Quantity'])
+                    # CustomPrint(InvoiceItem['Quantity'])
                     BaseUnitQuantity=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
                     InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
                     QtyInNo=UnitwiseQuantityConversion(InvoiceItem['Item'],InvoiceItem['Quantity'],InvoiceItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
