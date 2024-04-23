@@ -264,24 +264,21 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
         if not ret.get("Longitude", None):
             ret["Longitude"] = None    
 
-        aa = M_PartyDetails.objects.filter(Party=instance.id)
+        Party_Details = M_PartyDetails.objects.filter(Party=instance.id)
         
-        if aa.exists():
-            clusters = []
-            subclusters = []
+        for aa in Party_Details:
+            cluster = aa.Cluster
+            subcluster = aa.SubCluster
             
-            for party_details in aa:
-                cluster = party_details.Cluster
-                subcluster = party_details.SubCluster
-                
-                if cluster:
-                    clusters.append(ClusterSerializer(cluster).data)
-                
-                if subcluster:
-                    subclusters.append(SubClusterSerializer(subcluster).data)
+            if cluster:
+                ret['Cluster'] = ClusterSerializer(cluster).data
+            else:
+                ret['Cluster'] = None
             
-            ret['Cluster'] = clusters if clusters else None
-            ret['SubCluster'] = subclusters if subclusters else None
+            if subcluster:
+                ret['SubCluster'] = SubClusterSerializer(subcluster).data
+            else:
+                ret['SubCluster'] = None
         
         return ret    
 
