@@ -2328,6 +2328,7 @@ class M_RateMaster(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='RateCompany', on_delete=models.PROTECT)
+    UnitID = models.IntegerField(default=False)
     # '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
     # Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.PROTECT,null=True,blank=True)
     Item = models.ForeignKey(M_Items, related_name='ItemRateDetails', on_delete=models.CASCADE)
@@ -2335,4 +2336,26 @@ class M_RateMaster(models.Model):
     # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
 
     class Meta:
-        db_table = "M_RateMaster"        
+        db_table = "M_RateMaster"       
+        
+
+class M_SAPCustomerLedger(models.Model):
+    CompanyCode = models.CharField(max_length=50)
+    DocumentNo = models.CharField(max_length=50)
+    FiscalYear = models.CharField(max_length=50)
+    DocumentType = models.CharField(max_length=50)
+    PostingDate = models.DateField()
+    DocumentDesc = models.CharField(max_length=100)
+    CustomerCode = models.CharField(max_length=50)
+    CustomerName = models.CharField(max_length=100)
+    DebitCredit = models.CharField(max_length=20)
+    Amount = models.IntegerField()
+    ItemText = models.CharField(max_length=300, null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    FileDate = models.DateField()
+
+    class Meta:
+        db_table = "M_SAPCustomerLedger"
