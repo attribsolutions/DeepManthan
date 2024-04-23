@@ -712,6 +712,7 @@ urlpatterns = [
               url(r'GetTargetUploadsBySheetNo/([0-9]+)/([0-9]+)$',GetTargetUploadsBySheetNoView.as_view()), #SheetNo/PartyID     
               url(r'DeleteTargetRecords$',DeleteTargetRecordsView.as_view()),
               url(r'TargetVSAchievement$', TargetVSAchievementView.as_view()),
+              url(r'TargetVSAchievementGroupwise$', TargetVSAchievementGroupwiseView.as_view()),
           
 #Logs
               url(r'LogTransaction$',LogTransactionView.as_view()),           
