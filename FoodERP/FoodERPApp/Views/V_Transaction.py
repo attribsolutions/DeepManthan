@@ -139,4 +139,30 @@ class TransactionJsonView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
   
+class TransactionTypeAddView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Type_data = request.data  
+                TypesList = []
+                
+                for a in Type_data:
+                    Type_serializer = TransactionTypeSerializer(data=a)
+                    
+                    if Type_serializer.is_valid():
+                        Type = Type_serializer.save()
+                        TypesList.append(Type)
+                        LastInsertID = Type.id
+                        log_entry = create_transaction_logNew(request, Type_data,0,'TransactionID:'+str(LastInsertID),378,LastInsertID)    
+                    else:
+                        log_entry = create_transaction_logNew(request, Type_data,0,'TypeSave:'+str(Type_serializer.errors),34,0)
+                        transaction.set_rollback(True)
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Type_serializer.errors, 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Type Save Successfully', 'Data':[]})   
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'TypeSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
 

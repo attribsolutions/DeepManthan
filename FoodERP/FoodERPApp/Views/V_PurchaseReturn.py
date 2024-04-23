@@ -510,11 +510,14 @@ class ReturnItemAddView(CreateAPIView):
             with transaction.atomic():
                 # query = M_Items.objects.filter(id=id).values('id','Name')
                 query = M_Items.objects.raw('''select id ,name ,
-                                                round(GetTodaysDateMRP(%s,curdate(),2,0,0),2)MRPValue,
+                                                round(GetTodaysDateMRP(%s,curdate(),2,0,0),2)MRPValue,                                                
+                                                round(GetTodaysDateRate(%s,curdate(),2),2)RateValue,
                                                 round(GSTHsnCodeMaster(%s,curdate(),2),2)GSTPercentage,
                                                 GetTodaysDateMRP(%s,curdate(),1,0,0)MRPID,
-                                                GSTHsnCodeMaster(%s,curdate(),1)GSTID
-                                                from M_Items where id =%s''',[id,id,id,id,id])
+                                                GSTHsnCodeMaster(%s,curdate(),1)GSTID,
+                                                GetTodaysDateRate(%s,curdate(),1)RateID
+                                                from M_Items where id =%s''',[id,id,id,id,id,id,id])
+                # print(query.query)
                 
                 if query:
                     # return JsonResponse({'query':  str(Itemsquery.query)})
@@ -524,12 +527,18 @@ class ReturnItemAddView(CreateAPIView):
                     InvoiceItems=list()
                     ItemGSTDetails = list()
                     ItemMRPDetails = list()
+                    ItemRateDetails=list()
                     for a in query:
                         Item=a.id
                         ItemMRPDetails.append({
                                         "MRP": a.MRPID,
                                         "MRPValue": a.MRPValue,
                                     })
+                        ItemRateDetails.append({
+                                        "Rate": a.RateID,
+                                        "RateValue": a.RateValue,
+                                         })                        
+                        
                         ItemGSTDetails.append({
                                 "GST": a.GSTID,
                                 "GSTPercentage": a.GSTPercentage,   
@@ -577,7 +586,8 @@ class ReturnItemAddView(CreateAPIView):
                             "ItemName": a.Name,
                             "ItemUnitDetails": ItemUnitDetails, 
                             "ItemMRPDetails":ItemMRPDetails,
-                            "ItemGSTDetails":ItemGSTDetails
+                            "ItemGSTDetails":ItemGSTDetails,
+                            "ItemRateDetails":ItemRateDetails
                         })
                     
                     Itemlist.append({"InvoiceItems":InvoiceItems}) 

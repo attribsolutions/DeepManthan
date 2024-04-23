@@ -188,9 +188,9 @@ class GetOpeningBalanceView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        OpeningBalancedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                OpeningBalancedata = JSONParser().parse(request)
                 Party = OpeningBalancedata['PartyID']
                 Customer = OpeningBalancedata['CustomerID']
                 ReceiptDate = OpeningBalancedata['ReceiptDate']
@@ -202,7 +202,7 @@ class GetOpeningBalanceView(CreateAPIView):
                 aa.append({"OpeningBalanceAmount": OpeningBalance})
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': aa[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 def GetO_BatchWiseLiveStock(ItemID, PartyID):
@@ -798,8 +798,8 @@ class LogTransactionView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        LogData = JSONParser().parse(request)
         try:
-            LogData = JSONParser().parse(request)
             PartyID = LogData['PartyID']
             TransactionID = LogData['TransactionID']
             FromDate = LogData['FromDate']
