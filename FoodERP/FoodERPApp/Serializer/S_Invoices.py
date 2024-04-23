@@ -135,7 +135,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
                 
                 OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
-                # print(OBatchQuantity[0]['BaseUnitQuantity'] , O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
+                # CustomPrint(OBatchQuantity[0]['BaseUnitQuantity'] , O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
                     OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
                 else:
@@ -157,12 +157,12 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
         # fields ='__all__'
     
     def create(self, validated_data):
-        print(validated_data)
+        CustomPrint(validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         InvoiceID = T_Invoices.objects.create(**validated_data)
-        # print(InvoiceID)
+        # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:
-            print(InvoiceID)
+            CustomPrint(InvoiceID)
             InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
             
         return InvoiceID        

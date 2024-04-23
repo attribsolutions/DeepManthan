@@ -279,7 +279,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
   where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
             ''')
             TargetAchievementList = []   
-            print(query.query)
+            # CustomPrint(query.query)
             if query:   
                 for a in query:
                     
@@ -389,7 +389,7 @@ group by M_Group.id
   
             ''')
             TargetAchievementList = []   
-            # print(query.query)
+            # CustomPrint(query.query)
             TotalGTAchQuantity=0
             TotalGTAchAmount=0
             if query:   
