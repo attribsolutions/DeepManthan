@@ -90,6 +90,7 @@ class PartyItemsFilterView(CreateAPIView):
                             "InStock":InStock,
                             "MapItem": a['MapItem'],
                             "GST": GST[0]['GST'], 
+                            "GSTID":GST[0]['Gstid']
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
