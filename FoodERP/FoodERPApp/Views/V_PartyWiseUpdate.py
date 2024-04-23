@@ -41,7 +41,7 @@ class PartyWiseUpdateView(CreateAPIView):
                 # q1 = M_Parties.objects.filter(id__in = q0).select_related("PartyType")
 
                 query = MC_PartySubParty.objects.filter(Party = Party).filter(a).filter(b)
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query.exists:
                     PartyID_serializer = PartyWiseSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyID_serializer})

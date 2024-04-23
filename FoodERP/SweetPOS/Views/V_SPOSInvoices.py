@@ -32,7 +32,7 @@ class SPOSInvoiceView(CreateAPIView):
                        
                         Party = Invoicedata['DivisionID']
                         queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(DivisionID=Invoicedata['DivisionID']).values('Party')
-                        print(queryforParty)
+                        # CustomPrint(queryforParty)
                         if not queryforParty:
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
                         else:
@@ -108,7 +108,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
                             else:
                                 transaction.set_rollback(True)
-                                # print(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
+                                # CustomPrint(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
                                 # log_entry = create_transaction_logNew(request, Invoicedata, Party, str(Invoice_serializer.errors),34,0,0,0,Invoicedata['Customer'])
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                             

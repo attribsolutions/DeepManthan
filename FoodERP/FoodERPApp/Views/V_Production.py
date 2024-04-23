@@ -100,7 +100,7 @@ class ProductionView(CreateAPIView):
                     
                     })    
 
-                # print(GRNdata)
+                # CustomPrint(GRNdata)
                 Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 
                 Production_Serializer = H_ProductionSerializer(data=Productiondata)

@@ -52,7 +52,7 @@ LEFT JOIN M_Routes ON   MC_PartySubParty.Route_id = M_Routes.id
 LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_PartyAddress.IsDefault=1''', ([id]))
                 # AND M_PartyType.IsRetailer=1 remove (for credit note upload need all Parties not only Retailer)
                 
-                # print(str(query.query))
+                # CustomPrint(str(query.query))
                 if query:
                     Party_Serializer = PartyCustomerMappingSerializerSecond(query,many=True).data
                     log_entry = create_transaction_logNew(request, Party_Serializer,Party_Serializer[0]['Party_id'],'',341,0)

@@ -476,14 +476,14 @@ class M_ImageTypesView(CreateAPIView):
 #     def get(self, request,IsSCM=0,PartyID=0):
 #         try:
 #             with transaction.atomic():
-#                 # print(IsSCM)
+#                 # CustomPrint(IsSCM)
 #                 if IsSCM == '0':
 #                     Itemsdata = M_Items.objects.all()
 #                 else:
 #                     partyitem=MC_PartyItems.objects.filter(Party=PartyID).values('Item')
 #                     Itemsdata = M_Items.objects.filter(id__in=partyitem)
                 
-#                 # print(Itemsdata.query)
+#                 # CustomPrint(Itemsdata.query)
 #                 if Itemsdata.exists():
 #                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
 #                     ItemsList = list()

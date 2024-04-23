@@ -37,7 +37,7 @@ class StockEntryPageView(CreateAPIView):
                 O_LiveBatchesList=list()
                 T_StockEntryList = list()
                 for a in StockEntrydata['StockItems']:
-                    # print(a)
+                    # CustomPrint(a)
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
@@ -53,7 +53,7 @@ class StockEntryPageView(CreateAPIView):
                     else:
                         totalstock=0    
                     
-                    # print(query3)
+                    # CustomPrint(query3)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
@@ -117,7 +117,7 @@ class StockEntryPageView(CreateAPIView):
                         
                         for b in StockEntrydata['StockItems']:
                             OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party,Item=b['Item']).update(BaseUnitQuantity=0)      
-                # print(StockEntrydata['O_LiveBatchesList'])
+                # CustomPrint(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
                
                     if(Mode == 1):
@@ -265,7 +265,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
     order by M_Group.id, MC_SubGroup.id ,M_Items.id,A.id''')
                        
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-                    print(Itemquery)
+                    # CustomPrint(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
