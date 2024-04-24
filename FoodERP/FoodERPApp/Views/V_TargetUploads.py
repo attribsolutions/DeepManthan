@@ -204,6 +204,45 @@ class DeleteTargetRecordsView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
+def TargetVsAchiQurey(Party,Month,Year):
+    TvaAQuery=f''' (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,Month,Year 
+  from 
+(SELECT ItemID,Party Party_id from 
+(select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id in(SELECT distinct PartyType_id from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode > 0))s ,
+(SELECT id Party, Name from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode > 0)P )I 
+
+left join 
+  
+  (select  Month,Year,Party_id,Item_id,Sum(QtyInKg) TargetQuantity,Sum(Amount) TargetAmount from T_TargetUploads
+   where  Month={Month} and Year={Year} group by Item_id,Party_id )A
+   on I.ItemID = A.Item_id and I.Party_id = A.Party_id
+            
+left join 
+(select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount from T_Invoices
+ join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
+ where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id )B
+ on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
+ 
+ left join 
+(SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.QtyInKg)CRNoteQuantity,Sum(Amount)CRNoteAmount
+FROM T_CreditDebitNotes
+JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
+WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
+on I.ItemID = C.Item_id and I.Party_id = C.Customer_id 
+
+left join
+(select Party_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)CXQuantity,Sum(Amount)CxAmount from T_Invoices
+ join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
+ join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id = 15
+ where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,Party_id )E
+ on I.ItemID = E.Item_id and I.Party_id = E.Party_id
+
+WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
+Order By I.Party_id,ItemID)D'''
+    return TvaAQuery
+
+
+
 class TargetVSAchievementView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -234,39 +273,7 @@ class TargetVSAchievementView(CreateAPIView):
             Round(IFNULL(CXAmount,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
             FROM
   
-  (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,Month,Year 
-  from 
-(SELECT ItemID,Party Party_id from (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id =9)s ,
-(SELECT id Party, Name from M_Parties where  id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE SubParty_id in ({Party}) and  Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I 
-
-left join 
-  
-  (select  Month,Year,Party_id,Item_id,Sum(QtyInKg) TargetQuantity,Sum(Amount) TargetAmount from T_TargetUploads
-   where  Month={Month} and Year={Year} group by Item_id,Party_id )A
-   on I.ItemID = A.Item_id and I.Party_id = A.Party_id
-            
-left join 
-(select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount from T_Invoices
- join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
- where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id )B
- on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
- 
- left join 
-(SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.QtyInKg)CRNoteQuantity,Sum(Amount)CRNoteAmount
-FROM T_CreditDebitNotes
-JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
-WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
-on I.ItemID = C.Item_id and I.Party_id = C.Customer_id 
-
-left join
-(select Party_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)CXQuantity,Sum(Amount)CxAmount from T_Invoices
- join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
- join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id = 15
- where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,Party_id )D
- on I.ItemID = D.Item_id and I.Party_id = D.Party_id
-
-WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
-Order By I.Party_id,ItemID)D
+  {TargetVsAchiQurey(Party,Month,Year)}
 
 join  M_Items ON M_Items.id=D.ItemID
 join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
@@ -279,7 +286,7 @@ join M_Parties  ON M_Parties.id=D.Party_id
   where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
             ''')
             TargetAchievementList = []   
-            # CustomPrint(query.query)
+            
             if query:   
                 for a in query:
                     
@@ -346,39 +353,7 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
             Round(IFNULL(sum(CRNoteQuantity),0),3)CRNoteQuantity,Round(IFNULL(sum(CRNoteAmount),0),2)CRNoteAmount
 from 
 
-(SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,Month,Year
-  from
-(SELECT ItemID,Party Party_id from (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id =9)s ,
-(SELECT id Party, Name from M_Parties where id in (SELECT Distinct SubParty_id from MC_PartySubParty WHERE SubParty_id in ({Party}) and   Party_id in (select id from M_Parties WHERE Company_id=2 AND PartyType_id = 12)))P )I
-
-left join
-
-  (select  Month,Year,Party_id,Item_id,Sum(QtyInKg) TargetQuantity,Sum(Amount) TargetAmount from T_TargetUploads
-   where  Month={Month} and Year={Year} group by Item_id,Party_id )A
-   on I.ItemID = A.Item_id and I.Party_id = A.Party_id
-
-left join
-(select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount from T_Invoices
- join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
- where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id )B
- on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
-
- left join
-(SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.QtyInKg)CRNoteQuantity,Sum(Amount)CRNoteAmount
-FROM T_CreditDebitNotes
-JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
-WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C
-on I.ItemID = C.Item_id and I.Party_id = C.Customer_id
-
-left join
-(select Party_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)CXQuantity,Sum(Amount)CxAmount from T_Invoices
- join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
- join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id = 15
- where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,Party_id )D
- on I.ItemID = D.Item_id and I.Party_id = D.Party_id
-
-WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
-   Order By I.Party_id,ItemID)D
+{TargetVsAchiQurey(Party,Month,Year)}
    
 join  M_Items ON M_Items.id=D.ItemID
 join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id

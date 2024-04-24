@@ -96,8 +96,8 @@ class M_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializer(many=True)
     PartyPrefix = PartyPrefixsSerializer(many=True)
     PartySubParty = MC_PartySubPartySerializer(many=True)
-    Cluster = serializers.IntegerField(write_only=True)  
-    SubCluster = serializers.IntegerField(write_only=True)
+    Cluster = serializers.IntegerField(write_only=True,  required=False)  
+    SubCluster = serializers.IntegerField(write_only=True,  required=False)
 
     class Meta:
         model =  M_Parties
@@ -119,22 +119,33 @@ class M_PartiesSerializer(serializers.ModelSerializer):
         for PartyPrefix in PartyPrefix_data:
             Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix) 
         
-        query=M_PartyType.objects.filter(id=PartyType.id).values('IsVendor')
+        query=M_PartyType.objects.filter(id=PartyType.id).values('IsVendor', 'IsRetailer')
 
         if query[0]['IsVendor'] == True:
             for PartySubParty in PartySubPartys:
                 subparty = PartySubParty.pop('Party')
                 PartySubParty=MC_PartySubParty.objects.create(Party=PartyID,SubParty=subparty, **PartySubParty)
+
         else:
             
             for PartySubParty in PartySubPartys:
                 PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)   
 
+        if query[0]['IsRetailer'] == False:
 
-        if cluster_id is not None and sub_cluster_id is not None:
-            cluster_instance = M_Cluster.objects.get(id=cluster_id)
-            sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
-            M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
+            if cluster_id is None and sub_cluster_id is  None:
+                cluster_instance = M_Cluster.objects.get(id=cluster_id)
+                sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
+                M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
+            
+        # else:
+        #     for a in cluster_id:
+        #         cluster= cluster_id.pop('Cluster')
+        #         clusters = M_PartyDetails.objects.create(Cluster=cluster,**a)
+
+        #     for b in sub_cluster_id:
+        #         subcluster = sub_cluster_id.pop('SubCluster')
+        #         subclusters = M_PartyDetails.objects.create(SubCluster=subcluster,**b)
         
         return PartyID
     
