@@ -218,7 +218,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         WHERE T_CreditDebitNotes.Party_id = %s AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN = ''
                         GROUP BY  M_Parties.Name ,T_CreditDebitNotes.CRDRNoteDate,M_States.id ,M_States.Name ,TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
                         
-                        # print(CDNURquery.query)
+                        # CustomPrint(CDNURquery.query)
                 CDNUR2 = CDNURSerializer(CDNURquery, many=True).data
                 
                 CDNURquery2= T_CreditDebitNotes.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.Customer_id)NoOfRecipients,COUNT(A.CRDRNote_id) NoOfNotes,SUM(A.GrandTotal) TotalNoteValue,SUM(A.TaxbleAmount)
@@ -283,7 +283,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Parties b ON b.id=T_Invoices.Customer_id
                         WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description
                         ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
-                                # print(str(EXEMPquery.query))
+                                # CustomPrint(str(EXEMPquery.query))
                 EXEMP2 = EXEMPSerializer(EXEMPquery, many=True).data
                      
                 EXEMPquery2= T_Invoices.objects.raw(''' SELECT 1 as id, '' AA,sum(A.Total) TotalNilRatedSupplies,'' TotalExemptedSupplies,'' TotalNonGSTSupplies

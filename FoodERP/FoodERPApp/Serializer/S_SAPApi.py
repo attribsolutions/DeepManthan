@@ -22,7 +22,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','TCSAmount', 'InvoiceItems']
 
     def create(self, validated_data):
-        # print('dddddddddddddddddddddddd',validated_data)
+        # CustomPrint('dddddddddddddddddddddddd',validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         # InvoicesReferences_data = validated_data.pop('InvoicesReferences')
         # O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
@@ -34,7 +34,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         # for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
             
         #         OBatchQuantity=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).values('BaseUnitQuantity')
-        #         print(OBatchQuantity[0]['BaseUnitQuantity'],O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
+        #         CustomPrint(OBatchQuantity[0]['BaseUnitQuantity'],O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
         #         if(OBatchQuantity[0]['BaseUnitQuantity'] >= O_BatchWiseLiveStockItem_data['BaseUnitQuantity']):
         #             OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(id=O_BatchWiseLiveStockItem_data['Quantity']).update(BaseUnitQuantity =  OBatchQuantity[0]['BaseUnitQuantity'] - O_BatchWiseLiveStockItem_data['BaseUnitQuantity'])
         #         else:
@@ -42,7 +42,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         #             raise serializers.ValidationError("Not In Stock ")    
           
         # for InvoicesReference_data in InvoicesReferences_data:
-        #     print(InvoiceID) 
+        #     CustomPrint(InvoiceID) 
         #     InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)   
               
         

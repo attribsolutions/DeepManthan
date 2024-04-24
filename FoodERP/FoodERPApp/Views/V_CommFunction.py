@@ -162,7 +162,7 @@ def GetOpeningBalance(Party, Customer, Date):
     SELECT 4 as id ,T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal else 0 End) AS InvoiceAmount ,
     (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal else 0 End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
                                     Party], [Customer], [Date],[Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
-    # print(str(query2.query))
+    # CustomPrint(str(query2.query))
     query2_serializer = OpeningBalanceSerializer(query2, many=True).data
     OpeningBalance = 0.000
     InvoiceAmount = 0.000
@@ -252,7 +252,7 @@ class MRPMaster:
 
         TodayDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(
             Item_id=self.ItemID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(TodayDateItemMRPdata.query))
+        # CustomPrint(str(TodayDateItemMRPdata.query))
 
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(
@@ -289,7 +289,7 @@ class MRPMaster:
 
         EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(
             Item_id=self.ItemID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(EffectiveDateItemMRPdata.query))
+        # CustomPrint(str(EffectiveDateItemMRPdata.query))
 
         if EffectiveDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(
@@ -350,7 +350,7 @@ class DiscountMaster:
             ToDate__gte=self.EffectiveDate)
         ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID).filter(
             D).filter(P).values("DiscountType", "Discount").order_by('-id')[:1]
-        # print(ItemDiscountdata.query)
+        # CustomPrint(ItemDiscountdata.query)
         if not ItemDiscountdata:
 
             ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID, Customer_id__isnull=True).filter(
@@ -395,13 +395,13 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(ItemMargindata.query))
+        # CustomPrint(str(ItemMargindata.query))
         if ItemMargindata.exists:
 
             P = Q(Party_id__isnull=True)
             ItemMargindata = M_MarginMaster.objects.filter(P).filter(
                 Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-            # print(ItemMargindata.query)
+            # CustomPrint(ItemMargindata.query)
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -432,7 +432,7 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(ItemMargindata.query))
+        # CustomPrint(str(ItemMargindata.query))
         # if ItemMargindata.count() == 0:
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -452,7 +452,7 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(ItemMargindata.query))
+        # CustomPrint(str(ItemMargindata.query))
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -476,7 +476,7 @@ class GSTHsnCodeMaster:
 
         TodayDateGstHsncodedata = M_GSTHSNCode.objects.filter(
             Item_id=self.ItemID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(TodayDateGstHsncodedata.query))
+        # CustomPrint(str(TodayDateGstHsncodedata.query))
         if TodayDateGstHsncodedata.exists():
             GSTHsnCode_Serializer = M_GstHsnCodeSerializer(
                 TodayDateGstHsncodedata, many=True).data
@@ -664,9 +664,9 @@ class RateCalculationFunction:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
             MRPfun = MRPMaster(ItemID, DivisionID, 0,
                                self.today).GetTodaysDateMRP()
-            # print('MRPfun',MRPfun[0]['TodaysMRP'])
-            # print('Gstfun',Gstfun[0]['GST'])
-            # print('unitfun',MCItemUnit)
+            # CustomPrint('MRPfun',MRPfun[0]['TodaysMRP'])
+            # CustomPrint('Gstfun',Gstfun[0]['GST'])
+            # CustomPrint('unitfun',MCItemUnit)
             if selectedMRP != 0:
                 self.MRP = self.selectedMRP
             else:
@@ -694,7 +694,7 @@ class RateCalculationFunction:
 
         query1 = M_PriceList.objects.filter(
             id=PriceList).values('CalculationPath')
-        # print(query1)
+        # CustomPrint(query1)
         self.calculationPath = str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit = q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit = q3NoUnit[0]['BaseUnitQuantity']
@@ -767,12 +767,12 @@ def ValidationFunForStockTransactions(PartyID, ItemID, TransactionDate):
     for row in q:
         StockAdjustmentDate = row.StockAdjustmentDate
 
-    # print(StockAdjustmentDate, TransactionDate)
+    # CustomPrint(StockAdjustmentDate, TransactionDate)
     if StockAdjustmentDate >= TransactionDate:
-        # print('55555')
+        # CustomPrint('55555')
         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Transaction not allowed', 'Data': []})
     else:
-        # print('6666')
+        # CustomPrint('6666')
         pass
 
 

@@ -103,7 +103,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                         MaterialDetails =list()
                         ParentItem= a['Item']['id']
                         Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                        # print(query.query)
+                        # CustomPrint(query.query)
                         if Parentquery.exists():
                             ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
                             ParentUnitDetails = list()
@@ -118,7 +118,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                         for b in a['BOMItems']:
                             ChildItem= b['Item']['id']
                             query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
-                            # print(query.query)
+                            # CustomPrint(query.query)
                             if query.exists():
                                 Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                 UnitDetails = list()

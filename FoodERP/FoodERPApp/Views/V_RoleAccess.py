@@ -40,7 +40,7 @@ class RoleAccessView(RetrieveAPIView):
         CompanyIDQuery=M_Employees.objects.filter(id=EmployeeID).values('Company')
         CompanyID=CompanyIDQuery[0]['Company']
         Division=PartyID
-        # print(request.session.get('UserName'))
+        # CustomPrint(request.session.get('UserName'))
       
         if (int(PartyID) > 0)  : 
             Division="M_RoleAccess.Division_id = "+PartyID
@@ -51,7 +51,7 @@ class RoleAccessView(RetrieveAPIView):
            
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
-        # print(qq)
+        # CustomPrint(qq)
        
         if(len(qq) == 1):
             roles=list()
@@ -75,7 +75,7 @@ class RoleAccessView(RetrieveAPIView):
 
         queryset=H_Modules.objects.filter(id__in=modules).order_by("DisplayIndex")
         serializerdata = H_ModulesSerializer(queryset, many=True).data
-        # print(modules.query)
+        # CustomPrint(modules.query)
         
         Moduledata = list()
                
@@ -92,7 +92,7 @@ class RoleAccessView(RetrieveAPIView):
             else :
                 query=M_RoleAccess.objects.all().filter(Role_id__in=y,Modules_id=id,Division_id__isnull=True,Company=CompanyID).select_related('Pages').order_by('Pages__DisplayIndex')
 
-            # print(str(query.query) )  
+            # CustomPrint(str(query.query) )  
           
             PageSerializer = RoleAccessserializerforsidemenu(query,  many=True).data
             # return Response(PageSerializer ) 
@@ -104,7 +104,7 @@ class RoleAccessView(RetrieveAPIView):
                 JOIN H_PageAccess ON H_PageAccess.id=MC_RolePageAccess.PageAccess_id  WHERE MC_RolePageAccess.RoleAccess_id=%s ''', [id])
                 RolePageAccessSerializer = MC_RolePageAccessSerializer(
                     RolePageAccess,  many=True).data
-                # print(str(RolePageAccess.query))
+                # CustomPrint(str(RolePageAccess.query))
                
                 GetRelatedPageIDData=GetRelatedPageID(a1['Pages']['id'])
                 vvv=GetRelatedPageIDData.split(',')
@@ -246,10 +246,10 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             else:
                
                 RelatedPageroleaccessquery = M_RoleAccess.objects.raw('''SELECT M_RoleAccess.id id,'a' as Name FROM M_RoleAccess WHERE  Pages_id=%s and  Role_id=%s AND Division_id is null AND Company_id=%s   ''',([RelatedPageID],[Role],[Company]))
-            # print(pageid)
-            # print('vvvvvvvvvvvvvv',RelatedPageroleaccessquery.query)
+            # CustomPrint(pageid)
+            # CustomPrint('vvvvvvvvvvvvvv',RelatedPageroleaccessquery.query)
             RelatedPageRoleAccessdata = MC_RolePageAccessSerializerNewUpdated(RelatedPageroleaccessquery, many=True).data
-            # print(RelatedPageRoleAccessdata)
+            # CustomPrint(RelatedPageRoleAccessdata)
             
             rolepageaccessqueryforlistPage =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_RolePageAccess.PageAccess_id,0) id from H_PageAccess left JOIN MC_RolePageAccess ON MC_RolePageAccess.PageAccess_id=H_PageAccess.id AND MC_RolePageAccess.RoleAccess_id=%s ''', [id])
             # # return JsonResponse({'query':  str(rolepageaccessquery.query)})
@@ -260,9 +260,9 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             for d in RelatedPageRoleAccessdata:
                 
                 roleaccessID=d['id']
-            # print(roleaccessID)   
+            # CustomPrint(roleaccessID)   
             rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_RolePageAccess.PageAccess_id,0) id from H_PageAccess left JOIN MC_RolePageAccess ON MC_RolePageAccess.PageAccess_id=H_PageAccess.id AND MC_RolePageAccess.RoleAccess_id=%s ''', [roleaccessID])
-            # print(rolepageaccessquery.query)
+            # CustomPrint(rolepageaccessquery.query)
             # return JsonResponse({'query':  str(rolepageaccessquery.query)})
             RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
             # return JsonResponse({'data':  RolePageAccessSerializer})
