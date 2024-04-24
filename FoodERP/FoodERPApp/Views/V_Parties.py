@@ -225,24 +225,24 @@ class M_PartiesViewSecond(CreateAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
+        M_Partiesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Partiesdata = JSONParser().parse(request)
                 M_PartiesdataByID = M_Parties.objects.get(id=id)
                 M_Parties_Serializer = UpdateM_PartiesSerializer(
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
                     UpdatedParty = M_Parties_Serializer.save()
                     LastInsertID = UpdatedParty.id
-                    log_entry = create_transaction_logNew(request,M_Partiesdata,M_Partiesdata['PartySubParty'][0]['Party'],'',94,id)
+                    log_entry = create_transaction_logNew(request,M_Partiesdata,0,'',94,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request,M_Partiesdata, 0, 'PartyEditMethod:'+str(M_Parties_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'PartyEditMethod:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,M_Partiesdata, 0,'PartyEditMethod:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
