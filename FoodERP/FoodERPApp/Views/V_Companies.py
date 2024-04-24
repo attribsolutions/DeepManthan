@@ -9,6 +9,7 @@ from ..Serializer.S_Companies import *
 from ..Serializer.S_Login import UserRegistrationSerializer
 from ..Serializer.S_Employees import M_EmployeesSerializer
 from ..models import C_Companies
+from ..Views.V_CommFunction import *
 
 
 class C_CompaniesViewFilter(CreateAPIView):
@@ -18,9 +19,9 @@ class C_CompaniesViewFilter(CreateAPIView):
                    
     @transaction.atomic()
     def post(self, request):
+        Logindata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']
@@ -52,10 +53,13 @@ class C_CompaniesViewFilter(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
+                    log_entry = create_transaction_logNew(request, Logindata,0,'',305,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                log_entry = create_transaction_logNew(request, Logindata,0,'Company Not available',305,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Company Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
+            log_entry = create_transaction_logNew(request, Logindata, 0,'GETLogindata:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})                
 
 
 class C_CompaniesView(CreateAPIView):
@@ -89,17 +93,21 @@ class C_CompaniesView(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
+                    log_entry = create_transaction_logNew(request, Companydata,0,'',306,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                log_entry = create_transaction_logNew(request, Companydata,0,'Company Not available',306,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Company Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})                
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllCompanyDetails:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})                
 
     @transaction.atomic()
     def post(self, request):
+        Companiesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
                 AdminDivisionDatalist=list()
-                Companiesdata = JSONParser().parse(request)
+                
 
                 
                 AdminDivisionDatalist.append({
@@ -197,15 +205,18 @@ class C_CompaniesView(CreateAPIView):
                     UserID=UserRegistration_Serializer.data['id']
                     M_Users.objects.filter(id=UserID).update(Employee=EmployeeID)
                     MC_UserRoles.objects.filter(User=UserID).update(Party=partyID)
-                    
+                    log_entry = create_transaction_logNew(request, Companiesdata,0,'',307,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanySave:'+str(Employee_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Employee_Serializer.errors, 'Data':[]})
         except IntegrityError:   
+            log_entry = create_transaction_logNew(request, 0,0,'Company used in another table',8,0)  
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            log_entry = create_transaction_logNew(request, Companiesdata, 0,'CompanySave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
             
 
 
@@ -240,29 +251,35 @@ class C_CompaniesViewSecond(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn']
                         })
+                        log_entry = create_transaction_logNew(request, Companydata,0,'',308,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CompanyList[0]})
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
+                log_entry = create_transaction_logNew(request, Companydata,0,'Company Not available',308,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Company Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,'GETSingleCompanyDetails:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 
 
     @transaction.atomic()
     def put(self, request, id=0):
+        Companiesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Companiesdata = JSONParser().parse(request)
                 CompaniesdataByID = C_Companies.objects.get(id=id)
                 Companies_Serializer = C_CompanySerializer(
                     CompaniesdataByID, data=Companiesdata)
                 if Companies_Serializer.is_valid():
                     Companies_Serializer.save()
+                    log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanyID:'+str(id),309,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Updated Successfully', 'Data':[]})
                 else:
+                    log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanyEdit:'+str(Companies_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Companies_Serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanyEdit:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
         
 
     @transaction.atomic()
@@ -271,10 +288,13 @@ class C_CompaniesViewSecond(CreateAPIView):
             with transaction.atomic():
                 Companiesdata = C_Companies.objects.get(id=id)
                 Companiesdata.delete()
+                log_entry = create_transaction_logNew(request, 0,0,'CompanyID:'+str(id),310,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Deleted Successfully', 'Data':[]})
         except C_Companies.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'Company Not available',310,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company Not available', 'Data': []})
-        except IntegrityError:   
+        except IntegrityError:  
+            log_entry = create_transaction_logNew(request, 0,0,'Company used in another table',8,0)   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company used in another table', 'Data': []})   
 
 
@@ -298,10 +318,13 @@ class GetCompanyByDivisionType(CreateAPIView):
                     if CompaniesData.exists():
                         C_Companiesdata_Serializer = C_CompanySerializer(CompaniesData, many=True).data
                         # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data': C_Companiesdata_Serializer })
-                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': ' ' , 'Data':C_Companiesdata_Serializer })
+                        log_entry = create_transaction_logNew(request, C_Companiesdata_Serializer,0,'',311,0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': ' ' , 'Data':C_Companiesdata_Serializer })
+                log_entry = create_transaction_logNew(request, 0,0,'Party Types Not available',311,0)   
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party Types Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})               
+            log_entry = create_transaction_logNew(request, 0,0,'PartyTypes:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})               
 
 class GetCompanyByEmployeeType(CreateAPIView):
     
@@ -317,7 +340,8 @@ class GetCompanyByEmployeeType(CreateAPIView):
                 
                 Companiesdata = C_Companies.objects.filter(IsSCM=EmployeeTypesdata_Serializer['IsSCM'])
                 Companiesdata_Serializer = C_CompanySerializer(Companiesdata, many=True)
-                
+                log_entry = create_transaction_logNew(request, Companiesdata_Serializer,0,'',312,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': Companiesdata_Serializer.data})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            log_entry = create_transaction_logNew(request, 0,0,'Companiesdata:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
