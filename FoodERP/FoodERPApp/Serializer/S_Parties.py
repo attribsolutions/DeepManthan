@@ -133,23 +133,23 @@ class M_PartiesSerializer(serializers.ModelSerializer):
 
         if query[0]['IsRetailer'] == False:
 
-            # if cluster_id is None and sub_cluster_id is  None:
-            #     try:
-            #         cluster_instance = M_Cluster.objects.get(id=cluster_id)
-            #         sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
-            #         M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
-            #     except M_Cluster.DoesNotExist:
-            #         pass  
-            #     except M_SubCluster.DoesNotExist:
-            #         pass 
+            if cluster_id is None and sub_cluster_id is  None:
+                try:
+                    cluster_instance = M_Cluster.objects.get(id=cluster_id)
+                    sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
+                    M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
+                except M_Cluster.DoesNotExist:
+                    pass  
+                except M_SubCluster.DoesNotExist:
+                    pass 
         # else:
-            for a in cluster_id:
-                cluster= cluster_id.pop('Cluster')
-                clusters = M_PartyDetails.objects.create(Cluster=cluster,**a)
+            # for a in cluster_id:
+            #     cluster= cluster_id.pop('Cluster')
+            #     clusters = M_PartyDetails.objects.create(Cluster=cluster,**a)
 
-            for b in sub_cluster_id:
-                subcluster = sub_cluster_id.pop('SubCluster')
-                subclusters = M_PartyDetails.objects.create(SubCluster=subcluster,**b)
+            # for b in sub_cluster_id:
+            #     subcluster = sub_cluster_id.pop('SubCluster')
+            #     subclusters = M_PartyDetails.objects.create(SubCluster=subcluster,**b)
         
         return PartyID
     
