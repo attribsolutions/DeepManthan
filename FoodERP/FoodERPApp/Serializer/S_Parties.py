@@ -102,56 +102,49 @@ class M_PartiesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_Parties
         fields = '__all__'
-        
+
+
     def create(self, validated_data):
-        PartyType = validated_data.get('PartyType')
-        PartyAddress_data = validated_data.pop('PartyAddress')
-        PartyPrefix_data = validated_data.pop('PartyPrefix')
-        PartySubPartys=validated_data.pop('PartySubParty')
+        PartyAddress_data = validated_data.pop('PartyAddress', [])
+        PartyPrefix_data = validated_data.pop('PartyPrefix', [])
+        PartySubPartys = validated_data.pop('PartySubParty', [])
         cluster_id = validated_data.pop('Cluster', None)
         sub_cluster_id = validated_data.pop('SubCluster', None)
-        
-        PartyID= M_Parties.objects.create(**validated_data)
-        
-        for PartyAddress in PartyAddress_data:
-            Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
 
-        for PartyPrefix in PartyPrefix_data:
-            Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix) 
-        
-        query=M_PartyType.objects.filter(id=PartyType.id).values('IsVendor', 'IsRetailer')
+        Party = M_Parties.objects.create(**validated_data)
 
-        if query[0]['IsVendor'] == True:
-            for PartySubParty in PartySubPartys:
-                subparty = PartySubParty.pop('Party')
-                PartySubParty=MC_PartySubParty.objects.create(Party=PartyID,SubParty=subparty, **PartySubParty)
+        for address_data in PartyAddress_data:
+            MC_PartyAddress.objects.create(Party=Party, **address_data)
 
-        else:
-            
-            for PartySubParty in PartySubPartys:
-                PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)   
+        for prefix_data in PartyPrefix_data:
+            MC_PartyPrefixs.objects.create(Party=Party, **prefix_data)
 
-        if query[0]['IsRetailer'] == False:
+        if Party.PartyType: 
+            party_type_data = Party.PartyType
+            is_vendor = party_type_data.IsVendor
+            is_retailer = party_type_data.IsRetailer
 
-            if cluster_id is None and sub_cluster_id is  None:
-                try:
-                    cluster_instance = M_Cluster.objects.get(id=cluster_id)
-                    sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
-                    M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
-                except M_Cluster.DoesNotExist:
-                    pass  
-                except M_SubCluster.DoesNotExist:
-                    pass 
-        # else:
-            # for a in cluster_id:
-            #     cluster= cluster_id.pop('Cluster')
-            #     clusters = M_PartyDetails.objects.create(Cluster=cluster,**a)
+            if is_vendor:
+                for sub_party_data in PartySubPartys:
+                    sub_party = sub_party_data.pop('Party', None)
+                    if sub_party:
+                        MC_PartySubParty.objects.create(Party=Party, SubParty=sub_party, **sub_party_data)
+            else:
+                for sub_party_data in PartySubPartys:
+                    MC_PartySubParty.objects.create(SubParty=Party, **sub_party_data)
 
-            # for b in sub_cluster_id:
-            #     subcluster = sub_cluster_id.pop('SubCluster')
-            #     subclusters = M_PartyDetails.objects.create(SubCluster=subcluster,**b)
-        
-        return PartyID
+            if not is_retailer:
+                if cluster_id is not None and sub_cluster_id is not None:
+                    try:
+                        cluster_instance = M_Cluster.objects.get(id=cluster_id)
+                        sub_cluster_instance = M_SubCluster.objects.get(id=sub_cluster_id)
+                        M_PartyDetails.objects.create(Party=Party, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
+                    except M_Cluster.DoesNotExist:
+                        pass
+                    except M_SubCluster.DoesNotExist:
+                        pass
+
+        return Party
     
             
 class M_PartiesSerializer1(serializers.Serializer):
