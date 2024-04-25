@@ -12,16 +12,7 @@ from django.views import View
 class H_PageAccessView(CreateAPIView):    
     permission_classes = (IsAuthenticated,)
     @transaction.atomic() 
-    # @cache_page(60*15) 
-    # def get(self, request, *args, **kwargs):
-    #         # Your view logic for GET requests here
-    #     return HttpResponse("This is the GET response.")
-
-    # def head(self, request, *args, **kwargs):
-    #     # Your view logic for HEAD requests here
-    #     return HttpResponse(status=200)
-    
-    # authentication__Class = JSONWebTokenAuthentication   
+      
     def get(self, request):
         try:
             with transaction.atomic():
@@ -29,7 +20,7 @@ class H_PageAccessView(CreateAPIView):
                 if cached_result is not None:                     
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': cached_result})
                 else:                    
-                    H_PageAccess_data = H_PageAccess.objects.all().order_by('Sequence')
+                    H_PageAccess_data = H_PageAccess.objects.all().values('id','Name','Sequence').order_by('Sequence')
                     if H_PageAccess_data.exists():
                         H_PageAccess_serializer = H_PageAccessSerializer(H_PageAccess_data, many=True)
                     
