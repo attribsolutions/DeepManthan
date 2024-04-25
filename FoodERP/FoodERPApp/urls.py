@@ -149,12 +149,13 @@ from .Views.V_CentralServiceItemMaster import *
 
 from .Views.V_PartyDetails import *
 
-
 from .Views.V_Settings import *
 
 from .Views.V_TargetUploads import *
 
 from .Views.V_Rates import *
+
+# from .Views.V_FTP import *
 
 
 urlpatterns = [
@@ -677,6 +678,7 @@ urlpatterns = [
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
             url(r'TransactionJson/([0-9]+)$',TransactionJsonView.as_view()), 
             url(r'AddTransactionType$',TransactionTypeAddView.as_view()),
+            url(r'LogsOnDashboard$',LogsOnDashboardView.as_view()),
                
 
 # RetailerApproval Apis
@@ -717,12 +719,13 @@ urlpatterns = [
           
 #Logs
               url(r'LogTransaction$',LogTransactionView.as_view()),           
-              
+            #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
              
            
               
               
-             
+            
+
 
 
 
