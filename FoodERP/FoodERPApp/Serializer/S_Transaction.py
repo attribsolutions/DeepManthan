@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import *
 from datetime import datetime
+from FoodERPDBLog.models import L_Transactionlog
 
 
 class EmplyoeeSerializerSecond(serializers.ModelSerializer):
@@ -17,6 +18,13 @@ class TransactionTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_TransactionType
         fields = '__all__'
+        
+
+class TransactionlogOnDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = L_Transactionlog
+        fields = '__all__'
+
             
 
 class TransactionlogSerializer(serializers.Serializer):
