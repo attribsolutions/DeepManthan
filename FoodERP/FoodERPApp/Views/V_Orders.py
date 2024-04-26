@@ -866,7 +866,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                         "TermsAndConditions": OrderTermsAndCondition,
                         "CreatedBy":a['CreatedBy'],
                         "CreatedOn":a['CreatedOn'],
-                        "VRate":a['VRate']
+                        # "VRate":a['VRate']
                     })
                     FinalResult = OrderData[0]
 
