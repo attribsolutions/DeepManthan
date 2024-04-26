@@ -26,15 +26,14 @@ class DiscountMastergo(CreateAPIView):
                 log_entry = create_transaction_logNew(request, 0, 0,'DiscountID:'+str(id),110,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Deleted Successfully', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
+            log_entry = create_transaction_logNew(request, 0, 0,"DiscountDelete:"+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
     
     def post(self, request, id=0):
+        Discountdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                
-                Discountdata = JSONParser().parse(request)
                 FromDate = Discountdata['FromDate']
                 ToDate = Discountdata['ToDate']
                 Party = Discountdata['Party']
@@ -108,7 +107,7 @@ class DiscountMastergo(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':''})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
+            log_entry = create_transaction_logNew(request, Discountdata, 0,"ListOfDiscount:"+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -119,6 +118,7 @@ class DiscountMasterSaveView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        DiscountMaster_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
                 DiscountMaster_data = JSONParser().parse(request)
@@ -133,11 +133,11 @@ class DiscountMasterSaveView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, DiscountMaster_data,DiscountMaster_data[0]['Party'],'From:'+str(DiscountMaster_data[0]['FromDate'])+','+'To:'+str(DiscountMaster_data[0]['ToDate'])+','+'TransactionID:'+str(LastInsertID),108,LastInsertID,DiscountMaster_data[0]['FromDate'],DiscountMaster_data[0]['ToDate'],DiscountMaster_data[0]['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, DiscountMaster_data,0,Discount_serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, DiscountMaster_data,0,"DiscountMasterSave:"+str(Discount_serializer.errors),34,0)
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, DiscountMaster_data, 0,"DiscountMasterSave:"+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -145,9 +145,9 @@ class DiscountMasterFilter(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Discountdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Discountdata = JSONParser().parse(request)
                 FromDate = Discountdata['FromDate']
                 ToDate = Discountdata['ToDate']
                 Party = Discountdata['Party']
@@ -186,7 +186,7 @@ ORDER BY M_DiscountMaster.id DESC''', ([Party], [today], [today]))
                     log_entry = create_transaction_logNew(request, Discountdata, Party,'DiscountList not available',124,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
+            log_entry = create_transaction_logNew(request, Discountdata, 0,"DiscountList:"+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -211,7 +211,7 @@ class DiscountPartyTypeView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, PartyTypes_Serializer, 0,'Company:'+str(PartyTypes_Serializer[0]['Company']),125,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyTypes_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     
@@ -236,5 +236,5 @@ class DiscountCustomerView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, M_Parties_serializer,0,'',126,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
