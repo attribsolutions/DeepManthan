@@ -97,14 +97,14 @@ class ItemSaleItemDropdownView(CreateAPIView):
                     query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items''')  
                 if query:
                     Item_serializer = ItemSaleItemSerializer(query, many=True).data
-                    print("aaaaa")
+                    CustomPrint("aaaaa")
                     log_entry = create_transaction_logNew(request, Itemdata,0,'',283,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Item_serializer})
-                print("bbbbbbbb")
+                CustomPrint("bbbbbbbb")
                 log_entry = create_transaction_logNew(request, Itemdata,0,'Items Not available ',283,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except Exception as e:
-            print("cccc")
+            CustomPrint("cccc")
             log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleItemDropdown:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         

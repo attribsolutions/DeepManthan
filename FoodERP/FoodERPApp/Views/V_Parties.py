@@ -42,7 +42,7 @@ class DivisionsView(CreateAPIView):
 
 #     # Get the session variable
 #     my_var = session.get('my_var', None)
-#     print(my_var)
+#     CustomPrint(my_var)
 #     return render(request, 'index.html', {'my_var': my_var})
 
 
@@ -55,7 +55,7 @@ class M_PartiesFilterView(CreateAPIView):
     def post(self, request):
 
         session = SessionStore(session_key=request.session.session_key)
-        # print('bbbbbbbbbbbbbbbbb', session.get('UserName'))
+        # CustomPrint('bbbbbbbbbbbbbbbbb', session.get('UserName'))
         try:
             with transaction.atomic():
 
@@ -124,7 +124,7 @@ class M_PartiesFilterView(CreateAPIView):
                 # else:
                 #     query=MC_PartySubParty.objects.filter(Party=PartyID)
 
-                # print((query.query))
+                # CustomPrint((query.query))
                 if not query:
                    
                     log_entry = create_transaction_logNew(request, Logindata, PartyID, "List Not available",90,0)
@@ -191,7 +191,7 @@ class M_PartiesViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 M_Parties_data = M_Parties.objects.filter(id=id)
-                # print(str( M_Parties_data.query))
+                # CustomPrint(str( M_Parties_data.query))
                 if not M_Parties_data:
                     log_entry = create_transaction_logNew(request, {'PartyID':id}, 0, "Party Not available",93,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
@@ -225,24 +225,24 @@ class M_PartiesViewSecond(CreateAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
+        M_Partiesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Partiesdata = JSONParser().parse(request)
                 M_PartiesdataByID = M_Parties.objects.get(id=id)
                 M_Parties_Serializer = UpdateM_PartiesSerializer(
                     M_PartiesdataByID, data=M_Partiesdata)
                 if M_Parties_Serializer.is_valid():
                     UpdatedParty = M_Parties_Serializer.save()
                     LastInsertID = UpdatedParty.id
-                    log_entry = create_transaction_logNew(request,M_Partiesdata,M_Partiesdata['PartySubParty'][0]['Party'],'',94,id)
+                    log_entry = create_transaction_logNew(request,M_Partiesdata,0,'',94,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request,M_Partiesdata, 0, 'PartyEditMethod:'+str(M_Parties_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'PartyEditMethod:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,M_Partiesdata, 0,'PartyEditMethod:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):

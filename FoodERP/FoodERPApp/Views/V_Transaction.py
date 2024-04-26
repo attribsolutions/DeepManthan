@@ -11,6 +11,7 @@ from django.db.models import Q
 from datetime import datetime
 from django.db import connection
 from .V_CommFunction import *
+from FoodERPDBLog.models import L_Transactionlog
 
 
 class EmplyoeeListView(CreateAPIView):
@@ -165,4 +166,25 @@ class TransactionTypeAddView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'TypeSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+        
+
+class LogsOnDashboardView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+      
+                Last_Logs = L_Transactionlog.objects.using('transactionlog_db').order_by('-Transactiontime')[:20]
+                Log_Serializer = TransactionlogOnDashboardSerializer(Last_Logs, many=True)
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Log_Serializer.data})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': (e), 'Data':[]})
+        
+
+
+
+
 

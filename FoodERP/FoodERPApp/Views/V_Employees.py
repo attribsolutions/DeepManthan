@@ -309,10 +309,10 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                     
                 # q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
                 # q0 = MC_ManagementParties.objects.filter(Employee=EmployeeID).select_related('Party')
-                # print(str(q0.query))
+                # CustomPrint(str(q0.query))
                 # # q2=M_Parties.objects.filter(PartyType__in=q1).filter(Q(ManagementEmpparty__isnull=True)| Q(id__in=[MC_ManagementParties.Party_id for MC_ManagementParties in q0 ])).distinct().values('id','Name','PartyType','ManagementEmpparty__Party_id')
                 # q2=q2=M_Parties.objects.filter(PartyType__in=q1).all()
-                # print(str(q2.query))
+                # CustomPrint(str(q2.query))
                 # Parties_serializer = M_PartiesSerializerThird(q2,many=True).data
                 # GetAllData = list()
                 # for a in Parties_serializer:

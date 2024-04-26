@@ -76,7 +76,7 @@ class DemandDetailsForIBChallan(CreateAPIView):
                                 "BaseUnitQuantity":d['BaseUnitQuantity']   
                                 })
                     query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                    # print(query.query)
+                    # CustomPrint(query.query)
                     if query.exists():
                         Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                         UnitDetails = list()

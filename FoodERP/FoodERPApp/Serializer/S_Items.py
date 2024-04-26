@@ -192,7 +192,7 @@ class ItemSerializer(serializers.ModelSerializer):
         else:
            
             for c in instance.ItemUnitDetails.all():
-                # print(c.id)
+                # CustomPrint(c.id)
                 SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
 
             for ItemUnit_data in validated_data['ItemUnitDetails']:

@@ -110,7 +110,7 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
-                # print(GRNdata['GRNReferences'])
+                # CustomPrint(GRNdata['GRNReferences'])
 
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
@@ -188,7 +188,7 @@ class T_GRNView(CreateAPIView):
                     O_BatchWiseLiveStockList=list()
                     
                    
-                # print(GRNdata)
+                # CustomPrint(GRNdata)
                 GRNdata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'GRN Save Successfully', 'Data': GRNdata})   
                 GRN_serializer = T_GRNSerializer(data=GRNdata)
@@ -335,7 +335,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         for b in OrderItemSerializedata:
                                 Item= b['Item']['id']
                                 query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                                # print(query.query)
+                                # CustomPrint(query.query)
                                 if query.exists():
                                     Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                     UnitDetails = list()
@@ -408,7 +408,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     ParentItem= a['Item']['id']
                                    
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # print(query.query)
+                                    # CustomPrint(query.query)
                                     if Parentquery.exists():
                                         ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
                                         ParentUnitDetails = list()
@@ -484,10 +484,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 elif Mode == 3: #Make GRN from Invoice
                     
                     Query1 = T_Invoices.objects.filter(id=POOrderIDs).values('Customer')
-                    # print(str(Query1[0]['Customer'])) 
+                    # CustomPrint(str(Query1[0]['Customer'])) 
                     
                     Query = T_Invoices.objects.filter(id=POOrderIDs).select_related('Party').values('Party__PartyType_id')
-                    # print(str(Query[0]['Party__PartyType_id'])) 
+                    # CustomPrint(str(Query[0]['Party__PartyType_id'])) 
                     if (Query[0]['Party__PartyType_id']) ==12:
                         IsDivisionFlag=1
                     else:
@@ -518,7 +518,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     
                                 Item= b['Item']['id']
                                 query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
-                                # print(query.query)
+                                # CustomPrint(query.query)
                                 if query.exists():
                                     Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
                                     UnitDetails = list()
