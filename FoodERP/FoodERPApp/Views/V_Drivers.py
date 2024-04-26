@@ -16,9 +16,9 @@ class DriverViewList(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Driverdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Driverdata = JSONParser().parse(request)
                 Company = Driverdata['CompanyID']
                 Party = Driverdata['PartyID']
                 DriverNamedata = M_Drivers.objects.filter(Party=Party,Company=Company)
@@ -30,7 +30,7 @@ class DriverViewList(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Driverdata,0,'Drivers Not Available',41,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Drivers Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'DriverList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, Driverdata,0,'DriverList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     
@@ -42,9 +42,9 @@ class DriverView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request, id=0):
+        Driverdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Driverdata = JSONParser().parse(request)
                 Driver_Serializer = M_DriverSerializer(data=Driverdata)
             if Driver_Serializer.is_valid():
                 Driver = Driver_Serializer.save()
@@ -56,7 +56,7 @@ class DriverView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Driver_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'DriverSave:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, Driverdata,0,'DriverSave:'+str(e),33,0)
             raise JsonResponse(
                 {'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
@@ -86,14 +86,14 @@ class DriverView(CreateAPIView):
             log_entry = create_transaction_logNew(request, Driver_Serializer,0,'DriverDetails Not available',179,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Driver Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'DriverDetails:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'DriverDetails:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
     @transaction.atomic()
     def put(self, request, id=0):
+        Driverdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Driverdata = JSONParser().parse(request)
                 DriverdataByID = M_Drivers.objects.get(id=id)
                 Driver_Serializer = M_DriverSerializer(
                     DriverdataByID, data=Driverdata)
@@ -106,7 +106,7 @@ class DriverView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Driver_Serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'DriverEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, Driverdata,0,'DriverEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
     @transaction.atomic()
