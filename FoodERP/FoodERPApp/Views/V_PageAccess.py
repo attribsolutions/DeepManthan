@@ -20,7 +20,7 @@ class H_PageAccessView(CreateAPIView):
                 if cached_result is not None:                     
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': cached_result})
                 else:                    
-                    H_PageAccess_data = H_PageAccess.objects.all().values('id','Name','Sequence').order_by('Sequence')
+                    H_PageAccess_data = H_PageAccess.objects.all().order_by('Sequence')
                     if H_PageAccess_data.exists():
                         H_PageAccess_serializer = H_PageAccessSerializer(H_PageAccess_data, many=True)
                     
