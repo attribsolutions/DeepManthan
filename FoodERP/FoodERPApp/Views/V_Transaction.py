@@ -193,7 +193,7 @@ class LogsOnDashboardView(CreateAPIView):
         try:
             with transaction.atomic():
                 query = """
-                    SELECT L_Transactionlog.id, L_Transactionlog.TranasactionDate, L_Transactionlog.Transactiontime, 
+                    SELECT L_Transactionlog.id, L_Transactionlog.TranasactionDate AS TransactionDate, L_Transactionlog.Transactiontime, 
                            M_Users.LoginName AS UserName, L_Transactionlog.IPaddress, M_Parties.Name AS PartyName, 
                            L_Transactionlog.TransactionDetails, L_Transactionlog.JsonData, M_TransactionType.Name AS TransactionType,
                            L_Transactionlog.TransactionID, L_Transactionlog.FromDate, L_Transactionlog.ToDate, P.Name AS CustomerName
@@ -214,7 +214,7 @@ class LogsOnDashboardView(CreateAPIView):
             for row in rows:
                 LogList.append({
                     "id": row[0],
-                    "TranasactionDate": row[1],
+                    "TransactionDate": row[1],
                     "Transactiontime": row[2],
                     "UserName": row[3],
                     "IPaddress": row[4],
