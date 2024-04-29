@@ -187,6 +187,7 @@ class LogsOnDashboardView(CreateAPIView):
                             LEFT JOIN FoodERP.M_Parties ON L_Transactionlog.PartyID = M_Parties.id
                             LEFT JOIN FoodERP.M_Parties P ON L_Transactionlog.CustomerID = P.id
                             LEFT JOIN FoodERP.M_TransactionType  ON L_Transactionlog.TransactionType = M_TransactionType.id
+                            WHERE M_TransactionType.TransactionCategory = 92
                             ORDER BY L_Transactionlog.Transactiontime DESC LIMIT 20"""
 
             with connection.cursor() as cursor:
