@@ -19,12 +19,6 @@ class TransactionTypeSerializer(serializers.ModelSerializer):
         model = M_TransactionType
         fields = '__all__'
         
-
-class TransactionlogOnDashboardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = L_Transactionlog
-        fields = '__all__'
-
             
 
 class TransactionlogSerializer(serializers.Serializer):
@@ -55,3 +49,5 @@ class TransactionJsonSerializer(serializers.Serializer):
     FromDate =serializers.DateField()
     ToDate=serializers.DateField()
     CustomerID = serializers.IntegerField()
+    
+ 
