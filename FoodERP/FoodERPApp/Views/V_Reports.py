@@ -438,13 +438,13 @@ FROM T_PurchaseReturn join TC_PurchaseReturnItems on TC_PurchaseReturnItems.Purc
 WHERE ReturnDate = %s AND Customer_id = %s and ((TC_PurchaseReturnItems.ItemReason_id IN (SELECT DefaultValue FROM M_Settings WHERE id = 14) and T_PurchaseReturn.Mode =3) OR(T_PurchaseReturn.Mode =2)) GROUP BY Item_id)PurchesReturn
 on I.Item_id=PurchesReturn.Item_id
 
-Left join (Select Item_id,SUM(BaseUnitQuantity)StockEntry  from T_Stock where IsStockAdjustment=0 and StockDate= DATE_SUB(  %s, INTERVAL 1 DAY ) AND Party_id=%s GROUP BY Item_id)StockEntry 
+Left join (Select Item_id,SUM(BaseUnitQuantity)StockEntry  from T_Stock where IsDeleted=0 and  IsStockAdjustment=0 and StockDate= DATE_SUB(  %s, INTERVAL 1 DAY ) AND Party_id=%s GROUP BY Item_id)StockEntry 
 ON I.Item_id=StockEntry.Item_id
 
-left join (SELECT Item_id,sum(Difference)StockAdjustmentQTY FROM T_Stock where IsStockAdjustment=1 and StockDate = %s and Party_id= %s group by Item_id)StockAdjustment 
+left join (SELECT Item_id,sum(Difference)StockAdjustmentQTY FROM T_Stock where IsDeleted=0 and IsStockAdjustment=1 and StockDate = %s and Party_id= %s group by Item_id)StockAdjustment 
 on I.Item_id=StockAdjustment.Item_id
 
-left join (SELECT Item_id,sum(BaseUnitQuantity)ActualStock FROM T_Stock where IsStockAdjustment=0 and StockDate = %s and Party_id= %s group by Item_id)ActualStock
+left join (SELECT Item_id,sum(BaseUnitQuantity)ActualStock FROM T_Stock where IsDeleted=0 and IsStockAdjustment=0 and StockDate = %s and Party_id= %s group by Item_id)ActualStock
 on I.Item_id=ActualStock.Item_id
 
 )R
