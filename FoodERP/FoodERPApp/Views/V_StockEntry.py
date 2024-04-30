@@ -162,7 +162,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 SubCluster = StockReportdata['SubCluster']
                 Group = StockReportdata['Group']
                 SubGroup = StockReportdata['SubGroup']
-
+                IsRateWise=StockReportdata['IsRateWise']
                 today = date.today()                 
                 if Party == "":
                     
@@ -223,8 +223,16 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
                     PartyIDs= Party  
 
                     where_clause = ""
-                    p2 = (today, Unit, [PartyIDs])
-
+                    Condition=""
+                    # p2 = (today, Unit, [PartyIDs]) 
+                    if IsRateWise:
+                        Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),2),2),0)Rate"
+                        p2 = (today, [PartyIDs])                         
+                        
+                    else:     
+                        Condition += "RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, %s, 0, 0, O_LiveBatches.MRPValue, 0)Rate"                  
+                        p2 = (today, Unit, [PartyIDs]) 
+                        
                     if Cluster:
                         where_clause += " AND M_Cluster.id = %s "
                         p2 += (Cluster,)
@@ -248,7 +256,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
     ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
     O_LiveBatches.MRPValue ,
     O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage,
-    RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, %s, 0, 0, O_LiveBatches.MRPValue, 0)Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+    {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
     FROM M_Items 
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
     left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
@@ -304,6 +312,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
                             "BatchCode" : row.BatchCode ,
                             "SystemBatchCode" : row.SystemBatchCode ,
                             "MRP":row.MRPValue,
+                            "Rate":row.Rate,
                             "PurchaseRate" : round(row.Rate,2),
                             "SaleableStock":round(SaleableStockActualQty,3),
                             "UnSaleableStock":round(UnSaleableStockActualQty,3),
