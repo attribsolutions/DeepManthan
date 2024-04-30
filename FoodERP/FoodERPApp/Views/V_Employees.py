@@ -290,7 +290,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
                 JOIN M_States ON M_States.id=M_Parties.State_id
                 JOIN M_Districts ON M_Districts.id=M_Parties.District_id
-                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 )a
+                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 OR M_PartyType.IsFranchises =1 )a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
@@ -370,20 +370,12 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     # q2 = M_Parties.objects.filter(id__in=query)
                     # Parties_serializer = DivisionsSerializerSecond(
                     #     q2, many=True).data
-                    query =  ( M_Parties.objects
-                            .filter(id__in=query,PartyAddress__IsDefault=1)
-                            .annotate(
-                                Address=F('PartyAddress__Address'),
-                               PartyTypeName=F('PartyType_id__Name'),
-                                
-                            )
-                            .values(
-                                'id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
-                                'PartyTypeName'
-                            ))
+                    query =  ( M_Parties.objects.filter(id__in=query,PartyAddress__IsDefault=1)
+                            .annotate(Address=F('PartyAddress__Address'),
+                               PartyTypeName=F('PartyType_id__Name'),).values('id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
+                                'PartyTypeName'))
                     
-                    
-                    
+                    CustomPrint(query.query)
                     Partylist = list()
                     for a in query:
                         
