@@ -338,3 +338,28 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
 
 
 
+class DeleteDuplicateStockEntryPageView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                
+                query=T_Stock.objects.raw('''select 1 as id, StockDate,Item_id,Party_id,max(id) maxid, count(*) cnt from T_Stock where StockDate>='20240331' and IsStockAdjustment=0  
+group by StockDate,Item_id,Party_id having count(*) > 1
+order by StockDate,Party_id,Item_id ''')
+                
+                for a in query:
+                    CustomPrint(a.Party_id,)
+                    CustomPrint(a.Item_id)
+                    CustomPrint(a.maxid)
+                    query2=T_Stock.objects.filter(StockDate='2024-03-31',  Item_id=a.Item_id,Party_id=a.Party_id,
+).exclude(id=a.maxid).update(IsDeleted=1)
+                   
+            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Delete Duplicate Stock Entry Successfully', 'Data': []})
+        except Exception as e:
+            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

@@ -220,14 +220,16 @@ left join
 left join 
 (select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)Quantity,Sum(Amount)Amount from T_Invoices
  join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
- where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,customer_id )B
+ where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 and Party_id in(select M_Parties.id from M_Parties join M_PartyType on M_PartyType.id=PartyType_id where M_PartyType.IsDivision=1 and M_PartyType.Company_id in(2,3)
+ ) group by item_id,customer_id )B
  on I.ItemID = B.Item_id and I.Party_id = B.Customer_id
  
  left join 
 (SELECT Customer_id ,Item_id ,Sum(TC_CreditDebitNoteItems.QtyInKg)CRNoteQuantity,Sum(Amount)CRNoteAmount
 FROM T_CreditDebitNotes
 JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id=T_CreditDebitNotes.id
-WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} group by item_id,customer_id)C 
+WHERE Month(CRDRNoteDate)={Month} and year(CRDRNoteDate)={Year} and Party_id in(select M_Parties.id from M_Parties join M_PartyType on M_PartyType.id=PartyType_id where M_PartyType.IsDivision=1 and M_PartyType.Company_id in(2,3)
+ ) group by item_id,customer_id)C 
 on I.ItemID = C.Item_id and I.Party_id = C.Customer_id 
 
 left join
@@ -287,6 +289,8 @@ join M_Parties  ON M_Parties.id=D.Party_id
             ''')
             TargetAchievementList = []   
             
+            CustomPrint(query)
+
             if query:   
                 for a in query:
                     
