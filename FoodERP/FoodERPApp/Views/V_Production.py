@@ -58,59 +58,79 @@ class ProductionView(CreateAPIView):
             with transaction.atomic():
                 Productiondata = JSONParser().parse(request)
                 Customer = Productiondata['Division']
-                Item = Productiondata['Item']
-                
+                Item = Productiondata['Item']  
+                PrintedBatchCode=Productiondata['PrintedBatchCode']
                 query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')
-                
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
                 BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0,1).GetBaseUnitQuantity()
                 
-                Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()
+                Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()                
                 GSTID = Gst[0]['Gstid']
-
+                GSTValue=Gst[0]['GST']                
+                
+                # MRPs=M_MRPMaster.objects.raw(f'''SELECT 1 id ,GetTodaysDateMRP({Item},'{ProductionDate}',1,0,0) MRPID,GetTodaysDateMRP({Item},'{ProductionDate}',2,0,0) MRPValue ''') 
+                # first_row = MRPs[0]
+                # MRPID = first_row.MRPID               
+                # MRPValue=first_row.MRPValue
+                # CustomPrint(MRPID)
+                # CustomPrint(MRPValue)
+               
+                
+                # ProductionItemCount=T_Production.objects.filter(Item_id=Item, ProductionDate=ProductionDate).count()
+                # ProductionItemCount_str = str(ProductionItemCount)
+                
+                # CustomPrint(Productiondata['BatchCode'])
                 Productiondata['BatchCode'] = BatchCode
+                # CustomPrint(ProductionItemCount_str)
+                # productionbatchcode = Productiondata['BatchCode'] 
+                # CustomPrint(Productiondata['BatchCode'])
                 Productiondata['BatchDate'] = date.today()
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 O_BatchWiseLiveStockList.append({
+                    
                     "Item": Productiondata['Item'],
                     "Quantity": Productiondata['ActualQuantity'],
                     "Unit": Productiondata['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "Party": Customer,
-                    "CreatedBy":Productiondata['CreatedBy'],
-                    
-                    
+                    "CreatedBy":Productiondata['CreatedBy'],                    
                     })
-
+                
                 O_LiveBatchesList.append({
                     
-                    "MRP": Productiondata['MRP'],
-                    "Rate": Productiondata['Rate'],
+                    "MRP": "",
+                    "Rate":"",
                     "GST": GSTID,
                     "SystemBatchDate": Productiondata['BatchDate'],
                     "SystemBatchCode": Productiondata['BatchCode'],
                     "BatchDate": Productiondata['BatchDate'],
-                    "BatchCode": Productiondata['PrintedBatchCode'],
+                    "BatchCode": PrintedBatchCode,
                     "ItemExpiryDate":Productiondata['BestBefore'],
                     "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
-                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList, 
+                    "MRPValue":0,
+                    "GSTPercentage":GSTValue,
                     
-                    })    
-
-                # CustomPrint(GRNdata)
-                Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
+                    }) 
+                # CustomPrint(O_LiveBatchesList)   
                 
+                # print(GRNdata)
+                Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList})                 
                 Production_Serializer = H_ProductionSerializer(data=Productiondata)
+                # CustomPrint(Production_Serializer)
                 if Production_Serializer.is_valid():
-                    Production_Serializer.save()
+                    
+                    Production_Serializer.save()                    
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production Save Successfully', 'Data':[]})
                 else:
+                    
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors, 'Data': []})
-        except Exception as e:
+        except Exception as e:            
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
 
 class ProductionViewSecond(RetrieveAPIView):
