@@ -168,21 +168,55 @@ class TransactionTypeAddView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 
+        
+        
+        
 class LogsOnDashboardView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    
+           
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request):
         try:
             with transaction.atomic():
-      
-                Last_Logs = L_Transactionlog.objects.using('transactionlog_db').order_by('-Transactiontime')[:20]
-                Log_Serializer = TransactionlogOnDashboardSerializer(Last_Logs, many=True)
-                
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Log_Serializer.data})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': (e), 'Data':[]})
+                query = """ SELECT L_Transactionlog.id, L_Transactionlog.TranasactionDate AS TransactionDate, L_Transactionlog.Transactiontime, 
+                            M_Users.LoginName AS UserName, L_Transactionlog.IPaddress, M_Parties.Name AS PartyName, 
+                            L_Transactionlog.TransactionDetails, L_Transactionlog.JsonData, M_TransactionType.Name AS TransactionType,
+                            L_Transactionlog.TransactionID, L_Transactionlog.FromDate, L_Transactionlog.ToDate, P.Name AS CustomerName
+                            FROM TransactionLog.L_Transactionlog 
+                            LEFT JOIN FoodERP.M_Users  ON L_Transactionlog.User = M_Users.id
+                            LEFT JOIN FoodERP.M_Parties ON L_Transactionlog.PartyID = M_Parties.id
+                            LEFT JOIN FoodERP.M_Parties P ON L_Transactionlog.CustomerID = P.id
+                            LEFT JOIN FoodERP.M_TransactionType  ON L_Transactionlog.TransactionType = M_TransactionType.id
+                            WHERE M_TransactionType.TransactionCategory = 92
+                            ORDER BY L_Transactionlog.Transactiontime DESC LIMIT 20"""
+
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+            LogList = []
+            for row in rows:
+                LogList.append({
+                    "id": row[0],
+                    "TransactionDate": row[1],
+                    "Transactiontime": row[2],
+                    "UserName": row[3],
+                    "IPaddress": row[4],
+                    "PartyName": row[5],
+                    "TransactionDetails": row[6],
+                    "JsonData": row[7],
+                    "TransactionType": row[8],
+                    "TransactionID": row[9],
+                    "FromDate": row[10],
+                    "ToDate": row[11],
+                    "CustomerName": row[12],
+                })
+
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': LogList})
         
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
 
 
 
