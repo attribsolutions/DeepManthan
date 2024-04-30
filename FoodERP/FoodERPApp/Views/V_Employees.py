@@ -375,7 +375,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                                PartyTypeName=F('PartyType_id__Name'),).values('id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
                                 'PartyTypeName'))
                     
-                    CustomPrint(query.query)
+                    # CustomPrint(query.query)
                     Partylist = list()
                     for a in query:
                         
