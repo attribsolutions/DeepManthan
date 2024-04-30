@@ -98,14 +98,16 @@ class MaterialIsssueList(CreateAPIView):
             with transaction.atomic():
                 MaterialIsssuedata = JSONParser().parse(request)
                 FromDate = MaterialIsssuedata['FromDate']
-                ToDate = MaterialIsssuedata['ToDate']
+                ToDate = MaterialIsssuedata['ToDate']  
                 query = T_MaterialIssue.objects.filter(
-                    MaterialIssueDate__range=[FromDate, ToDate])
+                    MaterialIssueDate__range=[FromDate, ToDate])                  
                 if query:
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond(
                         query, many=True).data
+                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
                     MaterialIsssueListData = list()
+                   
                     for a in MaterialIsssue_serializerdata:
                        
                         MaterialIsssueListData.append({
@@ -157,9 +159,10 @@ class MaterialIssueView(CreateAPIView):
                 
                 O_BatchWiseLiveStockList = list()
                 for MaterialIssueItem in MaterialIssueItems:
+                    CustomPrint(MaterialIssueItem)
                     BaseUnitQuantity = UnitwiseQuantityConversion(
                         MaterialIssueItem['Item'], MaterialIssueItem['IssueQuantity'], MaterialIssueItem['Unit'], 0, 0, 0, 1).GetBaseUnitQuantity()
-
+                   
                     O_BatchWiseLiveStockList.append({
                         "Quantity": MaterialIssueItem['BatchID'],
                         "Item": MaterialIssueItem['Item'],
@@ -178,7 +181,7 @@ class MaterialIssueView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssue_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
 class MaterialIssueViewSecond(RetrieveAPIView):
@@ -197,7 +200,35 @@ class MaterialIssueViewSecond(RetrieveAPIView):
         except T_MaterialIssue.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
     
+
+
     
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):       
+        ItemID = request.data['ItemID']
+        current_date = datetime.now().date() 
+        CustomPrint(ItemID) 
+        CustomPrint(current_date)        
+        try:
+            with transaction.atomic():
+                CustomPrint("shruti")          
+                ProductionItemCount=T_Production.objects.filter(Item_id=ItemID, ProductionDate=current_date).count()
+                CustomPrint(ProductionItemCount)
+                               
+                CountList = []                  
+                for a in ProductionItemCount:                       
+                        CountList.append({
+                            "ProductionItemCount":ProductionItemCount,
+                        })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CountList})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Exception(e), 'Data': []})
+
+
+   
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
