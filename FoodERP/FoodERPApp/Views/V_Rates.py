@@ -50,21 +50,29 @@ class M_RatesView(CreateAPIView):
                 
                 a=MaxValueMaster(M_RateMaster,'CommonID')
                 jsondata=a.GetMaxValue() 
+               
                 additionaldata= list()                
                 for b in M_Ratesdata:                    
+                    
                     b.update({'CommonID': jsondata})                   
-                    additionaldata.append(b)                
+                    additionaldata.append(b) 
+                    CustomPrint(b)
+                    ItemId=b['Item']
+                    EffectiveDate=b['EffectiveDate']
+                    CustomPrint(ItemId)
+                    Ratedata = M_RateMaster.objects.filter(Item_id=ItemId,EffectiveDate=EffectiveDate).update(IsDeleted=1)    
+                     
                 M_Rates_Serializer = M_RatesSerializer(data=additionaldata,many=True)
-            if M_Rates_Serializer.is_valid():
-                Rate = M_Rates_Serializer.save()
-                LastInsertID = Rate[0].id
-                
-                log_entry = create_transaction_logNew(request, M_Ratesdata,0,'TransactionID:'+str(LastInsertID),370,LastInsertID)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Save Successfully', 'TransactionID':LastInsertID,'ItemID':M_Ratesdata[0]['Item'],'Data' :[]})
-            else:
-                log_entry = create_transaction_logNew(request, M_Ratesdata, 0,'MRPSave:'+str(M_Rates_Serializer.errors),34,0)
-                transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Rates_Serializer.errors,'Data' :[]})
+                if M_Rates_Serializer.is_valid():
+                    Rate = M_Rates_Serializer.save()
+                    LastInsertID = Rate[0].id
+                    
+                    log_entry = create_transaction_logNew(request, M_Ratesdata,0,'TransactionID:'+str(LastInsertID),370,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Save Successfully', 'TransactionID':LastInsertID,'ItemID':M_Ratesdata[0]['Item'],'Data' :[]})
+                else:
+                    log_entry = create_transaction_logNew(request, M_Ratesdata, 0,'MRPSave:'+str(M_Rates_Serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Rates_Serializer.errors,'Data' :[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -80,13 +88,17 @@ class GETRateDetails(CreateAPIView):
             with transaction.atomic():
                 EffectiveDate = request.data['EffectiveDate'] 
                 CompanyID = request.data['CompanyID']            
-                MRates=M_RateMaster.objects.raw(f'''SELECT 1  id,ifnull(MAX(M_RateMaster.id),0) AS RateMasterID,
-                                                    M_Items.id AS ItemID,
-                                                    GetTodaysDateRate(M_Items.id, '{EffectiveDate}',2) AS MRates,
-                                                    MAX(M_Items.Name) AS Name 
-                                                    FROM M_Items LEFT JOIN  M_RateMaster ON M_RateMaster.Item_id = M_Items.id 
-                                                    JOIN  MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id   where M_Items.Company_id={CompanyID}                                                                                              
-                                                    GROUP BY  M_Items.id''')  
+                
+                MRates=M_RateMaster.objects.raw(f'''SELECT 1 id ,
+			M_Items.id AS ItemID,
+            GetTodaysDateRate(M_Items.id, '{EffectiveDate}',1) AS Rateid,
+			GetTodaysDateRate(M_Items.id, '{EffectiveDate}',2) AS MRates,
+            GetTodaysDateRate(M_Items.id, '{EffectiveDate}',3) AS EffectiveDate,
+            GetTodaysDateRate(M_Items.id, '{EffectiveDate}',4) AS Unit,
+			M_Items.Name ItemName ,M_Units.Name UnitName,BaseUnitID_id
+            FROM M_Items 
+            JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id
+            where M_Items.Company_id={CompanyID} ''')  
                 # CustomPrint(MRates.query)
                            
                 if not MRates:
@@ -102,11 +114,13 @@ class GETRateDetails(CreateAPIView):
                         
                         for a in MRates:
                             ItemList.append({
-                            "id":a.RateMasterID,
-                            "Item":a.ItemID,
-                            "Name": a.Name,
+                            "id":a.Rateid,
+                            "ItemID":a.ItemID,
+                            "ItemName": a.ItemName,
                             "CurrentRate":a.MRates,
-                            "CurrentDate":current_date,
+                            "EffectiveDate":a.EffectiveDate,                            
+                            "UnitName" : a.UnitName,
+                            "BaseUnitID" : a.BaseUnitID_id,
                             "Rate": ""
                         })
                             
