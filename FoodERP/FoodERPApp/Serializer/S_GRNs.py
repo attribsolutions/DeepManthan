@@ -165,7 +165,7 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
         ret = super(TC_GRNItemsSerializerSecond, self).to_representation(instance)
         # if parent is None, overwrite
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage": None}
+            ret["GST"] = {"id": None, "GSTPercentage": None,"HSNCode" :None}
             
         if not ret.get("MRP", None):
             ret["MRP"] = {"id": None, "MRP": None}    
