@@ -356,7 +356,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
