@@ -17,9 +17,9 @@ class M_EmployeesFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Logindata = JSONParser().parse(request)
         try:
-            with transaction.atomic():
-                Logindata = JSONParser().parse(request)
+            with transaction.atomic():  
                 UserID = Logindata['UserID']
                 RoleID = Logindata['RoleID']
                 CompanyID = Logindata['CompanyID']
@@ -98,7 +98,7 @@ where M_Employees.CreatedBy=%s
                     log_entry = create_transaction_logNew(request,Logindata,Logindata['PartyID'],'',199,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmployeesData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'EmployeeList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,Logindata,0,'EmployeeList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -130,7 +130,7 @@ class M_EmployeesView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -208,11 +208,10 @@ where M_Employees.id= %s''', [id])
 
     @transaction.atomic()
     def put(self, request, id=0):
+        M_Employeesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Employeesdata = JSONParser().parse(request)
                 M_EmployeesdataByID = M_Employees.objects.get(id=id)
-
                 M_Employees_Serializer = M_EmployeesSerializer(
                     M_EmployeesdataByID, data=M_Employeesdata)
                 if M_Employees_Serializer.is_valid():
@@ -225,7 +224,7 @@ where M_Employees.id= %s''', [id])
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'EmplyoeeEdit:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request,M_Employeesdata,0,'EmplyoeeEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
@@ -267,7 +266,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                 log_entry = create_transaction_logNew(request,ManagementEmployeedata,0,'Employee Not Available',204,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Employee Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeeList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeeList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
@@ -326,10 +325,10 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 #         'State': Parties_serializer2[0]['State']['Name'],
                 #         'District': Parties_serializer2[0]['District']['Name'],
                 #         })
-                log_entry = create_transaction_logNew(request,ManagementEmpParties_data,0,'Company:'+str(CompanyID),204,0)
+                log_entry = create_transaction_logNew(request,ManagementEmpParties_data,0,'Company:'+str(CompanyID),380,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GetAllData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeePartiesFilter:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeePartiesList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -357,7 +356,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -375,7 +374,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                                PartyTypeName=F('PartyType_id__Name'),).values('id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
                                 'PartyTypeName'))
                     
-                    CustomPrint(query.query)
+                    # CustomPrint(query.query)
                     Partylist = list()
                     for a in query:
                         
