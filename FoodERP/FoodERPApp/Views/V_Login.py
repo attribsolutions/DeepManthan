@@ -411,29 +411,32 @@ class UserPartiesForLoginPage(CreateAPIView):
                 #      left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id
                 #      Left JOIN M_Roles on M_Roles.id=MC_UserRoles.Role_id		 
                 #      WHERE M_Users.Employee_id=%s ''', [id])
-                
-                query =  ( MC_UserRoles.objects.select_related('User', 'Party', 'Role')
-                            .filter(User__Employee_id=id)
-                            .annotate(
-                                RoleName=F('Role__Name'),
-                                PartyName=F('Party__Name'),
-                                IsSCMPartyType=F('Party__PartyType__IsSCM'),
-                                GSTIN=F('Party__GSTIN'),
-                                FSSAINo=F('Party__PartyAddress__FSSAINo'),
-                                FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
-                                PartyTypeID=F('Party__PartyType_id'),
-                                PartyType=F('Party__PartyType__Name'),
-                                UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty')
-                            ).annotate(
-                                IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
-                                UploadSalesDatafromExcelPartyInt=Case(When(UploadSalesDatafromExcelParty=True, then=Value(1)),default=Value(0),output_field=IntegerField())
-    )
-                            .values(
-                                'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee',
-                                'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                                'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt'
-                            ))
-                        
+
+                query = (
+                    MC_UserRoles.objects.select_related('User', 'Party', 'Role')
+                    .filter(User__Employee_id=id)
+                    .annotate(
+                        RoleName=F('Role__Name'),
+                        PartyName=F('Party__Name'),
+                        IsSCMPartyType=F('Party__PartyType__IsSCM'),
+                        GSTIN=F('Party__GSTIN'),
+                        FSSAINo=F('Party__PartyAddress__FSSAINo'),
+                        FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
+                        PartyTypeID=F('Party__PartyType_id'),
+                        PartyType=F('Party__PartyType__Name'),
+                        UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty'),
+                        IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
+                    ).annotate(
+                        IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
+                        UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ) 
+                    )
+                    .values(
+                        'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee_id',
+                        'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
+                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt', 'IsDefaultPartyAddress'
+                    )
+                    .filter(IsDefaultPartyAddress=True)
+                )      
                 # UserID = request.user.id
                 # CustomPrint(str(query.query))
                 if not query:
@@ -444,9 +447,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     #     query, many=True).data
                     UserPartiesData = list()
                     for item in query:
-                        
                         UserPartiesData.append({
-
                             "id" : item['id'],
                             "Role" : item['Role_id'],
                             "RoleName" : item['RoleName'],
@@ -462,9 +463,6 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "PartyType":item['PartyType'],
                             "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt']
                         })
-
-                    
-                    
                     
                     log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserPartiesData})
