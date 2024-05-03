@@ -24,6 +24,7 @@ class H_PageAccessView(CreateAPIView):
                     if H_PageAccess_data.exists():
                         H_PageAccess_serializer = H_PageAccessSerializer(H_PageAccess_data, many=True)
                     
+                    
                         result = H_PageAccess_serializer.data
                         cache.set(request, result, timeout=3600)  # Cache for 1 hour
                         return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': H_PageAccess_serializer.data })
