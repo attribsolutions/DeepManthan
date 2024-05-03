@@ -273,6 +273,7 @@ class TargetVSAchievementView(CreateAPIView):
             Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
             Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CXQuantity,0),3)CXQuantity,
             Round(IFNULL(CXAmount,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
+            ,M_Items.id ItemID,M_Items.SAPItemCode
             FROM
   
   {TargetVsAchiQurey(Party,Month,Year)}
@@ -306,14 +307,18 @@ join M_Parties  ON M_Parties.id=D.Party_id
                     "CXAmountWithGST":a.CXAmount,
                     "CreditNoteQuantityInKG" : a.CRNoteQuantity,
                     "CreditNoteAmountWithGST" :a.CRNoteAmount,
-                    "PartyID": a.PartyID,
+                    
                     "PartyName": a.PartyName,
                     "ItemName": a.ItemName,
                     "ItemGroup": a.ItemGroupName,
                     "ItemSubGroup": a.SubGroupName,
                     "Cluster": a.ClusterName,
                     "SubCluster": a.SubClusterName,
-                    "SAPPartyCode":a.SAPPartyCode 
+                    "PartyID": a.PartyID,
+                    "SAPPartyCode":a.SAPPartyCode ,
+                    "ItemID" : a.ItemID,
+                    "SAPItemCode" : a.SAPItemCode
+
                       
                 })
            
@@ -347,7 +352,14 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
                     dd=Party_ID[:-1]
                     Party=', '.join(dd)
                     
-            query = T_TargetUploads.objects.raw(f'''
+            query = T_TargetUploads.objects.raw(f'''select id,ItemGroupName,(AchQuantity-CRNoteQuantity)AchQuantity, (AchAmount- CRNoteAmount)AchAmount,
+        CXQuantity,CXAmount,TargetQuantityInKG,TargetAmount,
+        ((AchQuantity-CRNoteQuantity)-CXQuantity)GTAchQuantity,
+        ((AchAmount- CRNoteAmount)-CXAmount)GTAchAmount,
+        CRNoteQuantity,CRNoteAmount
+        
+        from (
+                                                
             select  1 as id,M_Group.Name ItemGroupName,
             Round(IFNULL(sum(Quantity),0),3)AchQuantity,Round(IFNULL(sum(Amount),0),2)AchAmount,
             Round(IFNULL(sum(CXQuantity),0),3)CXQuantity,Round(IFNULL(sum(CXAmount),0),2)CXAmount,
@@ -364,11 +376,11 @@ join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
 where MC_ItemGroupDetails.GroupType_id=1  
 
-group by M_Group.id 
+group by M_Group.id )v
   
             ''')
             TargetAchievementList = []   
-            # CustomPrint(query.query)
+            
             TotalGTAchQuantity=0
             TotalGTAchAmount=0
             if query:   
@@ -386,12 +398,12 @@ group by M_Group.id
                     "CXAmountWithGST":a.CXAmount,
                     "TargetQuantityInKG": a.TargetQuantityInKG,
                     "GTAchQuantityInKG" : a.GTAchQuantity,
-                    "AchQty%" :  0 if a.TargetQuantityInKG ==0 else round((a.GTAchQuantity/a.TargetQuantityInKG),2),
-                    "ContriQty%" : 0 if TotalGTAchQuantity==0 else  round((a.GTAchQuantity/TotalGTAchQuantity),2),
+                    "AchQty%" :  0 if a.TargetQuantityInKG ==0 else round((a.GTAchQuantity/a.TargetQuantityInKG)*100,2),
+                    "ContriQty%" : 0 if TotalGTAchQuantity==0 else  round((a.GTAchQuantity/TotalGTAchQuantity)*100,2),
                     "TargetAmountWithGST" : a.TargetAmount,
                     "GTAchAmountWithGST" : a.GTAchAmount,
-                    "AchAmount%" : 0 if a.TargetAmount == 0 else round((a.GTAchAmount/a.TargetAmount),2),
-                    "ContriAmount%" : 0 if TotalGTAchAmount == 0 else round((a.GTAchAmount/TotalGTAchAmount),2),
+                    "AchAmount%" : 0 if a.TargetAmount == 0 else round((a.GTAchAmount/a.TargetAmount)*100,2),
+                    "ContriAmount%" : 0 if TotalGTAchAmount == 0 else round((a.GTAchAmount/TotalGTAchAmount)*100,2),
                     "CreditNoteQuantityInKG" : a.CRNoteQuantity,
                     "CreditNoteAmountWithGST" :a.CRNoteAmount,
                     
