@@ -433,7 +433,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt', 'IsDefaultPartyAddress'
+                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt'
                     )
                     # .filter(IsDefaultPartyAddress=True)
                 )      
