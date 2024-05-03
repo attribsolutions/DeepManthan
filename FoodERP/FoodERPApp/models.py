@@ -2336,7 +2336,7 @@ class M_RateMaster(models.Model):
     # 'Customer means M_Parties ID'
     # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
     Party =models.ForeignKey(M_Parties, related_name='RateParty', on_delete=models.PROTECT,null=True,blank=True)
-    PriceList =models.ForeignKey(M_PriceList, related_name='PriceList', on_delete=models.PROTECT)
+    PriceList =models.ForeignKey(M_PriceList, related_name='RatePriceList', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_RateMaster"       
         
