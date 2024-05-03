@@ -425,7 +425,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         PartyTypeID=F('Party__PartyType_id'),
                         PartyType=F('Party__PartyType__Name'),
                         UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty'),
-                        IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
+                        # IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
                     ).annotate(
                         IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
                         UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ) 
@@ -435,7 +435,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
                         'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt', 'IsDefaultPartyAddress'
                     )
-                    .filter(IsDefaultPartyAddress=True)
+                    # .filter(IsDefaultPartyAddress=True)
                 )      
                 # UserID = request.user.id
                 # CustomPrint(str(query.query))
