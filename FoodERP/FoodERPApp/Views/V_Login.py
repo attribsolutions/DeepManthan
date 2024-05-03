@@ -438,7 +438,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     # .filter(IsDefaultPartyAddress=True)
                 )      
                 # UserID = request.user.id
-                CustomPrint(str(query.query))
+                # CustomPrint(str(query.query))
                 if not query:
                     log_entry = create_transaction_logNew(request,0,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
