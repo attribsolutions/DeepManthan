@@ -414,7 +414,7 @@ class UserPartiesForLoginPage(CreateAPIView):
 
                 query = (
                     MC_UserRoles.objects.select_related('User', 'Party', 'Role')
-                    .filter(User__Employee_id=id )
+                    .filter(User__Employee_id=id)
                     .annotate(
                         RoleName=F('Role__Name'),
                         PartyName=F('Party__Name'),
@@ -425,18 +425,17 @@ class UserPartiesForLoginPage(CreateAPIView):
                         PartyTypeID=F('Party__PartyType_id'),
                         PartyType=F('Party__PartyType__Name'),
                         UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty'),
-                        # IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault') ,     
+                        IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
                     ).annotate(
                         IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
-                        UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ), 
-                        
+                        UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ) 
                     )
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt'
+                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt', 'IsDefaultPartyAddress'
                     )
-                   
+                    .filter(IsDefaultPartyAddress=True)
                 )      
                 # UserID = request.user.id
                 # CustomPrint(str(query.query))
