@@ -12,16 +12,7 @@ from django.views import View
 class H_PageAccessView(CreateAPIView):    
     permission_classes = (IsAuthenticated,)
     @transaction.atomic() 
-    # @cache_page(60*15) 
-    # def get(self, request, *args, **kwargs):
-    #         # Your view logic for GET requests here
-    #     return HttpResponse("This is the GET response.")
-
-    # def head(self, request, *args, **kwargs):
-    #     # Your view logic for HEAD requests here
-    #     return HttpResponse(status=200)
-    
-    # authentication__Class = JSONWebTokenAuthentication   
+      
     def get(self, request):
         try:
             with transaction.atomic():
