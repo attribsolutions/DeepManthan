@@ -718,7 +718,8 @@ urlpatterns = [
               url(r'TargetVSAchievementGroupwise$', TargetVSAchievementGroupwiseView.as_view()),
           
 #Logs
-              url(r'LogTransaction$',LogTransactionView.as_view()),           
+              url(r'LogTransaction$',LogTransactionView.as_view()),   
+              url(r'DeleteDuplicateStockEntry$',DeleteDuplicateStockEntryPageView.as_view()),        
             #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
              
            

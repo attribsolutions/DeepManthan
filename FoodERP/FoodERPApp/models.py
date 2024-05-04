@@ -1844,6 +1844,7 @@ class T_Stock(models.Model):
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
     Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
+    IsDeleted = models.BooleanField(default=False)
     class Meta:
         db_table="T_Stock"        
                 
@@ -2334,7 +2335,8 @@ class M_RateMaster(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemRateDetails', on_delete=models.CASCADE)
     # 'Customer means M_Parties ID'
     # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
- 
+    Party =models.ForeignKey(M_Parties, related_name='RateParty', on_delete=models.PROTECT,null=True,blank=True)
+    PriceList =models.ForeignKey(M_PriceList, related_name='RatePriceList', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_RateMaster"       
         
