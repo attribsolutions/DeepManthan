@@ -209,7 +209,7 @@ def TargetVsAchiQurey(Party,Month,Year):
   from 
 (SELECT ItemID,Party Party_id from 
 (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id in(SELECT distinct PartyType_id from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode > 0))s ,
-(SELECT id Party, Name from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode > 0)P )I 
+(SELECT id Party, Name from M_Parties where id in ({Party}) and PartyType_id !=19 and  M_Parties.SAPPartyCode > 0)P )I 
 
 left join 
   
