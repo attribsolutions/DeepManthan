@@ -121,7 +121,6 @@ class DiscountMasterSaveView(CreateAPIView):
         DiscountMaster_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                DiscountMaster_data = JSONParser().parse(request)
                 Discount_serializer = DiscountSerializer(data=DiscountMaster_data, many=True)
                 if Discount_serializer.is_valid():
                     Discount = Discount_serializer.save()
