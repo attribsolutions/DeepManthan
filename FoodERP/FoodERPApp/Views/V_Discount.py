@@ -121,9 +121,7 @@ class DiscountMasterSaveView(CreateAPIView):
         DiscountMaster_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                DiscountMaster_data = JSONParser().parse(request)
-                Discount_serializer = DiscountSerializer(
-                    data=DiscountMaster_data, many=True)
+                Discount_serializer = DiscountSerializer(data=DiscountMaster_data, many=True)
                 if Discount_serializer.is_valid():
                     Discount = Discount_serializer.save()
                     LastInsertID = Discount[0].id
@@ -138,7 +136,7 @@ class DiscountMasterSaveView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, DiscountMaster_data, 0,"DiscountMasterSave:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DiscountMasterFilter(CreateAPIView):
