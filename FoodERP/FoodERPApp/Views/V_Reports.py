@@ -1383,7 +1383,6 @@ class ProductAndMarginReportView(CreateAPIView):
                 SubGroupID = data['SubGroup'].split(",")
                 ItemID = data['Item'].split(",")
                 
-                
 
                 query = """ SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
@@ -1440,22 +1439,16 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID])
                 
-                
-                
-                
                     # CustomPrint(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
 
                     for row in ItemQuery:
-
-                            
                         
                         if IsSCM == '0':
                             
                             if PriceListID == 0:
-                                
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
                             else:
                                
@@ -1481,12 +1474,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                     
                                     pp=(i.CalculationPath).split(',')
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
-                         
                         # CustomPrint(pricelistquery.query) 
-
-
-                            
-                            
 
                         ItemMargins = list()
                         RateList = list()
@@ -1503,8 +1491,6 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                 string2 = (x.Name).replace(" ", "")
                                 ItemMargins.append({
                                     string2+'Margin': str(float(a.Margin)) + '%'
-
-
                                 })
                                 RateList.append({
 
@@ -1531,15 +1517,15 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                             "Barcode": row.BarCode,
                             "HSNCode": row.HSNCode,
                             "Company": row.CompanyName,
-                            "SKUActiveDeactivestatus": row.isActive,
+                            "SKUStatus(T,F)": row.isActive,
                             "BoxSize": row.BoxSize,
                             "StoringCondition": row.StoringCondition,
                             "Product": row.Product,
-                            "subProduct": row.SubProduct,
-                            "ItemName": row.ItemName,
-                            "ItemShortName": row.ShortName,
+                            "SubProduct": row.SubProduct,
+                            "SKUName": row.ItemName,
+                            "SKUShortName": row.ShortName,
                             "MRP": row.MRP,
-                            "GST": str(row.GST) +'%',
+                            "GST%": str(row.GST) +'%',
                             "BaseUnit": row.BaseUnit,
                             "SKUVol": row.SKUVol,
                             "ShelfLife": row.ShelfLife,
