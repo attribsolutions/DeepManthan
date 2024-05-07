@@ -164,7 +164,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                         Supplier_serializer = PartySerializer(Query, many=True).data
                     else:    
                         Supplier_serializer = PartySubpartySerializerSecond(Query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Supplier_serializer})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Supplier_serializer})
                     ListData = list()
                     FSSAINo= " "
                     FSSAIExipry = ""
