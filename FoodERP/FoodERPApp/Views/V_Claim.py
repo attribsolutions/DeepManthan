@@ -322,11 +322,11 @@ class MasterClaimView(CreateAPIView):
                                     "NetPurchaseValue"], Budget=a["Budget"], ClaimAmount=a["ReturnAmount"], ClaimAgainstNetSale=a["ClaimAgainstNetSale"], Item_id=a["Item_id"],  Party_id=Party, CreatedBy=0)
                                 stock.save()
     # ===========================================================================================================================================
-                            print(PartyName +'Master Claim Create Successfully')
+                            # CustomPrint(PartyName +'Master Claim Create Successfully')
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName +' Master Claim Create Successfully', 'Data': []})
                         else:
                             log_entry = create_transaction_logNew(request, Orderdata,PartyID,'',259,0,FromDate,ToDate,0)
-                            print(PartyName +' Master Claim Already Created...!')
+                            # CustomPrint(PartyName +' Master Claim Already Created...!')
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': PartyName +' Master Claim Already Created...!', 'Data': []})
                 log_entry = create_transaction_logNew(request, Orderdata,0,'',258,0,FromDate,ToDate,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Master Claim Create Successfully', 'Data': []})
@@ -357,7 +357,7 @@ class MasterClaimPrintView(CreateAPIView):
                 for i in sorted_data_list:
                     PartyTypeID = i["id"]
                     PartyTypeName = i["Name"]
-                    printReasonwisequery = MC_ReturnReasonwiseMasterClaim.objects.raw(''' SELECT 1 as id, M_GeneralMaster.Name ItemReasonName, PrimaryAmount PurchaseAmount, SecondaryAmount SaleAmount, ReturnAmount, NetSaleValue, 
+                    Reasonwisequery = MC_ReturnReasonwiseMasterClaim.objects.raw(''' SELECT 1 as id, M_GeneralMaster.Name ItemReasonName, PrimaryAmount PurchaseAmount, SecondaryAmount SaleAmount, ReturnAmount, NetSaleValue, 
 MC_ReturnReasonwiseMasterClaim.Budget, ClaimAmount, ClaimAgainstNetSale
  FROM MC_ReturnReasonwiseMasterClaim 
 join M_GeneralMaster on M_GeneralMaster.id=MC_ReturnReasonwiseMasterClaim.ItemReason_id 
@@ -366,7 +366,7 @@ where FromDate=%s and ToDate=%s and Party_id=%s and PartyType=%s
 order by M_GeneralMaster.id
 ''', ([FromDate], [ToDate], [Party], [PartyTypeID]))
                     ReasonwiseMasterClaim = ReasonwiseMasterClaimSerializer(
-                        printReasonwisequery, many=True).data
+                        Reasonwisequery, many=True).data
                     if ReasonwiseMasterClaim:
                         ReasonwiseMasterClaimList.append({
                             PartyTypeName + ' Claim': ReasonwiseMasterClaim
