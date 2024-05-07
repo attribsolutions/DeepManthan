@@ -157,7 +157,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
 
                 elif (Type==4):
                     Query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=id))
-                
+                print(Query)
                 if Query:
                     
                     if(Type==4):
@@ -216,6 +216,21 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "FSSAIExipry" : FSSAIExipry,
                             "IsTCSParty":a['IsTCSParty'],
                             "SkyggeID": a['SubParty']['SkyggeID']
+                            })
+                        elif(Type==4  ):  
+                            if(a['PartyAddress'][0]['IsDefault'] == 1):
+                                FSSAINo=a['PartyAddress'][0]['FSSAINo']
+                                FSSAIExipry=a['PartyAddress'][0]['FSSAIExipry']
+                            
+                            ListData.append({
+                            "id": a['id'],
+                            "Name": a['Name'],
+                            "GSTIN": a['GSTIN'],
+                            "PAN":a['PAN'],
+                            "FSSAINo" : FSSAINo,
+                            "FSSAIExipry" : FSSAIExipry,
+                            "IsTCSParty":0,
+                            "SkyggeID": a['SkyggeID']
                             })
                         else:
                             if(a['Party']['PartyAddress'][0]['IsDefault'] == 1):
