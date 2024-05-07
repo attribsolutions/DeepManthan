@@ -580,7 +580,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     def put(self, request, id=0):
         try:
@@ -1027,9 +1027,9 @@ class SummaryReportView(CreateAPIView):
                             "OrderDate": row.OrderDate,
                             "SupplierName": row.SupplierName,
                             "CustomerName": row.CustomerName,
-                            "GroupName": row.GroupName,
-                            "SubGroup": row.SubGroup,
-                            "MaterialName": row.MaterialName,
+                            "Product": row.GroupName,
+                            "SubProduct": row.SubGroup,
+                            "SKUName": row.MaterialName,
                             "QtyInNo": float(row.QtyInNo),
                             "QtyInKg": float(row.QtyInKg),
                             "QtyInBox": float(row.QtyInBox),
