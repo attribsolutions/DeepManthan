@@ -346,6 +346,12 @@ class OrderEditserializer(serializers.Serializer):
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     StockQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data['StockQuantity'] is None:
+            data['StockQuantity'] = '0.00'
+        return data
    
 
 class ReportOrderItemSerializer(serializers.ModelSerializer):
