@@ -60,7 +60,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         
                         checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID'])
                         if checkduplicate:
-                            log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],33,0,0,0,Customer)
+                            log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
                             for aa in data['OrderItem']:
@@ -169,7 +169,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
                         # CustomPrint('bbbbbbbbbb')
-                        log_entry = create_transaction_logNew(request, data, 0,  'Unauthorized',33,0,0,0,0)
+                        log_entry = create_transaction_logNew(request, data, 0,  'Unauthorized',161,0,0,0,0)
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
