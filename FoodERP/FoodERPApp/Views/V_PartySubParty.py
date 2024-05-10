@@ -157,7 +157,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
 
                 elif (Type==4):
                     Query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=id))
-                print(Query)
+                # print(Query.query)
                 if Query:
                     
                     if(Type==4):
