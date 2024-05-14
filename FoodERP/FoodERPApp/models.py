@@ -262,7 +262,7 @@ class M_Employees(models.Model):
     State = models.ForeignKey(M_States, related_name='EmployeesState', on_delete=models.PROTECT)
     City = models.ForeignKey(M_Cities, related_name='EmployeesCity', on_delete=models.PROTECT,blank=True, null=True)
     PIN = models.CharField(max_length=500,null=True,blank=True)
-  
+    Designation =  models.CharField(max_length=10,blank=True, null=True)
     class Meta:
         db_table = "M_Employees"
 

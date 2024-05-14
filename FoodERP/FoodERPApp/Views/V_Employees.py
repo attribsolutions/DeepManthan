@@ -473,4 +473,40 @@ class PartiesEmpAllDetailsView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
         
           
-   
+class EmployeeSubEmployeeView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)   
+
+    @transaction.atomic()
+    def get(self, request,id=0):
+        try:
+            with transaction.atomic():
+                
+                    pass
+                    
+                    
+                    
+#         EmployeeSubEmployeeQuery=M_PartyDetails.objects.raw('''select EmpID, concat(M_Employees.Name,'(', Desig,')') Employee from 
+# (SELECT distinct NH EmpID,'NH' Desig FROM FoodERP.M_PartyDetails where GM=362 
+# union
+# SELECT distinct RH EmpID,'RH' Desig FROM FoodERP.M_PartyDetails where GM=362
+# union
+# SELECT distinct ASM EmpID,'ASM' Desig FROM FoodERP.M_PartyDetails where GM=362
+# union
+# SELECT distinct SO EmpID,'SO' Desig FROM FoodERP.M_PartyDetails where GM=362
+# union
+# SELECT distinct SE EmpID,'SE' Desig FROM FoodERP.M_PartyDetails where GM=362
+# union
+# SELECT distinct MT EmpID,'MT' Desig FROM FoodERP.M_PartyDetails where GM=362)a
+# join M_Employees on M_Employees.id=EmpID
+# where EmpID >0''')
+                    
+                    
+#                     log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata[0]['Party'],'',205,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Management Employee Parties Data Save Successfully', 'Data': []})
+#                 else:
+#                     log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata['Party'],'ManagementEmpPartiesSave:'+str(ManagementEmployeesParties_Serializer.errors),34,0)
+#                     transaction.set_rollback(True)
+#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
