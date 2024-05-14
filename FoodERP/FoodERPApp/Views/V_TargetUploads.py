@@ -411,7 +411,7 @@ group by M_Group.id )v
   
             ''')
             TargetAchievementList = []   
-            print(query)
+            # print(query)
             TotalGTAchQuantity=0
             TotalGTAchAmount=0
             if query:   
