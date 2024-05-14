@@ -376,11 +376,11 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
             wherecondition = ""        
             if int(Cluster) > 0:
                 
-                wherecondition = f"""and M_PartyDetails.Cluster={Cluster}  """
+                wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster}  """
             
             if int(SubCluster) > 0:
                 
-                wherecondition = f"""and M_PartyDetails.Cluster={Cluster} and  M_PartyDetails.SubCluster={SubCluster} """        
+                wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster} and  M_PartyDetails.SubCluster_id={SubCluster} """        
                     
             query = T_TargetUploads.objects.raw(f'''select id,ItemGroupName,(AchQuantity-CRNoteQuantity)AchQuantity, (AchAmount- CRNoteAmount)AchAmount,
         CXQuantity,CXAmount,TargetQuantityInKG,TargetAmount,

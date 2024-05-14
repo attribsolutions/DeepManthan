@@ -1205,7 +1205,7 @@ class T_WorkOrder(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
-    Status = models.IntegerField()
+    Status = models.IntegerField(default=False)
     class Meta:
         db_table = "T_WorkOrder"
 
@@ -1234,7 +1234,7 @@ class T_MaterialIssue(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
-    Status = models.IntegerField()
+    Status = models.IntegerField(default=False)
     class Meta:
         db_table = "T_MaterialIssue"
 
