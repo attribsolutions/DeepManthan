@@ -20,23 +20,26 @@ class WorkOrderDetailsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                WorkOrderDetailsdata = JSONParser().parse(request)
+                WorkOrderDetailsdata = JSONParser().parse(request)                
                 WorkOrderID = WorkOrderDetailsdata['WorkOrder']
                 ItemID = WorkOrderDetailsdata['Item']
                 CompanyID = WorkOrderDetailsdata['Company']
                 PartyID = WorkOrderDetailsdata['Party']
                 GetQuantity = WorkOrderDetailsdata['Quantity']
+                # NoOfLots=WorkOrderDetailsdata['NoOfLots']
+                # CustomPrint(NoOfLots)
+                
                 Query = T_WorkOrder.objects.filter(
                     id=WorkOrderID, Item_id=ItemID, Company_id=CompanyID, Party_id=PartyID)
+                # CustomPrint(Query.query)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
                 if Query.exists():
                     WorkOrder_Serializer = WorkOrderSerializerSecond(
-                        Query, many=True).data
+                        Query, many=True).data                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
                     for a in WorkOrder_Serializer:
                         MaterialDetails = list()
-                        workorderqty = a['Quantity']
-
+                        workorderqty = a['Quantity']                        
                         for b in a['WorkOrderItems']:
                             Item = b['Item']['id']
                             z = 0
@@ -81,8 +84,10 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity": round(ActualQty, 3),
-                                "BatchesData": stockDatalist
+                                "BatchesData": stockDatalist,
+                                # "Status":a['Status']
                             })
+                            # CustomPrint(MaterialDetails)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialDetails})
         except T_WorkOrder.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
@@ -126,6 +131,8 @@ class MaterialIsssueList(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
+                            
+                           
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -142,12 +149,13 @@ class MaterialIssueView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                MaterialIssueData = JSONParser().parse(request)
+                MaterialIssueData = JSONParser().parse(request)               
                 
                 Party = MaterialIssueData['Party']
                
                 MaterialIssueDate = MaterialIssueData['MaterialIssueDate']
-                
+                NoOfLotsQty=MaterialIssueData['NumberOfLot']
+                # CustomPrint(NoOfLotsQty)
                 a = GetMaxNumber.GetMaterialIssueNumber(
                     Party, MaterialIssueDate)
                
@@ -155,27 +163,45 @@ class MaterialIssueView(CreateAPIView):
                 '''Get Order Prifix '''
                 b = GetPrifix.GetMaterialIssuePrifix(Party)
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
+                MaterialIssueData['Status']=0
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
-                
+                MaterialWorkOrder=MaterialIssueData['MaterialIssueWorkOrder']   
+                for MWorkOrder in  MaterialWorkOrder:     
+                     WorkOrderID= MWorkOrder['WorkOrder']                  
+                WorkOrderNOofLots = T_WorkOrder.objects.filter(id=WorkOrderID).values('NumberOfLot')
+                if WorkOrderNOofLots:
+                    Lots=WorkOrderNOofLots[0]['NumberOfLot']                
+                    
                 O_BatchWiseLiveStockList = list()
+               
                 for MaterialIssueItem in MaterialIssueItems:
-                    CustomPrint(MaterialIssueItem)
+                    # CustomPrint(MaterialIssueItem)
                     BaseUnitQuantity = UnitwiseQuantityConversion(
-                        MaterialIssueItem['Item'], MaterialIssueItem['IssueQuantity'], MaterialIssueItem['Unit'], 0, 0, 0, 1).GetBaseUnitQuantity()
+                        MaterialIssueItem['Item'], 
+                        MaterialIssueItem['IssueQuantity'], 
+                        MaterialIssueItem['Unit'], 0, 0, 0, 1).GetBaseUnitQuantity()
                    
                     O_BatchWiseLiveStockList.append({
                         "Quantity": MaterialIssueItem['BatchID'],
                         "Item": MaterialIssueItem['Item'],
                         "BaseUnitQuantity": BaseUnitQuantity
-                    })
+                    })                    
+                    
                 MaterialIssueData.update(
-                    {"obatchwiseStock": O_BatchWiseLiveStockList})
+                    {"obatchwiseStock": O_BatchWiseLiveStockList })
+                
                
                 MaterialIssue_Serializer = MaterialIssueSerializer(
                     data=MaterialIssueData)
-                
+                # CustomPrint(MaterialIssue_Serializer)                
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()
+                    if(Lots==NoOfLotsQty):                      
+                       query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=2)
+                    else:                       
+                       query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=1)
+                        
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -210,13 +236,13 @@ class MaterialIssueViewSecond(RetrieveAPIView):
     def post(self, request):       
         ItemID = request.data['ItemID']
         current_date = datetime.now().date() 
-        CustomPrint(ItemID) 
-        CustomPrint(current_date)        
+        # CustomPrint(ItemID) 
+        # CustomPrint(current_date)        
         try:
             with transaction.atomic():
-                CustomPrint("shruti")          
+                # CustomPrint("shruti")          
                 ProductionItemCount=T_Production.objects.filter(Item_id=ItemID, ProductionDate=current_date).count()
-                CustomPrint(ProductionItemCount)
+                # CustomPrint(ProductionItemCount)
                                
                 CountList = []                  
                 for a in ProductionItemCount:                       
@@ -260,9 +286,12 @@ class MaterialIssueViewSecond(RetrieveAPIView):
 
                 # if MaterialIssueItemdataserializer.is_valid():
                 #     MaterialIssueItemdataserializer.save()
-
+                # MaterialissueworkorderID=TC_MaterialIssueWorkOrders.objects.filter(id=id).values('WorkOrder_id')
+                # workOrderID=MaterialissueworkorderID[0]['WorkOrder_id']
+                # query = T_WorkOrder.objects.filter(id=workOrderID).update(Status=0)
                 MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
                 MaterialIssuedata.delete()
+                
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Delete Successfully', 'Data': []})
                 # else:
                 #     transaction.set_rollback(True)

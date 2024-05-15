@@ -1,14 +1,14 @@
 from ..models import *
 from ..Serializer.S_Orders import *
-from datetime import datetime 
-from django.db.models.functions import Coalesce
 
+from django.db.models.functions import Coalesce
+from datetime import datetime 
 
 # import datetime
 # import pdb
 
 def GetYear(TDate):
-    date = datetime.strptime(TDate, "%Y-%m-%d").date()
+    date = datetime.strptime(str(TDate), "%Y-%m-%d").date()
     #initialize the current year
     year_of_date=date.year     
     #initialize the current financial year start date
@@ -157,7 +157,7 @@ class GetMaxNumber:
         #     else:
         #         a=int(MaxDemandNumber[0]['DemandNo'])
         #         a=a+1
-        Return_year= GetYear(args[1])       
+        Return_year= GetYear(args[2])       
         fs,fe=Return_year  
         MaxDemandNumber=T_Demands.objects.filter(Division_id=args[0],).filter(Customer_id=args[1],DemandDate__range=(fs,fe)).values('DemandNo').order_by('-id')[:1]
         if(not MaxDemandNumber):
