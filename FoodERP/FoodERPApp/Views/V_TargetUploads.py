@@ -283,15 +283,17 @@ class TargetVSAchievementView(CreateAPIView):
 
             
             
-            query = T_TargetUploads.objects.raw(f'''
-            SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
+            query = T_TargetUploads.objects.raw(f''' select id,Year,FY,PartyID,ItemID,ItemName,ItemGroupName,SubGroupName,ClusterName,SubClusterName,
+            SAPPartyCode,PartyName, (AchQuantity-CRNoteQuantity) AchQuantity,(AchAmount-CRNoteAmount)AchAmount,TargetQuantityInKG,TargetAmount,
+            CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode from 
+            (SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
             (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,ItemID, M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.Name PartyName ,
             Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
             Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CXQuantity,0),3)CXQuantity,
             Round(IFNULL(CXAmount,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
-            ,M_Items.id ItemID,M_Items.SAPItemCode
+            ,M_Items.SAPItemCode
             FROM
   
   {TargetVsAchiQurey(Party,Month,Year)}
@@ -304,7 +306,7 @@ join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
 join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
 join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
 join M_Parties  ON M_Parties.id=D.Party_id
-where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  {wherecondition}
+where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  {wherecondition} )v
             ''')
             TargetAchievementList = []   
             
