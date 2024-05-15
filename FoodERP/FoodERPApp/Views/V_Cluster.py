@@ -324,4 +324,32 @@ class GetSubClusterOnclusterView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'GetSubClusterOncluster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
 
+class GetPartyOnSubclusterandclusterView(CreateAPIView):
 
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def get(self, request, ClusterID=0,SubClusterID=0,EmployeeID=0):
+        try:
+            with transaction.atomic():
+                w=Q()
+                if int(SubClusterID) >0:
+                   w=Q(SubCluster=SubClusterID) 
+
+                SubCluster_data = M_PartyDetails.objects.filter(Cluster=ClusterID).filter(w).select_related('Party').values('Party__Name','Party_id')
+                print(SubCluster_data)
+                PartyList=list()
+                for a in SubCluster_data:
+                    
+                    PartyList.append({
+                        "PartyID" : a['Party_id'],
+                        "PartyName" : a['Party__Name']
+
+                    })
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': PartyList})
+        except  M_PartyDetails.DoesNotExist:
+            
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'SubCluster Data Not available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GetSubClusterOncluster:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})

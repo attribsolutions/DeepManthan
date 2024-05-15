@@ -241,6 +241,7 @@ urlpatterns = [
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
             url(r'Employees$', M_EmployeesView.as_view()),
             url(r'EmployeesFilter$', M_EmployeesFilterView.as_view()),
+            url(r'EmployeeSubEmployee/([0-9]+)$', EmployeeSubEmployeeView.as_view()),
            
 #EmployeeTypes           
             url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
@@ -687,12 +688,13 @@ urlpatterns = [
 # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
-          
+            
             
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),
              url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
              url(r'GetSubclusterOncluster/([0-9]+)$',GetSubClusterOnclusterView.as_view()),
+             url(r'GetPartyOnSubclusterandcluster/([0-9]+)/([0-9]+)$',GetPartyOnSubclusterandclusterView.as_view()),
              
 # CentralServiceItem
              url(r'CentralItemService$',CentralServiceItemView.as_view()),

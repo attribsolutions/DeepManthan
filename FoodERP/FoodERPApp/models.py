@@ -262,7 +262,7 @@ class M_Employees(models.Model):
     State = models.ForeignKey(M_States, related_name='EmployeesState', on_delete=models.PROTECT)
     City = models.ForeignKey(M_Cities, related_name='EmployeesCity', on_delete=models.PROTECT,blank=True, null=True)
     PIN = models.CharField(max_length=500,null=True,blank=True)
-  
+    Designation =  models.CharField(max_length=10,blank=True, null=True)
     class Meta:
         db_table = "M_Employees"
 
@@ -1205,7 +1205,7 @@ class T_WorkOrder(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
-
+    Status = models.IntegerField(default=False)
     class Meta:
         db_table = "T_WorkOrder"
 
@@ -1234,7 +1234,7 @@ class T_MaterialIssue(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
-
+    Status = models.IntegerField(default=False)
     class Meta:
         db_table = "T_MaterialIssue"
 
