@@ -226,7 +226,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
                     Condition=""
                     # p2 = (today, Unit, [PartyIDs]) 
                     if IsRateWise:
-                        Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),2),2),0)Rate"
+                        Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),MC_PartyItems.Party_id,0,2),2),0)Rate"
                         p2 = (today, [PartyIDs])                         
                         
                     else:     
@@ -273,7 +273,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
     order by M_Group.id, MC_SubGroup.id ,M_Items.id,A.id''')
                        
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-                    # CustomPrint(Itemquery)
+                    CustomPrint(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
