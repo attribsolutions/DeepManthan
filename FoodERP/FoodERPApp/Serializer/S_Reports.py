@@ -204,6 +204,8 @@ class GenericSaleReportSerializer(serializers.Serializer):
     SubGroup = serializers.CharField(max_length=500) 
     Cluster = serializers.CharField(max_length=500)
     SubCluster = serializers.CharField(max_length=500)
+    BatchNo = serializers.CharField(max_length=500)
+    BatchDate = serializers.DateField()
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
