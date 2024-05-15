@@ -255,8 +255,12 @@ class TargetVSAchievementView(CreateAPIView):
             Month = TargetData.get('Month')
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
-            Employee = TargetData.get('Employee')            
-             
+            Employee = TargetData.get('Employee')  
+            SubEmployee =TargetData.get('SubEmployee')          
+            Cluster =TargetData.get('Cluster')
+            SubCluster = TargetData.get('SubCluster') 
+            
+            
             if Employee > 0 and Party == 0:
                     EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                     for row in EmpPartys:
@@ -264,7 +268,21 @@ class TargetVSAchievementView(CreateAPIView):
                     Party_ID = p.split(",")
                     dd=Party_ID[:-1]
                     Party=', '.join(dd)
-                    
+            
+            wherecondition = ""        
+            
+            
+            if int(Cluster) > 0:
+                
+                wherecondition = f"""and M_Cluster.id={Cluster}  """
+            
+            if int(SubCluster) > 0:
+                
+                wherecondition = f"""and M_Cluster.id={Cluster} and  M_SubCluster.id={SubCluster} """
+            
+
+            
+            
             query = T_TargetUploads.objects.raw(f'''
             SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
             (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,ItemID, M_Items.Name ItemName,M_Group.Name ItemGroupName,
@@ -286,7 +304,7 @@ join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
 join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
 join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
 join M_Parties  ON M_Parties.id=D.Party_id
-  where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
+where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  {wherecondition}
             ''')
             TargetAchievementList = []   
             
@@ -342,7 +360,10 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
             Month = TargetData.get('Month')
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
-            Employee = TargetData.get('Employee')            
+            Employee = TargetData.get('Employee')     
+            SubEmployee =TargetData.get('SubEmployee')          
+            Cluster =TargetData.get('Cluster')
+            SubCluster = TargetData.get('SubCluster')       
              
             if Employee > 0 and Party == 0:
                     EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
@@ -351,6 +372,15 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
                     Party_ID = p.split(",")
                     dd=Party_ID[:-1]
                     Party=', '.join(dd)
+
+            wherecondition = ""        
+            if int(Cluster) > 0:
+                
+                wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster}  """
+            
+            if int(SubCluster) > 0:
+                
+                wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster} and  M_PartyDetails.SubCluster_id={SubCluster} """        
                     
             query = T_TargetUploads.objects.raw(f'''select id,ItemGroupName,(AchQuantity-CRNoteQuantity)AchQuantity, (AchAmount- CRNoteAmount)AchAmount,
         CXQuantity,CXAmount,TargetQuantityInKG,TargetAmount,
@@ -374,13 +404,14 @@ from
 join  M_Items ON M_Items.id=D.ItemID
 join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
-where MC_ItemGroupDetails.GroupType_id=1  
+join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
+where MC_ItemGroupDetails.GroupType_id=1  {wherecondition}
 
 group by M_Group.id )v
   
             ''')
             TargetAchievementList = []   
-            
+            print(query)
             TotalGTAchQuantity=0
             TotalGTAchAmount=0
             if query:   
