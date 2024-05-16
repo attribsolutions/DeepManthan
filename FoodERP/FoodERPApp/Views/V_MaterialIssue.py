@@ -150,12 +150,13 @@ class MaterialIssueView(CreateAPIView):
         try:
             with transaction.atomic():
                 MaterialIssueData = JSONParser().parse(request)               
-                
+                CustomPrint(MaterialIssueData)
                 Party = MaterialIssueData['Party']
                
                 MaterialIssueDate = MaterialIssueData['MaterialIssueDate']
                 NoOfLotsQty=MaterialIssueData['NumberOfLot']
-                # CustomPrint(NoOfLotsQty)
+                NoOfQuantity=MaterialIssueData['LotQuantity']
+                CustomPrint(NoOfQuantity)
                 a = GetMaxNumber.GetMaterialIssueNumber(
                     Party, MaterialIssueDate)
                
@@ -164,13 +165,17 @@ class MaterialIssueView(CreateAPIView):
                 b = GetPrifix.GetMaterialIssuePrifix(Party)
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
                 MaterialIssueData['Status']=0
+                MaterialIssueData['RemainNumberOfLot']=0
+                MaterialIssueData['RemaninLotQuantity']=0
+                
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 MaterialWorkOrder=MaterialIssueData['MaterialIssueWorkOrder']   
                 for MWorkOrder in  MaterialWorkOrder:     
                      WorkOrderID= MWorkOrder['WorkOrder']                  
-                WorkOrderNOofLots = T_WorkOrder.objects.filter(id=WorkOrderID).values('NumberOfLot')
+                WorkOrderNOofLots = T_WorkOrder.objects.filter(id=WorkOrderID).values('RemainNumberOfLot','RemaninQuantity')
                 if WorkOrderNOofLots:
-                    Lots=WorkOrderNOofLots[0]['NumberOfLot']                
+                    RemaningLots=WorkOrderNOofLots[0]['RemainNumberOfLot']
+                    RamaningQty = float(WorkOrderNOofLots[0]['RemaninQuantity'])          
                     
                 O_BatchWiseLiveStockList = list()
                
@@ -195,11 +200,13 @@ class MaterialIssueView(CreateAPIView):
                     data=MaterialIssueData)
                 # CustomPrint(MaterialIssue_Serializer)                
                 if MaterialIssue_Serializer.is_valid():
-                    MaterialIssue_Serializer.save()
-                    if(Lots==NoOfLotsQty):                      
-                       query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=2)
+                    MaterialIssue_Serializer.save() 
+                    RemainNumberOfLot=RemaningLots-NoOfLotsQty
+                    RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
+                    if(RemaningLots==NoOfLotsQty):                      
+                       query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=2,RemainNumberOfLot=RemainNumberOfLot,RemaninQuantity=RemaninQuantity)
                     else:                       
-                       query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=1)
+                       query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=1,RemainNumberOfLot=RemainNumberOfLot,RemaninQuantity=RemaninQuantity)                       
                         
                     
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Save Successfully', 'Data': []})

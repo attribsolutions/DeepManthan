@@ -43,7 +43,7 @@ class MaterialIssueSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'MaterialIssueNumber', 'FullMaterialIssueNumber', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock','Status']
+        fields = ['id', 'MaterialIssueDate', 'MaterialIssueNumber', 'FullMaterialIssueNumber', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock','Status','RemainNumberOfLot','RemaninLotQuantity']
     
     def create(self, validated_data):
         
