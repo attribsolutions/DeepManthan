@@ -455,14 +455,22 @@ group by M_Group.id )v
 
 def GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,Mode):
 
-          
-    wherecondition = "" if not ClusterID else  f"""and M_PartyDetails.Cluster_id in( {ClusterID})  """
     
-    wherecondition = "" if not SubClusterID else f"""and M_PartyDetails.Cluster_id in( {ClusterID}) and  M_PartyDetails.SubCluster_id in( {SubClusterID}) """
+    if not ClusterID:
+        wherecondition += ""
+    else:
+        wherecondition +=  f"""and M_PartyDetails.Cluster_id in( {ClusterID})  """
+    
+    
+    if not SubClusterID:
+        wherecondition += "" 
+    else:
+        wherecondition += f""" and  M_PartyDetails.SubCluster_id in( {SubClusterID}) """
     
     
     isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__in=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).values('Designation')
-    if isSaleTeamMembrt_result : 
+    if isSaleTeamMembrt_result :
+        
         q1=M_Employees.objects.filter(id=EmployeeID).values('Designation')
         designation=q1[0]['Designation']
         q2=M_PartyDetails.objects.raw(f'''Select  M_Parties.id,M_Parties.Name from M_PartyDetails 
