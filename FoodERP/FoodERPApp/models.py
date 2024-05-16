@@ -1206,6 +1206,8 @@ class T_WorkOrder(models.Model):
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
     Status = models.IntegerField(default=False)
+    RemainNumberOfLot = models.IntegerField()
+    RemaninQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     class Meta:
         db_table = "T_WorkOrder"
 
@@ -1235,6 +1237,8 @@ class T_MaterialIssue(models.Model):
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
     Status = models.IntegerField(default=False)
+    RemainNumberOfLot = models.IntegerField()
+    RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     class Meta:
         db_table = "T_MaterialIssue"
 
