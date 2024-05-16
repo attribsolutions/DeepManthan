@@ -51,7 +51,8 @@ class InterBranchItemsView(CreateAPIView):
                 DemandID = request.data['OrderID']
 
                 Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
-M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence 
+M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence
+,M_Group.ID GroupID,M_Group.Name GroupName,MC_SubGroup.id SubGroupID,MC_SubGroup.Name SubGroupName
                 from
 ((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`
 FROM `TC_DemandItems` WHERE (`TC_DemandItems`.`IsDeleted` = False AND `TC_DemandItems`.`Demand_id` = %s)) 
@@ -61,12 +62,15 @@ FROM `M_Items` Join MC_PartyItems a On M_Items.id = a.Item_id
 join MC_PartyItems b On M_Items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
 
 join M_Items on M_Items.id=a.Item_id 
+JOIN Mc_itemgroupdetails on Mc_itemgroupdetails.item_id=a.Item_id
+JOIN M_Group on M_Group.id=Mc_itemgroupdetails.group_id
+JOIN MC_SubGroup on MC_SubGroup.id=Mc_itemgroupdetails.SubGroup_id
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order By m_items.Sequence''', ([DemandID], [Party], [Customer]))
-                
+                CustomPrint(Itemquery.query)
                 # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  '', 'Data': str(Itemquery.query)})
                 DemandItemSerializer = DemandEditserializer(
                     Itemquery, many=True).data
@@ -91,13 +95,20 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                         Stock = stockquery['Qty']
             # =====================Rate================================================
 
-                    ratequery = TC_DemandItems.objects.filter(
-                        Item_id=ItemID).values('Rate').order_by('-id')[:1]
+                    # ratequery = TC_DemandItems.objects.filter(
+                    #     Item_id=ItemID).values('Rate').order_by('-id')[:1]
+                    # if not ratequery:
+                    #     r = 0.00
+                    # else:
+                    #     r = ratequery[0]['Rate']
+                    ratequery= M_RateMaster.objects.raw(f'''Select 1 id, Round(GetTodaysDateRate('{ItemID}', '{EffectiveDate}','{Party}',0,2),2) AS Rate''')
+                    CustomPrint(ratequery)                    
                     if not ratequery:
-                        r = 0.00
+                            r = 0.00
                     else:
-                        r = ratequery[0]['Rate']
-
+                        for a in ratequery:
+                            r=a.Rate    
+                        
                     if b['Rate'] is None:
                         b['Rate'] = r
             # =====================Rate================================================
@@ -231,13 +242,14 @@ class DemandListFilterView(CreateAPIView):
                         DemandListData.append({
                             "id": a['id'],
                             "OrderDate": a['DemandDate'],
+                            "DeliveryDate": a['DemandDate'],
                             "Description": a['Comment'],
                             "FullOrderNumber": a['FullDemandNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
-                            "Amount": a['DemandAmount'],
+                            "OrderAmount": a['DemandAmount'],
                             # "BillingAddress": a['BillingAddress']['Address'],
                             # "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],

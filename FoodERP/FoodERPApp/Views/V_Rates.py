@@ -24,9 +24,11 @@ class M_RatesView(CreateAPIView):
         try:
             with transaction.atomic():
                 Ratedata = M_RateMaster.objects.raw('''SELECT M_RateMaster.id,M_RateMaster.EffectiveDate,M_RateMaster.Company_id,
-                M_RateMaster.CreatedBy,M_RateMaster.CreatedOn,M_RateMaster.CommonID,C_Companies.Name CompanyName
+                M_RateMaster.CreatedBy,M_RateMaster.CreatedOn,M_RateMaster.CommonID,C_Companies.Name CompanyName,M_Parties.Name PartyName,M_PriceList.Name PriceListName
                 FROM M_RateMaster 
                 left join C_Companies on C_Companies.id = M_RateMaster.Company_id
+                left JOIN M_Parties ON M_Parties.id=M_RateMaster.Party_id
+                left JOIN M_PriceList ON M_PriceList.id=M_RateMaster.PriceList_id
                 where M_RateMaster.CommonID >0 AND M_RateMaster.IsDeleted=0   group by EffectiveDate,CommonID 
                 Order BY EffectiveDate Desc''')
                 
@@ -50,7 +52,7 @@ class M_RatesView(CreateAPIView):
                 
                 a=MaxValueMaster(M_RateMaster,'CommonID')
                 jsondata=a.GetMaxValue() 
-               
+                CustomPrint(jsondata)
                 additionaldata= list()                
                 for b in M_Ratesdata:                    
                     
@@ -59,8 +61,10 @@ class M_RatesView(CreateAPIView):
                     CustomPrint(b)
                     ItemId=b['Item']
                     EffectiveDate=b['EffectiveDate']
+                    PriceListID = b['PriceList']
+                    PartyID = b['Party']                   
                     CustomPrint(ItemId)
-                    Ratedata = M_RateMaster.objects.filter(Item_id=ItemId,EffectiveDate=EffectiveDate).update(IsDeleted=1)    
+                    Ratedata = M_RateMaster.objects.filter(Item_id=ItemId,EffectiveDate=EffectiveDate,PriceList_id=PriceListID,Party_id=PartyID).update(IsDeleted=1)    
                      
                 M_Rates_Serializer = M_RatesSerializer(data=additionaldata,many=True)
                 if M_Rates_Serializer.is_valid():
@@ -87,19 +91,20 @@ class GETRateDetails(CreateAPIView):
         try:
             with transaction.atomic():
                 EffectiveDate = request.data['EffectiveDate'] 
+                PriceListID = request.data['PriceList']
+                PartyID = request.data['Party']
                 CompanyID = request.data['CompanyID']            
                 
                 MRates=M_RateMaster.objects.raw(f'''SELECT 1 id ,
 			M_Items.id AS ItemID,
-            GetTodaysDateRate(M_Items.id, '{EffectiveDate}',1) AS Rateid,
-			GetTodaysDateRate(M_Items.id, '{EffectiveDate}',2) AS MRates,
-            GetTodaysDateRate(M_Items.id, '{EffectiveDate}',3) AS EffectiveDate,
-            GetTodaysDateRate(M_Items.id, '{EffectiveDate}',4) AS Unit,
+            GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',1) AS Rateid,
+			GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',2) AS MRates,
+            GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',3) AS EffectiveDate,
+            GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',4) AS Unit,            
 			M_Items.Name ItemName ,M_Units.Name UnitName,BaseUnitID_id
             FROM M_Items 
             JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id
-            where M_Items.Company_id={CompanyID} ''')  
-                # CustomPrint(MRates.query)
+            where M_Items.Company_id={CompanyID} and isActive=1 ''')  
                            
                 if not MRates:
                     
@@ -121,7 +126,8 @@ class GETRateDetails(CreateAPIView):
                             "EffectiveDate":a.EffectiveDate,                            
                             "UnitName" : a.UnitName,
                             "BaseUnitID" : a.BaseUnitID_id,
-                            "Rate": ""
+                            "Rate": "",
+                           
                         })
                             
                        
