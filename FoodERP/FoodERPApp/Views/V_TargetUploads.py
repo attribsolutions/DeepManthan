@@ -455,7 +455,7 @@ group by M_Group.id )v
 
 def GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,Mode):
 
-    
+    wherecondition = ""
     if not ClusterID:
         wherecondition += ""
     else:
