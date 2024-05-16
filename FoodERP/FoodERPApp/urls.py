@@ -694,7 +694,7 @@ urlpatterns = [
              url(r'SubClusters$',SubClusterView.as_view()),
              url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
              url(r'GetSubclusterOncluster/([0-9]+)$',GetSubClusterOnclusterView.as_view()),
-             url(r'GetPartyOnSubclusterandcluster/([0-9]+)/([0-9]+)$',GetPartyOnSubclusterandclusterView.as_view()),
+             url(r'GetPartyOnSubclusterandcluster$',GetPartyOnSubclusterandclusterAndEmployeeView.as_view()),
              
 # CentralServiceItem
              url(r'CentralItemService$',CentralServiceItemView.as_view()),
