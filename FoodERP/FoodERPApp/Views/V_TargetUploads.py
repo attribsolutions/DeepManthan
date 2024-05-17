@@ -309,7 +309,7 @@ where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  )
             ''')
             TargetAchievementList = []   
             
-            CustomPrint(query)
+            # print(query)
 
             if query:   
                 for a in query:
@@ -407,7 +407,8 @@ join  M_Items ON M_Items.id=D.ItemID
 join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
 join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
-where MC_ItemGroupDetails.GroupType_id=1 
+ 
+where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null
 
 group by M_Group.id )v
   
@@ -522,7 +523,7 @@ class GetPartyOnSubclusterandclusterAndEmployeeView(CreateAPIView):
                 SubClusterID= Request_data['SubClusterID']
                 EmployeeID= Request_data['EmployeeID']
 
-                PartyList=GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,2)
+                PartyList=GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,1)
                 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': PartyList})  
         except Exception as e:
