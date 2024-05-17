@@ -523,7 +523,7 @@ class GetPartyOnSubclusterandclusterAndEmployeeView(CreateAPIView):
                 SubClusterID= Request_data['SubClusterID']
                 EmployeeID= Request_data['EmployeeID']
 
-                PartyList=GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,1)
+                PartyList=GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,2)
                 
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': PartyList})  
         except Exception as e:
