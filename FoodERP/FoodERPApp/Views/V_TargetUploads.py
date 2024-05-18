@@ -284,7 +284,9 @@ class TargetVSAchievementView(CreateAPIView):
             
             query = T_TargetUploads.objects.raw(f''' select id,Year,FY,PartyID,ItemID,ItemName,ItemGroupName,SubGroupName,ClusterName,SubClusterName,
             SAPPartyCode,PartyName, (AchQuantity-CRNoteQuantity) AchQuantity,(AchAmount-CRNoteAmount)AchAmount,TargetQuantityInKG,TargetAmount,
-            CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode from 
+            CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode 
+            
+            from 
             (SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
             (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,ItemID, M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
@@ -474,8 +476,10 @@ def GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,
         
         q1=M_Employees.objects.filter(id=EmployeeID).values('Designation')
         designation=q1[0]['Designation']
+        
         q2=M_PartyDetails.objects.raw(f'''Select  M_Parties.id,M_Parties.Name from M_PartyDetails 
-                                        join M_Parties on M_Parties.id=M_PartyDetails.Party_id where Group_id is null and  {designation} = {EmployeeID} {wherecondition}''')
+                                        join M_Parties on M_Parties.id=M_PartyDetails.Party_id 
+                                        where Group_id is null and  {designation} = {EmployeeID} {wherecondition}''')
     else:
         
         EmpPartys=MC_EmployeeParties.objects.raw(f'''select EmployeeParties({EmployeeID}) id''')
@@ -489,7 +493,7 @@ def GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,
             
             q2=M_Parties.objects.raw(f'''select M_Parties.id  ,Name from M_Parties
                                     join M_PartyDetails on M_PartyDetails.Party_id=M_Parties.id
-                                    where M_Parties.id in ({Party}) {wherecondition}''')
+                                    where Group_id is null and  M_Parties.id in ({Party}) {wherecondition}''')
         else:
             
             q2=MC_EmployeeParties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name FROM MC_EmployeeParties 
