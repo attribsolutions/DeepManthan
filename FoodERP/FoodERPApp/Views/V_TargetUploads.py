@@ -259,7 +259,11 @@ class TargetVSAchievementView(CreateAPIView):
             Cluster =TargetData.get('Cluster')
             SubCluster = TargetData.get('SubCluster') 
             
-            Party=GetPartyOnSubclusterandclusterAndEmployee(Cluster,SubCluster,Employee,1)
+            if Party == 0:
+                Party=GetPartyOnSubclusterandclusterAndEmployee(Cluster,SubCluster,Employee,1)
+            else :
+                Party=Party
+            
             # if Employee > 0 and Party == 0:
             #         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
             #         for row in EmpPartys:
@@ -368,7 +372,11 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
             Cluster =TargetData.get('Cluster')
             SubCluster = TargetData.get('SubCluster')       
 
-            Party=GetPartyOnSubclusterandclusterAndEmployee(Cluster,SubCluster,Employee,1) 
+            if Party == 0:
+
+                Party=GetPartyOnSubclusterandclusterAndEmployee(Cluster,SubCluster,Employee,1) 
+            else :
+                Party=Party
             # if Employee > 0 and Party == 0:
             #         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
             #         for row in EmpPartys:
