@@ -1,5 +1,7 @@
 from django.urls import re_path as url ,path
 
+from .Views.V_SPOSStockProcessing import *
+
 from .Views.V_SPOSInvoices import *
 
 from .Views.V_SweetPosRoleAccess import *
@@ -23,6 +25,8 @@ urlpatterns = [
     url(r'SPOSUsers$', SweetPOSUsersView.as_view()),
     url(r'SPOSUsers/([0-9]+)$', SweetPOSUsersSecondView.as_view()),    
     url(r'sposroleslist$', SweetPOSRolesView.as_view()),
+
+    url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view())
 
     
     
