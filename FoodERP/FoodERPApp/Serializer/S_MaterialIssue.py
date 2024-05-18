@@ -30,13 +30,20 @@ class obatchwiseStockSerializer(serializers.ModelSerializer):
         model=O_BatchWiseLiveStock
         fields=['Quantity','BaseUnitQuantity','Item']
 
+# class workorderserializer(serializers.ModelSerializer):
+#     class Meta:
+#         model=T_WorkOrder
+#         fields=['Status']
+        
 class MaterialIssueSerializer(serializers.ModelSerializer):
     MaterialIssueWorkOrder = MaterialIssueWorkOrdersSerializer(many=True)
     MaterialIssueItems = MaterialIssueItemsSerializer(many=True)
     obatchwiseStock=obatchwiseStockSerializer(many=True)
+    # Workorder=workorderserializer(many=True)
+    
     class Meta:
         model = T_MaterialIssue
-        fields = ['id', 'MaterialIssueDate', 'MaterialIssueNumber', 'FullMaterialIssueNumber', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock']
+        fields = ['id', 'MaterialIssueDate', 'MaterialIssueNumber', 'FullMaterialIssueNumber', 'NumberOfLot', 'LotQuantity','CreatedBy','UpdatedBy','Company','Party','Item','Unit','MaterialIssueItems','MaterialIssueWorkOrder','obatchwiseStock','Status']
     
     def create(self, validated_data):
         

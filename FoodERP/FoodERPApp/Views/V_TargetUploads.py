@@ -256,42 +256,43 @@ class TargetVSAchievementView(CreateAPIView):
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
             Employee = TargetData.get('Employee')  
-            SubEmployee =TargetData.get('SubEmployee')          
             Cluster =TargetData.get('Cluster')
             SubCluster = TargetData.get('SubCluster') 
             
+            Party=GetPartyOnSubclusterandclusterAndEmployee(Cluster,SubCluster,Employee,1)
+            # if Employee > 0 and Party == 0:
+            #         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+            #         for row in EmpPartys:
+            #             p=row.id
+            #         Party_ID = p.split(",")
+            #         dd=Party_ID[:-1]
+            #         Party=', '.join(dd)
             
-            if Employee > 0 and Party == 0:
-                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
-                    for row in EmpPartys:
-                        p=row.id
-                    Party_ID = p.split(",")
-                    dd=Party_ID[:-1]
-                    Party=', '.join(dd)
-            
-            wherecondition = ""        
+            # wherecondition = ""        
             
             
-            if int(Cluster) > 0:
+            # if int(Cluster) > 0:
                 
-                wherecondition = f"""and M_Cluster.id={Cluster}  """
+            #     wherecondition = f"""and M_Cluster.id={Cluster}  """
             
-            if int(SubCluster) > 0:
+            # if int(SubCluster) > 0:
                 
-                wherecondition = f"""and M_Cluster.id={Cluster} and  M_SubCluster.id={SubCluster} """
+            #     wherecondition = f"""and M_Cluster.id={Cluster} and  M_SubCluster.id={SubCluster} """
             
 
             
             
-            query = T_TargetUploads.objects.raw(f'''
-            SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
+            query = T_TargetUploads.objects.raw(f''' select id,Year,FY,PartyID,ItemID,ItemName,ItemGroupName,SubGroupName,ClusterName,SubClusterName,
+            SAPPartyCode,PartyName, (AchQuantity-CRNoteQuantity) AchQuantity,(AchAmount-CRNoteAmount)AchAmount,TargetQuantityInKG,TargetAmount,
+            CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode from 
+            (SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
             (CASE WHEN {Month} >= 4 THEN CONCAT({Year}, '-', {Year} + 1) ELSE CONCAT({Year} - 1, '-', {Year}) END) AS FY,D.Party_id PartyID,ItemID, M_Items.Name ItemName,M_Group.Name ItemGroupName,
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.Name PartyName ,
             Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
             Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CXQuantity,0),3)CXQuantity,
             Round(IFNULL(CXAmount,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
-            ,M_Items.id ItemID,M_Items.SAPItemCode
+            ,M_Items.SAPItemCode
             FROM
   
   {TargetVsAchiQurey(Party,Month,Year)}
@@ -304,7 +305,7 @@ join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
 join M_Cluster ON M_Cluster.id=M_PartyDetails.Cluster_id
 join M_SubCluster ON  M_SubCluster.id=M_PartyDetails.SubCluster_id
 join M_Parties  ON M_Parties.id=D.Party_id
-where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  {wherecondition}
+where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  )v
             ''')
             TargetAchievementList = []   
             
@@ -361,26 +362,27 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
             Year = TargetData.get('Year')
             Party = TargetData.get('Party')
             Employee = TargetData.get('Employee')     
-            SubEmployee =TargetData.get('SubEmployee')          
+                
             Cluster =TargetData.get('Cluster')
             SubCluster = TargetData.get('SubCluster')       
-             
-            if Employee > 0 and Party == 0:
-                    EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
-                    for row in EmpPartys:
-                        p=row.id
-                    Party_ID = p.split(",")
-                    dd=Party_ID[:-1]
-                    Party=', '.join(dd)
 
-            wherecondition = ""        
-            if int(Cluster) > 0:
+            Party=GetPartyOnSubclusterandclusterAndEmployee(Cluster,SubCluster,Employee,1) 
+            # if Employee > 0 and Party == 0:
+            #         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
+            #         for row in EmpPartys:
+            #             p=row.id
+            #         Party_ID = p.split(",")
+            #         dd=Party_ID[:-1]
+            #         Party=', '.join(dd)
+
+            # wherecondition = ""        
+            # if int(Cluster) > 0:
                 
-                wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster}  """
+            #     wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster}  """
             
-            if int(SubCluster) > 0:
+            # if int(SubCluster) > 0:
                 
-                wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster} and  M_PartyDetails.SubCluster_id={SubCluster} """        
+            #     wherecondition = f"""and M_PartyDetails.Cluster_id={Cluster} and  M_PartyDetails.SubCluster_id={SubCluster} """        
                     
             query = T_TargetUploads.objects.raw(f'''select id,ItemGroupName,(AchQuantity-CRNoteQuantity)AchQuantity, (AchAmount- CRNoteAmount)AchAmount,
         CXQuantity,CXAmount,TargetQuantityInKG,TargetAmount,
@@ -405,13 +407,13 @@ join  M_Items ON M_Items.id=D.ItemID
 join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
 join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
-where MC_ItemGroupDetails.GroupType_id=1  {wherecondition}
+where MC_ItemGroupDetails.GroupType_id=1 
 
 group by M_Group.id )v
   
             ''')
             TargetAchievementList = []   
-            print(query)
+            # print(query)
             TotalGTAchQuantity=0
             TotalGTAchAmount=0
             if query:   
@@ -449,3 +451,80 @@ group by M_Group.id )v
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'TargetVSAchievement:'+str(e),33,0)
             return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
+
+def GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,Mode):
+
+    wherecondition = ""
+    if not ClusterID:
+        wherecondition += ""
+    else:
+        wherecondition +=  f"""and M_PartyDetails.Cluster_id in( {ClusterID})  """
+    
+    
+    if not SubClusterID:
+        wherecondition += "" 
+    else:
+        wherecondition += f""" and  M_PartyDetails.SubCluster_id in( {SubClusterID}) """
+    
+    
+    isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__in=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).values('Designation')
+    if isSaleTeamMembrt_result :
+        
+        q1=M_Employees.objects.filter(id=EmployeeID).values('Designation')
+        designation=q1[0]['Designation']
+        q2=M_PartyDetails.objects.raw(f'''Select  M_Parties.id,M_Parties.Name from M_PartyDetails 
+                                        join M_Parties on M_Parties.id=M_PartyDetails.Party_id where Group_id is null and  {designation} = {EmployeeID} {wherecondition}''')
+    else:
+        
+        EmpPartys=MC_EmployeeParties.objects.raw(f'''select EmployeeParties({EmployeeID}) id''')
+        for row in EmpPartys:
+            p=row.id
+        Party_ID = p.split(",")
+        dd=Party_ID[:-1]
+        Party=', '.join(dd)
+        
+        if Party:
+            
+            q2=M_Parties.objects.raw(f'''select M_Parties.id  ,Name from M_Parties
+                                    join M_PartyDetails on M_PartyDetails.Party_id=M_Parties.id
+                                    where M_Parties.id in ({Party}) {wherecondition}''')
+        else:
+            
+            q2=MC_EmployeeParties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name FROM MC_EmployeeParties 
+                                                    join M_Parties on M_Parties.id=MC_EmployeeParties.Party_id 
+                                                    where Employee_id={EmployeeID}''')
+    
+    if Mode == 1:
+        PartyList=0
+        PartyID_list = [str(a.id) for a in q2]
+        PartyList = ','.join(PartyID_list)
+    
+    else:
+        PartyList=list()
+        for a in q2:
+            PartyList.append({
+                "PartyID" : a.id,
+                "PartyName" : a.Name
+
+            })
+    
+    return PartyList;
+
+class GetPartyOnSubclusterandclusterAndEmployeeView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, id=0):
+        Request_data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                
+                ClusterID= Request_data['ClusterID']
+                SubClusterID= Request_data['SubClusterID']
+                EmployeeID= Request_data['EmployeeID']
+
+                PartyList=GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,2)
+                
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': PartyList})  
+        except Exception as e:
+            # log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleReport:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                
