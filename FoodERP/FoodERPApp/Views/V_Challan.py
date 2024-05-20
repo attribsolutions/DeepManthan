@@ -290,7 +290,7 @@ class DemandDetailsForChallan(CreateAPIView):
                     MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_DemandItems.BaseUnitQuantity,
                     TC_DemandItems.GST_id,M_GSTHSNCode.HSNCode,
                     TC_DemandItems.GSTAmount,TC_DemandItems.CGST,TC_DemandItems.SGST,TC_DemandItems.IGST,TC_DemandItems.CGSTPercentage,TC_DemandItems.SGSTPercentage,
-                    TC_DemandItems.IGSTPercentage,TC_DemandItems.Amount, 
+                    TC_DemandItems.IGSTPercentage,TC_DemandItems.Amount,TC_DemandItems.BasicAmount, 
                     M_Parties.Name CustomerName,M_Parties.PAN,
                     T_Demands.DemandDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Demands.FullDemandNumber FROM  TC_DemandItems
                     JOIN T_Demands ON T_Demands.id=TC_DemandItems.Demand_id
@@ -299,7 +299,7 @@ class DemandDetailsForChallan(CreateAPIView):
                     JOIN MC_ItemUnits on MC_ItemUnits.id=TC_DemandItems.Unit_id
                     JOIN M_GSTHSNCode on M_GSTHSNCode.id=TC_DemandItems.GST_id
                     WHERE TC_DemandItems.Demand_id={DemandIDs} and TC_DemandItems.IsDeleted=0''')
-                        # CustomPrint(DemandItemQuery.query)
+                    CustomPrint(DemandItemQuery.query)
                             
                     for b in DemandItemQuery:                       
                         CustomPrint(b)
