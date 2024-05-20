@@ -155,5 +155,9 @@ class DemandEditserializer(serializers.Serializer):
     CGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     SGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     IGSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
-    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)  
+    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GroupID=serializers.IntegerField()  
+    GroupName=serializers.CharField(max_length=100)
+    SubGroupID=serializers.IntegerField()  
+    SubGroupName=serializers.CharField(max_length=100)
               
