@@ -57,6 +57,7 @@ class BOMListFilterView(CreateAPIView):
                         "CompanyName": a['Company']['Name'],
                         "CreatedOn" : a['CreatedOn'],
                         "CreatedBy": a['CreatedBy'],
+                        
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
@@ -137,6 +138,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity":b['Quantity'],
+                                "RemainNumberOfLot":a['RemainNumberOfLot'],
+                                "RemaninQuantity":a['RemaninQuantity'],
                                 "UnitDetails":UnitDetails
                             })
                             
