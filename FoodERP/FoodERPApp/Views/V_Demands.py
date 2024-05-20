@@ -62,9 +62,9 @@ FROM `M_Items` Join MC_PartyItems a On M_Items.id = a.Item_id
 join MC_PartyItems b On M_Items.id = b.Item_id  WHERE M_Items.IsActive=1 and  a.Party_id =%s AND b.Party_id =%s))a
 
 join M_Items on M_Items.id=a.Item_id 
-JOIN Mc_itemgroupdetails on Mc_itemgroupdetails.item_id=a.Item_id
-JOIN M_Group on M_Group.id=Mc_itemgroupdetails.group_id
-JOIN MC_SubGroup on MC_SubGroup.id=Mc_itemgroupdetails.SubGroup_id
+JOIN Mc_ItemGrouproupDetails on Mc_ItemGrouproupDetails.item_id=a.Item_id
+JOIN M_Group on M_Group.id=Mc_ItemGrouproupDetails.group_id
+JOIN MC_SubGroup on MC_SubGroup.id=Mc_ItemGrouproupDetails.SubGroup_id
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
