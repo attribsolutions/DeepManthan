@@ -143,3 +143,65 @@ class M_SweetPOSRoles(models.Model):
 
     class Meta:
             db_table="M_SweetPOSRoles"
+
+class T_SPOSStock(models.Model):
+    StockDate=models.DateField()
+    Item= models.IntegerField()#ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
+    BaseUnitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.IntegerField()#ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
+    MRP = models.IntegerField()#ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
+    Party = models.IntegerField()#ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    IsSaleable= models.BooleanField(default=False)
+    BatchCode = models.CharField(max_length=500,blank=True,null=True)
+    BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
+    Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
+    IsStockAdjustment = models.BooleanField(default=False)
+   
+    class Meta:
+        db_table="T_SPOSStock" 
+
+class O_SPOSDateWiseLiveStock(models.Model):
+    
+    StockDate=models.DateField()
+    Item= models.IntegerField()#ForeignKey(M_Items,related_name='DStockItem', on_delete=models.PROTECT)
+    OpeningBalance=models.DecimalField(max_digits=20,decimal_places=10)
+    GRN = models.DecimalField(max_digits=20,decimal_places=10)
+    Sale=models.DecimalField(max_digits=20,decimal_places=10)
+    PurchaseReturn = models.DecimalField(max_digits=20,decimal_places=10)
+    SalesReturn = models.DecimalField(max_digits=20,decimal_places=10)
+    ClosingBalance=models.DecimalField(max_digits=20,decimal_places=10)
+    ActualStock = models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.IntegerField()#ForeignKey(MC_ItemUnits, related_name='DStockUnit', on_delete=models.PROTECT) 
+    Party = models.IntegerField()#ForeignKey(M_Parties, related_name='DStockParty', on_delete=models.PROTECT)
+    IsAdjusted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    MRPValue = models.DecimalField(max_digits=20,decimal_places=10)
+    StockAdjustment = models.DecimalField(max_digits=20,decimal_places=10)
+
+    class Meta:
+        db_table="O_SPOSDateWiseLiveStock"                      
+
+class T_SPOSStockOut(models.Model):
+    StockDate=models.DateField()
+    Item= models.IntegerField()#ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
+    BaseUnitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Unit = models.IntegerField()#ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
+    MRP = models.IntegerField()#ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
+    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
+    Party = models.IntegerField()#ForeignKey(M_Parties, related_name='StockParty', on_delete=models.PROTECT)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    IsSaleable= models.BooleanField(default=False)
+    BatchCode = models.CharField(max_length=500,blank=True,null=True)
+    BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
+    Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
+    IsStockAdjustment = models.BooleanField(default=False)
+    IsDeleted = models.BooleanField(default=False)
+    class Meta:
+        db_table="T_SPOSStockOut"        

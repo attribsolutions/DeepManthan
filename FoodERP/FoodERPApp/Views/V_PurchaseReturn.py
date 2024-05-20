@@ -511,11 +511,11 @@ class ReturnItemAddView(CreateAPIView):
                 # query = M_Items.objects.filter(id=id).values('id','Name')
                 query = M_Items.objects.raw('''select id ,name ,
                                                 round(GetTodaysDateMRP(%s,curdate(),2,0,0),2)MRPValue,                                                
-                                                round(GetTodaysDateRate(%s,curdate(),2),2)RateValue,
+                                                round(GetTodaysDateRate(%s,curdate(),0,0,2),2)RateValue,
                                                 round(GSTHsnCodeMaster(%s,curdate(),2),2)GSTPercentage,
                                                 GetTodaysDateMRP(%s,curdate(),1,0,0)MRPID,
                                                 GSTHsnCodeMaster(%s,curdate(),1)GSTID,
-                                                GetTodaysDateRate(%s,curdate(),1)RateID
+                                                GetTodaysDateRate(%s,curdate(),0,0,1)RateID
                                                 from M_Items where id =%s''',[id,id,id,id,id,id,id])
                 # CustomPrint(query.query)
                 

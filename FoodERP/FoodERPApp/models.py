@@ -674,7 +674,7 @@ class M_Items(models.Model):
     ShortName = models.CharField(max_length=500)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     BarCode = models.CharField(max_length=500,null=True,blank=True) 
-    SAPItemCode = models.CharField(max_length=100,unique=True)
+    SAPItemCode = models.CharField(max_length=100,unique=True,null=True,blank=True)
     isActive = models.BooleanField(default=False)
     IsSCM = models.BooleanField(default=False)
     CanBeSold = models.BooleanField(default=False)
