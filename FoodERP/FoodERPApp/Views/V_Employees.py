@@ -28,7 +28,7 @@ class M_EmployeesFilterView(CreateAPIView):
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, M_Employees.Designation
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
@@ -40,7 +40,7 @@ JOIN M_Cities ON M_Cities.id=M_Employees.City_id
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, M_Employees.Designation
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 
@@ -93,6 +93,7 @@ where M_Employees.CreatedBy=%s
                             'District_id':  a['District_id'],
                             'City_id':  a['City_id'],
                             'PIN':  a['PIN'],
+                            'Designation' : a['Designation'],
                             'EmployeeParties': EmployeeParties
                         })
                     log_entry = create_transaction_logNew(request,Logindata,Logindata['PartyID'],'',199,0)
@@ -145,7 +146,7 @@ class M_EmployeesViewSecond(RetrieveAPIView):
                 query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN 
+M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, M_Employees.Designation
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
@@ -198,6 +199,7 @@ where M_Employees.id= %s''', [id])
                         'District_id':  M_Employees_Serializer[0]['District_id'],
                         'City_id':  M_Employees_Serializer[0]['City_id'],
                         'PIN':  M_Employees_Serializer[0]['PIN'],
+                        'Designation':  M_Employees_Serializer[0]['Designation'],
                         'EmployeeParties': EmployeeParties
                     })
                     log_entry = create_transaction_logNew(request,M_Employees_Serializer,0,'',201,id)
@@ -254,8 +256,7 @@ class ManagementEmployeeViewList(CreateAPIView):
             with transaction.atomic():
                 ManagementEmployeedata = JSONParser().parse(request)
                 Company = ManagementEmployeedata['Company']
-                query = M_EmployeeTypes.objects.filter(
-                    Company=Company, IsSalesTeamMember=1)
+                query = M_EmployeeTypes.objects.filter(Company=Company, IsSalesTeamMember=1)
                 if query.exists():
                     query2 = M_Employees.objects.filter(
                         Company=Company, EmployeeType__in=query)
@@ -293,8 +294,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
-                Parties_serializer2 = M_PartiesSerializerFourth(
-                    query, many=True).data
+                Parties_serializer2 = M_PartiesSerializerFourth(query, many=True).data
                 GetAllData = list()
                 for a in Parties_serializer2:
                     GetAllData.append({
@@ -363,8 +363,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query = MC_ManagementParties.objects.filter(
-                    Employee=id).values('Party')
+                query = MC_ManagementParties.objects.filter(Employee=id).values('Party')
                 if query:
                     # q2 = M_Parties.objects.filter(id__in=query)
                     # Parties_serializer = DivisionsSerializerSecond(
@@ -373,7 +372,6 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             .annotate(Address=F('PartyAddress__Address'),
                                PartyTypeName=F('PartyType_id__Name'),).values('id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
                                 'PartyTypeName'))
-                    
                     # CustomPrint(query.query)
                     Partylist = list()
                     for a in query:
