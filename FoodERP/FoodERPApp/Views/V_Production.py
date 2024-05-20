@@ -60,7 +60,10 @@ class ProductionView(CreateAPIView):
                 Customer = Productiondata['Division']
                 Item = Productiondata['Item']  
                 PrintedBatchCode=Productiondata['PrintedBatchCode']
-                query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')
+                NoOfLotsQty=Productiondata['NumberOfLot']
+                NoOfQuantity=Productiondata['EstimatedQuantity']
+                Materialissueid=Productiondata['ProductionMaterialIssue'][0]['MaterialIssue']
+                query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')                
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
                 BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0,1).GetBaseUnitQuantity()
@@ -121,9 +124,18 @@ class ProductionView(CreateAPIView):
                 Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList})                 
                 Production_Serializer = H_ProductionSerializer(data=Productiondata)
                 # CustomPrint(Production_Serializer)
-                if Production_Serializer.is_valid():
-                    
-                    Production_Serializer.save()                    
+                if Production_Serializer.is_valid():                    
+                    Production_Serializer.save() 
+                    MaterialissueNOofLots = T_MaterialIssue.objects.filter(id=Materialissueid).values('RemainNumberOfLot','RemaninLotQuantity')
+                    if MaterialissueNOofLots:
+                        RemaningLots=MaterialissueNOofLots[0]['RemainNumberOfLot']
+                        RamaningQty = float(MaterialissueNOofLots[0]['RemaninLotQuantity']) 
+                        RemainNumberOfLot=RemaningLots-NoOfLotsQty
+                        RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
+                    if(RemaningLots==NoOfLotsQty):                      
+                       query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=2,RemainNumberOfLot=RemainNumberOfLot,RemaninLotQuantity=RemaninQuantity)
+                    else:                       
+                       query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=1,RemainNumberOfLot=RemainNumberOfLot,RemaninLotQuantity=RemaninQuantity)                   
                     
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production Save Successfully', 'Data':[]})
                 else:
@@ -157,6 +169,26 @@ class ProductionViewSecond(RetrieveAPIView):
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})  
+                CustomPrint(id)
+                MaterialissueidOnProd = TC_ProductionMaterialIssue.objects.filter(Production_id=id).values('MaterialIssue_id')
+                CustomPrint(MaterialissueidOnProd.query)
+                Productioninfo = T_Production.objects.filter(id=id).values('EstimatedQuantity','NumberOfLot')  
+                CustomPrint(Productioninfo.query)              
+                PLot=Productioninfo[0]['NumberOfLot']
+                CustomPrint(PLot)
+                PQuantity=Productioninfo[0]['EstimatedQuantity']
+                CustomPrint(PQuantity)
+                Materialissueid=MaterialissueidOnProd[0]['MaterialIssue_id']
+                CustomPrint(Materialissueid)
+                query1 = T_MaterialIssue.objects.filter(id=Materialissueid).values('RemainNumberOfLot','RemaninLotQuantity','NumberOfLot')
+                ActualLot=query1[0]['RemainNumberOfLot']+PLot
+                ActualQty=float(query1[0]['RemaninLotQuantity'])+float(PQuantity)
+                orignalLot=query1[0]['NumberOfLot']                
+                if(orignalLot==ActualLot):
+                     Status=0
+                else:
+                     Status=1
+                query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninLotQuantity=ActualQty)
                 Productiondata = T_Production.objects.get(id=id)
                 Productiondata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})

@@ -131,6 +131,7 @@ class MaterialIsssueList(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
+                            "Status":a['Status'],
                             
                            
                         })
@@ -165,8 +166,8 @@ class MaterialIssueView(CreateAPIView):
                 b = GetPrifix.GetMaterialIssuePrifix(Party)
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
                 MaterialIssueData['Status']=0
-                MaterialIssueData['RemainNumberOfLot']=0
-                MaterialIssueData['RemaninLotQuantity']=0
+                MaterialIssueData['RemainNumberOfLot']=MaterialIssueData['NumberOfLot']
+                MaterialIssueData['RemaninLotQuantity']=MaterialIssueData['LotQuantity']
                 
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 MaterialWorkOrder=MaterialIssueData['MaterialIssueWorkOrder']   
@@ -267,8 +268,10 @@ class MaterialIssueViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 MaterialIssueItemdata = T_MaterialIssue.objects.all().filter(id=id)
+                
                 MaterialIssueItemdataserializer = MatetrialIssueSerializerForDelete(
                     MaterialIssueItemdata, many=True).data
+                CustomPrint(MaterialIssueItemdataserializer)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IBChallan Delete Successfully', 'Data':MaterialIssueItemdataserializer})
     
                 for a in MaterialIssueItemdataserializer[0]['MaterialIssueItems']:
@@ -293,9 +296,19 @@ class MaterialIssueViewSecond(RetrieveAPIView):
 
                 # if MaterialIssueItemdataserializer.is_valid():
                 #     MaterialIssueItemdataserializer.save()
-                # MaterialissueworkorderID=TC_MaterialIssueWorkOrders.objects.filter(id=id).values('WorkOrder_id')
-                # workOrderID=MaterialissueworkorderID[0]['WorkOrder_id']
-                # query = T_WorkOrder.objects.filter(id=workOrderID).update(Status=0)
+                MaterialissueworkorderID=TC_MaterialIssueWorkOrders.objects.filter(id=id).values('WorkOrder_id')
+                workOrderID=MaterialissueworkorderID[0]['WorkOrder_id']
+                MLot=MaterialIssueItemdataserializer[0]['NumberOfLot']
+                MQuantity=MaterialIssueItemdataserializer[0]['LotQuantity']
+                query1 = T_WorkOrder.objects.filter(id=workOrderID).values('RemainNumberOfLot','RemaninQuantity','NumberOfLot')
+                ActualLot=query1[0]['RemainNumberOfLot']+MLot
+                ActualQty=float(query1[0]['RemaninQuantity'])+float(MQuantity)
+                orignalLot=query1[0]['NumberOfLot']                
+                if(orignalLot==ActualLot):
+                     Status=0
+                else:
+                     Status=1
+                query = T_WorkOrder.objects.filter(id=workOrderID).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninQuantity=ActualQty)
                 MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
                 MaterialIssuedata.delete()
                 
