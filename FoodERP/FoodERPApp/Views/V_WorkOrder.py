@@ -91,7 +91,7 @@ class WorkOrderList(CreateAPIView):
                 ToDate = WorkOrderdata['ToDate']
                 query = T_WorkOrder.objects.filter(
                     WorkOrderDate__range=[FromDate, ToDate])
-                CustomPrint(query)
+                             
                 if query:
                     WorkOrder_serializerdata = WorkOrderSerializerSecond(
                         query, many=True).data
@@ -100,27 +100,27 @@ class WorkOrderList(CreateAPIView):
                     WorkOrderListData = list()
                     for a in WorkOrder_serializerdata:
                         Percentage = 0
+                        RemaningQty = a["RemaninQuantity"]
+                        NumberOFLots =a['RemainNumberOfLot'] 
                         Query=TC_MaterialIssueWorkOrders.objects.filter(WorkOrder_id=a['id']).select_related('MaterialIssue').values('MaterialIssue__id')
-                        CustomPrint(Query.query)
+                        
                         MaterialIssueList = list()
-                        for b in Query:
-                            MaterialIssueList.append(b['MaterialIssue__id'])
+                        for b in Query:                            
+                            MaterialIssueList.append(b['MaterialIssue__id'])                            
                             if not MaterialIssueList:
                                 Percentage = 0 
                             else:
-                                y=tuple(MaterialIssueList)
-                                CustomPrint(y)
+                                y=tuple(MaterialIssueList)  
                                 Itemsquery = T_MaterialIssue.objects.filter(id__in=y).aggregate(Sum('LotQuantity'))                                
                                 Percentage = (float(Itemsquery['LotQuantity__sum'])/float(a["Quantity"]) )*100
-                                NoOfLot=T_MaterialIssue.objects.filter(id__in=y).values('NumberOfLot')
-                                NumberOFLots=a['NumberOfLot']- NoOfLot[0]['NumberOfLot']
-                                NO=int(NoOfLot[0]['NumberOfLot'])
-                                NoQty=float(a["Quantity"])                                                              
-                                if NO >0:                              
-                                    RemaningQty=NoQty/NO
-                                else:
-                                    RemaningQty=NoQty
-                                CustomPrint(RemaningQty)
+                                # NoOfLot=T_MaterialIssue.objects.filter(id__in=y).values('NumberOfLot')                                
+                                # NumberOFLots=a['NumberOfLot']- NoOfLot[0]['NumberOfLot']                           
+                                # NO=int(NoOfLot[0]['NumberOfLot'])                               
+                                # NoQty=float(a["Quantity"])                                   
+                                # if NO >0:                              
+                                #     RemaningQty=NoQty/NO
+                                # else:
+                                #     RemaningQty=NoQty                                
                         WorkOrderListData.append({
                             "id": a['id'],
                             "WorkOrderDate": a['WorkOrderDate'],
@@ -132,7 +132,7 @@ class WorkOrderList(CreateAPIView):
                             "UnitName": a['Unit']['BaseUnitConversion'],
                             "Bom": a['Bom'],
                             "NumberOfLot": a['NumberOfLot'],
-                            "RemainingLot":NumberOFLots,
+                            "RemainingLot":NumberOFLots,                            
                             "Quantity": a["Quantity"],
                             "RemaningQty":RemaningQty,
                             "Percentage":Percentage,
@@ -167,6 +167,9 @@ class WorkOrderView(CreateAPIView):
                 b = GetPrifix.GetWorkOrderPrifix(Party)
                 WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
                 WorkOrderData['Status']=0
+                WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
+                WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity']
+               
                 WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
                 if WorkOrder_Serializer.is_valid():
                     WorkOrder_Serializer.save()

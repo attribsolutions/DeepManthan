@@ -344,6 +344,7 @@ urlpatterns = [
             url(r'ChallanFilter$',ChallanListFilterView.as_view()), # Challan List Api
             url(r'ChallanItems$', ChallanItemsView.as_view()),# ChallanItems Api
             url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItemsStock Api
+            url(r'GetDemandDetails$',DemandDetailsForChallan.as_view()),
                     
             
                      
