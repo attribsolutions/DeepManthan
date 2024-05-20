@@ -1379,12 +1379,13 @@ class ProductAndMarginReportView(CreateAPIView):
                 PartyID = data['Party']
                 PartyTypeID = data['PartyType']
                 PriceListID = data['PriceList']
+                CompanyID = data['Company']
                 GroupID = data['Group'].split(",")
                 SubGroupID = data['SubGroup'].split(",")
                 ItemID = data['Item'].split(",")
                 
 
-                query = """ SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
+                query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
 round(GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
@@ -1401,19 +1402,31 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
- where M_Items.Company_id != 4"""
+ """
                 # CustomPrint(query.query)
+                q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
+                if q[0]['IsSCM'] == 1:
+                    CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
+                    for row in CompanyIDs:
+                        p=row.id
+                    Party_ID = p.split(",")
+                    dd=Party_ID[:-1]
+                    C=', '.join(dd)
+                    Companycondition = f"where M_Items.Company_id in( {C}) and M_Items.IsSCM=1"
+                else:
+                    Companycondition = f"where M_Items.Company_id = {CompanyID}"
+                
                 if IsSCM == '0':
-                    query += " "
+                    query += f"{Companycondition} "
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today])
                 else:
-                    query += " join MC_PartyItems on MC_PartyItems.Item_id=M_Items.id and MC_PartyItems.Party_id=%s"
+                    query += f"join MC_PartyItems on MC_PartyItems.Item_id=M_Items.id and MC_PartyItems.Party_id=%s {Companycondition}"
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
                 
                 if any(ItemID) :    
-                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += " "
                     query += "  AND M_Items.id in %s "
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
@@ -1424,7 +1437,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
                 elif any(SubGroupID):
-                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += " "
                     query += "  AND M_Group.id in %s and MC_SubGroup.id in %s"
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
@@ -1432,7 +1445,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID,SubGroupID])
                 elif any(GroupID):
-                    query += " WHERE M_Items.IsFranchisesItem=0"
+                    query += " "
                     query += "  AND M_Group.id in %s "
                     query += "order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
                     if IsSCM == '0':
@@ -1440,7 +1453,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID])
                 
-                    # CustomPrint(ItemQuery.query)
+                # print(ItemQuery.query)
                 
                 ItemsList = list()
                 if ItemQuery:
