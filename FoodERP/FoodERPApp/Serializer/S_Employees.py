@@ -26,7 +26,9 @@ class M_EmployeesSerializer02(serializers.Serializer):
     District_id =serializers.IntegerField()
     City_id =serializers.IntegerField()
     PIN = serializers.CharField(max_length=100)
+    DesignationID = serializers.IntegerField()
     Designation = serializers.CharField(max_length=50)
+    
 
 class MC_EmployeePartiesSerializer(serializers.ModelSerializer):
     class Meta:
