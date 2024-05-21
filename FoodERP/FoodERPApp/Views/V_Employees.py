@@ -475,36 +475,57 @@ class EmployeeSubEmployeeView(CreateAPIView):
     permission_classes = (IsAuthenticated,)   
 
     @transaction.atomic()
-    def get(self, request,id=0):
+    def get(self, request,EmployeeID=0):
         try:
             with transaction.atomic():
                 
-                    pass
+                
+                
+                isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__in=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).values('Designation')
+                Q =""
+                if isSaleTeamMembrt_result :
+                    designation=isSaleTeamMembrt_result[0]['Designation']
+                    Q =""
+                    whereCondition= f'''where {designation}={EmployeeID}'''
+                else:    
+                    designation ="GM"
+                    whereCondition= ""
+                    Q += f'''SELECT distinct GM EmpID,'GM' Desig FROM FoodERP.M_PartyDetails union'''
+                
+                
+                if designation == 'GM':
+                    Q += f''' SELECT distinct NH EmpID,'NH' Desig FROM FoodERP.M_PartyDetails {whereCondition} union'''
+                if designation == 'GM' or designation == 'NH':
+                    Q += f''' SELECT distinct RH EmpID,'RH' Desig FROM FoodERP.M_PartyDetails {whereCondition} union'''    
+                if designation == 'GM' or designation == 'NH' or designation == 'RH':
+                    Q += f''' SELECT distinct ASM EmpID,'ASM' Desig FROM FoodERP.M_PartyDetails {whereCondition} union'''
+                if designation == 'GM' or designation == 'NH' or designation == 'RH' or designation == 'ASM' :
+                    Q += f''' SELECT distinct SO EmpID,'SO' Desig  FROM FoodERP.M_PartyDetails {whereCondition} union'''
+                if designation == 'GM' or designation == 'NH' or designation == 'RH' or designation == 'ASM' or designation == 'SO' :
+                    Q += f''' SELECT distinct SE EmpID,'SE' Desig  FROM FoodERP.M_PartyDetails {whereCondition} union'''
+                if designation == 'GM' or designation == 'NH' or designation == 'RH' or designation == 'ASM' or designation == 'SO'or designation == 'SE' :
+                    Q += f''' SELECT distinct SR EmpID,'SR' Desig  FROM FoodERP.M_PartyDetails {whereCondition} union'''
+                if designation == 'GM' or designation == 'NH' or designation == 'RH' or designation == 'ASM' or designation == 'SO'or designation == 'SE' or designation == 'SR' :
+                    Q += f''' SELECT distinct MT EmpID,'MT' Desig  FROM FoodERP.M_PartyDetails {whereCondition} '''    
+
+                EmployeeSubEmployeeQuery=M_PartyDetails.objects.raw(f'''select EmpID id, concat(M_Employees.Name,'(', Desig,')') Employee from 
+                                                            ({Q})a
+                                                            join M_Employees on M_Employees.id=EmpID
+                                                            where EmpID >0''')
+                EMPList=list()
+                for a in EmployeeSubEmployeeQuery:
                     
+                    EMPList.append({
+                    "id": a.id,
+                    "ItemGroup": a.Employee,    
+                    })
+                
                     
-                    
-#         EmployeeSubEmployeeQuery=M_PartyDetails.objects.raw('''select EmpID, concat(M_Employees.Name,'(', Desig,')') Employee from 
-# (SELECT distinct NH EmpID,'NH' Desig FROM FoodERP.M_PartyDetails where GM=362 
-# union
-# SELECT distinct RH EmpID,'RH' Desig FROM FoodERP.M_PartyDetails where GM=362
-# union
-# SELECT distinct ASM EmpID,'ASM' Desig FROM FoodERP.M_PartyDetails where GM=362
-# union
-# SELECT distinct SO EmpID,'SO' Desig FROM FoodERP.M_PartyDetails where GM=362
-# union
-# SELECT distinct SE EmpID,'SE' Desig FROM FoodERP.M_PartyDetails where GM=362
-# union
-# SELECT distinct MT EmpID,'MT' Desig FROM FoodERP.M_PartyDetails where GM=362)a
-# join M_Employees on M_Employees.id=EmpID
-# where EmpID >0''')
-                    
-                    
-#                     log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata[0]['Party'],'',205,0)
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Management Employee Parties Data Save Successfully', 'Data': []})
-#                 else:
-#                     log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata['Party'],'ManagementEmpPartiesSave:'+str(ManagementEmployeesParties_Serializer.errors),34,0)
-#                     transaction.set_rollback(True)
-#                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
+            
+            
+            # log_entry = create_transaction_logNew(request,ManagementEmployeePartiesdata,ManagementEmployeePartiesdata[0]['Party'],'',205,0)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EMPList})
+                
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
+            # log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
