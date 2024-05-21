@@ -290,7 +290,7 @@ class TargetVSAchievementView(CreateAPIView):
             SAPPartyCode,PartyName, (AchQuantity-CRNoteQuantity) AchQuantity,(AchAmount-CRNoteAmount)AchAmount,TargetQuantityInKG,TargetAmount,
             CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode ,
             ((AchQuantity-CRNoteQuantity)-CXQuantity)GTAchQuantity,
-            ((AchAmount- CRNoteAmount)-CXAmount)GTAchAmount,
+            ((AchAmount- CRNoteAmount)-CXAmount)GTAchAmount
             
             from 
             (SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
