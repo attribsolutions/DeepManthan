@@ -23,14 +23,13 @@ urlpatterns = [
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
     url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
     url(r'FranchiseStockEntry$', FranchiseStockView.as_view()), 
+    url(r'ItemsForFranchise$', FranchiseItemView.as_view()),
+
 
     #User
     url(r'SPOSUsers$', SweetPOSUsersView.as_view()),
     url(r'SPOSUsers/([0-9]+)$', SweetPOSUsersSecondView.as_view()),    
     url(r'sposroleslist$', SweetPOSRolesView.as_view()),
-
     url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view())
 
-    
-    
     ]
