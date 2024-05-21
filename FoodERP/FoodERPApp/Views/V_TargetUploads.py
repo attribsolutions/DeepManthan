@@ -288,7 +288,9 @@ class TargetVSAchievementView(CreateAPIView):
             
             query = T_TargetUploads.objects.raw(f''' select id,Year,FY,PartyID,ItemID,ItemName,ItemGroupName,SubGroupName,ClusterName,SubClusterName,
             SAPPartyCode,PartyName, (AchQuantity-CRNoteQuantity) AchQuantity,(AchAmount-CRNoteAmount)AchAmount,TargetQuantityInKG,TargetAmount,
-            CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode 
+            CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,SAPItemCode ,
+            ((AchQuantity-CRNoteQuantity)-CXQuantity)GTAchQuantity,
+            ((AchAmount- CRNoteAmount)-CXAmount)GTAchAmount
             
             from 
             (SELECT 1 id,CONCAT(DATE_FORMAT(CONCAT({Year}, '-', {Month}, '-01'), '%%b'), '-', {Year}) AS Year,
@@ -332,7 +334,8 @@ where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  )
                     "CXAmountWithGST":a.CXAmount,
                     "CreditNoteQuantityInKG" : a.CRNoteQuantity,
                     "CreditNoteAmountWithGST" :a.CRNoteAmount,
-                    
+                    "GTAchQuantityInKG" : a.GTAchQuantity,
+                    "GTAchAmountWithGST" : a.GTAchAmount,
                     "PartyName": a.PartyName,
                     "ItemName": a.ItemName,
                     "ItemGroup": a.ItemGroupName,
