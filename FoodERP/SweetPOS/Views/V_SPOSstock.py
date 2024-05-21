@@ -157,7 +157,7 @@ class FranchiseItemView(CreateAPIView):
                             })
 
                     ItemList.append({"InvoiceItems":FranchiseItemsList})        
-                log_entry = create_transaction_logNew(request, Logindata, PartyID, '', 181, 0)
+                log_entry = create_transaction_logNew(request, Logindata, PartyID, '', 382, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchSingleGETItem:' + str(Exception(e)), 33, 0)
