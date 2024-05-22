@@ -14,9 +14,8 @@ from django.db.models import *
 from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from datetime import date
 
-class FranchiseStockView(CreateAPIView):
+class StockView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
     
     @transaction.atomic()
     def post(self, request):

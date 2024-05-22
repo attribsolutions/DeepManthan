@@ -365,7 +365,7 @@ order by StockDate,Party_id,Item_id ''')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 
-class FranchiseItemView(CreateAPIView):
+class StockEntryItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
     @transaction.atomic()
