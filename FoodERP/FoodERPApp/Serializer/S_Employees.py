@@ -74,6 +74,8 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
             'District', instance.District) 
         instance.PIN = validated_data.get(
             'PIN', instance.PIN)
+        instance.DesignationID = validated_data.get(
+            'DesignationID', instance.DesignationID)
         instance.Designation = validated_data.get(
             'Designation', instance.Designation)
         instance.City = validated_data.get(
