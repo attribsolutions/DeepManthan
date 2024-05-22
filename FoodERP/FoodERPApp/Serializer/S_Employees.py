@@ -26,7 +26,7 @@ class M_EmployeesSerializer02(serializers.Serializer):
     District_id =serializers.IntegerField()
     City_id =serializers.IntegerField()
     PIN = serializers.CharField(max_length=100)
-    DesignationID = serializers.IntegerField()
+    DesignationID = serializers.CharField(max_length=50)
     Designation = serializers.CharField(max_length=50)
     
 
