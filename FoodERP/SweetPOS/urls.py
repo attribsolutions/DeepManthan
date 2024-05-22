@@ -23,7 +23,6 @@ urlpatterns = [
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
     url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
     url(r'FranchiseStockEntry$', FranchiseStockView.as_view()), 
-    url(r'ItemsForFranchise$', FranchiseItemView.as_view()),
 
 
     #User
