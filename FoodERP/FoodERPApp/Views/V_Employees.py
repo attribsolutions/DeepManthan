@@ -36,7 +36,7 @@ JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
 JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
 JOIN M_Cities ON M_Cities.id=M_Employees.City_id
-JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
+LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
 ''')
                 else:
                     query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
@@ -45,12 +45,11 @@ M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
 M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, M_Employees.Designation AS DesignationID, M_GeneralMaster.Name AS Designation
 FROM M_Employees
 JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
-
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
 JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
 JOIN M_Cities ON M_Cities.id=M_Employees.City_id
-JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
+LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
 where M_Employees.CreatedBy=%s
 ''', [UserID])
                 if not query:
@@ -158,7 +157,7 @@ JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
 JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id 
 JOIN M_Cities ON M_Cities.id=M_Employees.City_id
-JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
+LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
 where M_Employees.id= %s''', [id])
                 if not query:
                     log_entry = create_transaction_logNew(request,0,0,'Details Not available',201,0)
