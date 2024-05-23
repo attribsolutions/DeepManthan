@@ -482,12 +482,17 @@ def GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,
         wherecondition += f""" and  M_PartyDetails.SubCluster_id in( {SubClusterID}) """
     
     
-    isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__in=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).values('Designation')
+    # isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__TypeID=161,Designation__Name=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).select_related('Designation').values('Designation__Name')
+    isSaleTeamMembrt_result = M_Employees.objects.raw(f'''select 1 as id,  M_Employees.Designation,M_GeneralMaster.Name from M_Employees 
+left  join M_GeneralMaster on M_GeneralMaster.id=M_Employees.Designation and M_GeneralMaster.TypeID=161
+where M_Employees.id={EmployeeID} and M_GeneralMaster.Name in('ASM','GM','MT','NH','RH','SO', 'SE','SR')''')
+    
     if isSaleTeamMembrt_result :
         
-        q1=M_Employees.objects.filter(id=EmployeeID).values('Designation')
-        designation=q1[0]['Designation']
         
+        for row in isSaleTeamMembrt_result:
+            designation=row.Name
+       
         q2=M_PartyDetails.objects.raw(f'''Select  M_Parties.id,M_Parties.Name from M_PartyDetails 
                                         join M_Parties on M_Parties.id=M_PartyDetails.Party_id 
                                         where Group_id is null and  {designation} = {EmployeeID} {wherecondition}''')
