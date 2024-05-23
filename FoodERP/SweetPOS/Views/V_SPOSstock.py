@@ -6,15 +6,16 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authentication import BasicAuthentication
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
+from FoodERPApp.Serializer.S_PartyItems import *
+from FoodERPApp.Serializer.S_Orders import *
 from ..models import  *
 from SweetPOS.Serializer.S_SPOSstock import SPOSstockSerializer
 from django.db.models import *
 from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from datetime import date
 
-class FranchiseStockView(CreateAPIView):
+class StockView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
     
     @transaction.atomic()
     def post(self, request):
@@ -80,7 +81,3 @@ class FranchiseStockView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
-
-
-
-
