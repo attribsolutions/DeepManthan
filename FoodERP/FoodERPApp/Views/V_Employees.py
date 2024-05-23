@@ -487,10 +487,15 @@ class EmployeeSubEmployeeView(CreateAPIView):
                 
                 
                 
-                isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__in=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).values('Designation')
+                # isSaleTeamMembrt_result = M_Employees.objects.filter(id=EmployeeID,Designation__in=['ASM','GM','MT','NH','RH','SO', 'SE','SR']).values('Designation')
+                isSaleTeamMembrt_result = M_Employees.objects.raw(f'''select 1 as id,  M_Employees.Designation,M_GeneralMaster.Name from M_Employees 
+left  join M_GeneralMaster on M_GeneralMaster.id=M_Employees.Designation and M_GeneralMaster.TypeID=161
+where M_Employees.id={EmployeeID} and M_GeneralMaster.Name in('ASM','GM','MT','NH','RH','SO', 'SE','SR')''')
                 Q =""
                 if isSaleTeamMembrt_result :
-                    designation=isSaleTeamMembrt_result[0]['Designation']
+                    # designation=isSaleTeamMembrt_result[0]['Designation']
+                    for row in isSaleTeamMembrt_result:
+                        designation=row.Name
                     Q =""
                     whereCondition= f'''where {designation}={EmployeeID}'''
                 else:    
