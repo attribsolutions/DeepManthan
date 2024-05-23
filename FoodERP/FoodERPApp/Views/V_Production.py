@@ -40,7 +40,7 @@ class ProductionList(CreateAPIView):
                 ToDate = Productiondata['ToDate']
                 query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
                 if query:
-                    Production_Serializer = H_ProductionSerializerforGET(query, many=True).data
+                    Production_Serializer = H_ProductionSerializerforGET(query, many=True).data                  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:

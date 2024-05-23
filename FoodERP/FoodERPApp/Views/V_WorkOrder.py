@@ -89,9 +89,10 @@ class WorkOrderList(CreateAPIView):
                 WorkOrderdata = JSONParser().parse(request)
                 FromDate = WorkOrderdata['FromDate']
                 ToDate = WorkOrderdata['ToDate']
-                query = T_WorkOrder.objects.filter(
-                    WorkOrderDate__range=[FromDate, ToDate])
-                             
+                if(FromDate=="" and ToDate=="" ):
+                    query = T_WorkOrder.objects.filter(Status=0)
+                else:
+                    query = T_WorkOrder.objects.filter( WorkOrderDate__range=[FromDate, ToDate])      
                 if query:
                     WorkOrder_serializerdata = WorkOrderSerializerSecond(
                         query, many=True).data
@@ -198,24 +199,37 @@ class WorkOrderViewSecond(RetrieveAPIView):
                     if Query.exists():
                         WorkOrder_serializer = WorkOrderSerializerSecond(
                             Query, many=True).data
+                        # CustomPrint(WorkOrder_serializer)
                         WorkOrderData = list()
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                         ActualBomqty = 0
                         for a in WorkOrder_serializer:
                             Item = a['Item']['id']
+                            CustomPrint(Item)                            
                             obatchwisestockquery = O_BatchWiseLiveStock.objects.raw(
                                 ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [Item])
+                            # CustomPrint(obatchwisestockquery.query)
                             if not obatchwisestockquery:
                                 StockQty = 0.0
                             else:
                                 StockQtySerialize_data = StockQtyserializer(
                                     obatchwisestockquery, many=True).data
                                 StockQty = StockQtySerialize_data[0]['actualStock']
-
+                            CustomPrint(StockQty)
                             ActualBomqty = float(
                                 a['Quantity']) / float(a['NumberOfLot'])
                             MaterialDetails = list()
                             for b in a['WorkOrderItems']:
+                               
+                                obatchwisestockquery1 = O_BatchWiseLiveStock.objects.raw(
+                                ''' SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,SUM(O_BatchWiseLiveStock.BaseUnitQuantity) AS actualStock FROM O_BatchWiseLiveStock WHERE O_BatchWiseLiveStock.Item_id = %s GROUP BY O_BatchWiseLiveStock.Item_id''', [b['Item']['id']])                              
+                                if not obatchwisestockquery1:
+                                    StockQty1 = 0.0
+                                else:
+                                    StockQtySerialize_data = StockQtyserializer(
+                                    obatchwisestockquery1, many=True).data
+                                    StockQty1 = StockQtySerialize_data[0]['actualStock']
+                                
                                 MaterialDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
@@ -224,8 +238,9 @@ class WorkOrderViewSecond(RetrieveAPIView):
                                     "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BomQuantity": b['BomQuantity'],
                                     "Quantity": b['Quantity'],
+                                    "StockQuantity":StockQty1
                                 })
-
+                            
                             WorkOrderData.append({
                                 "id": a['id'],
                                 "WorkOrderDate": a['WorkOrderDate'],
@@ -247,6 +262,9 @@ class WorkOrderViewSecond(RetrieveAPIView):
                                 "EstimatedOutputQty": a['Quantity'],
                                 "WorkOrderItems": MaterialDetails,
                                 "Status":a['Status'],
+                                "RemainNumberOfLot":a['RemainNumberOfLot'],
+                                "RemaninQuantity":a['RemaninQuantity']                                
+                                
                             })
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderData})
         except T_WorkOrder.DoesNotExist:
