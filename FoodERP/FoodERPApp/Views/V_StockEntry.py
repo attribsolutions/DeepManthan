@@ -251,7 +251,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
                     
                     Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
     ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
-    O_BatchWiseLiveStock.BaseUnitQuantity Qty ,
+    O_BatchWiseLiveStock.BaseUnitQuantity Qty ,M_Items.BaseUnitID_id,
     ifnull((case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
     ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
     O_LiveBatches.MRPValue ,
@@ -280,7 +280,8 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
                 else:
                     ItemList = list()
                     for row in Itemquery:
-                        
+                        if int(Unit)==0:
+                            Unit=row.BaseUnitID_id   
                         if int(Unit) == 1:
                             SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
                             UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
