@@ -119,7 +119,7 @@ class MaterialIsssueList(CreateAPIView):
                     for a in MaterialIsssue_serializerdata:
                         if(a['RemainNumberOfLot']!=0):
                             if(a['NumberOfLot']!=a['RemainNumberOfLot']):
-                                Percentage=a['NumberOfLot']/a['RemainNumberOfLot']*100 
+                                Percentage=a['RemainNumberOfLot']/a['NumberOfLot']*100 
                             else:
                                 Percentage=0
                         else:  
