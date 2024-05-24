@@ -674,7 +674,7 @@ urlpatterns = [
             url(r'CheckStockEntryForFYFirstTransaction$',CheckStockEntryForFYFirstTransactionView.as_view()),
             url(r'CheckStockEntryDateAndNotAllowedBackdatedTransaction$',CheckStockEntryDateAndNotAllowedBackdatedTransactionView.as_view()),
             # url(r'ItemsForFranchise$', FranchiseItemView.as_view()),
-            url(r'PartyItemsStock_EntryItem$', StockEntryItemsView.as_view()),
+            url(r'PartyItemsStock_Entry$', StockEntryItemsView.as_view()),
             
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
