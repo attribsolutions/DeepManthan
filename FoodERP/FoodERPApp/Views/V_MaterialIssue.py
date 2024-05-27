@@ -41,6 +41,7 @@ class WorkOrderDetailsView(CreateAPIView):
                         MaterialDetails = list()
                         workorderqty = a['Quantity']                        
                         for b in a['WorkOrderItems']:
+                            # CustomPrint(b)
                             Item = b['Item']['id']
                             z = 0
                             obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(
@@ -75,7 +76,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                         "ObatchwiseQuantity": c['Quantity'],
                                         "BaseUnitQuantity": StockQty,
                                         # "Qty":p
-                                        "Qty": ""
+                                        "Qty": ""                                        
                                     })
                             MaterialDetails.append({
                                 "id": b['id'],
@@ -84,7 +85,8 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity": round(ActualQty, 3),
-                                "BatchesData": stockDatalist,
+                                "OriginalWorkOrderQty":b['Quantity'],
+                                "BatchesData": stockDatalist                                
                                 # "Status":a['Status']
                             })
                             # CustomPrint(MaterialDetails)
@@ -103,18 +105,25 @@ class MaterialIsssueList(CreateAPIView):
             with transaction.atomic():
                 MaterialIsssuedata = JSONParser().parse(request)
                 FromDate = MaterialIsssuedata['FromDate']
-                ToDate = MaterialIsssuedata['ToDate']  
-                query = T_MaterialIssue.objects.filter(
-                    MaterialIssueDate__range=[FromDate, ToDate])                  
+                ToDate = MaterialIsssuedata['ToDate'] 
+                if(FromDate=="" and ToDate=="" ): 
+                    query = T_MaterialIssue.objects.filter(Status=0) 
+                else: 
+                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate])                 
                 if query:
-                    MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond(
-                        query, many=True).data
+                    MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond( query, many=True).data
                     
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': MaterialIsssue_serializerdata})
                     MaterialIsssueListData = list()
                    
                     for a in MaterialIsssue_serializerdata:
-                       
+                        if(a['RemainNumberOfLot']!=0):
+                            if(a['NumberOfLot']!=a['RemainNumberOfLot']):
+                                Percentage=a['RemainNumberOfLot']/a['NumberOfLot']*100 
+                            else:
+                                Percentage=0
+                        else:  
+                            Percentage=100                        
                         MaterialIsssueListData.append({
                             "id": a['id'],
                             "MaterialIssueDate": a['MaterialIssueDate'],
@@ -132,9 +141,10 @@ class MaterialIsssueList(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
                             "Status":a['Status'],
-                            
+                            "Percentage":Percentage                         
                            
-                        })
+                        })                        
+                        CustomPrint(MaterialIsssueListData)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
@@ -233,7 +243,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIssue_serializer})
         except T_MaterialIssue.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
-    
+        
 
 
     
@@ -296,7 +306,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
 
                 # if MaterialIssueItemdataserializer.is_valid():
                 #     MaterialIssueItemdataserializer.save()
-                MaterialissueworkorderID=TC_MaterialIssueWorkOrders.objects.filter(id=id).values('WorkOrder_id')
+                MaterialissueworkorderID=TC_MaterialIssueWorkOrders.objects.filter(MaterialIssue_id=id).values('WorkOrder_id')                
                 workOrderID=MaterialissueworkorderID[0]['WorkOrder_id']
                 MLot=MaterialIssueItemdataserializer[0]['NumberOfLot']
                 MQuantity=MaterialIssueItemdataserializer[0]['LotQuantity']
@@ -318,7 +328,8 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssueItemdataserializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-
+        except IntegrityError:
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Material Issue used in another table', 'Data': []})
 
 
 

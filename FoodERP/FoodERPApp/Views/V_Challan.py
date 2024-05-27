@@ -286,7 +286,7 @@ class DemandDetailsForChallan(CreateAPIView):
                 Demanddata = list() 
                 for DemandID in Demand_list: 
                     DemandItemDetails = list()
-                    DemandItemQuery=TC_DemandItems.objects.raw(f'''SELECT 1 as id,TC_DemandItems.ID DemandID,M_items.id ItemID,M_Items.Name ItemName,TC_DemandItems.Quantity,Rate,Unit_id,
+                    DemandItemQuery=TC_DemandItems.objects.raw(f'''SELECT 1 as id,TC_DemandItems.ID DemandID,M_Items.id ItemID,M_Items.Name ItemName,TC_DemandItems.Quantity,Rate,Unit_id,
                     MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_DemandItems.BaseUnitQuantity,
                     TC_DemandItems.GST_id,M_GSTHSNCode.HSNCode,
                     TC_DemandItems.GSTAmount,TC_DemandItems.CGST,TC_DemandItems.SGST,TC_DemandItems.IGST,TC_DemandItems.CGSTPercentage,TC_DemandItems.SGSTPercentage,
@@ -295,7 +295,7 @@ class DemandDetailsForChallan(CreateAPIView):
                     T_Demands.DemandDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Demands.FullDemandNumber FROM  TC_DemandItems
                     JOIN T_Demands ON T_Demands.id=TC_DemandItems.Demand_id
                     JOIN M_Parties on M_Parties.id=T_Demands.Customer_id
-                    JOIN M_items ON M_items.id=TC_demandItems.Item_id
+                    JOIN M_Items ON M_Items.id=TC_DemandItems.Item_id
                     JOIN MC_ItemUnits on MC_ItemUnits.id=TC_DemandItems.Unit_id
                     JOIN M_GSTHSNCode on M_GSTHSNCode.id=TC_DemandItems.GST_id
                     WHERE TC_DemandItems.Demand_id={DemandIDs} and TC_DemandItems.IsDeleted=0''')
