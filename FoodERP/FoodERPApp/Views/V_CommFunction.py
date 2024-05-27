@@ -95,21 +95,29 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
     return log_entry
     
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):
-
+    # CustomPrint("MMMMMMMMMMMMMM")
     UnitDetails = list()
     ItemUnitquery = MC_ItemUnits.objects.filter(
         Item=ItemID, IsDeleted=0)
     ItemUnitqueryserialize = ItemUnitSerializer(
         ItemUnitquery, many=True).data
-
+    # CustomPrint(ItemUnitqueryserialize)
     RateMcItemUnit = ""
-    q = M_Parties.objects.filter(id=PartyForRate ).select_related(
-        "PartyType").values("PartyType__IsSCM","PartyType__IsFranchises","PartyType__IsRetailer")
-    CustomPrint(q.query)
+    # q = M_Parties.objects.filter(id=PartyForRate ).values("PartyType__IsSCM","PartyType__IsFranchises","PartyType__IsRetailer")
+    q1 = M_Parties.objects.filter(id=PartyForRate ).values("PartyType_id")
+    PartyTypeID=q1[0]['PartyType_id']
+    Q11=M_Settings.objects.filter(id=44).values("DefaultValue")
+    PartyTypeID1=str(Q11[0]['DefaultValue'])
+    PartyTypeID1_list = [int(x) for x in PartyTypeID1.split(",")]
+    # CustomPrint(PartyTypeID)
+    # CustomPrint(PartyTypeID1)
+    # CustomPrint(PartyTypeID1_list)
     for d in ItemUnitqueryserialize:
         if (d['PODefaultUnit'] == True):
             RateMcItemUnit = d['id']
-        if(q[0]['PartyType__IsSCM'] == 1 or q[0]['PartyType__IsFranchises'] == 1  or q[0]['PartyType__IsRetailer'] == 1 or q[0]['PartyType__IsRetailer'] == 0):
+        # if(q[0]['PartyType__IsSCM'] == 1 or q[0]['PartyType__IsFranchises'] == 1  or q[0]['PartyType__IsRetailer'] == 1 or q[0]['PartyType__IsRetailer'] == 0):
+        if PartyTypeID in PartyTypeID1_list:
+            # CustomPrint("Shrutiiiiiiuuuuu")
             CalculatedRateusingMRPMargin = RateCalculationFunction(
                 0, ItemID, PartyForRate, 0, 0, d['id'], 0).RateWithGST()
             Rate = CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
@@ -694,7 +702,7 @@ class RateCalculationFunction:
 
         query1 = M_PriceList.objects.filter(
             id=PriceList).values('CalculationPath')
-        # CustomPrint(query1)
+        # CustomPrint(query1.query)
         self.calculationPath = str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit = q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit = q3NoUnit[0]['BaseUnitQuantity']
