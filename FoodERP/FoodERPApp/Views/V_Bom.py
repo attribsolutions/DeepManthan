@@ -118,6 +118,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
                             })
                         
                         for b in a['BOMItems']:
+                            CustomPrint(b)
                             ChildItem= b['Item']['id']
                             query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
                             # CustomPrint(query.query)
@@ -138,8 +139,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity":b['Quantity'],
-                                "RemainNumberOfLot":a['RemainNumberOfLot'],
-                                "RemaninQuantity":a['RemaninQuantity'],
+                                # "RemainNumberOfLot":a['RemainNumberOfLot'],
+                                # "RemaninQuantity":a['RemaninQuantity'],
                                 "UnitDetails":UnitDetails
                             })
                             
