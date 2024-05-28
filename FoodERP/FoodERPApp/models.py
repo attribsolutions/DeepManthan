@@ -18,11 +18,8 @@ def CustomPrint(value):
     for row in printvalue:
        printvalue=row.IsActive
     if printvalue is True:
-       
         print(value)      
-    else:
-       
-        print()
+    
 # def GetYear(TDate):
 #     date = datetime.strptime(TDate, "%Y-%m-%d").date()
 #     #initialize the current year
