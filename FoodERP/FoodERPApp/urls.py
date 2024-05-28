@@ -490,6 +490,10 @@ urlpatterns = [
             url(r'Group/([0-9]+)$', GroupViewSecond.as_view()),
             url(r'Group$', GroupView.as_view()),
             url(r'GetGroupByGroupTypeID/([0-9]+)$', GetGroupByGroupTypeID.as_view()),
+            # url(r'GetSubGroupsByGroup$', GetSubGroupsByGroupView.as_view()),  #GETAll
+            # url(r'UpdateGroupSubGroupSequence$', UpdateGroupSubGroupSequenceView.as_view()),  #POST
+            
+            
 # SubGroups
             url(r'SubGroups/([0-9]+)$', SubGroupViewSecond.as_view()),
             url(r'SubGroups$', SubGroupView.as_view()),
@@ -673,8 +677,7 @@ urlpatterns = [
             url(r'GetStockCountForParty$',GetStockCountForPartyView.as_view()),
             url(r'CheckStockEntryForFYFirstTransaction$',CheckStockEntryForFYFirstTransactionView.as_view()),
             url(r'CheckStockEntryDateAndNotAllowedBackdatedTransaction$',CheckStockEntryDateAndNotAllowedBackdatedTransactionView.as_view()),
-            # url(r'ItemsForFranchise$', FranchiseItemView.as_view()),
-            url(r'StockEntryItems$', StockEntryItemsView.as_view()),
+            url(r'PartyItemsStock_Entry$', StockEntryItemsView.as_view()),
             
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 

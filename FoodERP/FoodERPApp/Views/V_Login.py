@@ -419,6 +419,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         RoleName=F('Role__Name'),
                         PartyName=F('Party__Name'),
                         IsSCMPartyType=F('Party__PartyType__IsSCM'),
+                        IsFranchises=F('Party__PartyType__IsFranchises'),
                         GSTIN=F('Party__GSTIN'),
                         FSSAINo=F('Party__PartyAddress__FSSAINo'),
                         FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
@@ -428,14 +429,16 @@ class UserPartiesForLoginPage(CreateAPIView):
                         # IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
                     ).annotate(
                         IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
+                        IsFranchisesInt=Case(When(IsFranchises=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
                         UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ) 
                     )
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee_id',
-                        'Party__SAPPartyCode', 'IsSCMPartyTypeInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
+                        'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
                         'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt'
                     )
                     # .filter(IsDefaultPartyAddress=True)
+                    
                 )      
                 # UserID = request.user.id
                 # CustomPrint(str(query.query))
@@ -456,6 +459,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "Employee_id" : id,
                             "SAPPartyCode" :item['Party__SAPPartyCode'],
                             "IsSCMPartyType" :item['IsSCMPartyTypeInt'],
+                            "IsFranchises": item['IsFranchisesInt'],
                             "GSTIN":item['GSTIN'],
                             "FSSAINo": item['FSSAINo'],
                             "FSSAIExipry" :item['FSSAIExpiry'],
@@ -515,7 +519,6 @@ class GetUserDetailsView(APIView):
         employee = user.Employee
         company = employee.Company
         companygroup = company.CompanyGroup
-        
        
         a = list()
         a.append({
