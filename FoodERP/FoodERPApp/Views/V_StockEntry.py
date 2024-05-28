@@ -193,7 +193,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     
                     Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
-sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,
+sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,M_Items.BaseUnitID_id,
 ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
 ifnull(sum(case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
 O_LiveBatches.MRPValue ,
