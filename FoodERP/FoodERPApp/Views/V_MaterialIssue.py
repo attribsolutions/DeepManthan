@@ -107,7 +107,7 @@ class MaterialIsssueList(CreateAPIView):
                 FromDate = MaterialIsssuedata['FromDate']
                 ToDate = MaterialIsssuedata['ToDate'] 
                 if(FromDate=="" and ToDate=="" ): 
-                    query = T_MaterialIssue.objects.filter(Status=0) 
+                    query = T_MaterialIssue.objects.filter(~Q(Status=2)) 
                 else: 
                     query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate])                 
                 if query:
