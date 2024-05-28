@@ -1273,7 +1273,7 @@ class T_Production(models.Model):
         StoreLocation = models.CharField(max_length=500)
         PrintedBatchCode = models.CharField(max_length=500)		
         BestBefore = models.DateField()  
-        Remark = models.CharField(max_length=500)	
+        Remark = models.CharField(max_length=500,null=True,blank=True)	
         CreatedBy = models.IntegerField()
         CreatedOn = models.DateTimeField(auto_now_add=True)
         UpdatedBy = models.IntegerField()
