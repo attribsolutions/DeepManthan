@@ -174,7 +174,7 @@ class M_ItemsFilterView(CreateAPIView):
                             "UnitDetails":UnitDetails
                         })  
                         
-                    log_entry = create_transaction_logNew(request, Logindata, x,'',102,0)
+                    log_entry = create_transaction_logNew(request, Logindata, x,'Party Items List',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'ItemList:'+str(Exception(e)),33,0)

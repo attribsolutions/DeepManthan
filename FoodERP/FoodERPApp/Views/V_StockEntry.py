@@ -394,7 +394,7 @@ class StockEntryItemsView(CreateAPIView):
                                                             WHERE MC_PartyItems.Party_id = %s''', ([PartyID]))
              
                 if not Itemquery:
-                    log_entry = create_transaction_logNew(request, Logindata, 0, 'Items Not available', 181, 0)
+                    log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
                 
                 FranchiseItemsList = [{
@@ -420,7 +420,7 @@ class StockEntryItemsView(CreateAPIView):
                     }]
                 } for item in Itemquery]
                 
-                log_entry = create_transaction_logNew(request, Logindata, PartyID, '', 382, 0)
+                log_entry = create_transaction_logNew(request, Logindata, PartyID, 'Franchise Items List', 102, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': FranchiseItemsList})
 
         except Exception as e:
