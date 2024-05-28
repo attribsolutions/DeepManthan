@@ -458,7 +458,7 @@ class StockEntryItemsView(CreateAPIView):
             with transaction.atomic():
                 UserID = Logindata['UserID']
                 RoleID = Logindata['RoleID']
-                CompanyID = Logindata['CompanyID']
+                CompanyID = Logindata['CompanyID']   
                 PartyID = Logindata['PartyID']
                 CompanyGroupID = Logindata['CompanyGroup']
                 IsSCMCompany = Logindata['IsSCMCompany']
@@ -471,9 +471,9 @@ class StockEntryItemsView(CreateAPIView):
                                                             GSTHsnCodeMaster(M_Items.id, CURDATE(), 1) AS GSTID,
                                                             GetTodaysDateRate(M_Items.id, CURDATE(), 0, 0, 1) AS RateID
                                                             FROM M_Items 
-                                                            JOIN MC_PartyItems  ON MC_PartyItems.Item_id = M_Items.id
+                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
                                                             WHERE MC_PartyItems.Party_id = %s''', ([PartyID]))
-                print(Itemquery)
+             
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Items Not available', 181, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
@@ -505,5 +505,5 @@ class StockEntryItemsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': FranchiseItemsList})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchSingleGETItem:' + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
