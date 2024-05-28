@@ -193,7 +193,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     
                     Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
-sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,
+sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,M_Items.BaseUnitID_id,
 ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
 ifnull(sum(case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
 O_LiveBatches.MRPValue ,
@@ -394,7 +394,7 @@ class StockEntryItemsView(CreateAPIView):
                                                             WHERE MC_PartyItems.Party_id = %s''', ([PartyID]))
              
                 if not Itemquery:
-                    log_entry = create_transaction_logNew(request, Logindata, 0, 'Items Not available', 181, 0)
+                    log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
                 
                 FranchiseItemsList = [{
@@ -420,7 +420,7 @@ class StockEntryItemsView(CreateAPIView):
                     }]
                 } for item in Itemquery]
                 
-                log_entry = create_transaction_logNew(request, Logindata, PartyID, '', 382, 0)
+                log_entry = create_transaction_logNew(request, Logindata, PartyID, 'Franchise Items List', 102, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': FranchiseItemsList})
 
         except Exception as e:

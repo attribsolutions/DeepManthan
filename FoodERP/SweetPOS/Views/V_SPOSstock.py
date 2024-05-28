@@ -72,7 +72,7 @@ class StockView(CreateAPIView):
                 if Stock_serializer.is_valid():
                     Stock_serializer.save()
                   
-                    log_entry = create_transaction_logNew(request, FranchiseStockdata, FranchiseStockdata['PartyID'],'',381,0)
+                    log_entry = create_transaction_logNew(request, FranchiseStockdata, FranchiseStockdata['PartyID'],'Franchise Items Save Successfully',87,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Save Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(Stock_serializer.errors),34,0)

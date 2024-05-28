@@ -435,7 +435,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt'
+                        'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
                     )
                     # .filter(IsDefaultPartyAddress=True)
                     
@@ -465,7 +465,8 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "FSSAIExipry" :item['FSSAIExpiry'],
                             "PartyTypeID":item['PartyTypeID'],
                             "PartyType":item['PartyType'],
-                            "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt']
+                            "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt'],
+                            "PriceList_id":item['Party__PriceList_id']
                         })
                     
                     log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
