@@ -73,50 +73,105 @@ class PartySubPartyViewSecond(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query= MC_PartySubParty.objects.filter(Party=id)
-                # CustomPrint(query.query)
+                query = MC_PartySubParty.objects.filter(Party=id)
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
-                query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
-                query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
-                query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
-                # CustomPrint(query3.query)
+                
+                query1 = MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
+                query2 = M_Parties.objects.filter(id__in=query1, PartyType__IsVendor=1).select_related('PartyType')
+                query3 = MC_PartySubParty.objects.filter(Party__in=query2)
                 PartySerializer = PartySubpartySerializerSecond(query3, many=True).data
                 
-                SubPartyList = list()
+                # CustomPrint(query3.query)
+                SubPartyList = []
+                seen_subparties = set()
+                
                 for a in PartySerializer:
-                    # CustomPrint('aaaa')
-                    SubPartyList.append({
-                        "Party": a['SubParty']['id'],
-                        "PartyName": a['SubParty']['Name'],
-                        "SubParty": a['Party']['id'],
-                        "SubPartyName": a['Party']['Name'],
-                        "PartyType": a['Party']['PartyType']['id'],
-                        "IsVendor": a['Party']['PartyType']['IsVendor'],
-                        "Route": a['Route']['id'],
-                        "Creditlimit": a['Creditlimit']
-                    }) 
+                    subparty_id = a['SubParty']['id']
+                    if subparty_id not in seen_subparties:
+                        seen_subparties.add(subparty_id)
+                        SubPartyList.append({
+                            "Party": a['SubParty']['id'],
+                            "PartyName": a['SubParty']['Name'],
+                            "SubParty": a['Party']['id'],
+                            "SubPartyName": a['Party']['Name'],
+                            "PartyType": a['Party']['PartyType']['id'],
+                            "IsVendor": a['Party']['PartyType']['IsVendor'],
+                            "Route": a['Route']['id'],
+                            "Creditlimit": a['Creditlimit']
+                        })
 
                 for a in SubPartySerializer:
-                    # CustomPrint('bb')
-                    SubPartyList.append({
-                        "Party": a['Party']['id'],
-                        "PartyName": a['Party']['Name'],
-                        "SubParty": a['SubParty']['id'],
-                        "SubPartyName": a['SubParty']['Name'],
-                        "PartyType": a['SubParty']['PartyType']['id'],
-                        "IsVendor": a['SubParty']['PartyType']['IsVendor'],
-                        "Route": a['Route']['id'],
-                        "Creditlimit": a['Creditlimit']
-                    })
+                    subparty_id = a['SubParty']['id']
+                    if subparty_id not in seen_subparties:
+                        seen_subparties.add(subparty_id)
+                        SubPartyList.append({
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "SubParty": a['SubParty']['id'],
+                            "SubPartyName": a['SubParty']['Name'],
+                            "PartyType": a['SubParty']['PartyType']['id'],
+                            "IsVendor": a['SubParty']['PartyType']['IsVendor'],
+                            "Route": a['Route']['id'],
+                            "Creditlimit": a['Creditlimit']
+                        })
                 
-                log_entry = create_transaction_logNew(request, PartySerializer,0,'',175,0)               
+                log_entry = create_transaction_logNew(request, PartySerializer, 0, '', 175, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
-        except  MC_PartySubParty.DoesNotExist:
-            log_entry = create_transaction_logNew(request, PartySerializer,0,'PartySubPartyList Not Available',175,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
+        
+        except MC_PartySubParty.DoesNotExist:
+            log_entry = create_transaction_logNew(request, PartySerializer, 0, 'PartySubPartyList Not Available', 175, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Party SubParty Not available', 'Data': []})
+        
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'PartySubPartyList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0, 0, 'PartySubPartyList:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+    # def get(self, request, id=0):
+    #     try:
+    #         with transaction.atomic():
+    #             query= MC_PartySubParty.objects.filter(Party=id)
+    #             # CustomPrint(query.query)
+    #             SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
+    #             query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
+    #             query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
+    #             query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
+    #             # CustomPrint(query3.query)
+    #             PartySerializer = PartySubpartySerializerSecond(query3, many=True).data
+                
+    #             SubPartyList = list()
+    #             for a in PartySerializer:
+    #                 # CustomPrint('aaaa')
+    #                 SubPartyList.append({
+    #                     "Party": a['SubParty']['id'],
+    #                     "PartyName": a['SubParty']['Name'],
+    #                     "SubParty": a['Party']['id'],
+    #                     "SubPartyName": a['Party']['Name'],
+    #                     "PartyType": a['Party']['PartyType']['id'],
+    #                     "IsVendor": a['Party']['PartyType']['IsVendor'],
+    #                     "Route": a['Route']['id'],
+    #                     "Creditlimit": a['Creditlimit']
+    #                 }) 
+
+    #             for a in SubPartySerializer:
+    #                 # CustomPrint('bb')
+    #                 SubPartyList.append({
+    #                     "Party": a['Party']['id'],
+    #                     "PartyName": a['Party']['Name'],
+    #                     "SubParty": a['SubParty']['id'],
+    #                     "SubPartyName": a['SubParty']['Name'],
+    #                     "PartyType": a['SubParty']['PartyType']['id'],
+    #                     "IsVendor": a['SubParty']['PartyType']['IsVendor'],
+    #                     "Route": a['Route']['id'],
+    #                     "Creditlimit": a['Creditlimit']
+    #                 })
+                
+    #             log_entry = create_transaction_logNew(request, PartySerializer,0,'',175,0)               
+    #             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SubPartyList})
+    #     except  MC_PartySubParty.DoesNotExist:
+    #         log_entry = create_transaction_logNew(request, PartySerializer,0,'PartySubPartyList Not Available',175,0)
+    #         return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Party SubParty Not available', 'Data': []})
+    #     except Exception as e:
+    #         log_entry = create_transaction_logNew(request, 0,0,'PartySubPartyList:'+str(Exception(e)),33,0)
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GetVendorSupplierCustomerListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
