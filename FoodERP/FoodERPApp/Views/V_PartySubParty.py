@@ -82,7 +82,6 @@ class PartySubPartyViewSecond(CreateAPIView):
                 
                 SubPartyList = list()
                 for a in PartySerializer:
-                    CustomPrint('aaaa')
                     SubPartyList.append({
                         "Party": a['SubParty']['id'],
                         "PartyName": a['SubParty']['Name'],
@@ -95,7 +94,6 @@ class PartySubPartyViewSecond(CreateAPIView):
                     }) 
 
                 for a in SubPartySerializer:
-                    CustomPrint('bb')
                     SubPartyList.append({
                         "Party": a['Party']['id'],
                         "PartyName": a['Party']['Name'],
