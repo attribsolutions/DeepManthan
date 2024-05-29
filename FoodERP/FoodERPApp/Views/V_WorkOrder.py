@@ -89,10 +89,10 @@ class WorkOrderList(CreateAPIView):
                 WorkOrderdata = JSONParser().parse(request)
                 FromDate = WorkOrderdata['FromDate']
                 ToDate = WorkOrderdata['ToDate']
-                if(FromDate=="" and ToDate=="" ):
-                    query = T_WorkOrder.objects.filter(Status=0)
-                else:
-                    query = T_WorkOrder.objects.filter( WorkOrderDate__range=[FromDate, ToDate])      
+                if(FromDate=="" and ToDate=="" ):                    
+                    query = T_WorkOrder.objects.filter(~Q(Status=2))                    
+                else:                    
+                    query = T_WorkOrder.objects.filter( WorkOrderDate__range=[FromDate, ToDate])
                 if query:
                     WorkOrder_serializerdata = WorkOrderSerializerSecond(
                         query, many=True).data
