@@ -75,9 +75,13 @@ class PartySubPartyViewSecond(CreateAPIView):
             with transaction.atomic():
                 query= MC_PartySubParty.objects.filter(Party=id)
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
-                query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
+                # CustomPrint(query.query)
+                query1= MC_PartySubParty.objects.filter(Party=id).values('SubParty_id')
+                # CustomPrint(query1.query)
                 query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
+                # CustomPrint(query2.query)
                 query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
+                CustomPrint(query3.query)
                 PartySerializer = PartySubpartySerializerSecond(query3, many=True).data
                 
                 SubPartyList = list()
