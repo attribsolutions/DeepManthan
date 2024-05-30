@@ -962,6 +962,8 @@ class T_Invoices(models.Model):
     Hide = models.BooleanField(default=False)
     ImportFromExcel= models.BooleanField(default=False)
     DeletedFromSAP = models.BooleanField(default=False)
+    DataRecovery = models.BooleanField(default=False)
+    # IsDataRecovery = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
 
