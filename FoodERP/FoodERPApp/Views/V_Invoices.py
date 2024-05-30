@@ -203,6 +203,7 @@ class InvoiceListFilterView(CreateAPIView):
                     Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
                     InvoiceListData = list()
+                    CustomPrint(Invoice_serializer)
                     for a in Invoice_serializer:
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
@@ -241,7 +242,8 @@ class InvoiceListFilterView(CreateAPIView):
                                 "CustomerGSTIN": a['Customer']['GSTIN'],
                                 "CustomerPAN": a['Customer']['PAN'],
                                 "IsTCSParty": IsTCSParty ,
-                                "ImportFromExcel" :a['ImportFromExcel']
+                                "ImportFromExcel" :a['ImportFromExcel'],
+                                "DataRecovery":a['DataRecovery']
                             })
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate,35,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
