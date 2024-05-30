@@ -47,7 +47,7 @@ class PartySubPartyView(CreateAPIView):     # PartySubParty Save
                     PartySubpartiesdata1 = MC_PartySubParty.objects.filter(Party=PartySubpartiesdata[0]['PartyID'])
                  
                     PartySubpartiesdata1.delete()
-                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubpartiesdata[0]['PartyID'],Party__PartyType=3).select_related('Party')
+                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubpartiesdata[0]['PartyID']).select_related('Party')
                   
                     PartySubpartiesdata2.delete()
                     
@@ -75,7 +75,7 @@ class PartySubPartyViewSecond(CreateAPIView):
             with transaction.atomic():
                 query= MC_PartySubParty.objects.filter(Party=id)
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
-                
+
                 query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
                 query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
                 query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
