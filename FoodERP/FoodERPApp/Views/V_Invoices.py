@@ -203,7 +203,7 @@ class InvoiceListFilterView(CreateAPIView):
                     Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
                     InvoiceListData = list()
-                    CustomPrint(Invoice_serializer)
+                    # CustomPrint(Invoice_serializer)
                     for a in Invoice_serializer:
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
