@@ -401,7 +401,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             ChallanItemDetails = list()
                             for y in x['ChallanItems']:
                                 Qty = y['Quantity']
-                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id'],BOM__IsVDCItem=1).values('BOM')
+                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
                                 # CustomPrint(bomquery.query)
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
                                 # CustomPrint(Query.query)
@@ -455,7 +455,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "Quantity": Qty,
                                         "MRP":MRPDetails[0]['id'],
                                         "MRPValue": MRPDetails[0]['MRP'],
-                                        "Rate":"",  
+                                        "Rate":y['Rate'], 
                                         "Unit": y['Unit']['id'],
                                         "UnitName": y['Unit']['BaseUnitConversion'],
                                         "BaseUnitQuantity": y['Unit']['BaseUnitQuantity'],

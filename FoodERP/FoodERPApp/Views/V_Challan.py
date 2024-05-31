@@ -277,8 +277,8 @@ class DemandDetailsForChallan(CreateAPIView):
                
                 Demanddata = JSONParser().parse(request)
                 # CustomPrint(Demanddata)
-                # Party = Demanddata['Party']                
-                DemandIDs = Demanddata['DemandID']
+                Party = Demanddata['Party']                
+                DemandIDs = Demanddata['OrderIDs']
                 DemandDate=Demanddata['DemandDate']
                 # CustomPrint(DemandDate)
                 # Demand_list = DemandIDs.split(",")    
@@ -299,11 +299,11 @@ class DemandDetailsForChallan(CreateAPIView):
                     JOIN MC_ItemUnits on MC_ItemUnits.id=TC_DemandItems.Unit_id
                     JOIN M_GSTHSNCode on M_GSTHSNCode.id=TC_DemandItems.GST_id
                     WHERE TC_DemandItems.Demand_id={DemandIDs} and TC_DemandItems.IsDeleted=0''')
-                    CustomPrint(DemandItemQuery.query)
+                    # CustomPrint(DemandItemQuery.query)
                             
                     for b in DemandItemQuery:                       
-                        CustomPrint(b)
-                        Customer=b.CustomerID
+                        # CustomPrint(b)
+                        Customer=Party
                         Item= b.ItemID                         
                         obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''SELECT 1 as id ,BatchDate,BaseUnitConversion,BatchCode,SystemBatchDate,SystemBatchCode,Round(GetTodaysDateRate({Item},'{DemandDate}',{Customer},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, O_BatchWiseLiveStock.BaseUnitQuantity, O_BatchWiseLiveStock.IsDamagePieces, O_BatchWiseLiveStock.CreatedBy,
                         O_BatchWiseLiveStock.CreatedOn, O_BatchWiseLiveStock.GRN_id, O_BatchWiseLiveStock.InterBranchInward_id, 
@@ -315,7 +315,7 @@ class DemandDetailsForChallan(CreateAPIView):
                         left join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
                         WHERE O_BatchWiseLiveStock.BaseUnitQuantity > 0 AND O_BatchWiseLiveStock.Item_id = {Item} AND 
                         O_BatchWiseLiveStock.Party_id = {Customer}''')
-                        CustomPrint(obatchwisestockquery.query)     
+                        # CustomPrint(obatchwisestockquery.query)     
                         stockDatalist = list()
                         if not obatchwisestockquery:
                             stockDatalist =[]
