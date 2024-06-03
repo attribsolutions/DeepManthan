@@ -170,36 +170,45 @@ class GetGroupByGroupTypeID(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
-
-
-class GetSubGroupsByGroupView(CreateAPIView):
+class DetailsOfSubgroups_GroupsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                groups = M_Group.objects.all()
-                if not groups.exists():
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available', 'Data': []})
+                query1 = M_Group.objects.filter(GroupType_id=id)
+                if not query1.exists():
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GroupType Not available', 'Data': []})
 
-                GroupSubgroupList = []
-                for group in groups:
-                    subgroups = MC_SubGroup.objects.filter(Group=group)
-                    for subgroup in subgroups:
-                        GroupSubgroupList.append({
-                            "SubGroupID": subgroup.id,
-                            "SubGroupName": subgroup.Name,
+                GroupSubgroupItemList = []
+                for group in query1:
+                    query2 = MC_SubGroup.objects.filter(Group=group)
+                    for subgroup in query2:
+                        query3 = MC_ItemGroupDetails.objects.filter(Group=group, SubGroup=subgroup).select_related('Item')
+                        ItemList = [
+                            {
+                                "ItemID": a.Item.id,
+                                "ItemName": a.Item.Name,
+                                "ItemSequence": a.Item.Sequence
+                            }
+                            for a in query3
+                        ]
+
+                        GroupSubgroupItemList.append({
+                            "GroupTypeID": group.GroupType_id,
                             "GroupID": group.id,
                             "GroupName": group.Name,
                             "GroupSequence": group.Sequence,
-                            "SubGroupSequence": subgroup.Sequence
+                            "SubGroupID": subgroup.id,
+                            "SubGroupName": subgroup.Name,
+                            "SubGroupSequence": subgroup.Sequence,
+                            "Items": ItemList
                         })
 
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupList})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
-
 
 
 class UpdateGroupSubGroupSequenceView(CreateAPIView):
@@ -212,39 +221,50 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
             if not isinstance(SequenceData, list):
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid data format', 'Data': []})
 
-            Group_IDs = list(set([item['GroupID'] for item in SequenceData]))
-            query1 = M_Group.objects.filter(id__in=Group_IDs)
-            if len(query1) != len(Group_IDs):
+            Group_IDs = list(set(item['GroupID'] for item in SequenceData))
+            groups = M_Group.objects.filter(id__in=Group_IDs)
+            if groups.count() != len(Group_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more groups not found', 'Data': []})
 
-            SubGroup_IDs = [item['SubGroupID'] for item in SequenceData]
-            query2 = MC_SubGroup.objects.filter(id__in=SubGroup_IDs)
-            if len(query2) != len(SubGroup_IDs):
+            SubGroup_IDs = list(set(item['SubGroupID'] for item in SequenceData))
+            subgroups = MC_SubGroup.objects.filter(id__in=SubGroup_IDs)
+            if subgroups.count() != len(SubGroup_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more subgroups not found', 'Data': []})
 
-            Group_Data = {group.id: group for group in query1}
-            SubGroup_Data = {subgroup.id: subgroup for subgroup in query2}
+            Item_IDs = list(set(item['ItemID'] for group in SequenceData if 'Items' in group for item in group['Items']))
+            items = M_Items.objects.filter(id__in=Item_IDs)
+            if items.count() != len(Item_IDs):
+                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more items not found', 'Data': []})
 
-            for a in SequenceData:
-                Group_ID = a['GroupID']
-                Group_Sequence = a['GroupSequence']
-                SubGroup_ID = a['SubGroupID']
-                SubGroup_Sequence = a['SubGroupSequence']
+            Group_Data = {group.id: group for group in groups}
+            SubGroup_Data = {subgroup.id: subgroup for subgroup in subgroups}
+            Item_Data = {item.id: item for item in items}
 
+            for group_data in SequenceData:
+                Group_ID = group_data['GroupID']
+                Group_Sequence = group_data['GroupSequence']
                 Group = Group_Data[Group_ID]
                 Group.Sequence = Group_Sequence
                 Group.save()
 
-                if SubGroup_ID in SubGroup_Data:
-                    SubGroup = SubGroup_Data[SubGroup_ID]
-                    SubGroup.Sequence = SubGroup_Sequence
-                    SubGroup.save()
+                SubGroup_ID = group_data['SubGroupID']
+                SubGroup_Sequence = group_data['SubGroupSequence']
+                SubGroup = SubGroup_Data[SubGroup_ID]
+                SubGroup.Sequence = SubGroup_Sequence
+                SubGroup.save()
+
+                for item_data in group_data['Items']:
+                    Item_ID = item_data['ItemID']
+                    Item_Sequence = item_data['ItemSequence']
+                    Item = Item_Data[Item_ID]
+                    Item.Sequence = Item_Sequence
+                    Item.save()
 
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Sequences updated successfully', 'Data': []})
 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
+
         
-        
-      
+    
