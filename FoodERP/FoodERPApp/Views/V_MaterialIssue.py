@@ -118,8 +118,11 @@ class MaterialIsssueList(CreateAPIView):
                    
                     for a in MaterialIsssue_serializerdata:
                         if(a['RemainNumberOfLot']!=0):
+                            # CustomPrint("Shrutip")
                             if(a['NumberOfLot']!=a['RemainNumberOfLot']):
+                                # CustomPrint("Shrutip")
                                 Percentage=a['RemainNumberOfLot']/a['NumberOfLot']*100 
+                                Percentage=100-Percentage
                             else:
                                 Percentage=0
                         else:  
@@ -144,7 +147,7 @@ class MaterialIsssueList(CreateAPIView):
                             "Percentage":Percentage                         
                            
                         })                        
-                        CustomPrint(MaterialIsssueListData)
+                        # CustomPrint(MaterialIsssueListData)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
@@ -161,13 +164,13 @@ class MaterialIssueView(CreateAPIView):
         try:
             with transaction.atomic():
                 MaterialIssueData = JSONParser().parse(request)               
-                CustomPrint(MaterialIssueData)
+                # CustomPrint(MaterialIssueData)
                 Party = MaterialIssueData['Party']
                
                 MaterialIssueDate = MaterialIssueData['MaterialIssueDate']
                 NoOfLotsQty=MaterialIssueData['NumberOfLot']
                 NoOfQuantity=MaterialIssueData['LotQuantity']
-                CustomPrint(NoOfQuantity)
+                # CustomPrint(NoOfQuantity)
                 a = GetMaxNumber.GetMaterialIssueNumber(
                     Party, MaterialIssueDate)
                
@@ -326,8 +329,8 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 # else:
                 #     transaction.set_rollback(True)
                 #     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MaterialIssueItemdataserializer.errors, 'Data': []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        except T_MaterialIssue.DoesNotExist:
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Material Issue Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Material Issue used in another table', 'Data': []})
 
