@@ -206,7 +206,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
     SubCluster = serializers.CharField(max_length=500)
     BatchNo = serializers.CharField(max_length=500)
     BatchDate = serializers.DateField()
-    SAPItemID = serializers.CharField(max_length=500)
+    SAPItemCode = serializers.CharField(max_length=500)
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
