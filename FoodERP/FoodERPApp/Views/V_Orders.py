@@ -786,7 +786,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
 
                     OrderData = list()
                     OrderData.append({
-                        "id": OrderQuery[0]['id'],
+                        "id": OrderID,
                         "OrderDate": OrderQuery[0]['OrderDate'],
                         "DeliveryDate": OrderQuery[0]['DeliveryDate'],
                         "POFromDate": OrderQuery[0]['POFromDate'],
