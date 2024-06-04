@@ -1386,10 +1386,11 @@ class ProductAndMarginReportView(CreateAPIView):
                 
 
                 try:
-                    PriceListID = int(data['PriceList'])
+                    PriceListID = int(PriceListID)
+                    price_list_id_type = "integer"
                 except (ValueError, TypeError):
-                    PriceListID = data['PriceList']
-            
+                    price_list_id_type = "string"
+                
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
@@ -1467,7 +1468,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         
                         if IsSCM == '0':
                             
-                            if int(PriceListID) == 0:
+                            if PriceListID == 0:
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
                             else:
                                
@@ -1477,7 +1478,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
                          
                         else:
-                            if int(PriceListID) == 0:
+                            if PriceListID == 0:
                                
                                 pricelistquery=M_PriceList.objects.raw('''select distinct PriceList_id id,M_PriceList.Name,M_PriceList.CalculationPath,ShortName from M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id 
