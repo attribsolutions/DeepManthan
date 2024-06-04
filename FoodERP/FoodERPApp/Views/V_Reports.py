@@ -1384,11 +1384,11 @@ class ProductAndMarginReportView(CreateAPIView):
                 
 
                 if PriceListID == 0:
-                    PriceListID = int(PriceListID)  
+                    PriceListID = str(PriceListID)  
                     print('aaa')
                 else:
                     try:
-                        PriceListID = str(PriceListID)
+                        PriceListID = int(PriceListID)
                         print('bb')
                     except (ValueError, TypeError):
                         PriceListID = 0
