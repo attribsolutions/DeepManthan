@@ -1385,16 +1385,12 @@ class ProductAndMarginReportView(CreateAPIView):
 
                 if PriceListID == 0:
                     PriceListID = str(PriceListID)  
-                    print('aaa')
                 else:
                     try:
                         PriceListID = int(PriceListID)
-                        print('bb')
                     except (ValueError, TypeError):
                         PriceListID = 0
-                        print('cc')
 
-                
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
