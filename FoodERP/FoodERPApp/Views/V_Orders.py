@@ -12,6 +12,8 @@ from ..Serializer.S_Bom import *
 from ..Serializer.S_Challan import *
 from ..Serializer.S_Invoices import *
 from django.db.models import Sum
+from django.db.models import Value
+from django.db.models.functions import Coalesce
 from ..models import *
 
 
@@ -648,63 +650,69 @@ class EditOrderView(CreateAPIView):
             with transaction.atomic():
                 # DivisionID = request.data['Division']
                 Party = request.data['Party']  # Order Page Supplier DropDown
-                # Order Page Login Customer
-                Customer = request.data['Customer']
-                # Who's Rate you want
-                RateParty = request.data['RateParty']
+                Customer = request.data['Customer']     # Order Page Login Customer
+                RateParty = request.data['RateParty']           # Who's Rate you want
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
                 OrderType = request.data['OrderType']
-                q1 = M_Parties.objects.filter(id=Customer).values('PartyType')
-                q2 = M_PartyType.objects.filter(
-                    id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
-                if(OrderType==1):
+                
+                
+                q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM')
+                # print(q1)
+                # q2 = M_PartyType.objects.filter(
+                #     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
+                if(OrderType == 1):
                         Stockparty=Customer
                 else:
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
                
-                if (q2[0]['IsRetailer'] == 0 ):
+                if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
                                                    
                     Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
-                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
+                            (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
                     convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
                             (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
-a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
 ,
 (select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
 group by Item_id)StockQuantity , Round(GetTodaysDateRate(a.Item_id, %s,%s,0,2),2) AS VRate                  
                 from
-(select * from (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
-WHERE `MC_PartyItems`.`Party_id` = %s AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) and 
- M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id 
- WHERE ( SubParty_id=%s)) and M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
-left join
+(select * from 
+    (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` 
+    JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
+    WHERE `MC_PartyItems`.`Party_id` = %s 
+    AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) 
+    AND M_ChannelWiseItems.PartyType_id IN (SELECT PartyType_id FROM  M_Parties where id=%s) 
+    AND M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
+    
+    left join
 
-(SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`,DiscountType,Discount,DiscountAmount
-FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s))c
-on b.Item_id=c.Item )a
+    (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`,DiscountType,Discount,DiscountAmount
+    FROM `TC_OrderItems` WHERE `TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s)c
+    on b.Item_id=c.Item 
+)a
 
 
-INNER join M_Items on M_Items.id=Item_id 
+     join M_Items on M_Items.id=Item_id 
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
-left join M_MarginMaster on M_MarginMaster.id=a.Margin_id
+
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[Party],[PartyItem], [Party],[PartyItem], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  ''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[Party],[PartyItem], [Party],[PartyItem], [OrderID]))
                     
                 else:
                     PartyItem = Party
@@ -717,101 +725,43 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
-a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
 ,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
 group by Item_id)StockQuantity ,0 as VRate           
                 from
-(select * from (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
-left join
+(select * from 
+        (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
+    left join
 
-(SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`, `Comment`,DiscountType,Discount,DiscountAmount
-FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s))c
-on b.Item_id=c.Item )a
+        (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`, `Comment`,DiscountType,Discount,DiscountAmount
+        FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s))c
+    on b.Item_id=c.Item 
+)a
 
 
-INNER join M_Items on M_Items.id=Item_id 
+     join M_Items on M_Items.id=Item_id 
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
-left join M_MarginMaster on M_MarginMaster.id=a.Margin_id 
+
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
 Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
                 
+                # print(Itemquery)
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
-                    GSTID = b['GST_id']
-                    # CustomPrint('**********************',ItemID)
                     
-                    # =====================GST================================================
-                    # if GSTID is None:
-                    #     Gst = GSTHsnCodeMaster(
-                    #         ItemID, EffectiveDate).GetTodaysGstHsnCode()
-                    #     b['GST_id'] = Gst[0]['Gstid']
-                    #     b['GSTPercentage'] = Gst[0]['GST']
-                    #     # CustomPrint('ttttttGST',Gst[0]['GST'])
-                    
-
-                    # =====================Current MRP================================================
-                    # TodaysMRP = MRPMaster(
-                    #     ItemID, 0, 0, EffectiveDate).GetTodaysDateMRP()
-
-                    # b['MRP_id'] = TodaysMRP[0]['Mrpid']
-                    # b['MRPValue'] = TodaysMRP[0]['TodaysMRP']
-                    # CustomPrint('ttttttttttMRP',TodaysMRP[0]['TodaysMRP'])
-                    # =====================Current Discount================================================
-                    # TodaysDiscount = DiscountMaster(
-                    #     ItemID, Party, EffectiveDate,Customer).GetTodaysDateDiscount()
-
-                    # b['DiscountType'] = 0
-                    # b['Discount'] = 0
-                    # CustomPrint('ttttttttttDiscount',TodaysDiscount)
-                    # =====================Rate================================================
-
-                    # ratequery = TC_OrderItems.objects.filter(
-                    #     Item_id=ItemID).values('Rate').order_by('-id')[:1]
-                    # if not ratequery:
-                    #     r = 0.00
-                    # else:
-                    #     r = ratequery[0]['Rate']
-
-                    # if b['Rate'] is None:
-                    #     b['Rate'] = r
-                    # =====================Unit================================================
-                    # UnitDetails = list()
-                    # ItemUnitquery = MC_ItemUnits.objects.filter(
-                    #     Item=ItemID, IsDeleted=0)
-                    # ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
-                    #     ItemUnitquery, many=True).data
-
-                    # RateMcItemUnit = ""
-                    # for d in ItemUnitqueryserialize:
-                    #     if (d['PODefaultUnit'] == True):
-                    #         RateMcItemUnit = d['id']
-                    #     CustomPrint(0,ItemID,RateParty,0,0,d['id'])
-                    #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,ItemID,RateParty,0,0,d['id']).RateWithGST()
-                    #     UnitDetails.append({
-                    #         "UnitID": d['id'],
-                    #         "UnitName": d['BaseUnitConversion'] ,
-                    #         "BaseUnitQuantity": d['BaseUnitQuantity'],
-                    #         "PODefaultUnit": d['PODefaultUnit'],
-                    #         "SODefaultUnit": d['SODefaultUnit'],
-                    #         "Rate" : CalculatedRateusingMRPMargin[0]["RateWithoutGST"]
-
-                    #     })
-
-                    # =====================IsDefaultTermsAndConditions================================================
-
                     b.update({  #"StockQuantity": Stock,
                               "UnitDetails": UnitDropdown(ItemID, RateParty, 0)
                               })
-
+                    
                     # bomquery = MC_BillOfMaterialItems.objects.filter(
                     #     Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
                     # if bomquery.exists():
@@ -820,66 +770,60 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                     #     b.update({"Bom": False})
 
                 if OrderID != 0:
-                    OrderQuery = T_Orders.objects.get(id=OrderID)
-                    a = T_OrderSerializerThird(OrderQuery).data
-
+                    OrderQuery = T_Orders.objects.filter(id=OrderID).select_related('Supplier','Customer','POType','BillingAddress','ShippingAddress','OrderReferences').annotate(OrderReferences__Inward=Coalesce('OrderReferences__Inward', Value('0'))).values('id','OrderDate','DeliveryDate','POFromDate','POToDate',
+                           'POType','POType__Name','OrderAmount','Description','Customer','Customer__SAPPartyCode','Customer__Name','Supplier','Supplier__SAPPartyCode','Supplier__Name',
+                           'BillingAddress','BillingAddress__Address','ShippingAddress','ShippingAddress__Address','Customer__GSTIN','Supplier__GSTIN','OrderReferences__Inward','CreatedBy','CreatedOn','OrderTermsAndConditions')
+                    
+                    OrderTermsAndConditionQuery=TC_OrderTermsAndConditions.objects.filter(Order = OrderID ,IsDeleted=0).select_related('TermsAndCondition').values('TermsAndCondition','TermsAndCondition__Name')
+                    
                     OrderTermsAndCondition = list()
-                    for b in a['OrderTermsAndConditions']:
-                        # CustomPrint(b['TermsAndCondition']['IsDeleted'])
-                        if b['IsDeleted'] == 0:
-                            OrderTermsAndCondition.append({
-                                "id": b['TermsAndCondition']['id'],
-                                "TermsAndCondition": b['TermsAndCondition']['Name'],
-                            })
-                    inward = 0
-                    for c in a['OrderReferences']:
-                        if(c['Inward'] == 1):
-                            inward = 1
+                    for b in OrderTermsAndConditionQuery:
+                        OrderTermsAndCondition.append({
+                            "id": b['TermsAndCondition'],
+                            "TermsAndCondition": b['TermsAndCondition__Name'],
+                        })
+                    
 
                     OrderData = list()
                     OrderData.append({
-                        "id": a['id'],
-                        "OrderDate": a['OrderDate'],
-                        "DeliveryDate": a['DeliveryDate'],
-                        "POFromDate": a['POFromDate'],
-                        "POToDate": a['POToDate'],
-                        "POType": a['POType']['id'],
-                        "POTypeName": a['POType']['Name'],
-                        "OrderAmount": a['OrderAmount'],
-                        "Description": a['Description'],
-                        "Customer": a['Customer']['id'],
-                        "CustomerSAPCode": a['Customer']['SAPPartyCode'],
-                        "CustomerName": a['Customer']['Name'],
-                        "Supplier": a['Supplier']['id'],
-                        "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
-                        "SupplierName": a['Supplier']['Name'],
-                        "BillingAddressID": a['BillingAddress']['id'],
-                        "BillingAddress": a['BillingAddress']['Address'],
-                        "ShippingAddressID": a['ShippingAddress']['id'],
-                        "ShippingAddress": a['ShippingAddress']['Address'],
-                        "BillingAddress": a['BillingAddress']['Address'],
-                        "ShippingAddressID": a['ShippingAddress']['id'],
-                        "ShippingAddress": a['ShippingAddress']['Address'],
-                        "Inward": inward,
-                        "CustomerGSTIN": a['Customer']['GSTIN'],
-                        "SupplierGSTIN": a['Supplier']['GSTIN'],
+                        "id": OrderQuery[0]['id'],
+                        "OrderDate": OrderQuery[0]['OrderDate'],
+                        "DeliveryDate": OrderQuery[0]['DeliveryDate'],
+                        "POFromDate": OrderQuery[0]['POFromDate'],
+                        "POToDate": OrderQuery[0]['POToDate'],
+                        "POType": OrderQuery[0]['POType'],
+                        "POTypeName": OrderQuery[0]['POType__Name'],
+                        "OrderAmount": OrderQuery[0]['OrderAmount'],
+                        "Description": OrderQuery[0]['Description'],
+                        "Customer": OrderQuery[0]['Customer'],
+                        "CustomerSAPCode": OrderQuery[0]['Customer__SAPPartyCode'],
+                        "CustomerName": OrderQuery[0]['Customer__Name'],
+                        "Supplier": OrderQuery[0]['Supplier'],
+                        "SupplierSAPCode": OrderQuery[0]['Supplier__SAPPartyCode'],
+                        "SupplierName": OrderQuery[0]['Supplier__Name'],
+                        "BillingAddressID": OrderQuery[0]['BillingAddress'],
+                        "BillingAddress": OrderQuery[0]['BillingAddress__Address'],
+                        "ShippingAddressID": OrderQuery[0]['ShippingAddress'],
+                        "ShippingAddress": OrderQuery[0]['ShippingAddress__Address'],
+                        # "BillingAddress": OrderQuery[0]['BillingAddress__Address'],
+                        # "ShippingAddressID": OrderQuery[0]['ShippingAddress']['id'],
+                        # "ShippingAddress": OrderQuery[0]['ShippingAddress']['Address'],
+                        "Inward": int(OrderQuery[0]['OrderReferences__Inward']),
+                        "CustomerGSTIN": OrderQuery[0]['Customer__GSTIN'],
+                        "SupplierGSTIN": OrderQuery[0]['Supplier__GSTIN'],
                         "OrderItems": OrderItemSerializer,
                         "TermsAndConditions": OrderTermsAndCondition,
-                        "CreatedBy":a['CreatedBy'],
-                        "CreatedOn":a['CreatedOn'],
-                        # "VRate":a['VRate']
+                        "CreatedBy":OrderQuery[0]['CreatedBy'],
+                        "CreatedOn":OrderQuery[0]['CreatedOn']
+                        
                     })
                     FinalResult = OrderData[0]
 
                 else:
 
                     TermsAndConditions = list()
-                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(
-                        IsDefault=1)
-                    TermsAndConditionsSerializer = M_TermsAndConditionsSerializer(
-                        TermsAndConditionsquery, many=True).data
-
-                    for d in TermsAndConditionsSerializer:
+                    TermsAndConditionsquery = M_TermsAndConditions.objects.filter(IsDefault=1).values('id','Name')
+                    for d in TermsAndConditionsquery:
                         TermsAndConditions.append({
                             "id": d['id'],
                             "TermsAndCondition": d['Name']
