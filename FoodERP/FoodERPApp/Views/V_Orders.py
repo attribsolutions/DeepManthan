@@ -773,7 +773,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                     OrderQuery = T_Orders.objects.filter(id=OrderID).select_related('Supplier','Customer','POType','BillingAddress','ShippingAddress','OrderReferences').annotate(OrderReferences__Inward=Coalesce('OrderReferences__Inward', Value('0'))).values('id','OrderDate','DeliveryDate','POFromDate','POToDate',
                            'POType','POType__Name','OrderAmount','Description','Customer','Customer__SAPPartyCode','Customer__Name','Supplier','Supplier__SAPPartyCode','Supplier__Name',
                            'BillingAddress','BillingAddress__Address','ShippingAddress','ShippingAddress__Address','Customer__GSTIN','Supplier__GSTIN','OrderReferences__Inward','CreatedBy','CreatedOn','OrderTermsAndConditions')
-                    
+                    print(OrderQuery)
                     OrderTermsAndConditionQuery=TC_OrderTermsAndConditions.objects.filter(Order = OrderID ,IsDeleted=0).select_related('TermsAndCondition').values('TermsAndCondition','TermsAndCondition__Name')
                     
                     OrderTermsAndCondition = list()
