@@ -1375,19 +1375,20 @@ class ProductAndMarginReportView(CreateAPIView):
         try:
             with transaction.atomic():
                 today = date.today()
-                IsSCM = data.get('IsSCM')
-                PartyID = data.get('Party')
-                PartyTypeID = data.get('PartyType')
-                CompanyID = data.get('Company')
-                GroupID = data.get('Group', '').split(",")
-                SubGroupID = data.get('SubGroup', '').split(",")
-                ItemID = data.get('Item', '').split(",")
+                IsSCM = data['IsSCM']
+                PartyID = data['Party']
+                PartyTypeID = data['PartyType']
+                PriceListID = data['PriceList']
+                CompanyID = data['Company']
+                GroupID = data['Group'].split(",")
+                SubGroupID = data['SubGroup'].split(",")
+                ItemID = data['Item'].split(",")
                 
 
                 try:
-                    PriceListID = int(data.get('PriceList', 0))
+                    PriceListID = int(data['PriceList'])
                 except (ValueError, TypeError):
-                    PriceListID = 0
+                    PriceListID = data['PriceList']
             
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
@@ -1466,7 +1467,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         
                         if IsSCM == '0':
                             
-                            if PriceListID == 0:
+                            if int(PriceListID) == 0:
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
                             else:
                                
@@ -1476,7 +1477,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
                          
                         else:
-                            if PriceListID == 0:
+                            if int(PriceListID) == 0:
                                
                                 pricelistquery=M_PriceList.objects.raw('''select distinct PriceList_id id,M_PriceList.Name,M_PriceList.CalculationPath,ShortName from M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id 
