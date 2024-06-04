@@ -17,6 +17,7 @@ from rest_framework.authentication import BasicAuthentication
 import json ,requests
 
 
+
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
@@ -64,8 +65,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
                             for aa in data['OrderItem']:
+                                ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
+                                if not ItemCheck:
+                                    log_entry = create_transaction_logNew(request, data, Supplier, f'ItemID {aa["FoodERPItemID"]} is not present in the FoodERP 2.0', 161, 0, 0, 0, Customer)
+                                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': f'ItemID {aa["FoodERPItemID"]} is not present in the FoodERP 2.0'})
                                 # CustomPrint(aa['FoodERPItemID'])
                                 unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
+                                
                                 Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
                                 BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
                                 CGST= round(BasicAmount*(float(Gst[0]['GST'])/100),2)
@@ -176,7 +182,6 @@ class T_MobileAppOrdersView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0,'MobileAppOrderSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-
 
 
     @transaction.atomic()
