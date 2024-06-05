@@ -143,16 +143,24 @@ class InterBranchChallanListFilterView(CreateAPIView):
                 Customer = IBChallandata['Customer']
                 Party = IBChallandata['Party']
                 IBType = IBChallandata['IBType']
+                
+                CustomPrint(FromDate)
+                CustomPrint(ToDate)
+                CustomPrint(Customer)
+                CustomPrint(Party)
+                CustomPrint(IBType)
+                
                 if (IBType == "IBInvoice" ): # InterBranch Sales Order 
                     if(Customer == ''):
-                       query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Party=Party)
+                       query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Party=Party)                       
                     else:
                         query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)  
                 elif(IBType == "IBGRN"):
                     if(Customer == ''): # InterBranch Purchase Order
-                        query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Party)
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party)
+                        CustomPrint(query.query)
                     else:
-                        query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer)
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer)
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
                   
@@ -161,18 +169,19 @@ class InterBranchChallanListFilterView(CreateAPIView):
                 if query:
                     IBChallan_serializer = IBChallanSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
+                    CustomPrint("Shruti")
                     IBChallanListData = list()
                     for a in IBChallan_serializer:
                         IBChallanListData.append({
                             "id": a['id'],
-                            "InvoiceDate": a['IBChallanDate'],
-                            "FullInvoiceNumber": a['FullIBChallanNumber'],
+                            "InvoiceDate": a['ChallanDate'],
+                            "FullInvoiceNumber": a['FullChallanNumber'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
-                            "RoundOffAmount": a['RoundOffAmount'], 
+                            # "RoundOffAmount": a['RoundOffAmount'], 
                             "CreatedOn": a['CreatedOn']  
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': IBChallanListData})

@@ -50,7 +50,7 @@ class InterBranchItemsView(CreateAPIView):
                 EffectiveDate = request.data['EffectiveDate']
                 DemandID = request.data['OrderID']
 
-                Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
+                Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,M_MRPMaster.id MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
 M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence
 ,M_Group.ID GroupID,M_Group.Name GroupName,MC_SubGroup.id SubGroupID,MC_SubGroup.Name SubGroupName
                 from
@@ -65,7 +65,7 @@ join M_Items on M_Items.id=a.Item_id
 JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.item_id=a.Item_id
 JOIN M_Group on M_Group.id=MC_ItemGroupDetails.group_id
 JOIN MC_SubGroup on MC_SubGroup.id=MC_ItemGroupDetails.SubGroup_id
-left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
+left join M_MRPMaster on M_MRPMaster.Item_id =M_Items.id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
