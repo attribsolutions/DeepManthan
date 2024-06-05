@@ -37,9 +37,9 @@ class GeneralMasterFilterView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        GeneralMasterdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GeneralMasterdata = JSONParser().parse(request)
                 Company = GeneralMasterdata['Company']
                 query = M_GeneralMaster.objects.filter(Company=Company)
                 if query:
@@ -67,7 +67,7 @@ class GeneralMasterFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterList Not Found',240,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterList:'+str(Exception(e)),33,0)
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterList:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
             
 
@@ -79,9 +79,9 @@ class GeneralMasterTypeView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request):
+        GeneralMasterdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GeneralMasterdata = JSONParser().parse(request)
                 CompanyID = GeneralMasterdata['Company']
                 if (CompanyID >1):
                     query = M_GeneralMaster.objects.filter(Company=1,TypeID=0)    
@@ -107,7 +107,7 @@ class GeneralMasterTypeView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'CompanyID:'+str(CompanyID),241,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterType:'+str(Exception(e)),33,0)
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterType:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
 
 
@@ -118,9 +118,9 @@ class GeneralMasterSubTypeView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request):
+        GeneralMasterdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GeneralMasterdata = JSONParser().parse(request)
                 Company = GeneralMasterdata['Company'] 
                 Type = GeneralMasterdata['TypeID'] 
                 query = M_GeneralMaster.objects.filter(Company__in=[1,Company],TypeID=Type,IsActive = 1)
@@ -135,7 +135,7 @@ class GeneralMasterSubTypeView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'Company:'+str(Company),242,0)   
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterSubType:'+str(Exception(e)),33,0)
+                log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterSubType:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
     
@@ -147,9 +147,9 @@ class GeneralMasterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        GeneralMasterdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GeneralMasterdata = JSONParser().parse(request)
                 GeneralMaster_Serializer = GeneralMasterserializer(data=GeneralMasterdata)
                 if GeneralMaster_Serializer.is_valid():
                     GeneralMaster = GeneralMaster_Serializer.save()
@@ -161,7 +161,7 @@ class GeneralMasterView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':GeneralMaster_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GenearlMasterSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GenearlMasterSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
             
 class GeneralMasterViewSecond(CreateAPIView):
@@ -198,15 +198,15 @@ class GeneralMasterViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMaster Not available',244,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'General Master data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'SingleGETGeneralMaster:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'SingleGETGeneralMaster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
     def put(self, request, id=0):
+        GeneralMasterdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GeneralMasterdata = JSONParser().parse(request)
                 GeneralMasterdataByID = M_GeneralMaster.objects.get(id=id)
                 GeneralMaster_Serializer = GeneralMasterserializer(
                     GeneralMasterdataByID, data=GeneralMasterdata)
@@ -220,7 +220,7 @@ class GeneralMasterViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GeneralMaster_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
         
 
@@ -247,9 +247,9 @@ class GeneralMasterBrandName(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request, id=0 ):
+        BrandDetailsdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                BrandDetailsdata = JSONParser().parse(request)
                 Company = BrandDetailsdata['Company']
                 Type = BrandDetailsdata['TypeID']
                 query = M_GeneralMaster.objects.filter(Company_id = Company,TypeID=Type)
@@ -268,7 +268,7 @@ class GeneralMasterBrandName(CreateAPIView):
                     log_entry = create_transaction_logNew(request,BrandDetailsdata, 0,'Company:'+str(Company),247,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GeneralMasterBrandName:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,BrandDetailsdata, 0,'GeneralMasterBrandName:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
         
         

@@ -24,9 +24,9 @@ class GRNListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        GRNdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GRNdata = JSONParser().parse(request)
                 FromDate = GRNdata['FromDate']
                 ToDate = GRNdata['ToDate']
                 Customer = GRNdata['Party']
@@ -92,7 +92,7 @@ class GRNListFilterView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(y),68,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GRNList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 # GRN Save  API
@@ -104,9 +104,9 @@ class T_GRNView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        GRNdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GRNdata = JSONParser().parse(request)
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
@@ -201,7 +201,7 @@ class T_GRNView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, GRNdata,0,'GRNSave:'+str(GRN_serializer.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': GRN_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GRNSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 #GRN Single Get API
@@ -281,7 +281,7 @@ class T_GRNViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'GRNID':id}, a['Party']['id'],'Single GRN',70,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'SingleGRN:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,{'GRNID':id}, 0,'SingleGRN:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
  
 # GRN DELETE API 
@@ -306,7 +306,7 @@ class T_GRNViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'GRNID':id}, 0,'GRN Used in another Transaction',72,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GRNDelete:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'GRNDelete:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 # Get PO Details For Make GRN POST API 
 
@@ -401,7 +401,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             ChallanItemDetails = list()
                             for y in x['ChallanItems']:
                                 Qty = y['Quantity']
-                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id'],BOM__IsVDCItem=1).values('BOM')
+                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
                                 # CustomPrint(bomquery.query)
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
                                 # CustomPrint(Query.query)
@@ -455,7 +455,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "Quantity": Qty,
                                         "MRP":MRPDetails[0]['id'],
                                         "MRPValue": MRPDetails[0]['MRP'],
-                                        "Rate":"",  
+                                        "Rate":y['Rate'], 
                                         "Unit": y['Unit']['id'],
                                         "UnitName": y['Unit']['BaseUnitConversion'],
                                         "BaseUnitQuantity": y['Unit']['BaseUnitQuantity'],
@@ -621,6 +621,6 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, InvoiceSerializedata, a['Party']['id'],'Data Not available',7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'MakeOrdersGrn:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'MakeOrdersGrn:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
     
