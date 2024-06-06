@@ -73,7 +73,7 @@ class  M_BOMSerializerSecond(serializers.ModelSerializer):
     Company = C_CompanySerializer(read_only=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems','CreatedBy'] 
+        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems','CreatedBy','IsDelete'] 
         
 class StockQtyserializer(serializers.Serializer):
     id = serializers.IntegerField()
