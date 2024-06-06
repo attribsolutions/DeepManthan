@@ -273,7 +273,7 @@ order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
     order by M_Group.id, MC_SubGroup.id ,M_Items.id,A.id''')
                        
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-                    CustomPrint(Itemquery)
+                    CustomPrint(Itemquery.query)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -384,14 +384,14 @@ class StockEntryItemsView(CreateAPIView):
                 
                 Itemquery = MC_PartyItems.objects.raw('''SELECT M_Items.id, M_Items.Name AS ItemName,
                                                             ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, 0), 2) AS MRPValue,
-                                                            ROUND(GetTodaysDateRate(M_Items.id, CURDATE(), 0, 0, 2), 2) AS RateValue,
+                                                            ROUND(GetTodaysDateRate(M_Items.id, CURDATE(), %s, 0, 2), 2) AS RateValue,
                                                             ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2), 2) AS GSTPercentage,
                                                             GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0, 0) AS MRPID,
                                                             GSTHsnCodeMaster(M_Items.id, CURDATE(), 1) AS GSTID,
-                                                            GetTodaysDateRate(M_Items.id, CURDATE(), 0, 0, 1) AS RateID
+                                                            GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate
                                                             FROM M_Items 
                                                             JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
-                                                            WHERE MC_PartyItems.Party_id = %s''', ([PartyID]))
+                                                            WHERE MC_PartyItems.Party_id = %s''', ([PartyID],[PartyID],[PartyID]))
              
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
@@ -415,7 +415,7 @@ class StockEntryItemsView(CreateAPIView):
                         "GSTPercentage": item.GSTPercentage,
                     }],
                     "ItemRateDetails": [{
-                        "Rate": item.RateID,
+                        "Rate": item.Rate,
                         "RateValue": item.RateValue,
                     }]
                 } for item in Itemquery]

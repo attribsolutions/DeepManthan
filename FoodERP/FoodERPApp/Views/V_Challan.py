@@ -102,24 +102,31 @@ class ChallanView(CreateAPIView):
                     # CustomPrint(ChallanItems)
                     # CustomPrint("Shruti")
                     BatchWiseLiveStockList=list()
-                    # CustomPrint(ChallanItems)
+                    CustomPrint(ChallanItems)
                     for ChallanItem in ChallanItems:
-                        # CustomPrint(ChallanItem['Item'])
+                        CustomPrint(ChallanItem['Item'])
                         # CustomPrint(ChallanItem['Quantity'])
                         # CustomPrint(ChallanItem['BaseUnitQuantity'])
                         # CustomPrint(ChallanItem['BatchID'])
-                        CustomPrint(Challandata['Customer'])
-                        # CustomPrint("FFFFFFFF")
+                        # CustomPrint(Challandata['Customer'])
+                        # CustomPrint("FFFFFFFF")                                              
+                        BaseUnitQuantity=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                        ChallanItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                        # QtyInNo=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                        # ChallanItem['QtyInNo'] =  float(QtyInNo)
+                        # QtyInKg=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                        # ChallanItem['QtyInKg'] =  float(QtyInKg)
+                        # QtyInBox=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                        # ChallanItem['QtyInBox'] = float(QtyInBox)
                         BatchWiseLiveStockList.append({
                             "Item" : ChallanItem['Item'],
                             "Quantity" : ChallanItem['Quantity'],
                             "BaseUnitQuantity" : ChallanItem['BaseUnitQuantity'],
-                            "LiveBatche" : ChallanItem['BatchID'],
-                            # "Item" : ChallanItem['Item'],
-                            "Party" : Challandata['Customer'],
+                            "LiveBatche" : ChallanItem['BatchID'],                           
+                            "Party" : Party,
                             # "Customer:":Challandata['Customer'],
                         })
-                    # CustomPrint(BatchWiseLiveStockList)
+                    CustomPrint(BatchWiseLiveStockList)
                     Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
                     # CustomPrint(Challandata)
                     Challan_serializer = ChallanSerializer(data=Challandata) 
@@ -284,11 +291,13 @@ class DemandDetailsForChallan(CreateAPIView):
                 # Demand_list = DemandIDs.split(",")    
                 Demand_list = DemandIDs              
                 Demanddata = list() 
+                CustomerName1 = M_Parties.objects.filter(id=Party).values('Name')
+                CustomerName1=CustomerName1[0]['Name']
                 for DemandID in Demand_list: 
                     DemandItemDetails = list()
                     DemandItemQuery=TC_DemandItems.objects.raw(f'''SELECT 1 as id,TC_DemandItems.ID DemandID,M_Items.id ItemID,M_Items.Name ItemName,TC_DemandItems.Quantity,Rate,Unit_id,
                     MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_DemandItems.BaseUnitQuantity,
-                    TC_DemandItems.GST_id,M_GSTHSNCode.HSNCode,
+                    TC_DemandItems.GST_id,M_GSTHSNCode.HSNCode,M_MRPMaster.MRP ItemMRP,
                     TC_DemandItems.GSTAmount,TC_DemandItems.CGST,TC_DemandItems.SGST,TC_DemandItems.IGST,TC_DemandItems.CGSTPercentage,TC_DemandItems.SGSTPercentage,
                     TC_DemandItems.IGSTPercentage,TC_DemandItems.Amount,TC_DemandItems.BasicAmount, 
                     M_Parties.Name CustomerName,M_Parties.PAN,
@@ -298,6 +307,7 @@ class DemandDetailsForChallan(CreateAPIView):
                     JOIN M_Items ON M_Items.id=TC_DemandItems.Item_id
                     JOIN MC_ItemUnits on MC_ItemUnits.id=TC_DemandItems.Unit_id
                     JOIN M_GSTHSNCode on M_GSTHSNCode.id=TC_DemandItems.GST_id
+                    JOIN M_MRPMaster ON M_MRPMaster.id=TC_DemandItems.MRP_id
                     WHERE TC_DemandItems.Demand_id={DemandIDs} and TC_DemandItems.IsDeleted=0''')
                     # CustomPrint(DemandItemQuery.query)
                             
@@ -321,8 +331,8 @@ class DemandDetailsForChallan(CreateAPIView):
                             stockDatalist =[]
                         else:   
                             for d in obatchwisestockquery:
-                                stockDatalist.append({
-                                    "id": d.id,
+                              
+                                stockDatalist.append({                                    
                                     "Item":d.ItemID,
                                     "BatchDate":d.BatchDate,
                                     "BatchCode":d.BatchCode,
@@ -332,18 +342,21 @@ class DemandDetailsForChallan(CreateAPIView):
                                     "LiveBatche_id":d.LiveBatche_id,
                                     "Rate":round(d.Rate,2),                                   
                                     "GSTPercentage" : d.GST,
+                                    "UnitId":d.Unit_id,
                                     "UnitName":d.BaseUnitConversion, 
-                                    "BaseUnitQuantity":d.BaseUnitQuantity,                                    
-                                    })  
-                        DemandItemDetails.append({
-                                            
-                            "id": b.id,
+                                    "BaseUnitQuantity":d.BaseUnitQuantity,
+                                    "Quantity":d.Quantity,    
+                                    "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,                                
+                                    }) 
+                                CustomPrint(stockDatalist) 
+                        DemandItemDetails.append({                                            
+                            
                             "Item": b.ItemID,
                             "ItemName": b.ItemName,
                             "Quantity": b.Quantity,                            
                             "Rate": b.Rate,
                             "Unit": b.Unit_id,
-                            "UnitName": b.BaseUnitConversion,
+                            "UnitName":b.BaseUnitConversion,
                             "DeletedMCUnitsUnitID": b.MUnitID,
                             "ConversionUnit": b.ConversionUnit,
                             "BaseUnitQuantity": b.BaseUnitQuantity,
@@ -357,14 +370,16 @@ class DemandDetailsForChallan(CreateAPIView):
                             "CGSTPercentage": b.CGSTPercentage,
                             "SGSTPercentage": b.SGSTPercentage,
                             "IGSTPercentage": b.IGSTPercentage,
-                            "Amount": b.Amount,                           
+                            "Amount": b.Amount,  
+                            "MRP":b.ItemMRP,                         
                                     # "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                             })
+                        CustomPrint(DemandItemDetails)
                         Demanddata.append({
                                 "DemandIDs":DemandIDs,
                                 "DemandDate" :  b.DemandDate,
-                                "CustomerName" : b.CustomerName,                        
+                                "CustomerName" : CustomerName1,                        
                                 "CustomerPAN" : b.PAN,
                                 "CustomerGSTIN" : b.GSTIN,
                                 "CustomerID" : Customer,
