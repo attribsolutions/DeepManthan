@@ -372,7 +372,7 @@ class DemandDetailsForChallan(CreateAPIView):
                             "IGSTPercentage": b.IGSTPercentage,
                             "Amount": b.Amount,  
                             "MRP":b.ItemMRP,                         
-                                    # "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
+                            "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                             })
                         CustomPrint(DemandItemDetails)
