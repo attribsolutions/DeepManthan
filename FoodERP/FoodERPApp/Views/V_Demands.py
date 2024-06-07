@@ -49,10 +49,10 @@ class InterBranchItemsView(CreateAPIView):
                 Customer = request.data['Customer']
                 EffectiveDate = request.data['EffectiveDate']
                 DemandID = request.data['OrderID']
-
-                Itemquery = TC_DemandItems.objects.raw('''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,M_MRPMaster.id MRP_id,M_MRPMaster.MRP MRPValue,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
+                RateParty = request.data['RateParty']
+                Itemquery = TC_DemandItems.objects.raw(f'''select a.id, a.Item_id,M_Items.Name ItemName,a.Quantity,M_MRPMaster.id MRP_id,M_MRPMaster.MRP MRPValue,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,a.GST_id,M_GSTHSNCode.GSTPercentage,
 M_GSTHSNCode.HSNCode,a.Margin_id,M_MarginMaster.Margin MarginValue,a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,M_Items.Sequence
-,M_Group.ID GroupID,M_Group.Name GroupName,MC_SubGroup.id SubGroupID,MC_SubGroup.Name SubGroupName
+,M_Group.ID GroupID,M_Group.Name GroupName,MC_SubGroup.id SubGroupID,MC_SubGroup.Name SubGroupName, Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS Rate
                 from
 ((SELECT 0 id,`Item_id`,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`
 FROM `TC_DemandItems` WHERE (`TC_DemandItems`.`IsDeleted` = False AND `TC_DemandItems`.`Demand_id` = %s)) 
@@ -101,38 +101,40 @@ left join M_MarginMaster on M_MarginMaster.id=a.Margin_id group by Item_id Order
                     #     r = 0.00
                     # else:
                     #     r = ratequery[0]['Rate']
-                    ratequery= M_RateMaster.objects.raw(f'''Select 1 id, Round(GetTodaysDateRate('{ItemID}', '{EffectiveDate}','{Party}',0,2),2) AS Rate''')
-                    CustomPrint(ratequery)                    
-                    if not ratequery:
-                            r = 0.00
-                    else:
-                        for a in ratequery:
-                            r=a.Rate    
+                    # ratequery= M_RateMaster.objects.raw(f'''Select 1 id, Round(GetTodaysDateRate('{ItemID}', '{EffectiveDate}','{Party}',0,2),2) AS Rate''')
+                    # CustomPrint(ratequery)                    
+                    # if not ratequery:
+                    #         r = 0.00
+                    # else:
+                    #     for a in ratequery:
+                    #         r=a.Rate    
                         
-                    if b['Rate'] is None:
-                        b['Rate'] = r
+                    # if b['Rate'] is None:
+                    #     b['Rate'] = r
             # =====================Rate================================================
-                    UnitDetails = list()
-                    ItemUnitquery = MC_ItemUnits.objects.filter(
-                        Item=ItemID, IsDeleted=0)
-                    ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
-                        ItemUnitquery, many=True).data
+                    # UnitDetails = list()
+                    # ItemUnitquery = MC_ItemUnits.objects.filter(
+                    #     Item=ItemID, IsDeleted=0)
+                    # ItemUnitqueryserialize = Mc_ItemUnitSerializerThird(
+                    #     ItemUnitquery, many=True).data
 
-                    for d in ItemUnitqueryserialize:
+                    for b in DemandItemSerializer:
                       
-                        UnitDetails.append({
-                            "UnitID": d['id'],
-                            "UnitName": d['BaseUnitConversion'],
-                            "BaseUnitQuantity": d['BaseUnitQuantity'],
-                            "PODefaultUnit": d['PODefaultUnit'],
-                            "SODefaultUnit": d['SODefaultUnit'],
+                        # UnitDetails.append({
+                        #     "UnitID": d['id'],
+                        #     "UnitName": d['BaseUnitConversion'],
+                        #     "BaseUnitQuantity": d['BaseUnitQuantity'],
+                        #     "PODefaultUnit": d['PODefaultUnit'],
+                        #     "SODefaultUnit": d['SODefaultUnit'],
 
-
-                        })
+                        # })
             # =====================IsDefaultTermsAndConditions================================================
 
-                    b.update({"StockQuantity": Stock,
-                              "UnitDetails": UnitDetails
+                    # b.update({"StockQuantity": Stock,
+                    #           "UnitDetails": UnitDetails
+                    #           })
+                        b.update({  #"StockQuantity": Stock,
+                              "UnitDetails": UnitDropdown(ItemID, RateParty, 0)
                               })
 
                 if DemandID != 0:
@@ -222,9 +224,16 @@ class DemandListFilterView(CreateAPIView):
                 IBType = Demanddata['IBType']
                 if (IBType == "IBSO" ): # InterBranch Sales Order 
                     if(Supplier == ''):
-                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)
+                        if(FromDate=="" and ToDate=="" ):
+                            query = T_Demands.objects.filter(Supplier_id=Customer)
+                        else:
+                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)                            
                     else:
-                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
+                        if(FromDate=="" and ToDate=="" ):
+                            query = T_Demands.objects.filter(Customer_id=Supplier, Supplier_id=Customer)  
+                        else:
+                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
+                            
                 elif(IBType == "IBPO"):
                     if(Supplier == ''): # InterBranch Purchase Order
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
@@ -285,12 +294,12 @@ class DemandView(CreateAPIView):
                 Demanddata['DemandNo'] = a
                 '''Get Demand Prifix '''
                 b = GetPrifix.GetDemandPrifix(Division)
-                Demanddata['FullDemandNumber'] = str(b)+""+str(a)
+                Demanddata['FullDemandNumber'] = b+""+str(a)
                
                 Demand_serializer = T_DemandSerializer(data=Demanddata)
                 if Demand_serializer.is_valid():
                     Demand_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Order Save Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Demand Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Demand_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -309,7 +318,7 @@ class DemandViewSecond(CreateAPIView):
                     DemandupdateByID, data=Demandupdatedata)
                 if Demandupdate_Serializer.is_valid():
                     Demandupdate_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Order Updated Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Demand Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
@@ -323,7 +332,7 @@ class DemandViewSecond(CreateAPIView):
             with transaction.atomic():
                 Demand_Data = T_Demands.objects.get(id=id)
                 Demand_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Order Deleted Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Demand Deleted Successfully', 'Data': []})
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:
