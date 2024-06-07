@@ -47,7 +47,7 @@ class PartySubPartyView(CreateAPIView):     # PartySubParty Save
                     PartySubpartiesdata1 = MC_PartySubParty.objects.filter(Party=PartySubpartiesdata[0]['PartyID'])
                  
                     PartySubpartiesdata1.delete()
-                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubpartiesdata[0]['PartyID'],Party__PartyType=3).select_related('Party')
+                    PartySubpartiesdata2 = MC_PartySubParty.objects.filter(SubParty=PartySubpartiesdata[0]['PartyID'],Party__PartyType=13).select_related('Party')
                   
                     PartySubpartiesdata2.delete()
                     
