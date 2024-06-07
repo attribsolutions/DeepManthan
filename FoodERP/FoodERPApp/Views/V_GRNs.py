@@ -31,7 +31,7 @@ class GRNListFilterView(CreateAPIView):
                 ToDate = GRNdata['ToDate']
                 Customer = GRNdata['Party']
                 Supplier = GRNdata['Supplier']
-
+                
                 if(Supplier == ''):
                     query = T_GRNs.objects.filter(
                         GRNDate__range=[FromDate, ToDate], Customer_id=Customer)
@@ -108,10 +108,11 @@ class T_GRNView(CreateAPIView):
         try:
             with transaction.atomic():
                 Customer = GRNdata['Customer']
+                CustomPrint(Customer)
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
                 # CustomPrint(GRNdata['GRNReferences'])
-
+                CustomPrint("Shruti")
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
 # ==========================Get Max GRN Number=====================================================
@@ -168,6 +169,7 @@ class T_GRNView(CreateAPIView):
                     "CreatedBy":CreatedBy,
                     
                     })
+                    CustomPrint(O_BatchWiseLiveStockList)
                     
                     O_LiveBatchesList.append({
                     
@@ -185,8 +187,9 @@ class T_GRNView(CreateAPIView):
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
                     
                     })
+                   
                     O_BatchWiseLiveStockList=list()
-                    
+                    CustomPrint(O_LiveBatchesList)
                    
                 # CustomPrint(GRNdata)
                 GRNdata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
@@ -478,10 +481,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         })       
                             ChallanItemDetails.append(BillofmaterialData[0])        
                         ChallanData.append({
-                            "Supplier": x['Customer']['id'],
+                            "Supplier": x['Party']['id'],
                             "SupplierName": x['Customer']['Name'],
                             "OrderAmount": x['GrandTotal'],
-                            "Customer": x['Party']['id'],
+                            "Customer": x['Customer']['id'],
                             "InvoiceNumber":" ",
                             "OrderItem": ChallanItemDetails,
                         })
