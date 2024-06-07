@@ -142,13 +142,12 @@ class InterBranchChallanListFilterView(CreateAPIView):
                 ToDate = IBChallandata['ToDate']
                 Customer = IBChallandata['Customer']
                 Party = IBChallandata['Party']
-                IBType = IBChallandata['IBType']
-                
-                CustomPrint(FromDate)
-                CustomPrint(ToDate)
-                CustomPrint(Customer)
-                CustomPrint(Party)
-                CustomPrint(IBType)
+                IBType = IBChallandata['IBType']                
+                # CustomPrint(FromDate)
+                # CustomPrint(ToDate)
+                # CustomPrint(Customer)
+                # CustomPrint(Party)
+                # CustomPrint(IBType)
                 
                 if (IBType == "IBInvoice" ): # InterBranch Sales Order 
                     if(Customer == ''):
@@ -157,10 +156,17 @@ class InterBranchChallanListFilterView(CreateAPIView):
                         query = T_InterbranchChallan.objects.filter(IBChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party)  
                 elif(IBType == "IBGRN"):
                     if(Customer == ''): # InterBranch Purchase Order
-                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party)
-                        CustomPrint(query.query)
+                        if(FromDate=="" and ToDate=="" ):
+                            query = T_Challan.objects.filter(Customer_id=Party)
+                        else:
+                            query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party)                            
+                        
                     else:
-                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer)
+                        if(FromDate=="" and ToDate=="" ):
+                            query = T_Challan.objects.filter(Customer_id=Party, Party=Customer)
+                        else:
+                            query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer)
+                            
                 else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
                   
@@ -169,7 +175,7 @@ class InterBranchChallanListFilterView(CreateAPIView):
                 if query:
                     IBChallan_serializer = IBChallanSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
-                    CustomPrint("Shruti")
+                    # CustomPrint("Shruti")
                     IBChallanListData = list()
                     for a in IBChallan_serializer:
                         IBChallanListData.append({
