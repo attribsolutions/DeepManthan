@@ -4,7 +4,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-import logging
 from ..Serializer.S_Items import ItemReportSerializer
 
 from ..Serializer.S_Parties import M_PartiesSerializerSecond
@@ -16,7 +15,6 @@ from ..Serializer.S_Reports import *
 from ..models import *
 from datetime import datetime, timedelta
 
-logger = logging.getLogger(__name__)
 class PartyLedgerReportView(CreateAPIView):  
     permission_classes = (IsAuthenticated,)
 
@@ -1385,17 +1383,17 @@ class ProductAndMarginReportView(CreateAPIView):
                 ItemID = data['Item'].split(",")
                 
 
-                if PriceListID is None or PriceListID == '':
-                    PriceListID = 0  
+                if PriceListID == 0:
+                    PriceListID = int(PriceListID)  
+                    print('aaa')
                 else:
                     try:
-                        PriceListID = int(PriceListID)
-                        price_list_id_type = "integer"
+                        PriceListID = str(PriceListID)
+                        print('bb')
                     except (ValueError, TypeError):
-                        price_list_id_type = "string"
+                        PriceListID = 0
+                        print('cc')
 
-                logger.debug(f"Data received: {data}")
-                logger.debug(f"PriceListID: {PriceListID}, Type: {price_list_id_type}")
                 
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
