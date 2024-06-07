@@ -224,9 +224,16 @@ class DemandListFilterView(CreateAPIView):
                 IBType = Demanddata['IBType']
                 if (IBType == "IBSO" ): # InterBranch Sales Order 
                     if(Supplier == ''):
-                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)
+                        if(FromDate=="" and ToDate=="" ):
+                            query = T_Demands.objects.filter(Supplier_id=Customer)
+                        else:
+                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)                            
                     else:
-                        query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
+                        if(FromDate=="" and ToDate=="" ):
+                            query = T_Demands.objects.filter(Customer_id=Supplier, Supplier_id=Customer)  
+                        else:
+                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
+                            
                 elif(IBType == "IBPO"):
                     if(Supplier == ''): # InterBranch Purchase Order
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
@@ -287,7 +294,7 @@ class DemandView(CreateAPIView):
                 Demanddata['DemandNo'] = a
                 '''Get Demand Prifix '''
                 b = GetPrifix.GetDemandPrifix(Division)
-                Demanddata['FullDemandNumber'] = str(b)+""+str(a)
+                Demanddata['FullDemandNumber'] = b+""+str(a)
                
                 Demand_serializer = T_DemandSerializer(data=Demanddata)
                 if Demand_serializer.is_valid():
