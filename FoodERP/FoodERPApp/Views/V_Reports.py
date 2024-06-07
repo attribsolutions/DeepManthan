@@ -1462,7 +1462,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         
                         if IsSCM == '0':
                             
-                            if PriceListID == 0:
+                            if PriceListID == int(0):
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
                             else:
                                
@@ -1472,7 +1472,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
                          
                         else:
-                            if PriceListID == 0:
+                            if PriceListID == int(0):
                                
                                 pricelistquery=M_PriceList.objects.raw('''select distinct PriceList_id id,M_PriceList.Name,M_PriceList.CalculationPath,ShortName from M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id 
