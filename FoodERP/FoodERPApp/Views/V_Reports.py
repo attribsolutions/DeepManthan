@@ -256,7 +256,7 @@ T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS `Group`, MC_SubG
 M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, TC_InvoiceItems.BatchCode AS BatchNo , TC_InvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID 
 FROM TC_InvoiceItems 
 JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id 
-JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id
+JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Party_id=T_Invoices.Party_id
 left JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id 
 left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  JOIN M_Parties A ON A.id = T_Invoices.Party_id 
