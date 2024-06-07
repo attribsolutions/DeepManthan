@@ -96,7 +96,7 @@ class ChallanView(CreateAPIView):
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
                     Challandata['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party)
-                    Challandata['FullChallanNumber'] = str(b)+""+str(a)
+                    Challandata['FullChallanNumber'] = b+""+str(a)
                     # CustomPrint(Challandata)
                     ChallanItems = Challandata['ChallanItems']
                     # CustomPrint(ChallanItems)
@@ -197,7 +197,7 @@ class ChallanView(CreateAPIView):
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
                     GRNListData[0]['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party)
-                    GRNListData[0]['FullChallanNumber'] = str(b)+""+str(a)
+                    GRNListData[0]['FullChallanNumber'] = b+""+str(a)
                     #==================================================================================================
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
                     Challan_serializer = ChallanSerializer(data=GRNListData[0])
