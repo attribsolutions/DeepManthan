@@ -1375,20 +1375,19 @@ class ProductAndMarginReportView(CreateAPIView):
         try:
             with transaction.atomic():
                 today = date.today()
-                IsSCM = data['IsSCM']
-                PartyID = data['Party']
-                PartyTypeID = data['PartyType']
-                PriceListID = data['PriceList']
-                CompanyID = data['Company']
-                GroupID = data['Group'].split(",")
-                SubGroupID = data['SubGroup'].split(",")
-                ItemID = data['Item'].split(",")
+                IsSCM = data.get('IsSCM')
+                PartyID = data.get('Party')
+                PartyTypeID = data.get('PartyType')
+                CompanyID = data.get('Company')
+                GroupID = data.get('Group', '').split(",")
+                SubGroupID = data.get('SubGroup', '').split(",")
+                ItemID = data.get('Item', '').split(",")
                 
 
                 try:
-                    PriceListID = int(data['PriceList'])
+                    PriceListID = int(data.get('PriceList', 0))
                 except (ValueError, TypeError):
-                    PriceListID = data['PriceList']
+                    PriceListID = 0
             
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
