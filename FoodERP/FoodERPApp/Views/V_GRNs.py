@@ -394,27 +394,32 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 elif Mode == 2: #Make GRN from Challan
                     # CustomPrint("Shrutiiiiii")
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
-                    # CustomPrint(ChallanQuery.query)
+                    CustomPrint(POOrderIDs)
+                    CustomPrint(ChallanQuery.query)
                     if ChallanQuery.exists():
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
-                        # CustomPrint(ChallanSerializedata)
+                        CustomPrint(ChallanSerializedata)
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
                         ChallanData = list()
                         for x in ChallanSerializedata:
                             ChallanItemDetails = list()
                             for y in x['ChallanItems']:
+                                # CustomPrint("yyyyyyy")
+                                # CustomPrint(y)
                                 Qty = y['Quantity']
                                 bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
-                                # CustomPrint(bomquery.query)
+                                CustomPrint(bomquery.query)
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
-                                # CustomPrint(Query.query)
+                                CustomPrint(Query.query)
                                 BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                                # CustomPrint("PSSSSSS")
                                 # CustomPrint(BOM_Serializer)
                                 BillofmaterialData = list()
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                                 for a in BOM_Serializer:
                                     ParentItem= y['Item']['id']
-                                    # CustomPrint(ParentItem)
+                                    # CustomPrint("sssssss")
+                                    # CustomPrint(a)
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     # CustomPrint(Parentquery.query)
                                     if Parentquery.exists():
@@ -479,7 +484,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "UnitDetails":ParentUnitDetails,
         
                                         })       
-                            ChallanItemDetails.append(BillofmaterialData[0])        
+                                ChallanItemDetails.append(BillofmaterialData[0])        
                         ChallanData.append({
                             "Supplier": x['Party']['id'],
                             "SupplierName": x['Customer']['Name'],
@@ -488,7 +493,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "InvoiceNumber":" ",
                             "OrderItem": ChallanItemDetails,
                         })
-                        CustomPrint(ChallanItemDetails)
+                        # CustomPrint("SPPPPPP")
+                        # CustomPrint(ChallanItemDetails)
                         log_entry = create_transaction_logNew(request,ChallanSerializedata, 0,'ChallanData',74,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})
                     
