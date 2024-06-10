@@ -214,7 +214,7 @@ LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
 group by A.id, M_GroupType.id,
 M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
-order by A.id ,M_Group.id, MC_SubGroup.id ,M_Items.id''')
+order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
                     
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p1)
                     
