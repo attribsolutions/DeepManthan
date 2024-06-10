@@ -702,8 +702,8 @@ class InvoiceDateExportReportView(CreateAPIView):
                     Invoicequery ='''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo, M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
                                             FROM TC_InvoiceItems
                                             JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
-                                            JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
-                                            JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
+                                            LEFT JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id=T_Invoices.id
+                                            LEFT JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
                                             
                                             JOIN M_Parties A ON A.id= T_Invoices.Party_id
                                             JOIN M_Parties B ON B.id = T_Invoices.Customer_id
@@ -775,8 +775,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                     else:
 
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Customer])
-                
-
+                      
                 if InvoiceQueryresults:
 
                     InvoiceExportData = list()
