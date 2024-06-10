@@ -775,7 +775,8 @@ class InvoiceDateExportReportView(CreateAPIView):
                     else:
 
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Customer])
-                      
+                        
+                        
                 if InvoiceQueryresults:
 
                     InvoiceExportData = list()
@@ -783,13 +784,12 @@ class InvoiceDateExportReportView(CreateAPIView):
                         InvoiceQueryresults, many=True).data
                     for b in InvoiceExportSerializer:
 
-                        qur2 = M_Parties.objects.filter(
-                            id=b['CustomerID']).values('PriceList').distinct()
-                        query = M_PriceList.objects.values(
-                            'id').filter(id__in=qur2)
+                        qur2 = M_Parties.objects.filter(id=b['CustomerID']).values('PriceList').distinct()
+                        
+                        query = M_PriceList.objects.values('id').filter(id__in=qur2)
 
-                        Rate = RateCalculationFunction(
-                            0, b['FE2MaterialID'], 0, 0, 1, 0, query[0]['id']).RateWithGST()
+                        Rate = RateCalculationFunction(0, b['FE2MaterialID'], 0, 0, 1, 0, query[0]['id']).RateWithGST()
+                        
                         NoRate = float(Rate[0]['NoRatewithOutGST'])
                         InvoiceExportData.append({
 
@@ -843,12 +843,11 @@ class InvoiceDateExportReportView(CreateAPIView):
                         request, Reportdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 212, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceExportData})
                 else:
-                    log_entry = create_transaction_logNew(
-                        request, Reportdata, 0, 'Report Not available', 212, 0)
+                    log_entry = create_transaction_logNew(request, Reportdata, 0, 'Report Not available', 212, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Reportdata, 0, 'InvoiceDateExportReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class DeletedInvoiceDateExportReportView(CreateAPIView):
