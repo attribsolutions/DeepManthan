@@ -120,8 +120,23 @@ class ChallanItemsSerializerSecond(serializers.ModelSerializer):
             ret["GST"] = {"id": None, "GSTPercentage ": None}        
              
         return ret
-
-
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_States
+        fields = '__all__'
+class MC_PartyAdressSerializer(serializers.ModelSerializer):
+    Address = serializers.CharField() 
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+class PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyAddress=MC_PartyAdressSerializer(many=True)
+    State = StateSerializer(read_only=True)
+    # MCSubParty=MCPartySubPartySerializer(many=True) # code by ankita 
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','PartyType_id'] 
+        
 class ChallanSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
