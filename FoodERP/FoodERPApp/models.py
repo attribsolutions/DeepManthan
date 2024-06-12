@@ -1101,64 +1101,7 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
              
         
-class T_Challan(models.Model):
-    ChallanDate = models.DateField()
-    ChallanNumber = models.IntegerField()
-    FullChallanNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
-    Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
 
-    class Meta:
-        db_table = "T_Challan"
-
-
-class TC_ChallanItems(models.Model):
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3,null=True,blank=True)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    TaxType = models.CharField(max_length=500,null=True,blank=True)
-    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    Amount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    DiscountType = models.CharField(max_length=500,blank=True, null=True)
-    Discount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    CGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    SGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    IGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500,null=True,blank=True)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    Challan = models.ForeignKey(T_Challan, related_name='ChallanItems', on_delete=models.CASCADE)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='ChallanItemGST',on_delete=models.PROTECT,null=True,blank=True)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT,null=True,blank=True)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT, blank=True, null=True)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='ChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='ChallanUnitID', on_delete=models.PROTECT,null=True,blank=True)
-
-    class Meta:
-        db_table = "TC_ChallanItems" 
-        
-        
-class TC_GRNReferences(models.Model):
-    ChallanNo = models.CharField(max_length=500 ,null=True)
-    Inward = models.BooleanField(default=False)
-    Challan = models.ForeignKey(T_Challan, on_delete=models.PROTECT ,null=True)
-    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
-    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
-    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
-    class Meta:
-        db_table = "TC_GRNReferences"   
-        unique_together = [['Invoice']] 
 
                   
         
@@ -1340,7 +1283,79 @@ class TC_DemandItems(models.Model):
    
     class Meta:
         db_table = "TC_DemandItems"
+
+
+
+class T_Challan(models.Model):
+    ChallanDate = models.DateField()
+    ChallanNumber = models.IntegerField()
+    FullChallanNumber = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
+    Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
+    
+
+    class Meta:
+        db_table = "T_Challan"
+
+
+class TC_ChallanItems(models.Model):
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3,null=True,blank=True)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    TaxType = models.CharField(max_length=500,null=True,blank=True)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500,null=True,blank=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    Challan = models.ForeignKey(T_Challan, related_name='ChallanItems', on_delete=models.CASCADE)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ChallanItemGST',on_delete=models.PROTECT,null=True,blank=True)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT,null=True,blank=True)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT, blank=True, null=True)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='ChallanUnitID', on_delete=models.PROTECT,null=True,blank=True)
+
+    class Meta:
+        db_table = "TC_ChallanItems" 
         
+class TC_ChallanReferences(models.Model):
+    Challan = models.ForeignKey(T_Challan, related_name='ChallanReferences', on_delete=models.CASCADE)
+    Demands = models.ForeignKey(T_Demands, related_name='ChallanDemandReferences', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_ChallanReferences"        
+
+
+
+class TC_GRNReferences(models.Model):
+    ChallanNo = models.CharField(max_length=500 ,null=True)
+    Inward = models.BooleanField(default=False)
+    Challan = models.ForeignKey(T_Challan, on_delete=models.PROTECT ,null=True)
+    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
+    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
+    class Meta:
+        db_table = "TC_GRNReferences"   
+        unique_together = [['Invoice']] 
+        
+
+
+
 
 class T_InterbranchChallan(models.Model):
     IBChallanDate = models.DateField()
