@@ -90,7 +90,7 @@ class ChallanView(CreateAPIView):
         Challandata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                    GRN = Challandata['GRN']
+                # GRN = Challandata['GRN']
                 # if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
