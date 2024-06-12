@@ -656,7 +656,7 @@ class EditOrderView(CreateAPIView):
                 RateParty = request.data['RateParty']           # Who's Rate you want
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
-                OrderType = request.data['Demand']
+                OrderType = request.data['OrderType']
                 DemandID = request.data['Demand']
                 
                 q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM')
