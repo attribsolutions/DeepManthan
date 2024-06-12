@@ -394,19 +394,29 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 elif Mode == 2: #Make GRN from Challan
                     # CustomPrint("Shrutiiiiii")
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
-                    CustomPrint(POOrderIDs)
-                    CustomPrint(ChallanQuery.query)
+                    # CustomPrint(POOrderIDs)
+                    # CustomPrint(ChallanQuery.query)
                     if ChallanQuery.exists():
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
-                        CustomPrint(ChallanSerializedata)
+                        # CustomPrint(ChallanSerializedata)                        
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
+                        
                         ChallanData = list()
                         for x in ChallanSerializedata:
-                            ChallanItemDetails = list()
+                            ChallanItemDetails = list()                                                  
+                            for D in x['ChallanReferences']: 
+                                DemandID=D['Demands']
+                                CustomPrint(DemandID)
+                            DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
+                            FullDemandNumber=DemandQuery[0]['FullDemandNumber']
+                            DemandDate=DemandQuery[0]['DemandDate']
+                            # CustomPrint(FullDemandNumber)
+                            # CustomPrint(DemandDate)
                             for y in x['ChallanItems']:
                                 # CustomPrint("yyyyyyy")
                                 # CustomPrint(y)
                                 Qty = y['Quantity']
+                                
                                 bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
                                 CustomPrint(bomquery.query)
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
@@ -492,7 +502,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "SupplierName": x['Customer']['Name'],
                             "OrderAmount": x['GrandTotal'],
                             "Customer": x['Customer']['id'],
-                            "InvoiceNumber":" ",
+                            "InvoiceNumber":" ",                            
+                            "FullDemandNumber":FullDemandNumber,
+                            "DemandDate":DemandDate,
                             "OrderItem": ChallanItemDetails,
                         })
                         # CustomPrint("SPPPPPP")
