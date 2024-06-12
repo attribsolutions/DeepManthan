@@ -273,11 +273,11 @@ urlpatterns = [
             
 
 # InterBranch Order All APIs
-            url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
+            url(r'IBPOList/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
             url(r'InterBranchesOrder$', DemandView.as_view()),                          #POST Only
             url(r'InterBranchesOrderFilter$', DemandListFilterView.as_view()),          #POST Filter
             url(r'InterBranches$', InterBranchDivisionView.as_view()),                  #Division Dropdown
-            url(r'InterBranchesItems$', InterBranchItemsView.as_view()),                #Go Button
+            # url(r'InterBranchesItems$', InterBranchItemsView.as_view()),                #Go Button
 
 #InterBranch Invoice  All APIs
             url(r'BranchInvoice/([0-9]+)$', InterBranchChallanViewSecond.as_view()),    #DELETE
