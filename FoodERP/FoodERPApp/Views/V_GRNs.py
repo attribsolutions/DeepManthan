@@ -392,10 +392,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
                 elif Mode == 2: #Make GRN from Challan
-                    # CustomPrint("Shrutiiiiii")
+                    CustomPrint("Shrutiiiiii")
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
-                    # CustomPrint(POOrderIDs)
-                    # CustomPrint(ChallanQuery.query)
+                    CustomPrint(POOrderIDs)
+                    CustomPrint(ChallanQuery.query)
                     if ChallanQuery.exists():
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
                         # CustomPrint(ChallanSerializedata)                        
@@ -410,7 +410,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
                             FullDemandNumber=DemandQuery[0]['FullDemandNumber']
                             DemandDate=DemandQuery[0]['DemandDate']
-                            # CustomPrint(FullDemandNumber)
+                            CustomPrint(DemandQuery.query)
                             # CustomPrint(DemandDate)
                             for y in x['ChallanItems']:
                                 # CustomPrint("yyyyyyy")
