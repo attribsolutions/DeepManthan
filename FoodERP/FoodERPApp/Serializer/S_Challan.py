@@ -129,4 +129,9 @@ class ChallanSerializerSecond(serializers.ModelSerializer):
     ChallanReferences=ChallanReferenceSerializer(read_only=True,many=True)
     class Meta:
         model = T_Challan
-        fields = '__all__'                 
+        fields = '__all__'
+        
+        
+
+        
+                  
