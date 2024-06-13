@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.db.models import F, Q
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
@@ -656,7 +657,7 @@ class EditOrderView(CreateAPIView):
                 EffectiveDate = request.data['EffectiveDate']
                 OrderID = request.data['OrderID']
                 OrderType = request.data['OrderType']
-                
+                DemandID = request.data['Demand']
                 
                 q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM')
                 # print(q1)
@@ -671,7 +672,7 @@ class EditOrderView(CreateAPIView):
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
                                                    
-                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
+                    Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
                             (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
@@ -680,7 +681,7 @@ class EditOrderView(CreateAPIView):
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
-a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,ifnull(a.DiscountAmount,0)DiscountAmount
 ,
 (select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
@@ -697,7 +698,11 @@ group by Item_id)StockQuantity , Round(GetTodaysDateRate(a.Item_id, %s,%s,0,2),2
     left join
 
     (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,`Comment`,DiscountType,Discount,DiscountAmount
-    FROM `TC_OrderItems` WHERE `TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s)c
+    FROM `TC_OrderItems` WHERE `TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s
+                                                          
+        union
+    SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,'' 'Comment','' DiscountType,'' Discount,0 DiscountAmount
+    FROM `TC_DemandItems` WHERE `TC_DemandItems`.`IsDeleted` = False AND `TC_DemandItems`.Demand_id ={DemandID} )c
     on b.Item_id=c.Item 
 )a
 
@@ -717,7 +722,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  ''', ([Effectiv
                     
                 else:
                     PartyItem = Party
-                    Itemquery = TC_OrderItems.objects.raw('''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
+                    Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage, 
                     (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
@@ -726,7 +731,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  ''', ([Effectiv
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
-a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,a.DiscountAmount
+a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,ifnull(a.DiscountAmount,0)DiscountAmount
 ,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
 group by Item_id)StockQuantity ,0 as VRate           
@@ -736,7 +741,11 @@ group by Item_id)StockQuantity ,0 as VRate
     left join
 
         (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`, `Comment`,DiscountType,Discount,DiscountAmount
-        FROM `TC_OrderItems` WHERE (`TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s))c
+        FROM `TC_OrderItems` WHERE `TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s
+        
+            union
+    SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,'' 'Comment','' DiscountType,'' Discount,0 DiscountAmount
+    FROM `TC_DemandItems` WHERE `TC_DemandItems`.`IsDeleted` = False AND `TC_DemandItems`.Demand_id ={DemandID} )c
     on b.Item_id=c.Item 
 )a
 
@@ -770,8 +779,9 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                     # else:
                     #     b.update({"Bom": False})
 
-                if OrderID != 0:
-                    OrderQuery = T_Orders.objects.filter(id=OrderID).select_related(
+                if (OrderID != 0 or DemandID != 0):
+                    if(OrderID != 0):
+                        OrderQuery = T_Orders.objects.filter(id=OrderID).select_related(
     'Supplier', 'Customer', 'POType', 'BillingAddress', 'ShippingAddress', 'OrderReferences'
 ).annotate(
     OrderReferences__Inward=Coalesce('OrderReferences__Inward', Value('0'), output_field=CharField())
@@ -780,6 +790,28 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
     'Description', 'Customer', 'Customer__SAPPartyCode', 'Customer__Name', 'Supplier', 'Supplier__SAPPartyCode',
     'Supplier__Name', 'BillingAddress', 'BillingAddress__Address', 'ShippingAddress', 'ShippingAddress__Address',
     'Customer__GSTIN', 'Supplier__GSTIN', 'OrderReferences__Inward', 'CreatedBy', 'CreatedOn', 'OrderTermsAndConditions'
+)
+                    else:  
+                        
+                        OrderQuery = T_Demands.objects.filter(id=DemandID).select_related(
+    'Supplier', 'Customer', 'BillingAddress', 'ShippingAddress'
+
+).annotate(
+    OrderReferences__Inward=Value(0, output_field=CharField()),
+    DeliveryDate=Value(0, output_field=CharField()),
+    POFromDate=Value(0, output_field=CharField()),
+    POToDate=Value(0, output_field=CharField()),
+    POType=Value(0, output_field=CharField()),
+    POType__Name=Value('', output_field=CharField()),
+    OrderTermsAndConditions=Value(0, output_field=CharField()),
+    OrderDate=F('DemandDate'),
+    OrderAmount=F('DemandAmount'),
+    Description=F('Comment')
+).values(
+    'id', 'OrderDate', 'DeliveryDate', 'POFromDate', 'POToDate', 'POType', 'POType__Name', 'OrderAmount',
+    'Description', 'Customer', 'Customer__SAPPartyCode', 'Customer__Name', 'Supplier', 'Supplier__SAPPartyCode',
+    'Supplier__Name', 'BillingAddress', 'BillingAddress__Address', 'ShippingAddress', 'ShippingAddress__Address',
+    'Customer__GSTIN', 'Supplier__GSTIN','OrderReferences__Inward' , 'CreatedBy', 'CreatedOn', 'OrderTermsAndConditions'
 )
                     # print(OrderQuery)
                     OrderTermsAndConditionQuery=TC_OrderTermsAndConditions.objects.filter(Order = OrderID ,IsDeleted=0).select_related('TermsAndCondition').values('TermsAndCondition','TermsAndCondition__Name')
@@ -794,7 +826,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
 
                     OrderData = list()
                     OrderData.append({
-                        "id": OrderID,
+                        "id": OrderQuery[0]['id'],
                         "OrderDate": OrderQuery[0]['OrderDate'],
                         "DeliveryDate": OrderQuery[0]['DeliveryDate'],
                         "POFromDate": OrderQuery[0]['POFromDate'],
@@ -813,9 +845,6 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
                         "BillingAddress": OrderQuery[0]['BillingAddress__Address'],
                         "ShippingAddressID": OrderQuery[0]['ShippingAddress'],
                         "ShippingAddress": OrderQuery[0]['ShippingAddress__Address'],
-                        # "BillingAddress": OrderQuery[0]['BillingAddress__Address'],
-                        # "ShippingAddressID": OrderQuery[0]['ShippingAddress']['id'],
-                        # "ShippingAddress": OrderQuery[0]['ShippingAddress']['Address'],
                         "Inward": int(OrderQuery[0]['OrderReferences__Inward']),
                         "CustomerGSTIN": OrderQuery[0]['Customer__GSTIN'],
                         "SupplierGSTIN": OrderQuery[0]['Supplier__GSTIN'],

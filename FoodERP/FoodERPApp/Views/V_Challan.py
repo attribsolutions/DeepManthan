@@ -5,11 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GRNs import *
-from ..Serializer.S_Challan import *
 from ..Serializer.S_Bom import * 
 from ..Serializer.S_Invoices import * 
+from ..Serializer.S_Challan import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
+
 
 class ChallanItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -89,8 +90,8 @@ class ChallanView(CreateAPIView):
         Challandata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GRN = Challandata['GRN']
-                if GRN == "":
+                # GRN = Challandata['GRN']
+                # if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
@@ -233,6 +234,89 @@ class ChallanView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan used in another table', 'Data': []})
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                
+                BranchInvoiceQuery = T_Challan.objects.filter(id=id)
+                CustomPrint(BranchInvoiceQuery.query)
+                
+                if BranchInvoiceQuery.exists():
+                    BranchInvoiceSerializedata = ChallanSerializerSecond(BranchInvoiceQuery, many=True).data
+                    CustomPrint(BranchInvoiceSerializedata)
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceSerializedata})
+                    BranchInvoiceData = list()
+                    for a in BranchInvoiceSerializedata:
+                        BranchInvoiceItemDetails = list()
+                        for b in a['ChallanItems']:
+                            BranchInvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                # "MRP": b['MRP']['id'],
+                                "MRP": 0,
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                # "GSTPercentage": b['GSTPercentage'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                                "Discount":0,
+                                "DiscountAmount":0
+                            })                          
+                        # Address = GetPartyAddressDetails(
+                        #             a['Party']['id']).PartyAddress()
+                                
+                        # CustomPrint(Address)
+                        BranchInvoiceData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['ChallanDate'],
+                            "InvoiceNumber": a['ChallanNumber'],
+                            "FullInvoiceNumber": a['FullChallanNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            # "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                             "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerMobileNo": a['Customer']['MobileNo'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyMobileNo": a['Party']['MobileNo'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "CustomerState": a['Customer']['State']['Name'],
+                            "PartyAddress": a['Party']['PartyAddress'][0]['Address'],                            
+                            "CustomerAddress":  a['Customer']['PartyAddress'][0]['Address'],                            
+                            "DriverName":"",
+                            "VehicleNo": "",
+                            "InvoiceItems": BranchInvoiceItemDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                  
+
 
 
 class ChallanListFilterView(CreateAPIView):
@@ -392,3 +476,6 @@ class DemandDetailsForChallan(CreateAPIView):
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            
+            
+    
