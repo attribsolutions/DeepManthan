@@ -108,11 +108,9 @@ class T_GRNView(CreateAPIView):
         try:
             with transaction.atomic():
                 Customer = GRNdata['Customer']
-                CustomPrint(Customer)
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
                 # CustomPrint(GRNdata['GRNReferences'])
-                CustomPrint("Shruti")
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
 # ==========================Get Max GRN Number=====================================================
@@ -130,6 +128,7 @@ class T_GRNView(CreateAPIView):
                   
                     query1 = TC_GRNItems.objects.filter(Item_id=a['Item'], SystemBatchDate=date.today(), GRN_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                    DaysofItems = query2[0]['Days'] if query2 else 0
                    
                     if(item == ""):
                         item = a['Item']
@@ -154,7 +153,6 @@ class T_GRNView(CreateAPIView):
                     a['QtyInBox'] = float(QtyInBox)
                     
                     
-                    
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     
@@ -168,12 +166,9 @@ class T_GRNView(CreateAPIView):
                     "Party": Customer,
                     "CreatedBy":CreatedBy,
                     
-                    })
-                    CustomPrint(O_BatchWiseLiveStockList)
-                    
+                    })  
                     O_LiveBatchesList.append({
-                    
-                    "ItemExpiryDate":date.today()+ timedelta(days = query2[0]['Days']),
+                    "ItemExpiryDate":date.today()+ timedelta(days = DaysofItems),
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
                     "GST": a['GST'],
@@ -185,11 +180,9 @@ class T_GRNView(CreateAPIView):
                     "BatchCode": a['BatchCode'],
                     "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,6),
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
-                    
                     })
-                   
                     O_BatchWiseLiveStockList=list()
-                    CustomPrint(O_LiveBatchesList)
+                    
                    
                 # CustomPrint(GRNdata)
                 GRNdata.update({"O_LiveBatchesList":O_LiveBatchesList}) 

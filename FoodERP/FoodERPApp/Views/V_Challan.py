@@ -246,7 +246,7 @@ class ChallanView(CreateAPIView):
                 if BranchInvoiceQuery.exists():
                     BranchInvoiceSerializedata = ChallanSerializerSecond(BranchInvoiceQuery, many=True).data
                     CustomPrint(BranchInvoiceSerializedata)
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceSerializedata})
                     BranchInvoiceData = list()
                     for a in BranchInvoiceSerializedata:
                         BranchInvoiceItemDetails = list()
@@ -274,8 +274,11 @@ class ChallanView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
-                            })
-                            
+                            })                          
+                        # Address = GetPartyAddressDetails(
+                        #             a['Party']['id']).PartyAddress()
+                                
+                        # CustomPrint(Address)
                         BranchInvoiceData.append({
                             "id": a['id'],
                             "InvoiceDate": a['ChallanDate'],
@@ -289,6 +292,22 @@ class ChallanView(CreateAPIView):
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
+                             "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerMobileNo": a['Customer']['MobileNo'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyMobileNo": a['Party']['MobileNo'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "CustomerState": a['Customer']['State']['Name'],
+                            "PartyAddress": a['Party']['PartyAddress'][0]['Address'],                            
+                            "CustomerAddress":  a['Customer']['PartyAddress'][0]['Address'],                            
+                            "DriverName":"",
+                            "VehicleNo": "",
                             "InvoiceItems": BranchInvoiceItemDetails,
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
