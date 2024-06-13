@@ -248,6 +248,13 @@ class DemandListFilterView(CreateAPIView):
                     DemandListData = list()
                     for a in Demand_serializer:
                        
+                        Count = TC_ChallanReferences.objects.filter(
+                                Challan=a['id']).count()
+                        if Count == 0:
+                            InvoiceCreated = False
+                        else:
+                            InvoiceCreated = True
+                        
                         DemandListData.append({
                             "id": a['id'],
                             "OrderDate": a['DemandDate'],
@@ -259,6 +266,7 @@ class DemandListFilterView(CreateAPIView):
                             "SupplierID": a['Supplier']['id'],
                             "Supplier": a['Supplier']['Name'],
                             "OrderAmount": a['DemandAmount'],
+                            "InvoiceCreated": InvoiceCreated,
                             # "BillingAddress": a['BillingAddress']['Address'],
                             # "ShippingAddress": a['ShippingAddress']['Address'],
                             "CreatedBy": a['CreatedBy'],
