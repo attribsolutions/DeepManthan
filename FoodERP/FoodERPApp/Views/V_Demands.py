@@ -249,7 +249,7 @@ class DemandListFilterView(CreateAPIView):
                     for a in Demand_serializer:
                        
                         Count = TC_ChallanReferences.objects.filter(
-                                Challan=a['id']).count()
+                                Demands=a['id']).count()
                         if Count == 0:
                             InvoiceCreated = False
                         else:
