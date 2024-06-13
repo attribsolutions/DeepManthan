@@ -274,7 +274,8 @@ class ChallanView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
-                                "Discount":0
+                                "Discount":0,
+                                "DiscountAmount":0
                             })                          
                         # Address = GetPartyAddressDetails(
                         #             a['Party']['id']).PartyAddress()
