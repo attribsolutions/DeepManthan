@@ -255,8 +255,8 @@ class ChallanView(CreateAPIView):
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
                                 "Quantity": b['Quantity'],
-                                "MRP": b['MRP']['id'],
-                                "MRP": b['MRP']['MRP'],
+                                # "MRP": b['MRP']['id'],
+                                "MRP": 0,
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
                                 "Unit": b['Unit']['id'],
@@ -274,6 +274,7 @@ class ChallanView(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
+                                "Discount":0
                             })                          
                         # Address = GetPartyAddressDetails(
                         #             a['Party']['id']).PartyAddress()
