@@ -148,7 +148,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 elif(Type==2): #Supplier
                     Query = MC_PartySubParty.objects.filter(
                                     SubParty=id,
-                                    Party__PartyType__IsVendor=0,
+                                    Party__PartyType__IsVendor=1,
                                     Party__PartyAddress__IsDefault=1
                                     ).select_related('Party', 'Party__PartyType','Party__PartyAddress').annotate(
         PartyId=F('Party__id'),
