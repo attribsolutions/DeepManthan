@@ -25,17 +25,12 @@ class BOMListFilterView(CreateAPIView):
                 ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
-                d = date.today()      
-                # CustomPrint(d)          
-                if (FromDate == d):
-                    query = M_BillOfMaterial.objects.filter(Company_id=Company)
-                    CustomPrint("1")
-                    CustomPrint(query.query)
-                else:  
-                      
-                    query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company)
-                    CustomPrint("2")
-                    CustomPrint(query.query)
+                d = date.today()   
+                if (str(FromDate) == str(d)):
+                    query = M_BillOfMaterial.objects.filter(Company_id=Company)                
+                else: 
+                    query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company)  
+                    
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
