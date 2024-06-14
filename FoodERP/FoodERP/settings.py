@@ -118,7 +118,7 @@ DATABASES = {
         'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -129,7 +129,7 @@ DATABASES = {
         'NAME': 'TransactionLog',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -140,7 +140,7 @@ DATABASES = {
         'NAME': 'SweetPOS',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -200,7 +200,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Calcutta'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
