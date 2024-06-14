@@ -45,14 +45,13 @@ class PartyCustomerMappingView(CreateAPIView):
                 query = MC_PartySubParty.objects.raw('''SELECT MC_PartySubParty.id,M_Parties.Name as CustomerName ,MC_PartySubParty.Party_id,MC_PartySubParty.SubParty_id 
 as Customer,M_PartyCustomerMappingMaster.MapCustomer, MC_PartyAddress.Address as CustomerAddress, M_Parties.GSTIN, M_Routes.Name as RouteName
 From MC_PartySubParty 
-LEFT join M_PartyCustomerMappingMaster ON M_PartyCustomerMappingMaster.Customer_id = MC_PartySubParty.SubParty_id 
+LEFT join M_PartyCustomerMappingMaster ON M_PartyCustomerMappingMaster.Customer_id = MC_PartySubParty.SubParty_id AND M_PartyCustomerMappingMaster.Party_id = %s
 JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id AND MC_PartySubParty.Party_id=%s AND M_Parties.IsApprovedParty = 0
 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
 LEFT JOIN M_Routes ON   MC_PartySubParty.Route_id = M_Routes.id 
-LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_PartyAddress.IsDefault=1''', ([id]))
+LEFT JOIN MC_PartyAddress ON MC_PartyAddress.Party_id = M_Parties.id AND MC_PartyAddress.IsDefault=1''', ([id],[id]))
                 # AND M_PartyType.IsRetailer=1 remove (for credit note upload need all Parties not only Retailer)
                 
-                # CustomPrint(str(query.query))
                 if query:
                     Party_Serializer = PartyCustomerMappingSerializerSecond(query,many=True).data
                     log_entry = create_transaction_logNew(request, Party_Serializer,Party_Serializer[0]['Party_id'],'',341,0)
