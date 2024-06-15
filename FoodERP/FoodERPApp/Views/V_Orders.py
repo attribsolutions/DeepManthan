@@ -556,7 +556,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "POToDate": a['POToDate'],
                             "POType": a['POType']['id'],
                             "POTypeName": a['POType']['Name'],
-                            "OrderAmount": b['Amount'],
+                            "OrderAmount": a['OrderAmount'],
                             "Description": a['Description'],
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
