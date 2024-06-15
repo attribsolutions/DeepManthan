@@ -484,7 +484,7 @@ class T_OrdersViewSecond(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
                     OrderData = list()
                     for a in OrderSerializedata:
-
+                        # CustomPrint(a)
                         OrderTermsAndCondition = list()
                         for b in a['OrderTermsAndConditions']:
                             OrderTermsAndCondition.append({
@@ -494,6 +494,7 @@ class T_OrdersViewSecond(CreateAPIView):
 
                         OrderItemDetails = list()
                         for b in a['OrderItem']:
+                            # CustomPrint(b)
                             if(b['IsDeleted'] == 0):
                                 
                                 aaaa = UnitwiseQuantityConversion(
@@ -555,7 +556,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "POToDate": a['POToDate'],
                             "POType": a['POType']['id'],
                             "POTypeName": a['POType']['Name'],
-                            "OrderAmount": a['OrderAmount'],
+                            "OrderAmount": b['Amount'],
                             "Description": a['Description'],
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
