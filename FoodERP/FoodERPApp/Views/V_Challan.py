@@ -250,7 +250,14 @@ class ChallanView(CreateAPIView):
                     BranchInvoiceData = list()
                     for a in BranchInvoiceSerializedata:
                         BranchInvoiceItemDetails = list()
+                        InvoiceItemDetails = list()                       
+                            
                         for b in a['ChallanItems']:
+                            aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                            if (aaaa == b['Unit']['UnitID']['Name']):
+                                bb=""
+                            else:
+                                bb=aaaa   
                             BranchInvoiceItemDetails.append({
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
@@ -260,7 +267,7 @@ class ChallanView(CreateAPIView):
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "UnitName": bb,
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "PrimaryUnitName":b['Unit']['UnitID']['Name'],
                                 # "GSTPercentage": b['GSTPercentage'],
