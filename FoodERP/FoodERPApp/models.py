@@ -727,6 +727,7 @@ class MC_ItemUnits(models.Model):
     BaseUnitConversion = models.CharField(max_length=500)
     Item = models.ForeignKey(M_Items, related_name='ItemUnitDetails', on_delete=models.CASCADE)
     UnitID = models.ForeignKey(M_Units, related_name='UnitID', on_delete=models.PROTECT)
+    IsShowUnit=models.BooleanField(default=False)
 
     class Meta:
         db_table = "MC_ItemUnits"                
