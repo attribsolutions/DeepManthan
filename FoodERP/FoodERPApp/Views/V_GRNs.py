@@ -510,6 +510,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     Query1 = T_Invoices.objects.filter(id=POOrderIDs).values('Customer')
                     
                     # CustomPrint(str(Query1[0]['Customer'])) 
+                    # Or=TC_InvoicesReferences.objects.filter(Invoice_id=POOrderIDs).values('Order')
+                    # Invoiceid=Or[0]['Order']       
+                    # OrderQuery=T_Orders.objects.filter(id=Invoiceid).values('FullOrderNumber')   
+                    # FullOrderNumber=OrderQuery[0]['FullOrderNumber']
                     
                     Query = T_Invoices.objects.filter(id=POOrderIDs).select_related('Party').values('Party__PartyType_id')
                     # CustomPrint(str(Query[0]['Party__PartyType_id'])) 
@@ -517,11 +521,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         IsDivisionFlag=1
                     else:
                         IsDivisionFlag=0
-                    Or=TC_InvoicesReferences.objects.filter(Invoice_id=POOrderIDs).values('Order')
-                    Invoiceid=Or[0]['Order']       
-                    OrderQuery=T_Orders.objects.filter(id=Invoiceid).values('FullOrderNumber')   
-                    FullOrderNumber=OrderQuery[0]['FullOrderNumber']
-                    
+                
+                
                     InvoiceQuery = T_Invoices.objects.filter(id=POOrderIDs)
                     
                     if InvoiceQuery.exists():
@@ -633,7 +634,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "OrderAmount": a['GrandTotal'],
                                 "Customer": a['Customer']['id'],
                                 "InvoiceNumber":a['FullInvoiceNumber'], 
-                                "FullOrderNumber":FullOrderNumber,
+                                # "FullOrderNumber":FullOrderNumber,
                                 "OrderItem": InvoiceItemDetails,
                                 
                                 
