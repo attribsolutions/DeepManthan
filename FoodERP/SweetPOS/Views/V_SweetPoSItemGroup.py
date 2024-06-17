@@ -90,9 +90,9 @@ class ItemListView(CreateAPIView):
                 ifnull(i.BaseUnitID_id,0) AS UnitID, 
                 i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
-                ifnull(subgroup.id,0) AS ItemGroupID
+                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID
                 FROM M_Items AS i
-                LEFT JOIN MC_SubGroup AS subgroup ON i.id = subgroup.id
+                left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
                 join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id=(SELECT Party from SweetPOS.M_SweetPOSRoleAccess where Divisionid={DivisionID})
                 WHERE M_ChannelWiseItems.PartyType_id = 19 """                  
