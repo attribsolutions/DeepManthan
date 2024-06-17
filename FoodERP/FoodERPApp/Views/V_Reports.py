@@ -524,7 +524,6 @@ FROM
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
 		ON A.Item_id = D.Item_id ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                # CustomPrint(StockreportQuery)
                 serializer = StockReportSerializer(
                     StockreportQuery, many=True).data
 
@@ -757,6 +756,7 @@ class InvoiceDateExportReportView(CreateAPIView):
     LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
     LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
     WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
+                    
                     if Customer == 0:
                         if Employee == 0:
                             Invoicequery += " "
@@ -772,11 +772,12 @@ class InvoiceDateExportReportView(CreateAPIView):
                         else:
                             InvoiceQueryresults = T_Invoices.objects.raw(
                                 Invoicequery, [FromDate, ToDate, PartyIDs])
+                            
                     else:
 
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Customer])
                         
-                        
+                       
                 if InvoiceQueryresults:
 
                     InvoiceExportData = list()
@@ -1381,13 +1382,10 @@ class ProductAndMarginReportView(CreateAPIView):
                 ItemID = data['Item'].split(",")
                 
 
-                if PriceListID == 0:
-                    PriceListID = str(PriceListID)  
-                else:
-                    try:
-                        PriceListID = int(PriceListID)
-                    except (ValueError, TypeError):
-                        PriceListID = 0
+                try:
+                    PriceListID = int(PriceListID)
+                except (ValueError, TypeError):
+                    PriceListID = 0
 
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
@@ -1407,7 +1405,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
  """
-                # CustomPrint(query.query)
+                
                 q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
                 if q[0]['IsSCM'] == 1:
                     CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
@@ -1437,6 +1435,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     if IsSCM == '0':
                        
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
+                        
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
@@ -1457,7 +1456,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID])
                 
-                # print(ItemQuery.query)
+               
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1468,13 +1467,14 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                             
                             if PriceListID == 0:
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
+                                
                             else:
                                
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName,CalculationPath FROM M_PriceList where id = %s order by Sequence''',[PriceListID])
                                 for i in pricelistquery:
                                     pp=(i.CalculationPath).split(',')
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
-                         
+                             
                         else:
                             if PriceListID == 0:
                                
@@ -1492,17 +1492,18 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                     
                                     pp=(i.CalculationPath).split(',')
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
-                        # CustomPrint(pricelistquery.query) 
+                         
 
                         ItemMargins = list()
                         RateList = list()
                         ItemImage = list()
 
                         for x in pricelistquery:
-
                             query2 = M_MarginMaster.objects.raw('''select 1 as id, GetTodaysDateMargin(%s,%s,%s,0,0)Margin,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 0)RatewithoutGST,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 1)RatewithGST,RateCalculationFunction1(0, %s, 0, %s, 0, %s, 0, 0)BaseUnitRatewithoutGST''', (
                                 row.id, today, x.id, row.id, x.id, row.id, x.id,row.id, row.BaseUnitID_id,x.id))
 
+                           
+                            
                             for a in query2:
                                 # string1 = x['Name']
                                 # string2 = x['ShortName'].replace(" ","")
@@ -1527,7 +1528,6 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                 b.ImageTypeName: str(b.Item_pic)
 
                             })
-
                         ItemsList.append({
 
                             "FE2ItemID": row.id,
