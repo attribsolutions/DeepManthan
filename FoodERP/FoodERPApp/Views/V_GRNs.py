@@ -385,10 +385,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
                 elif Mode == 2: #Make GRN from Challan
-                    CustomPrint("Shrutiiiiii")
+                    # CustomPrint("Shrutiiiiii")
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
-                    CustomPrint(POOrderIDs)
-                    CustomPrint(ChallanQuery.query)
+                    # CustomPrint(POOrderIDs)
+                    # CustomPrint(ChallanQuery.query)
                     if ChallanQuery.exists():
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
                         # CustomPrint(ChallanSerializedata)                        
@@ -508,6 +508,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 elif Mode == 3: #Make GRN from Invoice
                     
                     Query1 = T_Invoices.objects.filter(id=POOrderIDs).values('Customer')
+                    
                     # CustomPrint(str(Query1[0]['Customer'])) 
                     
                     Query = T_Invoices.objects.filter(id=POOrderIDs).select_related('Party').values('Party__PartyType_id')
@@ -516,16 +517,20 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         IsDivisionFlag=1
                     else:
                         IsDivisionFlag=0
-                            
-                   
+                    Or=TC_InvoicesReferences.objects.filter(Invoice_id=POOrderIDs).values('Order')
+                    Invoiceid=Or[0]['Order']       
+                    OrderQuery=T_Orders.objects.filter(id=Invoiceid).values('FullOrderNumber')   
+                    FullOrderNumber=OrderQuery[0]['FullOrderNumber']
+                    
                     InvoiceQuery = T_Invoices.objects.filter(id=POOrderIDs)
                     
                     if InvoiceQuery.exists():
                         InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
+                        # CustomPrint(InvoiceSerializedata)
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
-                            InvoiceItemDetails = list()
+                            InvoiceItemDetails = list()                           
                             
                             for b in a['InvoiceItems']:
                                 checkitemassigninPartyItems=MC_PartyItems.objects.filter(Item=b['Item']['id'],Party=a['Customer']['id']).count()
@@ -628,7 +633,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "OrderAmount": a['GrandTotal'],
                                 "Customer": a['Customer']['id'],
                                 "InvoiceNumber":a['FullInvoiceNumber'], 
+                                "FullOrderNumber":FullOrderNumber,
                                 "OrderItem": InvoiceItemDetails,
+                                
                                 
                             })
                         log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Party']['id'],'Supplier:'+str(a['Party']['id']),75,0,0,0,a['Customer']['id'])
