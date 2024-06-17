@@ -799,7 +799,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
 
 ).annotate(
     OrderReferences__Inward=Value(0, output_field=CharField()),
-    DeliveryDate=Value(0, output_field=CharField()),
+    DeliveryDate=F('DemandDate'),
     POFromDate=Value(0, output_field=CharField()),
     POToDate=Value(0, output_field=CharField()),
     POType=Value(0, output_field=CharField()),
@@ -807,7 +807,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveD
     OrderTermsAndConditions=Value(0, output_field=CharField()),
     OrderDate=F('DemandDate'),
     OrderAmount=F('DemandAmount'),
-    Description=F('Comment')
+    Description=F('Comment'),
 ).values(
     'id', 'OrderDate', 'DeliveryDate', 'POFromDate', 'POToDate', 'POType', 'POType__Name', 'OrderAmount',
     'Description', 'Customer', 'Customer__SAPPartyCode', 'Customer__Name', 'Supplier', 'Supplier__SAPPartyCode',

@@ -105,7 +105,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 
                                 LastInsertId = Invoice.id
                                 LastIDs.append(Invoice.id)
-                                log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),4,LastInsertId,0,0, Invoicedata['Customer'])
+                                log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),383,LastInsertId,0,0, Invoicedata['Customer'])
                             else:
                                 transaction.set_rollback(True)
                                 # CustomPrint(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])

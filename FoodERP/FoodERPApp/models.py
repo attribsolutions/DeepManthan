@@ -1232,7 +1232,7 @@ class T_Production(models.Model):
             db_table = "T_Production"
 
 class TC_ProductionMaterialIssue(models.Model):
-        MaterialIssue= models.ForeignKey(T_MaterialIssue, related_name='MaterialIssue', on_delete=models.CASCADE)
+        MaterialIssue= models.ForeignKey(T_MaterialIssue, related_name='MaterialIssue', on_delete=models.PROTECT)
         Production= models.ForeignKey(T_Production, related_name='ProductionMaterialIssue', on_delete=models.CASCADE)
     
         class Meta:
