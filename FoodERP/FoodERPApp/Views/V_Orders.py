@@ -714,7 +714,7 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
@@ -757,7 +757,7 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
@@ -957,7 +957,7 @@ class SummaryReportView(CreateAPIView):
                 join M_Items on M_Items.id=TC_OrderItems.Item_id 
                 join M_Parties s on T_Orders.Supplier_id=s.id 
                 join M_Parties c on T_Orders.Customer_id=c.id 
-                left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id 
+                left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
                 where  OrderDate between %s and %s''' 
