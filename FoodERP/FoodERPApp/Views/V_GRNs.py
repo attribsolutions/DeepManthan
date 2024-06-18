@@ -517,11 +517,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         IsDivisionFlag=1
                     else:
                         IsDivisionFlag=0
-                    Or=TC_InvoicesReferences.objects.filter(Invoice_id=POOrderIDs).values('Order')
-                    Invoiceid=Or[0]['Order']       
-                    OrderQuery=T_Orders.objects.filter(id=Invoiceid).values('FullOrderNumber')   
-                    FullOrderNumber=OrderQuery[0]['FullOrderNumber']
+                        
+                        
+                
+                    Ord=TC_InvoicesReferences.objects.filter(Invoice_id=POOrderIDs).values('Order')
                     
+                    if Ord.exists():
+                        
+                        Invoiceid=Ord[0]['Order']       
+                        OrderQuery=T_Orders.objects.filter(id=Invoiceid).values('FullOrderNumber')   
+                        FullOrderNumber=OrderQuery[0]['FullOrderNumber']
+                    else:
+                        FullOrderNumber=0
                     InvoiceQuery = T_Invoices.objects.filter(id=POOrderIDs)
                     
                     if InvoiceQuery.exists():
