@@ -269,7 +269,7 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
 
  LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
  LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
- JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+ JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and GroupType=1
  LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
  LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
