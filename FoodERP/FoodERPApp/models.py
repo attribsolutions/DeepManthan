@@ -715,6 +715,7 @@ class MC_ItemGroupDetails(models.Model):
     GroupType = models.ForeignKey(M_GroupType, related_name='ItemGroupType', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemGroupDetails', on_delete=models.CASCADE)  
     SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup',null=True, on_delete=models.PROTECT)
+    ItemSequence=models.DecimalField(max_digits=20, decimal_places=2,null=True)
     class Meta:
         db_table = "MC_ItemGroupDetails"
 
