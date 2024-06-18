@@ -201,7 +201,7 @@ O_LiveBatches.MRPValue ,
                 
                 FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
@@ -259,7 +259,7 @@ order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
     {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
     FROM M_Items 
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
