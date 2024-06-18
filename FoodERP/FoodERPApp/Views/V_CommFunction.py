@@ -94,11 +94,24 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
     #     return None
     return log_entry
     
-def UnitDropdown(ItemID, PartyForRate, BatchID=0):
-   
+def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
     UnitDetails = list()
-    ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
-    # ItemUnitqueryserialize = ItemUnitSerializer(ItemUnitquery, many=True).data
+    ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0,IsShowUnit=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # Same Base Unit Quantity then show Only BaseUnit
+    # ItemUnitquery2 = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ,IsBase=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # BaseUnitQuantity=ItemUnitquery2[0]['BaseUnitQuantity']    
+    # UnitID_List=[]
+    # for unit in ItemUnitquery:
+    #     UnitQuantity=unit['BaseUnitQuantity']
+    #     CustomPrint(UnitQuantity)
+    #     Base=unit['IsBase']         
+    #     if  Base==False:               
+    #         if(BaseUnitQuantity ==UnitQuantity):
+    #             UnitID_List.append(str(unit['id']))  
+    # ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ).exclude(
+    # id__in=UnitID_List).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # CustomPrint(ItemUnitquery.query)
+    
     
     
     

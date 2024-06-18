@@ -21,16 +21,17 @@ class BOMListFilterView(CreateAPIView):
         BillOfMaterialdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                FromDate = BillOfMaterialdata['FromDate']
-                ToDate = BillOfMaterialdata['ToDate']
+                # FromDate = BillOfMaterialdata['FromDate']
+                # ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
-                d = date.today()   
-                if (str(FromDate) == str(d)):
+                Item=BillOfMaterialdata['ItemID']
+                # d = date.today()   
+                if (Item==''):
                     query = M_BillOfMaterial.objects.filter(Company_id=Company)                
                 else: 
-                    query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company)  
-                    
+                    query = M_BillOfMaterial.objects.filter(Item_id=Item,Company_id=Company)
+                   
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
@@ -60,6 +61,8 @@ class BOMListFilterView(CreateAPIView):
                         "CreatedBy": a['CreatedBy'],
                         "IsRecordDeleted":a['IsDelete']
                         
+                        
+                        
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
@@ -76,7 +79,7 @@ class M_BOMsView(CreateAPIView):
         BillOfMaterial = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                CustomPrint("Sush")
+                # CustomPrint("Sush")
                 ReferenceBOMID = BillOfMaterial['ReferenceBom']                
                 Boms_Serializer = M_BOMSerializer(data=BillOfMaterial) 
                 ItemID=BillOfMaterial['Item']                            
@@ -85,10 +88,10 @@ class M_BOMsView(CreateAPIView):
                     query = M_BillOfMaterial.objects.filter(Item_id=ItemID).update(IsDelete=1)
                 if Boms_Serializer.is_valid():
                     Boms_Serializer.save()
-                    CustomPrint(ReferenceBOMID)
+                    # CustomPrint(ReferenceBOMID)
                     
                     if(ReferenceBOMID > 0):
-                        CustomPrint("3")
+                        # CustomPrint("3")
                         query = M_BillOfMaterial.objects.filter(id=ReferenceBOMID).update(IsActive=0,IsDelete=1)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Save Successfully', 'Data': []})
                 else:
@@ -179,8 +182,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 checkitem = T_WorkOrder.objects.filter(Bom_id=id)
-                CustomPrint("shrut")
-                CustomPrint(checkitem)
+                # CustomPrint("shrut")
+                # CustomPrint(checkitem)
                 
                 if checkitem.exists():
                     return JsonResponse({'StatusCode': 100, 'Status': True, 'Message': 'Bill Of Material used in Work Order, Still You Want to Create New Bill Of Material..', 'Data': []})
