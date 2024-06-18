@@ -315,7 +315,7 @@ class LoadingSheetPrintView(CreateAPIView):
                     JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id 
                     JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id 
                     JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id
-                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
                     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
