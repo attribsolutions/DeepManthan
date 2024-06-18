@@ -381,7 +381,7 @@ order by M_GeneralMaster.id
                 sum(ClaimAmount)ClaimAmount
 FROM M_MasterClaim
 left join M_Items on M_Items.id=M_MasterClaim.Item_id
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 where FromDate=%s and ToDate=%s and Party_id=%s

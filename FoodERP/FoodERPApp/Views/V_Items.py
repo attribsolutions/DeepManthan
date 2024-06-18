@@ -130,7 +130,7 @@ class M_ItemsFilterView(CreateAPIView):
                     ItemListData = list ()
                     for a in Items_Serializer:
                         UnitDetails = [] 
-                        if PartyID > 0: 
+                        if PartyID > 0:                             
                             UnitDetails = UnitDropdown(a['id'], PartyID, 0) 
                         # UnitDetails=list()
                         # for d in a['ItemUnitDetails']:
@@ -270,6 +270,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "IsBase": d['IsBase'],
                                     "PODefaultUnit": d['PODefaultUnit'],
                                     "SODefaultUnit": d['SODefaultUnit'],
+                                    "IsShowUnit":d['IsShowUnit']
                                 
                                 })
                             
