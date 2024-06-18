@@ -306,7 +306,7 @@ class TargetVSAchievementView(CreateAPIView):
   {TargetVsAchiQurey(Party,Month,Year)}
 
 join  M_Items ON M_Items.id=D.ItemID
-join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
+join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
 join  MC_SubGroup ON MC_SubGroup.id=MC_ItemGroupDetails.SubGroup_id
 join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
@@ -417,7 +417,7 @@ from
 {TargetVsAchiQurey(Party,Month,Year)}
    
 join  M_Items ON M_Items.id=D.ItemID
-join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id
+join MC_ItemGroupDetails  ON MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 join  M_Group  ON M_Group.id=MC_ItemGroupDetails.Group_id
 join M_PartyDetails ON M_PartyDetails.Party_id=D.Party_id
  
