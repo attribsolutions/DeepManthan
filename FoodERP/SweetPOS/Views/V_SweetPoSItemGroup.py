@@ -70,6 +70,7 @@ class ItemGroupandSubgroupView(CreateAPIView):
             else:
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemGroupandSubgroup_ForSPOS:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
 
 
@@ -120,9 +121,10 @@ class ItemListView(CreateAPIView):
                         "FranchisesItemCode": ""      
                     }
                     response_data["data"].append(item_data)
-
+                log_entry = create_transaction_logNew(request, 0, 0,'DivisonID:'+str(DivisionID),385,0)
                 return Response(response_data)
             else:
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemList_ForSPOS:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
