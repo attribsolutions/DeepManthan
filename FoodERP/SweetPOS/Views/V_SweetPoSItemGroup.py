@@ -40,7 +40,7 @@ class ItemGroupandSubgroupView(CreateAPIView):
         try:
             user = BasicAuthenticationfunction(request)
             if user is not None:
-                groups = M_Group.objects.all(GroupType=4)
+                groups = M_Group.objects.filter(GroupType=5)
                 response_data = {"status": True, "status_code": 200, "count": groups.count(),"data": [] }              
                 
                 for group in groups:
