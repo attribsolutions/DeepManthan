@@ -504,15 +504,17 @@ class GetUserDetailsView(APIView):
     permission_classes = (IsAuthenticated,)
     print('bbbbbbbbbbbbbbbbbbb')
     # authentication__Class = JSONWebTokenAuthentication
-    try:
-        with transaction.atomic():
-            def post(self, request):
-                # auth_header = request.META.get('HTTP_AUTHORIZATION')
-                # if auth_header:
-                                
-                #     # Parsing the authorization header
-                #     auth_type, auth_string = auth_header.split(' ', 1)
-                #     print(auth_type,auth_string)
+   
+    def post(self, request):
+        try:
+            with transaction.atomic():
+        
+            # auth_header = request.META.get('HTTP_AUTHORIZATION')
+            # if auth_header:
+                            
+            #     # Parsing the authorization header
+            #     auth_type, auth_string = auth_header.split(' ', 1)
+            #     print(auth_type,auth_string)
                 print(request.headers)
                 UserId = request.data['UserId']
                 
@@ -543,8 +545,9 @@ class GetUserDetailsView(APIView):
                 })
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
-    except Exception as e:
-        print(Exception(e)) 
+        except Exception as e:
+            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
 
 # Registration Input json
 # {
