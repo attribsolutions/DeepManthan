@@ -294,7 +294,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
                 elif(OrderType == 1):  # OrderType -1 PO Order
-                    
+                    # CustomPrint("FDFDFDFD")
                     if(Supplier == ''):
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Customer_id=Customer,  OrderType=1)
@@ -360,45 +360,45 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
 
                     })
 
-                Challanquery = T_Challan.objects.filter(Party=Customer)
-                Challan_serializer = ChallanSerializerList(
-                    Challanquery, many=True).data
-                for a in Challan_serializer:
-                    Query = TC_GRNReferences.objects.filter(
-                        Challan_id=a['id']).select_related('GRN').values('GRN_id')
-                    GRNList = list()
-                    for b in Query:
-                        GRNList.append(b['GRN_id'])
-                        if not GRNList:
-                            Percentage = 0
-                        else:
-                            y = tuple(GRNList)
-                            Itemsquery = TC_GRNItems.objects.filter(
-                                GRN__in=y).aggregate(Sum('Quantity'))
-                            Percentage = (
-                                float(Itemsquery['Quantity__sum'])/float(a['ChallanItems'][0]['Quantity']))*100
+                # Challanquery = T_Challan.objects.filter(Party=Customer)
+                # Challan_serializer = ChallanSerializerList(
+                #     Challanquery, many=True).data
+                # for a in Challan_serializer:
+                #     Query = TC_GRNReferences.objects.filter(
+                #         Challan_id=a['id']).select_related('GRN').values('GRN_id')
+                #     GRNList = list()
+                #     for b in Query:
+                #         GRNList.append(b['GRN_id'])
+                #         if not GRNList:
+                #             Percentage = 0
+                #         else:
+                #             y = tuple(GRNList)
+                #             Itemsquery = TC_GRNItems.objects.filter(
+                #                 GRN__in=y).aggregate(Sum('Quantity'))
+                #             Percentage = (
+                #                 float(Itemsquery['Quantity__sum'])/float(a['ChallanItems'][0]['Quantity']))*100
 
-                    OrderListData.append({
-                        "id": a['id'],
-                        "OrderDate": a['ChallanDate'],
-                        "DeliveryDate": "",
-                        "FullOrderNumber": a['FullChallanNumber'],
-                        "CustomerID": a['Customer']['id'],
-                        "Customer": a['Customer']['Name'],
-                        "SupplierID": a['Party']['id'],
-                        "Supplier": a['Party']['Name'],
-                        "OrderAmount": a['GrandTotal'],
-                        "Description": "",
-                        "OrderType": "",
-                        "POType": "Challan",
-                        "BillingAddress": "",
-                        "ShippingAddress": "",
-                        "CreatedBy": a['CreatedBy'],
-                        "CreatedOn": a['CreatedOn'],
-                        "Inward": "",
-                        "Percentage": Percentage,
+                #     OrderListData.append({
+                #         "id": a['id'],
+                #         "OrderDate": a['ChallanDate'],
+                #         "DeliveryDate": "",
+                #         "FullOrderNumber": a['FullChallanNumber'],
+                #         "CustomerID": a['Customer']['id'],
+                #         "Customer": a['Customer']['Name'],
+                #         "SupplierID": a['Party']['id'],
+                #         "Supplier": a['Party']['Name'],
+                #         "OrderAmount": a['GrandTotal'],
+                #         "Description": "",
+                #         "OrderType": "",
+                #         "POType": "Challan",
+                #         "BillingAddress": "",
+                #         "ShippingAddress": "",
+                #         "CreatedBy": a['CreatedBy'],
+                #         "CreatedOn": a['CreatedOn'],
+                #         "Inward": "",
+                #         "Percentage": Percentage,
 
-                    })
+                #     })
                 log_entry = create_transaction_logNew(request, Orderdata, customer,'From:'+FromDate+','+'To:'+ToDate,28,0,FromDate,ToDate,supplier)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
             log_entry = create_transaction_logNew(request, Orderdata, z, "Order Not available",28,0)
@@ -714,7 +714,7 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
@@ -757,7 +757,7 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
@@ -957,7 +957,7 @@ class SummaryReportView(CreateAPIView):
                 join M_Items on M_Items.id=TC_OrderItems.Item_id 
                 join M_Parties s on T_Orders.Supplier_id=s.id 
                 join M_Parties c on T_Orders.Customer_id=c.id 
-                left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id 
+                left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
                 where  OrderDate between %s and %s''' 
