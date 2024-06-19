@@ -500,48 +500,51 @@ NOT IN (SELECT Employee_id From M_Users) ''')
 
 
 class GetUserDetailsView(APIView):
-    
-    permission_classes = ()
-   
+    print('aaaaaaaaaaaaaaaaaa')
+    permission_classes = (IsAuthenticated,)
+    print('bbbbbbbbbbbbbbbbbbb')
     # authentication__Class = JSONWebTokenAuthentication
-
-    def post(self, request):
-        # auth_header = request.META.get('HTTP_AUTHORIZATION')
-        # if auth_header:
-                        
-        #     # Parsing the authorization header
-        #     auth_type, auth_string = auth_header.split(' ', 1)
-        #     print(auth_type,auth_string)
-        UserId = request.data['UserId']
-        
-        '''New code Date 26/07/2023'''
-        
-        # user = M_Users.objects.select_related(M_Employees).prefetch_related.values('Employee', 'LoginName').get(id=UserId)
-        
-        # employee = M_Employees.objects.values('Company','Name').get(id=user['Employee'])
-        # company = C_Companies.objects.values ('Name','IsSCM','CompanyGroup').get(id=employee['Company'])
-        
-        # user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
-        # user = M_Users.objects.select_related('Employee').get(id=UserId)
-        user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
-        employee = user.Employee
-        company = employee.Company
-        companygroup = company.CompanyGroup
-       
-        a = list()
-        a.append({
-            "UserID": UserId,
-            "UserName":user.LoginName,
-            "EmployeeID": employee.id,
-            "EmployeeName": employee.Name,
-            "CompanyID": company.id,
-            "CompanyName": company.Name,
-            "IsSCMCompany": company.IsSCM,
-            "CompanyGroup": companygroup.id
-        })
-        
-        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
-
+    try:
+        with transaction.atomic():
+            def post(self, request):
+                # auth_header = request.META.get('HTTP_AUTHORIZATION')
+                # if auth_header:
+                                
+                #     # Parsing the authorization header
+                #     auth_type, auth_string = auth_header.split(' ', 1)
+                #     print(auth_type,auth_string)
+                print(request.headers)
+                UserId = request.data['UserId']
+                
+                '''New code Date 26/07/2023'''
+                
+                # user = M_Users.objects.select_related(M_Employees).prefetch_related.values('Employee', 'LoginName').get(id=UserId)
+                
+                # employee = M_Employees.objects.values('Company','Name').get(id=user['Employee'])
+                # company = C_Companies.objects.values ('Name','IsSCM','CompanyGroup').get(id=employee['Company'])
+                
+                # user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+                # user = M_Users.objects.select_related('Employee').get(id=UserId)
+                user = M_Users.objects.select_related('Employee__Company').get(id=UserId)
+                employee = user.Employee
+                company = employee.Company
+                companygroup = company.CompanyGroup
+            
+                a = list()
+                a.append({
+                    "UserID": UserId,
+                    "UserName":user.LoginName,
+                    "EmployeeID": employee.id,
+                    "EmployeeName": employee.Name,
+                    "CompanyID": company.id,
+                    "CompanyName": company.Name,
+                    "IsSCMCompany": company.IsSCM,
+                    "CompanyGroup": companygroup.id
+                })
+                
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
+    except Exception as e:
+        print(Exception(e)) 
 
 # Registration Input json
 # {
