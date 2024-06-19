@@ -501,7 +501,7 @@ NOT IN (SELECT Employee_id From M_Users) ''')
 
 class GetUserDetailsView(APIView):
     print('aaaaaaaaaaaaaaaaaa')
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
     print('bbbbbbbbbbbbbbbbbbb')
     # authentication__Class = JSONWebTokenAuthentication
 
