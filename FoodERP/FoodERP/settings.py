@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
     'FoodERPApp.apps.FooderpappConfig',
     'FoodERPDBLog.apps.FooderpdblogConfig',
     'SweetPOS.apps.SweetposConfig',
@@ -240,6 +241,7 @@ REST_FRAMEWORK = {
     #  'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
      'rest_framework.authentication.SessionAuthentication',
      'rest_framework_simplejwt.authentication.JWTAuthentication',
+     
      )
 }
 
