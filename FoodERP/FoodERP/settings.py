@@ -58,6 +58,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'FoodERP.urls'
 
+CORS_ALLOWED_ORIGINS = [
+    "http://10.4.5.64",
+]
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
