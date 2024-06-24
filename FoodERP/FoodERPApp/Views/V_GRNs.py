@@ -485,7 +485,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "IGSTPercentage": "",
                                         "Amount":"",
                                         "BatchCode":y['BatchCode'],
-                                        "LoginName":y['LoginName'],
+                                        "LoginName":"",
                                         "UnitDetails":ParentUnitDetails
                                         
         
