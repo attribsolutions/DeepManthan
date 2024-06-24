@@ -116,7 +116,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
                 if Query.exists():
-                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
