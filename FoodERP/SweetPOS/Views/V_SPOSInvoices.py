@@ -145,8 +145,9 @@ class SPOSMaxsaleIDView(CreateAPIView):
                         for row in QueryForMaxSalesID:
                             maxSaleID=row.MaxSaleID
 
+                        log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
                         return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":100})    
         except Exception as e:
             
-            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})            
