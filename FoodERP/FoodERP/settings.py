@@ -21,7 +21,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.65','cbmfooderp.com','10.4.5.64','183.87.216.229','192.168.1.108','10.4.5.68'] 
+ALLOWED_HOSTS = ['localhost','192.168.1.114','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68'] 
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -122,7 +122,7 @@ DATABASES = {
         'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -134,7 +134,7 @@ DATABASES = {
         'NAME': 'TransactionLog',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -145,7 +145,7 @@ DATABASES = {
         'NAME': 'SweetPOS',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
