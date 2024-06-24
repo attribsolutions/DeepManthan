@@ -323,56 +323,56 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     Spos_Invoices.append(b)
                 combined_invoices = list(Invoices_query) + Spos_Invoices
 
-                if combined_invoices:
-                        InvoiceListData = list()
-                        for a in combined_invoices:
-                            q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
-                            Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
-                            if (Invoicedata['DashBoardMode'] == 1):
-                                InvoiceListData.append({
-                                    "InvoiceDate":a['InvoiceDate']   
-                                })
+                InvoiceListData = list()
+                for a in combined_invoices:
+                        q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
+                        Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
+                        if (Invoicedata['DashBoardMode'] == 1):
+                            InvoiceListData.append({
+                                "InvoiceDate":a['InvoiceDate']   
+                            })
+                        else:
+                            Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
+                            if Count == 0:
+                                LoadingSheetCreated = False 
                             else:
-                                Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
-                                if Count == 0:
-                                    LoadingSheetCreated = False 
-                                else:
-                                    LoadingSheetCreated = True
-                                query2 = MC_PartySubParty.objects.filter(Party=a['Party_id'],SubParty=a['Customer_id']).values('IsTCSParty')
-                                if not query2:
-                                    IsTCSParty = ""
-                                else:
-                                    IsTCSParty= query2[0]['IsTCSParty']   
+                                LoadingSheetCreated = True
+                            query2 = MC_PartySubParty.objects.filter(Party=a['Party_id'],SubParty=a['Customer_id']).values('IsTCSParty')
+                            if not query2:
+                                IsTCSParty = ""
+                            else:
+                                IsTCSParty= query2[0]['IsTCSParty']   
 
-                                InvoiceListData.append({
-                                    "id": a['id'],
-                                    "InvoiceDate": a['InvoiceDate'],
-                                    "FullInvoiceNumber": a['FullInvoiceNumber'],
-                                    "CustomerID": a['Customer_id'],
-                                    "Customer": a['CustomerName'],
-                                    "PartyID": a['Party_id'],
-                                    "Party": a['PartyName'],
-                                    "GrandTotal": a['GrandTotal'],
-                                    "RoundOffAmount": a['RoundOffAmount'],
-                                    "LoadingSheetCreated": LoadingSheetCreated,
-                                    "DriverName": a['DriverName'],
-                                    "VehicleNo": a['Vehicle_id'],
-                                    "CreatedOn": a['CreatedOn'],
-                                    "InvoiceUploads": Invoice_serializer,
-                                    "CustomerPartyType": a['CustomerPartyType'],
-                                    "CustomerGSTIN": a['CustomerGSTIN'],
-                                    "CustomerPAN": a['CustomerPAN'],
-                                    "IsTCSParty": IsTCSParty,
-                                    "ImportFromExcel": a['ImportFromExcel'],
-                                    "DataRecovery": a['DataRecovery']
-                                })
-                    
-                log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate,35,0,FromDate,ToDate,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
-            log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found",35,0,FromDate,ToDate,x)
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                            InvoiceListData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "CustomerID": a['Customer_id'],
+                                "Customer": a['CustomerName'],
+                                "PartyID": a['Party_id'],
+                                "Party": a['PartyName'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount": a['RoundOffAmount'],
+                                "LoadingSheetCreated": LoadingSheetCreated,
+                                "DriverName": a['DriverName'],
+                                "VehicleNo": a['Vehicle_id'],
+                                "CreatedOn": a['CreatedOn'],
+                                "InvoiceUploads": Invoice_serializer,
+                                "CustomerPartyType": a['CustomerPartyType'],
+                                "CustomerGSTIN": a['CustomerGSTIN'],
+                                "CustomerPAN": a['CustomerPAN'],
+                                "IsTCSParty": IsTCSParty,
+                                "ImportFromExcel": a['ImportFromExcel'],
+                                "DataRecovery": a['DataRecovery']
+                            })
+                if InvoiceListData:
+                    log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                else:
+                    log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found", 35, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})           
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
