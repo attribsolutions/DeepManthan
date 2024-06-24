@@ -23,9 +23,10 @@ class M_RatesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Ratedata = M_RateMaster.objects.raw('''SELECT M_RateMaster.id,M_RateMaster.EffectiveDate,M_RateMaster.Company_id,
-                M_RateMaster.CreatedBy,M_RateMaster.CreatedOn,M_RateMaster.CommonID,C_Companies.Name CompanyName,M_Parties.Name PartyName,M_PriceList.Name PriceListName
+                Ratedata = M_RateMaster.objects.raw('''SELECT M_RateMaster.id,M_RateMaster.EffectiveDate,M_Parties.Name PartyName,M_PriceList.Name PriceListName,GROUP_CONCAT(CONCAT(M_Items.Name, ' ','=', M_RateMaster.Rate)) AS RateItemList,M_RateMaster.Company_id,
+                M_RateMaster.CreatedBy,M_RateMaster.CreatedOn,M_RateMaster.CommonID,C_Companies.Name CompanyName
                 FROM M_RateMaster 
+                JOIN M_Items ON M_Items.Id=M_RateMaster.Item_Id
                 left join C_Companies on C_Companies.id = M_RateMaster.Company_id
                 left JOIN M_Parties ON M_Parties.id=M_RateMaster.Party_id
                 left JOIN M_PriceList ON M_PriceList.id=M_RateMaster.PriceList_id

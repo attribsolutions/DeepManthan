@@ -65,15 +65,18 @@ class MC_BOMItemsSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =  MC_BillOfMaterialItems
         fields = ['id','Quantity','Item','Unit'] 
+        
+
 
 class  M_BOMSerializerSecond(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializerSecond(many=True,read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     Unit = ItemUnitsSerializerSecond(read_only=True)
     Company = C_CompanySerializer(read_only=True)
+    LoginName=serializers.CharField(max_length=500)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems','CreatedBy','IsDelete'] 
+        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems','CreatedBy','IsDelete','LoginName'] 
         
 class StockQtyserializer(serializers.Serializer):
     id = serializers.IntegerField()
