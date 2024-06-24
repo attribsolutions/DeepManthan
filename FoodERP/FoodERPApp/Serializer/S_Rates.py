@@ -9,6 +9,9 @@ class M_RatesSerializer(serializers.ModelSerializer):
 class M_RatesSerializerSecond(serializers.Serializer):
     id = serializers.IntegerField()
     EffectiveDate = serializers.DateField()
+    PartyName = serializers.CharField(max_length=100)
+    PriceListName  = serializers.CharField(max_length=100)   
+    RateItemList = serializers.CharField(max_length=100) 
     Company_id = serializers.IntegerField()  
     CompanyName = serializers.CharField(max_length=100)   
     CreatedBy = serializers.IntegerField()
