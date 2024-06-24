@@ -500,9 +500,9 @@ NOT IN (SELECT Employee_id From M_Users) ''')
 
 
 class GetUserDetailsView(APIView):
-    print('aaaaaaaaaaaaaaaaaa')
+    # print('aaaaaaaaaaaaaaaaaa')
     permission_classes = (IsAuthenticated,)
-    print('bbbbbbbbbbbbbbbbbbb')
+    # print('bbbbbbbbbbbbbbbbbbb')
     # authentication__Class = JSONWebTokenAuthentication
    
     def post(self, request):
@@ -515,7 +515,7 @@ class GetUserDetailsView(APIView):
             #     # Parsing the authorization header
             #     auth_type, auth_string = auth_header.split(' ', 1)
             #     print(auth_type,auth_string)
-                print(request.headers)
+                # print(request.headers)
                 UserId = request.data['UserId']
                 
                 '''New code Date 26/07/2023'''
