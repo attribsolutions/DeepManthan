@@ -286,11 +286,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName'
                 ).order_by('-InvoiceDate')
 
-                party_ids = list(T_SPOSInvoices.objects.using('sweetpos_db').values_list('Party', flat=True))
-                customer_ids = list(T_SPOSInvoices.objects.using('sweetpos_db').values_list('Customer', flat=True))
+                party_ids = list(T_SPOSInvoices.objects.using('SweetPOS').values_list('Party', flat=True))
+                customer_ids = list(T_SPOSInvoices.objects.using('SweetPOS').values_list('Customer', flat=True))
 
-                parties = M_Parties.objects.using('default').filter(id__in=party_ids).values('id', 'Name')
-                customers = M_Parties.objects.using('default').filter(id__in=customer_ids).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                parties = M_Parties.objects.using('FoodERP').filter(id__in=party_ids).values('id', 'Name')
+                customers = M_Parties.objects.using('FoodERP').filter(id__in=customer_ids).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
 
                 party_dict = {party['id']: party['Name'] for party in parties}
                 customer_dict = {customer['id']: customer for customer in customers}
@@ -301,7 +301,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     }
                 if Customer:
                     SPOS_filter_args['Customer'] = Customer
-                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+                SposInvoices_query = T_SPOSInvoices.objects.using('SweetPOS').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
