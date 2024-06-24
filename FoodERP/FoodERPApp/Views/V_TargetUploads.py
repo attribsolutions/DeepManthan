@@ -205,7 +205,7 @@ class DeleteTargetRecordsView(CreateAPIView):
         
 
 def TargetVsAchiQurey(Party,Month,Year):
-    TvaAQuery=f''' (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CRNoteQuantity,CRNoteAmount,Month,Year 
+    TvaAQuery=f''' (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CXQuantity2,CXAmount2,CRNoteQuantity,CRNoteAmount,Month,Year 
   from 
 (SELECT ItemID,Party Party_id from 
 (select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id in(SELECT distinct PartyType_id from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode > 0))s ,
@@ -238,6 +238,13 @@ left join
  join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id = 15
  where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,Party_id )E
  on I.ItemID = E.Item_id and I.Party_id = E.Party_id
+
+ left join
+(select Customer_id ,Item_id ,Sum(TC_InvoiceItems.QtyInKg)CXQuantity2,Sum(Amount)CxAmount2 from T_Invoices
+ join TC_InvoiceItems ON TC_InvoiceItems.invoice_id=T_Invoices.id
+ join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id = 15
+ where Month(invoiceDate)={Month} and year(invoiceDate)={Year} and DeletedFromSAP=0 group by item_id,Customer_id )EE
+ on I.ItemID = EE.Item_id and I.Party_id = EE.Customer_id
 
 WHERE (TargetQuantity>0 OR Quantity>0 OR  CRNoteQuantity >0)
 Order By I.Party_id,ItemID)D'''
@@ -298,8 +305,8 @@ class TargetVSAchievementView(CreateAPIView):
             MC_SubGroup.Name SubGroupName,M_Cluster.Name ClusterName,
             M_SubCluster.Name SubClusterName,M_Parties.SAPPartyCode,M_Parties.Name PartyName ,
             Round(IFNULL(TargetQuantity,0),3)TargetQuantityInKG,Round(IFNULL(TargetAmount,0),2)TargetAmount,Round(IFNULL(Quantity,0),3)AchQuantity,
-            Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CXQuantity,0),3)CXQuantity,
-            Round(IFNULL(CXAmount,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
+            Round(IFNULL(Amount,0),2)AchAmount,Round(IFNULL(CXQuantity,0)+IFNULL(CXQuantity2,0),3)CXQuantity,
+            Round(IFNULL(CXAmount,0)+IFNULL(CXAmount2,0),2)CXAmount,Round(IFNULL(CRNoteQuantity,0),3)CRNoteQuantity,Round(IFNULL(CRNoteAmount,0),2)CRNoteAmount 
             ,M_Items.SAPItemCode
             FROM
   
@@ -317,7 +324,7 @@ where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  )
             ''')
             TargetAchievementList = []   
             
-            # print(query)
+            print(query)
 
             if query:   
                 for a in query:
@@ -407,7 +414,7 @@ class TargetVSAchievementGroupwiseView(CreateAPIView):
                                                 
             select  1 as id,M_Group.Name ItemGroupName,
             Round(IFNULL(sum(Quantity),0),3)AchQuantity,Round(IFNULL(sum(Amount),0),2)AchAmount,
-            Round(IFNULL(sum(CXQuantity),0),3)CXQuantity,Round(IFNULL(sum(CXAmount),0),2)CXAmount,
+            Round(IFNULL(sum(CXQuantity),0)+IFNULL(sum(CXQuantity2),0),3)CXQuantity,Round(IFNULL(sum(CXAmount),0)+IFNULL(sum(CXAmount2),0),2)CXAmount,
             Round(IFNULL(sum(TargetQuantity),0),3)TargetQuantityInKG,Round(IFNULL(sum(TargetAmount),0),2)TargetAmount,
             (Round(IFNULL(sum(Quantity),0),3)-Round(IFNULL(sum(CXQuantity),0),3))GTAchQuantity,
             (Round(IFNULL(sum(Amount),0),2)-Round(IFNULL(sum(CXAmount),0),2))GTAchAmount,
