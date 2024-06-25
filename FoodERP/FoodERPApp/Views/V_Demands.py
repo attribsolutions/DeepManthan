@@ -327,7 +327,7 @@ class DemandViewSecond(CreateAPIView):
                     # CustomPrint("Shr")
                     OrderSerializedata = TC_DemandSerializerThird(OrderQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-                    CustomPrint(OrderSerializedata)
+                    # CustomPrint(OrderSerializedata)
                     OrderData = list()
                     for a in OrderSerializedata:
                         # CustomPrint(a)
@@ -366,7 +366,7 @@ class DemandViewSecond(CreateAPIView):
                                     "UnitName": bb,
                                     "SAPUnitName": "",
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
-                                    "GST": "",
+                                    "GST":  b['GST']['id'],
                                     "GSTPercentage": b['GST']['GSTPercentage'],
                                     "HSNCode": b['GST']['HSNCode'],
                                     "Margin": b['Margin']['id'],
