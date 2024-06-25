@@ -19,28 +19,35 @@ class BOMListFilterView(CreateAPIView):
     @transaction.atomic()
     def post(self, request,id=0):
         BillOfMaterialdata = JSONParser().parse(request)
-        try:
+        try:            
             with transaction.atomic():
                 # FromDate = BillOfMaterialdata['FromDate']
                 # ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
-                Item=BillOfMaterialdata['ItemID']
+                # Item=BillOfMaterialdata['ItemID']
+                Item=""
                 # d = date.today()   
                 if (Item==''):
-                    query = M_BillOfMaterial.objects.filter(Company_id=Company)                
+                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName  
+                                                         From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
+                                                         where IsDelete=0 and Company_id={Company}''')  
                 else: 
-                    query = M_BillOfMaterial.objects.filter(Item_id=Item,Company_id=Company)
-                   
+                    # query = M_BillOfMaterial.objects.filter(Item_id=Item,Company_id=Company)  
+                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby where Item_id={Item},Company_id={Company}''')                   
+                  
+                
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
                     BomListData = list()
+                    # return JsonResponse({'Date': Bom_serializer})
                     # CustomPrint(Bom_serializer)
+                
                     for a in Bom_serializer:
-                        # CustomPrint(a)
-                        Item = a['Item']['id']
                         
+                        Item = a['Item']['id']
+                       
                         Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
                         StockintoSelectedUnit=UnitwiseQuantityConversion(Item,Stock,0,0,a['Unit']['id'],0,1).ConvertintoSelectedUnit()
                         BomListData.append({
@@ -59,7 +66,8 @@ class BOMListFilterView(CreateAPIView):
                         "CompanyName": a['Company']['Name'],
                         "CreatedOn" : a['CreatedOn'],
                         "CreatedBy": a['CreatedBy'],
-                        "IsRecordDeleted":a['IsDelete']
+                        "IsRecordDeleted":a['IsDelete'],
+                        "UserName":a['LoginName']
                         
                         
                         
@@ -111,7 +119,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
                 if Query.exists():
-                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:

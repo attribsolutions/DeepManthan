@@ -302,7 +302,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                     #     "CreatedBy": 1,
                     # })
                     selectQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatchID']).values('BaseUnitQuantity')
-                    UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatchID']).update(BaseUnitQuantity = int(selectQuery[0]['BaseUnitQuantity'] )+int(BaseUnitQuantity11))
+                    UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatchID']).update(BaseUnitQuantity = float(selectQuery[0]['BaseUnitQuantity'] )+float(BaseUnitQuantity11))
                     
                 # MaterialIssueItemdataserializer = obatchwiseStockSerializerfordelete(
                 #     data=O_BatchWiseLiveStockList)
