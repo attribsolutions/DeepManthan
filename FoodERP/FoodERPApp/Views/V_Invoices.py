@@ -15,6 +15,8 @@ from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.http import Http404 
+from SweetPOS.models import *
+from django.db.models import F
 
 
 class OrderDetailsForInvoice(CreateAPIView):
@@ -172,11 +174,9 @@ class OrderDetailsForInvoice(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'OrderDetailsForInvoice:'+str (Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
-
 class InvoiceListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
-
 
     @transaction.atomic()
     def post(self, request, id=0):
@@ -192,7 +192,6 @@ class InvoiceListFilterView(CreateAPIView):
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Party=Party).order_by('-InvoiceDate')
                 else:
                     query = T_Invoices.objects.filter(InvoiceDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party).order_by('-InvoiceDate')
-                # CustomPrint(query.query)
                 # for log
                 if(Customer == ''):
                     x = 0
@@ -203,7 +202,6 @@ class InvoiceListFilterView(CreateAPIView):
                     Invoice_serializer = InvoiceSerializerSecond(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Invoice_serializer})
                     InvoiceListData = list()
-                    CustomPrint(Invoice_serializer)
                     for a in Invoice_serializer:
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
@@ -251,6 +249,130 @@ class InvoiceListFilterView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+        
+class InvoiceListFilterViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+
+    @transaction.atomic()
+    def post(self, request, id=0):
+        try:
+            with transaction.atomic():
+                Invoicedata = JSONParser().parse(request)
+                FromDate = Invoicedata['FromDate']
+                ToDate = Invoicedata['ToDate']
+                Customer = Invoicedata['Customer']
+                Party = Invoicedata['Party']
+               
+                filter_args = {
+                        'InvoiceDate__range': (FromDate, ToDate),
+                        'Party': Party
+                    }
+                if Customer:
+                    filter_args['Customer'] = Customer
+                Invoices_query = T_Invoices.objects.filter(**filter_args).select_related('Party', 'Customer', 'Driver').annotate(
+                    CustomerGSTIN=F('Customer__GSTIN'),
+                    CustomerPAN=F('Customer__PAN'),
+                    CustomerPartyType=F('Customer__PartyType'),
+                    PartyName=F('Party__Name'),
+                    CustomerName=F('Customer__Name'),
+                    DriverName=F('Driver__Name'),
+                ).values(
+                    'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                    'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
+                    'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName',
+                    'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName'
+                ).order_by('-InvoiceDate')
+
+                party_ids = list(T_SPOSInvoices.objects.using('sweetpos_db').values_list('Party', flat=True))
+                customer_ids = list(T_SPOSInvoices.objects.using('sweetpos_db').values_list('Customer', flat=True))
+
+                parties = M_Parties.objects.using('default').filter(id__in=party_ids).values('id', 'Name')
+                customers = M_Parties.objects.using('default').filter(id__in=customer_ids).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+
+                party_dict = {party['id']: party['Name'] for party in parties}
+                customer_dict = {customer['id']: customer for customer in customers}
+                
+                SPOS_filter_args = {
+                        'InvoiceDate__range': (FromDate, ToDate),
+                        'Party__in': party_ids
+                    }
+                if Customer:
+                    SPOS_filter_args['Customer'] = Customer
+                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+                        Party_id=F('Party'),
+                        Customer_id=F('Customer'),
+                        Vehicle_id=F('Vehicle')).values(
+                    'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                    'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
+                    'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP'
+                )
+                Spos_Invoices = []
+                for b in SposInvoices_query:
+                    party = party_dict.get(b['Party_id'])
+                    customer = customer_dict.get(b['Customer_id'])
+                    b['PartyName'] = party if party else None
+                    b['CustomerName'] = customer['Name'] if customer else None
+                    b['DriverName'] = 0
+                    b['DataRecovery'] = 0
+                    b['CustomerGSTIN'] = customer['GSTIN'] if customer else None
+                    b['CustomerPAN'] = customer['PAN'] if customer else None
+                    b['CustomerPartyType'] = customer['PartyType'] if customer else None
+                    Spos_Invoices.append(b)
+                combined_invoices = list(Invoices_query) + Spos_Invoices
+
+                InvoiceListData = list()
+                for a in combined_invoices:
+                        q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
+                        Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
+                        if (Invoicedata['DashBoardMode'] == 1):
+                            InvoiceListData.append({
+                                "InvoiceDate":a['InvoiceDate']   
+                            })
+                        else:
+                            Count = TC_LoadingSheetDetails.objects.filter(Invoice=a['id']).count()
+                            if Count == 0:
+                                LoadingSheetCreated = False 
+                            else:
+                                LoadingSheetCreated = True
+                            query2 = MC_PartySubParty.objects.filter(Party=a['Party_id'],SubParty=a['Customer_id']).values('IsTCSParty')
+                            if not query2:
+                                IsTCSParty = ""
+                            else:
+                                IsTCSParty= query2[0]['IsTCSParty']   
+
+                            InvoiceListData.append({
+                                "id": a['id'],
+                                "InvoiceDate": a['InvoiceDate'],
+                                "FullInvoiceNumber": a['FullInvoiceNumber'],
+                                "CustomerID": a['Customer_id'],
+                                "Customer": a['CustomerName'],
+                                "PartyID": a['Party_id'],
+                                "Party": a['PartyName'],
+                                "GrandTotal": a['GrandTotal'],
+                                "RoundOffAmount": a['RoundOffAmount'],
+                                "LoadingSheetCreated": LoadingSheetCreated,
+                                "DriverName": a['DriverName'],
+                                "VehicleNo": a['Vehicle_id'],
+                                "CreatedOn": a['CreatedOn'],
+                                "InvoiceUploads": Invoice_serializer,
+                                "CustomerPartyType": a['CustomerPartyType'],
+                                "CustomerGSTIN": a['CustomerGSTIN'],
+                                "CustomerPAN": a['CustomerPAN'],
+                                "IsTCSParty": IsTCSParty,
+                                "ImportFromExcel": a['ImportFromExcel'],
+                                "DataRecovery": a['DataRecovery']
+                            })
+                if InvoiceListData:
+                    log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
+                else:
+                    log_entry = create_transaction_logNew(request, Invoicedata, Party, "Invoice List Not Found", 35, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})           
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
