@@ -73,8 +73,8 @@ class WorkOrderDetailsView(CreateAPIView):
                                         "SystemBatchDate": c['LiveBatche']['SystemBatchDate'],
                                         "SystemBatchCode": c['LiveBatche']['SystemBatchCode'],
                                         "LiveBatchID": c['LiveBatche']['id'],
-                                        "ObatchwiseQuantity": c['Quantity'],
-                                        "BaseUnitQuantity": StockQty,
+                                        "ObatchwiseQuantity": StockQty,
+                                        "BaseUnitQuantity": c['Quantity'],
                                         # "Qty":p
                                         "Qty": ""                                        
                                     })
