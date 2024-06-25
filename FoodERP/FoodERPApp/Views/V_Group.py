@@ -233,12 +233,14 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
 
             Item_IDs = list(set(item['ItemID'] for group in SequenceData if 'Items' in group for item in group['Items']))
             items = M_Items.objects.filter(id__in=Item_IDs)
+            item_group_details = MC_ItemGroupDetails.objects.filter(Item__in=Item_IDs)
             if items.count() != len(Item_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more items not found', 'Data': []})
 
             Group_Data = {group.id: group for group in groups}
             SubGroup_Data = {subgroup.id: subgroup for subgroup in subgroups}
             Item_Data = {item.id: item for item in items}
+            ItemGroup_Data= {item.Item.id: item for item in item_group_details}
 
             for group_data in SequenceData:
                 Group_ID = group_data['GroupID']
@@ -256,9 +258,11 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
                 for item_data in group_data['Items']:
                     Item_ID = item_data['ItemID']
                     Item_Sequence = item_data['ItemSequence']
-                    Item = Item_Data[Item_ID]
-                    Item.Sequence = Item_Sequence
-                    Item.save()
+                    item_group_detail = ItemGroup_Data.get(Item_ID)
+
+                    if item_group_detail:
+                        item_group_detail.ItemSequence = Item_Sequence
+                        item_group_detail.save()
 
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Sequences updated successfully', 'Data': []})
 

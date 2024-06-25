@@ -309,6 +309,7 @@ urlpatterns = [
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
+            url(r'InvoicesFilterSecond$', InvoiceListFilterViewSecond.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
             url(r'BulkInvoices$', BulkInvoiceView.as_view()),
             
