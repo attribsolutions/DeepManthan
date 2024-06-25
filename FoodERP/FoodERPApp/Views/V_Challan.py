@@ -135,7 +135,7 @@ class ChallanView(CreateAPIView):
                     if Challan_serializer.is_valid():
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Sales Order Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
                 # else:
    
@@ -229,11 +229,11 @@ class ChallanView(CreateAPIView):
                     UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = float(selectQuery[0]['BaseUnitQuantity'])+float(BaseUnitQuantity11))
                 Invoicedata = T_Challan.objects.get(id=id)
                 Invoicedata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Delete Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Sales Order Delete Successfully', 'Data':[]})
         except T_Challan.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'IB Sales Order Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'IB Sales Order used in another table', 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):

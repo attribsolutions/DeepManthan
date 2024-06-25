@@ -307,7 +307,7 @@ class DemandView(CreateAPIView):
                 Demand_serializer = T_DemandSerializer(data=Demanddata)
                 if Demand_serializer.is_valid():
                     Demand_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Demand Save Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Purchase Order Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Demand_serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -447,7 +447,7 @@ class DemandViewSecond(CreateAPIView):
                     DemandupdateByID, data=Demandupdatedata)
                 if Demandupdate_Serializer.is_valid():
                     Demandupdate_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Demand Updated Successfully', 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Purchase Order Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
@@ -461,7 +461,7 @@ class DemandViewSecond(CreateAPIView):
             with transaction.atomic():
                 Demand_Data = T_Demands.objects.get(id=id)
                 Demand_Data.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Demand Deleted Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Purchase Order Deleted Successfully', 'Data': []})
         except T_Demands.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except IntegrityError:

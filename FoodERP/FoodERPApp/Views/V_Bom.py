@@ -25,10 +25,13 @@ class BOMListFilterView(CreateAPIView):
                 # ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
-                Item=BillOfMaterialdata['ItemID']
+                # Item=BillOfMaterialdata['ItemID']
+                Item=""
                 # d = date.today()   
                 if (Item==''):
-                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName  From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby where Company_id={Company}''')  
+                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName  
+                                                         From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
+                                                         where Isdelete=0 and Company_id={Company}''')  
                 else: 
                     # query = M_BillOfMaterial.objects.filter(Item_id=Item,Company_id=Company)  
                     query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby where Item_id={Item},Company_id={Company}''')                   
