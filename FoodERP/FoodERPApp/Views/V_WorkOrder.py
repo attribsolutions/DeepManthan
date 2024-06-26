@@ -29,7 +29,7 @@ class BomDetailsView(CreateAPIView):
                 Query = M_BillOfMaterial.objects.filter(id=BomID)
                 
                 if Query.exists():
-                    BOM_Serializer = M_BOMSerializerSecond(
+                    BOM_Serializer = M_BOMSerializerSecond001(
                         Query, many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})

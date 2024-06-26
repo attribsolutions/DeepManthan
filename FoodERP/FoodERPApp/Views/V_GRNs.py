@@ -414,7 +414,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 CustomPrint(bomquery.query)
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
                                 CustomPrint(Query.query)
-                                BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                                BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                                 # CustomPrint("PSSSSSS")
                                 # CustomPrint(BOM_Serializer)
                                 BillofmaterialData = list()
@@ -485,6 +485,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "IGSTPercentage": "",
                                         "Amount":"",
                                         "BatchCode":y['BatchCode'],
+                                        "LoginName":"",
                                         "UnitDetails":ParentUnitDetails
                                         
         

@@ -183,13 +183,13 @@ in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC
                     Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,ifnull(M_ChannelWiseItems.IsAvailableForOrdering,0) IsAvailableForOrdering,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items 
-left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id AND M_ChannelWiseItems.PartyType_id=%s
-left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id and MC_ItemGroupDetails.GroupType_id=1
-left JOIN MC_ItemGroupDetails 
-ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType 
-ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group 
-ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
-ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.Company_id =%s 
+left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id  AND M_ChannelWiseItems.PartyType_id=%s
+left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+where M_Items.Company_id =%s 
 order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
                 # CustomPrint(str(Itemquery.query))
                 if not Itemquery:

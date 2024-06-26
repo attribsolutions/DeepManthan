@@ -5,6 +5,7 @@ from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.db import connection
+from django.db.models import UniqueConstraint
 from datetime import datetime 
 # from activity_log.models import UserMixin
 
@@ -606,6 +607,7 @@ class M_Group(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)    
     GroupType = models.ForeignKey(M_GroupType, related_name='GroupType', on_delete=models.PROTECT)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='ItemGroupCompany', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_Group"
 
@@ -671,7 +673,7 @@ class M_Items(models.Model):
     ShortName = models.CharField(max_length=500)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     BarCode = models.CharField(max_length=500,null=True,blank=True) 
-    SAPItemCode = models.CharField(max_length=100,unique=True,null=True,blank=True)
+    SAPItemCode = models.CharField(max_length=100,null=True,blank=True)
     isActive = models.BooleanField(default=False)
     IsSCM = models.BooleanField(default=False)
     CanBeSold = models.BooleanField(default=False)
@@ -695,6 +697,9 @@ class M_Items(models.Model):
     CItemID = models.IntegerField(default=False,null=True,blank=True)
     SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['Company', 'SAPItemCode'], name='unique_company_sapitemcode')
+        ]
         db_table = "M_Items"
         
         
@@ -2381,3 +2386,5 @@ class M_SAPCustomerLedger(models.Model):
 
     class Meta:
         db_table = "M_SAPCustomerLedger"
+
+
