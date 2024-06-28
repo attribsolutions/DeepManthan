@@ -25,8 +25,8 @@ class BOMListFilterView(CreateAPIView):
                 # ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
-                # Item=BillOfMaterialdata['ItemID']
-                Item=""
+                Item=BillOfMaterialdata['ItemID']
+                # Item=""
                 # d = date.today()   
                 if (Item==''):
                     query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName  
