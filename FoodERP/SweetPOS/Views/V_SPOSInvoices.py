@@ -28,8 +28,7 @@ class SPOSInvoiceView(CreateAPIView):
                     
                 if user is not None:
                     
-                    for Invoicedata in mulInvoicedata:
-                       
+                    for Invoicedata in mulInvoicedata:                        
                         Party = Invoicedata['DivisionID']
                         queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(DivisionID=Invoicedata['DivisionID']).values('Party')
                         # CustomPrint(queryforParty)
@@ -48,12 +47,15 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['RoundOffAmount'] =Invoicedata['NetAmount']
                             Invoicedata['Driver'] = 0
                             Invoicedata['Vehicle'] = 0
-
+                            Invoicedata['NetAmount'] =Invoicedata['NetAmount']
+                            Invoicedata['SaleID'] =0
+                             
                             
                             #================================================================================================== 
                             InvoiceItems = Invoicedata['SaleItems']
                             
                             for InvoiceItem in InvoiceItems:
+                                
                                 queryforItem=M_Items.objects.filter(CItemID=InvoiceItem['ERPItemID']).values('id')
                                 
                                     
@@ -71,24 +73,28 @@ class SPOSInvoiceView(CreateAPIView):
                                 quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                                 
                                 InvoiceItem['Unit'] = quryforunit[0]['id']
-                                InvoiceItem['GSTPercentage'] = InvoiceItem['GST']
-                                InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                                 
+                                InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
+                                InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
                                 InvoiceItem['MRPValue'] = InvoiceItem['Rate']
                                 InvoiceItem['TaxType'] = 'GST'
-                                InvoiceItem['GSTAmount'] = 0
-                                InvoiceItem['DiscountType'] = 2
-                                InvoiceItem['Discount'] = 0
-                                InvoiceItem['DiscountAmount'] = 0
+                                InvoiceItem['GSTPercentage'] = InvoiceItem['GSTRate']
+                                InvoiceItem['GSTAmount'] = InvoiceItem['GSTAmount']
+                                InvoiceItem['DiscountType'] = InvoiceItem['DiscountType']
+                                InvoiceItem['Discount'] = InvoiceItem['DiscountValue']
+                                InvoiceItem['DiscountAmount'] = InvoiceItem['DiscountAmount']
                                 InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
+                                InvoiceItem['CGST'] = InvoiceItem['CGSTAmount']
                                 InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
+                                InvoiceItem['SGST'] = InvoiceItem['SGSTAmount']
                                 InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
                                 InvoiceItem['Item'] = ItemId
-                                InvoiceItem['IGST'] = InvoiceItem['IGSTRate']
+                                InvoiceItem['IGST'] = InvoiceItem['IGSTAmount']
                                 InvoiceItem['BatchCode'] = '0'
                                 InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
-                                    
-
+                                InvoiceItem['SaleItemID']=0
+                                InvoiceItem['SaleID']=0
+                                InvoiceItem['Party']=InvoiceItem['PartyID']
                                 BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                                 InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
                                 QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
