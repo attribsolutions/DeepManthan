@@ -67,8 +67,12 @@ class T_SPOSInvoices(models.Model):
     Vehicle = models.IntegerField()
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
     DiscountPercentage = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True) #Discount amount of all items
+    PaymentType = models.CharField(max_length=500)
+    TotalAmount = models.DecimalField(max_digits=20, decimal_places=2)  #All Items total without discount
+    NetAmount = models.DecimalField(max_digits=20, decimal_places=2)    #TotalAmount+DiscountAmount
+    MobileNo  = models.CharField(max_length=15, blank=True, null=True)
+    CustomerGSTIN = models.CharField(max_length=20, blank=True, null=True)
     # Hide Flag is temporary 
     Hide = models.BooleanField(default=False)
     ImportFromExcel= models.BooleanField(default=False)
@@ -114,6 +118,9 @@ class TC_SPOSInvoiceItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    HSNCode = models.CharField(max_length=20)
+    InvoiceDate = models.DateField()
+    Party = models.IntegerField()
 
     class Meta:
         db_table = "TC_SPOSInvoiceItems"    
