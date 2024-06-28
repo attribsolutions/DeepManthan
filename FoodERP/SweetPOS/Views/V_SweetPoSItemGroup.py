@@ -55,7 +55,7 @@ class ItemGroupandSubgroupView(CreateAPIView):
                     }
                     subgroups = MC_SubGroup.objects.filter(Group=group)
                     for subgroup in subgroups:
-                        sequence = group.Sequence if subgroup.Sequence is not None else 0.00
+                        sequence = subgroup.Sequence if subgroup.Sequence is not None else 0.00
                         subgroup_data = {
                             "GroupID": subgroup.id,
                             "ItemName": None, 
@@ -70,7 +70,6 @@ class ItemGroupandSubgroupView(CreateAPIView):
             else:
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemGroupandSubgroup_ForSPOS:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
 
 
@@ -83,48 +82,47 @@ class ItemListView(CreateAPIView):
             user = BasicAuthenticationfunction(request)
             if user is not None:
                 
-                query = f"""SELECT i.id AS FoodERPID, i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
-                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,
-                i.Name, i.SAPItemCode AS ItemCode,  
+                query = M_Items.objects.raw(f"""SELECT i.id , i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
-                ifnull(i.BaseUnitID_id,0) AS UnitID, 
-                i.IsFranchisesItem,  
+                ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
-                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID
+                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence
                 FROM M_Items AS i
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
-                join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id=(SELECT Party from SweetPOS.M_SweetPOSRoleAccess where Divisionid={DivisionID})
-                WHERE M_ChannelWiseItems.PartyType_id = 19 """                  
-                with connection.cursor() as cursor:
-                    cursor.execute(query)
-                    rows = cursor.fetchall()
-
-                response_data = {"status": True, "status_code": 200, "count": len(rows), "data": [] }
-                for row in rows:
-                    item_data = {
-                        "FoodERPID": row[0],
-                        "CItemID": row[1],
-                        "BarCode": row[2],
-                        "HSNCode": row[3],
-                        "Name": row[4],
-                        "ItemCode": row[5],
-                        "GST": row[6],
-                        "Rate": row[7],
-                        "UnitID": row[8],
+                join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id={DivisionID}
+                WHERE M_ChannelWiseItems.PartyType_id = 19  """)                  
+                
+               
+                count=0
+                item_data=list()
+                for row in query:
+                    count=count+1
+                    
+                    item_data.append({
+                        "FoodERPID": row.id,
+                        "CItemID": row.CItemID,
+                        "BarCode": row.BarCode,
+                        "HSNCode": row.HSNCode,
+                        "Name": row.Name,
+                        "ItemCode": row.ItemCode,
+                        "GST": row.GST,
+                        "Rate": row.Rate,
+                        "UnitID": row.UnitID,
                         "ISChitaleSupplier": True,  
-                        "IsFranchisesPOSItem": row[9],
+                        "IsFranchisesPOSItem": row.IsFranchisesItem,
                         "UnitConversion": "",         
-                        "FoodERPMRP": row[10],
-                        "ItemGroupID": row[11],
-                        "FranchisesItemCode": ""      
-                    }
-                    response_data["data"].append(item_data)
-                log_entry = create_transaction_logNew(request, 0, 0,'DivisonID:'+str(DivisionID),385,0)
-                return Response(response_data)
+                        "FoodERPMRP": row.FoodERPMRP,
+                        "ItemGroupID": row.ItemGroupID,
+                        "FranchisesItemCode": "" ,
+                        "DisplayIndex" :  row.ItemSequence  
+                    } )
+                    
+
+                return Response({"status": True, "status_code": 200, "count": count, "data": item_data }, status=200)
             else:
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemList_ForSPOS:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
