@@ -171,7 +171,7 @@ class SPOSStockReportView(CreateAPIView):
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
                 ON A.Item_id = D.Item ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate],[Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                CustomPrint(StockreportQuery)
+                # CustomPrint(StockreportQuery)
                 serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data
 
                 StockData = list()
