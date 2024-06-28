@@ -30,7 +30,7 @@ class SPOSInvoiceView(CreateAPIView):
                     
                     for Invoicedata in mulInvoicedata:                        
                         Party = Invoicedata['DivisionID']
-                        queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(DivisionID=Invoicedata['DivisionID']).values('Party')
+                        queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(Party=Invoicedata['DivisionID']).values('Party')
                         # CustomPrint(queryforParty)
                         if not queryforParty:
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
@@ -42,7 +42,7 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
                             Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
                             Invoicedata['Customer'] = 97
-                            Invoicedata['Party'] = Invoicedata['PartyID']
+                            Invoicedata['Party'] = queryforParty[0]['Party']
                             Invoicedata['GrandTotal'] =Invoicedata['NetAmount']
                             Invoicedata['RoundOffAmount'] =Invoicedata['NetAmount']
                             Invoicedata['Driver'] = 0
