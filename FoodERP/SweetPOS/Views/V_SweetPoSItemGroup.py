@@ -55,7 +55,7 @@ class ItemGroupandSubgroupView(CreateAPIView):
                     }
                     subgroups = MC_SubGroup.objects.filter(Group=group)
                     for subgroup in subgroups:
-                        sequence = group.Sequence if subgroup.Sequence is not None else 0.00
+                        sequence = subgroup.Sequence if subgroup.Sequence is not None else 0.00
                         subgroup_data = {
                             "GroupID": subgroup.id,
                             "ItemName": None, 
