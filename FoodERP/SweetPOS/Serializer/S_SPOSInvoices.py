@@ -7,7 +7,7 @@ class SPOSInvoiceItemsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TC_SPOSInvoiceItems
-        fields = [ 'SaleItemID', 'ClientID', 'ClientSaleItemID', 'ClientSaleID', 'ERPItemID', 'POSItemID', 'Quantity', 'BaseUnitQuantity', 'MRPValue', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode', 'Item', 'Unit', 'QtyInNo', 'QtyInKg', 'QtyInBox']
+        fields = [ 'InvoiceDate','SaleItemID', 'ClientID', 'ClientSaleItemID', 'ClientSaleID', 'ERPItemID', 'POSItemID', 'Quantity', 'BaseUnitQuantity', 'MRPValue', 'Rate', 'BasicAmount', 'TaxType', 'GSTPercentage', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode', 'Item', 'Unit', 'QtyInNo', 'QtyInKg', 'QtyInBox','Party']
 
 
 
