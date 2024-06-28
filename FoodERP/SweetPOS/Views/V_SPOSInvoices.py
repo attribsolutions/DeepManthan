@@ -141,7 +141,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                     
                 if user is not None: 
                     
-                    QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(DivisionID=DivisionID).values('Party')
+                    QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
                     if not QueryfordivisionID:
                             
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
