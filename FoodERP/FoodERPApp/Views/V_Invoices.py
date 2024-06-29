@@ -286,22 +286,21 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName'
                 ).order_by('-InvoiceDate')
 
-                party_ids = list(T_SPOSInvoices.objects.using('sweetpos_db').values_list('Party', flat=True))
-                customer_ids = list(T_SPOSInvoices.objects.using('sweetpos_db').values_list('Customer', flat=True))
-
-                parties = M_Parties.objects.using('default').filter(id__in=party_ids).values('id', 'Name')
-                customers = M_Parties.objects.using('default').filter(id__in=customer_ids).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                SPOS_filter_args = {
+                        'InvoiceDate__range': (FromDate, ToDate),
+                        'Party': Party
+                    }
+                
+                parties = M_Parties.objects.using('FoodERP').filter(id=Party).values('id', 'Name')
+                if Customer:
+                    customers = M_Parties.objects.using('FoodERP').filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                else:
+                    customers = M_Parties.objects.using('FoodERP').filter(id__in=Invoices_query.values('Customer_id')).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
 
                 party_dict = {party['id']: party['Name'] for party in parties}
                 customer_dict = {customer['id']: customer for customer in customers}
-                
-                SPOS_filter_args = {
-                        'InvoiceDate__range': (FromDate, ToDate),
-                        'Party__in': party_ids
-                    }
-                if Customer:
-                    SPOS_filter_args['Customer'] = Customer
-                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+            
+                SposInvoices_query = T_SPOSInvoices.objects.using('SweetPOS').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
@@ -320,9 +319,14 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerGSTIN'] = customer['GSTIN'] if customer else None
                     b['CustomerPAN'] = customer['PAN'] if customer else None
                     b['CustomerPartyType'] = customer['PartyType'] if customer else None
+                    b['Identify_id'] = 2
                     Spos_Invoices.append(b)
-                combined_invoices = list(Invoices_query) + Spos_Invoices
-
+                combined_invoices = []
+                for invoice in Invoices_query:
+                        invoice['Identify_id'] = 1 
+                        combined_invoices.append(invoice)
+                combined_invoices.extend(Spos_Invoices)
+                        
                 InvoiceListData = list()
                 for a in combined_invoices:
                         q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
@@ -344,6 +348,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 IsTCSParty= query2[0]['IsTCSParty']   
 
                             InvoiceListData.append({
+                                "Identify_id": a['Identify_id'],
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
                                 "FullInvoiceNumber": a['FullInvoiceNumber'],
@@ -364,6 +369,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "IsTCSParty": IsTCSParty,
                                 "ImportFromExcel": a['ImportFromExcel'],
                                 "DataRecovery": a['DataRecovery']
+                                
                             })
                 if InvoiceListData:
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
