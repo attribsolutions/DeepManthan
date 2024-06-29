@@ -56,12 +56,12 @@ class SPOSInvoiceView(CreateAPIView):
                             
                             for InvoiceItem in InvoiceItems:
                                 
-                                queryforItem=M_Items.objects.filter(CItemID=InvoiceItem['ERPItemID']).values('id')
+                                queryforItem=M_Items.objects.filter(id=InvoiceItem['ERPItemID']).values('id')
                                 
                                     
                                 if not queryforItem:
-                                    ItemId= 33
-                                    # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
+                                    ItemId= 0
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                                 else:
                                     ItemId=queryforItem[0]['id']
                                 
