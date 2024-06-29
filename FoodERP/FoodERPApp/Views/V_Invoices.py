@@ -291,16 +291,16 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'Party': Party
                     }
                 
-                parties = M_Parties.objects.using('FoodERP').filter(id=Party).values('id', 'Name')
+                parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
                 if Customer:
-                    customers = M_Parties.objects.using('FoodERP').filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                    customers = M_Parties.objects.filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                 else:
-                    customers = M_Parties.objects.using('FoodERP').filter(id__in=Invoices_query.values('Customer_id')).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                    customers = M_Parties.objects.filter(id__in=Invoices_query.values('Customer_id')).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
 
                 party_dict = {party['id']: party['Name'] for party in parties}
                 customer_dict = {customer['id']: customer for customer in customers}
             
-                SposInvoices_query = T_SPOSInvoices.objects.using('SweetPOS').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
