@@ -50,6 +50,7 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['Vehicle'] = 0
                             Invoicedata['NetAmount'] =Invoicedata['NetAmount']
                             Invoicedata['SaleID'] =0
+                            Invoicedata['MobileNo'] =Invoicedata['Mobile']
                              
                             
                             #================================================================================================== 
