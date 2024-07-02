@@ -20,9 +20,10 @@ class SPOSInvoiceView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        mulInvoicedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                mulInvoicedata = JSONParser().parse(request)
+                
                 LastIDs=[]
                 user=BasicAuthenticationfunction(request)
                     
@@ -111,18 +112,18 @@ class SPOSInvoiceView(CreateAPIView):
                                 
                                 LastInsertId = Invoice.id
                                 LastIDs.append(Invoice.id)
-                                log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId),383,LastInsertId,0,0, Invoicedata['Customer'])
+                                
                             else:
                                 transaction.set_rollback(True)
                                 # CustomPrint(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
                                 # log_entry = create_transaction_logNew(request, Invoicedata, Party, str(Invoice_serializer.errors),34,0,0,0,Invoicedata['Customer'])
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                             
-                    
+                log_entry = create_transaction_logNew(request, mulInvoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
         except Exception as e:
             
-            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, mulInvoicedata, 0,'InvoiceSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
         
 
