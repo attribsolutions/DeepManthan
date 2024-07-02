@@ -567,7 +567,7 @@ class Cancel_EInvoice(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0,userID=0):
+    def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
 
@@ -578,8 +578,10 @@ class Cancel_EInvoice(CreateAPIView):
                 invoicedetaillist=list()
                 if(aa[0] == '1'):
                     access_token=aa[1]
-                    InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
-                   
+                    if int(Mode) == 1:
+                        InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
+                    else:
+                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
                     invoicedetaillist.append({
                             "access_token" : access_token,
                             "user_gstin" : InvoiceUploadsData[0]["user_gstin"],
@@ -601,11 +603,17 @@ class Cancel_EInvoice(CreateAPIView):
                     data_dict = json.loads(response.text)
                     
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        if int(Mode) == 0:
+                            Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        else:
+                            Query=TC_SPOSInvoiceUploads.objects.filter(Invoice_id=id)    
                         
                         if(Query.count() > 0):
+                            if int(Mode) == 0:
+                                StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
+                            else:
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             
-                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             log_entry = create_transaction_logNew(request,0,0,'E-Invoice Cancel Successfully',365,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Cancel Successfully', 'Data': [] })
                         else:
