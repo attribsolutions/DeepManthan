@@ -77,6 +77,7 @@ class T_SPOSInvoices(models.Model):
     Hide = models.BooleanField(default=False)
     ImportFromExcel= models.BooleanField(default=False)
     DeletedFromSAP = models.BooleanField(default=False)
+    UploadedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "T_SPOSInvoices"
 
