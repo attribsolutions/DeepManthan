@@ -324,7 +324,7 @@ where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  )
             ''')
             TargetAchievementList = []   
             
-            print(query)
+            # print(query)
 
             if query:   
                 for a in query:
