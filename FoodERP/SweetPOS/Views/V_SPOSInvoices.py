@@ -52,8 +52,7 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['NetAmount'] =Invoicedata['NetAmount']
                             Invoicedata['SaleID'] =0
                             Invoicedata['MobileNo'] =Invoicedata['Mobile']
-                            # Invoicedata['CreatedOn'] =Invoicedata['CreatedOn']
-                            # Invoicedata['UpdatedOn'] =Invoicedata['UpdatedOn']
+                            
                              
                             
                             #================================================================================================== 
@@ -99,6 +98,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
                                 InvoiceItem['SaleItemID']=0
                                 InvoiceItem['SaleID']=0
+                                InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                                 InvoiceItem['Party']=InvoiceItem['PartyID']
                                 BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                                 InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
