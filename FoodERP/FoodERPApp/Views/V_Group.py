@@ -186,14 +186,15 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     query2 = MC_SubGroup.objects.filter(Group=group)
                     for subgroup in query2:
                         query3 = MC_ItemGroupDetails.objects.filter(Group=group, SubGroup=subgroup).select_related('Item')
-                        ItemList = [
-                            {
-                                "ItemID": a.Item.id,
-                                "ItemName": a.Item.Name,
-                                "ItemSequence": a.Item.Sequence
-                            }
-                            for a in query3
-                        ]
+                        for a in query3:
+                            ItemList = [
+                                {
+                                    "ItemID": a.Item.id,
+                                    "ItemName": a.Item.Name,
+                                    "ItemSequence": a.ItemSequence
+                                }
+                                
+                            ]
 
                         GroupSubgroupItemList.append({
                             "GroupTypeID": group.GroupType_id,
