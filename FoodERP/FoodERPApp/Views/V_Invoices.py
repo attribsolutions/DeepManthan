@@ -290,6 +290,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
                     }
+                if Customer:
+                    SPOS_filter_args['Customer'] = Customer
                 SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
@@ -298,30 +300,20 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
                     'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP'
                 )
-
-                parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
-                if Customer:
-                    customers = M_Parties.objects.filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-                else:
-                    invoice_ids = [invoice['id'] for invoice in SposInvoices_query]
-                    Customer_IDs_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(id__in=invoice_ids).values('Customer')
-                    Customer_IDs = [customer['Customer'] for customer in Customer_IDs_query]
-                    customers = M_Parties.objects.filter(id__in=Customer_IDs).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-
-                party_dict = {party['id']: party['Name'] for party in parties}
-                customer_dict = {customer['id']: customer for customer in customers}
-
+    
                 Spos_Invoices = []
                 for b in SposInvoices_query:
-                    party = party_dict.get(b['Party_id'])
-                    customer = customer_dict.get(b['Customer_id'])
-                    b['PartyName'] = party if party else None
-                    b['CustomerName'] = customer['Name'] if customer else None
+                    parties = M_Parties.objects.filter(id=Party).values('Name')
+                    customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                    party = Party
+                    customer = customers[0]['id']
+                    b['PartyName'] = parties[0]['Name']
+                    b['CustomerName'] = customers[0]['Name']
                     b['DriverName'] = 0
                     b['DataRecovery'] = 0
-                    b['CustomerGSTIN'] = customer['GSTIN'] if customer else None
-                    b['CustomerPAN'] = customer['PAN'] if customer else None
-                    b['CustomerPartyType'] = customer['PartyType'] if customer else None
+                    b['CustomerGSTIN'] = customers[0]['GSTIN'] 
+                    b['CustomerPAN'] = customers[0]['PAN'] 
+                    b['CustomerPartyType'] = customers[0]['PartyType'] 
                     b['Identify_id'] = 2
                     Spos_Invoices.append(b)
                 combined_invoices = []
