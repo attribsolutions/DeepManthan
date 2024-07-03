@@ -290,16 +290,6 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
                     }
-                
-                parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
-                if Customer:
-                    customers = M_Parties.objects.filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-                else:
-                    customers = M_Parties.objects.filter(id__in=Invoices_query.values('Customer_id')).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-
-                party_dict = {party['id']: party['Name'] for party in parties}
-                customer_dict = {customer['id']: customer for customer in customers}
-            
                 SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
@@ -308,6 +298,19 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
                     'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP'
                 )
+
+                parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
+                if Customer:
+                    customers = M_Parties.objects.filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                else:
+                    invoice_ids = [invoice['id'] for invoice in SposInvoices_query]
+                    Customer_IDs_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(id__in=invoice_ids).values('Customer')
+                    Customer_IDs = [customer['Customer'] for customer in Customer_IDs_query]
+                    customers = M_Parties.objects.filter(id__in=Customer_IDs).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+
+                party_dict = {party['id']: party['Name'] for party in parties}
+                customer_dict = {customer['id']: customer for customer in customers}
+
                 Spos_Invoices = []
                 for b in SposInvoices_query:
                     party = party_dict.get(b['Party_id'])
@@ -458,8 +461,7 @@ class InvoiceViewSecond(CreateAPIView):
                         B = 351
                 else:
                     A = "Action is not defined"
-                # CustomPrint(characters)
-                # CustomPrint(id)
+               
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
@@ -532,7 +534,6 @@ class InvoiceViewSecond(CreateAPIView):
                         # for bb in a['Customer']['MCSubParty']:
                         #     # if bb['IsDefault'] == True:
                         #         DefCustomerRoute = bb['Route']['Name']
-                        
                         
                         query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
                         BanksSerializer= PartyBanksSerializer(query, many=True).data
