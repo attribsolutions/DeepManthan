@@ -4,6 +4,8 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 
+from SweetPOS.models import *
+
 from ..Serializer.S_EInvoiceEwayBill import *
 
 
@@ -40,7 +42,7 @@ class Uploaded_EInvoice(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0,userID=0):
+    def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
 
@@ -52,40 +54,79 @@ class Uploaded_EInvoice(CreateAPIView):
                 if(aa[0] == '1'):
                     
                     access_token=aa[1]
-                    ItemQuery = T_Invoices.objects.raw('''select * from (SELECT T_Invoices.id ,T_Invoices.InvoiceDate document_date,
-P.Name seller_legal_name,C.Name Buyer_legal_name,T_Invoices.FullInvoiceNumber document_number,
+                    if int(Mode) == 1:    #This Mode is 1 for FoodERPInvoice and 2 for SweetPoS Invoice
+                        
+                        ItemQuery = T_Invoices.objects.raw('''select * from (SELECT T_Invoices.id ,T_Invoices.InvoiceDate document_date,
+    P.Name seller_legal_name,C.Name Buyer_legal_name,T_Invoices.FullInvoiceNumber document_number,
+    PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
+    PD.Name Seller_location ,CD.Name Buyer_location,
+    P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
+    PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode 
+    FROM T_Invoices 
+    join M_Parties P on P.id=T_Invoices.Party_id
+    join M_Parties C on C.id=T_Invoices.Customer_id
+    left join MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
+    left join MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
+    left join M_States PS on PS.id=P.State_id
+    left join M_States CS on CS.id=C.State_id
+    left join M_Districts PD on PD.id=P.District_id
+    left join M_Districts CD on  CD.id=C.District_id
+    where T_Invoices.id=%s)a
+    left join 
+    (select sum(BasicAmount)Total_assessable_value,(sum(Amount))total_invoice_value,sum(CGST)total_cgst_value,
+    sum(SGST) total_sgst_value,sum(IGST)total_igst_value,sum(DiscountAmount)total_discount, Invoice_id 
+    from TC_InvoiceItems where Invoice_id=%s)b
+    on a.id=b.Invoice_id''',([id],[id])
+    )
+                        InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,M_GSTHSNCode.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_InvoiceItems.Rate,sum(TC_InvoiceItems.DiscountAmount)DiscountAmount,
+    sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,TC_InvoiceItems.GSTPercentage gst_rate,
+    sum(Amount) total_item_value
+    FROM TC_InvoiceItems 
+    join M_Items on TC_InvoiceItems.Item_id=M_Items.id
+    join M_GSTHSNCode on M_GSTHSNCode.id=TC_InvoiceItems.GST_id
+    join MC_ItemUnits on MC_ItemUnits.id=TC_InvoiceItems.Unit_id
+    join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+
+
+    where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Units.EwayBillUnit,TC_InvoiceItems.Rate,TC_InvoiceItems.GSTPercentage
+    ''',[id])
+                        
+                    else:
+                        
+                        ItemQuery = T_SPOSInvoices.objects.raw('''select * from (SELECT SPOSInvoice.id ,SPOSInvoice.InvoiceDate document_date,
+P.Name seller_legal_name,C.Name Buyer_legal_name,SPOSInvoice.FullInvoiceNumber document_number,
 PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
 PD.Name Seller_location ,CD.Name Buyer_location,
 P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
 PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode 
-FROM T_Invoices 
-join M_Parties P on P.id=T_Invoices.Party_id
-join M_Parties C on C.id=T_Invoices.Customer_id
-left join MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
-left join MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
-left join M_States PS on PS.id=P.State_id
-left join M_States CS on CS.id=C.State_id
-left join M_Districts PD on PD.id=P.District_id
-left join M_Districts CD on  CD.id=C.District_id
-where T_Invoices.id=%s)a
+FROM SweetPOS.T_SPOSInvoices SPOSInvoice
+join FoodERP.M_Parties P on P.id=SPOSInvoice.Party
+join FoodERP.M_Parties C on C.id=SPOSInvoice.Customer
+left join FoodERP.MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
+left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
+left join FoodERP.M_States PS on PS.id=P.State_id
+left join FoodERP.M_States CS on CS.id=C.State_id
+left join FoodERP.M_Districts PD on PD.id=P.District_id
+left join FoodERP.M_Districts CD on  CD.id=C.District_id
+where SPOSInvoice.id=%s)a
 left join 
 (select sum(BasicAmount)Total_assessable_value,(sum(Amount))total_invoice_value,sum(CGST)total_cgst_value,
 sum(SGST) total_sgst_value,sum(IGST)total_igst_value,sum(DiscountAmount)total_discount, Invoice_id 
-from TC_InvoiceItems where Invoice_id=%s)b
+from SweetPOS.TC_SPOSInvoiceItems where Invoice_id=%s)b
 on a.id=b.Invoice_id''',([id],[id])
 )
-                    InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,M_GSTHSNCode.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_InvoiceItems.Rate,sum(TC_InvoiceItems.DiscountAmount)DiscountAmount,
-sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,TC_InvoiceItems.GSTPercentage gst_rate,
+                        InvoiceItem=TC_SPOSInvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,SPOSInvoiceItems.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,SPOSInvoiceItems.Rate,sum(SPOSInvoiceItems.DiscountAmount)DiscountAmount,
+sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,SPOSInvoiceItems.GSTPercentage gst_rate,
 sum(Amount) total_item_value
-FROM TC_InvoiceItems 
-join M_Items on TC_InvoiceItems.Item_id=M_Items.id
-join M_GSTHSNCode on M_GSTHSNCode.id=TC_InvoiceItems.GST_id
-join MC_ItemUnits on MC_ItemUnits.id=TC_InvoiceItems.Unit_id
-join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
+FROM SweetPOS.TC_SPOSInvoiceItems SPOSInvoiceItems
+join FoodERP.M_Items on SPOSInvoiceItems.Item=M_Items.id
+join FoodERP.MC_ItemUnits on MC_ItemUnits.id=SPOSInvoiceItems.Unit
+join FoodERP.M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 
 
-where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Units.EwayBillUnit,TC_InvoiceItems.Rate,TC_InvoiceItems.GSTPercentage
+where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Units.EwayBillUnit,SPOSInvoiceItems.Rate,SPOSInvoiceItems.GSTPercentage
  ''',[id])
+                    
                     InvoiceUploadSerializer = InvoicegovUploadSerializer2(ItemQuery, many=True).data
                     Invoice=InvoiceUploadSerializer[0]
                     InvoiceItemUploadSerializer = InvoiceItemgovUploadSerializer2(InvoiceItem, many=True).data
@@ -112,9 +153,12 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     # total_discount = 0
                     # for Invoice in InvoiceUploadSerializer:
                         # user_gstin=Invoice['Party']['GSTIN']
+                    
                     for a in InvoiceItemUploadSerializer:
-                        q0=TC_InvoiceItems.objects.filter(Invoice_id=id ,Item_id=a['id']).values("BatchCode")
-                        
+                        if int(Mode) == 1:
+                            q0=TC_InvoiceItems.objects.filter(Invoice_id=id ,Item_id=a['id']).values("BatchCode")
+                        else:
+                            q0=TC_SPOSInvoiceItems.objects.using('sweetpos_db').filter(Invoice_id=id ,Item=a['id']).values("BatchCode")
                         Batchlist = list()
                         for d in q0:
                             Batchlist.append({
@@ -140,7 +184,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                         })
 
                    
-
+                   
                     transaction_details.append({
                         "supply_type": 'B2B'
                     }),
@@ -244,17 +288,25 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     # CustomPrint(data_dict)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
-                       
+                        if int(Mode) == 1:
+                            Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        else:
+                            Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)
                         if(Query.count() > 0):
-                            
-                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
+                            if int(Mode) == 1:
+                                StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
+                            else:
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())
                             log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,'E-Invoice Upload Successfully',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1 })
                         else:
-                           
-                            InvoiceID=T_Invoices.objects.get(id=id)
-                            Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
+                            if int(Mode) == 1:
+                                InvoiceID=T_Invoices.objects.get(id=id)
+                                Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
+                            else:
+                                InvoiceID=T_SPOSInvoices.objects.using('sweetpos_db').get(id=id)
+                                Statusinsert=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').create(Invoice=InvoiceID,user_gstin=Invoice['Seller_gstin'],Irn=data_dict['results']['message']['Irn'],AckNo=data_dict['results']['message']['AckNo'],EInvoicePdf=data_dict['results']['message']['EinvoicePdf'],QRCodeUrl=data_dict['results']['message']['QRCodeUrl'],EInvoiceCreatedBy=userID,EInvoiceCreatedOn=datetime.now())        
+                            
                             log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-Invoice Upload Successfully  of InvoiceID: {InvoiceID}',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1})
                     else:
@@ -266,7 +318,7 @@ where Invoice_id=%s group by TC_InvoiceItems.Item_id,M_GSTHSNCode.HSNCode,M_Unit
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-Invoice Upload:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
 class Uploaded_EwayBill(CreateAPIView):
@@ -515,7 +567,7 @@ class Cancel_EInvoice(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0,userID=0):
+    def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
 
@@ -526,8 +578,10 @@ class Cancel_EInvoice(CreateAPIView):
                 invoicedetaillist=list()
                 if(aa[0] == '1'):
                     access_token=aa[1]
-                    InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
-                   
+                    if int(Mode) == 1:
+                        InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
+                    else:
+                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
                     invoicedetaillist.append({
                             "access_token" : access_token,
                             "user_gstin" : InvoiceUploadsData[0]["user_gstin"],
@@ -549,11 +603,17 @@ class Cancel_EInvoice(CreateAPIView):
                     data_dict = json.loads(response.text)
                     
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        if int(Mode) == 0:
+                            Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        else:
+                            Query=TC_SPOSInvoiceUploads.objects.filter(Invoice_id=id)    
                         
                         if(Query.count() > 0):
+                            if int(Mode) == 0:
+                                StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
+                            else:
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             
-                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             log_entry = create_transaction_logNew(request,0,0,'E-Invoice Cancel Successfully',365,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Cancel Successfully', 'Data': [] })
                         else:

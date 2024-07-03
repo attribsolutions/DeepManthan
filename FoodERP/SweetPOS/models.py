@@ -58,9 +58,9 @@ class T_SPOSInvoices(models.Model):
     GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)
     RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
+    CreatedOn = models.DateTimeField(auto_now_add=False)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
+    UpdatedOn = models.DateTimeField(auto_now=False)
     Customer = models.IntegerField()
     Driver = models.IntegerField()
     Party = models.IntegerField()
@@ -77,6 +77,7 @@ class T_SPOSInvoices(models.Model):
     Hide = models.BooleanField(default=False)
     ImportFromExcel= models.BooleanField(default=False)
     DeletedFromSAP = models.BooleanField(default=False)
+    UploadedOn = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = "T_SPOSInvoices"
 
@@ -212,3 +213,26 @@ class T_SPOSStockOut(models.Model):
     # IsDeleted = models.BooleanField(default=False)
     class Meta:
         db_table="T_SPOSStockOut"        
+
+class TC_SPOSInvoiceUploads(models.Model):
+    Invoice = models.ForeignKey(T_SPOSInvoices,related_name='SPOSInvoiceUploads', on_delete=models.CASCADE) 
+    AckNo =  models.CharField(max_length=500,null=True)  
+    Irn =  models.CharField(max_length=500,null=True)
+    QRCodeUrl =models.CharField(max_length=500,null=True)
+    EInvoicePdf = models.CharField(max_length=500,null=True)
+    EwayBillNo = models.CharField(max_length=500,null=True)
+    EwayBillUrl = models.CharField(max_length=500,null=True)
+    EInvoiceCreatedBy = models.IntegerField(null=True)
+    EInvoiceCreatedOn = models.DateTimeField(null=True)
+    EwayBillCreatedBy = models.IntegerField(null=True)
+    EwayBillCreatedOn = models.DateTimeField(null=True)
+    EInvoiceCanceledBy = models.IntegerField(null=True)
+    EInvoiceCanceledOn = models.DateTimeField(null=True)
+    EwayBillCanceledBy = models.IntegerField(null=True)
+    EwayBillCanceledOn = models.DateTimeField(null=True)
+    EInvoiceIsCancel = models.BooleanField(default=False)
+    EwayBillIsCancel = models.BooleanField(default=False)
+    user_gstin = models.CharField(max_length=500)  
+    
+    class Meta:
+        db_table="TC_SPOSInvoiceUploads"             

@@ -208,8 +208,8 @@ def TargetVsAchiQurey(Party,Month,Year):
     TvaAQuery=f''' (SELECT I.Party_id,I.ItemID,TargetQuantity,TargetAmount,Quantity,Amount,CXQuantity,CXAmount,CXQuantity2,CXAmount2,CRNoteQuantity,CRNoteAmount,Month,Year 
   from 
 (SELECT ItemID,Party Party_id from 
-(select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id in(SELECT distinct PartyType_id from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode > 0))s ,
-(SELECT id Party, Name from M_Parties where id in ({Party}) and PartyType_id !=19 and  M_Parties.SAPPartyCode > 0)P )I 
+(select distinct Item_id ItemID  from M_ChannelWiseItems where PartyType_id in(SELECT distinct PartyType_id from M_Parties where id in ({Party}) and  M_Parties.SAPPartyCode is not null))s ,
+(SELECT id Party, Name from M_Parties where id in ({Party}) and PartyType_id !=19 and  M_Parties.SAPPartyCode is not null)P )I 
 
 left join 
   
@@ -324,7 +324,7 @@ where MC_ItemGroupDetails.GroupType_id=1  and M_PartyDetails.Group_id is null  )
             ''')
             TargetAchievementList = []   
             
-            print(query)
+            # print(query)
 
             if query:   
                 for a in query:
