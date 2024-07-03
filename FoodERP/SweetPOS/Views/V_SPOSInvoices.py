@@ -21,6 +21,7 @@ class SPOSInvoiceView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         mulInvoicedata = JSONParser().parse(request)
+        inputdata = mulInvoicedata
         try:
             with transaction.atomic():
                 
@@ -50,6 +51,8 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['Vehicle'] = 0
                             Invoicedata['NetAmount'] =Invoicedata['NetAmount']
                             Invoicedata['SaleID'] =0
+                            Invoicedata['MobileNo'] =Invoicedata['Mobile']
+                            
                              
                             
                             #================================================================================================== 
@@ -95,6 +98,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
                                 InvoiceItem['SaleItemID']=0
                                 InvoiceItem['SaleID']=0
+                                InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                                 InvoiceItem['Party']=InvoiceItem['PartyID']
                                 BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                                 InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
@@ -114,16 +118,15 @@ class SPOSInvoiceView(CreateAPIView):
                                 LastIDs.append(Invoice.id)
                                 
                             else:
+                                log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
                                 transaction.set_rollback(True)
-                                # CustomPrint(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])
-                                # log_entry = create_transaction_logNew(request, Invoicedata, Party, str(Invoice_serializer.errors),34,0,0,0,Invoicedata['Customer'])
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                             
-                log_entry = create_transaction_logNew(request, mulInvoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
+                log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
         except Exception as e:
             
-            log_entry = create_transaction_logNew(request, mulInvoicedata, 0,'InvoiceSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
         
 
