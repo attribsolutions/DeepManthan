@@ -12,43 +12,43 @@ from ..models import  *
 
 class SPOSCashierSummaryList(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+    
     def post(self, request, id=0):
         POSCashierdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                user=BasicAuthenticationfunction(request)
                 FromDate = POSCashierdata['FromDate']
                 ToDate = POSCashierdata['ToDate']
                 Party = POSCashierdata['Party']
-            if user is not None:  
+             
                 WhereClause=""
                 if Party:
-                    WhereClause= f'AND T_SPOSInvoices.Party={Party}'
+                    WhereClause= f'AND SPOSIn.Party={Party}'
                 
-                CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id ,T_SPOSInvoices.InvoiceDate,
-                M_SweetPOSUser.LoginName ClientName,fooderp20240624.M_Parties.Name CashierName ,
-                SUM(T_SPOSInvoices.GrandTotal)Amount from T_SPOSInvoices               
-                JOIN M_SweetPOSUser ON M_SweetPOSUser.DivisionID=T_SPOSInvoices.Party
-                JOIN fooderp20240624.M_Parties ON fooderp20240624.M_Parties.ID=T_SPOSInvoices.Party
-                WHERE T_SPOSInvoices.InvoiceDate BETWEEN {FromDate} AND {ToDate} {WhereClause} 
-                GROUP BY M_SweetPOSUser.ID''')
-                
+                CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id , SPOSIn.InvoiceDate,
+                SPOSUser.LoginName CashierName ,
+                SUM(SPOSIn.GrandTotal)Amount
+                from SweetPOS.T_SPOSInvoices SPOSIn
+                JOIN SweetPOS.M_SweetPOSUser SPOSUser ON SPOSUser.id=SPOSIn.CreatedBy
+                WHERE SPOSIn.InvoiceDate BETWEEN {FromDate} AND {ToDate} {WhereClause} 
+                GROUP BY SPOSIn.InvoiceDate,SPOSUser.LoginName, SPOSUser.id
+                ''')
+                print(CashierSummaryQuery)
                 if CashierSummaryQuery:
+                    print('sssssssssssssss')
                     CashierDetails=list()
                     for row in CashierSummaryQuery:
                         print(row)
                         CashierDetails.append({
-                            "Id":row.Id,
+                            
                             "InvoiceDate":row.InvoiceDate,
-                            "ClientName":row.ClientName,
                             "CashierName":row.CashierName,
                             "Amount":row.Amount                           
                             
                         })
                     
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CashierDetails})
-                        
+                            
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
