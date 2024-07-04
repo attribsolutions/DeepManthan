@@ -3,8 +3,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-from rest_framework.authentication import BasicAuthentication
-from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 
 from ..models import  *
 
@@ -13,7 +11,7 @@ from ..models import  *
 class SPOSCashierSummaryList(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
-    def post(self, request, id=0):
+    def post(self, request):
         POSCashierdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
@@ -23,22 +21,22 @@ class SPOSCashierSummaryList(CreateAPIView):
              
                 WhereClause=""
                 if Party:
-                    WhereClause= f'AND SPOSIn.Party={Party}'
+                    WhereClause= f'''AND SPOSIn.Party={Party}'''
                 
                 CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id , SPOSIn.InvoiceDate,
                 SPOSUser.LoginName CashierName ,
                 SUM(SPOSIn.GrandTotal)Amount
                 from SweetPOS.T_SPOSInvoices SPOSIn
                 JOIN SweetPOS.M_SweetPOSUser SPOSUser ON SPOSUser.id=SPOSIn.CreatedBy
-                WHERE SPOSIn.InvoiceDate BETWEEN {FromDate} AND {ToDate} {WhereClause} 
+                WHERE SPOSIn.InvoiceDate BETWEEN %s AND %s {WhereClause} 
                 GROUP BY SPOSIn.InvoiceDate,SPOSUser.LoginName, SPOSUser.id
-                ''')
-                print(CashierSummaryQuery)
+                ''',(FromDate,ToDate))
+                
                 if CashierSummaryQuery:
-                    print('sssssssssssssss')
+                    
                     CashierDetails=list()
                     for row in CashierSummaryQuery:
-                        print(row)
+                        
                         CashierDetails.append({
                             
                             "InvoiceDate":row.InvoiceDate,
