@@ -78,7 +78,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 
                                 InvoiceItem['Unit'] = quryforunit[0]['id']
                                 
-                                InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
+                                # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                                 InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
                                 InvoiceItem['MRPValue'] = InvoiceItem['Rate']
                                 InvoiceItem['TaxType'] = 'GST'
