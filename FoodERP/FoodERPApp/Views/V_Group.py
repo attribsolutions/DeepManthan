@@ -188,8 +188,14 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     if query2:
                         for subgroup in query2:
                             query3 = MC_ItemGroupDetails.objects.filter(Group=group, SubGroup=subgroup).select_related('Item')
+                            SubGroupID = subgroup.id
+                            SubGroupName = subgroup.Name
+                            SubGroupSequence = subgroup.Sequence
                     else:
                         query3 = MC_ItemGroupDetails.objects.filter(Group=group).select_related('Item')
+                        SubGroupID = None
+                        SubGroupName = None
+                        SubGroupSequence = None
                     for a in query3:
                         ItemList.append(
                             {
@@ -203,9 +209,9 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                         "GroupID": group.id,
                         "GroupName": group.Name,
                         "GroupSequence": group.Sequence,
-                        "SubGroupID": subgroup.id,
-                        "SubGroupName": subgroup.Name,
-                        "SubGroupSequence": subgroup.Sequence,
+                        "SubGroupID": SubGroupID,
+                        "SubGroupName": SubGroupName,
+                        "SubGroupSequence": SubGroupSequence,
                         "Items": ItemList
                     })
 
