@@ -55,7 +55,7 @@ class T_SPOSInvoices(models.Model):
     InvoiceDate = models.DateField()
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=60, decimal_places=20)
+    GrandTotal = models.DecimalField(max_digits=60, decimal_places=20)     
     RoundOffAmount = models.DecimalField(max_digits=30, decimal_places=10)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=False)
@@ -70,7 +70,7 @@ class T_SPOSInvoices(models.Model):
     DiscountAmount = models.DecimalField(max_digits=60, decimal_places=20,blank=True, null=True) #Discount amount of all items
     PaymentType = models.CharField(max_length=500)
     TotalAmount = models.DecimalField(max_digits=60, decimal_places=20)  #All Items total without discount
-    NetAmount = models.DecimalField(max_digits=60, decimal_places=20)    #TotalAmount+DiscountAmount
+    NetAmount = models.DecimalField(max_digits=60, decimal_places=20)    #TotalAmount+(-DiscountAmount)
     MobileNo  = models.CharField(max_length=15, blank=True, null=True)
     CustomerGSTIN = models.CharField(max_length=20, blank=True, null=True)
     # Hide Flag is temporary 
@@ -91,7 +91,7 @@ class TC_SPOSInvoiceItems(models.Model):
     POSItemID = models.IntegerField()
     Quantity = models.DecimalField(max_digits=20, decimal_places=4)
     BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=4)
-    MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    MRPValue =  models.DecimalField(max_digits=60, decimal_places=20,null=True,blank=True)
     Rate = models.DecimalField(max_digits=60, decimal_places=20)
     BasicAmount = models.DecimalField(max_digits=60, decimal_places=20)
     TaxType = models.CharField(max_length=500)
