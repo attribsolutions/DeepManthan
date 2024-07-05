@@ -45,13 +45,13 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
                             Invoicedata['Customer'] = 97
                             Invoicedata['Party'] = queryforParty[0]['Party']
-                            Invoicedata['GrandTotal'] =Invoicedata['NetAmount']
-                            Invoicedata['RoundOffAmount'] =Invoicedata['NetAmount']
+                            Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
+                            Invoicedata['RoundOffAmount'] =Invoicedata['RoundOffAmount']
                             Invoicedata['Driver'] = 0
                             Invoicedata['Vehicle'] = 0
-                            Invoicedata['NetAmount'] =Invoicedata['NetAmount']
                             Invoicedata['SaleID'] =0
                             Invoicedata['MobileNo'] =Invoicedata['Mobile']
+                            
                             
                              
                             
