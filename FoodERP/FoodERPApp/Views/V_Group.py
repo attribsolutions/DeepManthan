@@ -182,38 +182,58 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GroupType Not available', 'Data': []})
 
                 GroupSubgroupItemList = []
-                for group in query1:
-                    query2 = MC_SubGroup.objects.filter(Group=group)
+                for aa in query1:
+                    query2 = MC_SubGroup.objects.filter(Group=aa)
                     if query2.exists():
                         for subgroup in query2:
-                            query3 = MC_ItemGroupDetails.objects.filter(Group=group, SubGroup=subgroup).select_related('Item')
+                            query3 = MC_ItemGroupDetails.objects.filter(Group=aa, SubGroup=subgroup).select_related('Item')
                             SubGroupID = subgroup.id
                             SubGroupName = subgroup.Name
-                            SubGroupSequence = subgroup.Sequence     
-                    else:
-                        query3 = MC_ItemGroupDetails.objects.filter(Group=group).select_related('Item')
-                        SubGroupID = None
-                        SubGroupName = None
-                        SubGroupSequence = None
-                    ItemList = list()
-                    for a in query3:
-                            ItemList.append(
-                                    {
+                            SubGroupSequence = subgroup.Sequence
+
+                            ItemList = []
+                            for a in query3:
+                                ItemList.append({
                                     "ItemID": a.Item.id,
                                     "ItemName": a.Item.Name,
                                     "ItemSequence": a.ItemSequence
-                                } 
-                                    )
-                    GroupSubgroupItemList.append({
-                                            "GroupTypeID": group.GroupType_id,
-                                            "GroupID": group.id,
-                                            "GroupName": group.Name,
-                                            "GroupSequence": group.Sequence,
-                                            "SubGroupID": SubGroupID,
-                                            "SubGroupName": SubGroupName,
-                                            "SubGroupSequence": SubGroupSequence,
-                                            "Items": ItemList
-                                        })
+                                })
+
+                            GroupSubgroupItemList.append({
+                                "GroupTypeID": aa.GroupType_id,
+                                "GroupID": aa.id,
+                                "GroupName": aa.Name,
+                                "GroupSequence": aa.Sequence,
+                                "SubGroupID": SubGroupID,
+                                "SubGroupName": SubGroupName,
+                                "SubGroupSequence": SubGroupSequence,
+                                "Items": ItemList
+                            })
+                    else:
+                        query3 = MC_ItemGroupDetails.objects.filter(Group=aa).select_related('Item')
+                        SubGroupID = None
+                        SubGroupName = None
+                        SubGroupSequence = None
+
+                        ItemList = []
+                        for a in query3:
+                            ItemList.append({
+                                "ItemID": a.Item.id,
+                                "ItemName": a.Item.Name,
+                                "ItemSequence": a.ItemSequence
+                            })
+
+                        GroupSubgroupItemList.append({
+                            "GroupTypeID": aa.GroupType_id,
+                            "GroupID": aa.id,
+                            "GroupName": aa.Name,
+                            "GroupSequence": aa.Sequence,
+                            "SubGroupID": SubGroupID,
+                            "SubGroupName": SubGroupName,
+                            "SubGroupSequence": SubGroupSequence,
+                            "Items": ItemList
+                        })
+
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
@@ -234,11 +254,14 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
             if groups.count() != len(Group_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more groups not found', 'Data': []})
 
-            SubGroup_IDs = list(set(item['SubGroupID'] for item in SequenceData))
-            subgroups = MC_SubGroup.objects.filter(id__in=SubGroup_IDs)
-            if subgroups.count() != len(SubGroup_IDs):
-                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more subgroups not found', 'Data': []})
-
+            SubGroup_IDs = SequenceData[0]['SubGroupID']
+            subgroups = MC_SubGroup.objects.filter(id=SubGroup_IDs)
+            if subgroups.exists():
+                q = MC_ItemGroupDetails.objects.filter(Group__in=Group_IDs, SubGroup=SubGroup_IDs)
+                # if subgroups.count() != len(SubGroup_IDs) and :
+                #     return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more subgroups not found', 'Data': []})
+                
+                    
             Item_IDs = list(set(item['ItemID'] for group in SequenceData if 'Items' in group for item in group['Items']))
             items = M_Items.objects.filter(id__in=Item_IDs)
             item_group_details = MC_ItemGroupDetails.objects.filter(Item__in=Item_IDs)
@@ -257,25 +280,25 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
                 Group.Sequence = Group_Sequence
                 Group.save()
 
-                SubGroup_ID = group_data['SubGroupID']
-                SubGroup_Sequence = group_data['SubGroupSequence']
-                SubGroup = SubGroup_Data[SubGroup_ID]
-                SubGroup.Sequence = SubGroup_Sequence
-                SubGroup.save()
+                if group_data['SubGroupID'] == None and group_data['SubGroupID']:
+                    SubGroup_ID = group_data['SubGroupID']
+                    SubGroup_Sequence = group_data['SubGroupSequence']
+                    SubGroup = SubGroup_Data[SubGroup_ID]
+                    SubGroup.Sequence = SubGroup_Sequence
+                    SubGroup.save()
 
-                for item_data in group_data['Items']:
-                    Item_ID = item_data['ItemID']
-                    Item_Sequence = item_data['ItemSequence']
-                    item_group_detail = ItemGroup_Data.get(Item_ID)
+                    for item_data in group_data['Items']:
+                        Item_ID = item_data['ItemID']
+                        Item_Sequence = item_data['ItemSequence']
+                        item_group_detail = ItemGroup_Data.get(Item_ID)
 
-                    if item_group_detail:
-                        item_group_detail.ItemSequence = Item_Sequence
-                        item_group_detail.save()
-
+                        if item_group_detail:
+                            item_group_detail.ItemSequence = Item_Sequence
+                            item_group_detail.save()
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Sequences updated successfully', 'Data': []})
 
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
 
 
         
