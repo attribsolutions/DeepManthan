@@ -367,3 +367,20 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        
+
+class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        CustomerVehicledata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                VehicleUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(id=id).update(Vehicle=CustomerVehicledata['vehicle'],Customer=CustomerVehicledata['Customer'])
+                log_entry = create_transaction_logNew(request, {'POSInvoiceID':id}, 0,'',67,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Customer and Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'UpdateCustomerVehiclePOSInvoice:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
