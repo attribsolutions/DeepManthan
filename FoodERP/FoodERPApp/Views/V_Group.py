@@ -182,7 +182,6 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GroupType Not available', 'Data': []})
 
                 GroupSubgroupItemList = []
-                ItemList = list()
                 for aa in query1:
                     query2 = MC_SubGroup.objects.filter(Group=aa)
                     for subgroup in query2:
@@ -196,16 +195,15 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                                 SubGroupID = None
                                 SubGroupName = None
                                 SubGroupSequence = None
-
-                                for a in query3:
-                                    ItemList.append(
-                                                {
-                                                "ItemID": a.Item.id,
-                                                "ItemName": a.Item.Name,
-                                                "ItemSequence": a.ItemSequence
-                                            } 
-                                                )
-                           
+                            ItemList = list()
+                            for a in query3:
+                                ItemList.append(
+                                            {
+                                            "ItemID": a.Item.id,
+                                            "ItemName": a.Item.Name,
+                                            "ItemSequence": a.ItemSequence
+                                        } 
+                                            )
                             GroupSubgroupItemList.append({
                                             "GroupTypeID": aa.GroupType_id,
                                             "GroupID": aa.id,
