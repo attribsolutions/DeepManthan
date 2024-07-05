@@ -510,9 +510,9 @@ class Uploaded_EwayBill(CreateAPIView):
         try:
             with transaction.atomic():
                 if Mode==1:
-                    Query=T_SPOSInvoices.objects.filter(id=id).values('Vehicle')
-                else:
                     Query=T_Invoices.objects.filter(id=id).values('Vehicle')
+                else:
+                    Query=T_SPOSInvoices.objects.using('sweetpos_db').filter(id=id).values('Vehicle')
                   
                 if (Query[0]['Vehicle']) is None:
                     log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
@@ -715,13 +715,13 @@ where Invoice_id={Invoice.id}''')
                                     if int(Mode) ==1 :
                                         Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                                     else:
-                                        Query=TC_SPOSInvoiceUploads.objects.filter(Invoice_id=id)
+                                        Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)
                                     
                                     if(Query.count() > 0):
                                         if int(Mode)==1:
                                             StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
                                         else:
-                                            StatusUpdates=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                            StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
                                         log_entry = create_transaction_logNew(request,payload,0,'E-WayBill Upload Successfully',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                     else:
@@ -729,8 +729,8 @@ where Invoice_id={Invoice.id}''')
                                             InvoiceID=T_Invoices.objects.get(id=id)
                                             Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
                                         else:
-                                            InvoiceID=T_SPOSInvoices.objects.get(id=id)
-                                            Statusinsert=TC_SPOSInvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                            InvoiceID=T_SPOSInvoices.objects.using('sweetpos_db').get(id=id)
+                                            Statusinsert=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
                                         log_entry = create_transaction_logNew(request,payload,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                 else:
@@ -767,7 +767,7 @@ class Cancel_EwayBill(CreateAPIView):
                     if int(Mode) == 1:
                         InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","EwayBillNo")
                     else:
-                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).values("user_gstin","EwayBillNo")    
+                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).values("user_gstin","EwayBillNo")    
                   
                     invoicedetaillist.append({
                             "access_token" : access_token,
@@ -794,13 +794,13 @@ class Cancel_EwayBill(CreateAPIView):
                         if int(Mode) == 1:
                             Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                         else:
-                            Query=TC_SPOSInvoiceUploads.objects.filter(Invoice_id=id)
+                            Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)
                         
                         if(Query.count() > 0):
                             if int(Mode)==1:
                                 StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())
                             else:
-                                StatusUpdates=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())    
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())    
                             log_entry = create_transaction_logNew(request,0,0,'E-WayBill Cancel Successfully',364,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Cancel Successfully', 'Data': [] })
                         else:
@@ -835,7 +835,7 @@ class Cancel_EInvoice(CreateAPIView):
                     if int(Mode) == 1:
                         InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
                     else:
-                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
+                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).values("user_gstin","Irn")
                     invoicedetaillist.append({
                             "access_token" : access_token,
                             "user_gstin" : InvoiceUploadsData[0]["user_gstin"],
@@ -860,13 +860,13 @@ class Cancel_EInvoice(CreateAPIView):
                         if int(Mode) == 0:
                             Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                         else:
-                            Query=TC_SPOSInvoiceUploads.objects.filter(Invoice_id=id)    
+                            Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)    
                         
                         if(Query.count() > 0):
                             if int(Mode) == 0:
                                 StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             else:
-                                StatusUpdates=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             
                             log_entry = create_transaction_logNew(request,0,0,'E-Invoice Cancel Successfully',365,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Cancel Successfully', 'Data': [] })
