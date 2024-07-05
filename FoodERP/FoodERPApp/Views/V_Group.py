@@ -195,15 +195,16 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                         SubGroupID = None
                         SubGroupName = None
                         SubGroupSequence = None
+                    ItemList = list()
                     for a in query3:
-                            Items = [
+                            ItemList.append(
                                     {
-                                        "ItemID": a.Item.id,
+                                    "ItemID": a.Item.id,
                                     "ItemName": a.Item.Name,
                                     "ItemSequence": a.ItemSequence
                                 } 
-                                        ]
-                            GroupSubgroupItemList.append({
+                                    )
+                    GroupSubgroupItemList.append({
                                             "GroupTypeID": group.GroupType_id,
                                             "GroupID": group.id,
                                             "GroupName": group.Name,
@@ -211,7 +212,7 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                                             "SubGroupID": SubGroupID,
                                             "SubGroupName": SubGroupName,
                                             "SubGroupSequence": SubGroupSequence,
-                                            "Items": Items
+                                            "Items": ItemList
                                         })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
         except Exception as e:
