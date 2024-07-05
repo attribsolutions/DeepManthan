@@ -182,40 +182,38 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GroupType Not available', 'Data': []})
 
                 GroupSubgroupItemList = []
-                ItemList=[]
                 for group in query1:
                     query2 = MC_SubGroup.objects.filter(Group=group)
-                    if query2:
+                    if query2.exists():
                         for subgroup in query2:
                             query3 = MC_ItemGroupDetails.objects.filter(Group=group, SubGroup=subgroup).select_related('Item')
                             SubGroupID = subgroup.id
                             SubGroupName = subgroup.Name
-                            SubGroupSequence = subgroup.Sequence
+                            SubGroupSequence = subgroup.Sequence     
                     else:
                         query3 = MC_ItemGroupDetails.objects.filter(Group=group).select_related('Item')
                         SubGroupID = None
                         SubGroupName = None
                         SubGroupSequence = None
                     for a in query3:
-                        ItemList.append(
-                            {
-                                "ItemID": a.Item.id,
-                                "ItemName": a.Item.Name,
-                                "ItemSequence": a.ItemSequence
-                            })
-                        
-                    GroupSubgroupItemList.append({
-                        "GroupTypeID": group.GroupType_id,
-                        "GroupID": group.id,
-                        "GroupName": group.Name,
-                        "GroupSequence": group.Sequence,
-                        "SubGroupID": SubGroupID,
-                        "SubGroupName": SubGroupName,
-                        "SubGroupSequence": SubGroupSequence,
-                        "Items": ItemList
-                    })
-
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
+                            Items = [
+                                    {
+                                        "ItemID": a.Item.id,
+                                    "ItemName": a.Item.Name,
+                                    "ItemSequence": a.ItemSequence
+                                } 
+                                        ]
+                            GroupSubgroupItemList.append({
+                                            "GroupTypeID": group.GroupType_id,
+                                            "GroupID": group.id,
+                                            "GroupName": group.Name,
+                                            "GroupSequence": group.Sequence,
+                                            "SubGroupID": SubGroupID,
+                                            "SubGroupName": SubGroupName,
+                                            "SubGroupSequence": SubGroupSequence,
+                                            "Items": Items
+                                        })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
