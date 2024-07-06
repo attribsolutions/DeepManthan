@@ -62,9 +62,9 @@ class T_SPOSInvoices(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=False)
     Customer = models.IntegerField()
-    Driver = models.IntegerField()
+    Driver = models.IntegerField(null=True)
     Party = models.IntegerField()
-    Vehicle = models.IntegerField()
+    Vehicle = models.IntegerField(null=True)
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
     DiscountPercentage = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     DiscountAmount = models.DecimalField(max_digits=60, decimal_places=20,blank=True, null=True) #Discount amount of all items
