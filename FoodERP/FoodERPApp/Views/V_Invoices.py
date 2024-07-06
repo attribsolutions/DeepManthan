@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404 
 from SweetPOS.models import *
 from django.db.models import F
-
+from SweetPOS.models import *
 
 class OrderDetailsForInvoice(CreateAPIView):
     
@@ -290,16 +290,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
                     }
-                
-                parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
                 if Customer:
-                    customers = M_Parties.objects.filter(id=Customer).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-                else:
-                    customers = M_Parties.objects.filter(id__in=Invoices_query.values('Customer_id')).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-
-                party_dict = {party['id']: party['Name'] for party in parties}
-                customer_dict = {customer['id']: customer for customer in customers}
-            
+                    SPOS_filter_args['Customer'] = Customer
                 SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
@@ -308,17 +300,20 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
                     'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP'
                 )
+    
                 Spos_Invoices = []
                 for b in SposInvoices_query:
-                    party = party_dict.get(b['Party_id'])
-                    customer = customer_dict.get(b['Customer_id'])
-                    b['PartyName'] = party if party else None
-                    b['CustomerName'] = customer['Name'] if customer else None
+                    parties = M_Parties.objects.filter(id=Party).values('Name')
+                    customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                    party = Party
+                    customer = customers[0]['id']
+                    b['PartyName'] = parties[0]['Name']
+                    b['CustomerName'] = customers[0]['Name']
                     b['DriverName'] = 0
                     b['DataRecovery'] = 0
-                    b['CustomerGSTIN'] = customer['GSTIN'] if customer else None
-                    b['CustomerPAN'] = customer['PAN'] if customer else None
-                    b['CustomerPartyType'] = customer['PartyType'] if customer else None
+                    b['CustomerGSTIN'] = customers[0]['GSTIN'] 
+                    b['CustomerPAN'] = customers[0]['PAN'] 
+                    b['CustomerPartyType'] = customers[0]['PartyType'] 
                     b['Identify_id'] = 2
                     Spos_Invoices.append(b)
                 combined_invoices = []
@@ -329,8 +324,14 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         
                 InvoiceListData = list()
                 for a in combined_invoices:
-                        q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
-                        Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
+                        Invoice_serializer = list()
+                        if a['Identify_id'] == 1:
+                            q = TC_InvoiceUploads.objects.filter(Invoice=a["id"])
+                            Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
+                        if a['Identify_id'] == 2:
+                            q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
+                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
+
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
                                 "InvoiceDate":a['InvoiceDate']   
@@ -458,8 +459,7 @@ class InvoiceViewSecond(CreateAPIView):
                         B = 351
                 else:
                     A = "Action is not defined"
-                # CustomPrint(characters)
-                # CustomPrint(id)
+               
                 InvoiceQuery = T_Invoices.objects.filter(id=id)
                 if InvoiceQuery.exists():
                     InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
@@ -532,7 +532,6 @@ class InvoiceViewSecond(CreateAPIView):
                         # for bb in a['Customer']['MCSubParty']:
                         #     # if bb['IsDefault'] == True:
                         #         DefCustomerRoute = bb['Route']['Name']
-                        
                         
                         query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
                         BanksSerializer= PartyBanksSerializer(query, many=True).data
