@@ -186,12 +186,12 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     query2 = MC_SubGroup.objects.filter(Group=aa)
                     for subgroup in query2:
                             if query2.exists():
-                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa, SubGroup=subgroup).select_related('Item')
+                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa, SubGroup=subgroup).select_related('Item').order_by('ItemSequence')
                                 SubGroupID = subgroup.id
                                 SubGroupName = subgroup.Name
                                 SubGroupSequence = subgroup.Sequence     
                             else:
-                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa).select_related('Item')
+                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa).select_related('Item').order_by('ItemSequence')
                                 SubGroupID = None
                                 SubGroupName = None
                                 SubGroupSequence = None
