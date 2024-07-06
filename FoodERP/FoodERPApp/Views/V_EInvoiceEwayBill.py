@@ -509,7 +509,7 @@ class Uploaded_EwayBill(CreateAPIView):
     def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
-                if Mode==1:
+                if int(Mode) == 1:
                     Query=T_Invoices.objects.filter(id=id).values('Vehicle')
                 else:
                     Query=T_SPOSInvoices.objects.using('sweetpos_db').filter(id=id).values('Vehicle')
