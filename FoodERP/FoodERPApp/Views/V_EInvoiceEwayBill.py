@@ -555,7 +555,7 @@ left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
 left join FoodERP.M_States PS on PS.id=P.State_id
 left join FoodERP.M_States CS on CS.id=C.State_id
 left join FoodERP.M_Cities CC on CC.id=C.City_id
-left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle_id=vehic.id 
+left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle=vehic.id 
 where SPOSIn.id= {id}''')
                        
                         # InvoiceUploadSerializer = InvoicegovUploadSerializer(
@@ -606,7 +606,7 @@ join FoodERP.M_Units units on units.id=itemunit.UnitID_id
 join FoodERP.M_GSTHSNCode gsthsn on gsthsn.id=SPOSItems.GST_id
 where Invoice_id={Invoice.id}''')
                                 else :     
-                                    Itemquery=TC_SPOSInvoiceItems.objects.row(f'''SELECT item.id,item.Name ItemName,SPOSItems.HSNCode,SPOSItems.Quantity,units.EwayBillUnit,SPOSItems.SGSTPercentage,SPOSItems.CGSTPercentage,
+                                    Itemquery=TC_SPOSInvoiceItems.objects.raw(f'''SELECT item.id,item.Name ItemName,SPOSItems.HSNCode,SPOSItems.Quantity,units.EwayBillUnit,SPOSItems.SGSTPercentage,SPOSItems.CGSTPercentage,
 SPOSItems.IGSTPercentage,
 SPOSItems.BasicAmount, SPOSItems.CGST,SPOSItems.SGST,SPOSItems.IGST,SPOSItems.Amount,SPOSItems.DiscountAmount
 FROM SweetPOS.T_SPOSInvoices SPOSIn
