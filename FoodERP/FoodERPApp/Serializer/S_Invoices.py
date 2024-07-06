@@ -4,6 +4,7 @@ from ..Serializer.S_Items import *
 from ..Serializer.S_Orders import  *
 from ..Serializer.S_Drivers import  *
 from ..Serializer.S_Vehicles import  *
+from SweetPOS.models import *
 
 # code by ankita 
 # class RouteSerializer(serializers.ModelSerializer):
@@ -198,6 +199,11 @@ class InvoiceUploadsSerializer(serializers.ModelSerializer):
         model = TC_InvoiceUploads
         fields=['AckNo','Irn','QRCodeUrl','EInvoicePdf','EwayBillNo','EwayBillUrl','EInvoiceIsCancel','EwayBillIsCancel']           
 
+class SPOSInvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_SPOSInvoiceUploads
+        fields = ['AckNo','Irn','QRCodeUrl','EInvoicePdf','EwayBillNo','EwayBillUrl','EInvoiceIsCancel','EwayBillIsCancel']
+
 class InvoiceSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
@@ -206,7 +212,6 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
     Driver= M_DriverSerializer(read_only=True)
     Vehicle = VehiclesSerializer(read_only=True)
     InvoiceUploads=InvoiceUploadsSerializer(many=True)
-    
     class Meta:
         model = T_Invoices
         fields = '__all__'
@@ -223,8 +228,8 @@ class InvoiceSerializerSecond(serializers.ModelSerializer):
 
         if not ret.get("Route", None):
             ret["Route"] = {"id": None, "Name": None}
-        
-        return ret          
+         
+        return ret       
 
 
 class InvoiceSerializerThird(serializers.ModelSerializer):
@@ -421,3 +426,4 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
             InvoicesReferences = TC_InvoicesReferences.objects.create(Invoice=instance, **InvoicesReference_data)   
                   
         return instance         
+    
