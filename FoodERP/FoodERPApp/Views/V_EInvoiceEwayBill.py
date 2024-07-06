@@ -546,7 +546,7 @@ where SPOSIn.id= {id}''')
 
                             InvoiceQuery=T_SPOSInvoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
        C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
-       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,SPOSIn.Vehicle VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
 FROM SweetPOS.T_SPOSInvoices SPOSIn
 join FoodERP.M_Parties P on P.id=SPOSIn.Party
 join FoodERP.M_Parties C on C.id=SPOSIn.Customer
@@ -555,6 +555,7 @@ left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
 left join FoodERP.M_States PS on PS.id=P.State_id
 left join FoodERP.M_States CS on CS.id=C.State_id
 left join FoodERP.M_Cities CC on CC.id=C.City_id
+left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle_id=vehic.id 
 where SPOSIn.id= {id}''')
                        
                         # InvoiceUploadSerializer = InvoicegovUploadSerializer(
