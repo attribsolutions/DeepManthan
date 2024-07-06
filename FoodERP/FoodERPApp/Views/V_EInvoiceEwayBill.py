@@ -509,7 +509,7 @@ class Uploaded_EwayBill(CreateAPIView):
     def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
-                if Mode==1:
+                if int(Mode) == 1:
                     Query=T_Invoices.objects.filter(id=id).values('Vehicle')
                 else:
                     Query=T_SPOSInvoices.objects.using('sweetpos_db').filter(id=id).values('Vehicle')
@@ -531,7 +531,7 @@ class Uploaded_EwayBill(CreateAPIView):
                         if int(Mode) == 1:
                             InvoiceQuery=T_Invoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
        C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
-       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,SPOSIn.Vehicle_id VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
 FROM FoodERP.T_Invoices SPOSIn
 join FoodERP.M_Parties P on P.id=SPOSIn.Party_id
 join FoodERP.M_Parties C on C.id=SPOSIn.Customer_id
@@ -540,6 +540,7 @@ left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
 left join FoodERP.M_States PS on PS.id=P.State_id
 left join FoodERP.M_States CS on CS.id=C.State_id
 left join FoodERP.M_Cities CC on CC.id=C.City_id
+left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle_id=vehic.id                                                                 
 where SPOSIn.id= {id}''')
                         else:
 
