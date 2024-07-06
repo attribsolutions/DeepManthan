@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404 
 from SweetPOS.models import *
 from django.db.models import F
-
+from SweetPOS.models import *
 
 class OrderDetailsForInvoice(CreateAPIView):
     
@@ -324,8 +324,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         
                 InvoiceListData = list()
                 for a in combined_invoices:
-                        q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
-                        Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
+                        q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
+                        Invoice_serializer = SPOSInvoiceSerializer(q, many=True).data
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
                                 "InvoiceDate":a['InvoiceDate']   
