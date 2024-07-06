@@ -325,7 +325,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 InvoiceListData = list()
                 for a in combined_invoices:
                         q=TC_InvoiceUploads.objects.filter(Invoice=a["id"])
-                        Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
+                        Invoice_serializer = SPOSInvoiceSerializer(q, many=True).data
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
                                 "InvoiceDate":a['InvoiceDate']   
