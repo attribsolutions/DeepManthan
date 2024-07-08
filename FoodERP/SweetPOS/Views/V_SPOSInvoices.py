@@ -48,7 +48,7 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
                             Invoicedata['RoundOffAmount'] =Invoicedata['RoundOffAmount']
                             Invoicedata['Driver'] = 0
-                            Invoicedata['Vehicle'] = ""
+                            # Invoicedata['Vehicle'] = ""
                             Invoicedata['SaleID'] =0
                             Invoicedata['MobileNo'] =Invoicedata['Mobile']
                             
