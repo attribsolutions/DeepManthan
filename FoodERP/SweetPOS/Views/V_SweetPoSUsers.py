@@ -80,39 +80,42 @@ class SweetPOSUsersSecondView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request, Division_id=0):
         try:
             with transaction.atomic():
                 query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
                             FROM SweetPOS.M_SweetPOSUser SU
-                            JOIN SweetPOS.M_SweetPOSRoles  ON SweetPOS.SU.RoleID = SweetPOS.M_SweetPOSRoles.id
-                            WHERE SU.id = %s"""
+                            JOIN SweetPOS.M_SweetPOSRoles  ON SU.RoleID = SweetPOS.M_SweetPOSRoles.id
+                            WHERE SU.DivisionID = %s"""
                 with connection.cursor() as cursor:
-                    cursor.execute(query, [id])
-                    row = cursor.fetchone()
+                    cursor.execute(query, [Division_id])
+                    rows = cursor.fetchall()
 
-                user_data = {
-                    "id": row[0],
-                    "CompanyID": row[1],
-                    "DivisionID": row[2],
-                    "LoginName": row[3],
-                    "Password": row[4],
-                    "RoleID": row[5],
-                    "IsActive": row[6],
-                    "CreatedBy": row[7],
-                    "CreatedOn": row[8],
-                    "UpdatedBy": row[9],
-                    "UpdatedOn": row[10],
-                    "RoleName": row[11],
-                }
-                log_entry = create_transaction_logNew(request, user_data, 0, '', 374, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': user_data})
+                user_list = []
+                for row in rows:
+                    user_data = {
+                        "id": row[0],
+                        "CompanyID": row[1],
+                        "DivisionID": row[2],
+                        "LoginName": row[3],
+                        "Password": row[4],
+                        "RoleID": row[5],
+                        "IsActive": row[6],
+                        "CreatedBy": row[7],
+                        "CreatedOn": row[8],
+                        "UpdatedBy": row[9],
+                        "UpdatedOn": row[10],
+                        "RoleName": row[11],
+                    }
+                    user_list.append(user_data)
+                log_entry = create_transaction_logNew(request, user_list, 0, '', 374, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': user_list})
         except M_SweetPOSUser.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0, 0, 'User data not available', 374, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User data not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'GETUser:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
     @transaction.atomic()
