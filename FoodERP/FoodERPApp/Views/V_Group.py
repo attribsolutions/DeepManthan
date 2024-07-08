@@ -182,30 +182,38 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GroupType Not available', 'Data': []})
 
                 GroupSubgroupItemList = []
-                for group in query1:
-                    query2 = MC_SubGroup.objects.filter(Group=group)
+                for aa in query1:
+                    query2 = MC_SubGroup.objects.filter(Group=aa)
                     for subgroup in query2:
-                        query3 = MC_ItemGroupDetails.objects.filter(Group=group, SubGroup=subgroup).select_related('Item')
-                        ItemList = [
-                            {
-                                "ItemID": a.Item.id,
-                                "ItemName": a.Item.Name,
-                                "ItemSequence": a.Item.Sequence
-                            }
-                            for a in query3
-                        ]
-
-                        GroupSubgroupItemList.append({
-                            "GroupTypeID": group.GroupType_id,
-                            "GroupID": group.id,
-                            "GroupName": group.Name,
-                            "GroupSequence": group.Sequence,
-                            "SubGroupID": subgroup.id,
-                            "SubGroupName": subgroup.Name,
-                            "SubGroupSequence": subgroup.Sequence,
-                            "Items": ItemList
-                        })
-
+                            if query2.exists():
+                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa, SubGroup=subgroup).select_related('Item').order_by('ItemSequence')
+                                SubGroupID = subgroup.id
+                                SubGroupName = subgroup.Name
+                                SubGroupSequence = subgroup.Sequence     
+                            else:
+                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa).select_related('Item').order_by('ItemSequence')
+                                SubGroupID = None
+                                SubGroupName = None
+                                SubGroupSequence = None
+                            ItemList = list()
+                            for a in query3:
+                                ItemList.append(
+                                            {
+                                            "ItemID": a.Item.id,
+                                            "ItemName": a.Item.Name,
+                                            "ItemSequence": a.ItemSequence
+                                        } 
+                                            )
+                            GroupSubgroupItemList.append({
+                                            "GroupTypeID": aa.GroupType_id,
+                                            "GroupID": aa.id,
+                                            "GroupName": aa.Name,
+                                            "GroupSequence": aa.Sequence,
+                                            "SubGroupID": SubGroupID,
+                                            "SubGroupName": SubGroupName,
+                                            "SubGroupSequence": SubGroupSequence,
+                                            "Items": ItemList
+                                        })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
@@ -226,21 +234,22 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
             if groups.count() != len(Group_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more groups not found', 'Data': []})
 
-            SubGroup_IDs = list(set(item['SubGroupID'] for item in SequenceData))
+            SubGroup_IDs = list(set(item['SubGroupID'] for item in SequenceData if 'SubGroupID' in item and item['SubGroupID'] is not None))
             subgroups = MC_SubGroup.objects.filter(id__in=SubGroup_IDs)
             if subgroups.count() != len(SubGroup_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more subgroups not found', 'Data': []})
 
             Item_IDs = list(set(item['ItemID'] for group in SequenceData if 'Items' in group for item in group['Items']))
             items = M_Items.objects.filter(id__in=Item_IDs)
-            item_group_details = MC_ItemGroupDetails.objects.filter(Item__in=Item_IDs)
             if items.count() != len(Item_IDs):
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more items not found', 'Data': []})
+
+            item_group_details = MC_ItemGroupDetails.objects.filter(Item__in=Item_IDs, Group__in=Group_IDs)
 
             Group_Data = {group.id: group for group in groups}
             SubGroup_Data = {subgroup.id: subgroup for subgroup in subgroups}
             Item_Data = {item.id: item for item in items}
-            ItemGroup_Data= {item.Item.id: item for item in item_group_details}
+            ItemGroup_Data = {(item_detail.Item.id, item_detail.Group.id): item_detail for item_detail in item_group_details}
 
             for group_data in SequenceData:
                 Group_ID = group_data['GroupID']
@@ -249,16 +258,17 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
                 Group.Sequence = Group_Sequence
                 Group.save()
 
-                SubGroup_ID = group_data['SubGroupID']
-                SubGroup_Sequence = group_data['SubGroupSequence']
-                SubGroup = SubGroup_Data[SubGroup_ID]
-                SubGroup.Sequence = SubGroup_Sequence
-                SubGroup.save()
+                SubGroup_ID = group_data.get('SubGroupID')
+                if SubGroup_ID is not None:
+                    SubGroup_Sequence = group_data['SubGroupSequence']
+                    SubGroup = SubGroup_Data[SubGroup_ID]
+                    SubGroup.Sequence = SubGroup_Sequence
+                    SubGroup.save()
 
                 for item_data in group_data['Items']:
                     Item_ID = item_data['ItemID']
                     Item_Sequence = item_data['ItemSequence']
-                    item_group_detail = ItemGroup_Data.get(Item_ID)
+                    item_group_detail = ItemGroup_Data.get((Item_ID, Group_ID))
 
                     if item_group_detail:
                         item_group_detail.ItemSequence = Item_Sequence

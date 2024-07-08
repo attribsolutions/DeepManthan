@@ -45,13 +45,13 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
                             Invoicedata['Customer'] = 97
                             Invoicedata['Party'] = queryforParty[0]['Party']
-                            Invoicedata['GrandTotal'] =Invoicedata['NetAmount']
-                            Invoicedata['RoundOffAmount'] =Invoicedata['NetAmount']
+                            Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
+                            Invoicedata['RoundOffAmount'] =Invoicedata['RoundOffAmount']
                             Invoicedata['Driver'] = 0
                             Invoicedata['Vehicle'] = 0
-                            Invoicedata['NetAmount'] =Invoicedata['NetAmount']
                             Invoicedata['SaleID'] =0
                             Invoicedata['MobileNo'] =Invoicedata['Mobile']
+                            
                             
                              
                             
@@ -78,7 +78,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 
                                 InvoiceItem['Unit'] = quryforunit[0]['id']
                                 
-                                InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
+                                # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                                 InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
                                 InvoiceItem['MRPValue'] = InvoiceItem['Rate']
                                 InvoiceItem['TaxType'] = 'GST'
@@ -156,7 +156,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                             maxSaleID=row.MaxSaleID
 
                         log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
-                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":100})    
+                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":500})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
@@ -367,3 +367,20 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+        
+
+class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        CustomerVehicledata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                VehicleUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(id=CustomerVehicledata['InvoiceID']).update(Vehicle=CustomerVehicledata['vehicle'],Customer=CustomerVehicledata['Customer'])
+                log_entry = create_transaction_logNew(request, {'POSInvoiceID':id}, 0,'',67,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Customer and Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'UpdateCustomerVehiclePOSInvoice:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        

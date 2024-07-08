@@ -321,18 +321,204 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
 
 
+# class Uploaded_EwayBill(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
+
+#     @transaction.atomic()
+#     def get(self, request, id=0,userID=0):
+#         try:
+#             with transaction.atomic():
+#                 Query=T_Invoices.objects.filter(id=id).values('Vehicle')
+#                 if (Query[0]['Vehicle']) is None:
+#                     log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
+#                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
+#                 else:
+#                     # CustomPrint('bbbbbbbbbb')
+#                     access_token = generate_Access_Token()
+#                     aa=access_token.split('!')
+#                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
+#     # =======================================================================================
+                    
+#                     if(aa[0] == '1'):
+#                         # CustomPrint('ccccccccccc')
+#                         access_token=aa[1]
+#                         ItemQuery = T_Invoices.objects.filter(id=id)
+#                         InvoiceUploadSerializer = InvoicegovUploadSerializer(
+#                             ItemQuery, many=True).data
+#                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceUploadSerializer})
+#                         # CustomPrint('qqqqqqqqqqq')
+#                         InvoiceData = list()
+#                         InvoiceItemDetails = list()
+#                         Total_assessable_value = 0
+#                         total_invoice_value = 0
+#                         total_cgst_value = 0
+#                         total_sgst_value = 0
+#                         total_igst_value = 0
+#                         total_discount = 0
+#                         for Invoice in InvoiceUploadSerializer:
+#                             user_gstin=Invoice['Party']['GSTIN']
+#                             for address in Invoice['Party']['PartyAddress']:
+#                                 if address['IsDefault'] == 1:
+#                                     selleraddress = address['Address'][:100]
+#                                     sellerpin = address['PIN']
+
+#                             for address in Invoice['Customer']['PartyAddress']:
+#                                 if address['IsDefault'] == 1:
+#                                     buyeraddress = address['Address'][:100]
+#                                     buyerpin = address['PIN']
+#                 #====================================Distance Calculate API====================================================            
+#                             Calculate_Distance_URL = f"https://pro.mastersindia.co/distance?access_token={access_token}&fromPincode={sellerpin}&toPincode={buyerpin}"
+#                             headers = {'Content-Type': 'application/json',}
+#                             response = requests.request("GET", Calculate_Distance_URL, headers=headers)
+
+#                             distance_dict = json.loads(response.text)
+                            
+#                 #===============================================================================================================           
+#                             if(distance_dict['results']['status']== 'Success' and distance_dict['results']['code']== 200):
+                                
+                            
+#                                 for a in Invoice['InvoiceItems']:
+
+#                                     # assessable_value=float(a['Quantity'])*float(a['Rate'])
+#                                     Total_assessable_value = float(
+#                                         Total_assessable_value) + float(a['BasicAmount'])
+#                                     total_invoice_value = float(
+#                                         total_invoice_value) + float(a['Amount'])
+#                                     total_cgst_value = float(
+#                                         total_cgst_value) + float(a['CGST'])
+#                                     total_sgst_value = float(
+#                                         total_sgst_value) + float(a['SGST'])
+#                                     total_igst_value = float(
+#                                         total_igst_value) + float(a['IGST'])
+#                                     total_discount = float(
+#                                         total_discount) + float(a['DiscountAmount'])
+
+#                                     InvoiceItemDetails.append({
+#                                         "product_name": a['Item']['Name'],
+#                                         "product_description": a['Item']['Name'],
+#                                         "hsn_code": a['GST']['HSNCode'],
+#                                         "quantity": a['Quantity'],
+#                                         "unit_of_product": a['Unit']['UnitID']['EwayBillUnit'],
+#                                         "cgst_rate": a['SGSTPercentage'],
+#                                         "sgst_rate": a['SGSTPercentage'],
+#                                         "igst_rate": a['IGSTPercentage'],
+#                                         "cess_rate": 0,
+#                                         "cessNonAdvol": 0,
+#                                         "taxable_amount": a['BasicAmount'],
+#                                     })
+
+                                
+
+#                                 InvoiceData.append({
+
+#                                     'access_token': access_token,
+#                                     'userGstin': Invoice['Party']['GSTIN'],
+#                                     'supply_type': "outward",
+#                                     'sub_supply_type': "Supply",
+#                                     'sub_supply_description': " ",
+#                                     'document_type': "TaxInvoice",
+#                                     'document_number': Invoice['id'],
+#                                     'document_date': Invoice['InvoiceDate'],
+#                                     'gstin_of_consignor': Invoice['Party']['GSTIN'],
+#                                     'legal_name_cosignor': Invoice['Party']['Name'],
+#                                     'address1_of_consignor': selleraddress,
+#                                     'address2_of_consignor': '',
+#                                     'pincode_of_consignor': sellerpin,
+#                                     'state_of_consignor': Invoice['Party']['State']['Name'],
+#                                     'actual_from_state_name': Invoice['Party']['State']['Name'],
+#                                     'gstin_of_consignee': Invoice['Customer']['GSTIN'],
+#                                     'legal_name_of_consignee': Invoice['Customer']['Name'],
+#                                     'address1_of_consignee': buyeraddress,
+#                                     'address2_of_consignee': "",
+#                                     'place_of_consignee': Invoice['Customer']['City']['Name'],
+#                                     'pincode_of_consignee': buyerpin,
+#                                     'state_of_supply': Invoice['Customer']['State']['Name'],
+#                                     'actual_to_state_name': Invoice['Customer']['State']['Name'],
+#                                     'other_value': '0',
+#                                     'total_invoice_value': Invoice['GrandTotal'],
+#                                     'taxable_amount': Total_assessable_value,
+#                                     'cgst_amount': total_cgst_value,
+#                                     'sgst_amount': total_sgst_value,
+#                                     'igst_amount': total_igst_value,
+#                                     'cess_amount': '0',
+#                                     'cess_nonadvol_value': '0',
+#                                     'transporter_id': "",
+#                                     'transporter_document_number': "",
+#                                     'transporter_document_date': "",
+#                                     'transportation_mode': "road",
+#                                     'transportation_distance': distance_dict['results']['distance'],
+#                                     'vehicle_number': Invoice['Vehicle']['VehicleNumber'],
+#                                     'transporter_name': "",
+#                                     'vehicle_type': "Regular",
+#                                     'data_source': "erp",
+#                                     'user_ref': "1232435466sdsf234",
+#                                     'eway_bill_status': "Y",
+#                                     'auto_print': "Y",
+#                                     'email' : Invoice['Party']['Email'],
+#                                     'itemList': InvoiceItemDetails
+#                                 })
+#                                 # CustomPrint('ddddddddddddd')
+#                                 E_Way_Bill_URL = 'https://pro.mastersindia.co/ewayBillsGenerate'
+                                
+#                                 payload = json.dumps(InvoiceData[0])
+                                
+#                                 headers = {
+#                                     'Content-Type': 'application/json',
+#                                 }
+#                                 # CustomPrint(payload)
+                            
+#                                 response = requests.request(
+#                                     "POST", E_Way_Bill_URL, headers=headers, data=payload)
+
+#                                 data_dict = json.loads(response.text)
+#                                 # CustomPrint('ffffffffffffff')
+#                                 # CustomPrint(data_dict)
+#                                 if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
+#                                     # CustomPrint('ggggggg')
+#                                     Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                                    
+#                                     if(Query.count() > 0):
+                                        
+#                                         StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+#                                         log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,'E-WayBill Upload Successfully',363,0 )
+#                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
+#                                     else:
+#                                         InvoiceID=T_Invoices.objects.get(id=id)
+#                                         Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
+#                                         log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
+#                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
+#                                 else:
+#                                     # CustomPrint('hhhhhhh')
+#                                     log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results'], 363,0)
+#                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
+#                             else:
+#                                 log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, distance_dict['results'], 363,0)
+#                                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
+                            
+#                     else:
+#                         log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0, aa[1],363,0) 
+#                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
+#         except Exception as e:
+#             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+#==========+}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}==================================================================== 
 class Uploaded_EwayBill(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0,userID=0):
+    def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
-                Query=T_Invoices.objects.filter(id=id).values('Vehicle')
+                if int(Mode) == 1:
+                    Query=T_Invoices.objects.filter(id=id).values('Vehicle')
+                else:
+                    Query=T_SPOSInvoices.objects.using('sweetpos_db').filter(id=id).values('Vehicle')
+                  
                 if (Query[0]['Vehicle']) is None:
                     log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
                 else:
+                   
                     # CustomPrint('bbbbbbbbbb')
                     access_token = generate_Access_Token()
                     aa=access_token.split('!')
@@ -340,11 +526,40 @@ class Uploaded_EwayBill(CreateAPIView):
     # =======================================================================================
                     
                     if(aa[0] == '1'):
-                        # CustomPrint('ccccccccccc')
+                        
                         access_token=aa[1]
-                        ItemQuery = T_Invoices.objects.filter(id=id)
-                        InvoiceUploadSerializer = InvoicegovUploadSerializer(
-                            ItemQuery, many=True).data
+                        if int(Mode) == 1:
+                            InvoiceQuery=T_Invoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
+       C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+FROM FoodERP.T_Invoices SPOSIn
+join FoodERP.M_Parties P on P.id=SPOSIn.Party_id
+join FoodERP.M_Parties C on C.id=SPOSIn.Customer_id
+left join FoodERP.MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
+left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
+left join FoodERP.M_States PS on PS.id=P.State_id
+left join FoodERP.M_States CS on CS.id=C.State_id
+left join FoodERP.M_Cities CC on CC.id=C.City_id
+left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle_id=vehic.id                                                                 
+where SPOSIn.id= {id}''')
+                        else:
+
+                            InvoiceQuery=T_SPOSInvoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
+       C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+FROM SweetPOS.T_SPOSInvoices SPOSIn
+join FoodERP.M_Parties P on P.id=SPOSIn.Party
+join FoodERP.M_Parties C on C.id=SPOSIn.Customer
+left join FoodERP.MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
+left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
+left join FoodERP.M_States PS on PS.id=P.State_id
+left join FoodERP.M_States CS on CS.id=C.State_id
+left join FoodERP.M_Cities CC on CC.id=C.City_id
+left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle=vehic.id 
+where SPOSIn.id= {id}''')
+                       
+                        # InvoiceUploadSerializer = InvoicegovUploadSerializer(
+                        #     ItemQuery, many=True).data
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceUploadSerializer})
                         # CustomPrint('qqqqqqqqqqq')
                         InvoiceData = list()
@@ -355,56 +570,80 @@ class Uploaded_EwayBill(CreateAPIView):
                         total_sgst_value = 0
                         total_igst_value = 0
                         total_discount = 0
-                        for Invoice in InvoiceUploadSerializer:
-                            user_gstin=Invoice['Party']['GSTIN']
-                            for address in Invoice['Party']['PartyAddress']:
-                                if address['IsDefault'] == 1:
-                                    selleraddress = address['Address'][:100]
-                                    sellerpin = address['PIN']
+                        
+                        for Invoice in InvoiceQuery:
+                           
+                            user_gstin = Invoice.PartyGSTIN
+                            sellerpin = Invoice.sellerpin
+                            buyerpin = Invoice.buyerpin
+                            # for address in Invoice['Party']['PartyAddress']:
+                            #     if address['IsDefault'] == 1:
+                            #         selleraddress = address['Address'][:100]
+                            #         sellerpin = Invoice.PIN['PIN']
 
-                            for address in Invoice['Customer']['PartyAddress']:
-                                if address['IsDefault'] == 1:
-                                    buyeraddress = address['Address'][:100]
-                                    buyerpin = address['PIN']
+                            # for address in Invoice['Customer']['PartyAddress']:
+                            #     if address['IsDefault'] == 1:
+                            #         buyeraddress = address['Address'][:100]
+                            #         buyerpin = address['PIN']
                 #====================================Distance Calculate API====================================================            
                             Calculate_Distance_URL = f"https://pro.mastersindia.co/distance?access_token={access_token}&fromPincode={sellerpin}&toPincode={buyerpin}"
                             headers = {'Content-Type': 'application/json',}
                             response = requests.request("GET", Calculate_Distance_URL, headers=headers)
 
                             distance_dict = json.loads(response.text)
-                            
+                           
                 #===============================================================================================================           
                             if(distance_dict['results']['status']== 'Success' and distance_dict['results']['code']== 200):
+                                if int(Mode) ==1 : 
+                                    Itemquery=TC_SPOSInvoiceItems.objects.raw(f'''SELECT item.id,item.Name ItemName,gsthsn.HSNCode,SPOSItems.Quantity,units.EwayBillUnit,SPOSItems.SGSTPercentage,SPOSItems.CGSTPercentage,
+SPOSItems.IGSTPercentage,
+SPOSItems.BasicAmount, SPOSItems.CGST,SPOSItems.SGST,SPOSItems.IGST,SPOSItems.Amount,SPOSItems.DiscountAmount
+FROM FoodERP.T_Invoices SPOSIn
+join FoodERP.TC_InvoiceItems SPOSItems on SPOSIn.id=SPOSItems.Invoice_id
+join FoodERP.M_Items item on item.id=SPOSItems.Item_id
+join FoodERP.MC_ItemUnits itemunit on itemunit.id=SPOSItems.Unit_id
+join FoodERP.M_Units units on units.id=itemunit.UnitID_id
+join FoodERP.M_GSTHSNCode gsthsn on gsthsn.id=SPOSItems.GST_id
+where Invoice_id={Invoice.id}''')
+                                else :     
+                                    Itemquery=TC_SPOSInvoiceItems.objects.raw(f'''SELECT item.id,item.Name ItemName,SPOSItems.HSNCode,SPOSItems.Quantity,units.EwayBillUnit,SPOSItems.SGSTPercentage,SPOSItems.CGSTPercentage,
+SPOSItems.IGSTPercentage,
+SPOSItems.BasicAmount, SPOSItems.CGST,SPOSItems.SGST,SPOSItems.IGST,SPOSItems.Amount,SPOSItems.DiscountAmount
+FROM SweetPOS.T_SPOSInvoices SPOSIn
+join SweetPOS.TC_SPOSInvoiceItems SPOSItems on SPOSIn.id=SPOSItems.Invoice_id
+join FoodERP.M_Items item on item.id=SPOSItems.Item
+join FoodERP.MC_ItemUnits itemunit on itemunit.id=SPOSItems.Unit
+join FoodERP.M_Units units on units.id=itemunit.UnitID_id
+where Invoice_id={Invoice.id}''')
                                 
-                            
-                                for a in Invoice['InvoiceItems']:
+                                for a in Itemquery:
 
                                     # assessable_value=float(a['Quantity'])*float(a['Rate'])
                                     Total_assessable_value = float(
-                                        Total_assessable_value) + float(a['BasicAmount'])
+                                        Total_assessable_value) + float(a.BasicAmount)
                                     total_invoice_value = float(
-                                        total_invoice_value) + float(a['Amount'])
+                                        total_invoice_value) + float(a.Amount)
                                     total_cgst_value = float(
-                                        total_cgst_value) + float(a['CGST'])
+                                        total_cgst_value) + float(a.CGST)
                                     total_sgst_value = float(
-                                        total_sgst_value) + float(a['SGST'])
+                                        total_sgst_value) + float(a.SGST)
                                     total_igst_value = float(
-                                        total_igst_value) + float(a['IGST'])
+                                        total_igst_value) + float(a.IGST)
                                     total_discount = float(
-                                        total_discount) + float(a['DiscountAmount'])
+                                        total_discount) + float(a.DiscountAmount)
 
                                     InvoiceItemDetails.append({
-                                        "product_name": a['Item']['Name'],
-                                        "product_description": a['Item']['Name'],
-                                        "hsn_code": a['GST']['HSNCode'],
-                                        "quantity": a['Quantity'],
-                                        "unit_of_product": a['Unit']['UnitID']['EwayBillUnit'],
-                                        "cgst_rate": a['SGSTPercentage'],
-                                        "sgst_rate": a['SGSTPercentage'],
-                                        "igst_rate": a['IGSTPercentage'],
+                                        "product_name": a.ItemName,
+                                        "product_description": a.ItemName,
+                                        "hsn_code": a.HSNCode,
+                                        "quantity": float(a.Quantity),
+                                        "unit_of_product": a.EwayBillUnit,
+                                        "cgst_rate": float(a.SGSTPercentage),
+                                        "sgst_rate": float(a.SGSTPercentage),
+                                        "igst_rate": float(a.IGSTPercentage),
                                         "cess_rate": 0,
                                         "cessNonAdvol": 0,
-                                        "taxable_amount": a['BasicAmount'],
+                                        "taxable_amount": float(a.BasicAmount),
                                     })
 
                                 
@@ -412,34 +651,34 @@ class Uploaded_EwayBill(CreateAPIView):
                                 InvoiceData.append({
 
                                     'access_token': access_token,
-                                    'userGstin': Invoice['Party']['GSTIN'],
+                                    'userGstin': Invoice.PartyGSTIN,
                                     'supply_type': "outward",
                                     'sub_supply_type': "Supply",
                                     'sub_supply_description': " ",
                                     'document_type': "TaxInvoice",
-                                    'document_number': Invoice['id'],
-                                    'document_date': Invoice['InvoiceDate'],
-                                    'gstin_of_consignor': Invoice['Party']['GSTIN'],
-                                    'legal_name_cosignor': Invoice['Party']['Name'],
-                                    'address1_of_consignor': selleraddress,
+                                    'document_number': Invoice.id,
+                                    'document_date': str(Invoice.InvoiceDate),
+                                    'gstin_of_consignor': Invoice.PartyGSTIN,
+                                    'legal_name_cosignor': Invoice.PartyName,
+                                    'address1_of_consignor': Invoice.selleraddress,
                                     'address2_of_consignor': '',
                                     'pincode_of_consignor': sellerpin,
-                                    'state_of_consignor': Invoice['Party']['State']['Name'],
-                                    'actual_from_state_name': Invoice['Party']['State']['Name'],
-                                    'gstin_of_consignee': Invoice['Customer']['GSTIN'],
-                                    'legal_name_of_consignee': Invoice['Customer']['Name'],
-                                    'address1_of_consignee': buyeraddress,
+                                    'state_of_consignor': Invoice.PartyState,
+                                    'actual_from_state_name': Invoice.PartyState,
+                                    'gstin_of_consignee': Invoice.CustomerGSTIN,
+                                    'legal_name_of_consignee': Invoice.CustomerName,
+                                    'address1_of_consignee': Invoice.buyeraddress,
                                     'address2_of_consignee': "",
-                                    'place_of_consignee': Invoice['Customer']['City']['Name'],
+                                    'place_of_consignee': Invoice.CustomerCity,
                                     'pincode_of_consignee': buyerpin,
-                                    'state_of_supply': Invoice['Customer']['State']['Name'],
-                                    'actual_to_state_name': Invoice['Customer']['State']['Name'],
+                                    'state_of_supply': Invoice.CustomerState,
+                                    'actual_to_state_name': Invoice.CustomerState,
                                     'other_value': '0',
-                                    'total_invoice_value': Invoice['GrandTotal'],
-                                    'taxable_amount': Total_assessable_value,
-                                    'cgst_amount': total_cgst_value,
-                                    'sgst_amount': total_sgst_value,
-                                    'igst_amount': total_igst_value,
+                                    'total_invoice_value': float(Invoice.GrandTotal),
+                                    'taxable_amount': float(Total_assessable_value),
+                                    'cgst_amount': float(total_cgst_value),
+                                    'sgst_amount': float(total_sgst_value),
+                                    'igst_amount': float(total_igst_value),
                                     'cess_amount': '0',
                                     'cess_nonadvol_value': '0',
                                     'transporter_id': "",
@@ -447,67 +686,76 @@ class Uploaded_EwayBill(CreateAPIView):
                                     'transporter_document_date': "",
                                     'transportation_mode': "road",
                                     'transportation_distance': distance_dict['results']['distance'],
-                                    'vehicle_number': Invoice['Vehicle']['VehicleNumber'],
+                                    'vehicle_number': Invoice.VehicleNumber,
                                     'transporter_name': "",
                                     'vehicle_type': "Regular",
                                     'data_source': "erp",
                                     'user_ref': "1232435466sdsf234",
                                     'eway_bill_status': "Y",
                                     'auto_print': "Y",
-                                    'email' : Invoice['Party']['Email'],
-                                    'itemList': InvoiceItemDetails
+                                    'email' : Invoice.PartyEmail,
+                                    'itemList': InvoiceItemDetails,
                                 })
-                                # CustomPrint('ddddddddddddd')
+                                # print(InvoiceData[0])
                                 E_Way_Bill_URL = 'https://pro.mastersindia.co/ewayBillsGenerate'
                                 
+                               
                                 payload = json.dumps(InvoiceData[0])
                                 
                                 headers = {
                                     'Content-Type': 'application/json',
                                 }
-                                # CustomPrint(payload)
+                                
                             
                                 response = requests.request(
                                     "POST", E_Way_Bill_URL, headers=headers, data=payload)
 
                                 data_dict = json.loads(response.text)
-                                # CustomPrint('ffffffffffffff')
-                                # CustomPrint(data_dict)
+                                
                                 if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                                     # CustomPrint('ggggggg')
-                                    Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                                    if int(Mode) ==1 :
+                                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                                    else:
+                                        Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)
                                     
                                     if(Query.count() > 0):
-                                        
-                                        StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
-                                        log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,'E-WayBill Upload Successfully',363,0 )
+                                        if int(Mode)==1:
+                                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                        else:
+                                            StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                        log_entry = create_transaction_logNew(request,payload,0,'E-WayBill Upload Successfully',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                     else:
-                                        InvoiceID=T_Invoices.objects.get(id=id)
-                                        Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
-                                        log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
+                                        if int(Mode) == 1:
+                                            InvoiceID=T_Invoices.objects.get(id=id)
+                                            Statusinsert=TC_InvoiceUploads.objects.create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
+                                        else:
+                                            InvoiceID=T_SPOSInvoices.objects.using('sweetpos_db').get(id=id)
+                                            Statusinsert=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').create(Invoice=InvoiceID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                        log_entry = create_transaction_logNew(request,payload,0,f'E-WayBill Upload Successfully  of InvoiceID: {InvoiceID}',363,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': InvoiceData[0] })
                                 else:
                                     # CustomPrint('hhhhhhh')
-                                    log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results'], 363,0)
+                                    log_entry = create_transaction_logNew(request, payload,0, data_dict['results'], 363,0)
                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                             else:
-                                log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, distance_dict['results'], 363,0)
+                                log_entry = create_transaction_logNew(request, payload,0, distance_dict['results'], 363,0)
                                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
                             
                     else:
-                        log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0, aa[1],363,0) 
+                        log_entry = create_transaction_logNew(request,payload,0, aa[1],363,0) 
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
 
 
 class Cancel_EwayBill(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0,userID=0):
+    def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
 
@@ -518,7 +766,10 @@ class Cancel_EwayBill(CreateAPIView):
                 invoicedetaillist=list()
                 if(aa[0] == '1'):
                     access_token=aa[1]
-                    InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","EwayBillNo")
+                    if int(Mode) == 1:
+                        InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","EwayBillNo")
+                    else:
+                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).values("user_gstin","EwayBillNo")    
                   
                     invoicedetaillist.append({
                             "access_token" : access_token,
@@ -542,11 +793,16 @@ class Cancel_EwayBill(CreateAPIView):
                     data_dict = json.loads(response.text)
                   
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                        Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        if int(Mode) == 1:
+                            Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
+                        else:
+                            Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)
                         
                         if(Query.count() > 0):
-                            
-                            StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())
+                            if int(Mode)==1:
+                                StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())
+                            else:
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())    
                             log_entry = create_transaction_logNew(request,0,0,'E-WayBill Cancel Successfully',364,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Cancel Successfully', 'Data': [] })
                         else:
@@ -560,7 +816,7 @@ class Cancel_EwayBill(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Cancel:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class Cancel_EInvoice(CreateAPIView):
@@ -581,7 +837,7 @@ class Cancel_EInvoice(CreateAPIView):
                     if int(Mode) == 1:
                         InvoiceUploadsData=TC_InvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
                     else:
-                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).values("user_gstin","Irn")
+                        InvoiceUploadsData=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).values("user_gstin","Irn")
                     invoicedetaillist.append({
                             "access_token" : access_token,
                             "user_gstin" : InvoiceUploadsData[0]["user_gstin"],
@@ -606,13 +862,13 @@ class Cancel_EInvoice(CreateAPIView):
                         if int(Mode) == 0:
                             Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                         else:
-                            Query=TC_SPOSInvoiceUploads.objects.filter(Invoice_id=id)    
+                            Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)    
                         
                         if(Query.count() > 0):
                             if int(Mode) == 0:
                                 StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             else:
-                                StatusUpdates=TC_SPOSInvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
+                                StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             
                             log_entry = create_transaction_logNew(request,0,0,'E-Invoice Cancel Successfully',365,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Cancel Successfully', 'Data': [] })
