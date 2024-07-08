@@ -531,7 +531,8 @@ class Uploaded_EwayBill(CreateAPIView):
                         if int(Mode) == 1:
                             InvoiceQuery=T_Invoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
        C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
-       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail ,
+       SPOSIn.FullInvoiceNumber
 FROM FoodERP.T_Invoices SPOSIn
 join FoodERP.M_Parties P on P.id=SPOSIn.Party_id
 join FoodERP.M_Parties C on C.id=SPOSIn.Customer_id
@@ -546,7 +547,8 @@ where SPOSIn.id= {id}''')
 
                             InvoiceQuery=T_SPOSInvoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
        C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
-       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,SPOSIn.Vehicle VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail ,
+       SPOSIn.FullInvoiceNumber                                                             
 FROM SweetPOS.T_SPOSInvoices SPOSIn
 join FoodERP.M_Parties P on P.id=SPOSIn.Party
 join FoodERP.M_Parties C on C.id=SPOSIn.Customer
@@ -555,6 +557,7 @@ left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
 left join FoodERP.M_States PS on PS.id=P.State_id
 left join FoodERP.M_States CS on CS.id=C.State_id
 left join FoodERP.M_Cities CC on CC.id=C.City_id
+left join FoodERP.M_Vehicles vehic on SPOSIn.Vehicle=vehic.id 
 where SPOSIn.id= {id}''')
                        
                         # InvoiceUploadSerializer = InvoicegovUploadSerializer(
@@ -605,7 +608,7 @@ join FoodERP.M_Units units on units.id=itemunit.UnitID_id
 join FoodERP.M_GSTHSNCode gsthsn on gsthsn.id=SPOSItems.GST_id
 where Invoice_id={Invoice.id}''')
                                 else :     
-                                    Itemquery=TC_SPOSInvoiceItems.objects.row(f'''SELECT item.id,item.Name ItemName,SPOSItems.HSNCode,SPOSItems.Quantity,units.EwayBillUnit,SPOSItems.SGSTPercentage,SPOSItems.CGSTPercentage,
+                                    Itemquery=TC_SPOSInvoiceItems.objects.raw(f'''SELECT item.id,item.Name ItemName,SPOSItems.HSNCode,SPOSItems.Quantity,units.EwayBillUnit,SPOSItems.SGSTPercentage,SPOSItems.CGSTPercentage,
 SPOSItems.IGSTPercentage,
 SPOSItems.BasicAmount, SPOSItems.CGST,SPOSItems.SGST,SPOSItems.IGST,SPOSItems.Amount,SPOSItems.DiscountAmount
 FROM SweetPOS.T_SPOSInvoices SPOSIn
@@ -655,7 +658,7 @@ where Invoice_id={Invoice.id}''')
                                     'sub_supply_type': "Supply",
                                     'sub_supply_description': " ",
                                     'document_type': "TaxInvoice",
-                                    'document_number': Invoice.id,
+                                    'document_number': Invoice.FullInvoiceNumber,
                                     'document_date': str(Invoice.InvoiceDate),
                                     'gstin_of_consignor': Invoice.PartyGSTIN,
                                     'legal_name_cosignor': Invoice.PartyName,
