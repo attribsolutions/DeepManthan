@@ -3,6 +3,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
+from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
 
 from ..models import  *
 
@@ -18,7 +19,7 @@ class SPOSCashierSummaryList(CreateAPIView):
                 FromDate = POSCashierdata['FromDate']
                 ToDate = POSCashierdata['ToDate']
                 Party = POSCashierdata['Party']
-             
+
                 WhereClause=""
                 if Party:
                     WhereClause= f'''AND SPOSIn.Party={Party}'''
@@ -44,11 +45,12 @@ class SPOSCashierSummaryList(CreateAPIView):
                             "Amount":row.Amount                           
                             
                         })
-                    
+
+                    log_entry = create_transaction_logNew( request, POSCashierdata, Party, '', 386, 0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CashierDetails})
-                            
+                log_entry = create_transaction_logNew( request, POSCashierdata, Party, 'Data Not Found', 386, 0,FromDate,ToDate,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
-            # log_entry = create_transaction_logNew( request, Orderdata, 0, 'StockProcessing:'+str(e), 33, 0)
+            log_entry = create_transaction_logNew( request, POSCashierdata, 0, 'SPOSCashierSummary:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
