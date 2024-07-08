@@ -27,7 +27,7 @@ class SPOSStockProcessingView(CreateAPIView):
                 current_date = start_date
                 while current_date <= end_date:
                     Date = current_date.strftime("%Y-%m-%d")
-                    print(Date)
+                    # print(Date)
                     
                     StockDeleteQuery = O_SPOSDateWiseLiveStock.objects.filter(
                         Party=Party, StockDate=Date)
@@ -106,7 +106,7 @@ on I.Item_id=ActualStock.Item
                  
                     # serializer = StockProcessingReportSerializer(StockProcessQuery, many=True).data
                     # CustomPrint(serializer)
-                    print(StockProcessQuery)
+                    # print(StockProcessQuery)
                     for a in StockProcessQuery:
                        
                         if(a.OpeningBalance!=0 or a.GRN!=0 or a.Sale!=0 or a.PurchaseReturn != 0 or a.SalesReturn !=0 or a.StockAdjustment!=0):

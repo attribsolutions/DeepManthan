@@ -55,7 +55,7 @@ class T_SPOSInvoices(models.Model):
     InvoiceDate = models.DateField()
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=60, decimal_places=20)     
+    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)     
     RoundOffAmount = models.DecimalField(max_digits=30, decimal_places=10)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=False)
