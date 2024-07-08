@@ -30,7 +30,7 @@ urlpatterns = [
 
     #User
     url(r'SPOSUsers$', SweetPOSUsersView.as_view()),
-    url(r'SPOSUsers/([0-9]+)$', SweetPOSUsersSecondView.as_view()),    
+    url(r'SPOSUsers/(?P<Division_id>\d+)/$', SweetPOSUsersSecondView.as_view()),    
     url(r'sposroleslist$', SweetPOSRolesView.as_view()),
     url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view()),
     url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?/$',SPOSInvoiceViewSecond.as_view()),
