@@ -23,11 +23,6 @@ class SPOSCashierSummaryList(CreateAPIView):
                 WhereClause=""
                 if Party:
                     WhereClause= f'''AND SPOSIn.Party={Party}'''
-                    # for log
-                    if WhereClause :
-                        x = Party
-                    else:
-                        x = 0
                 
                 CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id , SPOSIn.InvoiceDate,
                 SPOSUser.LoginName CashierName ,
@@ -51,9 +46,9 @@ class SPOSCashierSummaryList(CreateAPIView):
                             
                         })
 
-                    log_entry = create_transaction_logNew( request, POSCashierdata, x, '', 386, 0,FromDate,ToDate,0)
+                    log_entry = create_transaction_logNew( request, POSCashierdata, Party, '', 386, 0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CashierDetails})
-                log_entry = create_transaction_logNew( request, POSCashierdata, x, 'Data Not Found', 386, 0,FromDate,ToDate,0)           
+                log_entry = create_transaction_logNew( request, POSCashierdata, Party, 'Data Not Found', 386, 0,FromDate,ToDate,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
