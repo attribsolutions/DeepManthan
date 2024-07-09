@@ -861,13 +861,13 @@ class Cancel_EInvoice(CreateAPIView):
                     data_dict = json.loads(response.text)
                     
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
-                        if int(Mode) == 0:
+                        if int(Mode) == 1:
                             Query=TC_InvoiceUploads.objects.filter(Invoice_id=id)
                         else:
                             Query=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice_id=id)    
                         
                         if(Query.count() > 0):
-                            if int(Mode) == 0:
+                            if int(Mode) == 1:
                                 StatusUpdates=TC_InvoiceUploads.objects.filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
                             else:
                                 StatusUpdates=TC_SPOSInvoiceUploads.objects.using('sweetpos_db').filter(Invoice=id).update(EInvoiceIsCancel=1,EInvoiceCanceledBy=userID,EInvoiceCanceledOn=datetime.now())
