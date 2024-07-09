@@ -272,18 +272,19 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     }
                 if Customer:
                     filter_args['Customer'] = Customer
-                Invoices_query = T_Invoices.objects.filter(**filter_args).select_related('Party', 'Customer', 'Driver').annotate(
+                Invoices_query = T_Invoices.objects.filter(**filter_args).select_related('Party', 'Customer', 'Driver','Vehicle').annotate(
                     CustomerGSTIN=F('Customer__GSTIN'),
                     CustomerPAN=F('Customer__PAN'),
                     CustomerPartyType=F('Customer__PartyType'),
                     PartyName=F('Party__Name'),
                     CustomerName=F('Customer__Name'),
                     DriverName=F('Driver__Name'),
+                    VehicleNo=F('Vehicle__VehicleNumber'),
                     MobileNo=Value(0, output_field=IntegerField())
                 ).values(
                     'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
-                    'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName',
+                    'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
 
                 SPOS_filter_args = {
@@ -306,6 +307,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     parties = M_Parties.objects.filter(id=Party).values('Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     CPartyName = M_Parties.objects.filter(id=b['CreatedBy']).values('Name')
+                    vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
                     party = Party
                     customer = customers[0]['id']
                     b['PartyName'] = parties[0]['Name']
@@ -317,6 +319,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
                     b['CreatedBy'] = CPartyName[0]['Name']
                     b['Identify_id'] = 2
+                    b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b)
                 combined_invoices = []
                 for aa in Invoices_query:
@@ -364,7 +367,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "RoundOffAmount": a['RoundOffAmount'],
                                 "LoadingSheetCreated": LoadingSheetCreated,
                                 "DriverName": a['DriverName'],
-                                "VehicleNo": a['Vehicle_id'],
+                                "VehicleID":a['Vehicle_id'],
+                                "VehicleNo": a['VehicleNo'],
                                 "CreatedBy": a['CreatedBy'],
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
