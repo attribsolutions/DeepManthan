@@ -110,8 +110,7 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
     #             UnitID_List.append(str(unit['id']))  
     # ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ).exclude(
     # id__in=UnitID_List).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
-    # CustomPrint(ItemUnitquery.query)
-    
+    # CustomPrint(ItemUnitquery.query)   
     
     
     # CustomPrint(ItemID)
@@ -138,8 +137,7 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
             if query2:
                 rate_without_gst = query2[0].RatewithoutGST
                 if rate_without_gst is not None:
-                    Rate = round(float(rate_without_gst), 2)
-                    print(Rate,"Sheru")
+                    Rate = round(float(rate_without_gst), 2)                    
                 else:
                     Rate=0.0
             else:
