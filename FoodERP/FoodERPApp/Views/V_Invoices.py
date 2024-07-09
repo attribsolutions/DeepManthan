@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.http import Http404 
 from SweetPOS.models import *
-from django.db.models import F
+from django.db.models import F, Value, IntegerField
 from SweetPOS.models import *
 
 class OrderDetailsForInvoice(CreateAPIView):
@@ -279,12 +279,12 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     PartyName=F('Party__Name'),
                     CustomerName=F('Customer__Name'),
                     DriverName=F('Driver__Name'),
+                    MobileNo=Value(0, output_field=IntegerField())
                 ).values(
                     'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
-                    'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
+                    'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName',
-                    'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName'
-                ).order_by('-InvoiceDate')
+                    'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
 
                 SPOS_filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
@@ -298,13 +298,14 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         Vehicle_id=F('Vehicle')).values(
                     'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                    'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP'
+                    'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP','MobileNo'
                 )
     
                 Spos_Invoices = []
                 for b in SposInvoices_query:
                     parties = M_Parties.objects.filter(id=Party).values('Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
+                    CPartyName = M_Parties.objects.filter(id=b['CreatedBy']).values('Name')
                     party = Party
                     customer = customers[0]['id']
                     b['PartyName'] = parties[0]['Name']
@@ -314,12 +315,14 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerGSTIN'] = customers[0]['GSTIN'] 
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
+                    b['CreatedBy'] = CPartyName[0]['Name']
                     b['Identify_id'] = 2
                     Spos_Invoices.append(b)
                 combined_invoices = []
-                for invoice in Invoices_query:
-                        invoice['Identify_id'] = 1 
-                        combined_invoices.append(invoice)
+                for aa in Invoices_query:
+                        aa['CreatedBy'] = 0
+                        aa['Identify_id'] = 1 
+                        combined_invoices.append(aa)
                 combined_invoices.extend(Spos_Invoices)
                         
                 InvoiceListData = list()
@@ -362,6 +365,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "LoadingSheetCreated": LoadingSheetCreated,
                                 "DriverName": a['DriverName'],
                                 "VehicleNo": a['Vehicle_id'],
+                                "CreatedBy": a['CreatedBy'],
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
                                 "CustomerPartyType": a['CustomerPartyType'],
@@ -369,7 +373,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "CustomerPAN": a['CustomerPAN'],
                                 "IsTCSParty": IsTCSParty,
                                 "ImportFromExcel": a['ImportFromExcel'],
-                                "DataRecovery": a['DataRecovery']
+                                "DataRecovery": a['DataRecovery'],
+                                "MobileNo":a['MobileNo']
                                 
                             })
                 if InvoiceListData:

@@ -27,7 +27,7 @@ class SPOSStockProcessingView(CreateAPIView):
                 current_date = start_date
                 while current_date <= end_date:
                     Date = current_date.strftime("%Y-%m-%d")
-                    print(Date)
+                    # print(Date)
                     
                     StockDeleteQuery = O_SPOSDateWiseLiveStock.objects.filter(
                         Party=Party, StockDate=Date)
@@ -75,7 +75,7 @@ WHERE InvoiceDate = %s AND Party_id = %s GROUP BY Item_id
 union
 SELECT 2 as id, Item Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
 FROM SweetPOS.T_SPOSInvoices T_Invoices JOIN SweetPOS.TC_SPOSInvoiceItems TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
-WHERE  InvoiceDate = %s AND Party =%s GROUP BY Item)Invoice
+WHERE  T_Invoices.InvoiceDate = %s AND T_Invoices.Party =%s GROUP BY Item)Invoice
 
 on I.Item_id=Invoice.Item_id
 
@@ -100,8 +100,7 @@ left join (SELECT Item,sum(BaseUnitQuantity)ActualStock FROM SweetPOS.T_SPOSStoc
 on I.Item_id=ActualStock.Item
 
 )R
-''',
-                                                                        ([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+''',([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
 # where
 # OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0
                  
@@ -114,7 +113,7 @@ on I.Item_id=ActualStock.Item
                         
                             stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=0, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                             stock.save()
-                        else:
+                        if(a.ClosingBalance == 0) :
                             stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
                             stockout.save()    
                     

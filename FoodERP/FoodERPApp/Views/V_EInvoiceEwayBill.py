@@ -531,7 +531,8 @@ class Uploaded_EwayBill(CreateAPIView):
                         if int(Mode) == 1:
                             InvoiceQuery=T_Invoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
        C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
-       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail ,
+       SPOSIn.FullInvoiceNumber
 FROM FoodERP.T_Invoices SPOSIn
 join FoodERP.M_Parties P on P.id=SPOSIn.Party_id
 join FoodERP.M_Parties C on C.id=SPOSIn.Customer_id
@@ -546,7 +547,8 @@ where SPOSIn.id= {id}''')
 
                             InvoiceQuery=T_SPOSInvoices.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
        C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
-       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail 
+       SPOSIn.id,SPOSIn.InvoiceDate,SPOSIn.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail ,
+       SPOSIn.FullInvoiceNumber                                                             
 FROM SweetPOS.T_SPOSInvoices SPOSIn
 join FoodERP.M_Parties P on P.id=SPOSIn.Party
 join FoodERP.M_Parties C on C.id=SPOSIn.Customer
@@ -656,7 +658,7 @@ where Invoice_id={Invoice.id}''')
                                     'sub_supply_type': "Supply",
                                     'sub_supply_description': " ",
                                     'document_type': "TaxInvoice",
-                                    'document_number': Invoice.id,
+                                    'document_number': Invoice.FullInvoiceNumber,
                                     'document_date': str(Invoice.InvoiceDate),
                                     'gstin_of_consignor': Invoice.PartyGSTIN,
                                     'legal_name_cosignor': Invoice.PartyName,
