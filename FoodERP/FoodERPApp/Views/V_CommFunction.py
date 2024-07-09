@@ -142,6 +142,8 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
                     Rate=0.0
             else:
                 Rate = 0.0
+        else:
+            Rate=0.0
 
         q0 = MC_ItemUnits.objects.filter(
             Item=ItemID, UnitID=1, IsDeleted=0).values("BaseUnitQuantity")
