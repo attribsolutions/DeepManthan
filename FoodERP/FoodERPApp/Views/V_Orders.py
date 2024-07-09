@@ -660,7 +660,7 @@ class EditOrderView(CreateAPIView):
                 OrderType = request.data['OrderType']
                 DemandID = request.data['Demand']
                 
-                q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM')
+                q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM','PartyType__IsFranchises')
                 # print(q1)
                 # q2 = M_PartyType.objects.filter(
                 #     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
@@ -670,6 +670,14 @@ class EditOrderView(CreateAPIView):
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
                
+                if(q1[0]['PartyType__IsFranchises'] == 1):
+                    GroupTypeid = 5
+                    seq=(f'MC_ItemGroupDetails.ItemSequence')
+                else:    
+                    GroupTypeid = 1
+                    seq=(f'M_Items.Sequence')
+                    
+
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
                                                    
@@ -714,12 +722,12 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id={GroupTypeid}
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  ''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[RateParty],[PartyItem], [Party],[PartyItem], [OrderID]))
+Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}  ''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[RateParty],[PartyItem], [Party],[PartyItem], [OrderID]))
                     
                 else:
                     PartyItem = Party
@@ -757,11 +765,12 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id=1
+left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id={GroupTypeid}
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+
+Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
                 
                 # print(Itemquery)
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
