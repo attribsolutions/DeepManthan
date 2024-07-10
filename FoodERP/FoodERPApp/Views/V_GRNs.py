@@ -319,7 +319,11 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 OrderData = list()
                 OrderItemDetails = list()
                 if Mode == 1:
-                    OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
+                    OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID,P.PriceList_id PriceListId
+                    FROM T_Orders 
+                    join M_Parties on M_Parties.id=T_Orders.Supplier_id 
+                    JOIN M_Parties P ON P.id=T_Orders.Customer_id
+                    where T_Orders.id IN %s group by T_Orders.Supplier_id''',[Order_list])
                     if not OrderQuery:
                         log_entry = create_transaction_logNew(request, 0, 0,"Records Not Found",29,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
@@ -372,14 +376,16 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "Discount": b['Discount'],
                                     "DiscountAmount": b['DiscountAmount'],
                                     "UnitDetails":UnitDetails
+                                   
                                 })     
                         OrderData.append({
                             "Supplier": OrderSerializedata[0]['id'],
                             "SupplierName": OrderSerializedata[0]['SupplierName'],
                             "OrderAmount": OrderSerializedata[0]['OrderAmount'],
                             "Customer": OrderSerializedata[0]['CustomerID'],
+                            "PriceListId":OrderSerializedata[0]['PriceListId'],
                             "InvoiceNumber":" ",
-                            "OrderItem": OrderItemDetails,
+                            "OrderItem": OrderItemDetails                            
                         })
                         log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})

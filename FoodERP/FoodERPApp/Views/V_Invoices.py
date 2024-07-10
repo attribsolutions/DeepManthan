@@ -298,16 +298,17 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
                     'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
-                    'RoundOffAmount', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                    'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP','MobileNo'
+                    'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
+                    'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP','MobileNo','CreatedBy'
                 )
     
+                
                 Spos_Invoices = []
                 for b in SposInvoices_query:
                     parties = M_Parties.objects.filter(id=Party).values('Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
-                    CPartyName = M_Parties.objects.filter(id=b['CreatedBy']).values('Name')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
+                    CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName')
                     party = Party
                     customer = customers[0]['id']
                     b['PartyName'] = parties[0]['Name']
@@ -317,7 +318,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerGSTIN'] = customers[0]['GSTIN'] 
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
-                    b['CreatedBy'] = CPartyName[0]['Name']
+                    b['CreatedBy'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b)
