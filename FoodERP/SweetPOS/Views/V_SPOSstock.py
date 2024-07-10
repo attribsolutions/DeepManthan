@@ -100,51 +100,51 @@ class SPOSStockReportView(CreateAPIView):
                 UnitName = M_Units.objects.filter(id=Unit).values("Name")
                 unitname = UnitName[0]['Name']
                 StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,%s,0)OpeningBalance,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,%s,0)GRNInward,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,%s,0)Sale,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,%s,0)ClosingBalance,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,%s,0)OpeningBalance,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,%s,0)GRNInward,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,%s,0)Sale,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,%s,0)ClosingBalance,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
                         A.ItemName,
                         D.QuantityInBaseUnit,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn,
-                        fooderp20240624.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,%s,0)StockAdjustment
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn,
+                        FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,%s,0)StockAdjustment
                         ,GroupTypeName,GroupName,SubGroupName,%s UnitName
                         FROM( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
                             ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
-                        FROM fooderp20240624.O_DateWiseLiveStock X
-                JOIN fooderp20240624.M_Items ON M_Items.id= X.Item_id
-                join fooderp20240624.M_Units on M_Units.id= X.Unit_id
-                left join fooderp20240624.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-                left JOIN fooderp20240624.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                left JOIN fooderp20240624.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                left JOIN fooderp20240624.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                        FROM FoodERP.O_DateWiseLiveStock X
+                JOIN FoodERP.M_Items ON M_Items.id= X.Item_id
+                join FoodERP.M_Units on M_Units.id= X.Unit_id
+                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                  WHERE M_GroupType.id = 5 AND StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
 
-                left JOIN (SELECT Item_id, OpeningBalance FROM fooderp20240624.O_DateWiseLiveStock Y WHERE Y.StockDate = %s AND Y.Party_id=%s) B
+                left JOIN (SELECT Item_id, OpeningBalance FROM FoodERP.O_DateWiseLiveStock Y WHERE Y.StockDate = %s AND Y.Party_id=%s) B
                 ON A.Item_id = B.Item_id
 
-                left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM fooderp20240624.O_DateWiseLiveStock Z WHERE Z.StockDate = %s AND Z.Party_id=%s) C 
+                left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM FoodERP.O_DateWiseLiveStock Z WHERE Z.StockDate = %s AND Z.Party_id=%s) C 
                 ON A.Item_id = C.Item_id
 
                 LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit
-                FROM fooderp20240624.T_Stock
+                FROM FoodERP.T_Stock
                 WHERE Party_id =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item_id) D
                 ON A.Item_id = D.Item_id
         UNION    
                 SELECT 1 as id,A.Item_id,A.Unit,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,%s,0)OpeningBalance,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit,0,%s,0)GRNInward,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit,0,%s,0)Sale,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,%s,0)ClosingBalance,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit,0,%s,0)ActualStock,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,%s,0)OpeningBalance,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit,0,%s,0)GRNInward,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit,0,%s,0)Sale,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,%s,0)ClosingBalance,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit,0,%s,0)ActualStock,
                 A.ItemName,
                 D.QuantityInBaseUnit,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit,0,%s,0)PurchaseReturn,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,%s,0)SalesReturn,
-                fooderp20240624.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,%s,0)StockAdjustment
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit,0,%s,0)PurchaseReturn,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,%s,0)SalesReturn,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,%s,0)StockAdjustment
                 ,GroupTypeName,GroupName,SubGroupName,%s UnitName
                 FROM
 
@@ -152,12 +152,12 @@ class SPOSStockReportView(CreateAPIView):
                     ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
                         FROM O_SPOSDateWiseLiveStock
 
-                JOIN fooderp20240624.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
-                join fooderp20240624.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
-                left join fooderp20240624.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-                left JOIN fooderp20240624.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                left JOIN fooderp20240624.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                left JOIN fooderp20240624.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
+                join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
+                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                  WHERE M_GroupType.id = 5 AND StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
 
                 left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
