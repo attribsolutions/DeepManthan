@@ -28,18 +28,18 @@ class ItemSaleReportView(CreateAPIView):
                             
                 SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, A.FullInvoiceNumber, Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox, B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount, A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue   FROM SweetPOS.T_SPOSInvoices A 
                                 JOIN SweetPOS.TC_SPOSInvoiceItems B ON Invoice_id = A.id 
-                                JOIN fooderp.M_Parties Cust ON A.Customer = Cust.id 
-                                JOIN fooderp.M_Parties Sup ON A.Party = Sup.id 
-                                JOIN fooderp.M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id 
-                                JOIN fooderp.M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id 
-                                JOIN fooderp.M_Items ON B.Item = M_Items.id  
-                                left JOIN fooderp.MC_ItemGroupDetails C ON B.Item = C.Item_id AND GroupType_id = 1 
-                                JOIN fooderp.M_Group ON C.Group_id = M_Group.ID 
-                                JOIN fooderp.MC_SubGroup ON C.SubGroup_id = MC_SubGroup.id
-                                left JOIN fooderp.MC_PartySubParty D ON D.SubParty_id = Cust.id AND D.Party_id = Sup.id
-                                LEFT JOIN fooderp.M_Routes ON D.Route_id = M_Routes.id 
-                                LEFT JOIN fooderp.TC_GRNReferences ON TC_GRNReferences.Invoice_id = A.id 
-                                LEFT JOIN fooderp.T_GRNs ON GRN_id = T_GRNs.ID
+                                JOIN FoodERP.M_Parties Cust ON A.Customer = Cust.id 
+                                JOIN FoodERP.M_Parties Sup ON A.Party = Sup.id 
+                                JOIN FoodERP.M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id 
+                                JOIN FoodERP.M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id 
+                                JOIN FoodERP.M_Items ON B.Item = M_Items.id  
+                                left JOIN FoodERP.MC_ItemGroupDetails C ON B.Item = C.Item_id AND GroupType_id = 1 
+                                JOIN FoodERP.M_Group ON C.Group_id = M_Group.ID 
+                                JOIN FoodERP.MC_SubGroup ON C.SubGroup_id = MC_SubGroup.id
+                                left JOIN FoodERP.MC_PartySubParty D ON D.SubParty_id = Cust.id AND D.Party_id = Sup.id
+                                LEFT JOIN FoodERP.M_Routes ON D.Route_id = M_Routes.id 
+                                LEFT JOIN FoodERP.TC_GRNReferences ON TC_GRNReferences.Invoice_id = A.id 
+                                LEFT JOIN FoodERP.T_GRNs ON GRN_id = T_GRNs.ID
                                 WHERE A.InvoiceDate BETWEEN %s AND %s'''
                 parameters = [FromDate,ToDate]
                 if int(Party) > 0: 
