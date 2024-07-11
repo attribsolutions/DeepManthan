@@ -162,12 +162,7 @@ class GSTR3BDownloadView(CreateAPIView):
                                 FROM (SELECT SUM(TC_InvoiceItems.IGST) AS ITC_IntegratedTax, SUM(TC_InvoiceItems.CGST) AS ITC_CentralTax, SUM(TC_InvoiceItems.SGST) AS ITC_State_UTTax
                                     FROM T_Invoices
                                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
-                                    WHERE T_Invoices.Customer_id = %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s
-                                    UNION
-                                SELECT SUM(Y.IGST) AS ITC_IntegratedTax, SUM(Y.CGST) AS ITC_CentralTax, SUM(Y.SGST) AS ITC_State_UTTax
-                                FROM SweetPOS.T_SPOSInvoices X
-                                JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
-                                WHERE X.Customer = %s AND X.InvoiceDate BETWEEN %s AND %s) AS Total
+                                    WHERE T_Invoices.Customer_id = %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s) AS Total
                                 UNION
                                 SELECT 1 as id, '(B) ITC Reversed' AS Details, 0 AS IntegratedTax, 0 AS CentralTax, 0 AS State_UTTax, 0 AS Cess
                                 UNION
@@ -179,7 +174,7 @@ class GSTR3BDownloadView(CreateAPIView):
                                 UNION
                                 SELECT 1 as id, '(D) Ineligible ITC' AS Details, 0 AS IntegratedTax, 0 AS CentralTax, 0 AS State_UTTax, 0 AS Cess
                                 UNION
-                                SELECT 1 as id, '(1) As per section 17(5) of CGST/SGST Act' AS Details, 0 AS IntegratedTax, 0 AS CentralTax, 0 AS State_UTTax, 0 AS C''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                                SELECT 1 as id, '(1) As per section 17(5) of CGST/SGST Act' AS Details, 0 AS IntegratedTax, 0 AS CentralTax, 0 AS State_UTTax, 0 AS C''',([Party],[FromDate],[ToDate]))
                 EligibleITC = EligibleITCSerializer(EligibleITCquery, many=True).data
                 if not EligibleITC:
                     EligibleITC = [{
