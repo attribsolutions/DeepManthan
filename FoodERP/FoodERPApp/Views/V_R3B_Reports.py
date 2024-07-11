@@ -60,14 +60,6 @@ class GSTR3BDownloadView(CreateAPIView):
                 0 as IntegratedTax,
                 0 as CentralTax,
                 0 as State_UTTax,
-                0 as Cess
-            UNION 
-            SELECT 
-                '(b) Outward Taxable supplies (zero rated)' as NatureOfSupplies,
-                0 as TotalTaxableValue,
-                0 as IntegratedTax,
-                0 as CentralTax,
-                0 as State_UTTax,
                 0 as Cess                               
             UNION
             SELECT 
@@ -101,23 +93,7 @@ class GSTR3BDownloadView(CreateAPIView):
                 0 as CentralTax,
                 0 as State_UTTax,
                 0 as Cess
-            UNION 
-            SELECT 
-                '(d) Inward supplies (liable to reverse charge)' as NatureOfSupplies,
-                0 as TotalTaxableValue,
-                0 as IntegratedTax,
-                0 as CentralTax,
-                0 as State_UTTax,
-                0 as Cess
             UNION
-            SELECT 
-                '(e) Non-GST Outward supplies' as NatureOfSupplies,
-                0 as TotalTaxableValue,
-                0 as IntegratedTax,
-                0 as CentralTax,
-                0 as State_UTTax,
-                0 as Cess
-            UNION 
             SELECT 
                 '(e) Non-GST Outward supplies' as NatureOfSupplies,
                 0 as TotalTaxableValue,
