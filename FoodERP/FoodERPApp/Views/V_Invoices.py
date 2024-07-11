@@ -299,7 +299,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         Vehicle_id=F('Vehicle')).values(
                     'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                    'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'DeletedFromSAP','MobileNo','CreatedBy'
+                    'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
                 )
     
                 
@@ -315,6 +315,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerName'] = customers[0]['Name']
                     b['DriverName'] = 0
                     b['DataRecovery'] = 0
+                    b['ImportFromExcel'] = 0
+                    b['DeletedFromSAP'] = 0
                     b['CustomerGSTIN'] = customers[0]['GSTIN'] 
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
