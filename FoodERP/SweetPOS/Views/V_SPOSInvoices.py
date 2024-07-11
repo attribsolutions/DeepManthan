@@ -384,3 +384,19 @@ class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'UpdateCustomerVehiclePOSInvoice:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
+        
+class DeleteInvoiceView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        DeleteInvoicedatas = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                InvoiceIDs=list()
+                for DeleteInvoicedata in DeleteInvoicedatas:
+                    InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientSaleID=DeleteInvoicedata['ClientSaleID']).update(Description=DeleteInvoicedata['Description'],IsDeleted=DeleteInvoicedata['IsDeleted'],ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'])
+                    InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
+                # log_entry = create_transaction_logNew(request, {'POSDeletedInvoiceID':InvoiceIDs}, 0,'',67,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
+        except Exception as e:
+            # log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
