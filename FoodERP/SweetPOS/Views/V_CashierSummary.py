@@ -26,7 +26,8 @@ class SPOSCashierSummaryList(CreateAPIView):
                 
                 CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id , SPOSIn.InvoiceDate,
                 SPOSUser.LoginName CashierName ,
-                SUM(SPOSIn.GrandTotal)Amount,count(SPOSIn.id)InvoiceCount,count(SPOSIn.MobileNo)Mobilenocount
+                SUM(SPOSIn.GrandTotal)Amount,count(SPOSIn.id)InvoiceCount,
+                sum(case when MobileNo !=''  then 1 else 0 end)Mobile_Count
                 from SweetPOS.T_SPOSInvoices SPOSIn
                 JOIN SweetPOS.M_SweetPOSUser SPOSUser ON SPOSUser.id=SPOSIn.CreatedBy
                 WHERE SPOSIn.InvoiceDate BETWEEN %s AND %s {WhereClause} 
@@ -44,7 +45,7 @@ class SPOSCashierSummaryList(CreateAPIView):
                             "CashierName":row.CashierName,
                             "Amount":row.Amount, 
                             "InvoiceCount" : row.InvoiceCount,
-                            "MobilenoCount" :   row.Mobilenocount                        
+                            "MobilenoCount" :   row.Mobile_Count                        
                             
                         })
 
