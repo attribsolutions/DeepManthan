@@ -102,13 +102,13 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                             InvoiceItem['Party']=InvoiceItem['PartyID']
                             BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
-                            InvoiceItem['BaseUnitQuantity'] =  0
+                            InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
                             QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
-                            InvoiceItem['QtyInNo'] =  0
+                            InvoiceItem['QtyInNo'] =  float(QtyInNo)
                             QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
-                            InvoiceItem['QtyInKg'] = 0
+                            InvoiceItem['QtyInKg'] = float(QtyInKg)
                             QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
-                            InvoiceItem['QtyInBox'] = 0
+                            InvoiceItem['QtyInBox'] = float(QtyInBox)
                             
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
                             
