@@ -70,14 +70,14 @@ class SPOSInvoiceView(CreateAPIView):
                             # else:
                             ItemId=InvoiceItem['ERPItemID']
                             
-                            # if InvoiceItem['UnitID'] == 1:
-                            #     unit=2
-                            # else: 
-                            #     unit=1    
+                            if InvoiceItem['UnitID'] == 1:
+                                unit=2
+                            else: 
+                                unit=1    
                             
-                            # quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
+                            quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
-                            InvoiceItem['Unit'] = InvoiceItem['UnitID']
+                            InvoiceItem['Unit'] = quryforunit[0]['id']
                             
                             # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                             InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
@@ -101,13 +101,13 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['SaleID']=0
                             InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                             InvoiceItem['Party']=InvoiceItem['PartyID']
-                            # BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
+                            BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                             InvoiceItem['BaseUnitQuantity'] =  0
-                            # QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                            QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInNo'] =  0
-                            # QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
+                            QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInKg'] = 0
-                            # QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
+                            QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInBox'] = 0
                             
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
