@@ -42,12 +42,12 @@ class RoleAccessView(RetrieveAPIView):
         Division=PartyID
         # CustomPrint(request.session.get('UserName'))
       
-        if (int(PartyID) > 0)  : 
-            Division="M_RoleAccess.Division_id = "+PartyID
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id where Party_id= %s and M_Users.Employee_id=%s''',[PartyID,EmployeeID])
-        else:
-            Division="M_RoleAccess.Division_id is null "
-            Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id where Party_id IS NULL and M_Users.Employee_id=%s ''',[EmployeeID])
+        # if (int(PartyID) > 0)  : 
+        #     Division="M_RoleAccess.Division_id = "+PartyID
+        #     Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id where Party_id= %s and M_Users.Employee_id=%s''',[PartyID,EmployeeID])
+        # else:
+        #     Division="M_RoleAccess.Division_id is null "
+        #     Role=MC_UserRoles.objects.raw('''SELECT Role_id id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id where Party_id IS NULL and M_Users.Employee_id=%s ''',[EmployeeID])
            
         # return Response(str(Role.query))
         qq = M_RoleAccessSerializerforRole(Role, many=True).data
