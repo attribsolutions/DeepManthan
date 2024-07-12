@@ -78,7 +78,7 @@ class T_SPOSInvoices(models.Model):
     # ImportFromExcel= models.BooleanField(default=False)
     # DeletedFromSAP = models.BooleanField(default=False)
     UploadedOn = models.DateTimeField(auto_now=True)
-    Description = models.CharField(max_length=500)
+    Description = models.CharField(max_length=500,null=True,blank=True)
     IsDeleted = models.BooleanField(default=False)
     ReferenceInvoiceID = models.IntegerField(null=True)
     class Meta:
