@@ -100,14 +100,14 @@ class SPOSInvoiceView(CreateAPIView):
                                 InvoiceItem['SaleID']=0
                                 InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                                 InvoiceItem['Party']=InvoiceItem['PartyID']
-                                BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
-                                InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
-                                QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
-                                InvoiceItem['QtyInNo'] =  float(QtyInNo)
-                                QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
-                                InvoiceItem['QtyInKg'] =  float(QtyInKg)
-                                QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
-                                InvoiceItem['QtyInBox'] = float(QtyInBox)
+                                # BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
+                                InvoiceItem['BaseUnitQuantity'] =  0
+                                # QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInNo'] =  0
+                                # QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInKg'] = 0
+                                # QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInBox'] = 0
                                
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
                             
