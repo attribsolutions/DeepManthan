@@ -81,7 +81,7 @@ class SPOSInvoiceView(CreateAPIView):
                             
                             # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                             InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
-                            InvoiceItem['MRPValue'] = InvoiceItem['Rate']
+                            InvoiceItem['MRPValue'] = InvoiceItem['MRP']
                             InvoiceItem['TaxType'] = 'GST'
                             InvoiceItem['GSTPercentage'] = InvoiceItem['GSTRate']
                             InvoiceItem['GSTAmount'] = InvoiceItem['GSTAmount']
