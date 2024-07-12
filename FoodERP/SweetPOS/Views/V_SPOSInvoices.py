@@ -73,7 +73,7 @@ class SPOSInvoiceView(CreateAPIView):
                                     unit=2
                                 else: 
                                     unit=1    
-                                    
+                                
                                 quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                                 
                                 InvoiceItem['Unit'] = quryforunit[0]['id']
@@ -156,7 +156,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                             maxSaleID=row.MaxSaleID
 
                         log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
-                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":500})    
+                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
