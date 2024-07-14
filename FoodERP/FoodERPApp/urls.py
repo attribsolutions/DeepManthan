@@ -305,7 +305,7 @@ urlpatterns = [
             url(r'GeneralMasterBrandName$', GeneralMasterBrandName.as_view()),
 #Invoice All APIs
             url(r'Invoicegetandupdate/([0-9]+)$', InvoiceViewEditView.as_view()), # Single Invoice GET,PUT Method                     
-            url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?/$',InvoiceViewSecond.as_view()),
+            url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))$',InvoiceViewSecond.as_view()),
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
