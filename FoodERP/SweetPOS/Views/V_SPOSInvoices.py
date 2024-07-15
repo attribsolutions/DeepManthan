@@ -32,95 +32,96 @@ class SPOSInvoiceView(CreateAPIView):
                     
                     for Invoicedata in mulInvoicedata:                        
                         Party = Invoicedata['DivisionID']
-                        queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(Party=Invoicedata['DivisionID']).values('Party')
+                        # queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(Party=Invoicedata['DivisionID']).values('Party')
                         # CustomPrint(queryforParty)
-                        if not queryforParty:
-                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
-                        else:
-                            # ==========================Get Max Invoice Number=====================================================
+                        # queryforParty=1
+                        # if not queryforParty:
+                        #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
+                        # else:
+                        # ==========================Get Max Invoice Number=====================================================
+                        
+                        Invoicedata['TCSAmount']=0.0
+                        Invoicedata['InvoiceNumber'] = Invoicedata['BillNumber']
+                        Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
+                        Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
+                        Invoicedata['Customer'] = 43194
+                        Invoicedata['Party'] = Invoicedata['DivisionID']
+                        Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
+                        Invoicedata['RoundOffAmount'] =Invoicedata['RoundOffAmount']
+                        Invoicedata['Driver'] = 0
+                        # Invoicedata['Vehicle'] = ""
+                        Invoicedata['SaleID'] =0
+                        Invoicedata['MobileNo'] =Invoicedata['Mobile']
+                        
+                        
                             
-                            Invoicedata['TCSAmount']=0.0
-                            Invoicedata['InvoiceNumber'] = Invoicedata['BillNumber']
-                            Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
-                            Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
-                            Invoicedata['Customer'] = 43194
-                            Invoicedata['Party'] = queryforParty[0]['Party']
-                            Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
-                            Invoicedata['RoundOffAmount'] =Invoicedata['RoundOffAmount']
-                            Invoicedata['Driver'] = 0
-                            # Invoicedata['Vehicle'] = ""
-                            Invoicedata['SaleID'] =0
-                            Invoicedata['MobileNo'] =Invoicedata['Mobile']
+                        
+                        #================================================================================================== 
+                        InvoiceItems = Invoicedata['SaleItems']
+                        
+                        for InvoiceItem in InvoiceItems:
                             
+                            # queryforItem=M_Items.objects.filter(id=InvoiceItem['ERPItemID']).values('id')
+                            # queryforItem=1
+                                
+                            # if not queryforItem:
+                            #     ItemId= 0
+                            #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
+                            # else:
+                            ItemId=InvoiceItem['ERPItemID']
                             
-                             
+                            if InvoiceItem['UnitID'] == 1:
+                                unit=2
+                            else: 
+                                unit=1    
                             
-                            #================================================================================================== 
-                            InvoiceItems = Invoicedata['SaleItems']
+                            quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
-                            for InvoiceItem in InvoiceItems:
-                                
-                                queryforItem=M_Items.objects.filter(id=InvoiceItem['ERPItemID']).values('id')
-                                
-                                    
-                                if not queryforItem:
-                                    ItemId= 0
-                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
-                                else:
-                                    ItemId=queryforItem[0]['id']
-                                
-                                if InvoiceItem['UnitID'] == 1:
-                                    unit=2
-                                else: 
-                                    unit=1    
-                                    
-                                quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
-                                
-                                InvoiceItem['Unit'] = quryforunit[0]['id']
-                                
-                                # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
-                                InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
-                                InvoiceItem['MRPValue'] = InvoiceItem['Rate']
-                                InvoiceItem['TaxType'] = 'GST'
-                                InvoiceItem['GSTPercentage'] = InvoiceItem['GSTRate']
-                                InvoiceItem['GSTAmount'] = InvoiceItem['GSTAmount']
-                                InvoiceItem['DiscountType'] = InvoiceItem['DiscountType']
-                                InvoiceItem['Discount'] = InvoiceItem['DiscountValue']
-                                InvoiceItem['DiscountAmount'] = InvoiceItem['DiscountAmount']
-                                InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
-                                InvoiceItem['CGST'] = InvoiceItem['CGSTAmount']
-                                InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
-                                InvoiceItem['SGST'] = InvoiceItem['SGSTAmount']
-                                InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
-                                InvoiceItem['Item'] = ItemId
-                                InvoiceItem['IGST'] = InvoiceItem['IGSTAmount']
-                                InvoiceItem['BatchCode'] = '0'
-                                InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
-                                InvoiceItem['SaleItemID']=0
-                                InvoiceItem['SaleID']=0
-                                InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
-                                InvoiceItem['Party']=InvoiceItem['PartyID']
-                                BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
-                                InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
-                                QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
-                                InvoiceItem['QtyInNo'] =  float(QtyInNo)
-                                QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
-                                InvoiceItem['QtyInKg'] =  float(QtyInKg)
-                                QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
-                                InvoiceItem['QtyInBox'] = float(QtyInBox)
-                               
+                            InvoiceItem['Unit'] = quryforunit[0]['id']
+                            
+                            # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
+                            InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
+                            InvoiceItem['MRPValue'] = InvoiceItem['MRP']
+                            InvoiceItem['TaxType'] = 'GST'
+                            InvoiceItem['GSTPercentage'] = InvoiceItem['GSTRate']
+                            InvoiceItem['GSTAmount'] = InvoiceItem['GSTAmount']
+                            InvoiceItem['DiscountType'] = InvoiceItem['DiscountType']
+                            InvoiceItem['Discount'] = InvoiceItem['DiscountValue']
+                            InvoiceItem['DiscountAmount'] = InvoiceItem['DiscountAmount']
+                            InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
+                            InvoiceItem['CGST'] = InvoiceItem['CGSTAmount']
+                            InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
+                            InvoiceItem['SGST'] = InvoiceItem['SGSTAmount']
+                            InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
+                            InvoiceItem['Item'] = ItemId
+                            InvoiceItem['IGST'] = InvoiceItem['IGSTAmount']
+                            InvoiceItem['BatchCode'] = '0'
+                            InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
+                            InvoiceItem['SaleItemID']=0
+                            InvoiceItem['SaleID']=0
+                            InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
+                            InvoiceItem['Party']=InvoiceItem['PartyID']
+                            BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
+                            InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
+                            QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                            InvoiceItem['QtyInNo'] =  float(QtyInNo)
+                            QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
+                            InvoiceItem['QtyInKg'] = float(QtyInKg)
+                            QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
+                            InvoiceItem['QtyInBox'] = float(QtyInBox)
+                            
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
                             
-                            if Invoice_serializer.is_valid():
-                                Invoice = Invoice_serializer.save()
-                                
-                                LastInsertId = Invoice.id
-                                LastIDs.append(Invoice.id)
-                                
-                            else:
-                                log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
-                                transaction.set_rollback(True)
-                                return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
+                        if Invoice_serializer.is_valid():
+                            Invoice = Invoice_serializer.save()
+                            
+                            LastInsertId = Invoice.id
+                            LastIDs.append(Invoice.id)
+                            
+                        else:
+                            log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
+                            transaction.set_rollback(True)
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                             
                 log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
@@ -156,7 +157,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                             maxSaleID=row.MaxSaleID
 
                         log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
-                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":500})    
+                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
