@@ -19,27 +19,35 @@ class BOMListFilterView(CreateAPIView):
     @transaction.atomic()
     def post(self, request,id=0):
         BillOfMaterialdata = JSONParser().parse(request)
-        try:
+        try:            
             with transaction.atomic():
-                FromDate = BillOfMaterialdata['FromDate']
-                ToDate = BillOfMaterialdata['ToDate']
+                # FromDate = BillOfMaterialdata['FromDate']
+                # ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
                 Party = BillOfMaterialdata['Party']
-                d = date.today()   
-                if (str(FromDate) == str(d)):
-                    query = M_BillOfMaterial.objects.filter(Company_id=Company)                
+                Item=BillOfMaterialdata['ItemID']
+                # Item=""
+                # d = date.today()   
+                if (Item==''):
+                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName  
+                                                         From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
+                                                         where IsDelete=0 and Company_id={Company}''')  
                 else: 
-                    query = M_BillOfMaterial.objects.filter(BomDate__range=[FromDate,ToDate],Company_id=Company)  
-                    
+                    # query = M_BillOfMaterial.objects.filter(Item_id=Item,Company_id=Company)  
+                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby where Item_id={Item} and Company_id={Company}''')                   
+                  
+                
                 # return JsonResponse({'query': str(query.query)})
                 if query:
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
                     BomListData = list()
-                    # CustomPrint(Bom_serializer)
+                    # return JsonResponse({'Date': Bom_serializer})
+                    CustomPrint(Bom_serializer)
+                
                     for a in Bom_serializer:
-                        # CustomPrint(a)
-                        Item = a['Item']['id']
                         
+                        Item = a['Item']['id']
+                       
                         Stock=float(GetO_BatchWiseLiveStock(a['Item']['id'],Party))
                         StockintoSelectedUnit=UnitwiseQuantityConversion(Item,Stock,0,0,a['Unit']['id'],0,1).ConvertintoSelectedUnit()
                         BomListData.append({
@@ -58,7 +66,8 @@ class BOMListFilterView(CreateAPIView):
                         "CompanyName": a['Company']['Name'],
                         "CreatedOn" : a['CreatedOn'],
                         "CreatedBy": a['CreatedBy'],
-                        "IsRecordDeleted":a['IsDelete']
+                        "IsRecordDeleted":a['IsDelete'],
+                        "UserName":a['LoginName']  
                         
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
@@ -76,7 +85,7 @@ class M_BOMsView(CreateAPIView):
         BillOfMaterial = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                CustomPrint("Sush")
+                # CustomPrint("Sush")
                 ReferenceBOMID = BillOfMaterial['ReferenceBom']                
                 Boms_Serializer = M_BOMSerializer(data=BillOfMaterial) 
                 ItemID=BillOfMaterial['Item']                            
@@ -85,10 +94,10 @@ class M_BOMsView(CreateAPIView):
                     query = M_BillOfMaterial.objects.filter(Item_id=ItemID).update(IsDelete=1)
                 if Boms_Serializer.is_valid():
                     Boms_Serializer.save()
-                    CustomPrint(ReferenceBOMID)
+                    # CustomPrint(ReferenceBOMID)
                     
                     if(ReferenceBOMID > 0):
-                        CustomPrint("3")
+                        # CustomPrint("3")
                         query = M_BillOfMaterial.objects.filter(id=ReferenceBOMID).update(IsActive=0,IsDelete=1)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Save Successfully', 'Data': []})
                 else:
@@ -108,7 +117,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
                 if Query.exists():
-                    BOM_Serializer = M_BOMSerializerSecond(Query,many=True).data
+                    BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
@@ -179,8 +188,8 @@ class M_BOMsViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 checkitem = T_WorkOrder.objects.filter(Bom_id=id)
-                CustomPrint("shrut")
-                CustomPrint(checkitem)
+                # CustomPrint("shrut")
+                # CustomPrint(checkitem)
                 
                 if checkitem.exists():
                     return JsonResponse({'StatusCode': 100, 'Status': True, 'Message': 'Bill Of Material used in Work Order, Still You Want to Create New Bill Of Material..', 'Data': []})
@@ -211,3 +220,102 @@ class M_BOMsViewSecond(RetrieveAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Bill Of Material used in another table', 'Data': []})
+
+class BulkBOMView(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request,id=0):
+        BillOfMaterialdata = JSONParser().parse(request)
+        try:            
+            with transaction.atomic():
+                # FromDate = BillOfMaterialdata['FromDate']
+                # ToDate = BillOfMaterialdata['ToDate']
+                Company = BillOfMaterialdata['Company']
+                Party = BillOfMaterialdata['Party']
+                BOMid=BillOfMaterialdata['BOM_ID']
+                query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, 
+                M_BillOfMaterial.EstimatedOutputQty,M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, 
+                M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, 
+                M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
+                M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id,MC_BillOfMaterialItems.Quantity,
+                MC_BillOfMaterialItems.Item_id,
+                MC_BillOfMaterialItems.Unit_id,
+                M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName 
+                From M_BillOfMaterial 
+                JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
+                JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
+                where M_BillOfMaterial.id in({BOMid})and Company_id={Company}''')                   
+                # print(query)
+                
+                # return JsonResponse({'query': str(query.query)})
+                if query:
+                    # print("Shruti")
+                    BOM_Serializer = M_BOMSerializerSecond001(query,many=True).data
+                    BillofmaterialData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    for a in BOM_Serializer:
+                        MaterialDetails =list()
+                        ParentItem= a['Item']['id']
+                        Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                        # CustomPrint(query.query)
+                        if Parentquery.exists():
+                            ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                            ParentUnitDetails = list()
+                           
+                            for d in ParentUnitdata:
+                                ParentUnitDetails.append({
+                                   
+                                "Unit": d['id'],
+                                "UnitName": d['BaseUnitConversion'],
+                            })
+                        
+                        for b in a['BOMItems']:
+                            # CustomPrint(b)
+                            ChildItem= b['Item']['id']
+                            query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
+                            # CustomPrint(query.query)
+                            if query.exists():
+                                Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                UnitDetails = list()
+                               
+                                for c in Unitdata:
+                                    UnitDetails.append({
+                                    "Unit": c['id'],
+                                    "UnitName": c['BaseUnitConversion'],
+                                    
+                                })
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'], 
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "Quantity":b['Quantity'],                                
+                                "UnitDetails":UnitDetails
+                            })
+                            
+                        BillofmaterialData.append({
+                            "id": a['id'],
+                            "BomDate": a['BomDate'],
+                            "Comment": a['Comment'],
+                            "IsActive": a['IsActive'],
+                            "IsVDCItem": a['IsVDCItem'],
+                            "Company": a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
+                            "Item":a['Item']['id'],
+                            "ItemName":a['Item']['Name'],
+                            "EstimatedOutputQty": a['EstimatedOutputQty'],  
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['BaseUnitConversion'],
+                            "ParentUnitDetails":ParentUnitDetails,
+                            "BOMItems":MaterialDetails
+                        })
+                        print(BillofmaterialData)
+                        
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BillofmaterialData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

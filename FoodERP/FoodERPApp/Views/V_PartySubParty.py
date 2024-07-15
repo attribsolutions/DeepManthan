@@ -148,7 +148,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 elif(Type==2): #Supplier
                     Query = MC_PartySubParty.objects.filter(
                                     SubParty=id,
-                                    Party__PartyType__IsVendor=1,
+                                    
                                     Party__PartyAddress__IsDefault=1
                                     ).select_related('Party', 'Party__PartyType','Party__PartyAddress').annotate(
         PartyId=F('Party__id'),
@@ -168,7 +168,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                     else:
                         D = Q(Route=Route)
                     Query = MC_PartySubParty.objects.filter(D).filter(
-                                    Party=id,SubParty__PartyAddress__IsDefault=1).select_related('SubParty', 'SubParty__PartyType','SubParty__PartyAddress').annotate(
+                                    Party=id,SubParty__PartyAddress__IsDefault=1,SubParty__PartyType__IsDivision=0).select_related('SubParty', 'SubParty__PartyType','SubParty__PartyAddress').annotate(
         PartyId=F('SubParty__id'),
         PartyName=F('SubParty__Name'),
         GSTIN = F('SubParty__GSTIN'),

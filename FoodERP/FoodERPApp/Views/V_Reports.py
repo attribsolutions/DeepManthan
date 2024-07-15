@@ -269,7 +269,7 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
 
  LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
  LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
- JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+ left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
  LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
  LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
  LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
@@ -504,7 +504,7 @@ FROM
 	
 	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
         join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
-        left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+        left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
 		left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
 		left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 		left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
@@ -524,7 +524,6 @@ FROM
 		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
 		GROUP BY Item_id) D 		
 		ON A.Item_id = D.Item_id ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                # CustomPrint(StockreportQuery)
                 serializer = StockReportSerializer(
                     StockreportQuery, many=True).data
 
@@ -716,7 +715,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                                             JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_Invoices.Customer_id 
                                             LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
                                             LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
-                                            JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+                                            left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                                             LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                                             LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                             WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
@@ -753,10 +752,11 @@ class InvoiceDateExportReportView(CreateAPIView):
     JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
     JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_InvoiceItems.Item_id and M_GSTHSNCode.IsDeleted=0
     LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
-    JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
     LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
     LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
     WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
+                    
                     if Customer == 0:
                         if Employee == 0:
                             Invoicequery += " "
@@ -772,11 +772,12 @@ class InvoiceDateExportReportView(CreateAPIView):
                         else:
                             InvoiceQueryresults = T_Invoices.objects.raw(
                                 Invoicequery, [FromDate, ToDate, PartyIDs])
+                            
                     else:
 
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Customer])
                         
-                        
+                       
                 if InvoiceQueryresults:
 
                     InvoiceExportData = list()
@@ -875,7 +876,7 @@ JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id=T_DeletedInvoices.Customer AND MC_PartySubParty.Party_id=%s
 LEFT JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id
 LEFT JOIN TC_DeletedInvoiceUploads on TC_DeletedInvoiceUploads.Invoice= T_DeletedInvoices.id
-JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 
@@ -945,7 +946,7 @@ class ReturnReportDownloadView(CreateAPIView):
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
                 Party_list = Party.split(",")
-                query = T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, T_PurchaseReturn.ReturnDate,B.Name CustomerName,D.Name CustomerType,C_Companies.Name CompanyName, M_Group.Name Product,MC_SubGroup.Name SubProduct, M_Items.id AS ERPItemCode, M_Items.SAPItemCode, M_Items.Name MaterialName,TC_PurchaseReturnItems.Quantity ReturnQtyNos,TC_PurchaseReturnItems.MRPValue,TC_PurchaseReturnItems.Rate, TC_PurchaseReturnItems.BasicAmount,TC_PurchaseReturnItems.GSTPercentage, TC_PurchaseReturnItems.GSTAmount, TC_PurchaseReturnItems.Amount,TC_PurchaseReturnItems.Discount,TC_PurchaseReturnItems.DiscountAmount,TC_PurchaseReturnItems.DiscountType,TC_PurchaseReturnItems.BatchDate, TC_PurchaseReturnItems.BatchCode,M_GeneralMaster.Name ReasonForReturn,TC_PurchaseReturnItems.ApprovedQuantity ApprovedQuantityInNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,M_Routes.Name RouteName,A.Name SupplierName,C.Name SupplierType,T_PurchaseReturn.FullReturnNumber,ApprovedByCompany,FinalApprovalDate,ApprovedRate,ApprovedBasicAmount,ApprovedGSTPercentage,ApprovedCGST,ApprovedIGST,ApprovedSGST,ApprovedCGSTPercentage,ApprovedSGSTPercentage,ApprovedIGSTPercentage,ApprovedGSTAmount,ApprovedAmount,ApprovedDiscountAmount FROM TC_PurchaseReturnItems JOIN T_PurchaseReturn ON T_PurchaseReturn.id =TC_PurchaseReturnItems.PurchaseReturn_id JOIN M_Parties A ON A.id= T_PurchaseReturn.Party_id JOIN M_Parties B ON B.id = T_PurchaseReturn.Customer_id JOIN M_PartyType C  ON C.id= A.PartyType_id JOIN M_PartyType D ON D.id= B.PartyType_id Left JOIN MC_PartyAddress ON MC_PartyAddress.Party_id=B.id AND MC_PartyAddress.IsDefault=1 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = B.id  Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id JOIN M_Items ON M_Items.id = TC_PurchaseReturnItems.Item_id LEFT JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id JOIN M_GeneralMaster ON M_GeneralMaster.id = TC_PurchaseReturnItems.ItemReason_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE T_PurchaseReturn.ReturnDate BETWEEN %s AND %s AND  (T_PurchaseReturn.Party_id IN %s OR T_PurchaseReturn.Customer_id IN %s)  Order by T_PurchaseReturn.ReturnDate,T_PurchaseReturn.Customer_id  ''', ([
+                query = T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, T_PurchaseReturn.ReturnDate,B.Name CustomerName,D.Name CustomerType,C_Companies.Name CompanyName, M_Group.Name Product,MC_SubGroup.Name SubProduct, M_Items.id AS ERPItemCode, M_Items.SAPItemCode, M_Items.Name MaterialName,TC_PurchaseReturnItems.Quantity ReturnQtyNos,TC_PurchaseReturnItems.MRPValue,TC_PurchaseReturnItems.Rate, TC_PurchaseReturnItems.BasicAmount,TC_PurchaseReturnItems.GSTPercentage, TC_PurchaseReturnItems.GSTAmount, TC_PurchaseReturnItems.Amount,TC_PurchaseReturnItems.Discount,TC_PurchaseReturnItems.DiscountAmount,TC_PurchaseReturnItems.DiscountType,TC_PurchaseReturnItems.BatchDate, TC_PurchaseReturnItems.BatchCode,M_GeneralMaster.Name ReasonForReturn,TC_PurchaseReturnItems.ApprovedQuantity ApprovedQuantityInNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,M_Routes.Name RouteName,A.Name SupplierName,C.Name SupplierType,T_PurchaseReturn.FullReturnNumber,ApprovedByCompany,FinalApprovalDate,ApprovedRate,ApprovedBasicAmount,ApprovedGSTPercentage,ApprovedCGST,ApprovedIGST,ApprovedSGST,ApprovedCGSTPercentage,ApprovedSGSTPercentage,ApprovedIGSTPercentage,ApprovedGSTAmount,ApprovedAmount,ApprovedDiscountAmount FROM TC_PurchaseReturnItems JOIN T_PurchaseReturn ON T_PurchaseReturn.id =TC_PurchaseReturnItems.PurchaseReturn_id JOIN M_Parties A ON A.id= T_PurchaseReturn.Party_id JOIN M_Parties B ON B.id = T_PurchaseReturn.Customer_id JOIN M_PartyType C  ON C.id= A.PartyType_id JOIN M_PartyType D ON D.id= B.PartyType_id Left JOIN MC_PartyAddress ON MC_PartyAddress.Party_id=B.id AND MC_PartyAddress.IsDefault=1 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = B.id  Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id JOIN M_Items ON M_Items.id = TC_PurchaseReturnItems.Item_id LEFT JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1 LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id JOIN M_GeneralMaster ON M_GeneralMaster.id = TC_PurchaseReturnItems.ItemReason_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE T_PurchaseReturn.ReturnDate BETWEEN %s AND %s AND  (T_PurchaseReturn.Party_id IN %s OR T_PurchaseReturn.Customer_id IN %s)  Order by T_PurchaseReturn.ReturnDate,T_PurchaseReturn.Customer_id  ''', ([
                                                       FromDate, ToDate, Party_list,Party_list]))
                 # CustomPrint(query.query)
                 if query:
@@ -1381,13 +1382,10 @@ class ProductAndMarginReportView(CreateAPIView):
                 ItemID = data['Item'].split(",")
                 
 
-                if PriceListID == 0:
-                    PriceListID = str(PriceListID)  
-                else:
-                    try:
-                        PriceListID = int(PriceListID)
-                    except (ValueError, TypeError):
-                        PriceListID = 0
+                try:
+                    PriceListID = int(PriceListID)
+                except (ValueError, TypeError):
+                    PriceListID = 0
 
                 query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
@@ -1407,7 +1405,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
  """
-                # CustomPrint(query.query)
+                
                 q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
                 if q[0]['IsSCM'] == 1:
                     CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
@@ -1437,6 +1435,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     if IsSCM == '0':
                        
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
+                        
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
@@ -1457,7 +1456,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID])
                 
-                # print(ItemQuery.query)
+               
                 
                 ItemsList = list()
                 if ItemQuery:
@@ -1468,13 +1467,14 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                             
                             if PriceListID == 0:
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList order by Sequence''')
+                                
                             else:
                                
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName,CalculationPath FROM M_PriceList where id = %s order by Sequence''',[PriceListID])
                                 for i in pricelistquery:
                                     pp=(i.CalculationPath).split(',')
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
-                         
+                             
                         else:
                             if PriceListID == 0:
                                
@@ -1492,17 +1492,18 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                     
                                     pp=(i.CalculationPath).split(',')
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[pp])
-                        # CustomPrint(pricelistquery.query) 
+                         
 
                         ItemMargins = list()
                         RateList = list()
                         ItemImage = list()
 
                         for x in pricelistquery:
-
                             query2 = M_MarginMaster.objects.raw('''select 1 as id, GetTodaysDateMargin(%s,%s,%s,0,0)Margin,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 0)RatewithoutGST,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 1)RatewithGST,RateCalculationFunction1(0, %s, 0, %s, 0, %s, 0, 0)BaseUnitRatewithoutGST''', (
                                 row.id, today, x.id, row.id, x.id, row.id, x.id,row.id, row.BaseUnitID_id,x.id))
 
+                           
+                            
                             for a in query2:
                                 # string1 = x['Name']
                                 # string2 = x['ShortName'].replace(" ","")
@@ -1527,7 +1528,6 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id=%s '''
                                 b.ImageTypeName: str(b.Item_pic)
 
                             })
-
                         ItemsList.append({
 
                             "FE2ItemID": row.id,

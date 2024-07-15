@@ -55,24 +55,32 @@ class T_SPOSInvoices(models.Model):
     InvoiceDate = models.DateField()
     InvoiceNumber = models.IntegerField()
     FullInvoiceNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)
-    RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
+    GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)     
+    RoundOffAmount = models.DecimalField(max_digits=20, decimal_places=2)
     CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
+    CreatedOn = models.DateTimeField(auto_now_add=False)
     UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
+    UpdatedOn = models.DateTimeField(auto_now=False)
     Customer = models.IntegerField()
-    Driver = models.IntegerField()
+    Driver = models.IntegerField(null=True)
     Party = models.IntegerField()
-    Vehicle = models.IntegerField()
+    Vehicle = models.IntegerField(null=True)
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
     DiscountPercentage = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
-    
+    DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True) #Discount amount of all items
+    PaymentType = models.CharField(max_length=500)
+    TotalAmount = models.DecimalField(max_digits=20, decimal_places=2)  #All Items total without discount
+    NetAmount = models.DecimalField(max_digits=20, decimal_places=2)    #TotalAmount+(-DiscountAmount)
+    MobileNo  = models.CharField(max_length=15, blank=True, null=True)
+    CustomerGSTIN = models.CharField(max_length=20, blank=True, null=True)
     # Hide Flag is temporary 
     Hide = models.BooleanField(default=False)
-    ImportFromExcel= models.BooleanField(default=False)
-    DeletedFromSAP = models.BooleanField(default=False)
+    # ImportFromExcel= models.BooleanField(default=False)
+    # DeletedFromSAP = models.BooleanField(default=False)
+    UploadedOn = models.DateTimeField(auto_now=True)
+    Description = models.CharField(max_length=500)
+    IsDeleted = models.BooleanField(default=False)
+    ReferenceInvoiceID = models.IntegerField(null=True)
     class Meta:
         db_table = "T_SPOSInvoices"
 
@@ -89,11 +97,11 @@ class TC_SPOSInvoiceItems(models.Model):
     MRPValue =  models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     Rate = models.DecimalField(max_digits=20, decimal_places=2)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
-    TaxType = models.CharField(max_length=500)
+    TaxType = models.CharField(max_length=10)
     GSTPercentage = models.DecimalField(max_digits=20, decimal_places=2)
     GSTAmount = models.DecimalField(max_digits=20, decimal_places=2)
     Amount = models.DecimalField(max_digits=20, decimal_places=2)
-    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    DiscountType = models.CharField(max_length=10,blank=True, null=True)
     Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     CGST = models.DecimalField(max_digits=20, decimal_places=2)
@@ -114,6 +122,9 @@ class TC_SPOSInvoiceItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    HSNCode = models.CharField(max_length=20)
+    InvoiceDate = models.DateField()
+    Party = models.IntegerField()
 
     class Meta:
         db_table = "TC_SPOSInvoiceItems"    
@@ -205,3 +216,26 @@ class T_SPOSStockOut(models.Model):
     # IsDeleted = models.BooleanField(default=False)
     class Meta:
         db_table="T_SPOSStockOut"        
+
+class TC_SPOSInvoiceUploads(models.Model):
+    Invoice = models.ForeignKey(T_SPOSInvoices,related_name='SPOSInvoiceUploads', on_delete=models.CASCADE) 
+    AckNo =  models.CharField(max_length=500,null=True)  
+    Irn =  models.CharField(max_length=500,null=True)
+    QRCodeUrl =models.CharField(max_length=500,null=True)
+    EInvoicePdf = models.CharField(max_length=500,null=True)
+    EwayBillNo = models.CharField(max_length=500,null=True)
+    EwayBillUrl = models.CharField(max_length=500,null=True)
+    EInvoiceCreatedBy = models.IntegerField(null=True)
+    EInvoiceCreatedOn = models.DateTimeField(null=True)
+    EwayBillCreatedBy = models.IntegerField(null=True)
+    EwayBillCreatedOn = models.DateTimeField(null=True)
+    EInvoiceCanceledBy = models.IntegerField(null=True)
+    EInvoiceCanceledOn = models.DateTimeField(null=True)
+    EwayBillCanceledBy = models.IntegerField(null=True)
+    EwayBillCanceledOn = models.DateTimeField(null=True)
+    EInvoiceIsCancel = models.BooleanField(default=False)
+    EwayBillIsCancel = models.BooleanField(default=False)
+    user_gstin = models.CharField(max_length=500)  
+    
+    class Meta:
+        db_table="TC_SPOSInvoiceUploads"             

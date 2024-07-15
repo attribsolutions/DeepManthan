@@ -1,5 +1,7 @@
 from django.urls import re_path as url ,path
 
+from .Views.V_CashierSummary import SPOSCashierSummaryList
+
 from .Views.V_SPOSStockProcessing import *
 
 from .Views.V_SPOSInvoices import *
@@ -22,13 +24,18 @@ urlpatterns = [
     url(r'ItemList/([0-9]+)$', ItemListView.as_view()),
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
     url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
-    url(r'StockEntry$', StockView.as_view()), 
+    url(r'StockEntry$', StockView.as_view()),
+    url(r'SPOSStockReport$', SPOSStockReportView.as_view()), 
 
 
     #User
     url(r'SPOSUsers$', SweetPOSUsersView.as_view()),
-    url(r'SPOSUsers/([0-9]+)$', SweetPOSUsersSecondView.as_view()),    
+    url(r'SPOSUsers/(?P<Division_id>\d+)/$', SweetPOSUsersSecondView.as_view()),    
     url(r'sposroleslist$', SweetPOSRolesView.as_view()),
-    url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view())
+    url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view()),
+    url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?/$',SPOSInvoiceViewSecond.as_view()),
+    url(r'CashierSummary$',SPOSCashierSummaryList.as_view()),
+    url(r'UpdateCustomerVehiclePOSinvoice$',UpdateCustomerVehiclePOSInvoiceView.as_view()),
+    url(r'posDeletEInvoicE$',DeleteInvoiceView.as_view())
 
     ]

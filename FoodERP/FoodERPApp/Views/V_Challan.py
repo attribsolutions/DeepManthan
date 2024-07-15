@@ -135,7 +135,7 @@ class ChallanView(CreateAPIView):
                     if Challan_serializer.is_valid():
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Sales Order Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
                 # else:
    
@@ -229,11 +229,11 @@ class ChallanView(CreateAPIView):
                     UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = float(selectQuery[0]['BaseUnitQuantity'])+float(BaseUnitQuantity11))
                 Invoicedata = T_Challan.objects.get(id=id)
                 Invoicedata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Delete Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Sales Order Delete Successfully', 'Data':[]})
         except T_Challan.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'IB Sales Order Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'IB Sales Order used in another table', 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -250,7 +250,14 @@ class ChallanView(CreateAPIView):
                     BranchInvoiceData = list()
                     for a in BranchInvoiceSerializedata:
                         BranchInvoiceItemDetails = list()
+                        InvoiceItemDetails = list()                       
+                            
                         for b in a['ChallanItems']:
+                            aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                            if (aaaa == b['Unit']['UnitID']['Name']):
+                                bb=""
+                            else:
+                                bb=aaaa   
                             BranchInvoiceItemDetails.append({
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
@@ -260,7 +267,7 @@ class ChallanView(CreateAPIView):
                                 "Rate": b['Rate'],
                                 "TaxType": b['TaxType'],
                                 "Unit": b['Unit']['id'],
-                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "UnitName": bb,
                                 "BaseUnitQuantity": b['BaseUnitQuantity'],
                                 "PrimaryUnitName":b['Unit']['UnitID']['Name'],
                                 # "GSTPercentage": b['GSTPercentage'],

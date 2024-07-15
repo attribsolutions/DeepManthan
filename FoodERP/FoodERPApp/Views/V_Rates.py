@@ -23,9 +23,11 @@ class M_RatesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                Ratedata = M_RateMaster.objects.raw('''SELECT M_RateMaster.id,M_RateMaster.EffectiveDate,M_RateMaster.Company_id,
-                M_RateMaster.CreatedBy,M_RateMaster.CreatedOn,M_RateMaster.CommonID,C_Companies.Name CompanyName,M_Parties.Name PartyName,M_PriceList.Name PriceListName
+                Ratedata = M_RateMaster.objects.raw('''SELECT M_RateMaster.id,M_RateMaster.EffectiveDate,M_Parties.Name PartyName,
+                M_PriceList.Name PriceListName,GROUP_CONCAT(CONCAT(M_Items.Name, ' ','=', M_RateMaster.Rate)) AS RateItemList,M_RateMaster.Company_id,
+                M_RateMaster.CreatedBy,M_RateMaster.CreatedOn,M_RateMaster.CommonID,C_Companies.Name CompanyName
                 FROM M_RateMaster 
+                JOIN M_Items ON M_Items.Id=M_RateMaster.Item_Id
                 left join C_Companies on C_Companies.id = M_RateMaster.Company_id
                 left JOIN M_Parties ON M_Parties.id=M_RateMaster.Party_id
                 left JOIN M_PriceList ON M_PriceList.id=M_RateMaster.PriceList_id
@@ -50,20 +52,26 @@ class M_RatesView(CreateAPIView):
             with transaction.atomic():
                 M_Ratesdata = JSONParser().parse(request)
                 
+                MCUnitID = M_Ratesdata[0]['UnitID']
+                
+                query = MC_ItemUnits.objects.filter(id=MCUnitID).values('UnitID')                              
+                UnitID=query[0]['UnitID']
+                M_Ratesdata[0]['UnitID']=UnitID
+                
                 a=MaxValueMaster(M_RateMaster,'CommonID')
                 jsondata=a.GetMaxValue() 
-                CustomPrint(jsondata)
+                # CustomPrint(jsondata)
                 additionaldata= list()                
                 for b in M_Ratesdata:                    
                     
                     b.update({'CommonID': jsondata})                   
                     additionaldata.append(b) 
-                    CustomPrint(b)
+                    # CustomPrint(b)
                     ItemId=b['Item']
                     EffectiveDate=b['EffectiveDate']
                     PriceListID = b['PriceList']
                     PartyID = b['Party']                   
-                    CustomPrint(ItemId)
+                    # CustomPrint(ItemId)
                     Ratedata = M_RateMaster.objects.filter(Item_id=ItemId,EffectiveDate=EffectiveDate,PriceList_id=PriceListID,Party_id=PartyID).update(IsDeleted=1)    
                      
                 M_Rates_Serializer = M_RatesSerializer(data=additionaldata,many=True)
@@ -101,10 +109,11 @@ class GETRateDetails(CreateAPIView):
 			GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',2) AS MRates,
             GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',3) AS EffectiveDate,
             GetTodaysDateRate(M_Items.id, '{EffectiveDate}','{PartyID}','{PriceListID}',4) AS Unit,            
-			M_Items.Name ItemName ,M_Units.Name UnitName,BaseUnitID_id
+			M_Items.Name ItemName ,M_Units.Name UnitName,BaseUnitID_id,MC_ItemUnits.id UnitID
             FROM M_Items 
             JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id
-            where M_Items.Company_id={CompanyID} and isActive=1 ''')  
+            JOIN MC_ItemUnits on MC_ItemUnits.Item_id =M_Items.id
+            where M_Items.Company_id={CompanyID} and isActive=1 and IsBase=1 ''')  
                            
                 if not MRates:
                     
@@ -127,6 +136,7 @@ class GETRateDetails(CreateAPIView):
                             "UnitName" : a.UnitName,
                             "BaseUnitID" : a.BaseUnitID_id,
                             "Rate": "",
+                            "UnitID":a.UnitID
                            
                         })
                             

@@ -201,7 +201,7 @@ O_LiveBatches.MRPValue ,
                 
                 FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
@@ -259,7 +259,7 @@ order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
     {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
     FROM M_Items 
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
@@ -382,7 +382,21 @@ class StockEntryItemsView(CreateAPIView):
                 CompanyGroupID = Logindata['CompanyGroup']
                 IsSCMCompany = Logindata['IsSCMCompany']
                 
-                Itemquery = MC_PartyItems.objects.raw('''SELECT M_Items.id, M_Items.Name AS ItemName,
+                q1 = M_Parties.objects.filter(id=PartyID).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM','PartyType__IsFranchises')
+                if(q1[0]['PartyType__IsFranchises'] == 1):
+                    GroupTypeid = 5
+                    seq=(f'MC_ItemGroupDetails.ItemSequence')
+                else:    
+                    GroupTypeid = 1
+                    seq=(f'M_Items.Sequence')
+                
+                joinsforgroupsubgroup=(f'''left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
+
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
+                orderby=('''Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''')
+                
+                Itemquery = MC_PartyItems.objects.raw(f'''SELECT M_Items.id, M_Items.Name AS ItemName,
                                                             ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, 0), 2) AS MRPValue,
                                                             ROUND(GetTodaysDateRate(M_Items.id, CURDATE(), %s, 0, 2), 2) AS RateValue,
                                                             ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2), 2) AS GSTPercentage,
@@ -391,7 +405,8 @@ class StockEntryItemsView(CreateAPIView):
                                                             GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate
                                                             FROM M_Items 
                                                             JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
-                                                            WHERE MC_PartyItems.Party_id = %s''', ([PartyID],[PartyID],[PartyID]))
+                                                            {joinsforgroupsubgroup}
+                                                            WHERE MC_PartyItems.Party_id = %s {orderby}''', ([PartyID],[PartyID],[PartyID]))
              
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)

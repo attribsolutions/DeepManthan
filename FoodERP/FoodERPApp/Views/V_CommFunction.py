@@ -94,14 +94,26 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
     #     return None
     return log_entry
     
-def UnitDropdown(ItemID, PartyForRate, BatchID=0):
-   
+def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
     UnitDetails = list()
-    ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
-    # ItemUnitqueryserialize = ItemUnitSerializer(ItemUnitquery, many=True).data
+    ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0,IsShowUnit=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # Same Base Unit Quantity then show Only BaseUnit
+    # ItemUnitquery2 = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ,IsBase=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # BaseUnitQuantity=ItemUnitquery2[0]['BaseUnitQuantity']    
+    # UnitID_List=[]
+    # for unit in ItemUnitquery:
+    #     UnitQuantity=unit['BaseUnitQuantity']
+    #     CustomPrint(UnitQuantity)
+    #     Base=unit['IsBase']         
+    #     if  Base==False:               
+    #         if(BaseUnitQuantity ==UnitQuantity):
+    #             UnitID_List.append(str(unit['id']))  
+    # ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ).exclude(
+    # id__in=UnitID_List).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # CustomPrint(ItemUnitquery.query)   
     
     
-    
+    # CustomPrint(ItemID)
     q1 = M_Parties.objects.filter(id=PartyForRate ).values("PartyType_id")
     PartyTypeID=q1[0]['PartyType_id']
     
@@ -121,13 +133,21 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
             # CalculatedRateusingMRPMargin = RateCalculationFunction(
             #     0, ItemID, PartyForRate, 0, 0, d['id'], 0).RateWithGST()
             # Rate = CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
-            Rate = round(float(query2[0].RatewithoutGST), 2)
+            
+            if query2:
+                rate_without_gst = query2[0].RatewithoutGST
+                if rate_without_gst is not None:
+                    Rate = round(float(rate_without_gst), 2)                    
+                else:
+                    Rate=0.0
+            else:
+                Rate = 0.0
         else:
-            Rate = 0
+            Rate=0.0
 
         q0 = MC_ItemUnits.objects.filter(
             Item=ItemID, UnitID=1, IsDeleted=0).values("BaseUnitQuantity")
-
+        # CustomPrint(q0)
         UnitDetails.append({
             "UnitID": d['id'],
             "UnitName": d['BaseUnitConversion'],
@@ -140,6 +160,7 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
             "DeletedMCUnitsUnitID": d['UnitID__id'],
 
         })
+        # CustomPrint(UnitDetails)
     return UnitDetails
 
 
