@@ -188,7 +188,7 @@ class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
 
     def get_Image(self, obj):
         if obj.Image:
-            media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.id}/3"
+            media_url = f"https://cbmfooderp.com/api/downloadQr/{obj.id}/3"
             return media_url
         return None
 
