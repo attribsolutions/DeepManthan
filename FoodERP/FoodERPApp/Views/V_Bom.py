@@ -230,30 +230,15 @@ class BulkBOMView(RetrieveAPIView):
     def post(self, request,id=0):
         BillOfMaterialdata = JSONParser().parse(request)
         try:            
-            with transaction.atomic():
-                # FromDate = BillOfMaterialdata['FromDate']
-                # ToDate = BillOfMaterialdata['ToDate']
+            with transaction.atomic():                
                 Company = BillOfMaterialdata['Company']
-                # Party = BillOfMaterialdata['Party']
-                ids=BillOfMaterialdata['BOM_ID']
-                # query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, 
-                # M_BillOfMaterial.EstimatedOutputQty,M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, 
-                # M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, 
-                # M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
-                # M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id,MC_BillOfMaterialItems.Quantity,
-                # MC_BillOfMaterialItems.Item_id,
-                # MC_BillOfMaterialItems.Unit_id,
-                # M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName 
-                # From M_BillOfMaterial 
-                # JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
-                # JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
-                # where M_BillOfMaterial.id in({BOMid})and Company_id={Company}''')                   
-                # print(query)
+                
+                ids=BillOfMaterialdata['BOM_ID']                
                 BomID = [int(id.strip()) for id in ids.split(',')]
                 query = M_BillOfMaterial.objects.filter(id__in=(BomID),Company_id=Company)
                 # return JsonResponse({'query': str(query)})
                 if query:
-                    # print("Shruti")
+                   
                     BOM_Serializer = M_BOMSerializerSecond001(query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
@@ -314,8 +299,7 @@ class BulkBOMView(RetrieveAPIView):
                             "ParentUnitDetails":ParentUnitDetails,                           
                             "BOMItems":MaterialDetails,
                             
-                        })
-                        print(BillofmaterialData)
+                        })                       
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BillofmaterialData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
