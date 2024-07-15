@@ -139,6 +139,6 @@ class ClaimTrackingSerializerSecond(serializers.Serializer):
     SubCluster = serializers.CharField(max_length=500)
     def get_CreditNoteUpload(self, obj):
         if obj.CreditNoteUpload:
-            media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.id}/2"  # Replace with your actual media URL prefix from settings
+            media_url = f"https://cbmfooderp.com/api/downloadQr/{obj.id}/2"  # Replace with your actual media URL prefix from settings
             return media_url
         return None
