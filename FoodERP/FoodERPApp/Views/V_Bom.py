@@ -234,30 +234,31 @@ class BulkBOMView(RetrieveAPIView):
                 # FromDate = BillOfMaterialdata['FromDate']
                 # ToDate = BillOfMaterialdata['ToDate']
                 Company = BillOfMaterialdata['Company']
-                Party = BillOfMaterialdata['Party']
-                BOMid=BillOfMaterialdata['BOM_ID']
-                query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, 
-                M_BillOfMaterial.EstimatedOutputQty,M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, 
-                M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, 
-                M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
-                M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id,MC_BillOfMaterialItems.Quantity,
-                MC_BillOfMaterialItems.Item_id,
-                MC_BillOfMaterialItems.Unit_id,
-                M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName 
-                From M_BillOfMaterial 
-                JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
-                JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
-                where M_BillOfMaterial.id in({BOMid})and Company_id={Company}''')                   
+                # Party = BillOfMaterialdata['Party']
+                ids=BillOfMaterialdata['BOM_ID']
+                # query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, 
+                # M_BillOfMaterial.EstimatedOutputQty,M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, 
+                # M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, 
+                # M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
+                # M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id,MC_BillOfMaterialItems.Quantity,
+                # MC_BillOfMaterialItems.Item_id,
+                # MC_BillOfMaterialItems.Unit_id,
+                # M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName 
+                # From M_BillOfMaterial 
+                # JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby 
+                # JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
+                # where M_BillOfMaterial.id in({BOMid})and Company_id={Company}''')                   
                 # print(query)
-                
-                # return JsonResponse({'query': str(query.query)})
+                BomID = [int(id.strip()) for id in ids.split(',')]
+                query = M_BillOfMaterial.objects.filter(id__in=(BomID),Company_id=Company)
+                # return JsonResponse({'query': str(query)})
                 if query:
                     # print("Shruti")
                     BOM_Serializer = M_BOMSerializerSecond001(query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
-                        MaterialDetails =list()
+                        MaterialDetails =list() 
                         ParentItem= a['Item']['id']
                         Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                         # CustomPrint(query.query)
@@ -310,8 +311,9 @@ class BulkBOMView(RetrieveAPIView):
                             "EstimatedOutputQty": a['EstimatedOutputQty'],  
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['BaseUnitConversion'],
-                            "ParentUnitDetails":ParentUnitDetails,
-                            "BOMItems":MaterialDetails
+                            "ParentUnitDetails":ParentUnitDetails,                           
+                            "BOMItems":MaterialDetails,
+                            
                         })
                         print(BillofmaterialData)
                         
@@ -319,3 +321,5 @@ class BulkBOMView(RetrieveAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
+
