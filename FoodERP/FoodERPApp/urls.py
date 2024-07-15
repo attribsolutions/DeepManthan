@@ -167,7 +167,7 @@ urlpatterns = [
     url(r'SAPLedger',SAPLedgerView.as_view()),
     url(r'InvoicetoSCM',InvoiceToSCMView.as_view()),
     
-    url(r'MobileAppOrderss$',T_MobileAppOrdersView.as_view()),
+    url(r'MobileAppOrder$',T_MobileAppOrdersView.as_view()),
     url(r'MobileAppOrderDelete$',T_MobileAppOrdersDeleteView.as_view()),
     url(r'MobileAppOrder/([0-9]+)$',T_MobileAppOrdersView.as_view()),
     
