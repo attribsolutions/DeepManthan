@@ -388,16 +388,52 @@ class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
         
 class DeleteInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
     def post(self, request):
         DeleteInvoicedatas = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                InvoiceIDs=list()
-                for DeleteInvoicedata in DeleteInvoicedatas:
-                    InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientSaleID=DeleteInvoicedata['ClientSaleID']).update(Description=DeleteInvoicedata['Description'],IsDeleted=DeleteInvoicedata['IsDeleted'],ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'])
-                    InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
-                # log_entry = create_transaction_logNew(request, {'POSDeletedInvoiceID':InvoiceIDs}, 0,'',67,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
+                user=BasicAuthenticationfunction(request)
+                    
+                if user is not None:
+                
+                    InvoiceIDs=list()
+                    for DeleteInvoicedata in DeleteInvoicedatas:
+                        print(DeleteInvoicedata)
+                        # InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).update(IsDeleted=1)
+                        ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'])
+                        ss.save()
+                        
+                        InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
+                    # log_entry = create_transaction_logNew(request, {'POSDeletedInvoiceID':InvoiceIDs}, 0,'',67,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
+        
+
+class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+    
+    
+    @transaction.atomic()
+    def get(self, request,DivisionID,ClientID):
+        try:
+            with transaction.atomic():
+                
+                user=BasicAuthenticationfunction(request)
+                    
+                if user is not None: 
+                    
+                    QueryForMaxSalesID=T_SPOSDeletedInvoices.objects.raw('''SELECT 1 id,ifnull(max(DeletedTableAutoID),0) MaxSaleID FROM SweetPOS.T_SPOSDeletedInvoices where Party=%s and clientID=%s''', [DivisionID ,ClientID])
+                    for row in QueryForMaxSalesID:
+                        maxSaleID=row.MaxSaleID
+
+                    # log_entry = create_transaction_logNew(request, 0, DivisionID,'',384,0,0,0,ClientID)
+                    return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
+        except Exception as e:
+            
+            # log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})            
+        

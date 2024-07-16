@@ -21,8 +21,9 @@ class GSTR3BDownloadView(CreateAPIView):
                 Party = Orderdata['Party']
            
         
-                query = T_Invoices.objects.raw('''WITH CombinedData AS (
+                query = T_Invoices.objects.raw('''
         SELECT 
+            1 as id,                                  
             NatureOfSupplies,
             SUM(TotalTaxableValue) as TotalTaxableValue,
             SUM(IntegratedTax) as IntegratedTax,
@@ -60,7 +61,7 @@ class GSTR3BDownloadView(CreateAPIView):
                 0 as IntegratedTax,
                 0 as CentralTax,
                 0 as State_UTTax,
-                0 as Cess                               
+                0 as Cess                                                                   
             UNION
             SELECT 
                 '(c) Other Outward Taxable supplies (Nil rated, exempted)' as NatureOfSupplies,
@@ -101,11 +102,8 @@ class GSTR3BDownloadView(CreateAPIView):
                 0 as CentralTax,
                 0 as State_UTTax,
                 0 as Cess
-        ) AS AllData
-        GROUP BY NatureOfSupplies
-    )
-    SELECT 1 as id, NatureOfSupplies, TotalTaxableValue, IntegratedTax, CentralTax, State_UTTax, Cess
-    FROM CombinedData''', (Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate))
+        ) A
+        GROUP BY NatureOfSupplies''', (Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate))
                                                     
                 DOSAISLTRC = DOSAISLTRCSerializer(query, many=True).data
                 
@@ -183,7 +181,7 @@ class GSTR3BDownloadView(CreateAPIView):
                                     JOIN M_Parties ON M_Parties.id = X.Customer
                                     JOIN M_States ON M_Parties.State_id = M_States.id
                                     WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s
-                                    GROUP BY X.id, M_States.StateCode, M_States.Name) as combined_results 
+                                    GROUP BY X.id, M_States.StateCode, M_States.Name) A
                                     GROUP BY PlaceOfSupplyState_UT''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 Query3 = Query3Serializer(query3, many=True).data
                 
