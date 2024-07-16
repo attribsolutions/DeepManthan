@@ -350,10 +350,10 @@ urlpatterns = [
             
                      
 # Bill Of Material All API's
-            url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
+            url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),            
             url(r'Billofmaterial$', M_BOMsView.as_view()),
             url(r'BomFilter$', BOMListFilterView.as_view()),
-    
+            url(r'BulkBom$', BulkBOMView.as_view()),
 # Work Order All API's
             url(r'BomDetails$', BomDetailsView.as_view()),
             url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
@@ -651,6 +651,7 @@ urlpatterns = [
             url(r'ManPowerReport$', ManPowerReportView.as_view()),
             url(r'TCSAmountReport$', TCSAmountReportView.as_view()),
             url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
+            url(r'FranchiseSaleReport$',FranchiseSecondarySaleReportView.as_view()), 
             
             
             

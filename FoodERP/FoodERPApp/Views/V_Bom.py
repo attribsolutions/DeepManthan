@@ -34,7 +34,7 @@ class BOMListFilterView(CreateAPIView):
                                                          where IsDelete=0 and Company_id={Company}''')  
                 else: 
                     # query = M_BillOfMaterial.objects.filter(Item_id=Item,Company_id=Company)  
-                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby where Item_id={Item},Company_id={Company}''')                   
+                    query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty, M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, M_BillOfMaterial.Unit_id,M_Users.LoginName From M_BillOfMaterial JOIN M_Users ON M_Users.id=M_BillOfMaterial.Createdby where Item_id={Item} and Company_id={Company}''')                   
                   
                 
                 # return JsonResponse({'query': str(query.query)})
@@ -42,7 +42,7 @@ class BOMListFilterView(CreateAPIView):
                     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
                     BomListData = list()
                     # return JsonResponse({'Date': Bom_serializer})
-                    # CustomPrint(Bom_serializer)
+                    CustomPrint(Bom_serializer)
                 
                     for a in Bom_serializer:
                         
@@ -67,9 +67,7 @@ class BOMListFilterView(CreateAPIView):
                         "CreatedOn" : a['CreatedOn'],
                         "CreatedBy": a['CreatedBy'],
                         "IsRecordDeleted":a['IsDelete'],
-                        "UserName":a['LoginName']
-                        
-                        
+                        "UserName":a['LoginName']  
                         
                         }) 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BomListData})
@@ -222,3 +220,110 @@ class M_BOMsViewSecond(RetrieveAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Bill Of Material Not available', 'Data': []})
         except IntegrityError:
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Bill Of Material used in another table', 'Data': []})
+
+class BulkBOMView(RetrieveAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request,id=0):
+        BillOfMaterialdata = JSONParser().parse(request)
+        try:            
+            with transaction.atomic():                
+                Company = BillOfMaterialdata['Company']
+                Party=BillOfMaterialdata['Party']
+                ids=BillOfMaterialdata['BOM_ID']  
+                # GetQuantity = int(BillOfMaterialdata['Quantity'])              
+                BomID = [int(id.strip()) for id in ids.split(',')]
+                query = M_BillOfMaterial.objects.filter(id__in=(BomID),Company_id=Company)
+                # return JsonResponse({'query': str(query.query)})
+                if query:
+                   
+                    BOM_Serializer = M_BOMSerializerSecond001(query,many=True).data
+                    BillofmaterialData = list()
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                    for a in BOM_Serializer:
+                        
+                        Stock = float(GetO_BatchWiseLiveStock(
+                            a['Item']['id'], Party))
+                        StockintoSelectedUnit = UnitwiseQuantityConversion(
+                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0,1).ConvertintoSelectedUnit()
+                        CustomPrint(StockintoSelectedUnit)
+                        MaterialDetails =list()                         
+                        
+                        ParentItem= a['Item']['id']
+                        Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                        # CustomPrint(query.query)
+                        if Parentquery.exists():
+                            ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                            ParentUnitDetails = list()
+                           
+                            for d in ParentUnitdata:
+                                ParentUnitDetails.append({
+                                   
+                                "Unit": d['id'],
+                                "UnitName": d['BaseUnitConversion'],
+                            })
+                        
+                        for b in a['BOMItems']:
+                            # CustomPrint(b)
+                            Item = b['Item']['id']
+                            Stock = float(GetO_BatchWiseLiveStock(
+                                b['Item']['id'], Party))
+
+                            StockQty = UnitwiseQuantityConversion(
+                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0,1).ConvertintoSelectedUnit()
+
+                            Qty = float(b['Quantity']) / \
+                                float(a['EstimatedOutputQty'])
+                            ActualQty = float(Qty)
+                            ChildItem= b['Item']['id']
+                            query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
+                            # CustomPrint(query.query)
+                            if query.exists():
+                                Unitdata = Mc_ItemUnitSerializerThird(query, many=True).data
+                                UnitDetails = list()
+                               
+                                for c in Unitdata:
+                                    UnitDetails.append({
+                                    "Unit": c['id'],
+                                    "UnitName": c['BaseUnitConversion'],
+                                    
+                                })
+                            MaterialDetails.append({
+                                "id": b['id'],
+                                "Item":b['Item']['id'],
+                                "ItemName":b['Item']['Name'], 
+                                "Unit": b['Unit']['id'],
+                                "UnitName": b['Unit']['BaseUnitConversion'],
+                                "BomQuantity": b['Quantity'],
+                                "Quantity": round(ActualQty,3),   
+                                "StockQuantity": StockQty,                            
+                                "UnitDetails":UnitDetails
+                            })
+                            
+                        BillofmaterialData.append({
+                            "id": a['id'],
+                            "BomDate": a['BomDate'],
+                            "Comment": a['Comment'],
+                            "IsActive": a['IsActive'],
+                            "IsVDCItem": a['IsVDCItem'],
+                            "Company": a['Company']['id'],
+                            "CompanyName":a['Company']['Name'],
+                            "Item":a['Item']['id'],
+                            "ItemName":a['Item']['Name'],
+                            "EstimatedOutputQty": a['EstimatedOutputQty'],                             
+                            "Stock": StockintoSelectedUnit,
+                            "Unit": a['Unit']['id'],
+                            "UnitName": a['Unit']['BaseUnitConversion'],
+                            "ParentUnitDetails":ParentUnitDetails,                           
+                            "BOMItems":MaterialDetails                            
+                        })                       
+                        
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BillofmaterialData})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
+        except Exception as e:
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
+
