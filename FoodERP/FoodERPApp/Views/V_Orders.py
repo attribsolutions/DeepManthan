@@ -743,7 +743,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}  ''', ([EffectiveDate],[Eff
 a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,ifnull(a.DiscountAmount,0)DiscountAmount
 ,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
 and Party_id=%s 
-group by Item_id)StockQuantity ,0 as VRate           
+group by Item_id)StockQuantity ,Round(GetTodaysDateRate(a.Item_id, {EffectiveDate},{Party},0,2),2) AS VRate            
                 from
 (select * from 
         (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
@@ -772,9 +772,9 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 
 Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
                 
-                # print(Itemquery)
+                CustomPrint(Itemquery)
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
-                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     
