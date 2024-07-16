@@ -232,18 +232,26 @@ class BulkBOMView(RetrieveAPIView):
         try:            
             with transaction.atomic():                
                 Company = BillOfMaterialdata['Company']
-                
-                ids=BillOfMaterialdata['BOM_ID']                
+                Party=BillOfMaterialdata['Party']
+                ids=BillOfMaterialdata['BOM_ID']  
+                # GetQuantity = int(BillOfMaterialdata['Quantity'])              
                 BomID = [int(id.strip()) for id in ids.split(',')]
                 query = M_BillOfMaterial.objects.filter(id__in=(BomID),Company_id=Company)
-                # return JsonResponse({'query': str(query)})
+                # return JsonResponse({'query': str(query.query)})
                 if query:
                    
                     BOM_Serializer = M_BOMSerializerSecond001(query,many=True).data
                     BillofmaterialData = list()
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                     for a in BOM_Serializer:
-                        MaterialDetails =list() 
+                        
+                        Stock = float(GetO_BatchWiseLiveStock(
+                            a['Item']['id'], Party))
+                        StockintoSelectedUnit = UnitwiseQuantityConversion(
+                            a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0,1).ConvertintoSelectedUnit()
+                        CustomPrint(StockintoSelectedUnit)
+                        MaterialDetails =list()                         
+                        
                         ParentItem= a['Item']['id']
                         Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                         # CustomPrint(query.query)
@@ -260,6 +268,16 @@ class BulkBOMView(RetrieveAPIView):
                         
                         for b in a['BOMItems']:
                             # CustomPrint(b)
+                            Item = b['Item']['id']
+                            Stock = float(GetO_BatchWiseLiveStock(
+                                b['Item']['id'], Party))
+
+                            StockQty = UnitwiseQuantityConversion(
+                                b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0,1).ConvertintoSelectedUnit()
+
+                            Qty = float(b['Quantity']) / \
+                                float(a['EstimatedOutputQty'])
+                            ActualQty = float(Qty)
                             ChildItem= b['Item']['id']
                             query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
                             # CustomPrint(query.query)
@@ -279,7 +297,9 @@ class BulkBOMView(RetrieveAPIView):
                                 "ItemName":b['Item']['Name'], 
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
-                                "Quantity":b['Quantity'],                                
+                                "BomQuantity": b['Quantity'],
+                                "Quantity": round(ActualQty,3),   
+                                "StockQuantity": StockQty,                            
                                 "UnitDetails":UnitDetails
                             })
                             
@@ -293,12 +313,12 @@ class BulkBOMView(RetrieveAPIView):
                             "CompanyName":a['Company']['Name'],
                             "Item":a['Item']['id'],
                             "ItemName":a['Item']['Name'],
-                            "EstimatedOutputQty": a['EstimatedOutputQty'],  
+                            "EstimatedOutputQty": a['EstimatedOutputQty'],                             
+                            "Stock": StockintoSelectedUnit,
                             "Unit": a['Unit']['id'],
                             "UnitName": a['Unit']['BaseUnitConversion'],
                             "ParentUnitDetails":ParentUnitDetails,                           
-                            "BOMItems":MaterialDetails,
-                            
+                            "BOMItems":MaterialDetails                            
                         })                       
                         
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': BillofmaterialData})
