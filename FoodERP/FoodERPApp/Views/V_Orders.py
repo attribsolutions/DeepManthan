@@ -774,7 +774,7 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[Effec
                 
                 CustomPrint(Itemquery)
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
                 for b in OrderItemSerializer:
                     ItemID = b['Item_id']
                     
