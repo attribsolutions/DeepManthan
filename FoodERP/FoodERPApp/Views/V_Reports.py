@@ -1766,7 +1766,8 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "MobileNo": a.MobileNo,
                         "Material SAP Code": a.MaterialSAPCode
                         })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})   
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
