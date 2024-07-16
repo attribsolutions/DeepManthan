@@ -1702,7 +1702,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 Party = Data['Party']
                 Item = Data['Item']
 
-                Invoicequery = '''Select T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
+                Invoicequery = '''Select DISTINCT T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
                         1 ClientID, "" CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
                         A.Rate, A.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
                         from T_Invoices
@@ -1713,7 +1713,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         left join M_Units on M_Units.id = A.Unit_id
                         where T_Invoices.InvoiceDate between %s and %s'''
                 
-                SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
+                SPOSInvoicequery ='''Select DISTINCT X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
                         1 ClientID, "" CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.Rate, Y.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
                         from SweetPOS.T_SPOSInvoices X
                         join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
@@ -1751,8 +1751,8 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         ReportdataList.append({
                         "id":a.id,
                         "FranchiseName": a.FranchiseName,
-                        "SAP Code": a.SAPCode,
-                        "SAP Name": a.SAPName,
+                        "SAPCode": a.SAPCode,
+                        "SAPName": a.SAPName,
                         "SaleDate": a.SaleDate,
                         "ClientID": a.ClientID,
                         "CItemID": a.CItemID,
@@ -1764,7 +1764,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "Amount": a.Amount,
                         "IsCBMItem": a.IsCBMItem,
                         "MobileNo": a.MobileNo,
-                        "Material SAP Code": a.MaterialSAPCode
+                        "MaterialSAPCode": a.MaterialSAPCode
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
