@@ -21,7 +21,7 @@ class FileDownloadView(View):
         if int(table)==1: #M_PartySettingsDetails table
             query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            image_url = f'https://cbmfooderp.com/api/media/{Image}'
+            image_url = f'https://cbmfooderp.com/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
         elif int(table)==2:  #T_ClaimTrackingEntry
