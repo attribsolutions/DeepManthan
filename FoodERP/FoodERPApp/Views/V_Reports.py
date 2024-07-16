@@ -1702,36 +1702,36 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 Party = Data['Party']
                 Item = Data['Item']
 
-                Invoicequery = '''Select DISTINCT T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
+                Invoicequery = '''Select T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
                         1 ClientID, "" CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
                         A.Rate, A.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
                         from T_Invoices
-                        join TC_InvoiceItems A on A.Invoice_id = T_Invoices.id 
-                        join M_Parties on M_Parties.id = T_Invoices.Party_id
-                        join M_Items on M_Items.id = A.Item_id
-                        left join MC_ItemUnits on MC_ItemUnits.UnitID_id = A.Unit_id
-                        left join M_Units on M_Units.id = A.Unit_id
-                        where T_Invoices.InvoiceDate between %s and %s'''
+                        join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
+                        join FoodERP.M_Parties on M_Parties.id = X.Party
+                        join FoodERP.M_Items  on M_Items.id = Y.Item 
+                        join FoodERP.MC_ItemUnits on MC_ItemUnits.id = Y.Unit
+                        join FoodERP.M_Units on M_Units.id = MC_ItemUnits.UnitID_id
+                        where X.InvoiceDate between %s and %s '''
                 
-                SPOSInvoicequery ='''Select DISTINCT X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
+                SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
                         1 ClientID, "" CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.Rate, Y.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
                         from SweetPOS.T_SPOSInvoices X
                         join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
                         join FoodERP.M_Parties on M_Parties.id = X.Party
-                        join FoodERP.M_Items  on M_Items.id = Y.Item
-                        left join FoodERP.MC_ItemUnits on MC_ItemUnits.UnitID_id = Y.Unit
-                        left join FoodERP.M_Units on M_Units.id = MC_ItemUnits.UnitID_id
+                        join FoodERP.M_Items  on M_Items.id = Y.Item 
+                        join FoodERP.MC_ItemUnits on MC_ItemUnits.id = Y.Unit
+                        join FoodERP.M_Units on M_Units.id = MC_ItemUnits.UnitID_id
                         where X.InvoiceDate between %s and %s '''
                 
                 parameters = [FromDate,ToDate]
                 if int(Party) > 0 and int(Item) > 0: 
-                    Invoicequery += ' AND T_Invoices.Party_id = %s AND M_Items.id = %s'
-                    SPOSInvoicequery += ' AND X.Party = %s AND M_Items.id = %s'
+                    Invoicequery += ' AND T_Invoices.Party_id = %s AND Y.Item = %s'
+                    SPOSInvoicequery += ' AND X.Party = %s AND Y.Item = %s'
                     parameters.extend([Party, Item])
 
                 elif int(Party) == 0:
-                    Invoicequery += ' AND M_Items.id = %s'
-                    SPOSInvoicequery += ' AND M_Items.id = %s'
+                    Invoicequery += ' AND Y.Item = %s'
+                    SPOSInvoicequery += ' AND Y.Item = %s'
                     parameters.append(Item)
 
                 elif int(Item) == 0:
