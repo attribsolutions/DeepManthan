@@ -80,7 +80,7 @@ class T_SPOSInvoices(models.Model):
     UploadedOn = models.DateTimeField(auto_now=True)
     Description = models.CharField(max_length=500,null=True,blank=True)
     IsDeleted = models.BooleanField(default=False)
-    ReferenceInvoiceID = models.IntegerField(null=True)
+    ReferenceInvoiceID = models.IntegerField(null=True,blank=True)
     class Meta:
         db_table = "T_SPOSInvoices"
 
@@ -238,4 +238,18 @@ class TC_SPOSInvoiceUploads(models.Model):
     user_gstin = models.CharField(max_length=500)  
     
     class Meta:
-        db_table="TC_SPOSInvoiceUploads"             
+        db_table="TC_SPOSInvoiceUploads" 
+
+
+class T_SPOSDeletedInvoices(models.Model):
+    DeletedTableAutoID  = models.IntegerField()               
+    ClientID = models.IntegerField()
+    ClientSaleID = models.IntegerField()
+    InvoiceDate = models.DateField()    
+    Party = models.IntegerField()
+    DeletedBy = models.IntegerField()
+    DeletedOn = models.DateTimeField(auto_now_add=True)
+    ReferenceInvoiceID =models.IntegerField(null=True)
+
+    class Meta:
+        db_table="T_SPOSDeletedInvoices" 

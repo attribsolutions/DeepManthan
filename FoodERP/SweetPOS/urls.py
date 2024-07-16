@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?/$',SPOSInvoiceViewSecond.as_view()),
     url(r'CashierSummary$',SPOSCashierSummaryList.as_view()),
     url(r'UpdateCustomerVehiclePOSinvoice$',UpdateCustomerVehiclePOSInvoiceView.as_view()),
-    url(r'posDeletEInvoicE$',DeleteInvoiceView.as_view())
+    url(r'posDeletEInvoicE$',DeleteInvoiceView.as_view()),
+    url(r'GETMaxPOSDeletedInvoiceIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxDeletedInvoiceIDView.as_view()),
 
     ]
