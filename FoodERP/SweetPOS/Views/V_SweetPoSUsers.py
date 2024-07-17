@@ -95,7 +95,7 @@ class SweetPOSUsersSecondView(CreateAPIView):
 
                     user_list = []
                     for row in query:
-                        print(row)
+                        
                         user_list.append( {
                             "id": row.id,
                             "CompanyID": row.CompanyID,

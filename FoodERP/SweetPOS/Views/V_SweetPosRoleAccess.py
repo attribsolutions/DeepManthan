@@ -96,10 +96,11 @@ class SPOSLog_inView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request ):
+        SPOSLog_in_data = JSONParser().parse(request)
         try:
             
             with transaction.atomic():
-                SPOSLog_in_data = JSONParser().parse(request)
+               
                 # pdb.set_trace()
                 Division = SPOSLog_in_data['DivisionID']
 
@@ -117,5 +118,5 @@ class SPOSLog_inView(CreateAPIView):
                     
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'SweetPOSLogin:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, SPOSLog_in_data,0,'SweetPOSLogin:'+str(Exception(e)),33,0)
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
