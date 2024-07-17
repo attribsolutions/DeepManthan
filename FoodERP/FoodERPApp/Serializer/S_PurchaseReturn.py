@@ -186,9 +186,16 @@ class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
         model = TC_PurchaseReturnItemImages
         fields = ['id','Item_pic', 'Image']
 
+    # def get_Image(self, obj):
+    #     if obj.Image:
+    #         media_url = f"https://cbmfooderp.com/api/downloadQr/{obj.id}/3"
+    #         return media_url
+    #     return None
+    
     def get_Image(self, obj):
         if obj.Image:
-            media_url = f"https://cbmfooderp.com/api/downloadQr/{obj.id}/3"
+            url_prefix = NewURLPrefix()
+            media_url = f"{url_prefix}downloadQr/{obj.id}/3"
             return media_url
         return None
 
