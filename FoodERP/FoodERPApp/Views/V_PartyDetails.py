@@ -38,7 +38,7 @@ class FileDownloadView(View):
             # image_url = f'http://192.168.1.114:8000/media/{Image}'    
             
         try:
-            response = requests.get(image_url)
+            response = requests.get(image_url, verify=False)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return HttpResponse(f"Error: {e}", status=500)
