@@ -85,31 +85,32 @@ class SweetPOSUsersSecondView(CreateAPIView):
             with transaction.atomic():
                 user = BasicAuthenticationfunction(request)
                 if user is not None:
-                    query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
+                    query = M_SweetPOSUser.objects.raw(f""" SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
                                 FROM SweetPOS.M_SweetPOSUser SU
                                 JOIN SweetPOS.M_SweetPOSRoles  ON SU.RoleID = SweetPOS.M_SweetPOSRoles.id
-                                WHERE SU.DivisionID = %s"""
-                    with connection.cursor() as cursor:
-                        cursor.execute(query, [Division_id])
-                        rows = cursor.fetchall()
+                                WHERE SU.DivisionID = {Division_id}""")
+                    # with connection.cursor() as cursor:
+                    #     cursor.execute(query, [Division_id])
+                    #     rows = cursor.fetchall()
 
                     user_list = []
-                    for row in rows:
-                        user_data = {
-                            "id": row[0],
-                            "CompanyID": row[1],
-                            "DivisionID": row[2],
-                            "LoginName": row[3],
-                            "Password": row[4],
-                            "RoleID": row[5],
-                            "IsActive": row[6],
-                            "CreatedBy": row[7],
-                            "CreatedOn": row[8],
-                            "UpdatedBy": row[9],
-                            "UpdatedOn": row[10],
-                            "RoleName": row[11],
-                        }
-                        user_list.append(user_data)
+                    for row in query:
+                        print(row)
+                        user_list.append( {
+                            "id": row.id,
+                            "CompanyID": row.CompanyID,
+                            "DivisionID": row.DivisionID,
+                            "LoginName": row.LoginName,
+                            "Password": row.Password,
+                            "RoleID": row.RoleID,
+                            "IsActive": row.IsActive,
+                            "CreatedBy": row.CreatedBy,
+                            "CreatedOn": row.CreatedOn,
+                            "UpdatedBy": row.UpdatedBy,
+                            "UpdatedOn": row.UpdatedOn,
+                            "RoleName": row.RoleName,
+                        })
+                        
                     log_entry = create_transaction_logNew(request, user_list, 0, '', 374, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': user_list})
         except M_SweetPOSUser.DoesNotExist:
