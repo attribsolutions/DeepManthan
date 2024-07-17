@@ -158,23 +158,29 @@ class WorkOrderView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                WorkOrderData = JSONParser().parse(request)
-                Party = WorkOrderData['Party']
-                WorkOrderDate = WorkOrderData['WorkOrderDate']
-                a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
-                # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                WorkOrderData['WorkOrderNumber'] = a
-                '''Get Order Prifix '''
-                b = GetPrifix.GetWorkOrderPrifix(Party)
-                WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)
-                WorkOrderData['Status']=0
-                WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
-                WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity']
+                MultipleWorkOrderData = JSONParser().parse(request)
+                CustomPrint(MultipleWorkOrderData)
+                for WorkOrderData in MultipleWorkOrderData:
+                    Party = WorkOrderData['Party']
+                    WorkOrderDate = WorkOrderData['WorkOrderDate']
+                    #==================Max Work Order ==================
+                    a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
+                    # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
+                    WorkOrderData['WorkOrderNumber'] = a
+                    '''Get Order Prifix '''
+                    b = GetPrifix.GetWorkOrderPrifix(Party)
+                    WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)                
+                    #=====================================================
+                    # WorkOrderItems= WorkOrderData['WorkOrderItems']
+                    # for WorkOrderItem in WorkOrderItems:
+                    WorkOrderData['Status']=0
+                    WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
+                    WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity']
                
-                WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
-                if WorkOrder_Serializer.is_valid():
-                    WorkOrder_Serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Save Successfully', 'Data': []})
+                    WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
+                    if WorkOrder_Serializer.is_valid():
+                        WorkOrder_Serializer.save()
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Save Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
