@@ -1703,8 +1703,8 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 Item = Data['Item']
 
                 Invoicequery = '''Select T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
-                        1 ClientID, "" CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
-                        A.Rate, A.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
+                        1 ClientID, M_Items.CItemID CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
+                        A.Rate, A.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode,M_Items.IsCBMItem
                         from T_Invoices
                         join TC_InvoiceItems A on A.Invoice_id = T_Invoices.id 
                         join M_Parties on M_Parties.id = T_Invoices.Party_id
