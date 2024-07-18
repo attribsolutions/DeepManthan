@@ -275,9 +275,9 @@ class BulkBOMView(RetrieveAPIView):
                             StockQty = UnitwiseQuantityConversion(
                                 b['Item']['id'], Stock, 0, 0, b['Unit']['id'], 0,1).ConvertintoSelectedUnit()
 
-                            Qty = float(b['Quantity']) / \
-                                float(a['EstimatedOutputQty'])
-                            ActualQty = float(Qty)
+                            # Qty = float(b['Quantity']) / \
+                            #     float(a['EstimatedOutputQty'])
+                            # ActualQty = float(Qty)
                             ChildItem= b['Item']['id']
                             query = MC_ItemUnits.objects.filter(Item_id=ChildItem,IsDeleted=0)
                             # CustomPrint(query.query)
@@ -298,7 +298,7 @@ class BulkBOMView(RetrieveAPIView):
                                 "Unit": b['Unit']['id'],
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "BomQuantity": b['Quantity'],
-                                "Quantity": round(ActualQty,3),   
+                                "Quantity": b['Quantity'],   
                                 "StockQuantity": StockQty,                            
                                 "UnitDetails":UnitDetails
                             })

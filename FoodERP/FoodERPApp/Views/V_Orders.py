@@ -17,7 +17,7 @@ from django.db.models import Value
 from django.db.models.functions import Coalesce
 from django.db.models import Value, CharField
 from ..models import *
-
+from django.db.models import F
 
 class POTypeView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -504,6 +504,20 @@ class T_OrdersViewSecond(CreateAPIView):
                                     bb=''
                                 else:
                                     bb=aaaa
+
+                                q = M_Parties.objects.filter(id=a['Supplier']['id'],PartyType=a['Supplier']['PartyType']).select_related(
+                                'PartyType').annotate(IsFranchises=F('PartyType__IsFranchises')).values('IsFranchises')
+                                if q[0]['IsFranchises'] != 0:
+                                    GroupTypeID = 5
+                                else:
+                                    GroupTypeID = 1
+                                q1 = MC_ItemGroupDetails.objects.filter(GroupType=GroupTypeID, Item=b['Item']['id']
+                                ).select_related('Group', 'SubGroup').annotate(
+                                    GroupName=F('Group__Name'),
+                                    SubGroupName=F('SubGroup__Name')).values('GroupName', 'SubGroupName')
+                                if q1.exists():
+                                    Group = q1[0]['GroupName']
+                                    SubGroup = q1[0]['SubGroupName']
                                 
                                 OrderItemDetails.append({
                                     "id": b['id'],
@@ -538,6 +552,8 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Discount":b['Discount'],
                                     "DiscountAmount":b['DiscountAmount'],
                                     "Comment": b['Comment'],
+                                    "Group": Group,
+                                    "SubGroup": SubGroup,
                                 })
                         
                         inward = 0
