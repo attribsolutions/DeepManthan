@@ -651,6 +651,7 @@ urlpatterns = [
             url(r'ManPowerReport$', ManPowerReportView.as_view()),
             url(r'TCSAmountReport$', TCSAmountReportView.as_view()),
             url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
+            url(r'FranchiseSaleReport$',FranchiseSecondarySaleReportView.as_view()), 
             
             
             

@@ -19,8 +19,13 @@ def CustomPrint(value):
     for row in printvalue:
        printvalue=row.IsActive
     if printvalue is True:
-        print(value)      
-    
+        print(value) 
+        
+# FUNCTION FOR NEW URL PATTERN
+def NewURLPrefix():
+    newurl = M_Settings.objects.get(id=46)
+    return newurl.DefaultValue
+     
 # def GetYear(TDate):
 #     date = datetime.strptime(TDate, "%Y-%m-%d").date()
 #     #initialize the current year
@@ -696,6 +701,7 @@ class M_Items(models.Model):
     IsFranchisesItem = models.BooleanField(default=False)
     CItemID = models.IntegerField(default=False,null=True,blank=True)
     SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
+    IsCBMItem  = models.BooleanField(default=False)
     class Meta:
         constraints = [
             UniqueConstraint(fields=['Company', 'SAPItemCode'], name='unique_company_sapitemcode')

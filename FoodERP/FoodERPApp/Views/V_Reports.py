@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Items import ItemReportSerializer
-
+from SweetPOS.models import *
 from ..Serializer.S_Parties import M_PartiesSerializerSecond
 from ..Views.V_CommFunction import *
 from ..Views.V_CommFunction import GetOpeningBalance, UnitwiseQuantityConversion, RateCalculationFunction
@@ -1688,3 +1688,86 @@ where T_Invoices.InvoiceDate between %s and %s
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, 'CxDDDiffReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
+
+class FranchiseSecondarySaleReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data['Party']
+                Item = Data['Item']
+
+                Invoicequery = '''Select T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
+                        1 ClientID, M_Items.CItemID CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
+                        A.Rate, A.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode,M_Items.IsCBMItem
+                        from T_Invoices
+                        join TC_InvoiceItems A on A.Invoice_id = T_Invoices.id 
+                        join M_Parties on M_Parties.id = T_Invoices.Party_id
+                        join M_Items  on M_Items.id = A.Item_id
+                        join MC_ItemUnits on MC_ItemUnits.id = A.Unit_id
+                        join M_Units on M_Units.id = MC_ItemUnits.UnitID_id
+                        where T_Invoices.InvoiceDate between %s and %s '''
+                
+                SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
+                        1 ClientID, "" CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.Rate, Y.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
+                        from SweetPOS.T_SPOSInvoices X
+                        join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
+                        join FoodERP.M_Parties on M_Parties.id = X.Party
+                        join FoodERP.M_Items  on M_Items.id = Y.Item 
+                        join FoodERP.MC_ItemUnits on MC_ItemUnits.id = Y.Unit
+                        join FoodERP.M_Units on M_Units.id = MC_ItemUnits.UnitID_id
+                        where X.InvoiceDate between %s and %s '''
+                
+                parameters = [FromDate,ToDate]
+                if int(Party) > 0 and int(Item) > 0: 
+                    Invoicequery += ' AND T_Invoices.Party_id = %s AND A.Item_id = %s'
+                    SPOSInvoicequery += ' AND X.Party = %s AND Y.Item = %s'
+                    parameters.extend([Party, Item])
+
+                elif int(Party) == 0:
+                    Invoicequery += ' AND A.Item_id = %s'
+                    SPOSInvoicequery += ' AND Y.Item = %s'
+                    parameters.append(Item)
+
+                elif int(Item) == 0:
+                    Invoicequery += 'AND T_Invoices.Party_id = %s'
+                    SPOSInvoicequery += 'AND X.Party = %s'
+                    parameters.append(Party)
+
+                q1 = T_Invoices.objects.raw(Invoicequery,parameters)
+                q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
+
+                combined_sale = list(q1) + list(q2)
+
+                if combined_sale:
+                    
+                    ReportdataList = []
+                    for a in combined_sale:
+                        ReportdataList.append({
+                        "id":a.id,
+                        "FranchiseName": a.FranchiseName,
+                        "SAPCode": a.SAPCode,
+                        "SAPName": a.SAPName,
+                        "SaleDate": a.SaleDate,
+                        "ClientID": a.ClientID,
+                        "CItemID": a.CItemID,
+                        "BillNumber": a.BillNumber,
+                        "ItemName": a.ItemName,
+                        "Quantity": a.Quantity,
+                        "UnitName": a.UnitName,
+                        "Rate": a.Rate,
+                        "Amount": a.Amount,
+                        "IsCBMItem": a.IsCBMItem,
+                        "MobileNo": a.MobileNo,
+                        "MaterialSAPCode": a.MaterialSAPCode
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
