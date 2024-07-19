@@ -429,7 +429,7 @@ class T_OrdersView(CreateAPIView):
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(
                         aa['Item'], aa['Quantity'], aa['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
-                    aa['BaseUnitQuantity'] = BaseUnitQuantity
+                    aa['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
                     QtyInNo = UnitwiseQuantityConversion(
                         aa['Item'], aa['Quantity'], aa['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
                     aa['QtyInNo'] = QtyInNo
@@ -444,10 +444,10 @@ class T_OrdersView(CreateAPIView):
                 '''Get Order Prifix '''
                 b = GetPrifix.GetOrderPrifix(Division)
                 Orderdata['FullOrderNumber'] = b+""+str(a)
-                # return JsonResponse({ 'Data': Orderdata })
+                return JsonResponse({ 'Data': Orderdata })
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
-                    Order_serializer.save()
+                    # Order_serializer.save()
                     OrderID = Order_serializer.data['id']
                     PartyID = Order_serializer.data['Customer']
                     PartyMapping = M_Parties.objects.filter(
