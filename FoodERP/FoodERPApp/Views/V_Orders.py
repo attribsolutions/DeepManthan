@@ -447,7 +447,7 @@ class T_OrdersView(CreateAPIView):
                 # return JsonResponse({ 'Data': Orderdata })
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
-                    # Order_serializer.save()
+                    Order_serializer.save()
                     OrderID = Order_serializer.data['id']
                     PartyID = Order_serializer.data['Customer']
                     PartyMapping = M_Parties.objects.filter(
