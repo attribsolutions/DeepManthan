@@ -444,7 +444,7 @@ class T_OrdersView(CreateAPIView):
                 '''Get Order Prifix '''
                 b = GetPrifix.GetOrderPrifix(Division)
                 Orderdata['FullOrderNumber'] = b+""+str(a)
-                return JsonResponse({ 'Data': Orderdata })
+                # return JsonResponse({ 'Data': Orderdata })
                 Order_serializer = T_OrderSerializer(data=Orderdata)
                 if Order_serializer.is_valid():
                     # Order_serializer.save()
