@@ -100,6 +100,16 @@ class ItemListView(CreateAPIView):
                 item_data=list()
                 for row in query:
                     count=count+1
+                    Ratelist=list()
+                    queryforRate =M_SPOSRateMaster.objects.filter(Item=row.id)
+                    for RateRow in queryforRate:
+                        Ratelist.append({	
+                            "Rate": RateRow.Rate,
+                            "POSRateType": RateRow.POSRateType,
+                            "IsChangeRateToDefault": RateRow.IsChangeRateToDefault,
+                            "EffectiveFrom":RateRow.EffectiveFrom
+                        })
+                    
                     
                     item_data.append({
                         "FoodERPID": row.id,
@@ -109,7 +119,7 @@ class ItemListView(CreateAPIView):
                         "Name": row.Name,
                         "ItemCode": row.ItemCode,
                         "GST": row.GST,
-                        "Rate": row.Rate,
+                        "Rate": Ratelist,
                         "UnitID": row.UnitID,
                         "ISChitaleSupplier": True,  
                         "IsFranchisesPOSItem": row.IsFranchisesItem,
