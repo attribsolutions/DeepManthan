@@ -29,6 +29,7 @@ class M_ItemTag(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
+                print('ItemTag API StartTime: ',datetime.now())
                 query = M_Items.objects.all()
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
@@ -44,9 +45,11 @@ class M_ItemTag(CreateAPIView):
                             ListData.append({
                                 "dta": d+ "-" + a['Name']
                             })  
+                    print('ItemTag API EndTime: ',datetime.now())
                     log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0,'',100,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
+            print('ItemTag API EndTime: ',datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'ItemTagList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
