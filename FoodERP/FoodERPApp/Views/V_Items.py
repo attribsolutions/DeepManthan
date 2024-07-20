@@ -30,20 +30,21 @@ class M_ItemTag(CreateAPIView):
         try:
             with transaction.atomic():
                 print('ItemTag API StartTime: ',datetime.now())
-                query = M_Items.objects.all()
+                query = M_Items.objects.raw('''select id,Name, Tag from M_Items where Tag != '' ''')
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
                     log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0, "Items Not available",100,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
-                    Items_Serializer = ItemSerializerSecond(query, many=True).data
+                    # Items_Serializer = ItemSerializerSecond(query, many=True).data
                     ListData = list ()
-                    for a in Items_Serializer:
-                        b=str(a['Tag'])
+                    for a in query:
+                       
+                        b=str(a.Tag)
                         c=b.split(',')
                         for d in c:
                             ListData.append({
-                                "dta": d+ "-" + a['Name']
+                                "dta": d+ "-" + a.Name
                             })  
                     print('ItemTag API EndTime: ',datetime.now())
                     log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0,'',100,0)
