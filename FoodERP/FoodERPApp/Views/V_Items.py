@@ -87,6 +87,7 @@ class M_ItemsFilterView(CreateAPIView):
     def post(self, request, id=0 ):
         try:
             with transaction.atomic():
+                print("ItemFilterAPI StartTime : ",datetime.now())
                 Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
@@ -173,10 +174,11 @@ class M_ItemsFilterView(CreateAPIView):
                             "UpdatedOn": a['UpdatedOn'],
                             "UnitDetails":UnitDetails
                         })  
-                        
+                    print("ItemFilterAPI EndTime : ",datetime.now())    
                     log_entry = create_transaction_logNew(request, Logindata, x,'Party Items List',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
+            print("ItemFilterAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, 0, 0,'ItemList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -190,6 +192,7 @@ class M_ItemsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
+                print("ItemSaveAPI StartTime : ",datetime.now())
                 Itemsdata = JSONParser().parse(request)
                 query = M_Units.objects.filter(id=Itemsdata['BaseUnitID']).values('Name')
                 BaseUnitName = query[0]['Name']
@@ -209,13 +212,16 @@ class M_ItemsView(CreateAPIView):
                 if Items_Serializer.is_valid():
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
+                    print("ItemSaveAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, Itemsdata, 0,'TransactionID:'+str(LastInsertID),103,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 else:
+                    print("ItemSaveAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, Itemsdata, 0,'ItemSave:'+str(Items_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
         except Exception as e:
+            print("ItemSaveAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, 0, 0,'ItemSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -229,6 +235,7 @@ class M_ItemsViewSecond(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
+                print("ItemSingleGETAPI StartTime : ",datetime.now())
                 Itemsquery = M_Items.objects.filter(id=id)
                 if Itemsquery.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
@@ -406,14 +413,18 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemGSTHSNDetails":GSTHSNDetails,
                             "ItemShelfLife":ShelfLifeDetails
                         })
+                    print("ItemSingleGETAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+                print("ItemSingleGETAPI EndTime : ",datetime.now())
                 log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
+            print("ItemSingleGETAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request,0, 0, "Items Not available",181,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
+            print("ItemSingleGETAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'Item SingleGETmethod :'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
