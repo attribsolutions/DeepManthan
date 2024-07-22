@@ -726,20 +726,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "GSTPercentage": GSTDetails[0]['GSTPercentage'],
                                         "Margin": "",
                                         "MarginValue":"",
-                                        "BasicAmount": "",
-                                        "GSTAmount": "",
-                                        "CGST": "",
-                                        "SGST": "",
-                                        "IGST": "",
-                                        "CGSTPercentage": "",
-                                        "SGSTPercentage": "",
-                                        "IGSTPercentage": "",
-                                        "Amount":"",
+                                        "BasicAmount":y['BasicAmount'],
+                                        "GSTAmount": y['GSTAmount'],
+                                        "CGST": y['CGST'],
+                                        "SGST": y['SGST'],
+                                        "IGST": y['IGST'],
+                                        "CGSTPercentage": y['CGSTPercentage'],
+                                        "SGSTPercentage":y['SGSTPercentage'],
+                                        "IGSTPercentage": y['IGSTPercentage'],
+                                        "Amount":y['Amount'],
                                         "BatchCode":y['BatchCode'],
                                         "LoginName":"",
-                                        "UnitDetails":ParentUnitDetails
-                                        
-        
+                                        "UnitDetails":ParentUnitDetails   
                                         })       
                                     ChallanItemDetails.append(BillofmaterialData[0])        
                         ChallanData.append({
