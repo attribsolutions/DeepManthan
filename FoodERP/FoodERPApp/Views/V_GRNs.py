@@ -390,7 +390,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
-                elif Mode == 2: #Make GRN from Challan
+                elif Mode == 2: #Make GRN from VDCChallan
                     # CustomPrint("Shrutiiiiii")
                     ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
                     # CustomPrint(POOrderIDs)
@@ -405,21 +405,20 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             ChallanItemDetails = list()                                                  
                             for D in x['ChallanReferences']: 
                                 DemandID=D['Demands']
-                                CustomPrint(DemandID)
+                                # CustomPrint(DemandID)
                             DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
                             FullDemandNumber=DemandQuery[0]['FullDemandNumber']
                             DemandDate=DemandQuery[0]['DemandDate']
-                            CustomPrint(DemandQuery.query)
+                            # CustomPrint(DemandQuery.query)
                             # CustomPrint(DemandDate)
                             for y in x['ChallanItems']:
                                 # CustomPrint("yyyyyyy")
                                 # CustomPrint(y)
-                                Qty = y['Quantity']
-                                
+                                Qty = y['Quantity']                                
                                 bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
-                                CustomPrint(bomquery.query)
+                                # CustomPrint(bomquery.query)
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
-                                CustomPrint(Query.query)
+                                # CustomPrint(Query.query)
                                 BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                                 # CustomPrint("PSSSSSS")
                                 # CustomPrint(BOM_Serializer)
@@ -653,7 +652,110 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 
                             })
                         log_entry = create_transaction_logNew(request,InvoiceSerializedata, a['Party']['id'],'Supplier:'+str(a['Party']['id']),75,0,0,0,a['Customer']['id'])
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})    
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]}) 
+                elif Mode == 4: #Make GRN from Challan
+                    
+                    ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)                    
+                    if ChallanQuery.exists():
+                        ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data                                         
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
+                        
+                        ChallanData = list()
+                        for x in ChallanSerializedata:
+                            ChallanItemDetails = list()                                                  
+                            for D in x['ChallanReferences']: 
+                                DemandID=D['Demands']                               
+                            DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
+                            FullDemandNumber=DemandQuery[0]['FullDemandNumber']
+                            DemandDate=DemandQuery[0]['DemandDate']                            
+                            for y in x['ChallanItems']:                                
+                                    Qty = y['Quantity']                                
+                                # bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')                                
+                                # Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])                                
+                                # BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data                                
+                                    BillofmaterialData = list()
+                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                                # for a in BOM_Serializer:
+                                    ParentItem= y['Item']['id']                                    
+                                    Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)                                    
+                                    if Parentquery.exists():
+                                        ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                                        ParentUnitDetails = list()
+                                        for b in ParentUnitdata:
+                                            if b['IsDeleted']== 0 :
+                                                ParentUnitDetails.append({
+                                                "Unit": b['id'],
+                                                "UnitName": b['BaseUnitConversion'],
+                                                })
+                                            
+                                    GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)                                    
+                                    if GSTquery.exists():
+                                        GSTdata =ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                                        GSTDetails = list()
+                                        for c in GSTdata:
+                                            GSTDetails.append({
+                                            "id": c['id'],
+                                            "EffectiveDate": c['EffectiveDate'],
+                                            "GSTPercentage": c['GSTPercentage'],
+                                            "HSNCode": c['HSNCode'],
+                                        })
+                                    MRPquery = M_MRPMaster.objects.filter(Item_id=ParentItem,IsDeleted=0)                                    
+                                    if MRPquery.exists():
+                                        MRPdata =ItemMRPSerializerSecond(MRPquery, many=True).data
+                                        MRPDetails = list()
+                                        for d in MRPdata:
+                                            MRPDetails.append({
+                                            "id": d['id'],
+                                            "EffectiveDate": d['EffectiveDate'],
+                                            "Company": d['Company']['id'],
+                                            "CompanyName": d['Company']['Name'],
+                                            "MRP": d['MRP'],
+                                            })                
+                                    BillofmaterialData.append({
+                                        "Item":ParentItem,
+                                        "ItemName":y['Item']['Name'],
+                                        "Quantity": Qty,
+                                        "MRP":MRPDetails[0]['id'],
+                                        "MRPValue": MRPDetails[0]['MRP'],
+                                        "Rate":y['Rate'], 
+                                        "Unit": y['Unit']['id'],
+                                        "UnitName": y['Unit']['BaseUnitConversion'],
+                                        "BaseUnitQuantity": y['Unit']['BaseUnitQuantity'],
+                                        "GST":GSTDetails[0]['id'],
+                                        "HSNCode": GSTDetails[0]['HSNCode'],
+                                        "GSTPercentage": GSTDetails[0]['GSTPercentage'],
+                                        "Margin": "",
+                                        "MarginValue":"",
+                                        "BasicAmount": "",
+                                        "GSTAmount": "",
+                                        "CGST": "",
+                                        "SGST": "",
+                                        "IGST": "",
+                                        "CGSTPercentage": "",
+                                        "SGSTPercentage": "",
+                                        "IGSTPercentage": "",
+                                        "Amount":"",
+                                        "BatchCode":y['BatchCode'],
+                                        "LoginName":"",
+                                        "UnitDetails":ParentUnitDetails
+                                        
+        
+                                        })       
+                                    ChallanItemDetails.append(BillofmaterialData[0])        
+                        ChallanData.append({
+                            "Supplier": x['Party']['id'],
+                            "SupplierName": x['Customer']['Name'],
+                            "OrderAmount": x['GrandTotal'],
+                            "Customer": x['Customer']['id'],
+                            "InvoiceNumber":" ",                            
+                            "FullDemandNumber":FullDemandNumber,
+                            "DemandDate":DemandDate,
+                            "OrderItem": ChallanItemDetails,
+                        })
+                        # CustomPrint("SPPPPPP")
+                        # CustomPrint(ChallanItemDetails)
+                        log_entry = create_transaction_logNew(request,ChallanSerializedata, 0,'ChallanData',74,0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ChallanData[0]})   
                 else:
                     log_entry = create_transaction_logNew(request, InvoiceSerializedata, a['Party']['id'],'Data Not available',7,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
