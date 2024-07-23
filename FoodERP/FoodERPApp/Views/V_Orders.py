@@ -429,7 +429,7 @@ class T_OrdersView(CreateAPIView):
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(
                         aa['Item'], aa['Quantity'], aa['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
-                    aa['BaseUnitQuantity'] = BaseUnitQuantity
+                    aa['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
                     QtyInNo = UnitwiseQuantityConversion(
                         aa['Item'], aa['Quantity'], aa['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
                     aa['QtyInNo'] = QtyInNo

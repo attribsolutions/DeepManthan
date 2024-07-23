@@ -253,3 +253,13 @@ class T_SPOSDeletedInvoices(models.Model):
 
     class Meta:
         db_table="T_SPOSDeletedInvoices" 
+
+class M_SPOSRateMaster(models.Model):
+    POSRateType = models.IntegerField()   
+    IsChangeRateToDefault =  models.BooleanField(default=False)
+    EffectiveFrom = models.DateField()
+    Rate = models.DecimalField(max_digits=15,decimal_places=2)
+    ItemID = models.IntegerField()
+
+    class Meta:
+        db_table="M_SPOSRateMaster"
