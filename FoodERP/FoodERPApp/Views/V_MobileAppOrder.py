@@ -782,59 +782,65 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                     RetailerAddList=list()
                     for a in data['outlets']:
                         query1 = M_Parties.objects.filter(id=a['DistributorId']).values('State_id','District_id','City_id')
-                        PartySubParty = list()
-                        PartySubParty.append({
-                            "Party":a['DistributorId'],
-                            "Route": "",
-                            "CreatedBy":430,
-                            "UpdatedBy":430,  
-                        })
-                        PartyAddress = list()
-                        PartyAddress.append({
-                            "Address": a['Address'],
-                            "FSSAINo": a['FSSAINumber'],
-                            "FSSAIExipry": a['FSSAIExpiry'],
-                            "IsDefault": True, 
-                        })
-                        PartyPrefix = list()
-                        PartyPrefix.append({
-                            "Orderprefix": "PO",
-                            "Invoiceprefix": "IN",
-                            "Grnprefix": "GRN",
-                            "Receiptprefix": "RE",
-                            "WorkOrderprefix": "",
-                            "MaterialIssueprefix": "",
-                            "Demandprefix": "",
-                            "IBChallanprefix": "",
-                            "IBInwardprefix": "",
-                            "PurchaseReturnprefix": "PR",
-                            "Creditprefix": "CR",
-                            "Debitprefix": "DR" 
-                        })
-                        
-                        RetailerAddList.append(
-                            {
-                                "Name":a['RetailerName'],
-                                "PriceList": 3,
-                                "PartyType": 11,
-                                "Company": 3,
-                                "PAN": a['PANNumber'],
-                                "Email":a['EmailAddress'],
-                                "MobileNo": a['MobileNumber'],
-                                "Latitude": a['Latitude'],
-                                "Longitude": a['Longitude'],
-                                "GSTIN": a['GSTNumber'],
-                                "isActive": a['IsActive'],
+                        if query1:
+
+                            PartySubParty = list()
+                            PartySubParty.append({
+                                "Party":a['DistributorId'],
+                                "Route": "",
                                 "CreatedBy":430,
-                                "UpdatedBy":430,
-                                "IsApprovedParty":1,
-                                "State":query1[0]['State_id'], #Compensary
-                                "District":query1[0]['District_id'], #Compensary
-                                "City":query1[0]['City_id'], #Compensary
-                                "PartySubParty":PartySubParty,
-                                "PartyAddress":PartyAddress,
-                                "PartyPrefix":PartyPrefix
+                                "UpdatedBy":430,  
                             })
+                            PartyAddress = list()
+                            PartyAddress.append({
+                                "Address": a['Address'],
+                                "FSSAINo": a['FSSAINumber'],
+                                "FSSAIExipry": a['FSSAIExpiry'],
+                                "IsDefault": True, 
+                            })
+                            PartyPrefix = list()
+                            PartyPrefix.append({
+                                "Orderprefix": "PO",
+                                "Invoiceprefix": "IN",
+                                "Grnprefix": "GRN",
+                                "Receiptprefix": "RE",
+                                "WorkOrderprefix": "",
+                                "MaterialIssueprefix": "",
+                                "Demandprefix": "",
+                                "IBChallanprefix": "",
+                                "IBInwardprefix": "",
+                                "PurchaseReturnprefix": "PR",
+                                "Creditprefix": "CR",
+                                "Debitprefix": "DR" 
+                            })
+                            
+                            RetailerAddList.append(
+                                {
+                                    "Name":a['RetailerName'],
+                                    "PriceList": 3,
+                                    "PartyType": 11,
+                                    "Company": 3,
+                                    "PAN": a['PANNumber'],
+                                    "Email":a['EmailAddress'],
+                                    "MobileNo": a['MobileNumber'],
+                                    "Latitude": a['Latitude'],
+                                    "Longitude": a['Longitude'],
+                                    "GSTIN": a['GSTNumber'],
+                                    "isActive": a['IsActive'],
+                                    "CreatedBy":430,
+                                    "UpdatedBy":430,
+                                    "IsApprovedParty":1,
+                                    "State":query1[0]['State_id'], #Compensary
+                                    "District":query1[0]['District_id'], #Compensary
+                                    "City":query1[0]['City_id'], #Compensary
+                                    "PartySubParty":PartySubParty,
+                                    "PartyAddress":PartyAddress,
+                                    "PartyPrefix":PartyPrefix
+                                })
+                        else:
+                            log_entry = create_transaction_logNew(request, data, 0,'Invalid DistributorId',170,0)
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'Invalid DistributorId'})
+
                     inserted_retailerlist = list()     
                     for aa in RetailerAddList:
                         Retailer_serializer = RetailerAddFromMobileAppSerializer(data=aa)
@@ -853,7 +859,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
             log_entry = create_transaction_logNew(request,data,0,'RetailerAddedFromMobileApp:'+str(e),170,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e) })
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e) })
         
         
         
