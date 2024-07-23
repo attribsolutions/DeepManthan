@@ -86,6 +86,7 @@ class ItemListView(CreateAPIView):
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
+                (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, NULL, NULL),0.0)))RateEffectiveDate,                          
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
                 ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence
@@ -101,7 +102,14 @@ class ItemListView(CreateAPIView):
                 for row in query:
                     count=count+1
                     Ratelist=list()
-                    queryforRate =M_SPOSRateMaster.objects.filter(Item=row.id)
+                    Ratelist.append({
+                            "Rate": row.Rate,
+                            "POSRateType": 1,
+                            "IsChangeRateToDefault": 1,
+                            "EffectiveFrom":row.RateEffectiveDate
+                    })
+
+                    queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id)
                     for RateRow in queryforRate:
                         Ratelist.append({	
                             "Rate": RateRow.Rate,
