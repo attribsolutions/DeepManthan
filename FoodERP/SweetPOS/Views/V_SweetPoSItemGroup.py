@@ -66,10 +66,13 @@ class ItemGroupandSubgroupView(CreateAPIView):
                         }
                         group_data["Itemsgroup"].append(subgroup_data)
                     response_data["data"].append(group_data)
+                log_entry = create_transaction_logNew(request, 0, 0,'ItemGroupandSubgroup',391,0)
                 return Response(response_data)
             else:
+                log_entry = create_transaction_logNew(request,0, 0, "Item Not available",391,0)
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemGroupandSubgroup:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
 
 
@@ -138,9 +141,11 @@ class ItemListView(CreateAPIView):
                         "DisplayIndex" :  row.ItemSequence  
                     } )
                     
-
+                log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList',392,0)
                 return Response({"status": True, "status_code": 200, "count": count, "data": item_data }, status=200)
             else:
+                log_entry = create_transaction_logNew(request,0, DivisionID, "ItemList Not available",392,0)
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
