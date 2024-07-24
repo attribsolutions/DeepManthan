@@ -88,7 +88,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     from O_BatchWiseLiveStock 
     join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
     join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
-    join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
+    left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
     where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])
