@@ -69,11 +69,11 @@ class SPOSInvoiceView(CreateAPIView):
                             #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                             # else:
                             ItemId=InvoiceItem['ERPItemID']
-                            
-                            if InvoiceItem['UnitID'] == 1:
-                                unit=2
-                            else: 
-                                unit=1    
+                            unit= int(InvoiceItem['UnitID'])
+                            # if InvoiceItem['UnitID'] == 1:
+                            #     unit=2
+                            # else: 
+                            #     unit=1    
                             
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
