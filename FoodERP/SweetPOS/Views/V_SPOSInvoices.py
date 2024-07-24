@@ -9,7 +9,7 @@ from rest_framework.authentication import BasicAuthentication
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
 from SweetPOS.Serializer.S_SPOSInvoices import SPOSInvoiceSerializer
-from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
+# from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
 
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 
