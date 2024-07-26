@@ -70,11 +70,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     '' AS ApplicableOfTaxRate,  '' AS ECommerceGSTIN,
                     TC_InvoiceItems.GSTPercentage AS Rate, SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,TC_InvoiceItems.IGST,TC_InvoiceItems.CGST,
-                    TC_InvoiceItems.SGST,'' AS IRN ,'' AS IRNDate,'0' AS CessAmount
+                    TC_InvoiceItems.SGST,COALESCE(TC_InvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_InvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,'0' AS CessAmount
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
                     JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
                     JOIN M_States ON M_States.id = M_Parties.State_id
+                    Left JOIN TC_InvoiceUploads ON TC_InvoiceUploads.Invoice_id=T_Invoices.id
                     WHERE Party_id = %s AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, T_Invoices.id, T_Invoices.InvoiceDate,
                     M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage
@@ -84,11 +85,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     '' AS ApplicableOfTaxRate,  '' AS ECommerceGSTIN,
-                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,'' AS IRN ,'' AS IRNDate,'0' AS CessAmount
+                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,'0' AS CessAmount
                     FROM SweetPOS.T_SPOSInvoices X 
                     JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
                     JOIN M_Parties ON M_Parties.id = X.Customer
                     JOIN M_States ON M_States.id = M_Parties.State_id
+                    Left JOIN SweetPOS.TC_SPOSInvoiceUploads ON SweetPOS.TC_SPOSInvoiceUploads.Invoice_id=X.id
                     WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, X.id, X.InvoiceDate,
                     M_States.id, M_States.Name, Y.GSTPercentage''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
@@ -196,11 +198,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     '' AS ApplicableOfTaxRate,  '' AS ECommerceGSTIN,
                     TC_InvoiceItems.GSTPercentage AS Rate, SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,TC_InvoiceItems.IGST,TC_InvoiceItems.CGST,
-                    TC_InvoiceItems.SGST,'' AS IRN ,'' AS IRNDate,'0' AS CessAmount
+                    TC_InvoiceItems.SGST,COALESCE(TC_InvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_InvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,'0' AS CessAmount
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
                     JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
                     JOIN M_States ON M_States.id = M_Parties.State_id
+                    Left JOIN TC_InvoiceUploads ON TC_InvoiceUploads.Invoice_id=T_Invoices.id
                     WHERE Party_id = %s AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, T_Invoices.id, T_Invoices.InvoiceDate,
                     M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage
@@ -210,11 +213,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     '' AS ApplicableOfTaxRate,  '' AS ECommerceGSTIN,
-                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,'' AS IRN ,'' AS IRNDate,'0' AS CessAmount
+                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,'0' AS CessAmount
                     FROM SweetPOS.T_SPOSInvoices X 
                     JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
                     JOIN M_Parties ON M_Parties.id = X.Customer
                     JOIN M_States ON M_States.id = M_Parties.State_id
+                    Left JOIN SweetPOS.TC_SPOSInvoiceUploads ON SweetPOS.TC_SPOSInvoiceUploads.Invoice_id=X.id
                     WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, X.id, X.InvoiceDate,
                     M_States.id, M_States.Name, Y.GSTPercentage''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
@@ -407,7 +411,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                 'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,'' ApplicableOfTaxRate,
                                 TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount,TC_CreditDebitNoteItems.IGST,
                                 TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGST,
-                                TC_CreditDebitNoteUploads.Irn AS INR,TC_CreditDebitNoteUploads.EINvoiceCreatedON AS INRDate 
+                                COALESCE(TC_CreditDebitNoteUploads.Irn, '') AS IRN, 
+                                COALESCE(TC_CreditDebitNoteUploads.EINvoiceCreatedON ,'')AS EINvoiceCreatedON 
                                 FROM T_CreditDebitNotes
                                 JOIN TC_CreditDebitNoteItems ON TC_CreditDebitNoteItems.CRDRNote_id = T_CreditDebitNotes.id
                                 JOIN M_Parties ON M_Parties.id = T_CreditDebitNotes.Customer_id

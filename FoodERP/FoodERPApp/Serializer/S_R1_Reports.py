@@ -237,8 +237,8 @@ class CDNRSerializer1(serializers.Serializer):
     CGST=FloatDecimalField()
     SGST=FloatDecimalField()
     CessAmount=serializers.CharField(max_length=100)    
-    IRN = serializers.CharField(source='related_model.Irn', read_only=True) 
-    IRNDate=serializers.CharField(source='related_model.EINvoiceCreatedON', read_only=True)  
+    IRN = serializers.CharField(max_length=500) 
+    EINvoiceCreatedON=serializers.CharField(max_length=100)  
       
     def to_representation(self, obj):
         representation = super().to_representation(obj)
@@ -257,8 +257,8 @@ class CDNRSerializer1(serializers.Serializer):
         representation ['Central Tax (₹)'] = representation.pop('CGST')
         representation ['State Tax (₹)'] = representation.pop('SGST')
         representation ['Cess Amount'] = representation.pop('CessAmount')
-        representation['IRN'] = representation.pop('IRN',None)
-        representation ['IRN Date'] = representation.pop('IRNDate',None)
+        representation['IRN'] = representation.pop('IRN')
+        representation ['IRN Date'] = representation.pop('EINvoiceCreatedON')
         return representation 
     # class Meta:
     #     model = T_CreditDebitNotes
