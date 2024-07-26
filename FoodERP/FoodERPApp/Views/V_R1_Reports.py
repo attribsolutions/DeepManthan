@@ -319,7 +319,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     '' AS ApplicableOfTaxRate,  '' AS ECommerceGSTIN,
                     TC_InvoiceItems.GSTPercentage AS Rate, SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,TC_InvoiceItems.IGST,TC_InvoiceItems.CGST,
-                    TC_InvoiceItems.SGST,'' AS IRN ,'' AS IRNDate,'0' AS CessAmount
+                    TC_InvoiceItems.SGST,'0' AS CessAmount
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
                     JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
@@ -330,10 +330,10 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     UNION
                     SELECT X.id, 'OE' Type,M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType,
-                    X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
+                    X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS TaxableValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     '' AS ApplicableOfTaxRate,  '' AS ECommerceGSTIN,
-                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,'' AS IRN ,'' AS IRNDate,'0' AS CessAmount
+                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,'0' AS CessAmount
                     FROM SweetPOS.T_SPOSInvoices X 
                     JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
                     JOIN M_Parties ON M_Parties.id = X.Customer
@@ -341,8 +341,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, X.id, X.InvoiceDate,
                     M_States.id, M_States.Name, Y.GSTPercentage''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
-                B2CS3 = B2B3Serializer1(B2CSquery3, many=True).data
-                # CustomPrint(B2CSquery3.query)
+                B2CS3 = B2CSSerializer(B2CSquery3, many=True).data
+                CustomPrint(B2CSquery3.query)
                 
                 if not B2B1:
                     B2B1 = [{
