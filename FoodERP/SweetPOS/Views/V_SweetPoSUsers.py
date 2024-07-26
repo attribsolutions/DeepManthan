@@ -13,7 +13,7 @@ from rest_framework.authentication import BasicAuthentication
 from FoodERPApp.models import *
 from ..Serializer.S_SweetPoSUsers import *
 from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
-from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
+
 
 
 class SweetPOSUsersView(CreateAPIView):
@@ -78,13 +78,11 @@ class SweetPOSUsersView(CreateAPIView):
     
 class SweetPOSUsersSecondView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+    
     @transaction.atomic()
     def get(self, request, Division_id=0):
         try:
             with transaction.atomic():
-                user = BasicAuthenticationfunction(request)
-                if user is not None:
                     query = M_SweetPOSUser.objects.raw(f""" SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
                                 FROM SweetPOS.M_SweetPOSUser SU
                                 JOIN SweetPOS.M_SweetPOSRoles  ON SU.RoleID = SweetPOS.M_SweetPOSRoles.id
