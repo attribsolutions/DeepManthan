@@ -293,7 +293,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     }
                 if Customer:
                     SPOS_filter_args['Customer'] = Customer
-                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(IsDeleted = 0).filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
@@ -302,7 +302,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
                 )
     
-                
+                # print(SposInvoices_query)
                 Spos_Invoices = []
                 for b in SposInvoices_query:
                     parties = M_Parties.objects.filter(id=Party).values('Name')
