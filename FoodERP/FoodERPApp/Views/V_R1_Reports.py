@@ -36,10 +36,10 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage
                     UNION
                     SELECT X.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
-                                                  M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,
+                                                  M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, 
                     X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
-                    '' AS ApplicableOfTaxRate, 'Regular' AS InvoiceType, 
+                    '' AS ApplicableOfTaxRate, 
                     Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
                     '0' AS CessAmount
                     FROM SweetPOS.T_SPOSInvoices X 
