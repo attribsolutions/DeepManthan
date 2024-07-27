@@ -505,7 +505,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                 else:
                                     bb=aaaa
 
-                                q = M_Parties.objects.filter(id=a['Supplier']['id'],PartyType=a['Supplier']['PartyType']).select_related(
+                                q = M_Parties.objects.filter(id=a['Customer']['id'],PartyType=a['Customer']['PartyType']).select_related(
                                 'PartyType').annotate(IsFranchises=F('PartyType__IsFranchises')).values('IsFranchises')
                                 if q[0]['IsFranchises'] != 0:
                                     GroupTypeID = 5
