@@ -430,12 +430,12 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
                     for row in QueryForMaxSalesID:
                         maxSaleID=row.MaxSaleID
 
-                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+maxSaleID,389,0,0,0,ClientID)
+                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(maxSaleID),389,0,0,0,ClientID)
                     return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})      
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})      
         
 
 
