@@ -191,7 +191,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_States ON M_States.id=b.State_id
                 where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
                 and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))
-                group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage
+                group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage,InvoiceDate
                 UNION
                 SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, sum(X.GrandTotal) AS InvoiceValue,
                 Y.GSTPercentage AS  ApplicableOfTaxRate ,sum(Y.BasicAmount) TaxableValue ,SUM(Y.IGST) AS IGST,SUM(Y.CGST) AS CGST, SUM(Y.SGST) AS SGST ,'0' CessAmount
@@ -201,7 +201,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_States ON M_States.id=b.State_id
                 where X.Party=%s and X.InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
                 and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000 AND X.IsDeleted=0))
-                group  by M_States.id,M_States.Name,Y.GSTPercentage''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))                                
+                group  by M_States.id,M_States.Name,Y.GSTPercentage,X.InvoiceDate''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))                                
                 B2CS2 = B2CSSerializer(B2CSquery, many=True).data
                 
                 B2CSquery2 = T_Invoices.objects.raw('''
