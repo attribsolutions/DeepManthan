@@ -474,7 +474,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     JOIN fooderp.MC_ItemUnits ON fooderp.M_Items.id =  fooderp.MC_ItemUnits.Item_id
                                                                     JOIN fooderp.M_Units ON fooderp.MC_ItemUnits.UnitID_id = fooderp.M_Units.id
                                                                     WHERE sweetpos.T_SPOSInvoices.InvoiceDate=  '2024-07-15' AND sweetpos.T_SPOSInvoices.Party={id}
-                                                                    GROUP BY sweetpos.TC_SPOSInvoiceItems.Item, fooderp.M_Units.Name
+                                                                    GROUP BY sweetpos.TC_SPOSInvoiceItems.Item
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''')
                 
                         TopSaleItems_List = []
