@@ -505,7 +505,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                 else:
                                     bb=aaaa
 
-                                q = M_Parties.objects.filter(id=a['Supplier']['id'],PartyType=a['Supplier']['PartyType']).select_related(
+                                q = M_Parties.objects.filter(id=a['Customer']['id'],PartyType=a['Customer']['PartyType']).select_related(
                                 'PartyType').annotate(IsFranchises=F('PartyType__IsFranchises')).values('IsFranchises')
                                 if q[0]['IsFranchises'] != 0:
                                     GroupTypeID = 5
@@ -514,7 +514,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                 q1 = MC_ItemGroupDetails.objects.filter(GroupType=GroupTypeID, Item=b['Item']['id']
                                 ).select_related('Group', 'SubGroup').annotate(
                                     GroupName=F('Group__Name'),
-                                    SubGroupName=F('SubGroup__Name')).values('GroupName', 'SubGroupName')
+                                    SubGroupName=F('SubGroup__Name')).order_by('Group__Sequence', 'SubGroup__Sequence','ItemSequence').values('GroupName', 'SubGroupName')
                                 if q1.exists():
                                     Group = q1[0]['GroupName']
                                     SubGroup = q1[0]['SubGroupName']
