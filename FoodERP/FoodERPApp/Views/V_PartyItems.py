@@ -137,6 +137,7 @@ class ChannelWiseItemsView(CreateAPIView):
             with transaction.atomic():
                 Items_data = JSONParser().parse(request)                
                 Items_Serializer = M_ChannelWiseItemsSerializer(data=Items_data, many=True)
+                
             if Items_Serializer.is_valid():
                    
                 id = Items_Serializer.data[0]['PartyType']
@@ -147,7 +148,8 @@ class ChannelWiseItemsView(CreateAPIView):
                 PartyTypeID1=str(Q11[0]['DefaultValue'])
                 PartyTypeID1_list = [int(x) for x in PartyTypeID1.split(",")]
                 
-                if id in PartyTypeID1_list:                    
+                if id in PartyTypeID1_list:                                     
+                   
                     PartysID= M_Parties.objects.filter(PartyType_id=id).values('id')
                     # MC_PartyItem_data = MC_PartyItems.objects.filter(Party__in=PartysID)
                     MC_PartyItems.objects.filter(Party__in=PartysID).delete()                   
@@ -158,11 +160,11 @@ class ChannelWiseItemsView(CreateAPIView):
                             Party=  PartyID['id']                              
                             PartyItems_data=[] 
                             party_item = {"Item": item_value,"Party": Party, "IsAvailableForOrdering": 0}
-                            PartyItems_data.append(party_item)                             
-                            CustomPrint(PartyItems_data)                                      
-                PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data, many=True)                        
-                if PartyItems_serializer.is_valid():   
-                    Item = PartyItems_serializer.save()                       
+                            PartyItems_data.append(party_item)
+                            # CustomPrint(PartyItems_data)        
+                            PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data, many=True)
+                            if PartyItems_serializer.is_valid():                               
+                                Item = PartyItems_serializer.save()                       
                 LastInsertID = ChannelWiseItem[0].id
                 log_entry = create_transaction_logNew(request,Items_data,0,'PartyTypeID:'+str(id)+','+'TransactionID:'+str(LastInsertID),183,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully','TransactionID':LastInsertID, 'Data': []})

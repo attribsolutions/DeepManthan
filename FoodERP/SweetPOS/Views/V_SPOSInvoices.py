@@ -9,6 +9,7 @@ from rest_framework.authentication import BasicAuthentication
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
 from SweetPOS.Serializer.S_SPOSInvoices import SPOSInvoiceSerializer
+# from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
 
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 
@@ -69,11 +70,11 @@ class SPOSInvoiceView(CreateAPIView):
                             #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                             # else:
                             ItemId=InvoiceItem['ERPItemID']
-                            
-                            if InvoiceItem['UnitID'] == 1:
-                                unit=2
-                            else: 
-                                unit=1    
+                            unit= int(InvoiceItem['UnitID'])
+                            # if InvoiceItem['UnitID'] == 1:
+                            #     unit=2
+                            # else: 
+                            #     unit=1    
                             
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
@@ -127,8 +128,8 @@ class SPOSInvoiceView(CreateAPIView):
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
         except Exception as e:
             
-            log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
 
@@ -161,7 +162,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})            
         
 
 
@@ -361,13 +362,13 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "BankData":BankData
                                                         
                         })
-                    # log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a.Party']['id'], A+','+"InvoiceID:"+str(id),int(B),0,0,0,a.Customer']['id'])
+                    log_entry = create_transaction_logNew(request,0, a.Party['id'], A+','+"InvoiceID:"+str(id),387,int(B),0,0,a.Customer['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-                # log_entry = create_transaction_logNew(request, {'InvoiceID':id}, a.Party']['id'], "Invoice Not available",int(B),0,0,0,a.Customer']['id'])
+                log_entry = create_transaction_logNew(request,0, a.Party['id'], "Invoice Not available",387,int(B),0,0,a.Customer['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
         
 
 class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
@@ -380,11 +381,11 @@ class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
         try:
             with transaction.atomic():
                 VehicleUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(id=CustomerVehicledata['InvoiceID']).update(Vehicle=CustomerVehicledata['vehicle'],Customer=CustomerVehicledata['Customer'])
-                log_entry = create_transaction_logNew(request, {'POSInvoiceID':id}, 0,'',67,0)
+                log_entry = create_transaction_logNew(request,CustomerVehicledata,0, {'POSInvoiceID':id},67,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Customer and Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'UpdateCustomerVehiclePOSInvoice:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})        
+            log_entry = create_transaction_logNew(request, CustomerVehicledata, 0,'UpdateCustomerVehiclePOSInvoice:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})        
         
 class DeleteInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -399,17 +400,16 @@ class DeleteInvoiceView(CreateAPIView):
                 
                     InvoiceIDs=list()
                     for DeleteInvoicedata in DeleteInvoicedatas:
-                        print(DeleteInvoicedata)
-                        # InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).update(IsDeleted=1)
+                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).update(IsDeleted=1)
                         ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'])
                         ss.save()
                         
                         InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
-                    # log_entry = create_transaction_logNew(request, {'POSDeletedInvoiceID':InvoiceIDs}, 0,'',67,0)
+                    log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'POSDeletedInvoiceID':InvoiceIDs}, 388,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
+            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})       
         
 
 class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
@@ -430,10 +430,68 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
                     for row in QueryForMaxSalesID:
                         maxSaleID=row.MaxSaleID
 
-                    # log_entry = create_transaction_logNew(request, 0, DivisionID,'',384,0,0,0,ClientID)
+                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(maxSaleID),389,0,0,0,ClientID)
                     return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
-            # log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})            
+            log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})      
         
+
+
+
+
+
+
+
+
+# class TopSaleItemsOfFranchiseView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
+#     # authentication__Class = JSONWebTokenAuthentication
+
+#     @transaction.atomic()
+#     def get(self,request):
+#         try:
+#             with transaction.atomic():
+#                 query = TC_SPOSInvoiceItems.objects.raw('''SELECT sweetpos.TC_SPOSInvoiceItems.id,
+#                         sweetpos.TC_SPOSInvoiceItems.Item,
+#                         fooderp.M_Items.Name as ItemName,
+#                         SUM(sweetpos.TC_SPOSInvoiceItems.Amount) as TotalAmount,
+#                         SUM(sweetpos.TC_SPOSInvoiceItems.Quantity) as TotalQuantity
+#                     FROM 
+#                         sweetpos.TC_SPOSInvoiceItems 
+#                     INNER JOIN 
+#                         sweetpos.T_SPOSInvoices ON sweetpos.TC_SPOSInvoiceItems.Invoice_id = sweetpos.T_SPOSInvoices.id
+#                     INNER JOIN 
+#                         fooderp.M_Items  ON sweetpos.TC_SPOSInvoiceItems.Item = fooderp.M_Items.id
+#                     WHERE 
+#                         sweetpos.T_SPOSInvoices.InvoiceDate = '2024-07-16'
+                        
+#                         AND sweetpos.T_SPOSInvoices.Party = 19803  
+#                     GROUP BY 
+#                         sweetpos.TC_SPOSInvoiceItems.Item,
+#                         fooderp.M_Items.Name
+#                     ORDER BY 
+#                         TotalAmount DESC, 
+#                         TotalQuantity DESC
+#                         LIMIT 5
+#                     ''')
+
+#                 if query:
+#                     SaleItem_serializer = SaleItemSerializer(query, many=True).data
+#                     SaleItem_List = list()
+#                     for a in SaleItem_serializer:
+#                         SaleItem_List.append({
+#                             "Item" : a["Item"],
+#                             "ItemName":a['ItemName'],
+#                             "TotalAmount":a['TotalAmount'],
+#                             "TotalQuantity":a['TotalQuantity'],
+                            
+#                         })
+#                     log_entry = create_transaction_logNew(request,SaleItem_serializer,0,'Top Sale Items',390,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :SaleItem_List})
+#                 log_entry = create_transaction_logNew(request, SaleItem_serializer,0,'SaleItem not available',390,0)
+#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'SaleItem not available', 'Data' : []})
+#         except Exception as e:
+#             log_entry = create_transaction_logNew(request, 0,0,'TopSaleItems:'+str(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]}) 

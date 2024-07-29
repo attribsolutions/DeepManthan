@@ -221,8 +221,7 @@ FROM
                         "TotalTCS": TotalTCS,
                         "InvoiceItems": PartyLedgerItemDetails
                     })
-                log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(
-                    FromDate)+','+'To:'+str(ToDate), 206, 0, FromDate, ToDate, Customer)
+                log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 206, 0, FromDate, ToDate, Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
             log_entry = create_transaction_logNew( request, Orderdata, 0, 'PartyLedgerReport'+str(e), 33, 0)
@@ -1702,19 +1701,19 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 Party = Data['Party']
                 Item = Data['Item']
 
-                Invoicequery = '''Select T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
-                        1 ClientID, M_Items.CItemID CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
-                        A.Rate, A.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode,M_Items.IsCBMItem
-                        from T_Invoices
-                        join TC_InvoiceItems A on A.Invoice_id = T_Invoices.id 
-                        join M_Parties on M_Parties.id = T_Invoices.Party_id
-                        join M_Items  on M_Items.id = A.Item_id
-                        join MC_ItemUnits on MC_ItemUnits.id = A.Unit_id
-                        join M_Units on M_Units.id = MC_ItemUnits.UnitID_id
-                        where T_Invoices.InvoiceDate between %s and %s '''
+                # Invoicequery = '''Select T_Invoices.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, T_Invoices.InvoiceDate SaleDate, 
+                #         0 ClientID, M_Items.CItemID CItemID, T_Invoices.FullInvoiceNumber BillNumber, M_Items.Name ItemName, A.Quantity, M_Units.Name UnitName,
+                #         A.Rate, A.Amount,  M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode,M_Items.IsCBMItem
+                #         from T_Invoices
+                #         join TC_InvoiceItems A on A.Invoice_id = T_Invoices.id 
+                #         join M_Parties on M_Parties.id = T_Invoices.Party_id
+                #         join M_Items  on M_Items.id = A.Item_id
+                #         join MC_ItemUnits on MC_ItemUnits.id = A.Unit_id
+                #         join M_Units on M_Units.id = MC_ItemUnits.UnitID_id
+                #         where T_Invoices.InvoiceDate between %s and %s '''
                 
                 SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
-                        1 ClientID, "" CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.Rate, Y.Amount, "" IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
+                        X.ClientID, M_Items.CItemID , X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.MRPValue Rate, Y.Amount, M_Items.IsCBMItem, M_Parties.MobileNo, M_Items.SAPItemCode MaterialSAPCode
                         from SweetPOS.T_SPOSInvoices X
                         join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
                         join FoodERP.M_Parties on M_Parties.id = X.Party
@@ -1725,29 +1724,35 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 
                 parameters = [FromDate,ToDate]
                 if int(Party) > 0 and int(Item) > 0: 
-                    Invoicequery += ' AND T_Invoices.Party_id = %s AND A.Item_id = %s'
+                    # Invoicequery += ' AND T_Invoices.Party_id = %s AND A.Item_id = %s'
                     SPOSInvoicequery += ' AND X.Party = %s AND Y.Item = %s'
                     parameters.extend([Party, Item])
 
                 elif int(Party) == 0:
-                    Invoicequery += ' AND A.Item_id = %s'
+                    # Invoicequery += ' AND A.Item_id = %s'
                     SPOSInvoicequery += ' AND Y.Item = %s'
                     parameters.append(Item)
 
                 elif int(Item) == 0:
-                    Invoicequery += 'AND T_Invoices.Party_id = %s'
+                    # Invoicequery += 'AND T_Invoices.Party_id = %s'
                     SPOSInvoicequery += 'AND X.Party = %s'
                     parameters.append(Party)
 
-                q1 = T_Invoices.objects.raw(Invoicequery,parameters)
+                    
+                # q1 = T_Invoices.objects.raw(Invoicequery,parameters)
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
 
-                combined_sale = list(q1) + list(q2)
+                # combined_sale = list(q1) + list(q2)
+                combined_sale =  list(q2)
 
                 if combined_sale:
                     
                     ReportdataList = []
-                    for a in combined_sale:
+                    for a in combined_sale:      
+                        if a.IsCBMItem == 1:
+                            aa="Yes"
+                        else:
+                            aa= "No"
                         ReportdataList.append({
                         "id":a.id,
                         "FranchiseName": a.FranchiseName,
@@ -1762,7 +1767,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "UnitName": a.UnitName,
                         "Rate": a.Rate,
                         "Amount": a.Amount,
-                        "IsCBMItem": a.IsCBMItem,
+                        "IsCBMItem": aa,
                         "MobileNo": a.MobileNo,
                         "MaterialSAPCode": a.MaterialSAPCode
                         })

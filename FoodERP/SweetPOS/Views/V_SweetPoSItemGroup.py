@@ -66,10 +66,13 @@ class ItemGroupandSubgroupView(CreateAPIView):
                         }
                         group_data["Itemsgroup"].append(subgroup_data)
                     response_data["data"].append(group_data)
+                log_entry = create_transaction_logNew(request, 0, 0,'ItemGroupandSubgroup',391,0)
                 return Response(response_data)
             else:
+                log_entry = create_transaction_logNew(request,0, 0, "Item Not available",391,0)
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemGroupandSubgroup:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
 
 
@@ -83,9 +86,10 @@ class ItemListView(CreateAPIView):
             if user is not None:
                 
                 query = M_Items.objects.raw(f"""SELECT i.id , i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
-                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
+                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
+                (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, NULL, NULL),0.0)))RateEffectiveDate,                          
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
                 ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence
@@ -100,6 +104,23 @@ class ItemListView(CreateAPIView):
                 item_data=list()
                 for row in query:
                     count=count+1
+                    Ratelist=list()
+                    Ratelist.append({
+                            "Rate": row.Rate,
+                            "POSRateType": 1,
+                            "IsChangeRateToDefault": False,
+                            "EffectiveFrom":row.RateEffectiveDate
+                    })
+
+                    queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id)
+                    for RateRow in queryforRate:
+                        Ratelist.append({	
+                            "Rate": RateRow.Rate,
+                            "POSRateType": RateRow.POSRateType,
+                            "IsChangeRateToDefault": RateRow.IsChangeRateToDefault,
+                            "EffectiveFrom":RateRow.EffectiveFrom
+                        })
+                    
                     
                     item_data.append({
                         "FoodERPID": row.id,
@@ -109,7 +130,7 @@ class ItemListView(CreateAPIView):
                         "Name": row.Name,
                         "ItemCode": row.ItemCode,
                         "GST": row.GST,
-                        "Rate": row.Rate,
+                        "Rate": Ratelist,
                         "UnitID": row.UnitID,
                         "ISChitaleSupplier": True,  
                         "IsFranchisesPOSItem": row.IsFranchisesItem,
@@ -120,9 +141,11 @@ class ItemListView(CreateAPIView):
                         "DisplayIndex" :  row.ItemSequence  
                     } )
                     
-
+                log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList',392,0)
                 return Response({"status": True, "status_code": 200, "count": count, "data": item_data }, status=200)
             else:
+                log_entry = create_transaction_logNew(request,0, DivisionID, "ItemList Not available",392,0)
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList:'+str(e),33,0)
             return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)

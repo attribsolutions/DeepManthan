@@ -158,32 +158,39 @@ class WorkOrderView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                MultipleWorkOrderData = JSONParser().parse(request)
-                CustomPrint(MultipleWorkOrderData)
-                for WorkOrderData in MultipleWorkOrderData:
-                    Party = WorkOrderData['Party']
-                    WorkOrderDate = WorkOrderData['WorkOrderDate']
-                    #==================Max Work Order ==================
-                    a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
-                    # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                    WorkOrderData['WorkOrderNumber'] = a
-                    '''Get Order Prifix '''
-                    b = GetPrifix.GetWorkOrderPrifix(Party)
-                    WorkOrderData['FullWorkOrderNumber'] = b+""+str(a)                
-                    #=====================================================
-                    # WorkOrderItems= WorkOrderData['WorkOrderItems']
-                    # for WorkOrderItem in WorkOrderItems:
-                    WorkOrderData['Status']=0
-                    WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
-                    WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity']
-               
-                    WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrderData)
-                    if WorkOrder_Serializer.is_valid():
-                        WorkOrder_Serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Save Successfully', 'Data': []})
-                else:
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
+                        
+                        MultipleWorkOrderData = JSONParser().parse(request)  
+                        if not isinstance(MultipleWorkOrderData, list):
+                            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Expected a list of items', 'Data': []})                      
+                        # CustomPrint(MultipleWorkOrderData)
+                        WorkOrders=[]
+                        for index,WorkOrderData in enumerate(MultipleWorkOrderData):
+                            # CustomPrint(WorkOrderData)
+                            Party = WorkOrderData['Party']
+                            WorkOrderDate = WorkOrderData['WorkOrderDate']
+                            #==================Max Work Order ==================
+                            a = GetMaxNumber.GetWorkOrderNumber(Party, WorkOrderDate)
+                            # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[a] })
+                            aa=index+a                            
+                            WorkOrderData['WorkOrderNumber'] = aa
+                            '''Get Order Prifix '''
+                            b = GetPrifix.GetWorkOrderPrifix(Party)
+                            WorkOrderData['FullWorkOrderNumber'] = b+""+str(aa)                
+                            #=====================================================
+                            WorkOrderData['Status']=0
+                            WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
+                            WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity'] 
+                            WorkOrders.append(WorkOrderData)
+                            # CustomPrint(WorkOrders)
+                        # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[WorkOrders] })
+                        WorkOrder_Serializer = WorkOrderSerializer(data=WorkOrders,many=True) 
+                        if WorkOrder_Serializer.is_valid():                           
+                            # work_order_instances.append(WorkOrder_Serializer)
+                            WorkOrder_Serializer.save()
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Save Successfully', 'Data': []})
+                        else:
+                            transaction.set_rollback(True)
+                            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
