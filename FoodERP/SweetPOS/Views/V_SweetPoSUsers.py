@@ -35,33 +35,36 @@ class SweetPOSUsersView(CreateAPIView):
             log_entry = create_transaction_logNew(request, User_data, 0,'UserSave:'+str(e),33,0)
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
  
- 
+class SweetPOSSingleUserView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,id=0):
         try:
             with transaction.atomic():
-                query = """ SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
-                            FROM SweetPOS.M_SweetPOSUser SU
-                            JOIN SweetPOS.M_SweetPOSRoles ON SweetPOS.SU.RoleID = SweetPOS.M_SweetPOSRoles.id"""
+                query =  M_SweetPOSUser.objects.raw(f'''SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
+                            FROM sweetpos.M_SweetPOSUser SU
+                            JOIN sweetpos.M_SweetPOSRoles ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
+                            where SU.id = %s''',([id]))
 
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                rows = cursor.fetchall()
+            # with connection.cursor() as cursor:
+            #     cursor.execute(query)
+            #     rows = cursor.fetchall()
             UserList = []
-            for row in rows:
+            for user in query:
                 UserList.append({
-                    "id": row[0],
-                    "CompanyID": row[1],
-                    "DivisionID": row[2],
-                    "LoginName": row[3],
-                    "Password": row[4],
-                    "RoleID": row[5],
-                    "IsActive": row[6],
-                    "CreatedBy": row[7],
-                    "CreatedOn": row[8],
-                    "UpdatedBy": row[9],
-                    "UpdatedOn": row[10],
-                    "RoleName": row[11],
+                    "id":user.id,
+                    "CompanyID": user.CompanyID,
+                    "DivisionID": user.DivisionID,
+                    "LoginName": user.LoginName,
+                    "Password": user.Password,
+                    "RoleID": user.RoleID,
+                    "IsActive": user.IsActive,
+                    "CreatedBy": user.CreatedBy,
+                    "CreatedOn": user.CreatedOn,
+                    "UpdatedBy": user.UpdatedBy,
+                    "UpdatedOn":user.UpdatedOn,
+                    "RoleName":user.RoleName,
                 })
 
             log_entry = create_transaction_logNew(request, UserList, 0, '', 373, 0)
