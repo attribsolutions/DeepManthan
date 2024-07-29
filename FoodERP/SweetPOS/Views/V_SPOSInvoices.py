@@ -466,10 +466,13 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     sweetpos.TC_SPOSInvoiceItems.Item,
                                                                     fooderp.M_Items.Name AS ItemName,
                                                                     SUM(sweetpos.TC_SPOSInvoiceItems.Amount) AS TotalAmount,
-                                                                    SUM(sweetpos.TC_SPOSInvoiceItems.Quantity) AS TotalQuantity
+                                                                    SUM(sweetpos.TC_SPOSInvoiceItems.Quantity) AS TotalQuantity,
+                                                                    fooderp.M_Units.Name AS UnitName
                                                                     FROM sweetpos.TC_SPOSInvoiceItems                                                                   
                                                                     JOIN sweetpos.T_SPOSInvoices  ON sweetpos.TC_SPOSInvoiceItems.Invoice_id = sweetpos.T_SPOSInvoices.id
                                                                     JOIN fooderp.M_Items ON sweetpos.TC_SPOSInvoiceItems.Item = fooderp.M_Items.id
+                                                                    JOIN fooderp.MC_ItemUnits ON fooderp.M_Items.id =  fooderp.MC_ItemUnits.Item_id
+                                                                    JOIN fooderp.M_Units ON fooderp.MC_ItemUnits.UnitID_id = fooderp.M_Units.id
                                                                     WHERE sweetpos.T_SPOSInvoices.InvoiceDate=  '2024-07-15' AND sweetpos.T_SPOSInvoices.Party={id}
                                                                     GROUP BY sweetpos.TC_SPOSInvoiceItems.Item
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''')
@@ -481,6 +484,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                     "ItemName": item.ItemName,
                                     "TotalAmount": item.TotalAmount,
                                     "TotalQuantity": item.TotalQuantity,
+                                    "UnitName": item.UnitName
                                 })
                 
                     Party_List .append({
