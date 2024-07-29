@@ -22,9 +22,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                                   M_Parties.Name AS ReceiverName, T_Invoices.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType,
                     T_Invoices.InvoiceDate AS InvoiceDate, (T_Invoices.GrandTotal + T_Invoices.TCSAmount) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
-                    '' AS ApplicableOfTaxRate,  
-                    TC_InvoiceItems.GSTPercentage AS Rate, SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,TC_InvoiceItems.IGST,TC_InvoiceItems.CGST,
-                      TC_InvoiceItems.SGST,COALESCE(TC_InvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_InvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
+                    TC_InvoiceItems.GSTPercentage  AS ApplicableOfTaxRate,  
+                     SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,SUM(TC_InvoiceItems.IGST) AS IGST,SUM(TC_InvoiceItems.CGST) AS CGST,
+                      SUM(TC_InvoiceItems.SGST)AS SGST,COALESCE(TC_InvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_InvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
                     '0' AS CessAmount
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
@@ -39,8 +39,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                                   M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, 
                     X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
-                    '' AS ApplicableOfTaxRate, 
-                    Y.GSTPercentage AS Rate, SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
+                    Y.GSTPercentage AS ApplicableOfTaxRate, 
+                     SUM(Y.BasicAmount) AS TaxableValue,SUM(Y.IGST)AS IGST,SUM(Y.CGST)AS CGST, SUM(Y.SGST)AS SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
                     '0' AS CessAmount
                     FROM SweetPOS.T_SPOSInvoices X 
                     JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
@@ -84,15 +84,15 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Invoice Number': None,
                              'Invoice Type':None, 
                              'Invoice Date' : None,
-                             'Invoice Value (₹)': None, 
+                             'Invoice Value (?)': None, 
                              'Place Of Supply': None, 
                              'Reverse Charge': None, 
                              'Applicable Of TaxRate': None,                           
                              'Taxable Value': None,
-                             'Integrated Tax (₹)':None,
-                             'Central Tax (₹)':None,
-                             'State Tax (₹)':None,
-                             'Cess Amount (₹)': None,
+                             'Integrated Tax (?)':None,
+                             'Central Tax (?)':None,
+                             'State Tax (?)':None,
+                             'Cess Amount (?)': None,
                              'IRN':None,
                              'IRN date':None,
                              
@@ -101,9 +101,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 # Example data for the second sheet B2CL
                 B2CLquery = T_Invoices.objects.raw('''SELECT T_Invoices.id, b.GSTIN AS GSTIN_UINOfRecipient, T_Invoices.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, T_Invoices.InvoiceDate,
                     (T_Invoices.GrandTotal) AS InvoiceValue, CONCAT(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply,'N' AS ReverseCharge,
-                    '' AS ApplicableOfTaxRate, TC_InvoiceItems.GSTPercentage AS Rate,
-                    SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,TC_InvoiceItems.IGST,TC_InvoiceItems.CGST,
-                    TC_InvoiceItems.SGST,COALESCE(TC_InvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_InvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate, '0' AS CessAmount 
+                    TC_InvoiceItems.GSTPercentage  AS ApplicableOfTaxRate,
+                    SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,SUM(TC_InvoiceItems.IGST)IGST,SUM(TC_InvoiceItems.CGST)CGST,
+                    SUM(TC_InvoiceItems.SGST)SGST,COALESCE(TC_InvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_InvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate, '0' AS CessAmount 
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                     JOIN M_Parties a ON a.id=T_Invoices.Party_id
@@ -116,8 +116,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     UNION
                     SELECT X.id, b.GSTIN AS GSTIN_UINOfRecipient,X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, X.InvoiceDate,
                     (X.GrandTotal) AS InvoiceValue, CONCAT(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply,'N' AS ReverseCharge,
-                    '' AS ApplicableOfTaxRate, Y.GSTPercentage AS Rate,
-                    SUM(Y.BasicAmount) AS TaxableValue,Y.IGST,Y.CGST, Y.SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate, '0' AS CessAmount
+                     Y.GSTPercentage  AS ApplicableOfTaxRate, 
+                    SUM(Y.BasicAmount) AS TaxableValue,SUM(Y.IGST)IGST,SUM(Y.CGST)CGST, SUM(Y.SGST)SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate, '0' AS CessAmount
                     FROM SweetPOS.T_SPOSInvoices X 
                     JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                     JOIN M_Parties a ON a.id=X.Party
@@ -165,26 +165,26 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Invoice Number': None,
                              'Invoice Type':None, 
                              'Invoice Date' : None,
-                             'Invoice Value (₹)': None, 
+                             'Invoice Value (?)': None, 
                              'Place Of Supply': None, 
                              'Reverse Charge': None, 
                              'Applicable Of TaxRate': None,
                              'Rate': None, 
                              'Taxable Value': None,
-                             'Integrated Tax (₹)':None,
-                             'Central Tax (₹)':None,
-                             'State Tax (₹)':None,
+                             'Integrated Tax (?)':None,
+                             'Central Tax (?)':None,
+                             'State Tax (?)':None,
                              'IRN':None,
                              'IRN date':None,
-                             'Cess Amount (₹)': None,
-                             
+                             'Cess Amount (?)': None,   
+                                                       
                              }]
                     
                 # Example data for the third sheet B2CS  
                 B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,T_Invoices.FullInvoiceNumber AS InvoiceNumber, T_Invoices.InvoiceDate AS InvoiceDate,
                 (T_Invoices.GrandTotal + T_Invoices.TCSAmount) AS InvoiceValue,
-                '' ApplicableOfTaxRate , sum(TC_InvoiceItems.BasicAmount) TaxableValue, TC_InvoiceItems.IGST,TC_InvoiceItems.CGST,
-                TC_InvoiceItems.SGST,'0' CessAmount from T_Invoices 
+                TC_InvoiceItems.GSTPercentage AS  ApplicableOfTaxRate , sum(TC_InvoiceItems.BasicAmount) TaxableValue, SUM(TC_InvoiceItems.IGST)AS IGST,SUM(TC_InvoiceItems.CGST)AS CGST,
+                SUM(TC_InvoiceItems.SGST)AS SGST,'0' CessAmount from T_Invoices 
                 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                 JOIN M_Parties a ON a.id=T_Invoices.Party_id
                 JOIN M_Parties b ON b.id=T_Invoices.Customer_id
@@ -194,7 +194,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage
                 UNION
                 SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
-                '' ApplicableOfTaxRate ,sum(Y.BasicAmount) TaxableValue ,Y.IGST,Y.CGST, Y.SGST,'0' CessAmount
+                Y.GSTPercentage AS  ApplicableOfTaxRate ,sum(Y.BasicAmount) TaxableValue ,SUM(Y.IGST) AS IGST,SUM(Y.CGST) AS CGST, SUM(Y.SGST) AS SGST ,'0' CessAmount
                 from SweetPOS.T_SPOSInvoices X JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                 JOIN M_Parties a ON a.id=X.Party
                 JOIN M_Parties b ON b.id=X.Customer
@@ -243,13 +243,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Place Of Supply': None, 
                              'Invoice Number': None,                              
                              'Invoice Date' : None,
-                             'Invoice Value (₹)': None, 
+                             'Invoice Value (?)': None, 
                              'Applicable Of TaxRate': None,                             
                              'Taxable Value': None,
-                             'Integrated Tax (₹)':None,
-                             'Central Tax (₹)':None,
-                             'State Tax (₹)':None,                             
-                             'Cess Amount (₹)': None,
+                             'Integrated Tax (?)':None,
+                             'Central Tax (?)':None,
+                             'State Tax (?)':None,                             
+                             'Cess Amount (?)': None,
                              
                              }]
                 
@@ -257,7 +257,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 CDNRquery = T_CreditDebitNotes.objects.raw('''SELECT T_CreditDebitNotes.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,M_Parties.Name AS ReceiverName,
                                 T_CreditDebitNotes.FullNoteNumber AS NoteNumber,T_CreditDebitNotes.CRDRNoteDate AS NoteDate,M_GeneralMaster.Name NoteTypeName,
                                 T_CreditDebitNotes.NoteType_id AS NoteValue,CONCAT(M_States.StateCode, '-', M_States.Name) PlaceOfSupply,
-                                'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,'' ApplicableOfTaxRate,
+                                'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,TC_CreditDebitNoteItems.GSTPercentage AS  ApplicableOfTaxRate,
                                 TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount,TC_CreditDebitNoteItems.IGST,
                                 TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGST,
                                 COALESCE(TC_CreditDebitNoteUploads.Irn, '') AS IRN, 
@@ -305,9 +305,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Rate': None,
                             #  'Applicable Of TaxRate': None,                              
                              'Taxable Value': None,
-                             'Integrated Tax (₹)' : None,
-                             'Central Tax (₹)':None,
-                             'State Tax (₹)':None, 
+                             'Integrated Tax (?)' : None,
+                             'Central Tax (?)':None,
+                             'State Tax (?)':None, 
                              'Cess Amount': None,                                                         
                              'IRN':None,
                              'INR Date':None,
@@ -503,12 +503,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  Group by id, M_GSTHSNCode.HSNCode,M_Items.Name
                         UNION
-                        SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(Y.QtyInNo) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, '' CessAmount,Y.Rate
+                        SELECT 1 as id, Y.HSNCode AS HSN,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(Y.QtyInNo) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, '' CessAmount,Y.Rate
                         FROM SweetPOS.T_SPOSInvoices X 
-                        JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
-                        JOIN M_GSTHSNCode ON M_GSTHSNCode.id=Y.HSNCode
+                        JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
                         JOIN M_Items ON M_Items.id=Y.Item
-                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s  Group by id, M_GSTHSNCode.HSNCode,M_Items.Name''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        
+                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s  Group by id, Y.HSNCode,M_Items.Name ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
                 
                 HSNquery2= T_Invoices.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.HSNCode) AS NoOfHSN,
