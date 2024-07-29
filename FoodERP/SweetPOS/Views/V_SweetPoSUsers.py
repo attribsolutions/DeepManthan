@@ -45,8 +45,8 @@ class SweetPOSSingleUserView(CreateAPIView):
             with transaction.atomic():
                 query = M_SweetPOSUser.objects.raw(f'''
                     SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
-                    FROM sweetpos.M_SweetPOSUser SU
-                    JOIN sweetpos.M_SweetPOSRoles ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
+                    FROM SweetPOS.M_SweetPOSUser SU
+                    JOIN SweetPOS.M_SweetPOSRoles ON SweetPOS.SU.RoleID = SweetPOS.M_SweetPOSRoles.id
                     WHERE SU.id = %s
                 ''', [id])
 
