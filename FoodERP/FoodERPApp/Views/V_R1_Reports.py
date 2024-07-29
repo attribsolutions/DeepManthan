@@ -199,8 +199,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_Parties a ON a.id=X.Party
                 JOIN M_Parties b ON b.id=X.Customer
                 JOIN M_States ON M_States.id=b.State_id
-                where X.Party=%s and X.InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
-                and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000 AND X.IsDeleted=0))
+                where X.Party=%s and X.InvoiceDate BETWEEN %s AND %s and  b.GSTIN ='' AND X.IsDeleted=0
+                and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000 ))
                 group  by M_States.id,M_States.Name,Y.GSTPercentage,X.InvoiceDate''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))                                
                 B2CS2 = B2CSSerializer(B2CSquery, many=True).data
                 
