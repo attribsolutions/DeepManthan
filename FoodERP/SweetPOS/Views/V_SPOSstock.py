@@ -99,41 +99,7 @@ class SPOSStockReportView(CreateAPIView):
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 UnitName = M_Units.objects.filter(id=Unit).values("Name")
                 unitname = UnitName[0]['Name']
-                StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,%s,0)OpeningBalance,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,%s,0)GRNInward,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,%s,0)Sale,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,%s,0)ClosingBalance,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,%s,0)ActualStock,
-                        A.ItemName,
-                        D.QuantityInBaseUnit,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,%s,0)PurchaseReturn,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,%s,0)SalesReturn,
-                        FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,%s,0)StockAdjustment
-                        ,GroupTypeName,GroupName,SubGroupName,%s UnitName
-                        FROM( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-                            ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
-                        FROM FoodERP.O_DateWiseLiveStock X
-                JOIN FoodERP.M_Items ON M_Items.id= X.Item_id
-                join FoodERP.M_Units on M_Units.id= X.Unit_id
-                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                 WHERE M_GroupType.id = 5 AND StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
-
-                left JOIN (SELECT Item_id, OpeningBalance FROM FoodERP.O_DateWiseLiveStock Y WHERE Y.StockDate = %s AND Y.Party_id=%s) B
-                ON A.Item_id = B.Item_id
-
-                left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM FoodERP.O_DateWiseLiveStock Z WHERE Z.StockDate = %s AND Z.Party_id=%s) C 
-                ON A.Item_id = C.Item_id
-
-                LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit
-                FROM FoodERP.T_Stock
-                WHERE Party_id =%s AND StockDate BETWEEN %s AND %s
-                GROUP BY Item_id) D
-                ON A.Item_id = D.Item_id
-        UNION    
+                StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw('''
                 SELECT 1 as id,A.Item_id,A.Unit,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,%s,0)OpeningBalance,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit,0,%s,0)GRNInward,
@@ -170,8 +136,7 @@ class SPOSStockReportView(CreateAPIView):
                 FROM T_SPOSStock
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
-                ON A.Item_id = D.Item ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate],[Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                # CustomPrint(StockreportQuery)
+                ON A.Item_id = D.Item ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
                 serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data
 
                 StockData = list()
