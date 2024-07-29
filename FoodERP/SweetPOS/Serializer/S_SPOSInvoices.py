@@ -30,3 +30,14 @@ class SPOSInvoiceSerializer(serializers.ModelSerializer):
             
         
         return InvoiceID   
+    
+    
+
+class SaleItemSerializer(serializers.Serializer):    
+    id= serializers.IntegerField()     
+    Item = serializers.IntegerField()
+    ItemName = serializers.CharField(max_length=200)
+    TotalAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
+    TotalQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
+    UnitName = serializers.CharField(max_length=200)
+
