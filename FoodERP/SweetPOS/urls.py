@@ -38,5 +38,5 @@ urlpatterns = [
     url(r'UpdateCustomerVehiclePOSinvoice$',UpdateCustomerVehiclePOSInvoiceView.as_view()),
     url(r'posDeletEInvoicE$',DeleteInvoiceView.as_view()),
     url(r'GETMaxPOSDeletedInvoiceIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxDeletedInvoiceIDView.as_view()),
-    url(r'TopSaleItemsOfFranchise/([0-9]+)$', TopSaleItemsOfFranchiseView.as_view()),
+    url(r'TopSaleItemsOfFranchise$', TopSaleItemsOfFranchiseView.as_view()),
     ]

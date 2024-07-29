@@ -9,7 +9,7 @@ from rest_framework.authentication import BasicAuthentication
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
 from SweetPOS.Serializer.S_SPOSInvoices import SPOSInvoiceSerializer
-from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
+# from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
 
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 
@@ -70,11 +70,11 @@ class SPOSInvoiceView(CreateAPIView):
                             #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                             # else:
                             ItemId=InvoiceItem['ERPItemID']
-                            
-                            if InvoiceItem['UnitID'] == 1:
-                                unit=2
-                            else: 
-                                unit=1    
+                            unit= int(InvoiceItem['UnitID'])
+                            # if InvoiceItem['UnitID'] == 1:
+                            #     unit=2
+                            # else: 
+                            #     unit=1 
                             
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
@@ -443,9 +443,13 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
     authentication_classes = [BasicAuthentication]
 
     @transaction.atomic()
-    def get(self, request,id=0):
+    def post(self, request):
+        SaleData = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                FromDate = SaleData['FromDate']
+                ToDate = SaleData['ToDate']
+                Party = SaleData['Party']
                 
                 PartyDetails = M_Parties.objects.raw('''SELECT M_Parties.id, M_Parties.Name,                                                         
                                                         SUM(sweetpos.T_SPOSInvoices.TotalAmount) AS TotalAmount, MC_PartyAddress.Address,
@@ -453,7 +457,8 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                         FROM M_Parties   
                                                         JOIN MC_PartyAddress ON M_Parties .id = MC_PartyAddress.Party_id  AND MC_PartyAddress.IsDefault = True                                                     
                                                         JOIN sweetpos.T_SPOSInvoices ON M_Parties.id = sweetpos.T_SPOSInvoices.Party
-                                                        WHERE sweetpos.T_SPOSInvoices.InvoiceDate =  '2024-07-15' AND M_Parties.id= %s''',[id])
+                                                        WHERE sweetpos.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND sweetpos.T_SPOSInvoices.Party= %s''',([FromDate,ToDate,Party]))
+                                                   
                 
                 if not PartyDetails:
                     return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Data not available', 'Data': []}) 
@@ -473,9 +478,9 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     JOIN fooderp.M_Items ON sweetpos.TC_SPOSInvoiceItems.Item = fooderp.M_Items.id
                                                                     JOIN fooderp.MC_ItemUnits ON fooderp.M_Items.id =  fooderp.MC_ItemUnits.Item_id
                                                                     JOIN fooderp.M_Units ON fooderp.MC_ItemUnits.UnitID_id = fooderp.M_Units.id
-                                                                    WHERE sweetpos.T_SPOSInvoices.InvoiceDate=  '2024-07-15' AND sweetpos.T_SPOSInvoices.Party={id}
+                                                                    WHERE sweetpos.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND sweetpos.T_SPOSInvoices.Party= %s
                                                                     GROUP BY sweetpos.TC_SPOSInvoiceItems.Item
-                                                                    ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''')
+                                                                    ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''',([FromDate,ToDate,Party]))
                 
                         TopSaleItems_List = []
                         for item in TopSaleItems:
@@ -496,9 +501,9 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                         "TopSaleItems": TopSaleItems_List
                     })
 
-                log_entry = create_transaction_logNew(request, Party_List, 0, 'TopSaleItems:'+str(TopSaleItems_List), 390, 0)
+                log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:'+str(TopSaleItems_List), 390, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Party_List})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'TopSaleItems:' + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
