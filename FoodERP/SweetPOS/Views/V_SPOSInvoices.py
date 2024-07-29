@@ -70,11 +70,11 @@ class SPOSInvoiceView(CreateAPIView):
                             #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                             # else:
                             ItemId=InvoiceItem['ERPItemID']
-                            
-                            if InvoiceItem['UnitID'] == 1:
-                                unit=2
-                            else: 
-                                unit=1    
+                            unit= int(InvoiceItem['UnitID'])
+                            # if InvoiceItem['UnitID'] == 1:
+                            #     unit=2
+                            # else: 
+                            #     unit=1    
                             
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
@@ -430,12 +430,12 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
                     for row in QueryForMaxSalesID:
                         maxSaleID=row.MaxSaleID
 
-                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+maxSaleID,389,0,0,0,ClientID)
+                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(maxSaleID),389,0,0,0,ClientID)
                     return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})      
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})      
         
 
 

@@ -88,7 +88,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     from O_BatchWiseLiveStock 
     join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
     join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
-    join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
+    left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
     where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])
@@ -293,7 +293,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     }
                 if Customer:
                     SPOS_filter_args['Customer'] = Customer
-                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(IsDeleted = 0).filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
@@ -302,7 +302,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
                 )
     
-                
+                # print(SposInvoices_query)
                 Spos_Invoices = []
                 for b in SposInvoices_query:
                     parties = M_Parties.objects.filter(id=Party).values('Name')
