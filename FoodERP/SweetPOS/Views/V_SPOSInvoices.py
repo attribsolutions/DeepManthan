@@ -74,7 +74,7 @@ class SPOSInvoiceView(CreateAPIView):
                             # if InvoiceItem['UnitID'] == 1:
                             #     unit=2
                             # else: 
-                            #     unit=1    
+                            #     unit=1 
                             
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
@@ -430,68 +430,73 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
                     for row in QueryForMaxSalesID:
                         maxSaleID=row.MaxSaleID
 
-                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(maxSaleID),389,0,0,0,ClientID)
+                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+maxSaleID,389,0,0,0,ClientID)
                     return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})      
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})      
 
 
+class TopSaleItemsOfFranchiseView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
 
-
-
-
-
-
-# class TopSaleItemsOfFranchiseView(CreateAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     # authentication__Class = JSONWebTokenAuthentication
-
-#     @transaction.atomic()
-#     def get(self,request):
-#         try:
-#             with transaction.atomic():
-#                 query = TC_SPOSInvoiceItems.objects.raw('''SELECT sweetpos.TC_SPOSInvoiceItems.id,
-#                         sweetpos.TC_SPOSInvoiceItems.Item,
-#                         fooderp.M_Items.Name as ItemName,
-#                         SUM(sweetpos.TC_SPOSInvoiceItems.Amount) as TotalAmount,
-#                         SUM(sweetpos.TC_SPOSInvoiceItems.Quantity) as TotalQuantity
-#                     FROM 
-#                         sweetpos.TC_SPOSInvoiceItems 
-#                     INNER JOIN 
-#                         sweetpos.T_SPOSInvoices ON sweetpos.TC_SPOSInvoiceItems.Invoice_id = sweetpos.T_SPOSInvoices.id
-#                     INNER JOIN 
-#                         fooderp.M_Items  ON sweetpos.TC_SPOSInvoiceItems.Item = fooderp.M_Items.id
-#                     WHERE 
-#                         sweetpos.T_SPOSInvoices.InvoiceDate = '2024-07-16'
-                        
-#                         AND sweetpos.T_SPOSInvoices.Party = 19803  
-#                     GROUP BY 
-#                         sweetpos.TC_SPOSInvoiceItems.Item,
-#                         fooderp.M_Items.Name
-#                     ORDER BY 
-#                         TotalAmount DESC, 
-#                         TotalQuantity DESC
-#                         LIMIT 5
-#                     ''')
-
-#                 if query:
-#                     SaleItem_serializer = SaleItemSerializer(query, many=True).data
-#                     SaleItem_List = list()
-#                     for a in SaleItem_serializer:
-#                         SaleItem_List.append({
-#                             "Item" : a["Item"],
-#                             "ItemName":a['ItemName'],
-#                             "TotalAmount":a['TotalAmount'],
-#                             "TotalQuantity":a['TotalQuantity'],
-                            
-#                         })
-#                     log_entry = create_transaction_logNew(request,SaleItem_serializer,0,'Top Sale Items',390,0)
-#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :SaleItem_List})
-#                 log_entry = create_transaction_logNew(request, SaleItem_serializer,0,'SaleItem not available',390,0)
-#                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'SaleItem not available', 'Data' : []})
-#         except Exception as e:
-#             log_entry = create_transaction_logNew(request, 0,0,'TopSaleItems:'+str(e),33,0)
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]}) 
+    @transaction.atomic()
+    def post(self, request):
+        SaleData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = SaleData['FromDate']
+                ToDate = SaleData['ToDate']
+                Party = SaleData['Party']
+                
+                PartyDetails = M_Parties.objects.raw('''SELECT M_Parties.id, M_Parties.Name,MC_PartyAddress.Address,
+                                                        COALESCE(SUM(sweetpos.T_SPOSInvoices.TotalAmount), 0) AS TotalAmount, 
+                                                        COALESCE(COUNT(sweetpos.T_SPOSInvoices.id), 0) AS BillCount
+                                                        FROM M_Parties   
+                                                        JOIN MC_PartyAddress ON M_Parties.id = MC_PartyAddress.Party_id AND MC_PartyAddress.IsDefault = True                                                     
+                                                        LEFT JOIN sweetpos.T_SPOSInvoices ON M_Parties.id = sweetpos.T_SPOSInvoices.Party 
+                                                        AND sweetpos.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s
+                                                        WHERE M_Parties.id = %s
+                                                        GROUP BY M_Parties.id''', ([FromDate, ToDate, Party]))
+                Party_List = []
+                for party in PartyDetails:
+                    TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT sweetpos.TC_SPOSInvoiceItems.id, sweetpos.TC_SPOSInvoiceItems.Item, fooderp.M_Items.Name AS ItemName,
+                                                                      SUM(sweetpos.TC_SPOSInvoiceItems.Amount) AS TotalAmount,
+                                                                      SUM(sweetpos.TC_SPOSInvoiceItems.Quantity) AS TotalQuantity,
+                                                                      fooderp.M_Units.Name AS UnitName
+                                                                      FROM sweetpos.TC_SPOSInvoiceItems                                                                   
+                                                                      JOIN sweetpos.T_SPOSInvoices  ON sweetpos.TC_SPOSInvoiceItems.Invoice_id = sweetpos.T_SPOSInvoices.id
+                                                                      JOIN fooderp.M_Items ON sweetpos.TC_SPOSInvoiceItems.Item = fooderp.M_Items.id
+                                                                      JOIN fooderp.MC_ItemUnits ON fooderp.M_Items.id = fooderp.MC_ItemUnits.Item_id
+                                                                      JOIN fooderp.M_Units ON fooderp.MC_ItemUnits.UnitID_id = fooderp.M_Units.id
+                                                                      WHERE sweetpos.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND sweetpos.T_SPOSInvoices.Party= %s
+                                                                      GROUP BY sweetpos.TC_SPOSInvoiceItems.Item
+                                                                      ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
+                    TopSaleItems_List = []
+                    for item in TopSaleItems:
+                        TopSaleItems_List.append({
+                            "Item": item.Item,
+                            "ItemName": item.ItemName,
+                            "TotalAmount": item.TotalAmount,
+                            "TotalQuantity": item.TotalQuantity,
+                            "UnitName": item.UnitName
+                        })
+                    Party_List.append({
+                        "PartyId": party.id,
+                        "PartyName": party.Name,
+                        "PartyAddress": party.Address,
+                        "BillCount": party.BillCount,
+                        "TotalAmount": party.TotalAmount,
+                        "TopSaleItems": TopSaleItems_List
+                    })
+                if Party_List:
+                    log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(Party_List), 390, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Party_List})
+                else:
+                    log_entry = create_transaction_logNew(request, SaleData, Party, 'Record Not Found', 390, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+        except Exception as e:
+                    log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
