@@ -41,15 +41,14 @@ class GroupView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'List Not available',220,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
+        Group_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Group_data = JSONParser().parse(request)
-
                 Group_Serializer = M_GroupSerializerForItem(data=Group_data)
                 if Group_Serializer.is_valid():
                     Group = Group_Serializer.save()
@@ -61,7 +60,7 @@ class GroupView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Group_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,Group_data, 0,'GroupSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GroupViewSecond(CreateAPIView):
@@ -95,15 +94,15 @@ class GroupViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'Details Not available',221,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
     def put(self, request, id=0):
+        Group_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Group_data = JSONParser().parse(request)
                 Group_dataByID = M_Group.objects.get(id=id)
                 Group_Serializer = GroupSerializerThird(
                     Group_dataByID, data=Group_data)
@@ -116,7 +115,7 @@ class GroupViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Group_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,Group_data, 0,'GroupEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -214,8 +213,10 @@ class DetailsOfSubgroups_GroupsView(CreateAPIView):
                                             "SubGroupSequence": SubGroupSequence,
                                             "Items": ItemList
                                         })
+                log_entry = create_transaction_logNew(request,0, 0,'GroupTypeID:'+str(id),393,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
         except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'DetailsOfsubgroups_groups:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
 
@@ -224,8 +225,8 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
 
     @transaction.atomic
     def post(self, request):
+        SequenceData = JSONParser().parse(request)
         try:
-            SequenceData = JSONParser().parse(request)
             if not isinstance(SequenceData, list):
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid data format', 'Data': []})
 
@@ -274,9 +275,11 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
                         item_group_detail.ItemSequence = Item_Sequence
                         item_group_detail.save()
 
+            log_entry = create_transaction_logNew(request,SequenceData, 0,'',394,0)
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Sequences updated successfully', 'Data': []})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request,SequenceData, 0,'GroupSubGroupSequenceUpdate:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
 
