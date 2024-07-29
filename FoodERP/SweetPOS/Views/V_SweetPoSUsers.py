@@ -50,7 +50,7 @@ class SweetPOSSingleUserView(CreateAPIView):
             # with connection.cursor() as cursor:
             #     cursor.execute(query)
             #     rows = cursor.fetchall()
-            UserList = []
+            UserList = list()
             for user in query:
                 UserList.append({
                     "id":user.id,
