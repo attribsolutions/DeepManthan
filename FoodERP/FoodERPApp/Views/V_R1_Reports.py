@@ -20,7 +20,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 B2Bquery = T_Invoices.objects.raw('''SELECT T_Invoices.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, T_Invoices.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType,
-                    T_Invoices.InvoiceDate AS InvoiceDate, (T_Invoices.GrandTotal + T_Invoices.TCSAmount) AS InvoiceValue,
+                    T_Invoices.InvoiceDate AS InvoiceDate, (T_Invoices.GrandTotal) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     TC_InvoiceItems.GSTPercentage  AS ApplicableOfTaxRate,  
                      SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,SUM(TC_InvoiceItems.IGST) AS IGST,SUM(TC_InvoiceItems.CGST) AS CGST,
@@ -37,7 +37,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     UNION
                     SELECT X.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, 
-                    X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
+                    X.InvoiceDate AS InvoiceDate, (X.GrandTotal ) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     Y.GSTPercentage AS ApplicableOfTaxRate, 
                      SUM(Y.BasicAmount) AS TaxableValue,SUM(Y.IGST)AS IGST,SUM(Y.CGST)AS CGST, SUM(Y.SGST)AS SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
@@ -47,7 +47,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     JOIN M_Parties ON M_Parties.id = X.Customer
                     JOIN M_States ON M_States.id = M_Parties.State_id
                     Left JOIN SweetPOS.TC_SPOSInvoiceUploads ON SweetPOS.TC_SPOSInvoiceUploads.Invoice_id=X.id
-                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
+                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''AND X.IsDeleted=0
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, X.id, X.InvoiceDate,
                     M_States.id, M_States.Name, Y.GSTPercentage''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
                 B2B2 = B2B3Serializer1(B2Bquery, many=True).data
@@ -55,17 +55,17 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 B2Bquery1 = T_Invoices.objects.raw('''SELECT 1 as id, SUM(NoOfRecipients) AS NoOfRecipients, SUM(NoOfInvoices) AS NoOfInvoices, SUM(TotalInvoiceValue) AS TotalInvoiceValue
                                 FROM (SELECT count(DISTINCT Customer_id) AS NoOfRecipients,
                                         count(*) AS NoOfInvoices,
-                                        sum(T_Invoices.GrandTotal + T_Invoices.TCSAmount) AS TotalInvoiceValue
+                                        sum(T_Invoices.GrandTotal) AS TotalInvoiceValue
                                     FROM T_Invoices 
                                     JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
                                     WHERE T_Invoices.Party_id = %s AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''
                                     UNION 
                                     SELECT count(DISTINCT Customer) AS NoOfRecipients,
                                         count(*) AS NoOfInvoices,
-                                        sum(X.GrandTotal + X.TCSAmount) AS TotalInvoiceValue
+                                        sum(X.GrandTotal) AS TotalInvoiceValue
                                     FROM SweetPOS.T_SPOSInvoices X 
                                     JOIN M_Parties ON M_Parties.id = X.Customer
-                                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != '') A''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
+                                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''AND X.IsDeleted=0) A''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
                 B2B1 = B2BSerializer2(B2Bquery1, many=True).data               
                 
                 
@@ -125,7 +125,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     JOIN M_States ON M_States.id=b.State_id
                     Left JOIN SweetPOS.TC_SPOSInvoiceUploads ON SweetPOS.TC_SPOSInvoiceUploads.Invoice_id=X.id
                     WHERE X.Party=%s AND X.InvoiceDate BETWEEN %s AND %s AND b.GSTIN != '' AND b.State_id != a.State_id
-                    AND X.GrandTotal > 250000
+                    AND X.GrandTotal > 250000 AND X.IsDeleted=0
                     GROUP BY X.id, X.InvoiceDate, M_States.id, M_States.Name, Y.GSTPercentage''',(Party, FromDate, ToDate,Party, FromDate, ToDate))
                 
                 B2CL2 = B2B3Serializer1(B2CLquery, many=True).data
@@ -149,7 +149,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             JOIN M_Parties b ON b.id = X.Customer
                             JOIN M_States ON M_States.id = b.State_id
                             WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND b.GSTIN != '' AND b.State_id != a.State_id
-                            AND X.GrandTotal > 250000) A''', (Party, FromDate, ToDate, Party, FromDate, ToDate)) 
+                            AND X.GrandTotal > 250000 AND X.IsDeleted=0) A''', (Party, FromDate, ToDate, Party, FromDate, ToDate)) 
                 B2CL1 = B2CLSerializer2(B2CLquery2, many=True).data              
                 # Check if B2CL is empty
                 if not B2CL1:
@@ -182,7 +182,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     
                 # Example data for the third sheet B2CS  
                 B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,T_Invoices.FullInvoiceNumber AS InvoiceNumber, T_Invoices.InvoiceDate AS InvoiceDate,
-                (T_Invoices.GrandTotal + T_Invoices.TCSAmount) AS InvoiceValue,
+                sum(T_Invoices.GrandTotal ) AS InvoiceValue,
                 TC_InvoiceItems.GSTPercentage AS  ApplicableOfTaxRate , sum(TC_InvoiceItems.BasicAmount) TaxableValue, SUM(TC_InvoiceItems.IGST)AS IGST,SUM(TC_InvoiceItems.CGST)AS CGST,
                 SUM(TC_InvoiceItems.SGST)AS SGST,'0' CessAmount from T_Invoices 
                 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
@@ -193,14 +193,14 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))
                 group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage
                 UNION
-                SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, (X.GrandTotal + X.TCSAmount) AS InvoiceValue,
+                SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, sum(X.GrandTotal) AS InvoiceValue,
                 Y.GSTPercentage AS  ApplicableOfTaxRate ,sum(Y.BasicAmount) TaxableValue ,SUM(Y.IGST) AS IGST,SUM(Y.CGST) AS CGST, SUM(Y.SGST) AS SGST ,'0' CessAmount
                 from SweetPOS.T_SPOSInvoices X JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                 JOIN M_Parties a ON a.id=X.Party
                 JOIN M_Parties b ON b.id=X.Customer
                 JOIN M_States ON M_States.id=b.State_id
                 where X.Party=%s and X.InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
-                and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000))
+                and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000 AND X.IsDeleted=0))
                 group  by M_States.id,M_States.Name,Y.GSTPercentage''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))                                
                 B2CS2 = B2CSSerializer(B2CSquery, many=True).data
                 
@@ -224,7 +224,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                     JOIN M_Parties a ON a.id = X.Party
                                     JOIN M_Parties b ON b.id = X.Customer
                                     JOIN M_States ON M_States.id = b.State_id
-                                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND b.GSTIN = ''
+                                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND b.GSTIN = ''AND X.IsDeleted=0
                                     AND ((a.State_id = b.State_id) OR (a.State_id != b.State_id AND X.GrandTotal <= 250000))) A''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                                             
                 B2CS1 = B2CSSerializer2(B2CSquery2, many=True).data               
@@ -508,12 +508,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
                         JOIN M_Items ON M_Items.id=Y.Item
                         
-                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s  Group by id, Y.HSNCode,M_Items.Name ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s  Group by id, Y.HSNCode,M_Items.Name AND X.IsDeleted=0''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
                 
                 HSNquery2= T_Invoices.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.HSNCode) AS NoOfHSN,
-                            '' AS a, '' AS b, '' AS c, SUM(A.TotalValue) AS TotalValue, SUM(A.TaxableValue) AS TotalTaxableValue,
+                            SUM(A.TotalValue) AS TotalValue, SUM(A.TaxableValue) AS TotalTaxableValue,
                     SUM(A.IntegratedTaxAmount) AS TotalIntegratedTaxAmount, SUM(A.CentralTaxAmount) AS TotalCentralTaxAmount,
                             SUM(A.StateUTTaxAmount) AS TotalStateUTTaxAmount, '' AS TotalCessAmount
                         FROM (
@@ -528,15 +528,14 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             WHERE T_Invoices.Party_id = %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s  
                             GROUP BY id, M_GSTHSNCode.HSNCode, M_Items.Name
                             UNION
-                            SELECT 1 as id, M_GSTHSNCode.HSNCode, M_Items.Name AS Description, 'NOS-NUMBERS' AS UQC,
+                            SELECT 1 as id, Y.HSNCode, M_Items.Name AS Description, 'NOS-NUMBERS' AS UQC,
                             SUM(Y.QtyInNo) AS TotalQuantity, SUM(Y.Amount) AS TotalValue, SUM(Y.BasicAmount) AS TaxableValue,
                             SUM(Y.IGST) AS IntegratedTaxAmount, SUM(Y.CGST) AS CentralTaxAmount, SUM(Y.SGST) AS StateUTTaxAmount, '' AS CessAmount
                             FROM SweetPOS.T_SPOSInvoices X 
-                                JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
-                                JOIN M_GSTHSNCode ON M_GSTHSNCode.id = Y.HSNCode
+                                JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id                               
                                 JOIN M_Items ON M_Items.id = Y.Item
-                            WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s  
-                            GROUP BY id, M_GSTHSNCode.HSNCode, M_Items.Name) A''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))
+                            WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s  AND X.IsDeleted=0
+                            GROUP BY id, Y.HSNCode, M_Items.Name) A''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))
                                     
                 HSN1 = HSN2Serializer2(HSNquery2, many=True).data  
                 
