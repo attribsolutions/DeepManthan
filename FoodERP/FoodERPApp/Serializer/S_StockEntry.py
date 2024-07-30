@@ -62,8 +62,7 @@ class PartyStockAdjustmentOLiveBatchesSerializer(serializers.ModelSerializer):
             GrnItem=O_BatchWiseLiveStock.objects.filter(id=T_StockEntryItem_data['BatchCodeID']).update(BaseUnitQuantity=O_BatchWiseLiveStockItems_data['BaseUnitQuantity'])    
         
         return GrnItem
-    
-        
+     
 class M_StockEntryListSerializerSecond(serializers.Serializer): 
     id =  serializers.IntegerField() 
     StockDate = serializers.DateField() 
