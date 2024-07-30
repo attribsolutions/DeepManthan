@@ -11,6 +11,7 @@ from django.db.models import Q
 from datetime import datetime
 from django.db import connection
 from .V_CommFunction import *
+from FoodERPDBLog.models import L_Transactionlog
 
 
 class EmplyoeeListView(CreateAPIView):
@@ -139,4 +140,85 @@ class TransactionJsonView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
   
+class TransactionTypeAddView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Type_data = request.data  
+                TypesList = []
+                
+                for a in Type_data:
+                    Type_serializer = TransactionTypeSerializer(data=a)
+                    
+                    if Type_serializer.is_valid():
+                        Type = Type_serializer.save()
+                        TypesList.append(Type)
+                        LastInsertID = Type.id
+                        log_entry = create_transaction_logNew(request, Type_data,0,'TransactionID:'+str(LastInsertID),378,LastInsertID)    
+                    else:
+                        log_entry = create_transaction_logNew(request, Type_data,0,'TypeSave:'+str(Type_serializer.errors),34,0)
+                        transaction.set_rollback(True)
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Type_serializer.errors, 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Type Save Successfully', 'Data':[]})   
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0,0,'TypeSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+        
+
+        
+        
+        
+class LogsOnDashboardView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+           
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                query = """ SELECT L_Transactionlog.id, L_Transactionlog.TranasactionDate AS TransactionDate, L_Transactionlog.Transactiontime, 
+                            M_Users.LoginName AS UserName, L_Transactionlog.IPaddress, M_Parties.Name AS PartyName, 
+                            L_Transactionlog.TransactionDetails, L_Transactionlog.JsonData, M_TransactionType.Name AS TransactionType,
+                            L_Transactionlog.TransactionID, L_Transactionlog.FromDate, L_Transactionlog.ToDate, P.Name AS CustomerName
+                            FROM TransactionLog.L_Transactionlog 
+                            LEFT JOIN FoodERP.M_Users  ON L_Transactionlog.User = M_Users.id
+                            LEFT JOIN FoodERP.M_Parties ON L_Transactionlog.PartyID = M_Parties.id
+                            LEFT JOIN FoodERP.M_Parties P ON L_Transactionlog.CustomerID = P.id
+                            LEFT JOIN FoodERP.M_TransactionType  ON L_Transactionlog.TransactionType = M_TransactionType.id
+                            WHERE M_TransactionType.TransactionCategory = 92
+                            ORDER BY L_Transactionlog.Transactiontime DESC LIMIT 20"""
+
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+            LogList = []
+            for row in rows:
+                LogList.append({
+                    "id": row[0],
+                    "TransactionDate": row[1],
+                    "Transactiontime": row[2],
+                    "UserName": row[3],
+                    "IPaddress": row[4],
+                    "PartyName": row[5],
+                    "TransactionDetails": row[6],
+                    "JsonData": row[7],
+                    "TransactionType": row[8],
+                    "TransactionID": row[9],
+                    "FromDate": row[10],
+                    "ToDate": row[11],
+                    "CustomerName": row[12],
+                })
+
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': LogList})
+        
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
+
+
+
+
 

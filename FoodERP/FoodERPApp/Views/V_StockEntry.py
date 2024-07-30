@@ -1,11 +1,10 @@
-import datetime
+from datetime import timedelta
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from rest_framework.parsers import JSONParser
-from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..Serializer.S_GRNs import *
 from ..Serializer.S_Orders import *
 from ..Serializer.S_Challan import *
@@ -38,7 +37,7 @@ class StockEntryPageView(CreateAPIView):
                 O_LiveBatchesList=list()
                 T_StockEntryList = list()
                 for a in StockEntrydata['StockItems']:
-                    # print(a)
+                    # CustomPrint(a)
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
@@ -54,7 +53,7 @@ class StockEntryPageView(CreateAPIView):
                     else:
                         totalstock=0    
                     
-                    # print(query3)
+                    # CustomPrint(query3)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
@@ -90,7 +89,7 @@ class StockEntryPageView(CreateAPIView):
                     
                     O_LiveBatchesList.append({
                     
-                    "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
+                    "ItemExpiryDate":date.today()+ timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "GST": a['GST'],
                     "MRPValue" :a["MRPValue"],
@@ -118,7 +117,7 @@ class StockEntryPageView(CreateAPIView):
                         
                         for b in StockEntrydata['StockItems']:
                             OBatchWiseLiveStock=O_BatchWiseLiveStock.objects.filter(Party=Party,Item=b['Item']).update(BaseUnitQuantity=0)      
-                # print(StockEntrydata['O_LiveBatchesList'])
+                # CustomPrint(StockEntrydata['O_LiveBatchesList'])
                 for aa in StockEntrydata['O_LiveBatchesList']:
                
                     if(Mode == 1):
@@ -159,102 +158,130 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 Unit = StockReportdata['Unit']
                 IsDamagePieces=StockReportdata['IsDamagePieces']
                 Employee = StockReportdata['Employee']
-                today = date.today() 
-                
+                Cluster = StockReportdata['Cluster']
+                SubCluster = StockReportdata['SubCluster']
+                Group = StockReportdata['Group']
+                SubGroup = StockReportdata['SubGroup']
+                IsRateWise=StockReportdata['IsRateWise']
+                today = date.today()                 
                 if Party == "":
+                    
                     PartyID=0;
                     if Employee > 0:
                         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                         for row in EmpPartys:
                             p=row.id
                         PartyIDs = p.split(",")
+                    where_clause = ""
+                    p1 = (today,PartyIDs)
+                    if Cluster:
+                        where_clause += " AND M_Cluster.id = %s"
+                        p1 += (Cluster,)
+                      
+                    if SubCluster:
+                        where_clause += " AND M_SubCluster.id = %s "
+                        p1 += (SubCluster,)
+            
+                    if Group:
+                        where_clause += " AND M_Group.id = %s"
+                        p1 += (Group,)
                         
-                        Stockquery='''SELECT M_Parties.id DistributorID,M_Parties.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+                    if SubGroup:
+                        where_clause += " AND MC_SubGroup.id = %s "
+                        p1 += (SubGroup,)
+                        
+                    
+                    Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
-sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,
+sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,M_Items.BaseUnitID_id,
 ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
 ifnull(sum(case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
 O_LiveBatches.MRPValue ,
-0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage,0 Rate
+0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage,0 Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
                 
                 FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id= MC_PartyItems.Party_id
 JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
-join M_Parties on M_Parties.id =MC_PartyItems.Party_id
-where O_BatchWiseLiveStock.BaseUnitQuantity >0 
-group by M_Parties.id, M_GroupType.id,
+join M_Parties A on A.id =MC_PartyItems.Party_id
+LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
+LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
+LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
+WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
+group by A.id, M_GroupType.id,
 M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
-order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
-                
+order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
+                    
+                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p1)
+                    
                 else : 
                     PartyID=Party;
                     PartyIDs= Party  
-                
-                    Stockquery='''SELECT M_Parties.id DistributorID,M_Parties.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
+
+                    where_clause = ""
+                    Condition=""
+                    # p2 = (today, Unit, [PartyIDs]) 
+                    if IsRateWise:
+                        Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),MC_PartyItems.Party_id,0,2),2),0)Rate"
+                        p2 = (today, [PartyIDs])                         
+                        
+                    else:     
+                        Condition += "RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, %s, 0, 0, O_LiveBatches.MRPValue, 0)Rate"                  
+                        p2 = (today, Unit, [PartyIDs]) 
+                        
+                    if Cluster:
+                        where_clause += " AND M_Cluster.id = %s "
+                        p2 += (Cluster,)
+                    
+                    if SubCluster:
+                        where_clause += " AND M_SubCluster.id = %s "
+                        p2 += (SubCluster,)
+                    
+                    if Group:
+                        where_clause += " AND M_Group.id = %s"
+                        p2 += (Group,)
+                    
+                    if SubGroup:
+                        where_clause += " AND MC_SubGroup.id = %s "
+                        p2 += (SubGroup,)
+                    
+                    Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,ifnull(M_GroupType.Name,'') GroupTypeName,
     ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
-    O_BatchWiseLiveStock.BaseUnitQuantity Qty ,
+    O_BatchWiseLiveStock.BaseUnitQuantity Qty ,M_Items.BaseUnitID_id,
     ifnull((case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
     ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
     O_LiveBatches.MRPValue ,
     O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage,
-    RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, %s, 0, 0, O_LiveBatches.MRPValue, 0)Rate
+    {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
     FROM M_Items 
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id 
+    left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
     join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id= MC_PartyItems.Party_id
     JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
-    join M_Parties on M_Parties.id =MC_PartyItems.Party_id
-    where O_BatchWiseLiveStock.BaseUnitQuantity >0 order by M_Group.id, MC_SubGroup.id ,M_Items.id,M_Parties.id   '''    
-                    
-                    
-                    
-                    
-                if Party == "":
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, (today,PartyIDs))
-                else :
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, (today,Unit,[PartyIDs]))
-                
-                
-                
-
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                # print(str(Itemquery.query))
-                
+    join M_Parties A on A.id =MC_PartyItems.Party_id
+    LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
+    LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
+    LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
+    WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
+    order by M_Group.id, MC_SubGroup.id ,M_Items.id,A.id''')
+                       
+                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
+                    CustomPrint(Itemquery.query)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
                     ItemList = list()
                     for row in Itemquery:
-                        
+                        if int(Unit)==0:
+                            Unit=row.BaseUnitID_id   
                         if int(Unit) == 1:
                             SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
                             UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
@@ -286,6 +313,7 @@ order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                             "BatchCode" : row.BatchCode ,
                             "SystemBatchCode" : row.SystemBatchCode ,
                             "MRP":row.MRPValue,
+                            "Rate":row.Rate,
                             "PurchaseRate" : round(row.Rate,2),
                             "SaleableStock":round(SaleableStockActualQty,3),
                             "UnSaleableStock":round(UnSaleableStockActualQty,3),
@@ -297,8 +325,11 @@ order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
                             "TaxValue" : SaleableStockTaxValue+UnSaleableStockTaxValue,
                             "Stockvaluewithtax" : SaleableStockValue+SaleableStockTaxValue+UnSaleableStockValue+UnSaleableStockTaxValue,
                             "Unit":StockUnit,
-                            "GST" : row.GSTPercentage
+                            "GST" : row.GSTPercentage,
+                            "Cluster" : row.Cluster,
+                            "SubCluster": row.SubCluster
                         })
+                        
                     
                     log_entry = create_transaction_logNew(request, StockReportdata, PartyID , 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
@@ -308,3 +339,105 @@ order by M_Parties.id ,M_Group.id, MC_SubGroup.id ,M_Items.id   '''
 
 
 
+class DeleteDuplicateStockEntryPageView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                
+                query=T_Stock.objects.raw('''select 1 as id, StockDate,Item_id,Party_id,max(id) maxid, count(*) cnt from T_Stock where StockDate>='20240331' and IsStockAdjustment=0  
+group by StockDate,Item_id,Party_id having count(*) > 1
+order by StockDate,Party_id,Item_id ''')
+                
+                for a in query:
+                    CustomPrint(a.Party_id,)
+                    CustomPrint(a.Item_id)
+                    CustomPrint(a.maxid)
+                    query2=T_Stock.objects.filter(StockDate='2024-03-31',  Item_id=a.Item_id,Party_id=a.Party_id,
+).exclude(id=a.maxid).update(IsDeleted=1)
+                   
+            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Delete Duplicate Stock Entry Successfully', 'Data': []})
+        except Exception as e:
+            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+
+
+   
+class StockEntryItemsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        Logindata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                UserID = Logindata['UserID']
+                RoleID = Logindata['RoleID']
+                CompanyID = Logindata['CompanyID']   
+                PartyID = Logindata['PartyID']
+                CompanyGroupID = Logindata['CompanyGroup']
+                IsSCMCompany = Logindata['IsSCMCompany']
+                
+                q1 = M_Parties.objects.filter(id=PartyID).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM','PartyType__IsFranchises')
+                if(q1[0]['PartyType__IsFranchises'] == 1):
+                    GroupTypeid = 5
+                    seq=(f'MC_ItemGroupDetails.ItemSequence')
+                else:    
+                    GroupTypeid = 1
+                    seq=(f'M_Items.Sequence')
+                
+                joinsforgroupsubgroup=(f'''left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
+
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
+                orderby=('''Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''')
+                
+                Itemquery = MC_PartyItems.objects.raw(f'''SELECT M_Items.id, M_Items.Name AS ItemName,
+                                                            ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, 0), 2) AS MRPValue,
+                                                            ROUND(GetTodaysDateRate(M_Items.id, CURDATE(), %s, 0, 2), 2) AS RateValue,
+                                                            ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2), 2) AS GSTPercentage,
+                                                            GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0, 0) AS MRPID,
+                                                            GSTHsnCodeMaster(M_Items.id, CURDATE(), 1) AS GSTID,
+                                                            GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate
+                                                            FROM M_Items 
+                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
+                                                            {joinsforgroupsubgroup}
+                                                            WHERE MC_PartyItems.Party_id = %s {orderby}''', ([PartyID],[PartyID],[PartyID]))
+             
+                if not Itemquery:
+                    log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
+                
+                FranchiseItemsList = [{
+                    "Item": item.id,
+                    "ItemName": item.ItemName,
+                    "ItemUnitDetails": [{
+                        "Unit": unit.id,
+                        "BaseUnitQuantity": unit.BaseUnitQuantity,
+                        "IsBase": unit.IsBase,
+                        "UnitName": unit.BaseUnitConversion,
+                    } for unit in MC_ItemUnits.objects.filter(Item_id=item.id, IsDeleted=0)],
+                    "ItemMRPDetails": [{
+                        "MRP": item.MRPID,
+                        "MRPValue": item.MRPValue,
+                    }],
+                    "ItemGSTDetails": [{
+                        "GST": item.GSTID,
+                        "GSTPercentage": item.GSTPercentage,
+                    }],
+                    "ItemRateDetails": [{
+                        "Rate": item.Rate,
+                        "RateValue": item.RateValue,
+                    }]
+                } for item in Itemquery]
+                
+                log_entry = create_transaction_logNew(request, Logindata, PartyID, 'Franchise Items List', 102, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': FranchiseItemsList})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})

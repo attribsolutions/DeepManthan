@@ -6,7 +6,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser,MultiPartParser,FormParser
 from rest_framework.parsers import JSONParser
-
 from ..Serializer.S_PriceLists import *
 from  ..Serializer.S_Items import *
 from  ..Serializer.S_GeneralMaster import *
@@ -14,7 +13,11 @@ from ..models import *
 from django.db.models import F
 from django.db import connections
 from django.views import View
-from rest_framework.parsers import JSONParser
+from ..Views.V_CommFunction import *
+
+
+
+
 
 
 
@@ -26,24 +29,28 @@ class M_ItemTag(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                query = M_Items.objects.all()
+                print('ItemTag API StartTime: ',datetime.now())
+                query = M_Items.objects.raw('''select id,Name, Tag from M_Items where Tag != '' ''')
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
                     log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0, "Items Not available",100,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
-                    Items_Serializer = ItemSerializerSecond(query, many=True).data
+                    # Items_Serializer = ItemSerializerSecond(query, many=True).data
                     ListData = list ()
-                    for a in Items_Serializer:
-                        b=str(a['Tag'])
+                    for a in query:
+                       
+                        b=str(a.Tag)
                         c=b.split(',')
                         for d in c:
                             ListData.append({
-                                "dta": d+ "-" + a['Name']
+                                "dta": d+ "-" + a.Name
                             })  
+                    print('ItemTag API EndTime: ',datetime.now())
                     log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0,'',100,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
+            print('ItemTag API EndTime: ',datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'ItemTagList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -84,6 +91,7 @@ class M_ItemsFilterView(CreateAPIView):
     def post(self, request, id=0 ):
         try:
             with transaction.atomic():
+                print("ItemFilterAPI StartTime : ",datetime.now())
                 Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
@@ -102,11 +110,23 @@ class M_ItemsFilterView(CreateAPIView):
                     company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
                     company_ids = [company.id for company in company_queryset]
                     # query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
-                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))   
                 else:
+                    # CustomPrint("Dhruti")
                     # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
-                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
-            
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, 
+                                               M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM,
+                                               M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName,
+                                               M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, 
+                                               M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, 
+                                               M_Items.Grammage, M_Items.Height, M_Items.Length, 
+                                               M_Items.StoringCondition, M_Items.BaseUnitID_id, 
+                                               M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName,
+                                               M_Units.Name AS BaseUnitName FROM M_Items 
+                                               JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
+                                               JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
+                                               WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
+                    # CustomPrint(query.query)
                 if not query:
                     log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -114,6 +134,9 @@ class M_ItemsFilterView(CreateAPIView):
                     Items_Serializer = ItemSerializerThird(query, many=True).data
                     ItemListData = list ()
                     for a in Items_Serializer:
+                        UnitDetails = [] 
+                        if PartyID > 0:                             
+                            UnitDetails = UnitDropdown(a['id'], PartyID, 0) 
                         # UnitDetails=list()
                         # for d in a['ItemUnitDetails']:
                         #     if d['IsDeleted']== 0 :
@@ -153,12 +176,13 @@ class M_ItemsFilterView(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
-                            # "UnitDetails":UnitDetails
-                        })    
-                        
-                    log_entry = create_transaction_logNew(request, Logindata, x,'',102,0)
+                            "UnitDetails":UnitDetails
+                        })  
+                    print("ItemFilterAPI EndTime : ",datetime.now())    
+                    log_entry = create_transaction_logNew(request, Logindata, x,'Party Items List',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
+            print("ItemFilterAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, 0, 0,'ItemList:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -172,6 +196,7 @@ class M_ItemsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
+                print("ItemSaveAPI StartTime : ",datetime.now())
                 Itemsdata = JSONParser().parse(request)
                 query = M_Units.objects.filter(id=Itemsdata['BaseUnitID']).values('Name')
                 BaseUnitName = query[0]['Name']
@@ -191,13 +216,16 @@ class M_ItemsView(CreateAPIView):
                 if Items_Serializer.is_valid():
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
+                    print("ItemSaveAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, Itemsdata, 0,'TransactionID:'+str(LastInsertID),103,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 else:
+                    print("ItemSaveAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, Itemsdata, 0,'ItemSave:'+str(Items_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
         except Exception as e:
+            print("ItemSaveAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, 0, 0,'ItemSave:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -211,6 +239,7 @@ class M_ItemsViewSecond(CreateAPIView):
     def get(self, request,id=0):
         try:
             with transaction.atomic():
+                print("ItemSingleGETAPI StartTime : ",datetime.now())
                 Itemsquery = M_Items.objects.filter(id=id)
                 if Itemsquery.exists():
                     # return JsonResponse({'query':  str(Itemsquery.query)})
@@ -252,6 +281,7 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "IsBase": d['IsBase'],
                                     "PODefaultUnit": d['PODefaultUnit'],
                                     "SODefaultUnit": d['SODefaultUnit'],
+                                    "IsShowUnit":d['IsShowUnit']
                                 
                                 })
                             
@@ -387,14 +417,18 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemGSTHSNDetails":GSTHSNDetails,
                             "ItemShelfLife":ShelfLifeDetails
                         })
+                    print("ItemSingleGETAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
+                print("ItemSingleGETAPI EndTime : ",datetime.now())
                 log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except M_Items.DoesNotExist:
+            print("ItemSingleGETAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request,0, 0, "Items Not available",181,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
+            print("ItemSingleGETAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'Item SingleGETmethod :'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
@@ -472,14 +506,14 @@ class M_ImageTypesView(CreateAPIView):
 #     def get(self, request,IsSCM=0,PartyID=0):
 #         try:
 #             with transaction.atomic():
-#                 # print(IsSCM)
+#                 # CustomPrint(IsSCM)
 #                 if IsSCM == '0':
 #                     Itemsdata = M_Items.objects.all()
 #                 else:
 #                     partyitem=MC_PartyItems.objects.filter(Party=PartyID).values('Item')
 #                     Itemsdata = M_Items.objects.filter(id__in=partyitem)
                 
-#                 # print(Itemsdata.query)
+#                 # CustomPrint(Itemsdata.query)
 #                 if Itemsdata.exists():
 #                     Itemsdata_Serializer = ItemReportSerializer(Itemsdata,many=True).data
 #                     ItemsList = list()
@@ -591,17 +625,15 @@ class ItemWiseUpdateView(CreateAPIView):
                 Type = Item_data['Type']
                 GroupTypeID = Item_data['GroupType']
                 
-                
                 query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
-                                                            M_Items.Length, M_Items.StoringCondition
+                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID
                                                             FROM M_Items
-                                                            LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and GroupType_id= %s
-                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id and IsDeleted=0
+                                                            LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and  MC_ItemGroupDetails.GroupType_id= %s
+                                                            LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id AND IsDeleted=0
                                                             LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                                                            ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID])
-                       
+                                                            LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id  
+                                                            ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''', [GroupTypeID]) 
                 
                 Item_Serializer = ItemWiseUpdateSerializer(query, many=True).data
                 ItemListData = list() 
@@ -615,41 +647,64 @@ class ItemWiseUpdateView(CreateAPIView):
                                 "SubGroupID": a['SubGroupID'],
                                 "SubGroupName": a['SubGroupName'],
                                  Type: a.get(Type)
-                        
-                        })
-                        
+                         })
+                log_entry = create_transaction_logNew(request, Item_data, 0,f'Type: {Type}',349,0)       
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemWiseBulkUpdate:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
-class ItemWiseSaveView(CreateAPIView):
 
+class ItemWiseSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
-                Item_data = JSONParser().parse(request) 
-                Type = Item_data['Type']
-                UpdatedData = Item_data['UpdatedData']
+                Item_data  = JSONParser().parse(request)
+                ItemType = Item_data ['Type']
+                Updated_data = Item_data ['UpdatedData']
+                Created_By = request.user.id 
                 
-                for a in UpdatedData: 
-                    if 'ItemID' in a:
-                        item_id = a['ItemID']
-                    if (Type == 'ShelfLife'):
-                        query = MC_ItemShelfLife.objects.filter(Item=a['ItemID']).update(Days=a['Value1'])
-                    elif(Type == 'Group'):
-                        query = MC_ItemGroupDetails.objects.filter(Item= a['ItemID']).update(Group=a['Value1'],SubGroup=a['Value2'])                   
-                    else:
-                        query = M_Items.objects.filter(id= a['ItemID']).update(**{Type: a['Value1']})
-                        
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': Type+' Update Successfully', 'Data': [] })
-        except Exception as e:
+                for a in Updated_data:
+                    ItemID = a.get('ItemID')
+                    
+                    if ItemID is None:
+                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'ItemID is required', 'Data': []})
+                    
+                    if ItemType == 'ShelfLife':
+                        ShelfLifeDays = a.get('Value1')
+                        query1 = MC_ItemShelfLife.objects.filter(Item_id=ItemID).first()
+                        if query1:
+                            query1.Days = ShelfLifeDays
+                            query1.save()
+                        else:
+                            MC_ItemShelfLife.objects.create(Item_id=ItemID, Days=ShelfLifeDays, CreatedBy=Created_By, UpdatedBy=Created_By) 
 
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})           
+                    elif ItemType == 'Group':   
+                        GroupID = a.get('Value1')
+                        SubGroupID = a.get('Value2')
+                        GroupTypeID = a.get('GroupTypeID')  
+                        query2 = MC_ItemGroupDetails.objects.filter(Item_id=ItemID).first()
+                        if query2:
+                            query2.Group_id = GroupID
+                            query2.SubGroup_id = SubGroupID
+                            query2.GroupType_id = GroupTypeID  
+                            query2.save()
+                        else:
+                            MC_ItemGroupDetails.objects.create(Item_id=ItemID, Group_id=GroupID, SubGroup_id=SubGroupID, GroupType_id=GroupTypeID)  
+                    
+                    else:
+                        M_Items.objects.filter(id=ItemID).update(**{ItemType: a.get('Value1')})  
+                        
+                log_entry = create_transaction_logNew(request, Item_data, 0, f'Type: {ItemType} ItemID: {ItemID}', 350, 0)       
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'{ItemType} Updated Successfully', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemDataSave:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 500, 'Status': True, 'Message': Exception(e), 'Data': []})
+        
 
 class ImageUploadsView(CreateAPIView):
     

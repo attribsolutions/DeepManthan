@@ -56,11 +56,11 @@ class PartyItemsFilterView(CreateAPIView):
                 IsSCMCompany = Logindata['IsSCMCompany']
 
                 if IsSCMCompany == 1:
-                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem FROM M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s WHERE IsSCM=1 AND M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s) AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s))  order by M_Group.id, MC_SubGroup.id ''',([PartyID],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
+                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem FROM M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1 LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s WHERE IsSCM=1 AND M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s) AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s))  order by M_Group.id, MC_SubGroup.id ''',([PartyID],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
                 else:
-                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem from M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  left JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s where M_Items.Company_id =%s order by M_Group.id, MC_SubGroup.id''',([PartyID],[PartyID],[CompanyID]))
-                
-                # print(Itemquery)
+                    # Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem from M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  left JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s where M_Items.Company_id =%s order by M_Group.id, MC_SubGroup.id''',([PartyID],[PartyID],[CompanyID]))
+                    Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem FROM M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1 LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s WHERE  M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s) AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s))  order by M_Group.id, MC_SubGroup.id ''',([PartyID],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
+                # CustomPrint(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request,Logindata,0,'Items Not available',181,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -68,7 +68,7 @@ class PartyItemsFilterView(CreateAPIView):
             
                     Items_Serializer = MC_PartyItemSerializerSingleGet(
                         Itemquery, many=True).data
-                    ItemList = list()
+                    ItemList = list() 
                     for a in Items_Serializer:
                         GST_HSNCodeMaster = GSTHsnCodeMaster(ItemID=a['id'], EffectiveDate=date.today())
                         GST = GST_HSNCodeMaster.GetTodaysGstHsnCode()
@@ -90,6 +90,7 @@ class PartyItemsFilterView(CreateAPIView):
                             "InStock":InStock,
                             "MapItem": a['MapItem'],
                             "GST": GST[0]['GST'], 
+                            "GSTID":GST[0]['Gstid']
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
@@ -134,13 +135,36 @@ class ChannelWiseItemsView(CreateAPIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                Items_data = JSONParser().parse(request)
+                Items_data = JSONParser().parse(request)                
                 Items_Serializer = M_ChannelWiseItemsSerializer(data=Items_data, many=True)
+                
             if Items_Serializer.is_valid():
+                   
                 id = Items_Serializer.data[0]['PartyType']
                 ChanelWiseItem_data = M_ChannelWiseItems.objects.filter(PartyType_id=id)
                 ChanelWiseItem_data.delete()
-                ChannelWiseItem = Items_Serializer.save()
+                ChannelWiseItem = Items_Serializer.save()  
+                Q11=M_Settings.objects.filter(id=45).values("DefaultValue")
+                PartyTypeID1=str(Q11[0]['DefaultValue'])
+                PartyTypeID1_list = [int(x) for x in PartyTypeID1.split(",")]
+                
+                if id in PartyTypeID1_list:                                     
+                   
+                    PartysID= M_Parties.objects.filter(PartyType_id=id).values('id')
+                    # MC_PartyItem_data = MC_PartyItems.objects.filter(Party__in=PartysID)
+                    MC_PartyItems.objects.filter(Party__in=PartysID).delete()                   
+                    # MC_PartyItem_data.delete()                                     
+                    for item_data in Items_Serializer.data:
+                        item_value = item_data['Item']                                                
+                        for PartyID in PartysID:  
+                            Party=  PartyID['id']                              
+                            PartyItems_data=[] 
+                            party_item = {"Item": item_value,"Party": Party, "IsAvailableForOrdering": 0}
+                            PartyItems_data.append(party_item)
+                            # CustomPrint(PartyItems_data)        
+                            PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data, many=True)
+                            if PartyItems_serializer.is_valid():                               
+                                Item = PartyItems_serializer.save()                       
                 LastInsertID = ChannelWiseItem[0].id
                 log_entry = create_transaction_logNew(request,Items_data,0,'PartyTypeID:'+str(id)+','+'TransactionID:'+str(LastInsertID),183,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ChanelWiseItem Save Successfully','TransactionID':LastInsertID, 'Data': []})
@@ -173,23 +197,24 @@ class ChannelWiseItemsFilterView(CreateAPIView):
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,
 ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id 
 AND M_ChannelWiseItems.PartyType_id=%s left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id 
-left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType 
-ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group
-ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
-ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.IsSCM=1 and M_Items.Company_id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.IsSCM=1 and M_Items.Company_id 
 in (select id from C_Companies where CompanyGroup_id=%s  order by M_Group.id, MC_SubGroup.id)''',([PartyTypeID],[CompanyGroupID]))
                 else:
                     Itemquery= M_ChannelWiseItems.objects.raw('''SELECT M_Items.id,M_Items.Name,ifnull(M_ChannelWiseItems.PartyType_id,0) PartyType_id,ifnull(M_ChannelWiseItems.IsAvailableForOrdering,0) IsAvailableForOrdering,
 ifnull(M_PartyType.Name,'') PartyTypeName,ifnull(M_GroupType.Name,'') GroupTypeName,
 ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName from M_Items 
-left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id AND M_ChannelWiseItems.PartyType_id=%s
-left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id left JOIN MC_ItemGroupDetails 
-ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType 
-ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group 
-ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup 
-ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where M_Items.Company_id =%s 
+left JOIN M_ChannelWiseItems ON M_ChannelWiseItems.item_id=M_Items.id  AND M_ChannelWiseItems.PartyType_id=%s
+left JOIN M_PartyType ON M_PartyType.id=M_ChannelWiseItems.PartyType_id 
+left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
+left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+where M_Items.Company_id =%s 
 order by M_Group.id, MC_SubGroup.id''',([PartyTypeID],[CompanyID]))
-                # print(str(Itemquery.query))
+                # CustomPrint(str(Itemquery.query))
                 if not Itemquery:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:

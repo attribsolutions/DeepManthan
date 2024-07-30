@@ -21,7 +21,7 @@ class M_MarginsView(CreateAPIView):
         try:
             with transaction.atomic():
                 Margindata = M_MarginMaster.objects.raw('''SELECT M_MarginMaster.id,M_MarginMaster.EffectiveDate,M_MarginMaster.Company_id,M_MarginMaster.PriceList_id,M_MarginMaster.CreatedBy,M_MarginMaster.CreatedOn,M_MarginMaster.Party_id,M_MarginMaster.CommonID,C_Companies.Name CompanyName, M_PriceList.Name PriceListName,M_Parties.Name PartyName  FROM M_MarginMaster  left join C_Companies on C_Companies.id = M_MarginMaster.Company_id left join M_PriceList  on M_PriceList.id = M_MarginMaster.PriceList_id left join M_Parties on M_Parties.id = M_MarginMaster.Party_id where M_MarginMaster.CommonID>0 AND M_MarginMaster.IsDeleted=0 group by EffectiveDate,Party_id,PriceList_id,CommonID Order BY EffectiveDate Desc''')
-                # print(str(MRPdata.query))
+                # CustomPrint(str(MRPdata.query))
                 if not Margindata:
                     log_entry = create_transaction_logNew(request, 0, 0, "MarginList Not available",114,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -70,7 +70,7 @@ class GETMarginDetails(CreateAPIView):
                 PriceListID = request.data['PriceList']
                 PartyID = request.data['Party']
                 EffectiveDate = request.data['EffectiveDate']
-                query = M_Items.objects.all()
+                query = M_Items.objects.all().filter(IsFranchisesItem=0)
                 if not query:
                     log_entry = create_transaction_logNew(request, 0, 0, "Margin Details Not available",116,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})

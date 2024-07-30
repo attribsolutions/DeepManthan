@@ -41,15 +41,14 @@ class GroupView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'List Not available',220,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
     @transaction.atomic()
     def post(self, request):
+        Group_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Group_data = JSONParser().parse(request)
-
                 Group_Serializer = M_GroupSerializerForItem(data=Group_data)
                 if Group_Serializer.is_valid():
                     Group = Group_Serializer.save()
@@ -61,7 +60,7 @@ class GroupView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Group_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,Group_data, 0,'GroupSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class GroupViewSecond(CreateAPIView):
@@ -95,15 +94,15 @@ class GroupViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Groupdata, 0,'Details Not available',221,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
 
 
     @transaction.atomic()
     def put(self, request, id=0):
+        Group_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Group_data = JSONParser().parse(request)
                 Group_dataByID = M_Group.objects.get(id=id)
                 Group_Serializer = GroupSerializerThird(
                     Group_dataByID, data=Group_data)
@@ -116,7 +115,7 @@ class GroupViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Group_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,Group_data, 0,'GroupEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
         
 
@@ -168,3 +167,121 @@ class GetGroupByGroupTypeID(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GetGroupByGroupTypeIDmethod:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+
+
+class DetailsOfSubgroups_GroupsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                query1 = M_Group.objects.filter(GroupType_id=id)
+                if not query1.exists():
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GroupType Not available', 'Data': []})
+
+                GroupSubgroupItemList = []
+                for aa in query1:
+                    query2 = MC_SubGroup.objects.filter(Group=aa)
+                    for subgroup in query2:
+                            if query2.exists():
+                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa, SubGroup=subgroup).select_related('Item').order_by('ItemSequence')
+                                SubGroupID = subgroup.id
+                                SubGroupName = subgroup.Name
+                                SubGroupSequence = subgroup.Sequence     
+                            else:
+                                query3 = MC_ItemGroupDetails.objects.filter(Group=aa).select_related('Item').order_by('ItemSequence')
+                                SubGroupID = None
+                                SubGroupName = None
+                                SubGroupSequence = None
+                            ItemList = list()
+                            for a in query3:
+                                ItemList.append(
+                                            {
+                                            "ItemID": a.Item.id,
+                                            "ItemName": a.Item.Name,
+                                            "ItemSequence": a.ItemSequence
+                                        } 
+                                            )
+                            GroupSubgroupItemList.append({
+                                            "GroupTypeID": aa.GroupType_id,
+                                            "GroupID": aa.id,
+                                            "GroupName": aa.Name,
+                                            "GroupSequence": aa.Sequence,
+                                            "SubGroupID": SubGroupID,
+                                            "SubGroupName": SubGroupName,
+                                            "SubGroupSequence": SubGroupSequence,
+                                            "Items": ItemList
+                                        })
+                log_entry = create_transaction_logNew(request,0, 0,'GroupTypeID:'+str(id),393,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'DetailsOfsubgroups_groups:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
+
+class UpdateGroupSubGroupSequenceView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        SequenceData = JSONParser().parse(request)
+        try:
+            if not isinstance(SequenceData, list):
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid data format', 'Data': []})
+
+            Group_IDs = list(set(item['GroupID'] for item in SequenceData))
+            groups = M_Group.objects.filter(id__in=Group_IDs)
+            if groups.count() != len(Group_IDs):
+                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more groups not found', 'Data': []})
+
+            SubGroup_IDs = list(set(item['SubGroupID'] for item in SequenceData if 'SubGroupID' in item and item['SubGroupID'] is not None))
+            subgroups = MC_SubGroup.objects.filter(id__in=SubGroup_IDs)
+            if subgroups.count() != len(SubGroup_IDs):
+                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more subgroups not found', 'Data': []})
+
+            Item_IDs = list(set(item['ItemID'] for group in SequenceData if 'Items' in group for item in group['Items']))
+            items = M_Items.objects.filter(id__in=Item_IDs)
+            if items.count() != len(Item_IDs):
+                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'One or more items not found', 'Data': []})
+
+            item_group_details = MC_ItemGroupDetails.objects.filter(Item__in=Item_IDs, Group__in=Group_IDs)
+
+            Group_Data = {group.id: group for group in groups}
+            SubGroup_Data = {subgroup.id: subgroup for subgroup in subgroups}
+            Item_Data = {item.id: item for item in items}
+            ItemGroup_Data = {(item_detail.Item.id, item_detail.Group.id): item_detail for item_detail in item_group_details}
+
+            for group_data in SequenceData:
+                Group_ID = group_data['GroupID']
+                Group_Sequence = group_data['GroupSequence']
+                Group = Group_Data[Group_ID]
+                Group.Sequence = Group_Sequence
+                Group.save()
+
+                SubGroup_ID = group_data.get('SubGroupID')
+                if SubGroup_ID is not None:
+                    SubGroup_Sequence = group_data['SubGroupSequence']
+                    SubGroup = SubGroup_Data[SubGroup_ID]
+                    SubGroup.Sequence = SubGroup_Sequence
+                    SubGroup.save()
+
+                for item_data in group_data['Items']:
+                    Item_ID = item_data['ItemID']
+                    Item_Sequence = item_data['ItemSequence']
+                    item_group_detail = ItemGroup_Data.get((Item_ID, Group_ID))
+
+                    if item_group_detail:
+                        item_group_detail.ItemSequence = Item_Sequence
+                        item_group_detail.save()
+
+            log_entry = create_transaction_logNew(request,SequenceData, 0,'',394,0)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Sequences updated successfully', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,SequenceData, 0,'GroupSubGroupSequenceUpdate:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
+
+        
+    

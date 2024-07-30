@@ -165,6 +165,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
     PartyID=serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     PartyType = serializers.CharField(max_length=500)
+    ImportFromExcel = serializers.BooleanField()
     FullInvoiceNumber=serializers.CharField(max_length=500)
     InvoiceDate = serializers.DateField()
     CustomerID=serializers.IntegerField()
@@ -203,6 +204,9 @@ class GenericSaleReportSerializer(serializers.Serializer):
     SubGroup = serializers.CharField(max_length=500) 
     Cluster = serializers.CharField(max_length=500)
     SubCluster = serializers.CharField(max_length=500)
+    BatchNo = serializers.CharField(max_length=500)
+    BatchDate = serializers.DateField()
+    SAPItemID = serializers.CharField(max_length=500)
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
@@ -210,6 +214,7 @@ class GenericSaleReportSerializer(serializers.Serializer):
         representation['QtyInNo'] = Decimal(representation['QtyInNo']).quantize(Decimal('0.00'))
         representation['QtyInKg'] = Decimal(representation['QtyInKg']).quantize(Decimal('0.00'))
         representation['QtyInBox'] = Decimal(representation['QtyInBox']).quantize(Decimal('0.00'))
+        representation ['Data Upload / FE2 Billing'] = "Data Upload" if representation['ImportFromExcel'] else "FE2 Billing"
         return representation
      
      
@@ -219,6 +224,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     SupplierName=serializers.CharField(max_length=500)
     Name = serializers.CharField(max_length=500)
     isActive=serializers.BooleanField()
+    PartyCreation = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     Email = serializers.CharField(max_length=200)
     MobileNo=serializers.CharField()
     AlternateContactNo=serializers.CharField(max_length=500)
@@ -402,6 +408,7 @@ class ManPowerSerializer(serializers.Serializer):
     FEParty_id = serializers.IntegerField(allow_null=True)
     PartyName = serializers.CharField(max_length=500)
     PartyActive = serializers.BooleanField(default=True)
+    PartyCreation = serializers.DateTimeField()
     PartyType = serializers.CharField(max_length=500)
     Email = serializers.CharField(max_length=500)
     PAN = serializers.CharField(max_length=500)
@@ -424,10 +431,13 @@ class ManPowerSerializer(serializers.Serializer):
     FSSAIExpiry = serializers.DateField()
     GSTIN = serializers.CharField(max_length=500)
     GM = serializers.CharField(max_length=500)
+    NSM =  serializers.CharField(max_length=500)
+    RSM =  serializers.CharField(max_length=500)
     ASM = serializers.CharField(max_length=500)
     SE = serializers.CharField(max_length=500)
     SO = serializers.CharField(max_length=500)
     SR = serializers.CharField(max_length=500)
+    MT =  serializers.CharField(max_length=500)
     
 
 class TCSAmountReportSerializer(serializers.Serializer):
@@ -438,13 +448,6 @@ class TCSAmountReportSerializer(serializers.Serializer):
     Total = serializers.DecimalField(max_digits=20, decimal_places=2)
     PartyID = serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
-
-
-
-
-
-
-
 
 
 

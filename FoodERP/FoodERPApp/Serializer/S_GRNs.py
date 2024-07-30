@@ -59,14 +59,19 @@ class T_GRNSerializer(serializers.ModelSerializer):
         grnID = T_GRNs.objects.create(**validated_data)
         
         for GRNItem_data in GRNItems_data :
-            # print(grnID)
+            # CustomPrint(grnID)
             GrnItem=TC_GRNItems.objects.create(GRN=grnID, **GRNItem_data)
- 
-        for O_LiveBatchesList_data in O_LiveBatchesLists_data :
-            O_BatchWiseLiveStockLists=O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
-            BatchID=O_LiveBatches.objects.create(**O_LiveBatchesList_data)
-            for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
-                O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID,LiveBatche=BatchID,**O_BatchWiseLiveStockList)  
+            
+            
+        Franchise = validated_data.get('Customer')
+        if Franchise:
+            CustID = M_Parties.objects.get(id=Franchise.id)
+            if CustID.PartyType_id != 19:
+                for O_LiveBatchesList_data in O_LiveBatchesLists_data:
+                    O_BatchWiseLiveStockLists = O_LiveBatchesList_data.pop('O_BatchWiseLiveStockList')
+                    BatchID = O_LiveBatches.objects.create(**O_LiveBatchesList_data)
+                    for O_BatchWiseLiveStockList in O_BatchWiseLiveStockLists:
+                        O_BatchWiseLiveStockdata=O_BatchWiseLiveStock.objects.create(GRN=grnID, LiveBatche=BatchID, **O_BatchWiseLiveStockList)
             
         
         # for GRNReference_data in GRNReferences_data:
@@ -85,18 +90,15 @@ class T_GRNSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        instance.GRNDate = validated_data.get(
-            'GRNDate', instance.GRNDate)
-        instance.Customer = validated_data.get(
-            'Customer', instance.Customer)
-        instance.Party = validated_data.get(
-            'Party', instance.Party)
+        instance.GRNDate = validated_data.get('GRNDate', instance.GRNDate)
+        
+        instance.Customer = validated_data.get('Customer', instance.Customer)
+        
+        instance.Party = validated_data.get('Party', instance.Party)
 
-        instance.GrandTotal = validated_data.get(
-            'GrandTotal', instance.GrandTotal)
+        instance.GrandTotal = validated_data.get('GrandTotal', instance.GrandTotal)
        
-        instance.UpdatedBy = validated_data.get(
-            'UpdatedBy', instance.UpdatedBy)
+        instance.UpdatedBy = validated_data.get('UpdatedBy', instance.UpdatedBy)
 
         instance.save()
 
@@ -165,7 +167,7 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
         ret = super(TC_GRNItemsSerializerSecond, self).to_representation(instance)
         # if parent is None, overwrite
         if not ret.get("GST", None):
-            ret["GST"] = {"id": None, "GSTPercentage": None}
+            ret["GST"] = {"id": None, "GSTPercentage": None,"HSNCode" :None}
             
         if not ret.get("MRP", None):
             ret["MRP"] = {"id": None, "MRP": None}    

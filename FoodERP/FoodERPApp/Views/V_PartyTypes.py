@@ -24,8 +24,7 @@ class PartyTypeListView(CreateAPIView):
                 RoleID=  PartyType_Data['RoleID']  
                 CompanyID = PartyType_Data['CompanyID']  
                 IsSCM=PartyType_Data['IsSCMCompany'] 
-                id=PartyType_Data['id'] 
-                
+                id=PartyType_Data['id']                 
                 
                 if (id == 0):
                     
@@ -35,15 +34,12 @@ class PartyTypeListView(CreateAPIView):
                     else:    
                         if(IsSCM == 0):
                         
-                            q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")
-                            q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')
-                            query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))
-                            # print(str(query.query))
+                            q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")                            
+                            q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')                           
+                            query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))                           
                             p=0
-                        else:
-                        
-                            query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)
-                        
+                        else:                        
+                            query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)                        
                             p=0
                 else:    
                     

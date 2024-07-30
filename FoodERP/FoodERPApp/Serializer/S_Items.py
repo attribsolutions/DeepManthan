@@ -8,6 +8,11 @@ class M_ItemsSerializer01(serializers.ModelSerializer):
         model = M_Items
         fields = '__all__'
 
+class M_ItemsSerializer02(serializers.ModelSerializer):
+    class Meta:
+        model = M_Items
+        fields = ['id','Name']        
+
 class ItemsSerializerList(serializers.Serializer):
     id = serializers.IntegerField()
     Name = serializers.CharField(max_length=500)
@@ -54,7 +59,7 @@ class ItemImagesSerializer(serializers.ModelSerializer):
 class ItemUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_ItemUnits
-        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion']
+        fields = ['UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','IsShowUnit']
         
                
 class ItemGroupDetailsSerializer(serializers.ModelSerializer):
@@ -187,7 +192,7 @@ class ItemSerializer(serializers.ModelSerializer):
         else:
            
             for c in instance.ItemUnitDetails.all():
-                # print(c.id)
+                # CustomPrint(c.id)
                 SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
 
             for ItemUnit_data in validated_data['ItemUnitDetails']:
@@ -338,7 +343,7 @@ class ItemUnitsSerializerSecond(serializers.ModelSerializer):
     UnitID = UnitSerializerSecond(read_only=True)
     class Meta:
         model = MC_ItemUnits
-        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion']
+        fields = ['id','UnitID', 'BaseUnitQuantity','IsDeleted','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','IsShowUnit']
 
 class ItemSubGroupSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -509,6 +514,7 @@ class ItemWiseUpdateSerializer(serializers.Serializer):
     SubGroupID = serializers.IntegerField()
     SubGroupName = serializers.CharField(max_length=200) 
     ShelfLife =  serializers.CharField(max_length=200) 
+    SAPUnitID = serializers.CharField(max_length=200)
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = ItemWiseUpdateSerializer(read_only=True)

@@ -149,8 +149,13 @@ from .Views.V_CentralServiceItemMaster import *
 
 from .Views.V_PartyDetails import *
 
-
 from .Views.V_Settings import *
+
+from .Views.V_TargetUploads import *
+
+from .Views.V_Rates import *
+
+# from .Views.V_FTP import *
 
 
 urlpatterns = [
@@ -236,6 +241,7 @@ urlpatterns = [
             url(r'Employees/([0-9]+)$', M_EmployeesViewSecond.as_view()),
             url(r'Employees$', M_EmployeesView.as_view()),
             url(r'EmployeesFilter$', M_EmployeesFilterView.as_view()),
+            url(r'EmployeeSubEmployee/([0-9]+)$', EmployeeSubEmployeeView.as_view()),
            
 #EmployeeTypes           
             url(r'EmployeeTypes/([0-9]+)$', M_EmployeeTypeViewSecond.as_view()),
@@ -248,6 +254,9 @@ urlpatterns = [
             url(r'ManagementEmpPartiesFilter$', ManagementEmployeePartiesFilterView.as_view()),
             url(r'ManagementEmpParties$', ManagementEmployeePartiesSaveView.as_view()),
             url(r'ManagementEmpParties/([0-9]+)$', ManagementEmployeePartiesSaveView.as_view()),
+            url(r'PartiesEmpAllDetails/([0-9]+)$', PartiesEmpAllDetailsView.as_view()),
+          
+       
          
 
 # Order All APIs
@@ -264,11 +273,11 @@ urlpatterns = [
             
 
 # InterBranch Order All APIs
-            url(r'InterBranchesOrder/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
+            url(r'IBPOList/([0-9]+)$', DemandViewSecond.as_view()),           #PUT,DELETE
             url(r'InterBranchesOrder$', DemandView.as_view()),                          #POST Only
             url(r'InterBranchesOrderFilter$', DemandListFilterView.as_view()),          #POST Filter
             url(r'InterBranches$', InterBranchDivisionView.as_view()),                  #Division Dropdown
-            url(r'InterBranchesItems$', InterBranchItemsView.as_view()),                #Go Button
+            # url(r'InterBranchesItems$', InterBranchItemsView.as_view()),                #Go Button
 
 #InterBranch Invoice  All APIs
             url(r'BranchInvoice/([0-9]+)$', InterBranchChallanViewSecond.as_view()),    #DELETE
@@ -296,17 +305,18 @@ urlpatterns = [
             url(r'GeneralMasterBrandName$', GeneralMasterBrandName.as_view()),
 #Invoice All APIs
             url(r'Invoicegetandupdate/([0-9]+)$', InvoiceViewEditView.as_view()), # Single Invoice GET,PUT Method                     
-            url(r'Invoice/([0-9]+)$', InvoiceViewSecond.as_view()),
+            url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?$',InvoiceViewSecond.as_view()),
             url(r'Invoice$', InvoiceView.as_view()),
             url(r'GetOrderDetails$', OrderDetailsForInvoice.as_view()),
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
+            url(r'InvoicesFilterSecond$', InvoiceListFilterViewSecond.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
             url(r'BulkInvoices$', BulkInvoiceView.as_view()),
             
-            url(r'Uploaded_EInvoicea/([0-9]+)/([0-9]+)$', Uploaded_EInvoice.as_view()),
-            url(r'Uploaded_EwayBill/([0-9]+)/([0-9]+)$', Uploaded_EwayBill.as_view()),
-            url(r'Cancel_EInvoicea/([0-9]+)/([0-9]+)$', Cancel_EInvoice.as_view()),
-            url(r'Cancel_EwayBill/([0-9]+)/([0-9]+)$', Cancel_EwayBill.as_view()),
+            url(r'Uploaded_EInvoicea/([0-9]+)/([0-9]+)/([0-9]+)$', Uploaded_EInvoice.as_view()),
+            url(r'Uploaded_EwayBill/([0-9]+)/([0-9]+)/([0-9]+)$', Uploaded_EwayBill.as_view()),
+            url(r'Cancel_EInvoicea/([0-9]+)/([0-9]+)/([0-9]+)$', Cancel_EInvoice.as_view()),
+            url(r'Cancel_EwayBill/([0-9]+)/([0-9]+)/([0-9]+)$', Cancel_EwayBill.as_view()),
             url(r'UpdateVehicleInvoice/([0-9]+)/([0-9]+)$',UpdateVehicleInvoiceView.as_view()),
             url(r'InvoiceHide/([0-9]+)/([0-9]+)$',InvoiceHideView.as_view()),
             url(r'InvoiceBulkDelete$', InvoiceBulkDeleteView.as_view()),
@@ -335,14 +345,15 @@ urlpatterns = [
             url(r'ChallanFilter$',ChallanListFilterView.as_view()), # Challan List Api
             url(r'ChallanItems$', ChallanItemsView.as_view()),# ChallanItems Api
             url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItemsStock Api
+            url(r'GetDemandDetails$',DemandDetailsForChallan.as_view()),
                     
             
                      
 # Bill Of Material All API's
-            url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),
+            url(r'Billofmaterial/([0-9]+)/([0-9]+)$',M_BOMsViewSecond.as_view()),            
             url(r'Billofmaterial$', M_BOMsView.as_view()),
             url(r'BomFilter$', BOMListFilterView.as_view()),
-    
+            url(r'BulkBom$', BulkBOMView.as_view()),
 # Work Order All API's
             url(r'BomDetails$', BomDetailsView.as_view()),
             url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
@@ -480,6 +491,10 @@ urlpatterns = [
             url(r'Group/([0-9]+)$', GroupViewSecond.as_view()),
             url(r'Group$', GroupView.as_view()),
             url(r'GetGroupByGroupTypeID/([0-9]+)$', GetGroupByGroupTypeID.as_view()),
+            url(r'DetailsOfsubgroups_groups/([0-9]+)$', DetailsOfSubgroups_GroupsView.as_view()), #GET by GroupTypeID
+            url(r'UpdateGroupSubGroupSequence$', UpdateGroupSubGroupSequenceView.as_view()),  #POST
+            
+            
 # SubGroups
             url(r'SubGroups/([0-9]+)$', SubGroupViewSecond.as_view()),
             url(r'SubGroups$', SubGroupView.as_view()),
@@ -516,10 +531,15 @@ urlpatterns = [
             url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
     
 # GetMRP 
+            
             url(r'GetMRP$',GETMrpDetails.as_view()),
             url(r'GetMargin$',GETMarginDetails.as_view()),
             url(r'GetGstHsncode$',GETGstHsnDetails.as_view()),
-            
+#GetRate    
+            url(r'Rates$',M_RatesView.as_view()),        
+            url(r'GetRate',GETRateDetails.as_view()),
+            url(r'DeleteRate/([0-9]+)$',M_RatesViewSecond.as_view()),
+            url(r'DeleteRateOnList/([0-9]+)$',M_RatesViewThird.as_view()),
 # BankMaster
             url(r'Bank/([0-9]+)$', BankView.as_view()),
             url(r'Bank$', BankView.as_view()),
@@ -546,7 +566,8 @@ urlpatterns = [
             
             url(r'Uploaded_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Uploaded_CreditDebitNotes_EInvoice.as_view()),
             url(r'Cancel_CreditDebitNotes_EInvoice/([0-9]+)/([0-9]+)$', Cancel_CreditDebitNotes_EInvoice.as_view()),
-            
+            url(r'BulkCreditNote$', CreditDebitNoteExcelView.as_view()),
+            url(r'BulkCreditNoteDelete$', CreditDebitNoteExcelView.as_view()),
 
 #ImportField
             url(r'ImportField$', ImportFieldSaveView.as_view()),  
@@ -629,6 +650,8 @@ urlpatterns = [
             url(r'OutStandingBalance$', OutStandingBalanceView.as_view()),
             url(r'ManPowerReport$', ManPowerReportView.as_view()),
             url(r'TCSAmountReport$', TCSAmountReportView.as_view()),
+            url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
+            url(r'FranchiseSaleReport$',FranchiseSecondarySaleReportView.as_view()), 
             
             
             
@@ -654,13 +677,18 @@ urlpatterns = [
 # StockAdjustment
             url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
             url(r'GetStockCountForParty$',GetStockCountForPartyView.as_view()),
+            url(r'CheckStockEntryForFYFirstTransaction$',CheckStockEntryForFYFirstTransactionView.as_view()),
+            url(r'CheckStockEntryDateAndNotAllowedBackdatedTransaction$',CheckStockEntryDateAndNotAllowedBackdatedTransactionView.as_view()),
+            url(r'PartyItemsStock_Entry$', StockEntryItemsView.as_view()),
             
 # Transactionlog  
             url(r'GetEmployeeFromUser$',EmplyoeeListView.as_view()), 
             url(r'GetTransactionType$',TransactionTypeListView.as_view()),
             url(r'TransactionDetails$',TransactionTypeView.as_view()),
-
-            url(r'TransactionJson/([0-9]+)$',TransactionJsonView.as_view()),    
+            url(r'TransactionJson/([0-9]+)$',TransactionJsonView.as_view()), 
+            url(r'AddTransactionType$',TransactionTypeAddView.as_view()),
+            url(r'LogsOnDashboard$',LogsOnDashboardView.as_view()),
+               
 
 # RetailerApproval Apis
             url(r'PartyListForApproval$',PartiesListForApprovalView.as_view()),
@@ -668,12 +696,13 @@ urlpatterns = [
 # Cluster 
             url(r'Cluster$',ClusterView.as_view()),
             url(r'Cluster/([0-9]+)$',ClusterViewsecond.as_view()),
-          
+            
             
 # SubCluster
              url(r'SubClusters$',SubClusterView.as_view()),
              url(r'SubClusters/([0-9]+)$',SubClusterViewsecond.as_view()),
              url(r'GetSubclusterOncluster/([0-9]+)$',GetSubClusterOnclusterView.as_view()),
+             url(r'GetPartyOnSubclusterandcluster$',GetPartyOnSubclusterandclusterAndEmployeeView.as_view()),
              
 # CentralServiceItem
              url(r'CentralItemService$',CentralServiceItemView.as_view()),
@@ -687,13 +716,26 @@ urlpatterns = [
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
               url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
-              url(r'SettingsDataSave$',SettingsView.as_view()), 
-             
-
-              url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()),  
-            
+              url(r'SettingsDataSave$',SettingsView.as_view()),  
               url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
 
+#TargetUploads
+              url(r'TargetUploads$',TargetUploadsView.as_view()), 
+              url(r'Gettargetupload$',GetTargetUploadsView.as_view()),
+              url(r'GetTargetUploadsBySheetNo/([0-9]+)/([0-9]+)$',GetTargetUploadsBySheetNoView.as_view()), #SheetNo/PartyID     
+              url(r'DeleteTargetRecords$',DeleteTargetRecordsView.as_view()),
+              url(r'TargetVSAchievement$', TargetVSAchievementView.as_view()),
+              url(r'TargetVSAchievementGroupwise$', TargetVSAchievementGroupwiseView.as_view()),
+          
+#Logs
+              url(r'LogTransaction$',LogTransactionView.as_view()),   
+              url(r'DeleteDuplicateStockEntry$',DeleteDuplicateStockEntryPageView.as_view()),        
+            #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
+             
+           
+              
+              
+            
 
 
 

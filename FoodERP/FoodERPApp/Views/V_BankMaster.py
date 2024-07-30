@@ -15,9 +15,9 @@ class PartyBanksFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self,request,id=0):
+        Bank_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Bank_data = JSONParser().parse(request)
                 Party = Bank_data['PartyID']
                 Company = Bank_data['CompanyID']
                 query1 = MC_PartyBanks.objects.raw('''SELECT MC_PartyBanks.id, M_Bank.id AS Bank_id, MC_PartyBanks.IFSC, MC_PartyBanks.BranchName, MC_PartyBanks.AccountNo, MC_PartyBanks.CustomerBank, MC_PartyBanks.IsSelfDepositoryBank, MC_PartyBanks.Company_id, MC_PartyBanks.Party_id, MC_PartyBanks.IsDefault FROM M_Bank LEFT JOIN MC_PartyBanks ON MC_PartyBanks.Bank_id = M_Bank.id AND MC_PartyBanks.Party_id=%s ORDER BY MC_PartyBanks.Party_id desc''',([Party]))
@@ -29,8 +29,8 @@ class PartyBanksFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Bank_data,Party,'Bank not available',189,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'PartyBankDetails:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, Bank_data,0,'PartyBankDetails:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 class PartyBanksListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -38,9 +38,9 @@ class PartyBanksListView(CreateAPIView):
 
     @transaction.atomic()
     def post(self,request,id=0):
+        Bank_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Bank_data = JSONParser().parse(request)
                 Party = Bank_data['PartyID']
                 Company = Bank_data['CompanyID']
                 query = MC_PartyBanks.objects.filter(Party=Party, Company=Company)
@@ -51,20 +51,19 @@ class PartyBanksListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Bank_data,Party,'Bank not available',190,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'PartyBankList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, Bank_data,0,'PartyBankList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 
 class PartyBanksSaveView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request, id=0):
+        PartyBanks_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                PartyBanks_data = JSONParser().parse(request)
                 PartyBanks_serializer = PartyBanksSerializerSecond(data=PartyBanks_data, many=True)
                 if PartyBanks_serializer.is_valid():
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': PartyBanks_serializer.data})
@@ -80,8 +79,8 @@ class PartyBanksSaveView(CreateAPIView):
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyBanks_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'PartyBanksSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, PartyBanks_data,0,'PartyBanksSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
 
 
 class BankListView(CreateAPIView):
@@ -100,17 +99,17 @@ class BankListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, bank_serializer,0,'Bank not available',192,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'BankList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,'BankList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
 
 class BankView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
     @transaction.atomic()
     def post(self, request):
+        Bank_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Bank_data = JSONParser().parse(request)
                 Bank_serializer = BankSerializer(data=Bank_data)
                 if Bank_serializer.is_valid():
                     Bank = Bank_serializer.save()
@@ -122,8 +121,8 @@ class BankView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Bank_serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'BankSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, Bank_data,0,'BankSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
     
     @transaction.atomic()
     def get(self, request, id=0):
@@ -131,17 +130,20 @@ class BankView(CreateAPIView):
             with transaction.atomic():
                 Bankdata = M_Bank.objects.get(id=id)
                 Bank_serializer = BankSerializer(Bankdata)
+                log_entry = create_transaction_logNew(request, Bank_serializer,0,f'Bank:{id}',367,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Bank_serializer.data})
         except  M_Bank.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0,0,'Bank not available',367,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Bank Not available', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,f'Bank:{id}'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
     @transaction.atomic()
     def put(self, request, id=0):
+        Bankdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Bankdata = JSONParser().parse(request)
                 BankdataByID = M_Bank.objects.get(id=id)
                 Bank_serializer = BankSerializer(
                     BankdataByID, data=Bankdata)
@@ -154,8 +156,8 @@ class BankView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Bank_serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'BankEdit:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,Bankdata,0,'BankEdit:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
     
 
     @transaction.atomic()

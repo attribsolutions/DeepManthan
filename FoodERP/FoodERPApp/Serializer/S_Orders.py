@@ -92,7 +92,7 @@ class T_OrderSerializer(serializers.ModelSerializer):
         instance.save()
 
         # for items in instance.OrderItem.all():
-        #     print(items.IsDeleted)
+        #     CustomPrint(items.IsDeleted)
         #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
             
             
@@ -235,7 +235,7 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
 class PartiesSerializerThird(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode','GSTIN']
+        fields = ['id','Name','SAPPartyCode','GSTIN','PartyType']
 
 
 class UnitSerializerThird(serializers.ModelSerializer):
@@ -308,7 +308,8 @@ class OrderSerializerForGrn(serializers.Serializer):
     id=serializers.IntegerField()
     SupplierName = serializers.CharField(max_length=500)     
     OrderAmount=serializers.DecimalField(max_digits=20, decimal_places=2) 
-    CustomerID =serializers.IntegerField() 
+    CustomerID =serializers.IntegerField()
+    PriceListId=serializers.IntegerField() 
 
 class OrderEditserializer(serializers.Serializer):
     # id=serializers.IntegerField()
@@ -318,14 +319,15 @@ class OrderEditserializer(serializers.Serializer):
     MRP_id=serializers.IntegerField() 
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    VRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     Unit_id=serializers.IntegerField() 
     UnitName=serializers.CharField(max_length=100)
     BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
     GST_id=serializers.IntegerField() 
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     HSNCode=serializers.CharField(max_length=100)
-    Margin_id=serializers.IntegerField() 
-    MarginValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    # Margin_id=serializers.IntegerField() 
+    # MarginValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     CGST=serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -345,6 +347,12 @@ class OrderEditserializer(serializers.Serializer):
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     StockQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
+    
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     if data['StockQuantity'] is None:
+    #         data['StockQuantity'] = '0.00'
+    #     return data
    
 
 class ReportOrderItemSerializer(serializers.ModelSerializer):
