@@ -417,7 +417,7 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
                     "ItemName": item.ItemName,
                     "ItemUnitDetails": [{
                         "Unit": unit.id,
-                        "BaseUnitQuantity": unit.BaseUnitQuantity,
+                        "BaseUnitQuantity": unit.BaseUnitQuantity,  
                         "IsBase": unit.IsBase,
                         "UnitName": unit.BaseUnitConversion,
                     } for unit in MC_ItemUnits.objects.filter(Item_id=item.id, IsDeleted=0)],
