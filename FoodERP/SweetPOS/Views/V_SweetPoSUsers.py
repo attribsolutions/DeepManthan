@@ -35,25 +35,27 @@ class SweetPOSUsersView(CreateAPIView):
             log_entry = create_transaction_logNew(request, User_data, 0,'UserSave:'+str(e),33,0)
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
  
+
 class SweetPOSSingleUserView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
-    @transaction.atomic()
-    def get(self, request,id=0):
+    @transaction.atomic
+    def get(self, request, id=0):
         try:
             with transaction.atomic():
-                query =  M_SweetPOSUser.objects.raw(f'''SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
-                            FROM sweetpos.M_SweetPOSUser SU
-                            JOIN sweetpos.M_SweetPOSRoles ON sweetpos.SU.RoleID = sweetpos.M_SweetPOSRoles.id
-                            where SU.id = %s''',([id]))
+                query = M_SweetPOSUser.objects.raw(f'''
+                    SELECT SU.id, CompanyID, DivisionID, LoginName, Password, RoleID, IsActive, SU.CreatedBy, SU.CreatedOn, SU.UpdatedBy, SU.UpdatedOn, M_SweetPOSRoles.Name as RoleName
+                    FROM SweetPOS.M_SweetPOSUser SU
+                    JOIN SweetPOS.M_SweetPOSRoles ON SweetPOS.SU.RoleID = SweetPOS.M_SweetPOSRoles.id
+                    WHERE SU.id = %s
+                ''', [id])
 
-            # with connection.cursor() as cursor:
-            #     cursor.execute(query)
-            #     rows = cursor.fetchall()
-            UserList = list()
-            for user in query:
-                UserList.append({
-                    "id":user.id,
+                if not query:
+                    raise M_SweetPOSUser.DoesNotExist
+
+                user = query[0]
+                UserList = {
+                    "id": user.id,
                     "CompanyID": user.CompanyID,
                     "DivisionID": user.DivisionID,
                     "LoginName": user.LoginName,
@@ -63,18 +65,19 @@ class SweetPOSSingleUserView(CreateAPIView):
                     "CreatedBy": user.CreatedBy,
                     "CreatedOn": user.CreatedOn,
                     "UpdatedBy": user.UpdatedBy,
-                    "UpdatedOn":user.UpdatedOn,
-                    "RoleName":user.RoleName,
-                })
+                    "UpdatedOn": user.UpdatedOn,
+                    "RoleName": user.RoleName,
+                }
 
             log_entry = create_transaction_logNew(request, UserList, 0, '', 373, 0)
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserList})
         except M_SweetPOSUser.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0, 0, 'Users Data Does Not Exist', 373, 0)
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Users Data Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Users Data Not available', 'Data': {}})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'GETAllUsers:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': {}})
+
        
 # Don't CommentOut below Logs without Permission  -- Commented By Pratiksha
 
