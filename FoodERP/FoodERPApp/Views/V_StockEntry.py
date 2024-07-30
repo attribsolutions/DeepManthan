@@ -417,7 +417,7 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
                     "ItemName": item.ItemName,
                     "ItemUnitDetails": [{
                         "Unit": unit.id,
-                        "BaseUnitQuantity": unit.BaseUnitQuantity,
+                        "BaseUnitQuantity": unit.BaseUnitQuantity,  
                         "IsBase": unit.IsBase,
                         "UnitName": unit.BaseUnitConversion,
                     } for unit in MC_ItemUnits.objects.filter(Item_id=item.id, IsDeleted=0)],
@@ -441,3 +441,81 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
         except Exception as e:
             log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+        
+        
+#  -------------------- Get Stock Entry List ----------------------
+          
+class M_GetStockEntryList(CreateAPIView):
+        
+    permission_classes = (IsAuthenticated,) 
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                StockData = JSONParser().parse(request)
+                FromDate = StockData.get('FromDate')
+                ToDate = StockData.get('ToDate')
+                    
+                if not FromDate or not ToDate:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'FromDate and ToDate are required', 'Data': []})
+
+                query = '''
+                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id FROM fooderp.t_stock as s 
+                    JOIN fooderp.m_parties as p ON s.Party_id = p.id   
+                    WHERE s.StockDate BETWEEN %s AND %s
+                    GROUP BY s.Party_Id, s.StockDate
+                '''
+                StockDataQuery = M_Items.objects.raw(query, [FromDate, ToDate])
+
+                if not list(StockDataQuery):
+                    log_entry = create_transaction_logNew(request, 0, 0, "Stock Not available", 210, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock not available', 'Data': []})
+                else:
+                    Stockdata_Serializer = M_StockEntryListSerializerSecond(StockDataQuery, many=True).data
+                    log_entry = create_transaction_logNew(request, Stockdata_Serializer, 0, '', 210, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Stockdata_Serializer})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, f'SingleGET Stock: {str(e)}', 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+#  -------------------- Get Stock Entry Item List ----------------------
+
+class M_GetStockEntryItemList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic(): 
+                Stockdata = JSONParser().parse(request) 
+                Party_id = Stockdata.get('Party')
+                StockDate = Stockdata.get('StockDate')
+
+                if Party_id is None:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party ID not provided', 'Data': []})
+                
+                if StockDate is None:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Stock Date not provided', 'Data': []})
+
+                # Execute the raw SQL query with parameterized input
+                query = '''
+                    SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
+	FROM fooderp.m_items as m RIGHT JOIN fooderp.t_stock as s ON s.Item_id = m.id 
+	INNER JOIN fooderp.mc_itemunits as iu ON iu.id=s.Unit_id
+    INNER JOIN fooderp.m_units as u ON u.id=iu.UnitID_id
+                    WHERE s.Party_id=%s AND s.StockDate=%s
+                '''
+                StockDataQuery = M_Items.objects.raw(query, [Party_id, StockDate])
+                
+                if not list(StockDataQuery):
+                    log_entry =create_transaction_logNew(request, 0, 0, "Stock Items List Not available", 210, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Items List Not available', 'Data': []})
+                else:
+                    Stockdata_Serializer = M_StockEntryItemListSecond(StockDataQuery, many=True).data
+                    log_entry =create_transaction_logNew(request, Stockdata_Serializer, 0, '', 210, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Stockdata_Serializer})
+        except Exception as e:
+            log_entry =create_transaction_logNew(request, 0, 0, f'SingleGET Stock: {str(e)}', 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
