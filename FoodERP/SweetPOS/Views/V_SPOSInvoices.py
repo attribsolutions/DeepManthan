@@ -451,14 +451,14 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 ToDate = SaleData['ToDate']
                 Party = SaleData['Party']
                 
-                PartyDetails = M_Parties.objects.raw('''select FoodERP.M_Parties.id, name, FoodERP.MC_PartyAddress.Address,
-                                                        (select sum(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s) TotalAmount,
-                                                        (select count(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s) BillCount
-                                                        from FoodERP.M_Parties
+                PartyDetails = M_Parties.objects.raw('''Select FoodERP.M_Parties.id, Name, FoodERP.MC_PartyAddress.Address,
+                                                        (Select SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
+                                                        (Select COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount
+                                                        From FoodERP.M_Parties
                                                         JOIN FoodERP.MC_PartyAddress ON FoodERP.M_Parties.id = FoodERP.MC_PartyAddress.Party_id AND FoodERP.MC_PartyAddress.IsDefault = True
                                                         JOIN SweetPOS.T_SPOSInvoices ON FoodERP.M_Parties.id = SweetPOS.T_SPOSInvoices.Party 
-                                                        where sweetpos.T_SPOSInvoices.Party= %s
-                                                        GROUP BY FoodERP.M_Parties.id,name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, FromDate, ToDate, Party]))
+                                                        Where SweetPOS.T_SPOSInvoices.Party= %s
+                                                        GROUP BY FoodERP.M_Parties.id,Name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
                 Party_List = []
                 for party in PartyDetails:
                     TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP.M_Items.Name AS ItemName,
@@ -499,3 +499,5 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
         except Exception as e:
                     log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
+
