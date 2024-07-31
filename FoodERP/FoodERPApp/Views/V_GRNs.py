@@ -52,7 +52,7 @@ class GRNListFilterView(CreateAPIView):
                             
                         if (GRNdata['DashBoardMode'] == 1):
                             GRNListData.append({
-                                "GRNDate": a['GRNDate'],                   
+                                "GRNDate": a['GRNDate']                
                             })
                         else:
 
