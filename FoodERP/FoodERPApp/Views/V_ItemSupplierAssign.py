@@ -49,8 +49,7 @@ class ItemSupplierView(CreateAPIView):
                         where M_Parties.PartyType_id = 12''')
                 # if query:
                 #     ItemSerializer = ItemSupplierSerializer(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :ItemSerializer})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Bank not available', 'Data' : []})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :[]})                
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
