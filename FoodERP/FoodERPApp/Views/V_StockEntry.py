@@ -461,8 +461,8 @@ class M_GetStockEntryList(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'FromDate and ToDate are required', 'Data': []})
 
                 query = '''
-                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id FROM t_stock as s 
-                    JOIN  m_parties as p ON s.Party_id = p.id   
+                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id FROM T_Stock as s 
+                    JOIN  M_Parties as p ON s.Party_id = p.id   
                     WHERE s.StockDate BETWEEN %s AND %s
                     GROUP BY s.Party_Id, s.StockDate
                 '''
@@ -501,9 +501,9 @@ class M_GetStockEntryItemList(CreateAPIView):
                 # Execute the raw SQL query with parameterized input
                 query = '''
                     SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
-	FROM  m_items as m RIGHT JOIN t_stock as s ON s.Item_id = m.id 
-	INNER JOIN mc_itemunits as iu ON iu.id=s.Unit_id
-    INNER JOIN  m_units as u ON u.id=iu.UnitID_id
+	FROM  M_Items as m RIGHT JOIN T_Stock as s ON s.Item_id = m.id 
+	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit_id
+    INNER JOIN  M_Units as u ON u.id=iu.UnitID_id
                     WHERE s.Party_id=%s AND s.StockDate=%s
                 '''
                 StockDataQuery = M_Items.objects.raw(query, [Party_id, StockDate])
