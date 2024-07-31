@@ -407,7 +407,9 @@ urlpatterns = [
             url(r'PartyLiveStock$',ShowOBatchWiseLiveStockView.as_view()),
             url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
             
-            
+ # Get Stock Entry List 
+            url(r'GetStockEntryList$',M_GetStockEntryList.as_view()),
+            url(r'GetStockEntryItemList$',M_GetStockEntryItemList.as_view()), 
            
 # State and District
             url(r'States$',M_StateView.as_view()),    
