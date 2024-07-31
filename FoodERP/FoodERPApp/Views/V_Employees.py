@@ -50,8 +50,8 @@ JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
 JOIN M_Cities ON M_Cities.id=M_Employees.City_id
 LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
-where M_Employees.CreatedBy=%s
-''', [UserID])
+where M_Employees.Company_id=%s
+''', [CompanyID])
                 if not query:
                     log_entry = create_transaction_logNew(request,Logindata,0,'List Not available',199,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
