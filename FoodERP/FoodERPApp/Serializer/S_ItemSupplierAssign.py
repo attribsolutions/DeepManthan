@@ -5,3 +5,5 @@ class ItemSupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model =  M_ItemSupplier
         fields = '__all__'
+
+        
