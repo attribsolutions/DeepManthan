@@ -501,7 +501,7 @@ class M_GetStockEntryItemList(CreateAPIView):
                 # Execute the raw SQL query with parameterized input
                 query = '''
                     SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
-	FROM  M_Items as m RIGHT JOIN t_stock as s ON s.Item_id = m.id 
+	FROM  M_Items as m RIGHT JOIN T_Stock as s ON s.Item_id = m.id 
 	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit_id
     INNER JOIN  M_Units as u ON u.id=iu.UnitID_id
                     WHERE s.Party_id=%s AND s.StockDate=%s
