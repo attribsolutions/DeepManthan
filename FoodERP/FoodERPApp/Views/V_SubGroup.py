@@ -46,9 +46,9 @@ class SubGroupView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        SubGroup_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                SubGroup_data = JSONParser().parse(request)
                 SubGroup_Serializer = SubGroupSerializer(data=SubGroup_data)
                 if SubGroup_Serializer.is_valid():
                     SubGroup = SubGroup_Serializer.save()
@@ -60,8 +60,8 @@ class SubGroupView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  SubGroup_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'SubGroupSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, SubGroup_data,0,'SubGroupSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 class SubGroupViewSecond(CreateAPIView):
     
@@ -92,18 +92,18 @@ class SubGroupViewSecond(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request, SubGroupdata,0,'TransactionID:'+str(id),226,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubGroupList[0]})
-                log_entry = create_transaction_logNew(request, SubGroupdata,0,'SubGroup Not available',226,0)
+                log_entry = create_transaction_logNew(request, 0,0,'SubGroup Not available',226,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubGroup Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'Single SubGroup:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0,0,'Single SubGroup:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 
     @transaction.atomic()
     def put(self, request, id=0):
+        SubGroup_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                SubGroup_data = JSONParser().parse(request)
                 SubGroup_dataByID = MC_SubGroup.objects.get(id=id)
                 SubGroup_Serializer = SubGroupSerializer(
                     SubGroup_dataByID, data=SubGroup_data)
@@ -116,8 +116,8 @@ class SubGroupViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SubGroup_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'SubGroupEdit:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, SubGroup_data,0,'SubGroupEdit:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 
     @transaction.atomic()
@@ -164,7 +164,7 @@ class GetSubGroupByGroupID(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request, SubGroupdata,0,'TransactionID:'+str(id),227,id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': SubGroupList})
-                log_entry = create_transaction_logNew(request, SubGroupdata,0,'SubGroup Not available',227,0)
+                log_entry = create_transaction_logNew(request, 0,0,'SubGroup Not available',227,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SubGroup Not available ', 'Data': []})
         except MC_SubGroup.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0,0,'SubGroup Not available',227,0)

@@ -155,6 +155,8 @@ from .Views.V_TargetUploads import *
 
 from .Views.V_Rates import *
 
+from .Views.V_ItemSupplierAssign import *
+
 # from .Views.V_FTP import *
 
 
@@ -734,6 +736,12 @@ urlpatterns = [
               url(r'DeleteDuplicateStockEntry$',DeleteDuplicateStockEntryPageView.as_view()),        
             #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
              
+#ItemSupplier
+              url(r'ItemSupplier$',ItemSupplierView.as_view()),   
+              url(r'ItemSupplier/([0-9]+)$',ItemSupplierUpdateView.as_view()),   
+
+
+              
            
               
               
