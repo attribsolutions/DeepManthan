@@ -65,6 +65,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                         sum(X.GrandTotal) AS TotalInvoiceValue
                                     FROM SweetPOS.T_SPOSInvoices X 
                                     JOIN M_Parties ON M_Parties.id = X.Customer
+
                                     WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN != ''AND X.IsDeleted=0) A''', (Party, FromDate, ToDate, Party, FromDate, ToDate))
                 B2B1 = B2BSerializer2(B2Bquery1, many=True).data               
                 
@@ -84,16 +85,19 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Invoice Number': None,
                              'Invoice Type':None, 
                              'Invoice Date' : None,
+
                              'Invoice Value (?)': None, 
+
                              'Place Of Supply': None, 
                              'Reverse Charge': None, 
                              'Applicable Of TaxRate': None,                           
                              'Taxable Value': None,
+
                              'Integrated Tax (?)':None,
                              'Central Tax (?)':None,
                              'State Tax (?)':None,
                              'Cess Amount (?)': None,
-                             'IRN':None,
+           'IRN':None,
                              'IRN date':None,
                              
                              
@@ -165,18 +169,22 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Invoice Number': None,
                              'Invoice Type':None, 
                              'Invoice Date' : None,
+
                              'Invoice Value (?)': None, 
+
                              'Place Of Supply': None, 
                              'Reverse Charge': None, 
                              'Applicable Of TaxRate': None,
                              'Rate': None, 
                              'Taxable Value': None,
+
                              'Integrated Tax (?)':None,
                              'Central Tax (?)':None,
                              'State Tax (?)':None,
                              'IRN':None,
                              'IRN date':None,
                              'Cess Amount (?)': None,   
+
                                                        
                              }]
                     
@@ -191,7 +199,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_States ON M_States.id=b.State_id
                 where Party_id=%s and InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
                 and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and T_Invoices.GrandTotal <= 250000))
+
                 group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage,InvoiceDate
+
                 UNION
                 SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, sum(X.GrandTotal) AS InvoiceValue,
                 Y.GSTPercentage AS  ApplicableOfTaxRate ,sum(Y.BasicAmount) TaxableValue ,SUM(Y.IGST) AS IGST,SUM(Y.CGST) AS CGST, SUM(Y.SGST) AS SGST ,'0' CessAmount
@@ -199,9 +209,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 JOIN M_Parties a ON a.id=X.Party
                 JOIN M_Parties b ON b.id=X.Customer
                 JOIN M_States ON M_States.id=b.State_id
-                where X.Party=%s and X.InvoiceDate BETWEEN %s AND %s and  b.GSTIN =''
-                and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000 AND X.IsDeleted=0))
+
+                where X.Party=%s and X.InvoiceDate BETWEEN %s AND %s and  b.GSTIN ='' AND X.IsDeleted=0
+                and ((a.State_id = b.State_id) OR (a.State_id != b.State_id and X.GrandTotal <= 250000 ))
+
                 group  by M_States.id,M_States.Name,Y.GSTPercentage,X.InvoiceDate''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))                                
+
                 B2CS2 = B2CSSerializer(B2CSquery, many=True).data
                 
                 B2CSquery2 = T_Invoices.objects.raw('''
@@ -243,6 +256,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Place Of Supply': None, 
                              'Invoice Number': None,                              
                              'Invoice Date' : None,
+
                              'Invoice Value (?)': None, 
                              'Applicable Of TaxRate': None,                             
                              'Taxable Value': None,
@@ -250,6 +264,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Central Tax (?)':None,
                              'State Tax (?)':None,                             
                              'Cess Amount (?)': None,
+
                              
                              }]
                 
@@ -305,9 +320,11 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Rate': None,
                             #  'Applicable Of TaxRate': None,                              
                              'Taxable Value': None,
+
                              'Integrated Tax (?)' : None,
                              'Central Tax (?)':None,
                              'State Tax (?)':None, 
+
                              'Cess Amount': None,                                                         
                              'IRN':None,
                              'INR Date':None,
@@ -496,19 +513,41 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              }]
                 
                 # Example data for the seven sheet HSN 
-                HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,sum(TC_InvoiceItems.CGST)CentralTaxAmount,sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount,TC_InvoiceItems.Rate
+
+
+                HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description, M_Units.EwayBillUnit AS UQC,
+
+                        sum(TC_InvoiceItems.QtyInNo) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
+                        sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,
+                        sum(TC_InvoiceItems.CGST)CentralTaxAmount,
+                        sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount,TC_InvoiceItems.GSTPercentage Rate
                         FROM T_Invoices 
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
                         JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id
-                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  Group by id, M_GSTHSNCode.HSNCode,M_Items.Name
+
+                        JOIN MC_Itemunits ON MC_Itemunits.id=TC_InvoiceItems.Unit_id
+                        JOIN M_Units ON M_Units.id=MC_Itemunits.UnitID_id
+
+                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  
+                        Group by id, M_GSTHSNCode.HSNCode,M_Items.Name
                         UNION
-                        SELECT 1 as id, Y.HSNCode AS HSN,M_Items.Name Description, 'NOS-NUMBERS' AS UQC,sum(Y.QtyInNo) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, '' CessAmount,Y.Rate
+
+
+                        SELECT 1 as id, Y.HSNCode AS HSN,M_Items.Name Description, M_Units.EwayBillUnit AS UQC,
+
+                        sum(Y.QtyInNo) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
+                        sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, 
+                        '' CessAmount,Y.GSTPercentage Rate
                         FROM SweetPOS.T_SPOSInvoices X 
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
-                        JOIN M_Items ON M_Items.id=Y.Item
-                        
-                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s  Group by id, Y.HSNCode,M_Items.Name AND X.IsDeleted=0''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+
+                        JOIN M_Items ON M_Items.id=Y.Item  
+                        JOIN MC_Itemunits ON MC_Itemunits.id=Y.Unit
+                        JOIN M_Units ON M_Units.id=MC_Itemunits.UnitID_id                      
+
+                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0 
+                        Group by id, Y.HSNCode,M_Items.Name ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
                 

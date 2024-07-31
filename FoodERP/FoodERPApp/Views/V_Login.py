@@ -70,7 +70,10 @@ class UserListView(CreateAPIView):
                 #     Usersdata = M_Users.objects.all()
                 # else:                
                 #     Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
-                Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
+                # Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
+                
+                employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
+                Usersdata = M_Users.objects.filter(Employee__in=employees)               
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
                     UserData = list()
