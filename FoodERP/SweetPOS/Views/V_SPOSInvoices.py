@@ -442,6 +442,11 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
 
+
+class TopSaleItemsOfFranchiseView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+
     @transaction.atomic()
     def post(self, request):
         SaleData = JSONParser().parse(request)
@@ -451,6 +456,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 ToDate = SaleData['ToDate']
                 Party = SaleData['Party']
                 
+
                 PartyDetails = M_Parties.objects.raw('''Select FoodERP.M_Parties.id, Name, FoodERP.MC_PartyAddress.Address,
                                                         (Select SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
                                                         (Select COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount
@@ -473,6 +479,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s
                                                                     GROUP BY SweetPOS.TC_SPOSInvoiceItems.Item, M_Items.Name, M_Units.Name
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
+
                     TopSaleItems_List = []
                     for item in TopSaleItems:
                         TopSaleItems_List.append({
@@ -499,5 +506,4 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
         except Exception as e:
                     log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
 
