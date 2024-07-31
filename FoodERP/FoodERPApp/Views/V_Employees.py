@@ -39,7 +39,17 @@ JOIN M_Cities ON M_Cities.id=M_Employees.City_id
 LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
 ''')
                 else:
-                    query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
+                    SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
+                    RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
+                    RoleID_list = [int(x) for x in RoleID_List.split(",")]
+                    # CustomPrint(RoleID_list)
+                    if RoleID in RoleID_list: 
+                        CustomPrint("Shruti")
+                        Clause= f"And M_Employees.CreatedBy={UserID}"
+                    else:
+                        Clause= ""
+                
+                    query = M_Employees.objects.raw(f'''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
 M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, M_Employees.Designation AS DesignationID, M_GeneralMaster.Name AS Designation
@@ -50,8 +60,8 @@ JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
 JOIN M_Cities ON M_Cities.id=M_Employees.City_id
 LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
-where M_Employees.CreatedBy=%s
-''', [UserID])
+where M_Employees.Company_id=%s {Clause}''', [CompanyID])  
+                    
                 if not query:
                     log_entry = create_transaction_logNew(request,Logindata,0,'List Not available',199,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
