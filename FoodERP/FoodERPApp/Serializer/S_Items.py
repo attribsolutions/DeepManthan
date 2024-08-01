@@ -178,6 +178,7 @@ class ItemSerializer(serializers.ModelSerializer):
             'StoringCondition', instance.StoringCondition)
         instance.Grammage = validated_data.get(
             'Grammage', instance.Grammage)
+        instance.Grammage=validated_data.get('IsCBMItem',instance.IsCBMItem)
             
         instance.save()
         
@@ -247,8 +248,7 @@ class ItemSerializer(serializers.ModelSerializer):
         
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
             ItemGSTHSN = M_GSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data) 
-        
-              
+            
         
         return instance 
          
