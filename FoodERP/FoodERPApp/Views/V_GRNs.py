@@ -47,8 +47,6 @@ class GRNListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
-                        InvoiceDate = a.get('InvoiceDate')
-                        FullInvoiceNumber = a.get('FullInvoiceNumber')
                             
                         if (GRNdata['DashBoardMode'] == 1):
                             GRNListData.append({
@@ -78,8 +76,8 @@ class GRNListFilterView(CreateAPIView):
                                 "GRNNumber": a['GRNNumber'],
                                 "FullGRNNumber": a['FullGRNNumber'],
                                 "InvoiceNumber": a['InvoiceNumber'],
-                                "FullInvoiceNumber": FullInvoiceNumber,
-                                "InvoiceDate": InvoiceDate,
+                                "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'],
+                                "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'],
                                 "GrandTotal": a['GrandTotal'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
