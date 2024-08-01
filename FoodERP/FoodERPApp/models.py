@@ -2394,3 +2394,12 @@ class M_SAPCustomerLedger(models.Model):
         db_table = "M_SAPCustomerLedger"
 
 
+
+class M_ItemSupplier(models.Model):
+
+    Item= models.ForeignKey(M_Items, related_name='ItemSupplier_Item', on_delete=models.PROTECT)    
+    Supplier= models.ForeignKey(M_Parties, related_name='ItemSupplier_Supplier', on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "M_ItemSupplier"
+ 

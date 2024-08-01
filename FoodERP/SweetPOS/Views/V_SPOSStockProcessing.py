@@ -75,7 +75,7 @@ WHERE InvoiceDate = %s AND Party_id = %s GROUP BY Item_id
 union
 SELECT 2 as id, Item Item_id,SUM(BaseUnitQuantity) InvoiveQuantity,SUM(Amount) SaleValue
 FROM SweetPOS.T_SPOSInvoices T_Invoices JOIN SweetPOS.TC_SPOSInvoiceItems TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
-WHERE  T_Invoices.InvoiceDate = %s AND T_Invoices.Party =%s GROUP BY Item)Invoice
+WHERE  T_Invoices.InvoiceDate = %s AND T_Invoices.Party =%s and T_Invoices.IsDeleted=0 GROUP BY Item)Invoice
 
 on I.Item_id=Invoice.Item_id
 

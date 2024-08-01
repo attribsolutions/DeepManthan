@@ -127,12 +127,17 @@ class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
         fields = ['id', 'Name']
-
+class InvoiceDateserializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_Invoices
+        fields = ['FullInvoiceNumber','InvoiceDate']
+        
 class TC_GRNReferencesSerializerSecond(serializers.ModelSerializer):
     Order = T_OrderSerializerThird(read_only=True)
+    Invoice = InvoiceDateserializer(read_only=True)
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo','Inward', 'Challan'] 
+        fields ='__all__'
         
 class ItemSerializer(serializers.ModelSerializer):
     class Meta : 
@@ -172,13 +177,15 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
         if not ret.get("MRP", None):
             ret["MRP"] = {"id": None, "MRP": None}    
         return ret
+    
+
 
 class T_GRNSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
     Party = Partiesserializer(read_only=True)
     GRNReferences = TC_GRNReferencesSerializerSecond(many=True,read_only=True)
     GRNItems = TC_GRNItemsSerializerSecond(many=True)
-
+    
     class Meta:
         model = T_GRNs
         fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'GRNReferences', 'GRNItems']

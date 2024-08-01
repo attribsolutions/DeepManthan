@@ -43,15 +43,14 @@ class GRNListFilterView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, GRNdata, Customer,'List Not available',68,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
-                    GRN_serializer = T_GRNSerializerForGET(
-                        query, many=True).data
+                    GRN_serializer = T_GRNSerializerForGET(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     for a in GRN_serializer:
+                            
                         if (GRNdata['DashBoardMode'] == 1):
                             GRNListData.append({
-                                "GRNDate": a['GRNDate']
-                                
+                                "GRNDate": a['GRNDate']                
                             })
                         else:
 
@@ -77,6 +76,8 @@ class GRNListFilterView(CreateAPIView):
                                 "GRNNumber": a['GRNNumber'],
                                 "FullGRNNumber": a['FullGRNNumber'],
                                 "InvoiceNumber": a['InvoiceNumber'],
+                                "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'],
+                                "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'],
                                 "GrandTotal": a['GrandTotal'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
@@ -93,7 +94,7 @@ class GRNListFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 # GRN Save  API
 
@@ -198,7 +199,7 @@ class T_GRNView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': GRN_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 #GRN Single Get API
 
@@ -759,5 +760,5 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})   
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'MakeOrdersGrn:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     

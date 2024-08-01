@@ -86,7 +86,7 @@ class ItemListView(CreateAPIView):
             if user is not None:
                 
                 query = M_Items.objects.raw(f"""SELECT i.id , i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
-                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 3),2),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
+                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
                 ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
                 (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, NULL, NULL),0.0)))RateEffectiveDate,                          

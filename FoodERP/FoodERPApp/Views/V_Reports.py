@@ -221,8 +221,7 @@ FROM
                         "TotalTCS": TotalTCS,
                         "InvoiceItems": PartyLedgerItemDetails
                     })
-                log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(
-                    FromDate)+','+'To:'+str(ToDate), 206, 0, FromDate, ToDate, Customer)
+                log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 206, 0, FromDate, ToDate, Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyLedgerData})
         except Exception as e:
             log_entry = create_transaction_logNew( request, Orderdata, 0, 'PartyLedgerReport'+str(e), 33, 0)
@@ -1749,7 +1748,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 if combined_sale:
                     
                     ReportdataList = []
-                    for a in combined_sale:
+                    for a in combined_sale:      
                         if a.IsCBMItem == 1:
                             aa="Yes"
                         else:

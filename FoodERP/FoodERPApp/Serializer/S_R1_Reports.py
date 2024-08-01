@@ -4,41 +4,8 @@ from rest_framework import serializers
 
 class FloatDecimalField(serializers.Field):
     def to_representation(self, value):
-        return float(value)
-    
-# class B2BSerializer(serializers.Serializer):
-#     # id = serializers.IntegerField()
-#     GSTIN_UINOfRecipient = serializers.CharField(max_length=100)
-#     ReceiverName = serializers.CharField(max_length=100)
-#     InvoiceNumber=serializers.CharField(max_length=100)
-#     InvoiceDate=serializers.CharField(max_length=100)
-#     InvoiceValue=FloatDecimalField()
-#     PlaceOfSupply=serializers.CharField(max_length=100)
-#     ReverseCharge=serializers.CharField(max_length=100)
-#     ApplicableOfTaxRate=serializers.CharField(max_length=100)
-#     InvoiceType=serializers.CharField(max_length=100)
-#     ECommerceGSTIN=serializers.CharField(max_length=100)
-#     Rate=FloatDecimalField()
-#     TaxableValue=FloatDecimalField()
-#     CessAmount=FloatDecimalField()
+        return float(value)   
 
-    
-#     def to_representation(self, obj):
-#         representation = super().to_representation(obj)
-#         representation ['GSTIN / UIN Of Recipient'] = representation.pop('GSTIN_UINOfRecipient')
-#         representation ['Receiver Name'] = representation.pop('ReceiverName')
-#         representation ['Invoice Number'] = representation.pop('InvoiceNumber')
-#         representation ['Invoice Date'] = representation.pop('InvoiceDate')
-#         representation ['Invoice Value'] = representation.pop('InvoiceValue')
-#         representation ['Place Of Supply'] = representation.pop('PlaceOfSupply')
-#         representation ['Reverse Charge'] = representation.pop('ReverseCharge')
-#         representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate')
-#         representation ['Invoice Type'] = representation.pop('InvoiceType')
-#         representation ['ECommerce GSTIN'] = representation.pop('ECommerceGSTIN')
-#         representation ['Rate'] = representation.pop('Rate')
-#         representation ['Taxable Value'] = representation.pop('TaxableValue')
-#         representation ['Cess Amount'] = representation.pop('CessAmount')
-#         return representation
     
 class B2BSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
@@ -64,9 +31,7 @@ class B2B3Serializer1(serializers.Serializer):
     InvoiceValue=FloatDecimalField()
     PlaceOfSupply=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
-    ApplicableOfTaxRate=serializers.CharField(max_length=100)    
-    # ECommerceGSTIN=serializers.CharField(max_length=100)
-    # Rate=serializers.CharField(max_length=100)
+    ApplicableOfTaxRate=serializers.CharField(max_length=100) 
     TaxableValue=serializers.CharField(max_length=100)
     IGST=FloatDecimalField()
     CGST=FloatDecimalField()
@@ -86,9 +51,7 @@ class B2B3Serializer1(serializers.Serializer):
         representation ['Invoice Value (₹)'] = representation.pop('InvoiceValue')
         representation ['Place Of Supply'] = representation.pop('PlaceOfSupply')
         representation ['Reverse Charge'] = representation.pop('ReverseCharge')
-        representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate')        
-        # representation ['ECommerce GSTIN'] = representation.pop('ECommerceGSTIN')
-        # representation ['Rate'] = representation.pop('Rate')
+        representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate') 
         representation ['Taxable Value (₹)'] = representation.pop('TaxableValue')
         representation ['Integrated Tax (₹)'] = representation.pop('IGST')
         representation ['Central Tax(₹)'] = representation.pop('CGST')
@@ -100,30 +63,7 @@ class B2B3Serializer1(serializers.Serializer):
         return representation
 ###########################################################################################################    
     
-# class B2CLSerializer(serializers.Serializer):
-#     # id = serializers.IntegerField()
-#     InvoiceNumber=serializers.CharField(max_length=100)
-#     InvoiceDate=serializers.CharField(max_length=100)
-#     InvoiceValue=FloatDecimalField()
-#     PlaceOfSupply=serializers.CharField(max_length=100)
-#     ApplicableOfTaxRate=serializers.CharField(max_length=100)
-#     ECommerceGSTIN=serializers.CharField(max_length=100)
-#     Rate=FloatDecimalField()
-#     TaxableValue=FloatDecimalField()
-#     CessAmount=FloatDecimalField()
-    
-#     def to_representation(self, obj):
-#         representation = super().to_representation(obj)
-#         representation ['Invoice Number'] = representation.pop('InvoiceNumber')
-#         representation ['Invoice Date'] = representation.pop('InvoiceDate')
-#         representation ['Invoice Value'] = representation.pop('InvoiceValue')
-#         representation ['Place Of Supply'] = representation.pop('PlaceOfSupply')
-#         representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate')
-#         representation ['ECommerce GSTIN'] = representation.pop('ECommerceGSTIN')
-#         representation ['Rate'] = representation.pop('Rate')
-#         representation ['Taxable Value'] = representation.pop('TaxableValue')
-#         representation ['Cess Amount'] = representation.pop('CessAmount')
-#         return representation
+
     
     
 class B2CLSerializer2(serializers.Serializer):
@@ -182,41 +122,7 @@ class B2CSSerializer2(serializers.Serializer):
         representation ['Total Cess'] = representation.pop('TotalCess')
         return representation 
     
-################################################################################################################    
-
-# class CDNRSerializer(serializers.Serializer):
-#     # id = serializers.IntegerField()
-#     GSTIN_UINOfRecipient = serializers.CharField(max_length=100)
-#     ReceiverName = serializers.CharField(max_length=100)
-#     NoteNumber=serializers.CharField(max_length=100)
-#     NoteDate=serializers.CharField(max_length=100)
-#     NoteTypeName=serializers.CharField(max_length=100)
-#     # NoteType_id=serializers.IntegerField()
-#     PlaceOfSupply=serializers.CharField(max_length=100)
-#     ReverseCharge=serializers.CharField(max_length=100)
-#     NoteValue =serializers.CharField(max_length=100)
-#     # GrandTotal=FloatDecimalField()
-#     ApplicableOfTaxRate=serializers.CharField(max_length=100)
-#     Rate=FloatDecimalField()
-#     TaxableValue=FloatDecimalField()
-#     CessAmount=serializers.CharField(max_length=100)
-    
-#     def to_representation(self, obj):
-#         representation = super().to_representation(obj)
-#         representation ['GSTIN / UIN Of Recipient'] = representation.pop('GSTIN_UINOfRecipient')
-#         representation ['Receiver Name'] = representation.pop('ReceiverName')
-#         representation ['Note Number'] = representation.pop('NoteNumber')
-#         representation ['Note Date'] = representation.pop('NoteDate')
-#         representation ['Note Type Name'] = representation.pop('NoteTypeName')
-#         representation ['Place Of Supply'] = representation.pop('PlaceOfSupply')
-#         representation ['Reverse Charge'] = representation.pop('ReverseCharge')
-#         representation ['Note Value'] = representation.pop('NoteValue')
-#         representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate')
-#         representation ['Rate'] = representation.pop('Rate')
-#         representation ['Taxable Value'] = representation.pop('TaxableValue')
-#         representation ['Cess Amount'] = representation.pop('CessAmount')
-#         return representation
-    
+################################################################################################################ 
     
 class CDNRSerializer1(serializers.Serializer):
     # id = serializers.IntegerField()
@@ -224,13 +130,10 @@ class CDNRSerializer1(serializers.Serializer):
     ReceiverName = serializers.CharField(max_length=100)
     NoteNumber=serializers.CharField(max_length=100)
     NoteDate=serializers.CharField(max_length=100)
-    NoteTypeName=serializers.CharField(max_length=100)
-    # NoteType_id=serializers.IntegerField()
+    NoteTypeName=serializers.CharField(max_length=100)    
     PlaceOfSupply=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
-    NoteValue =serializers.CharField(max_length=100)
-    # GrandTotal=FloatDecimalField()
-    # ApplicableOfTaxRate=serializers.CharField(max_length=100)
+    NoteValue =serializers.CharField(max_length=100)    
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField() 
     IGST=FloatDecimalField()
@@ -250,8 +153,7 @@ class CDNRSerializer1(serializers.Serializer):
         representation ['Note Value'] = representation.pop('NoteValue')
         representation ['Place Of Supply'] = representation.pop('PlaceOfSupply')
         representation ['Reverse Charge'] = representation.pop('ReverseCharge')
-        representation ['Rate'] = representation.pop('Rate')
-        # representation ['Applicable Of TaxRate'] = representation.pop('ApplicableOfTaxRate')        
+        representation ['Rate'] = representation.pop('Rate')                
         representation ['Taxable Value'] = representation.pop('TaxableValue')
         representation ['Integrated Tax (₹)'] = representation.pop('IGST')
         representation ['Central Tax (₹)'] = representation.pop('CGST')
@@ -260,9 +162,7 @@ class CDNRSerializer1(serializers.Serializer):
         representation['IRN'] = representation.pop('IRN')
         representation ['IRN Date'] = representation.pop('EINvoiceCreatedON')
         return representation 
-    # class Meta:
-    #     model = T_CreditDebitNotes
-    #     fields = ['id', 'GSTIN_UINOfRecipient', 'ReceiverName', 'NoteNumber', 'NoteDate', 'NoteTypeName', 'NoteValue', 'PlaceOfSupply', 'ReverseCharge', 'Rate', 'TaxableValue', 'CessAmount', 'IRN','IRNDate']   
+     
     
 class CDNRSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
@@ -362,35 +262,8 @@ class EXEMP2Serializer2(serializers.Serializer):
         representation ['Total Non GST Supplies'] = representation.pop('TotalNonGSTSupplies')
         return representation
     
-#######################################################################################################    
-    
-# class HSNSerializer(serializers.Serializer):
-#     # id = serializers.IntegerField()
-#     HSN=serializers.CharField(max_length=100)
-#     Description=serializers.CharField(max_length=100)
-#     UQC=serializers.CharField(max_length=100)
-#     TotalQuantity=FloatDecimalField()
-#     TotalValue=FloatDecimalField()
-#     TaxableValue=FloatDecimalField()
-#     IntegratedTaxAmount=FloatDecimalField()
-#     CentralTaxAmount=FloatDecimalField()
-#     StateUTTaxAmount=FloatDecimalField()
-#     CessAmount=serializers.CharField(max_length=100)
-      
-#     def to_representation(self, obj):
-#         representation = super().to_representation(obj)
-#         representation ['HSN'] = representation.pop('HSN')
-#         representation ['Description'] = representation.pop('Description')
-#         representation ['UQC'] = representation.pop('UQC')
-#         representation ['Total Quantity'] = representation.pop('TotalQuantity')
-#         representation ['Total Value'] = representation.pop('TotalValue')
-#         representation ['Taxable Value'] = representation.pop('TaxableValue')
-#         representation ['Integrated Tax Amount'] = representation.pop('IntegratedTaxAmount')
-#         representation ['Central Tax Amount'] = representation.pop('CentralTaxAmount')
-#         representation ['State UT Tax Amount'] = representation.pop('StateUTTaxAmount')
-#         representation ['Cess Amount'] = representation.pop('CessAmount')
-#         return representation
-    
+#######################################################################################################      
+
     
 class HSNSerializer1(serializers.Serializer):    
     HSN=serializers.CharField(max_length=100)
