@@ -59,8 +59,8 @@ class ItemSupplierView(CreateAPIView):
                             "ItemName":a["ItemName"],
                             "GroupName":a["GroupName"],
                             "SubGroupName":a["SubGroupName"],
-                            "Suppliers":a["Suppliers"],
-                            "PartyId":a["PartyId"]
+                            "SupplierName":a["Suppliers"],
+                            "SupplierId":a["PartyId"]
                         })  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Supplier_List}) 
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Not available', 'Data' : []})               
