@@ -203,9 +203,7 @@ left join FoodERP.MC_PartyBanks on MC_PartyBanks.Party_id=SPOSInv.Party and MC_P
 left join FoodERP.M_Bank on M_Bank.id=MC_PartyBanks.Bank_id
 left join FoodERP.M_States custstate on custstate.id=cust.State_id
 left join FoodERP.M_States partystate on partystate.id=party.State_id
-left join FoodERP.TC_InvoiceUploads IU on IU.Invoice_id=SPOSInv.id                                                          
-                                                          
-
+left join FoodERP.TC_InvoiceUploads IU on IU.Invoice_id=SPOSInv.id                                                           
 where SPOSInv.id={id}''')
                 # print(InvoiceQuery.query)
                 if InvoiceQuery:
@@ -218,18 +216,15 @@ where SPOSInv.id={id}''')
                         InvoiceItemQuery=TC_SPOSInvoiceItems.objects.raw(f'''SELECT items.id,items.Name,SPOSInv.Quantity,0 MRP,SPOSInv.MRPValue,SPOSInv.Rate,SPOSInv.TaxType,SPOSInv.BaseUnitQuantity,0 GST,SPOSInv.GSTPercentage,0 MarginValue,
 SPOSInv.BasicAmount,SPOSInv.GSTAmount,SPOSInv.CGST,SPOSInv.SGST,SPOSInv.IGST,SPOSInv.CGSTPercentage,SPOSInv.SGSTPercentage,SPOSInv.IGSTPercentage,SPOSInv.Amount,
 '' BatchCode,'' BatchDate,SPOSInv.HSNCode,SPOSInv.DiscountType,SPOSInv.Discount,SPOSInv.DiscountAmount,SPOSInv.Unit,unit.Name UnitName
-
-
 FROM SweetPOS.TC_SPOSInvoiceItems SPOSInv 
 join FoodERP.M_Items items on items.id=SPOSInv.Item
 join FoodERP.MC_ItemUnits itemunit on itemunit.id=SPOSInv.Unit
 join FoodERP.M_Units unit on unit.id=itemunit.UnitID_id
-
 WHERE SPOSInv.Invoice_id = {a.id}''')
                         # print(InvoiceItemQuery.query)
                         for b in InvoiceItemQuery:
                             aaaa=UnitwiseQuantityConversion(b.id,b.Quantity,b.Unit,0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
-                            print(aaaa)
+                            
                             if (aaaa == b.UnitName):
                                 bb=""
                             else:
@@ -362,13 +357,13 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "BankData":BankData
                                                         
                         })
-                    log_entry = create_transaction_logNew(request,0, a.Party['id'], A+','+"InvoiceID:"+str(id),387,int(B),0,0,a.Customer['id'])
+                    log_entry = create_transaction_logNew(request,0, a.Party, A+','+"InvoiceID:"+str(id),int(B),0,0,0,a.Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
-                log_entry = create_transaction_logNew(request,0, a.Party['id'], "Invoice Not available",387,int(B),0,0,a.Customer['id'])
+                log_entry = create_transaction_logNew(request,0, a.Party, "Invoice Not available",int(B),0,0,0,a.Customer)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
         
 
 class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
