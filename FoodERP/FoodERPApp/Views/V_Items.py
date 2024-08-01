@@ -407,6 +407,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
+                            "IsCBMItem": a['IsCBMItem'],
                             "ItemCategoryDetails" : CategoryDetails,
                             "ItemGroupDetails" : GroupDetails,
                             "ItemUnitDetails": UnitDetails, 
