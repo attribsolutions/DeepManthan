@@ -178,7 +178,8 @@ class ItemSerializer(serializers.ModelSerializer):
             'StoringCondition', instance.StoringCondition)
         instance.Grammage = validated_data.get(
             'Grammage', instance.Grammage)
-        instance.Grammage=validated_data.get('IsCBMItem',instance.IsCBMItem)
+        instance.IsCBMItem=validated_data.get(
+            'IsCBMItem',instance.IsCBMItem)
             
         instance.save()
         
