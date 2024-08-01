@@ -120,10 +120,12 @@ DATABASE_ROUTERS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FoodERP1',     
+        'NAME': 'FoodERP',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '192.168.1.114',
+
+        'HOST': '10.4.5.68', 
+
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -135,7 +137,7 @@ DATABASES = {
         'NAME': 'TransactionLog',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '192.168.1.114',
+        'HOST': '10.4.5.68',
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -146,7 +148,9 @@ DATABASES = {
         'NAME': 'SweetPOS',     
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '192.168.1.114',
+
+        'HOST': '10.4.5.68',  
+
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
