@@ -738,7 +738,7 @@ urlpatterns = [
              
 #ItemSupplier
               url(r'ItemSupplier$',ItemSupplierView.as_view()),   
-              url(r'ItemSupplier/([0-9]+)$',ItemSupplierUpdateView.as_view()),   
+                
 
 
               
