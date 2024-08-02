@@ -142,6 +142,7 @@ class ItemSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
 
+
         # instance.Name = validated_data.get(
         #     'Name', instance.Name)
         instance.ShortName = validated_data.get(

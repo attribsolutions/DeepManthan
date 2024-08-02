@@ -1671,12 +1671,12 @@ where T_Invoices.InvoiceDate between %s and %s
                             "XpressName" : row.CXName,
                             "ItemName" : row.ItemName,
                             "MRP" : row.MRPValue,
-                            "Quantity" : row.Quantity,
+                            "Quantity" : float(row.Quantity),
                             "Unit" :row.UnitName,
                             "CXRate" : row.Rate,
                             "DDRate" :row.DDRate,
-                            "Diff" : round(diff,2),
-                            "SumofDiff" : round(diff*row.Quantity,2),
+                            "Diff" : float(round(diff,2)),
+                            "SumofDiff" : float(round(diff*row.Quantity,2)),
                             "SupplierName" : row.SupplierName
                         })
                         log_entry = create_transaction_logNew(request, Data, Party, '', 366, 0, FromDate, ToDate, 0)
