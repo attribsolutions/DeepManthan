@@ -141,7 +141,7 @@ class M_SweetPOSUser(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    POSRateType = models.IntegerField()
+    POSRateType = models.IntegerField(blank=True, null=True)
     
     class Meta:
         db_table="M_SweetPOSUser"
