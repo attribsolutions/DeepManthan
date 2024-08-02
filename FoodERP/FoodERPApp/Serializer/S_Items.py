@@ -142,7 +142,6 @@ class ItemSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
 
-
         # instance.Name = validated_data.get(
         #     'Name', instance.Name)
         instance.ShortName = validated_data.get(
@@ -179,6 +178,7 @@ class ItemSerializer(serializers.ModelSerializer):
             'StoringCondition', instance.StoringCondition)
         instance.Grammage = validated_data.get(
             'Grammage', instance.Grammage)
+        # add IsCBMItem for update
         instance.IsCBMItem=validated_data.get(
             'IsCBMItem',instance.IsCBMItem)
             
