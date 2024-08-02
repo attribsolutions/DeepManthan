@@ -415,16 +415,78 @@ class DeleteInvoiceView(CreateAPIView):
                 
                     InvoiceIDs=list()
                     for DeleteInvoicedata in DeleteInvoicedatas:
-                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).update(IsDeleted=1)
-                        ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'])
-                        ss.save()
+                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                        
+                        
+                        if DeleteInvoicedata['UpdatedInvoiceDetails'] :
+                            
+                            invoice_instance = T_SPOSInvoices.objects.get(id=InvoiceDeleteUpdate[0]['id'])
+                            InvoiceItems = DeleteInvoicedata['UpdatedInvoiceDetails'][0]['SaleItems']
+                            InvoiceUpdate=T_SPOSInvoices.objects.filter(id=InvoiceDeleteUpdate[0]['id']).update(GrandTotal=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundedAmount'],DiscountAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['DiscountAmount'],TotalAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['TotalAmount'],RoundOffAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundOffAmount'],NetAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['NetAmount'],UpdatedBy=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['UpdatedBy'])
+                            DeleteItemsData=TC_SPOSInvoiceItems.objects.filter(Invoice=InvoiceDeleteUpdate[0]['id']).delete()
+
+                            # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':InvoiceItems})
+                            for InvoiceItem in InvoiceItems:
+                                ItemId=InvoiceItem['ERPItemID']
+                                unit= int(InvoiceItem['UnitID'])
+                               
+                                quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
+                                
+                                InvoiceItem['Unit'] = quryforunit[0]['id']
+                                
+                                # InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
+                                InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
+                                InvoiceItem['MRPValue'] = InvoiceItem['MRP']
+                                InvoiceItem['TaxType'] = 'GST'
+                                InvoiceItem['GSTPercentage'] = InvoiceItem['GSTRate']
+                                # InvoiceItem['GSTAmount'] = InvoiceItem['GSTAmount']
+                                # InvoiceItem['DiscountType'] = InvoiceItem['DiscountType']
+                                InvoiceItem['Discount'] = InvoiceItem['DiscountValue']
+                                # InvoiceItem['DiscountAmount'] = InvoiceItem['DiscountAmount']
+                                InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
+                                InvoiceItem['CGST'] = InvoiceItem['CGSTAmount']
+                                InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
+                                InvoiceItem['SGST'] = InvoiceItem['SGSTAmount']
+                                InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
+                                InvoiceItem['Item'] = ItemId
+                                InvoiceItem['IGST'] = InvoiceItem['IGSTAmount']
+                                InvoiceItem['BatchCode'] = '0'
+                                InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
+                                InvoiceItem['SaleItemID']=0
+                                InvoiceItem['SaleID']=0
+                                # InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
+                                InvoiceItem['Party']=InvoiceItem['PartyID']
+                                BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
+                                InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
+                                QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInNo'] =  float(QtyInNo)
+                                QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInKg'] = float(QtyInKg)
+                                QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInBox'] = float(QtyInBox)
+                                InvoiceItem['Invoice'] = invoice_instance
+                                del InvoiceItem['SaleDate'] ,InvoiceItem['PartyID'],InvoiceItem['ItemID'],InvoiceItem['ItemName']
+                                del InvoiceItem['UnitID'] ,InvoiceItem['DiscountValue'] ,InvoiceItem['MRP'] ,InvoiceItem['GSTRate']
+                                del InvoiceItem['CGSTRate'],InvoiceItem['CGSTAmount'],InvoiceItem['SGSTRate'],InvoiceItem['SGSTAmount']
+                                del InvoiceItem['IGSTRate'],InvoiceItem['IGSTAmount'],InvoiceItem['SaleID'],
+                               
+                                InvoiceItemID =TC_SPOSInvoiceItems.objects.create(**InvoiceItem)
+                                InvoiceItemID.save()    
+                            ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'],Invoice_id=InvoiceDeleteUpdate[0]['id'])
+                            ss.save()
+                        else:
+                            
+                            # InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                            InvoiceDeleteUpdate.update(IsDeleted=1)
+                            ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'],Invoice_id=InvoiceDeleteUpdate[0]['id'])
+                            ss.save()
                         
                         InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
                     log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'POSDeletedInvoiceID':InvoiceIDs}, 388,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})       
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})             
         
 
 class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
