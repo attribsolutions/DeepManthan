@@ -1,19 +1,39 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-
+import base64
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.authentication import BasicAuthentication
-
+from rest_framework.response import Response
+from django.contrib.auth import authenticate
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
 from SweetPOS.Serializer.S_SPOSInvoices import SPOSInvoiceSerializer
 # from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
-
+from rest_framework import status
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 
 from ..models import  *
+
+
+def BasicAuthenticationfunction(request):
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if auth_header:
+                    
+        # Parsing the authorization header
+        auth_type, auth_string = auth_header.split(' ', 1)
+        if auth_type.lower() == 'basic':
+            
+            
+            try:
+                username, password = base64.b64decode(
+                    auth_string).decode().split(':', 1)
+            except (TypeError, ValueError, UnicodeDecodeError):
+                return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                
+        user = authenticate(request, username=username, password=password)
+    return user
 
 class SPOSInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -433,13 +453,11 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})      
 
 
-class TopSaleItemsOfFranchiseView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+
 
 
 class TopSaleItemsOfFranchiseView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
     authentication_classes = [BasicAuthentication]
 
     @transaction.atomic()
