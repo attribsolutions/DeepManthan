@@ -456,17 +456,28 @@ class M_GetStockEntryList(CreateAPIView):
                 StockData = JSONParser().parse(request)
                 FromDate = StockData.get('FromDate')
                 ToDate = StockData.get('ToDate')
+                Party=StockData.get('Party')
                     
                 if not FromDate or not ToDate:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'FromDate and ToDate are required', 'Data': []})
 
+                if not Party:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party is required', 'Data': []})
+
                 query = '''
                     SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id FROM T_Stock as s 
                     JOIN  M_Parties as p ON s.Party_id = p.id   
-                    WHERE s.StockDate BETWEEN %s AND %s
+                    WHERE s.StockDate BETWEEN %s AND %s AND s.party_id=%s
                     GROUP BY s.Party_Id, s.StockDate
+                    
+                    UNION
+
+                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party FROM SweetPOS.T_SPOSStock as s  
+                    JOIN  M_Parties as p ON s.Party = p.id   
+                    WHERE s.StockDate BETWEEN %s AND %s AND s.Party=%s
+                    GROUP BY s.Party, s.StockDate
                 '''
-                StockDataQuery = M_Items.objects.raw(query, [FromDate, ToDate])
+                StockDataQuery = T_Stock.objects.raw(query, [FromDate, ToDate, Party, FromDate, ToDate, Party])
 
                 if not list(StockDataQuery):
                     log_entry = create_transaction_logNew(request, 0, 0, "Stock Not available", 210, 0)
