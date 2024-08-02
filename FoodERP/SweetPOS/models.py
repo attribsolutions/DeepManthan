@@ -248,7 +248,7 @@ class T_SPOSDeletedInvoices(models.Model):
     ClientSaleID = models.IntegerField()
     InvoiceDate = models.DateField()    
     Party = models.IntegerField()
-    DeletedBy = models.IntegerField()
+    DeletedBy = models.IntegerField(blank=True,null=True)
     DeletedOn = models.DateTimeField(auto_now_add=True)
     ReferenceInvoiceID =models.IntegerField(null=True)
     Invoice = models.ForeignKey(T_SPOSInvoices,related_name='SPOSDeletedInvoiceUploads', on_delete=models.CASCADE) 

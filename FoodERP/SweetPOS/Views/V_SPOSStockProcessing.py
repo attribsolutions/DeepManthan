@@ -65,7 +65,7 @@ on I.Item_id=CB.ItemID
 
 left join (SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
 FROM FoodERP.T_GRNs JOIN FoodERP.TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
-WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
+WHERE InvoiceDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
 
 on I.Item_id=GRN.Item_id
 
@@ -111,7 +111,7 @@ on I.Item_id=ActualStock.Item
                        
                         if(a.OpeningBalance!=0 or a.GRN!=0 or a.Sale!=0 or a.PurchaseReturn != 0 or a.SalesReturn !=0 or a.StockAdjustment!=0):
                             # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
-                            stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=0, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                            stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                             stock.save()
                         if(a.ClosingBalance == 0) :
                             stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
