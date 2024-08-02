@@ -176,7 +176,6 @@ class M_ItemsFilterView(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
-                            # "IsCBMItem":a['IsCBMItem'],
                             "UnitDetails":UnitDetails
                         })  
                     print("ItemFilterAPI EndTime : ",datetime.now())    
