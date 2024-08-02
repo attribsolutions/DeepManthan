@@ -1069,6 +1069,7 @@ class T_GRNs(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
     Comment = models.CharField(max_length=500 ,null=True,blank=True)
     Reason = models.ForeignKey(M_GeneralMaster, related_name='GRNReason', on_delete=models.PROTECT)
+    InvoiceDate = models.DateField(null=True,blank=True)
 
     class Meta:
         db_table = "T_GRNs"
