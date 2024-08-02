@@ -526,8 +526,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
                         JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id
 
-                        JOIN MC_Itemunits ON MC_Itemunits.id=TC_InvoiceItems.Unit_id
-                        JOIN M_Units ON M_Units.id=MC_Itemunits.UnitID_id
+                        JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
+                        JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
 
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  
                         Group by id, M_GSTHSNCode.HSNCode,M_Items.Name
@@ -543,8 +543,8 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
 
                         JOIN M_Items ON M_Items.id=Y.Item  
-                        JOIN MC_Itemunits ON MC_Itemunits.id=Y.Unit
-                        JOIN M_Units ON M_Units.id=MC_Itemunits.UnitID_id                      
+                        JOIN MC_ItemUnits ON MC_ItemUnits.id=Y.Unit
+                        JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                      
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0 
                         Group by id, Y.HSNCode,M_Items.Name ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))

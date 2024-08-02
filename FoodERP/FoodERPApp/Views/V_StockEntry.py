@@ -472,7 +472,7 @@ class M_GetStockEntryList(CreateAPIView):
                     
                     UNION
 
-                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party FROM sweetpos.t_sposstock as s  
+                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party FROM SweetPOS.T_SPOSStock as s  
                     JOIN  M_Parties as p ON s.Party = p.id   
                     WHERE s.StockDate BETWEEN %s AND %s AND s.Party=%s
                     GROUP BY s.Party, s.StockDate
