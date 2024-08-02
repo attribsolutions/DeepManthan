@@ -1642,7 +1642,7 @@ class CxDDDiffReportView(CreateAPIView):
                 InvoiceData=list()
                 
                 query='''select M_Parties.id,M_Parties.Name CXName,M_Items.Name ItemName,TC_InvoiceItems.MRPValue,sum(TC_InvoiceItems.Quantity)Quantity,M_Units.Name UnitName,TC_InvoiceItems.Rate,
-RateCalculationFunction1(0, TC_InvoiceItems.Item_id, 0, M_Units.id, 0, 2, TC_InvoiceItems.MRPValue, 0)DDRate,S.Name SupplierName
+IFNULL(RateCalculationFunction1(0, TC_InvoiceItems.Item_id, 0, M_Units.id, 0, 2, TC_InvoiceItems.MRPValue, 0),0)DDRate,S.Name SupplierName
 from T_Invoices 
 join TC_InvoiceItems on T_Invoices.id=TC_InvoiceItems.Invoice_id
 join M_Parties on M_Parties.id=T_Invoices.Customer_id and M_Parties.PartyType_id=15
@@ -1671,12 +1671,12 @@ where T_Invoices.InvoiceDate between %s and %s
                             "XpressName" : row.CXName,
                             "ItemName" : row.ItemName,
                             "MRP" : row.MRPValue,
-                            "Quantity" : float(row.Quantity),
+                            "Quantity" : row.Quantity,
                             "Unit" :row.UnitName,
                             "CXRate" : row.Rate,
                             "DDRate" :row.DDRate,
-                            "Diff" : float(round(diff,2)),
-                            "SumofDiff" : float(round(diff*row.Quantity,2)),
+                            "Diff" : round(diff,2),
+                            "SumofDiff" : round(diff*row.Quantity,2),
                             "SupplierName" : row.SupplierName
                         })
                         log_entry = create_transaction_logNew(request, Data, Party, '', 366, 0, FromDate, ToDate, 0)
