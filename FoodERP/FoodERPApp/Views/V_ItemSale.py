@@ -15,16 +15,16 @@ from SweetPOS.models import *
 class ItemSaleReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 PartyType =Reportdata['PartyType']
                 Party = Reportdata['Party']
                 EmployeeID = Reportdata['Employee']
                 
-                Invoicequery = '''SELECT T_Invoices.id, InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, FullInvoiceNumber,Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id JOIN M_Parties Cust ON Customer_id = Cust.id JOIN M_Parties Sup ON Party_id = Sup.id JOIN M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id JOIN M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id JOIN M_Items ON Item_id = M_Items.id left JOIN MC_ItemGroupDetails ON TC_InvoiceItems.Item_id = MC_ItemGroupDetails.Item_id AND GroupType_id = 1 JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.ID JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
+                Invoicequery = '''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, FullInvoiceNumber,Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id JOIN M_Parties Cust ON Customer_id = Cust.id JOIN M_Parties Sup ON Party_id = Sup.id JOIN M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id JOIN M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id JOIN M_Items ON Item_id = M_Items.id left JOIN MC_ItemGroupDetails ON TC_InvoiceItems.Item_id = MC_ItemGroupDetails.Item_id AND GroupType_id = 1 JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.ID JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
                             
                 SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, A.FullInvoiceNumber, Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox, B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount, A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue, A.MobileNo , M.LoginName CashierName  FROM SweetPOS.T_SPOSInvoices A 
                                 JOIN SweetPOS.TC_SPOSInvoiceItems B ON Invoice_id = A.id 
@@ -49,7 +49,6 @@ class ItemSaleReportView(CreateAPIView):
                     parameters.append(Party)
                     
                 elif int(PartyType) > 0: 
-                    print('aa')
                     Invoicequery += ' AND Sup.id = %s'
                     SPOSInvoicequery += ' AND Sup.id = %s'
                     parameters.append(PartyType)
@@ -66,7 +65,6 @@ class ItemSaleReportView(CreateAPIView):
 
                 q1 = T_Invoices.objects.raw(Invoicequery,parameters)
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
-                    
                 combined_invoices = list(q1) + list(q2)   
                 if combined_invoices:
                     ItemList = list()
@@ -106,8 +104,8 @@ class ItemSaleReportView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Reportdata, Party, 'Records Not available',281,0,FromDate,ToDate,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleReport:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+            log_entry = create_transaction_logNew(request, Reportdata, 0,'ItemSaleReport:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
                                             
                                                                              
                                 
@@ -136,8 +134,8 @@ class ItemSaleSupplierDropdownView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, ItemSaleSupplierSerializer,0,'Parties Not available',282,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleSupplierDropdown:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleSupplierDropdown:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
 class ItemSaleItemDropdownView(CreateAPIView):
@@ -146,9 +144,9 @@ class ItemSaleItemDropdownView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Itemdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Itemdata = JSONParser().parse(request)
                 Group = Itemdata['Group']
                 SubGroup = Itemdata['SubGroup']
               
@@ -168,8 +166,8 @@ class ItemSaleItemDropdownView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except Exception as e:
             CustomPrint("cccc")
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleItemDropdown:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            log_entry = create_transaction_logNew(request, Itemdata, 0,'ItemSaleItemDropdown:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
         
         
         
