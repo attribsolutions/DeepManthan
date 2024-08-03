@@ -65,7 +65,7 @@ on I.Item_id=CB.ItemID
 
 left join (SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
 FROM FoodERP.T_GRNs JOIN FoodERP.TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
-WHERE InvoiceDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
+WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
 
 on I.Item_id=GRN.Item_id
 
