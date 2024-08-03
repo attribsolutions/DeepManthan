@@ -30,7 +30,7 @@ class SPOSCashierSummaryList(CreateAPIView):
                 sum(case when MobileNo !=''  then 1 else 0 end)Mobile_Count
                 from SweetPOS.T_SPOSInvoices SPOSIn
                 JOIN SweetPOS.M_SweetPOSUser SPOSUser ON SPOSUser.id=SPOSIn.CreatedBy
-                WHERE SPOSIn.InvoiceDate BETWEEN %s AND %s {WhereClause} 
+                WHERE SPOSIn.InvoiceDate BETWEEN %s AND %s and SPOSIn.IsDeleted=0 {WhereClause} 
                 GROUP BY SPOSIn.InvoiceDate,SPOSUser.LoginName, SPOSUser.id
                 ''',(FromDate,ToDate))
                 
