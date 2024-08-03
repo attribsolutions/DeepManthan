@@ -510,6 +510,7 @@ class InvoiceViewSecond(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
+                                "ItemExpiryDate": b['LiveBatch']['ItemExpiryDate'],
                                 "HSNCode":b['GST']['HSNCode'],
                                 "DiscountType":b['DiscountType'],
                                 "Discount":b['Discount'],
