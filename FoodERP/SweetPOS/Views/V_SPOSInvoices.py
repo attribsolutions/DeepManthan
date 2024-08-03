@@ -544,8 +544,8 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                         GROUP BY FoodERP.M_Parties.id,Name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
                 Party_List = []
                 for party in PartyDetails:
-                    TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP.M_Items.Name AS ItemName,
-                                                                    SUM(SweetPOS.TC_SPOSInvoiceItems.Amount) AS TotalAmount, SweetPOS.T_SPOSInvoices.InvoiceDate ,
+                    TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT 1 as id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP.M_Items.Name AS ItemName,
+                                                                    SUM(SweetPOS.TC_SPOSInvoiceItems.Amount) AS TotalAmount, 
                                                                     SUM(SweetPOS.TC_SPOSInvoiceItems.Quantity) AS TotalQuantity,
                                                                     FoodERP.M_Units.Name AS UnitName
                                                                     FROM SweetPOS.TC_SPOSInvoiceItems                                                                   
