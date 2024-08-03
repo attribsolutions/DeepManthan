@@ -279,9 +279,10 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     CustomerName=F('Customer__Name'),
                     DriverName=F('Driver__Name'),
                     VehicleNo=F('Vehicle__VehicleNumber'),
-                    MobileNo=Value(0, output_field=IntegerField())
+                    MobileNo=Value(0, output_field=IntegerField()),
+                    PaymentType=Value(0,output_field=IntegerField())
                 ).values(
-                    'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                    'id','PaymentType','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
