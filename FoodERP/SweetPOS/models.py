@@ -141,7 +141,7 @@ class M_SweetPOSUser(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    POSRateType = models.IntegerField()
+    POSRateType = models.IntegerField(blank=True, null=True)
     
     class Meta:
         db_table="M_SweetPOSUser"
@@ -248,7 +248,7 @@ class T_SPOSDeletedInvoices(models.Model):
     ClientSaleID = models.IntegerField()
     InvoiceDate = models.DateField()    
     Party = models.IntegerField()
-    DeletedBy = models.IntegerField()
+    DeletedBy = models.IntegerField(blank=True,null=True)
     DeletedOn = models.DateTimeField(auto_now_add=True)
     ReferenceInvoiceID =models.IntegerField(null=True)
     Invoice = models.ForeignKey(T_SPOSInvoices,related_name='SPOSDeletedInvoiceUploads', on_delete=models.CASCADE) 

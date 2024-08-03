@@ -1,19 +1,39 @@
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-
+import base64
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.authentication import BasicAuthentication
-
+from rest_framework.response import Response
+from django.contrib.auth import authenticate
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
 from SweetPOS.Serializer.S_SPOSInvoices import SPOSInvoiceSerializer
 # from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
-
+from rest_framework import status
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 
 from ..models import  *
+
+
+def BasicAuthenticationfunction(request):
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if auth_header:
+                    
+        # Parsing the authorization header
+        auth_type, auth_string = auth_header.split(' ', 1)
+        if auth_type.lower() == 'basic':
+            
+            
+            try:
+                username, password = base64.b64decode(
+                    auth_string).decode().split(':', 1)
+            except (TypeError, ValueError, UnicodeDecodeError):
+                return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                
+        user = authenticate(request, username=username, password=password)
+    return user
 
 class SPOSInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -395,16 +415,78 @@ class DeleteInvoiceView(CreateAPIView):
                 
                     InvoiceIDs=list()
                     for DeleteInvoicedata in DeleteInvoicedatas:
-                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).update(IsDeleted=1)
-                        ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'])
-                        ss.save()
+                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                        
+                        
+                        if DeleteInvoicedata['UpdatedInvoiceDetails'] :
+                            
+                            invoice_instance = T_SPOSInvoices.objects.get(id=InvoiceDeleteUpdate[0]['id'])
+                            InvoiceItems = DeleteInvoicedata['UpdatedInvoiceDetails'][0]['SaleItems']
+                            InvoiceUpdate=T_SPOSInvoices.objects.filter(id=InvoiceDeleteUpdate[0]['id']).update(GrandTotal=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundedAmount'],DiscountAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['DiscountAmount'],TotalAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['TotalAmount'],RoundOffAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundOffAmount'],NetAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['NetAmount'],UpdatedBy=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['UpdatedBy'])
+                            DeleteItemsData=TC_SPOSInvoiceItems.objects.filter(Invoice=InvoiceDeleteUpdate[0]['id']).delete()
+
+                            # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':InvoiceItems})
+                            for InvoiceItem in InvoiceItems:
+                                ItemId=InvoiceItem['ERPItemID']
+                                unit= int(InvoiceItem['UnitID'])
+                               
+                                quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
+                                
+                                InvoiceItem['Unit'] = quryforunit[0]['id']
+                                
+                                # InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
+                                InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
+                                InvoiceItem['MRPValue'] = InvoiceItem['MRP']
+                                InvoiceItem['TaxType'] = 'GST'
+                                InvoiceItem['GSTPercentage'] = InvoiceItem['GSTRate']
+                                # InvoiceItem['GSTAmount'] = InvoiceItem['GSTAmount']
+                                # InvoiceItem['DiscountType'] = InvoiceItem['DiscountType']
+                                InvoiceItem['Discount'] = InvoiceItem['DiscountValue']
+                                # InvoiceItem['DiscountAmount'] = InvoiceItem['DiscountAmount']
+                                InvoiceItem['CGSTPercentage'] = InvoiceItem['CGSTRate']
+                                InvoiceItem['CGST'] = InvoiceItem['CGSTAmount']
+                                InvoiceItem['SGSTPercentage'] = InvoiceItem['SGSTRate']
+                                InvoiceItem['SGST'] = InvoiceItem['SGSTAmount']
+                                InvoiceItem['IGSTPercentage'] = InvoiceItem['IGSTRate']
+                                InvoiceItem['Item'] = ItemId
+                                InvoiceItem['IGST'] = InvoiceItem['IGSTAmount']
+                                InvoiceItem['BatchCode'] = '0'
+                                InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
+                                InvoiceItem['SaleItemID']=0
+                                InvoiceItem['SaleID']=0
+                                # InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
+                                InvoiceItem['Party']=InvoiceItem['PartyID']
+                                BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
+                                InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
+                                QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInNo'] =  float(QtyInNo)
+                                QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInKg'] = float(QtyInKg)
+                                QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
+                                InvoiceItem['QtyInBox'] = float(QtyInBox)
+                                InvoiceItem['Invoice'] = invoice_instance
+                                del InvoiceItem['SaleDate'] ,InvoiceItem['PartyID'],InvoiceItem['ItemID'],InvoiceItem['ItemName']
+                                del InvoiceItem['UnitID'] ,InvoiceItem['DiscountValue'] ,InvoiceItem['MRP'] ,InvoiceItem['GSTRate']
+                                del InvoiceItem['CGSTRate'],InvoiceItem['CGSTAmount'],InvoiceItem['SGSTRate'],InvoiceItem['SGSTAmount']
+                                del InvoiceItem['IGSTRate'],InvoiceItem['IGSTAmount'],InvoiceItem['SaleID'],
+                               
+                                InvoiceItemID =TC_SPOSInvoiceItems.objects.create(**InvoiceItem)
+                                InvoiceItemID.save()    
+                            ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'],Invoice_id=InvoiceDeleteUpdate[0]['id'])
+                            ss.save()
+                        else:
+                            
+                            # InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                            InvoiceDeleteUpdate.update(IsDeleted=1)
+                            ss=T_SPOSDeletedInvoices(DeletedTableAutoID=DeleteInvoicedata['DeletedTableAutoID'], ClientID=DeleteInvoicedata['ClientID'], ClientSaleID=DeleteInvoicedata['ClientSaleID'], InvoiceDate=DeleteInvoicedata['InvoiceDate'], Party=DeleteInvoicedata['PartyID'], DeletedBy=DeleteInvoicedata['DeletedBy'], DeletedOn=DeleteInvoicedata['DeletedOn'], ReferenceInvoiceID=DeleteInvoicedata['ReferenceInvoiceID'],Invoice_id=InvoiceDeleteUpdate[0]['id'])
+                            ss.save()
                         
                         InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
                     log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'POSDeletedInvoiceID':InvoiceIDs}, 388,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})       
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})             
         
 
 class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
@@ -433,13 +515,11 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})      
 
 
-class TopSaleItemsOfFranchiseView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+
 
 
 class TopSaleItemsOfFranchiseView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
     authentication_classes = [BasicAuthentication]
 
     @transaction.atomic()
@@ -450,17 +530,18 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 FromDate = SaleData['FromDate']
                 ToDate = SaleData['ToDate']
                 Party = SaleData['Party']
-                
 
-                PartyDetails = M_Parties.objects.raw('''Select FoodERP.M_Parties.id, Name,  FoodERP.MC_PartyAddress.Address,
-
-                                                        (Select SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
-                                                        (Select COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount
+                PartyDetails = M_Parties.objects.raw('''SELECT FoodERP.M_Parties.id, Name, FoodERP.MC_PartyAddress.Address,
+                                                        (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
+                                                        (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount,
+                                                        (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) LastBillTime,
+                                                        (SELECT id FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceID,
+                                                        (SELECT TotalAmount FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceAmount
                                                         From FoodERP.M_Parties
                                                         JOIN FoodERP.MC_PartyAddress ON FoodERP.M_Parties.id = FoodERP.MC_PartyAddress.Party_id AND FoodERP.MC_PartyAddress.IsDefault = True
                                                         LEFT JOIN SweetPOS.T_SPOSInvoices ON FoodERP.M_Parties.id = SweetPOS.T_SPOSInvoices.Party 
                                                         Where FoodERP.M_Parties.id= %s
-                                                        GROUP BY FoodERP.M_Parties.id,Name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
+                                                        GROUP BY FoodERP.M_Parties.id,Name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
                 Party_List = []
                 for party in PartyDetails:
                     TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP.M_Items.Name AS ItemName,
@@ -491,6 +572,9 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                         "PartyAddress": party.Address,
                         "BillCount": party.BillCount,
                         "TotalAmount": party.TotalAmount,
+                        "LastBillTime": party.LastBillTime,
+                        "LastInvoiceID": party.LastInvoiceID,
+                        "LastInvoiceAmount": party.LastInvoiceAmount,
                         "TopSaleItems": TopSaleItems_List
                     })
                 if Party_List:
@@ -502,4 +586,3 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
         except Exception as e:
                     log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-

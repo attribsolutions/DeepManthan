@@ -110,7 +110,7 @@ class M_ItemsFilterView(CreateAPIView):
                     company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
                     company_ids = [company.id for company in company_queryset]
                     # query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
-                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName,M_Items.IsCBMItem FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))   
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))    
                 else:
                     # CustomPrint("Dhruti")
                     # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
@@ -122,7 +122,7 @@ class M_ItemsFilterView(CreateAPIView):
                                                M_Items.Grammage, M_Items.Height, M_Items.Length, 
                                                M_Items.StoringCondition, M_Items.BaseUnitID_id, 
                                                M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName,
-                                               M_Units.Name AS BaseUnitName,M_Items.IsCBMItem FROM M_Items 
+                                               M_Units.Name AS BaseUnitName FROM M_Items 
                                                JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
                                                JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
                                                WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
@@ -176,7 +176,6 @@ class M_ItemsFilterView(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
-                            "IsCBMItem":a['IsCBMItem'],
                             "UnitDetails":UnitDetails
                         })  
                     print("ItemFilterAPI EndTime : ",datetime.now())    
@@ -451,8 +450,8 @@ class M_ItemsViewSecond(CreateAPIView):
                     else:
                         BaseUnitConversion=ChildUnitName    
                     a.update({"BaseUnitConversion":BaseUnitConversion})
-                M_Items_Serializer = ItemSerializer(
-                    M_ItemsdataByID, data=M_Itemsdata)
+                    # ItemSerializer
+                M_Items_Serializer = ItemSerializer(M_ItemsdataByID, data=M_Itemsdata) 
                 if M_Items_Serializer.is_valid():
                     UpdatedItem = M_Items_Serializer.save()
                     LastInsertID = UpdatedItem.id
@@ -629,7 +628,7 @@ class ItemWiseUpdateView(CreateAPIView):
                 
                 query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
-                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID
+                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID,CASE WHEN M_Items.IsCBMItem=null THEN 0 WHEN M_Items.IsCBMItem=0 THEN false ELSE true END as IsCBMItem
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and  MC_ItemGroupDetails.GroupType_id= %s
                                                             LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id AND IsDeleted=0
@@ -656,7 +655,6 @@ class ItemWiseUpdateView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'ItemWiseBulkUpdate:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
 
 class ItemWiseSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)

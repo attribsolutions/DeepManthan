@@ -178,6 +178,7 @@ class ItemSerializer(serializers.ModelSerializer):
             'StoringCondition', instance.StoringCondition)
         instance.Grammage = validated_data.get(
             'Grammage', instance.Grammage)
+        # add IsCBMItem for update
         instance.IsCBMItem=validated_data.get(
             'IsCBMItem',instance.IsCBMItem)
             
@@ -516,6 +517,7 @@ class ItemWiseUpdateSerializer(serializers.Serializer):
     SubGroupName = serializers.CharField(max_length=200) 
     ShelfLife =  serializers.CharField(max_length=200) 
     SAPUnitID = serializers.CharField(max_length=200)
+    IsCBMItem=serializers.BooleanField(default=False)
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = ItemWiseUpdateSerializer(read_only=True)
