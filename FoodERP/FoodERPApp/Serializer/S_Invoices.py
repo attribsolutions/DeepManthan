@@ -167,7 +167,12 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
             InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
             
         return InvoiceID        
-    
+
+class O_LiveBatchesserializers(serializers.ModelSerializer):
+    class Meta:
+        model = O_LiveBatches
+        fields = ['ItemExpiryDate']
+        
     
 class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
     
@@ -176,9 +181,10 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
     # Margin = M_MarginsSerializer(read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     Unit = Mc_ItemUnitSerializerThird(read_only=True)
+    LiveBatch= O_LiveBatchesserializers(read_only=True)
     class Meta:
         model = TC_InvoiceItems
-        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','LiveBatch']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
