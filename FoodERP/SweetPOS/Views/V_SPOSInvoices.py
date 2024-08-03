@@ -530,28 +530,29 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 FromDate = SaleData['FromDate']
                 ToDate = SaleData['ToDate']
                 Party = SaleData['Party']
-                
 
-                PartyDetails = M_Parties.objects.raw('''Select FoodERP.M_Parties.id, Name,  FoodERP.MC_PartyAddress.Address,
-
-                                                        (Select SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
-                                                        (Select COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount
-                                                        From FoodERP.M_Parties
-                                                        JOIN FoodERP.MC_PartyAddress ON FoodERP.M_Parties.id = FoodERP.MC_PartyAddress.Party_id AND FoodERP.MC_PartyAddress.IsDefault = True
-                                                        LEFT JOIN SweetPOS.T_SPOSInvoices ON FoodERP.M_Parties.id = SweetPOS.T_SPOSInvoices.Party 
-                                                        Where FoodERP.M_Parties.id= %s
-                                                        GROUP BY FoodERP.M_Parties.id,Name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
+                PartyDetails = M_Parties.objects.raw('''SELECT FoodERP1.M_Parties.id, Name, FoodERP1.MC_PartyAddress.Address,
+                                                        (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
+                                                        (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount,
+                                                        (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) LastBillTime,
+                                                        (SELECT id FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceID,
+                                                        (SELECT TotalAmount FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceAmount
+                                                        From FoodERP1.M_Parties
+                                                        JOIN FoodERP1.MC_PartyAddress ON FoodERP1.M_Parties.id = FoodERP1.MC_PartyAddress.Party_id AND FoodERP1.MC_PartyAddress.IsDefault = True
+                                                        LEFT JOIN SweetPOS.T_SPOSInvoices ON FoodERP1.M_Parties.id = SweetPOS.T_SPOSInvoices.Party 
+                                                        Where FoodERP1.M_Parties.id= %s
+                                                        GROUP BY FoodERP1.M_Parties.id,Name,FoodERP1.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
                 Party_List = []
                 for party in PartyDetails:
-                    TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP.M_Items.Name AS ItemName,
+                    TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP1.M_Items.Name AS ItemName,
                                                                     SUM(SweetPOS.TC_SPOSInvoiceItems.Amount) AS TotalAmount, SweetPOS.T_SPOSInvoices.InvoiceDate ,
                                                                     SUM(SweetPOS.TC_SPOSInvoiceItems.Quantity) AS TotalQuantity,
-                                                                    FoodERP.M_Units.Name AS UnitName
+                                                                    FoodERP1.M_Units.Name AS UnitName
                                                                     FROM SweetPOS.TC_SPOSInvoiceItems                                                                   
                                                                     JOIN SweetPOS.T_SPOSInvoices  ON SweetPOS.TC_SPOSInvoiceItems.Invoice_id = SweetPOS.T_SPOSInvoices.id
-                                                                    JOIN FoodERP.M_Items ON SweetPOS.TC_SPOSInvoiceItems.Item = FoodERP.M_Items.id
-                                                                    JOIN FoodERP.MC_ItemUnits ON SweetPOS.TC_SPOSInvoiceItems.Unit = FoodERP.MC_ItemUnits.id
-                                                                    JOIN FoodERP.M_Units ON FoodERP.MC_ItemUnits.UnitID_id = FoodERP.M_Units.id
+                                                                    JOIN FoodERP1.M_Items ON SweetPOS.TC_SPOSInvoiceItems.Item = FoodERP1.M_Items.id
+                                                                    JOIN FoodERP1.MC_ItemUnits ON SweetPOS.TC_SPOSInvoiceItems.Unit = FoodERP1.MC_ItemUnits.id
+                                                                    JOIN FoodERP1.M_Units ON FoodERP1.MC_ItemUnits.UnitID_id = FoodERP1.M_Units.id
                                                                     WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s
                                                                     GROUP BY SweetPOS.TC_SPOSInvoiceItems.Item, M_Items.Name, M_Units.Name
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
@@ -571,6 +572,9 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                         "PartyAddress": party.Address,
                         "BillCount": party.BillCount,
                         "TotalAmount": party.TotalAmount,
+                        "LastBillTime": party.LastBillTime,
+                        "LastInvoiceID": party.LastInvoiceID,
+                        "LastInvoiceAmount": party.LastInvoiceAmount,
                         "TopSaleItems": TopSaleItems_List
                     })
                 if Party_List:
@@ -581,5 +585,4 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
                     log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
-                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
