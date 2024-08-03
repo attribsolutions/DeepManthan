@@ -535,11 +535,11 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                         (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
                                                         (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount,
                                                         (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) LastBillTime,
-                                                        (SELECT id FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceID,
+                                                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceID,
                                                         (SELECT TotalAmount FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceAmount
                                                         From FoodERP.M_Parties
                                                         JOIN FoodERP.MC_PartyAddress ON FoodERP.M_Parties.id = FoodERP.MC_PartyAddress.Party_id AND FoodERP.MC_PartyAddress.IsDefault = True
-                                                        LEFT JOIN SweetPOS.T_SPOSInvoices ON FoodERP.M_Parties.id = SweetPOS.T_SPOSInvoices.Party 
+                                                         
                                                         Where FoodERP.M_Parties.id= %s
                                                         GROUP BY FoodERP.M_Parties.id,Name,FoodERP.MC_PartyAddress.Address''', ([FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, Party]))
                 Party_List = []
