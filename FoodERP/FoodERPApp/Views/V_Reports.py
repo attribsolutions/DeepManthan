@@ -1720,7 +1720,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         join FoodERP.M_Items  on M_Items.id = Y.Item 
                         join FoodERP.MC_ItemUnits on MC_ItemUnits.id = Y.Unit
                         join FoodERP.M_Units on M_Units.id = MC_ItemUnits.UnitID_id
-                        where X.InvoiceDate between %s and %s '''
+                        where X.InvoiceDate between %s and %s and X.IsDeleted=0  '''
                 
                 parameters = [FromDate,ToDate]
                 if int(Party) > 0 and int(Item) > 0: 
