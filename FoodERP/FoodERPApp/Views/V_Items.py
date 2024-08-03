@@ -628,7 +628,7 @@ class ItemWiseUpdateView(CreateAPIView):
                 
                 query = M_Items.objects.raw('''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
-                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID
+                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID,CASE WHEN M_Items.IsCBMItem=null THEN 0 WHEN M_Items.IsCBMItem=0 THEN false ELSE true END as IsCBMItem
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and  MC_ItemGroupDetails.GroupType_id= %s
                                                             LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id AND IsDeleted=0
@@ -655,7 +655,6 @@ class ItemWiseUpdateView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'ItemWiseBulkUpdate:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-
 
 class ItemWiseSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)

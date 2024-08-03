@@ -456,7 +456,7 @@ class M_GetStockEntryList(CreateAPIView):
                 StockData = JSONParser().parse(request)
                 FromDate = StockData.get('FromDate')
                 ToDate = StockData.get('ToDate')
-                Party=StockData.get('Party')
+                Party=StockData.get('PartyID')
                     
                 if not FromDate or not ToDate:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'FromDate and ToDate are required', 'Data': []})
@@ -500,7 +500,7 @@ class M_GetStockEntryItemList(CreateAPIView):
         try:
             with transaction.atomic(): 
                 Stockdata = JSONParser().parse(request) 
-                Party_id = Stockdata.get('Party')
+                Party_id = Stockdata.get('PartyID')
                 StockDate = Stockdata.get('StockDate')
 
                 if Party_id is None:
