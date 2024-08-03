@@ -532,11 +532,11 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 Party = SaleData['Party']
 
                 PartyDetails = M_Parties.objects.raw('''SELECT FoodERP.M_Parties.id, Name, FoodERP.MC_PartyAddress.Address,
-                                                        (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) TotalAmount,
-                                                        (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount,
-                                                        (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) LastBillTime,
-                                                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceID,
-                                                        (SELECT TotalAmount FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceAmount
+                                                        (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) TotalAmount,
+                                                        (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) BillCount,
+                                                        (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) LastBillTime,
+                                                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0 ORDER BY id DESC LIMIT 1) LastInvoiceID,
+                                                        (SELECT TotalAmount FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0 ORDER BY id DESC LIMIT 1) LastInvoiceAmount
                                                         From FoodERP.M_Parties
                                                         JOIN FoodERP.MC_PartyAddress ON FoodERP.M_Parties.id = FoodERP.MC_PartyAddress.Party_id AND FoodERP.MC_PartyAddress.IsDefault = True
                                                          
@@ -553,7 +553,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     JOIN FoodERP.M_Items ON SweetPOS.TC_SPOSInvoiceItems.Item = FoodERP.M_Items.id
                                                                     JOIN FoodERP.MC_ItemUnits ON SweetPOS.TC_SPOSInvoiceItems.Unit = FoodERP.MC_ItemUnits.id
                                                                     JOIN FoodERP.M_Units ON FoodERP.MC_ItemUnits.UnitID_id = FoodERP.M_Units.id
-                                                                    WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s
+                                                                    WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0
                                                                     GROUP BY SweetPOS.TC_SPOSInvoiceItems.Item, M_Items.Name, M_Units.Name
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
 
