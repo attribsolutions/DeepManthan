@@ -451,9 +451,9 @@ class M_GetStockEntryList(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        StockData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                StockData = JSONParser().parse(request)
                 FromDate = StockData.get('FromDate')
                 ToDate = StockData.get('ToDate')
                 Party=StockData.get('PartyID')
@@ -480,14 +480,14 @@ class M_GetStockEntryList(CreateAPIView):
                 StockDataQuery = T_Stock.objects.raw(query, [FromDate, ToDate, Party, FromDate, ToDate, Party])
 
                 if not list(StockDataQuery):
-                    log_entry = create_transaction_logNew(request, 0, 0, "Stock Not available", 210, 0)
+                    log_entry = create_transaction_logNew(request, 0, 0, "Get Stock Entry List:"+"Stock Not available", 7, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock not available', 'Data': []})
                 else:
                     Stockdata_Serializer = M_StockEntryListSerializerSecond(StockDataQuery, many=True).data
-                    log_entry = create_transaction_logNew(request, Stockdata_Serializer, 0, '', 210, 0)
+                    log_entry = create_transaction_logNew(request, StockData, 0, '', 404, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Stockdata_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, f'SingleGET Stock: {str(e)}', 33, 0)
+            log_entry = create_transaction_logNew(request, 0, 0, "Get Stock Entry List:"+ str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
         
 #  -------------------- Get Stock Entry Item List ----------------------
@@ -497,44 +497,41 @@ class M_GetStockEntryItemList(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        Stockdata = JSONParser().parse(request)
         try:
-            with transaction.atomic(): 
-                Stockdata = JSONParser().parse(request) 
-                Party_id = Stockdata.get('PartyID')
+            with transaction.atomic():  
+                PartyID = Stockdata.get('PartyID')
                 StockDate = Stockdata.get('StockDate')
 
-                if Party_id is None:
+                if PartyID is None:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party ID not provided', 'Data': []})
                 
                 if StockDate is None:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Stock Date not provided', 'Data': []})
 
-                # Execute the raw SQL query with parameterized input
-                query = '''
+                StockDataQuery = M_Items.objects.raw(f'''
                     SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
 	FROM  M_Items as m RIGHT JOIN T_Stock as s ON m.id = s.Item_id 
 	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit_id
     INNER JOIN  M_Units as u ON u.id=iu.UnitID_id
-                    WHERE s.Party_id=%s AND s.StockDate=%s
-                    
-                    UNION 
-                    
+                    WHERE s.Party_id={PartyID} AND s.StockDate= %s
+                UNION 
                     SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
 	FROM M_Items as m RIGHT JOIN SweetPOS.T_SPOSStock as s ON m.id = s.Item
 	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit
     INNER JOIN M_Units as u ON u.id=iu.UnitID_id
-    WHERE s.Party=%s AND s.StockDate=%s
-                '''
-                StockDataQuery = M_Items.objects.raw(query, [Party_id, StockDate])
+    WHERE s.Party={PartyID} AND s.StockDate=%s
+                ''',[StockDate,StockDate])
                 
-                if not list(StockDataQuery):
-                    log_entry =create_transaction_logNew(request, 0, 0, "Stock Items List Not available", 210, 0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Items List Not available', 'Data': []})
-                else:
+                if(StockDataQuery):
                     Stockdata_Serializer = M_StockEntryItemListSecond(StockDataQuery, many=True).data
-                    log_entry =create_transaction_logNew(request, Stockdata_Serializer, 0, '', 210, 0)
+                    log_entry = create_transaction_logNew(request, Stockdata, 0, '', 405, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Stockdata_Serializer})
+                else:
+                    log_entry = create_transaction_logNew(request, 0, 0, "Get Stock Entry Item List:" +" Stock Items List Not available", 7, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Items List Not available', 'Data': []})
+        
         except Exception as e:
-            log_entry =create_transaction_logNew(request, 0, 0, f'SingleGET Stock: {str(e)}', 33, 0)
+            log_entry = create_transaction_logNew(request, Stockdata, 0, "Get Stock Entry Item List:"+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
