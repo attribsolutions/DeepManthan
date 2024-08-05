@@ -142,19 +142,17 @@ class RoleAccessView(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, {'RoleAccessID':id},0,'RoleAccessID:'+str(id),127,0)
+        log_entry = create_transaction_logNew(request, 0,PartyID, f'EmployeeID:{EmployeeID}, CompanyID:{CompanyID}', 127, 0)
         return Response(response)
 
     # Role Access POST Method first delete record on role,company,division and then Insert data
 
     @transaction.atomic()
     def post(self, request):
+        RoleAccessdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                RoleAccessdata = JSONParser().parse(request)
-                
-                RoleAccessSerialize_data = M_RoleAccessSerializer(
-                    data=RoleAccessdata, many=True)
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
                
                 if RoleAccessSerialize_data.is_valid():
                     # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
@@ -165,12 +163,12 @@ class RoleAccessView(RetrieveAPIView):
                     Company=RoleAccessSerialize_data.data[0]['Company']
                     Role=RoleAccessSerialize_data.data[0]['Role']
 
-                    log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
+                    log_entry = create_transaction_logNew(request, RoleAccessdata,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
+                log_entry = create_transaction_logNew(request, RoleAccessdata,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
-            log_entry = create_transaction_logNew(request,0,0,'RoleAccessSave:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request,RoleAccessdata,0,'RoleAccessSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   e, 'Data': []})
 
 
@@ -181,9 +179,9 @@ class RoleAccessViewList(RetrieveAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Logindata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID'] 
@@ -212,7 +210,7 @@ class RoleAccessViewList(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
-            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessList:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, Logindata,0,'RoleAccessList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -322,8 +320,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},0,'RoleAccessID:'+str(RoleAccessID),131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]}) 
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]}) 
 
 class RoleAccessViewAddPage(RetrieveAPIView):
     
@@ -384,7 +382,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, {'RoleAccessID':a['id']},0,"RoleAccessAddPage",132,0)
+        log_entry = create_transaction_logNew(request, 0,0,"RoleAccessAddPage",132,0)
         return Response(response)    
 
 class RoleAccessGetPagesOnModule(RetrieveAPIView):
