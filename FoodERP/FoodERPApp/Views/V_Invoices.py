@@ -279,9 +279,10 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     CustomerName=F('Customer__Name'),
                     DriverName=F('Driver__Name'),
                     VehicleNo=F('Vehicle__VehicleNumber'),
-                    MobileNo=Value(0, output_field=IntegerField())
+                    MobileNo=Value(0, output_field=IntegerField()),
+                    PaymentType=Value(0,output_field=IntegerField())
                 ).values(
-                    'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                    'id','PaymentType','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
@@ -296,7 +297,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
                         Vehicle_id=F('Vehicle')).values(
-                    'id', 'InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                    'id', 'InvoiceDate','PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
                     'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
                 )
@@ -360,6 +361,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "Identify_id": a['Identify_id'],
                                 "id": a['id'],
                                 "InvoiceDate": a['InvoiceDate'],
+                                "PaymentType":a['PaymentType'],
                                 "FullInvoiceNumber": a['FullInvoiceNumber'],
                                 "CustomerID": a['Customer_id'],
                                 "Customer": a['CustomerName'],
