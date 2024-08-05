@@ -1728,12 +1728,12 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                     SPOSInvoicequery += ' AND X.Party = %s AND Y.Item = %s'
                     parameters.extend([Party, Item])
 
-                elif int(Party) == 0:
+                elif int(Party) > 0:
                     # Invoicequery += ' AND A.Item_id = %s'
                     SPOSInvoicequery += ' AND Y.Item = %s'
                     parameters.append(Item)
 
-                elif int(Item) == 0:
+                elif int(Item) > 0:
                     # Invoicequery += 'AND T_Invoices.Party_id = %s'
                     SPOSInvoicequery += 'AND X.Party = %s'
                     parameters.append(Party)
