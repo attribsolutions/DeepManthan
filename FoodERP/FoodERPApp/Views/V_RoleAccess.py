@@ -142,7 +142,7 @@ class RoleAccessView(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, 0,PartyID, f'EmployeeID:{EmployeeID}, CompanyID:{CompanyID}', 127, 0)
+        # log_entry = create_transaction_logNew(request, 0,PartyID, f'EmployeeID:{EmployeeID}, CompanyID:{CompanyID}', 127, 0)
         return Response(response)
 
     # Role Access POST Method first delete record on role,company,division and then Insert data
