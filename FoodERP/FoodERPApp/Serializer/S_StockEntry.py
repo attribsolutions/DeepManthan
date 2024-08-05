@@ -72,6 +72,6 @@ class M_StockEntryListSerializerSecond(serializers.Serializer):
 class M_StockEntryItemListSecond(serializers.Serializer): 
     id =  serializers.IntegerField() 
     Name=serializers.CharField(max_length=500) 
-    Quantity=serializers.DecimalField(max_digits=5, decimal_places=2)
-    MRPValue=serializers.DecimalField(max_digits=5, decimal_places=2)
+    Quantity=serializers.DecimalField(max_digits=20, decimal_places=2)
+    MRPValue=serializers.DecimalField(max_digits=20, decimal_places=2)
     Unit=serializers.CharField(max_length=500)
