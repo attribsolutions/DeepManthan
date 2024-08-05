@@ -48,13 +48,18 @@ class ItemSupplierView(CreateAPIView):
                     # CustomPrint(ItemSupplierSerializer)             
                     Supplier_List=list()
                     for a in  ItemSupplierSerializer: 
+                        Supplier = [{ 
+                                    "SupplierName": a["Suppliers"],
+                                    "SupplierId": a["PartyId"]
+                                    
+                                    }]
+                        
                         Supplier_List.append({                        
                             "ItemID":a["id"],
                             "ItemName":a["ItemName"],
                             "GroupName":a["GroupName"],
-                            "SubGroupName":a["SubGroupName"],
-                            "SupplierName":a["Suppliers"],
-                            "SupplierId":a["PartyId"]
+                            "SubGroupName":a["SubGroupName"],                            
+                            "SupplierDetails":Supplier
                         })  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Supplier_List}) 
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Not available', 'Data' : []})               
