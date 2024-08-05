@@ -1724,19 +1724,16 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 
                 parameters = [FromDate,ToDate]
                 if int(Party) > 0 and int(Item) > 0: 
-                    print('cc')
                     # Invoicequery += ' AND T_Invoices.Party_id = %s AND A.Item_id = %s'
                     SPOSInvoicequery += ' AND X.Party = %s AND Y.Item = %s'
                     parameters.extend([Party, Item])
 
                 elif int(Party) > 0:
-                    print('zz')
                     # Invoicequery += ' AND A.Item_id = %s'
                     SPOSInvoicequery += ' AND X.Party = %s'
                     parameters.append(Party)
 
                 elif int(Item) > 0:
-                    print('aaa')
                     
                     # Invoicequery += 'AND T_Invoices.Party_id = %s'
                     SPOSInvoicequery += 'AND Y.Item = %s'
