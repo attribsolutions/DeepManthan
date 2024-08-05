@@ -187,7 +187,6 @@ class PartyImportFieldView(CreateAPIView):
                         Party=id)
                     PartyImortField_data.delete()
                     PartyImport_serializer.save()
-                    # LastInsertID = PartyImportFieldID.id
                     log_entry = create_transaction_logNew(request, PartyImportField_data, 0, "",401,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'PartyImportFields Save Successfully', 'Data': []})
                 log_entry = create_transaction_logNew(request, PartyImportField_data, 0, "PartyImportFields Save:"+str(PartyImport_serializer.errors),34,0)
