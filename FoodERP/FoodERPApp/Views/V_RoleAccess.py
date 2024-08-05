@@ -142,7 +142,7 @@ class RoleAccessView(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, 0,PartyID, f'EmployeeID:{EmployeeID}, CompanyID:{CompanyID}', 127, 0)
+        # log_entry = create_transaction_logNew(request, 0,PartyID, f'EmployeeID:{EmployeeID}, CompanyID:{CompanyID}', 127, 0)
         return Response(response)
 
     # Role Access POST Method first delete record on role,company,division and then Insert data
@@ -163,12 +163,12 @@ class RoleAccessView(RetrieveAPIView):
                     Company=RoleAccessSerialize_data.data[0]['Company']
                     Role=RoleAccessSerialize_data.data[0]['Role']
 
-                    log_entry = create_transaction_logNew(request, RoleAccessdata,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
+                    # log_entry = create_transaction_logNew(request, RoleAccessdata,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_logNew(request, RoleAccessdata,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
+                # log_entry = create_transaction_logNew(request, RoleAccessdata,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
-            log_entry = create_transaction_logNew(request,RoleAccessdata,0,'RoleAccessSave:'+str(e),33,0)
+            # log_entry = create_transaction_logNew(request,RoleAccessdata,0,'RoleAccessSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':   e, 'Data': []})
 
 
