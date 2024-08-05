@@ -523,7 +523,7 @@ class M_GetStockEntryItemList(CreateAPIView):
 	FROM M_Items as m RIGHT JOIN SweetPOS.T_SPOSStock as s ON m.id = s.Item
 	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit
     INNER JOIN M_Units as u ON u.id=iu.UnitID_id
-    WHERE s.Party_id=%s AND s.StockDate=%s
+    WHERE s.Party=%s AND s.StockDate=%s
                 '''
                 StockDataQuery = M_Items.objects.raw(query, [Party_id, StockDate])
                 
