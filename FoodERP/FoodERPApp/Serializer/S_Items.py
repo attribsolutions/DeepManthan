@@ -517,6 +517,7 @@ class ItemWiseUpdateSerializer(serializers.Serializer):
     SubGroupName = serializers.CharField(max_length=200) 
     ShelfLife =  serializers.CharField(max_length=200) 
     SAPUnitID = serializers.CharField(max_length=200)
+    IsCBMItem=serializers.BooleanField(default=False)
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = ItemWiseUpdateSerializer(read_only=True)
