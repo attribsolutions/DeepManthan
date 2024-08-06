@@ -530,6 +530,7 @@ class M_GetStockEntryItemList(CreateAPIView):
                 orderby = f'''
                     ORDER BY M_Group.Sequence, MC_SubGroup.Sequence, {seq}
                 ''' 
+                # ---- Main Query 
                 
                 StockDataQuery = M_Items.objects.raw(f'''SELECT * FROM (
                         SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
@@ -556,17 +557,21 @@ class M_GetStockEntryItemList(CreateAPIView):
                     ) AS OrderedStock
                 ''', [PartyID, StockDate, PartyID, StockDate])
                 
+                # ---- Serializer
                 if StockDataQuery:
                     Stockdata_Serializer = M_StockEntryItemListSecond(StockDataQuery, many=True).data
-                    
-                    # def create_transaction_logNew(request, data, PartyID, TransactionDetails, TransactionType=0, TransactionID=0, FromDate=0, ToDate=0, CustomerID=0):
+                
+                # ---- transaction_logNew
                     log_entry = create_transaction_logNew(request, Stockdata, 0, '', 405, 0)
+                
+                # ---- return JsonResponse
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Stockdata_Serializer})
                 else:
                     log_entry = create_transaction_logNew(request, 0, 0, "Get Stock Entry Item List:" +" Stock Items List Not available", 7, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Items List Not available', 'Data': []})
-        
+       
+        # ---- Exception
         except Exception as e:
             log_entry = create_transaction_logNew(request, Stockdata, 0, "Get Stock Entry Item List:"+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
