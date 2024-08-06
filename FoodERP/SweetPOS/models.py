@@ -261,6 +261,7 @@ class M_SPOSRateMaster(models.Model):
     EffectiveFrom = models.DateField()
     Rate = models.DecimalField(max_digits=15,decimal_places=2)
     ItemID = models.IntegerField()
+    IsDeleted = models.BooleanField(default=False)
 
     class Meta:
         db_table="M_SPOSRateMaster"
