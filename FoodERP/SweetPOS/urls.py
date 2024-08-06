@@ -14,6 +14,8 @@ from .Views.V_SweetPoSUsers import *
 
 from .Views.V_SPOSstock import *
 
+from .Views.V_SPOSRate import *
+
 
 urlpatterns = [
     
@@ -26,6 +28,10 @@ urlpatterns = [
     url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
     url(r'StockEntry$', StockView.as_view()),
     url(r'SPOSStockReport$', SPOSStockReportView.as_view()), 
+    url(r'SPOSRateList$', RateListView.as_view()),
+    url(r'SPOSRateSave$', RateSaveView.as_view()),
+
+
 
 
     #User
