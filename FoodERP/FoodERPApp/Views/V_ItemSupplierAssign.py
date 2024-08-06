@@ -44,7 +44,7 @@ class ItemSupplierView(CreateAPIView):
                 LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id  
                 ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence''') 
-                CustomPrint(query.query)                               
+                # CustomPrint(query.query)                               
                 if query:                    
                     ItemSupplierSerializer = GETItemSupplierSerializer(query, many=True).data                                  
                     Supplier_List=list()  
@@ -74,7 +74,7 @@ class ItemSupplierView(CreateAPIView):
                             "SubGroupName":a["SubGroupName"],                            
                             "SupplierDetails":suppliers
                             })    
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :[Supplier_List]}) 
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Supplier_List}) 
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Not available', 'Data' : []})               
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
