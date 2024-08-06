@@ -1728,20 +1728,19 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                     SPOSInvoicequery += ' AND X.Party = %s AND Y.Item = %s'
                     parameters.extend([Party, Item])
 
-                elif int(Party) == 0:
+                elif int(Party) > 0:
                     # Invoicequery += ' AND A.Item_id = %s'
-                    SPOSInvoicequery += ' AND Y.Item = %s'
-                    parameters.append(Item)
-
-                elif int(Item) == 0:
-                    # Invoicequery += 'AND T_Invoices.Party_id = %s'
-                    SPOSInvoicequery += 'AND X.Party = %s'
+                    SPOSInvoicequery += ' AND X.Party = %s'
                     parameters.append(Party)
 
+                elif int(Item) > 0:
+                    
+                    # Invoicequery += 'AND T_Invoices.Party_id = %s'
+                    SPOSInvoicequery += 'AND Y.Item = %s'
+                    parameters.append(Item)
                     
                 # q1 = T_Invoices.objects.raw(Invoicequery,parameters)
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
-
                 # combined_sale = list(q1) + list(q2)
                 combined_sale =  list(q2)
 
