@@ -9,6 +9,7 @@ class ItemSupplierSerializer(serializers.ModelSerializer):
         
 class GETItemSupplierSerializer(serializers.Serializer):
     id= serializers.IntegerField()    
+    ItemID= serializers.IntegerField()
     ItemName=serializers.CharField(max_length=500)
     GroupName=serializers.CharField(max_length=500)
     SubGroupName=serializers.CharField(max_length=500)

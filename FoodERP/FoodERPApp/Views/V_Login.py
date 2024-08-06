@@ -74,7 +74,7 @@ class UserListView(CreateAPIView):
                 SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
                 RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
                 RoleID_list = [int(x) for x in RoleID_List.split(",")]
-                print(RoleID_list)
+                # print(RoleID_list)
                 if RoleID in RoleID_list:                    
                     Clause= {'Employee__CreatedBy': UserID}
                 else:
