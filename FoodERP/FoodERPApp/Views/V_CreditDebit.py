@@ -260,7 +260,7 @@ class CreditDebitNoteView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'Single CreditdebitNote:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -281,7 +281,7 @@ class CreditDebitNoteView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitNoteDelete:'+ str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class CreditDebitNoteExcelView(CreateAPIView):
     
@@ -354,7 +354,7 @@ class CreditDebitNoteExcelView(CreateAPIView):
         except Exception as e:
             
             log_entry = create_transaction_logNew(request,CreditNotedata, 0,'CreditDebitNoteSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  (e), 'Data': []})                  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                  
 
 
     @transaction.atomic()
