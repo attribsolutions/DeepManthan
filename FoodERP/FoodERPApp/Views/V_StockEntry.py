@@ -499,8 +499,7 @@ class M_GetStockEntryItemList(CreateAPIView):
     def post(self, request):
         Stockdata = JSONParser().parse(request)
         try:
-            with transaction.atomic(): 
-                
+            with transaction.atomic():  
                 # ---- POST Body where clause
                 PartyID = Stockdata.get('PartyID')
                 StockDate = Stockdata.get('StockDate')
@@ -531,9 +530,9 @@ class M_GetStockEntryItemList(CreateAPIView):
                     ORDER BY M_Group.Sequence, MC_SubGroup.Sequence, {seq}
                 ''' 
                 # ---- Main Query 
-                
                 StockDataQuery = M_Items.objects.raw(f'''SELECT * FROM (
-                        SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
+                        SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit,
+                        M_Group.Sequence, MC_SubGroup.Sequence as GSequence,MC_ItemGroupDetails.ItemSequence as ItemSequence
                         FROM M_Items as m 
                         RIGHT JOIN SweetPOS.T_SPOSStock as s ON m.id = s.Item
                         INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit
@@ -546,7 +545,8 @@ class M_GetStockEntryItemList(CreateAPIView):
                     UNION 
                     
                     SELECT * FROM (
-                        SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
+                        SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit,
+                        M_Group.Sequence, MC_SubGroup.Sequence as GSequence,m.Sequence as ItemSequence
                         FROM M_Items as m 
                         RIGHT JOIN T_Stock as s ON m.id = s.Item_id 
                         INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit_id
@@ -555,6 +555,7 @@ class M_GetStockEntryItemList(CreateAPIView):
                         WHERE s.Party_id = %s AND s.StockDate = %s
                         {orderby}
                     ) AS OrderedStock
+                    ORDER BY Sequence,GSequence,ItemSequence
                 ''', [PartyID, StockDate, PartyID, StockDate])
                 
                 # ---- Serializer
