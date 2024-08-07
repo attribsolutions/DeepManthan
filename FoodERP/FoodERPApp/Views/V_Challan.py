@@ -209,7 +209,7 @@ class ChallanView(CreateAPIView):
                 #         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
                 #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
  
  
         
@@ -372,10 +372,9 @@ class DemandDetailsForChallan(CreateAPIView):
     permission_classes = (IsAuthenticated,)   
 
     def post(self, request, id=0):
+        Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-               
-                Demanddata = JSONParser().parse(request)
                 # CustomPrint(Demanddata)
                 Party = Demanddata['Party']                
                 DemandIDs = Demanddata['OrderIDs']
@@ -482,8 +481,8 @@ class DemandDetailsForChallan(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Demanddata, 0,0,32,0,0,0,Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
         except Exception as e:
-                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
             
     

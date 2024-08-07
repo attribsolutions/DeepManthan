@@ -19,9 +19,9 @@ class InterBranchDivisionView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Divisiondata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Divisiondata = JSONParser().parse(request)
                 Company = Divisiondata['Company']
                 Party = Divisiondata['Party']
                 query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=Party))
@@ -36,7 +36,7 @@ class InterBranchDivisionView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DivisionListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
 # class InterBranchItemsView(CreateAPIView):
 #     permission_classes = (IsAuthenticated,)
@@ -214,9 +214,9 @@ class DemandListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Demanddata = JSONParser().parse(request)
                 FromDate = Demanddata['FromDate']
                 ToDate = Demanddata['ToDate']
                 Customer = Demanddata['Customer'] # Customer Compansary
@@ -285,9 +285,9 @@ class DemandView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Demanddata = JSONParser().parse(request)
                 Division = Demanddata['Division']
                 Customer = Demanddata['Customer']
                 DemandDate = Demanddata['DemandDate']
@@ -432,16 +432,16 @@ class DemandViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'], 'Order Not Found',62,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     
     
          
     def put(self, request, id=0):
+        Demandupdatedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Demandupdatedata = JSONParser().parse(request)
                 DemandupdateByID = T_Demands.objects.get(id=id)
                 Demandupdate_Serializer = T_DemandSerializer(
                     DemandupdateByID, data=Demandupdatedata)
@@ -452,7 +452,7 @@ class DemandViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
         
         
     @transaction.atomic()
@@ -467,4 +467,4 @@ class DemandViewSecond(CreateAPIView):
         except IntegrityError:
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
