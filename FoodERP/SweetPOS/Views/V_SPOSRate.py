@@ -18,7 +18,7 @@ class RateListView(CreateAPIView):
         try:
             with transaction.atomic():
 
-                query = M_SPOSRateMaster.objects.raw('''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate
+                query = M_SPOSRateMaster.objects.raw('''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault
                                                     FROM FoodERP.M_ChannelWiseItems A 
                                                     join FoodERP.M_Items B on A.Item_id = B.id
                                                     left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0
@@ -29,6 +29,7 @@ class RateListView(CreateAPIView):
                         "ItemID": a.ItemID,
                         "ItemName":a.ItemName,
                         "Rate": a.Rate,
+                        "IsChangeRateToDefault": a.IsChangeRateToDefault
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
