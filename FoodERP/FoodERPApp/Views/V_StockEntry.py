@@ -499,38 +499,78 @@ class M_GetStockEntryItemList(CreateAPIView):
     def post(self, request):
         Stockdata = JSONParser().parse(request)
         try:
-            with transaction.atomic():  
+            with transaction.atomic(): 
+                
+                # ---- POST Body where clause
                 PartyID = Stockdata.get('PartyID')
                 StockDate = Stockdata.get('StockDate')
-
+                 
+                # ---- POST Body Check Is None
                 if PartyID is None:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party ID not provided', 'Data': []})
-                
                 if StockDate is None:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Stock Date not provided', 'Data': []})
-
-                StockDataQuery = M_Items.objects.raw(f'''
-                    SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
-	FROM  M_Items as m RIGHT JOIN T_Stock as s ON m.id = s.Item_id 
-	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit_id
-    INNER JOIN  M_Units as u ON u.id=iu.UnitID_id
-                    WHERE s.Party_id={PartyID} AND s.StockDate= %s
-                UNION 
-                    SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
-	FROM M_Items as m RIGHT JOIN SweetPOS.T_SPOSStock as s ON m.id = s.Item
-	INNER JOIN MC_ItemUnits as iu ON iu.id=s.Unit
-    INNER JOIN M_Units as u ON u.id=iu.UnitID_id
-    WHERE s.Party={PartyID} AND s.StockDate=%s
-                ''',[StockDate,StockDate])
+                 
+                # ---- Order By Sequence 
+                q1 = M_Parties.objects.filter(id=PartyID).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM','PartyType__IsFranchises')
                 
-                if(StockDataQuery):
+                if(q1[0]['PartyType__IsFranchises'] == 1):
+                    GroupTypeid = 5
+                    seq = 'MC_ItemGroupDetails.ItemSequence'
+                else:    
+                    GroupTypeid = 1
+                    seq = 'm.Sequence'
+                    
+                joinsforgroupsubgroup = f'''
+                    LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = m.id AND MC_ItemGroupDetails.GroupType_id = {GroupTypeid}
+                    LEFT JOIN M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
+                    LEFT JOIN MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
+                '''  
+                
+                orderby = f'''
+                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence, {seq}
+                ''' 
+                # ---- Main Query 
+                
+                StockDataQuery = M_Items.objects.raw(f'''SELECT * FROM (
+                        SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
+                        FROM M_Items as m 
+                        RIGHT JOIN SweetPOS.T_SPOSStock as s ON m.id = s.Item
+                        INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit
+                        INNER JOIN M_Units as u ON u.id = iu.UnitID_id
+                        {joinsforgroupsubgroup}
+                        WHERE s.Party = %s AND s.StockDate = %s
+                        {orderby}
+                    ) AS OrderedSPOSStock
+                    
+                    UNION 
+                    
+                    SELECT * FROM (
+                        SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit
+                        FROM M_Items as m 
+                        RIGHT JOIN T_Stock as s ON m.id = s.Item_id 
+                        INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit_id
+                        INNER JOIN M_Units as u ON u.id = iu.UnitID_id
+                        {joinsforgroupsubgroup}
+                        WHERE s.Party_id = %s AND s.StockDate = %s
+                        {orderby}
+                    ) AS OrderedStock
+                ''', [PartyID, StockDate, PartyID, StockDate])
+                
+                # ---- Serializer
+                if StockDataQuery:
                     Stockdata_Serializer = M_StockEntryItemListSecond(StockDataQuery, many=True).data
+                
+                # ---- transaction_logNew
                     log_entry = create_transaction_logNew(request, Stockdata, 0, '', 405, 0)
+                
+                # ---- return JsonResponse
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Stockdata_Serializer})
                 else:
                     log_entry = create_transaction_logNew(request, 0, 0, "Get Stock Entry Item List:" +" Stock Items List Not available", 7, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Items List Not available', 'Data': []})
-        
+       
+        # ---- Exception
         except Exception as e:
             log_entry = create_transaction_logNew(request, Stockdata, 0, "Get Stock Entry Item List:"+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
