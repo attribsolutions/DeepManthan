@@ -34,5 +34,24 @@ class RateListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
+class RateSaveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        Rate_data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+
+                item_ids = [item['ItemID'] for item in Rate_data]
+                M_SPOSRateMaster.objects.filter(ItemID__in=item_ids, IsDeleted=False).update(IsDeleted=True)
+
+                Rate_serializer = RateSerializer(data=Rate_data, many=True)
+                if Rate_serializer.is_valid():
+                    Rate_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': 'Data not available', 'Data': Rate_serializer.errors})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
