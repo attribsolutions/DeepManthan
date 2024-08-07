@@ -64,8 +64,8 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
             'PAN', instance.PAN)
         instance.AadharNo = validated_data.get(
             'AadharNo', instance.AadharNo)
-        instance.Company = validated_data.get(
-            'Company', instance.Company)
+        # instance.Company = validated_data.get(
+        #     'Company', instance.Company)
         instance.EmployeeType = validated_data.get(
             'EmployeeType', instance.EmployeeType)
         instance.State = validated_data.get(

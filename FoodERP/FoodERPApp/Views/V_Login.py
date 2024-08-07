@@ -424,7 +424,7 @@ class UserPartiesForLoginPage(CreateAPIView):
 
                 query = (
                     MC_UserRoles.objects.select_related('User', 'Party', 'Role')
-                    .filter(User__Employee_id=id)
+                    .filter(User__Employee_id=id,Party__PartyAddress__IsDefault=1)
                     .annotate(
                         RoleName=F('Role__Name'),
                         PartyName=F('Party__Name'),
