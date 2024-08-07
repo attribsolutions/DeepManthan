@@ -17,30 +17,21 @@ class RateListView(CreateAPIView):
     def get(self,request):
         try:
             with transaction.atomic():
-                query = M_SPOSRateMaster.objects.all()
-                if query:
-                    Rate_serializer = RateSerializer(query, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Rate_serializer})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
+
+                query = M_SPOSRateMaster.objects.raw('''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate
+                                                    FROM FoodERP.M_ChannelWiseItems A 
+                                                    join FoodERP.M_Items B on A.Item_id = B.id
+                                                    left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0
+                                                    where PartyType_id=19 ''')
+                RateList = list()
+                for a in query:
+                    RateList.append({
+                        "ItemID": a.ItemID,
+                        "ItemName":a.ItemName,
+                        "Rate": a.Rate,
+                    })
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
-class RateSaveView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-
-    @transaction.atomic()
-    def post(self,request):
-        try:
-            with transaction.atomic():
-                Rate_data = JSONParser().parse(request)
-                M_SPOSRateMaster.objects.filter(ItemID=Rate_data['ItemID']).delete()
-                Rate_serializer = RateSerializer(data=Rate_data)
-                if Rate_serializer.is_valid():
-                    Rate_serializer.save()
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Save Successfully', 'Data':[]})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})    
-
-
-

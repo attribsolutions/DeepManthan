@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'StockEntry$', StockView.as_view()),
     url(r'SPOSStockReport$', SPOSStockReportView.as_view()), 
     url(r'SPOSRateList$', RateListView.as_view()),
-    url(r'SPOSRateSave$', RateSaveView.as_view()),
+    # url(r'SPOSRateSave$', RateSaveView.as_view()),
 
 
 
