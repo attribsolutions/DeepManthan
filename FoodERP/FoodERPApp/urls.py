@@ -679,7 +679,7 @@ urlpatterns = [
                  
             
 # StockAdjustment
-            url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),
+            url(r'ShowBatchesForItem/([0-9]+)/([0-9]+)$',ShowBatchesForItemView.as_view()),  #ItemID/PartyID   
             url(r'GetStockCountForParty$',GetStockCountForPartyView.as_view()),
             url(r'CheckStockEntryForFYFirstTransaction$',CheckStockEntryForFYFirstTransactionView.as_view()),
             url(r'CheckStockEntryDateAndNotAllowedBackdatedTransaction$',CheckStockEntryDateAndNotAllowedBackdatedTransactionView.as_view()),
