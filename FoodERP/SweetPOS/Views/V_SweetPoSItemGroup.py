@@ -92,7 +92,8 @@ class ItemListView(CreateAPIView):
                 (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, NULL, NULL),0.0)))RateEffectiveDate,                          
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
-                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence
+                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence,
+                i.IsCBMItem
                 FROM M_Items AS i
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
@@ -103,6 +104,7 @@ class ItemListView(CreateAPIView):
                 count=0
                 item_data=list()
                 for row in query:
+                   
                     count=count+1
                     Ratelist=list()
                     Ratelist.append({
@@ -125,6 +127,7 @@ class ItemListView(CreateAPIView):
                     item_data.append({
                         "FoodERPID": row.id,
                         "CItemID": row.CItemID,
+                        "IsCBMItem" : row.IsCBMItem,
                         "BarCode": row.BarCode,
                         "HSNCode": row.HSNCode,
                         "Name": row.Name,
@@ -138,7 +141,8 @@ class ItemListView(CreateAPIView):
                         "FoodERPMRP": row.FoodERPMRP,
                         "ItemGroupID": row.ItemGroupID,
                         "FranchisesItemCode": "" ,
-                        "DisplayIndex" :  row.ItemSequence  
+                        "DisplayIndex" :  row.ItemSequence,
+                        
                     } )
                     
                 log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList',392,0)
