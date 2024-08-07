@@ -36,3 +36,42 @@ class RateListView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
+class RateSaveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                Rate_data = JSONParser().parse(request)
+
+                POSRateType = Rate_data['POSRateType']
+                IsChangeRateToDefault = Rate_data['IsChangeRateToDefault']
+                EffectiveFrom = Rate_data['EffectiveFrom']
+                Rates = Rate_data['Rate'].split(',')
+                ItemIDs = Rate_data['ItemID'].split(',')
+                IsDeleted = Rate_data['IsDeleted']
+
+                ItemIDs = [int(item_id) for item_id in ItemIDs]
+
+                M_SPOSRateMaster.objects.filter(ItemID__in=ItemIDs, IsDeleted=False).update(IsDeleted=True)
+
+                RateList = []
+                for rate, item_id in zip(Rates, ItemIDs):
+                    rate_entry = {
+                        'POSRateType': POSRateType,
+                        'IsChangeRateToDefault': IsChangeRateToDefault,
+                        'EffectiveFrom': EffectiveFrom,
+                        'Rate': rate,
+                        'ItemID': item_id,
+                        'IsDeleted': IsDeleted
+                    }
+                    RateList.append(rate_entry)
+
+                Rate_serializer = RateSerializer(data=RateList, many=True)
+                if Rate_serializer.is_valid():
+                    Rate_serializer.save()
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Save Successfully', 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
