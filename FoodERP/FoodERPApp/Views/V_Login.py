@@ -273,7 +273,7 @@ class UserLoginView(RetrieveAPIView):
                 }, status=status.HTTP_200_OK)
                 
             else:
-                return Response({'StatusCode': 400, 'Status': True, 'Message': 'Invalid credentials', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'StatusCode': 401, 'Status': True, 'Message': 'Invalid credentials', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
 
         else:
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Invalid UserName', 'Data': []}, status=status.HTTP_401_UNAUTHORIZED)
