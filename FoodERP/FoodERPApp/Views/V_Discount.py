@@ -27,7 +27,7 @@ class DiscountMastergo(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Deleted Successfully', 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,"DiscountDelete:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
 
     
     def post(self, request, id=0):
@@ -108,7 +108,7 @@ class DiscountMastergo(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':''})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Discountdata, 0,"ListOfDiscount:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DiscountMasterSaveView(CreateAPIView):
@@ -185,7 +185,7 @@ ORDER BY M_DiscountMaster.id DESC''', ([Party], [today], [today]))
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Discountdata, 0,"DiscountList:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DiscountPartyTypeView(CreateAPIView):
@@ -210,7 +210,7 @@ class DiscountPartyTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyTypes_Serializer})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     
 
@@ -235,4 +235,4 @@ class DiscountCustomerView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
