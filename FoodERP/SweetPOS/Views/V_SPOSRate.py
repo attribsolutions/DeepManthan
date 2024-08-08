@@ -15,9 +15,12 @@ class RateListView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self,request):
+    def post(self,request):
+        Rate_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                EffectiveFrom = Rate_Data['EffectiveFrom']
+                POSRateType = Rate_Data['POSRateType']
 
                 today = today = date.today()
 
