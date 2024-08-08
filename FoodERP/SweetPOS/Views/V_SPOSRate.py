@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate
 from FoodERPApp.models import *
 from ..models import *
 from SweetPOS.Serializer.S_POSRate import *
+from FoodERPApp.Views.V_CommFunction import *
 
 class RateListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -18,18 +19,23 @@ class RateListView(CreateAPIView):
         try:
             with transaction.atomic():
 
-                query = M_SPOSRateMaster.objects.raw('''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault
+                today = today = date.today()
+
+                q0 = '''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(B.id,%s,2,0,0),0) PrimaryRate
                                                     FROM FoodERP.M_ChannelWiseItems A 
                                                     join FoodERP.M_Items B on A.Item_id = B.id
                                                     left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0
-                                                    where PartyType_id=19 ''')
+                                                    where PartyType_id=19 '''
+                
+                q1 = M_SPOSRateMaster.objects.raw(q0,[today])
                 RateList = list()
-                for a in query:
+                for a in q1:
                     RateList.append({
                         "ItemID": a.ItemID,
                         "ItemName":a.ItemName,
                         "Rate": a.Rate,
-                        "IsChangeRateToDefault": a.IsChangeRateToDefault
+                        "IsChangeRateToDefault": a.IsChangeRateToDefault,
+                        "PrimaryRate": a.PrimaryRate
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
@@ -46,7 +52,7 @@ class RateSaveView(CreateAPIView):
             with transaction.atomic():
 
                 item_ids = [item['ItemID'] for item in Rate_data]
-                M_SPOSRateMaster.objects.filter(ItemID__in=item_ids, IsDeleted=False).update(IsDeleted=True)
+                M_SPOSRateMaster.objects.filter(ItemID__in=item_ids, IsDeleted=0).update(IsDeleted=1)
 
                 Rate_serializer = RateSerializer(data=Rate_data, many=True)
                 if Rate_serializer.is_valid():
