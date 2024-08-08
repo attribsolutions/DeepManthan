@@ -428,6 +428,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     .annotate(
                         RoleName=F('Role__Name'),
                         PartyName=F('Party__Name'),
+                        PartyAddress=F('Party__PartyAddress__Address'),
                         IsSCMPartyType=F('Party__PartyType__IsSCM'),
                         IsFranchises=F('Party__PartyType__IsFranchises'),
                         GSTIN=F('Party__GSTIN'),
@@ -443,7 +444,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ) 
                     )
                     .values(
-                        'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName', 'User__Employee_id',
+                        'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName','PartyAddress', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
                         'PartyTypeID', 'PartyType', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
                     )
@@ -466,6 +467,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "RoleName" : item['RoleName'],
                             "Party_id" :item['Party_id'],
                             "PartyName" : item['PartyName'],
+                            "PartyAddress": item['PartyAddress'], 
                             "Employee_id" : id,
                             "SAPPartyCode" :item['Party__SAPPartyCode'],
                             "IsSCMPartyType" :item['IsSCMPartyTypeInt'],
@@ -541,6 +543,8 @@ class GetUserDetailsView(APIView):
                 employee = user.Employee
                 company = employee.Company
                 companygroup = company.CompanyGroup
+                
+               
             
                 a = list()
                 a.append({
@@ -548,6 +552,7 @@ class GetUserDetailsView(APIView):
                     "UserName":user.LoginName,
                     "EmployeeID": employee.id,
                     "EmployeeName": employee.Name,
+                    "EmpMobileNumber": employee.Mobile,
                     "CompanyID": company.id,
                     "CompanyName": company.Name,
                     "IsSCMCompany": company.IsSCM,
