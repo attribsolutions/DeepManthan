@@ -27,10 +27,11 @@ class RateListView(CreateAPIView):
                 q0 = '''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(B.id,%s,2,0,0),0) PrimaryRate
                                                     FROM FoodERP.M_ChannelWiseItems A 
                                                     join FoodERP.M_Items B on A.Item_id = B.id
-                                                    left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0
+                                                    left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0 and C.EffectiveFrom = %s and C.POSRateType = %s 
                                                     where PartyType_id=19 '''
+                params = [today, EffectiveFrom, POSRateType]
                 
-                q1 = M_SPOSRateMaster.objects.raw(q0,[today])
+                q1 = M_SPOSRateMaster.objects.raw(q0,params)
                 RateList = list()
                 for a in q1:
                     RateList.append({
@@ -43,7 +44,7 @@ class RateListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
 class RateSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
