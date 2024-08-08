@@ -167,7 +167,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "OrderItemDetails":OrderItemDetails
                     })
 
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,Customer)         
+            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
@@ -1013,7 +1013,7 @@ class InvoiceViewEditView(CreateAPIView):
                         })       
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
     
     @transaction.atomic()
     def put(self, request, id=0):
