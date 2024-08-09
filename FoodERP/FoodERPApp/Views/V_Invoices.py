@@ -154,7 +154,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                         })
-                    Orderdata.append({
+                        Orderdata.append({
                         "OrderIDs":OrderID,
                         "OrderDate" :  b.OrderDate,
                         "CustomerName" : b.CustomerName,
