@@ -151,15 +151,17 @@ class PartyImportFieldFilterView(CreateAPIView):
                 IsFieldType = PartyImportField_data['IsFieldType']
                 if Party =="":
                     query = M_ImportFields.objects.raw('''SELECT M_ImportFields.id,MC_PartyImportFields.Sequence, M_ImportFields.FieldName, M_ImportFields.IsCompulsory,M_ImportFields.ControlType_id, M_ImportFields.FieldValidation_id,MC_PartyImportFields.Value,MC_PartyImportFields.Party_id,M_ControlTypeMaster.Name ControlTypeName,M_FieldValidations.Name FieldValidationName,M_FieldValidations.RegularExpression,M_ImportFields.Format FROM M_ImportFields Left JOIN MC_PartyImportFields ON M_ImportFields.id = MC_PartyImportFields.ImportField_id JOIN M_ControlTypeMaster ON M_ControlTypeMaster.id = M_ImportFields.ControlType_id JOIN M_FieldValidations ON M_FieldValidations.id = M_ImportFields.FieldValidation_id Where M_ImportFields.ImportExcelType_id = %s ''', ([IsFieldType]))
+                    x = 0
                 else:    
                     query = M_ImportFields.objects.raw('''SELECT M_ImportFields.id,MC_PartyImportFields.Sequence, M_ImportFields.FieldName, M_ImportFields.IsCompulsory,M_ImportFields.ControlType_id, M_ImportFields.FieldValidation_id,MC_PartyImportFields.Value,MC_PartyImportFields.Party_id,M_ControlTypeMaster.Name ControlTypeName,M_FieldValidations.Name FieldValidationName,M_FieldValidations.RegularExpression,M_ImportFields.Format FROM M_ImportFields Left JOIN MC_PartyImportFields ON M_ImportFields.id = MC_PartyImportFields.ImportField_id AND MC_PartyImportFields.Party_id=%s AND MC_PartyImportFields.Company_id=%s   JOIN M_ControlTypeMaster ON M_ControlTypeMaster.id = M_ImportFields.ControlType_id JOIN M_FieldValidations ON M_FieldValidations.id = M_ImportFields.FieldValidation_id Where M_ImportFields.ImportExcelType_id = %s''', ([Party], [Company],[IsFieldType]))
+                    x = Party
 
                 # query= M_ImportFields.objects.prefetch_related('ImportFields').filter(Q(ImportFields__Party=Party) and Q(ImportFields__isnull=False) | Q(ImportFields__isnull=True)  ).values('id','FieldName','IsCompulsory','ControlType_id','FieldValidation_id', 'ImportFields__Value','ImportFields__Party_id')
                 # CustomPrint(str(query.query))
                 if query:
                     ImportField_serializer = PartyImportFieldSerializerList(
                         query, many=True)
-                    log_entry = create_transaction_logNew(request, PartyImportField_data, Party, "",400,0)
+                    log_entry = create_transaction_logNew(request, PartyImportField_data, x, "",400,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ImportField_serializer.data})
                 else:
                     log_entry = create_transaction_logNew(request, PartyImportField_data, 0, "No Record Found",7,0)
