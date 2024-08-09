@@ -74,7 +74,6 @@ class OrderDetailsForInvoice(CreateAPIView):
     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
                   
-                        
                     for b in OrderItemQuery:
                         Customer=b.CustomerID
                         Item= b.ItemID 
@@ -155,7 +154,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                         })
-                        Orderdata.append({
+                    Orderdata.append({
                         "OrderIDs":OrderID,
                         "OrderDate" :  b.OrderDate,
                         "CustomerName" : b.CustomerName,
