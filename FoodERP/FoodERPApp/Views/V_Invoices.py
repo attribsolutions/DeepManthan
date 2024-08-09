@@ -155,20 +155,20 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                         })
-                        Orderdata.append({
-                        "OrderIDs":OrderID,
-                        "OrderDate" :  b.OrderDate,
-                        "CustomerName" : b.CustomerName,
-                        "IsTCSParty" : b.IsTCSParty,
-                        "CustomerPAN" : b.PAN,
-                        "CustomerGSTIN" : b.GSTIN,
-                        "CustomerID" : Customer,
-                        "OrderNumber" : b.FullOrderNumber,
-                        "OrderItemDetails":OrderItemDetails
-                    })
+                    Orderdata.append({
+                    "OrderIDs":OrderID,
+                    "OrderDate" :  b.OrderDate,
+                    "CustomerName" : b.CustomerName,
+                    "IsTCSParty" : b.IsTCSParty,
+                    "CustomerPAN" : b.PAN,
+                    "CustomerGSTIN" : b.GSTIN,
+                    "CustomerID" : Customer,
+                    "OrderNumber" : b.FullOrderNumber,
+                    "OrderItemDetails":OrderItemDetails
+                })
 
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Orderdata})
+                log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Orderdata})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
