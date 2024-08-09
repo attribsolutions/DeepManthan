@@ -73,6 +73,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
+                  
                         
                     for b in OrderItemQuery:
                         Customer=b.CustomerID
@@ -90,8 +91,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
-    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])
-                        # CustomPrint(obatchwisestockquery.query)     
+    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])                        
                         stockDatalist = list()
                         if not obatchwisestockquery:
                             stockDatalist =[]
@@ -167,8 +167,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                         "OrderItemDetails":OrderItemDetails
                     })
 
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,Customer)         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata})
+            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Orderdata})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
@@ -653,7 +653,6 @@ class InvoiceViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []}) 
           
 class InvoiceNoView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
     @transaction.atomic()
@@ -1013,7 +1012,7 @@ class InvoiceViewEditView(CreateAPIView):
                         })       
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
     
     @transaction.atomic()
     def put(self, request, id=0):

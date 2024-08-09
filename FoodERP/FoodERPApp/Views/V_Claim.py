@@ -433,7 +433,7 @@ on a.PartyID=c.Customer_id''', ([Party], [Party], [FromDate], [ToDate], [FromDat
                     log_entry = create_transaction_logNew(request, Orderdata,Party,'ClaimList Not Available',253,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'ClaimList:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request,Orderdata,0,'ClaimList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not available', 'Data': []})
 
 
