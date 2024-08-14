@@ -346,9 +346,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 string = x['Name']
                 stringID = x['id']
                 PageAccess[f"PageAccess_{string}"] = stringID  
-                
-            # Moduledata.append({
-            PageAccessData = {
+                 
+            Moduledata.append ({
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['id'],
@@ -371,11 +370,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RoleAccess_IsShowOnMenuForList":0,
                 "RoleAccess_IsShowOnMenuForMaster":0,
                 **{f"{key}": value for key, value in PageAccess.items()}                   
-            }
-            
-            PageAccessData.pop("RoleAccess_IsShowOnMenu", None)
-            Moduledata.append(PageAccessData)
-           
+            })
+             
         response = {
             "StatusCode": 200,
             "Status": True,
