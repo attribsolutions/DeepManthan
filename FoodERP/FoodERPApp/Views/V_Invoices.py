@@ -34,7 +34,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 POOrderIDs = Orderdata['OrderIDs']
                 Order_list = POOrderIDs.split(",")
                 
-                Orderdata = list()
+                OrderdataList = list()
                 
                 
                 # if POOrderIDs != '':
@@ -74,7 +74,6 @@ class OrderDetailsForInvoice(CreateAPIView):
     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
                   
-                        
                     for b in OrderItemQuery:
                         Customer=b.CustomerID
                         Item= b.ItemID 
@@ -91,7 +90,8 @@ class OrderDetailsForInvoice(CreateAPIView):
     left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
     join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
     join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
-    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])                        
+    where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])     
+
                         stockDatalist = list()
                         if not obatchwisestockquery:
                             stockDatalist =[]
@@ -155,7 +155,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                         })
-                        Orderdata.append({
+                    OrderdataList.append({
                         "OrderIDs":OrderID,
                         "OrderDate" :  b.OrderDate,
                         "CustomerName" : b.CustomerName,
@@ -168,7 +168,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                     })
 
             log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Orderdata})
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
