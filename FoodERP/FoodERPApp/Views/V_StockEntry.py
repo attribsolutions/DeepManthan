@@ -527,8 +527,8 @@ class M_GetStockEntryItemList(CreateAPIView):
                 '''  
                 
                 orderby = f'''
-                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence, {seq}
-                ''' 
+                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,{seq}
+                '''  
                 # ---- Main Query 
                 StockDataQuery = M_Items.objects.raw(f'''SELECT * FROM (
                         SELECT 1 as id, m.Name, s.Quantity, s.MRPValue, u.Name as Unit,
@@ -557,12 +557,12 @@ class M_GetStockEntryItemList(CreateAPIView):
                     ) AS OrderedStock
                     ORDER BY Sequence,GSequence,ItemSequence
                 ''', [PartyID, StockDate, PartyID, StockDate])
-                
+                 
                 # ---- Serializer
                 if StockDataQuery:
                     Stockdata_Serializer = M_StockEntryItemListSecond(StockDataQuery, many=True).data
                 
-                # ---- transaction_logNew
+                # ---- transaction_logNew add 405 in m_transactiontype
                     log_entry = create_transaction_logNew(request, Stockdata, 0, '', 405, 0)
                 
                 # ---- return JsonResponse
