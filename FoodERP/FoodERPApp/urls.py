@@ -356,6 +356,8 @@ urlpatterns = [
             url(r'Billofmaterial$', M_BOMsView.as_view()),
             url(r'BomFilter$', BOMListFilterView.as_view()),
             url(r'BulkBom$', BulkBOMView.as_view()),
+            url(r'BOMReport$',GetBOMReport.as_view()),
+             
 # Work Order All API's
             url(r'BomDetails$', BomDetailsView.as_view()),
             url(r'WorkOrder/([0-9]+)$',WorkOrderViewSecond.as_view()),
