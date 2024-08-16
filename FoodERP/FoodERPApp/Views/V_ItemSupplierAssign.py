@@ -100,16 +100,15 @@ class OrderItemSupplier(CreateAPIView):
                 LEFT JOIN M_ItemSupplier I ON I.item_id=M_Items.id 
                 left join M_Parties s on I.Supplier_id=s.id                 
                 where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s
-                Group By M_Items.id,s.id order by s.id desc''',[FromDate,ToDate,Party])                
-               
-                CustomPrint(ItemSupplierquery.query)              
+                Group By M_Items.id,s.id order by s.id desc''',[FromDate,ToDate,Party])
+                # CustomPrint(ItemSupplierquery.query)              
                 if ItemSupplierquery:                   
                     Supplier_List=list()  
                     ItemData = []
                     TempItemSupplierID="" 
                                   
                     for row in  ItemSupplierquery:
-                        print(TempItemSupplierID ,row.itemSupplierid)
+                        # print(TempItemSupplierID ,row.itemSupplierid)
                         if TempItemSupplierID == row.itemSupplierid:                            
                             # if row.PartyId:
                             ItemData.append({  
