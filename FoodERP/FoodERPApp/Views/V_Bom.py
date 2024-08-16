@@ -326,6 +326,7 @@ class BulkBOMView(RetrieveAPIView):
         except Exception as e:
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
+
 class GetBOMReport(CreateAPIView):
      permission_classes = (IsAuthenticated,) 
  
@@ -334,85 +335,79 @@ class GetBOMReport(CreateAPIView):
         BOMdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                # Post Body for where clause 
-                Company = BOMdata.get('Company')
-                Party = BOMdata.get('Party')
-                Category = BOMdata.get('Category')
-                Item = BOMdata.get('Item')  
-                 
-                # check Postman wrong Data
-                if Company or Party or Category or Item or not BOMdata :
+                Company = BOMdata['Company']
+                Party = BOMdata['Party']
+                Category = BOMdata['Category']
+                Item = BOMdata['Item']  
+        
+            # # check Postman wrong Data
+            # if Company or Party or Category or Item or not BOMdata :
                     
-                    # Set WHERE clause 
-                        where_clause = "WHERE BOM.isActive = 1" 
-                        
-                        if Company is not None:
-                            where_clause += f''' AND BOM.Company_id = {Company}'''
-                        else:
-                            where_clause = where_clause  
+            # Set WHERE clause 
+                where_clause = f'''WHERE BOM.isActive = 1 AND BOM.Company_id = {Company}''' 
+                    
+                if Party !="":
+                    where_clause += f''' AND P.id = {Party}'''
+                else:
+                    where_clause = where_clause 
+                    
+                if Category!="":
+                    where_clause += f''' AND CT.id = {Category}'''
+                else:
+                    where_clause = where_clause  
 
-                        if Party is not None:
-                            where_clause += f''' AND P.id = {Party}'''
-                        else:
-                            where_clause = where_clause 
-                            
-                        if Category is not None:
-                            where_clause += f''' AND CT.id = {Category}'''
-                        else:
-                            where_clause = where_clause  
-
-                        if Item is not None:
-                            where_clause += f''' AND BOM.Item_id = {Item}'''
-                        else:
-                            where_clause = where_clause  
-                        # print(where_clause)
-                        
-                        query = M_BillOfMaterial.objects.raw(f'''
-                                    SELECT 1 as id, BOMI.BOM_id,P.id as PartyID, P.Name as PartyName, CT.Name as CategoryName, MI.Name as BOMItem, 
-                                        BOM.EstimatedOutputQty as LOTQuantity, i.Name as Ingrediance, 
-                                        BOMI.Quantity, u.Name as UnitName,
-                                        (SELECT SUM(Quantity) FROM MC_BillOfMaterialItems 
-                                            WHERE BOMI.BOM_id = MC_BillOfMaterialItems.BOM_id) AS QuantityTotal
-                                    FROM M_BillOfMaterial as BOM
-                                    INNER JOIN MC_BillOfMaterialItems as BOMI ON BOM.id = BOMI.BOM_id  
-                                    INNER JOIN MC_ItemUnits as iu ON iu.id = BOMI.Unit_id
-                                    INNER JOIN M_Units as u ON u.id = iu.UnitID_id
-                                    INNER JOIN M_Items as i ON i.id = BOMI.Item_id
-                                    JOIN M_Items MI ON BOM.Item_id = MI.id  
-                                    LEFT JOIN MC_ItemCategoryDetails as ICD ON ICD.Item_id = MI.id
-                                    INNER JOIN M_Category as C ON C.id = ICD.Category_id 
-                                    INNER JOIN M_CategoryType as CT ON CT.id = C.CategoryType_id  
-                                    LEFT JOIN MC_PartyItems as PT ON  PT.Item_id=BOM.Item_id
-                                    LEFT JOIN M_Parties as P ON P.id = PT.Party_id
-                                    {where_clause}
-                                    -- GROUP BY id,BOM_id,PartyName,CategoryName,BOMItem,LOTQuantity,Ingrediance,Quantity,UnitName
-                                    ORDER BY BOMI.id DESC;
-                        ''')  
-                        # print(query)
-                        
-                        results = list(query)
-
-                        if results:
-                            # ---- Serializer
-                            Bom_serializer = BOMReportSerializer(results, many=True).data 
-                            
-                            # ---- transaction_logNew add 406 in m_transactiontype
-                            log_entry = create_transaction_logNew(request, BOMdata, 0, '', 406, 0)  
-                            
-                            # ---- Return Status True
-                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bom_serializer})
-                        else:
-                            # ---- transaction_logNew 34 for serializer error  
-                            log_entry = create_transaction_logNew(request, 0, 0, "Get BOM report List:" +" BOM List Not available", 34, 0)
-                            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'No Records Found', 'Data': []})
+                if Item!="":
+                    where_clause += f''' AND BOM.Item_id = {Item}'''
+                else:
+                    where_clause = where_clause  
+                 
+                query = M_BillOfMaterial.objects.raw(f'''
+                            SELECT 1 as id, BOMI.BOM_id,P.id as PartyID, P.Name as PartyName, CT.Name as CategoryName, MI.Name as BOMItem, 
+                                BOM.EstimatedOutputQty as LOTQuantity, i.Name as Ingrediance, 
+                                BOMI.Quantity, u.Name as UnitName,
+                                (SELECT SUM(Quantity) FROM MC_BillOfMaterialItems 
+                                    WHERE BOMI.BOM_id = MC_BillOfMaterialItems.BOM_id) AS QuantityTotal
+                            FROM M_BillOfMaterial as BOM
+                            INNER JOIN MC_BillOfMaterialItems as BOMI ON BOM.id = BOMI.BOM_id  
+                            INNER JOIN MC_ItemUnits as iu ON iu.id = BOMI.Unit_id
+                            INNER JOIN M_Units as u ON u.id = iu.UnitID_id
+                            INNER JOIN M_Items as i ON i.id = BOMI.Item_id
+                            JOIN M_Items MI ON BOM.Item_id = MI.id  
+                            LEFT JOIN MC_ItemCategoryDetails as ICD ON ICD.Item_id = MI.id
+                            INNER JOIN M_Category as C ON C.id = ICD.Category_id 
+                            INNER JOIN M_CategoryType as CT ON CT.id = C.CategoryType_id  
+                            LEFT JOIN MC_PartyItems as PT ON  PT.Item_id=BOM.Item_id
+                            LEFT JOIN M_Parties as P ON P.id = PT.Party_id
+                            {where_clause}
+                            -- GROUP BY id,BOM_id,PartyName,CategoryName,BOMItem,LOTQuantity,Ingrediance,Quantity,UnitName
+                            ORDER BY BOMI.id DESC;
+                ''')  
+                # print(query)
                 
-                else: 
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Missing Or Wrong Parameters', 'Data': []})  
+                results = list(query)
+
+                if results:
+                    # ---- Serializer
+                    Bom_serializer = BOMReportSerializer(results, many=True).data 
+                    
+                    # ---- transaction_logNew add 406 in m_transactiontype
+                    log_entry = create_transaction_logNew(request, BOMdata, 0, '', 406, 0)  
+                    
+                    # ---- Return Status True
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Bom_serializer})
+                else:
+                    # ---- transaction_logNew 34 for serializer error  
+                    log_entry = create_transaction_logNew(request, 0, 0, "Get BOM report List:" +" BOM List Not available", 34, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'No Records Found', 'Data': []})
+            
+                # else: 
+                #         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Missing Or Wrong Parameters', 'Data': []})  
                   
         except Exception as e:
             # ---- log_entry 33 is fix id For Exception
             log_entry = create_transaction_logNew(request, BOMdata, 0, "Get Stock Entry Item List:"+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+         
          
 # ----- Without using Party
         # SELECT 1 as id, BOMI.BOM_id, CT.Name as CategoryName, MI.Name as BOMItem,
