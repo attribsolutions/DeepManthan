@@ -71,10 +71,11 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
                                     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
-                    for b in OrderItemQuery:
-                        Customer=b.CustomerID
-                        Item= b.ItemID 
-                        if b is not None:
+                    if OrderItemQuery:                            
+                        for b in OrderItemQuery:
+                            Customer=b.CustomerID
+                            Item= b.ItemID 
+                            
                             obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
                                                 from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
@@ -152,22 +153,21 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                                 "StockDetails":stockDatalist
                             })
-                    
                         OrderdataList.append({
-                            "OrderIDs":OrderID,
-                            "OrderDate" :  b.OrderDate,
-                            "CustomerName" : b.CustomerName,
-                            "IsTCSParty" : b.IsTCSParty,
-                            "CustomerPAN" : b.PAN,
-                            "CustomerGSTIN" : b.GSTIN,
-                            "CustomerID" : Customer,
-                            "OrderNumber" : b.FullOrderNumber,
-                            "OrderItemDetails":OrderItemDetails
-                        })
-                
+                                "OrderIDs":OrderID,
+                                "OrderDate" :  b.OrderDate,
+                                "CustomerName" : b.CustomerName,
+                                "IsTCSParty" : b.IsTCSParty,
+                                "CustomerPAN" : b.PAN,
+                                "CustomerGSTIN" : b.GSTIN,
+                                "CustomerID" : Customer,
+                                "OrderNumber" : b.FullOrderNumber,
+                                "OrderItemDetails":OrderItemDetails
+                            })
 
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                        log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
