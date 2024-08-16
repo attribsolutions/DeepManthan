@@ -112,7 +112,7 @@ class OrderItemSupplier(CreateAPIView):
                         if TempItemID==row.ItemID:                            
                             if row.PartyId:
                                 suppliers.append({                                  
-                                        "id":row.id,
+                                        
                                         "SKUName": row.MaterialName,
                                         "Quantity":row.Quantity,
                                         "QtyInNo": float(row.QtyInNo),
@@ -124,7 +124,7 @@ class OrderItemSupplier(CreateAPIView):
                             TempItemID=row.ItemID 
                             if row.PartyId:
                                 suppliers.append({
-                                        "id":row.id,
+                                        
                                         "SKUName": row.MaterialName,
                                         "Quantity":row.Quantity,
                                         "QtyInNo": float(row.QtyInNo),
@@ -135,15 +135,14 @@ class OrderItemSupplier(CreateAPIView):
                         
                                 Supplier_List.append({  
                                                                                    
-                                    "SupplierName": row.SupplierName, 
-                                    "SupplierId": row.PartyId, 
+                                    "SupplierName": row.SupplierName,
                                     "SupplierDetails":suppliers 
                                 })          
                     
                     log_entry = create_transaction_logNew(request, ItemSupplier_Data, Party, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Supplier_List})
                 log_entry = create_transaction_logNew(request, ItemSupplier_Data, Party, "Order Summary Not available",31,0) 
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Not available', 'Data' : []})   
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Not available', 'Data' : []})   
         except Exception as e:
             return JsonResponse({'StatusCode':400,'Status':True,'Message':Exception(e), 'Data':[]})
 
