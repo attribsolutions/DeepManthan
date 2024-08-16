@@ -79,6 +79,6 @@ class RetailerUpdateFromMobileAppSerializer(serializers.ModelSerializer):
         
         for PartyAddress_updatedata in validated_data['PartyAddress']:
             if PartyAddress_updatedata['FoodERPRetailerID'] >0:
-                Partyaddress = MC_PartyAddress.objects.filter(id=PartyAddress_updatedata['FoodERPRetailerID'],IsDefault=1).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'])
+                Partyaddress = MC_PartyAddress.objects.filter(Party=PartyAddress_updatedata['FoodERPRetailerID'],IsDefault=1).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'])
                         
         return instance     
