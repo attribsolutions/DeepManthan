@@ -95,8 +95,8 @@ class OrderItemSupplier(CreateAPIView):
                 M_Items.Name MaterialName,V.Name SupplierName, M_Items.id ItemID,
                 SUM(TC_OrderItems.QtyInNo)QtyInNo,SUM(TC_OrderItems.QtyInKg)QtyInKg,SUM(TC_OrderItems.QtyInBox)QtyInBox
                 FROM T_Orders
-                join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
-                join M_Items on M_Items.id=TC_OrderItems.Item_id  
+                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
+                 join M_Items on M_Items.id=TC_OrderItems.Item_id  
                 left JOIN M_ItemSupplier I ON I.item_id=M_Items.id  
                 left JOIN M_Parties V ON I.Supplier_id=V.id                 
                 where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s
@@ -129,7 +129,7 @@ class OrderItemSupplier(CreateAPIView):
                                         "Quantity":row.Quantity,
                                         "QtyInNo": float(row.QtyInNo),
                                         "QtyInKg": float(row.QtyInKg),
-                                        "QtyInBox": float(row.QtyInBox),                                     
+                                        "QtyInBox": float(row.QtyInBox)                                     
                                        
                                             })                            
                         
