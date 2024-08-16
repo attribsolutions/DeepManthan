@@ -91,49 +91,55 @@ class OrderItemSupplier(CreateAPIView):
                 Company = ItemSupplier_Data['CompanyID']
                 Party = ItemSupplier_Data['PartyID']
 
-                ItemSupplierquery= T_Orders.objects.raw('''SELECT 1 id ,M_Group.name GroupName,V.id PartyId,
-                MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,V.Name SupplierName, M_Items.id ItemID,
+                ItemSupplierquery= T_Orders.objects.raw('''SELECT 1 id ,V.id PartyId,Quantity,
+                M_Items.Name MaterialName,V.Name SupplierName, M_Items.id ItemID,
                 SUM(TC_OrderItems.QtyInNo)QtyInNo,SUM(TC_OrderItems.QtyInKg)QtyInKg,SUM(TC_OrderItems.QtyInBox)QtyInBox
-                FROM T_Orders 
-                left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id and TC_InvoicesReferences.Order_id is null
-                join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
-                join M_Items on M_Items.id=TC_OrderItems.Item_id  
+                FROM T_Orders
+                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
+                 join M_Items on M_Items.id=TC_OrderItems.Item_id  
                 left JOIN M_ItemSupplier I ON I.item_id=M_Items.id  
-                left JOIN M_Parties V ON I.Supplier_id=V.id  
-                left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=5
-                left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+                left JOIN M_Parties V ON I.Supplier_id=V.id                 
                 where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s
-                Group By M_Items.id''',[FromDate,ToDate,Party])                
+                Group By M_Items.id,V.id''',[FromDate,ToDate,Party])  
+                # CustomPrint(ItemSupplierquery.query)              
                 if ItemSupplierquery:                   
                     Supplier_List=list()  
                     suppliers = []
                     TempItemID=0 
-                    for row in  ItemSupplierquery: 
+                                  
+                    for row in  ItemSupplierquery:
+                        
                         if TempItemID==row.ItemID:                            
                             if row.PartyId:
                                 suppliers.append({                                  
-                                                "SupplierName": row.SupplierName, 
-                                                "SupplierId": row.PartyId
+                                        "id":row.id,
+                                        "SKUName": row.MaterialName,
+                                        "Quantity":row.Quantity,
+                                        "QtyInNo": float(row.QtyInNo),
+                                        "QtyInKg": float(row.QtyInKg),
+                                        "QtyInBox": float(row.QtyInBox),   
                                             })
                         else:                            
                             suppliers = []
-                            TempItemID=row.ItemID
+                            TempItemID=row.ItemID 
                             if row.PartyId:
-                                suppliers.append({                                  
-                                                "SupplierName": row.SupplierName, 
-                                                "SupplierId": row.PartyId
-                                            })                        
-                        Supplier_List.append({  
-                        "id":row.id,                                                                            
-                        "Product": row.GroupName,
-                        "SubProduct": row.SubGroup,
-                        "SKUName": row.MaterialName,
-                        "QtyInNo": float(row.QtyInNo),
-                        "QtyInKg": float(row.QtyInKg),
-                        "QtyInBox": float(row.QtyInBox),                                   
-                        "SupplierDetails":suppliers
-                        })
+                                suppliers.append({
+                                        "id":row.id,
+                                        "SKUName": row.MaterialName,
+                                        "Quantity":row.Quantity,
+                                        "QtyInNo": float(row.QtyInNo),
+                                        "QtyInKg": float(row.QtyInKg),
+                                        "QtyInBox": float(row.QtyInBox)                                     
+                                       
+                                            })                            
+                        
+                                Supplier_List.append({  
+                                                                                   
+                                    "SupplierName": row.SupplierName, 
+                                    "SupplierId": row.PartyId, 
+                                    "SupplierDetails":suppliers 
+                                })          
+                    
                     log_entry = create_transaction_logNew(request, ItemSupplier_Data, Party, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Supplier_List})
                 log_entry = create_transaction_logNew(request, ItemSupplier_Data, Party, "Order Summary Not available",31,0) 
