@@ -153,6 +153,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                             "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                             "StockDetails":stockDatalist
                         })
+
                     OrderdataList.append({
                         "OrderIDs":OrderID,
                         "OrderDate" :  b.OrderDate,
@@ -167,6 +168,7 @@ class OrderDetailsForInvoice(CreateAPIView):
 
             log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
@@ -510,7 +512,7 @@ class InvoiceViewSecond(CreateAPIView):
                                 "Amount": b['Amount'],
                                 "BatchCode": b['BatchCode'],
                                 "BatchDate": b['BatchDate'],
-                                "ItemExpiryDate": b['LiveBatch']['ItemExpiryDate'],
+                                "ItemExpiryDate": b['LiveBatch']['ItemExpiryDate'] if b['LiveBatch'] else None,
                                 "HSNCode":b['GST']['HSNCode'],
                                 "DiscountType":b['DiscountType'],
                                 "Discount":b['Discount'],
