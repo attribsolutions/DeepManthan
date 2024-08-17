@@ -73,13 +73,18 @@ class M_PartiesFilterView(CreateAPIView):
                     q1 = M_PartyType.objects.filter(Company=CompanyID)
                     query = M_Parties.objects.filter(PartyType__in=q1,IsApprovedParty=0)
 
+
                 elif(IsSCMCompany == 0):  # Admin
                                         
                         if(RoleID == 16):
                             
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
                        
-                            query = M_Parties.objects.filter(id__in=q0,IsApprovedParty=0)
+                            q1 = M_Parties.objects.filter(id__in=q0,IsApprovedParty=0)
+
+                            q2 = M_Parties.objects.filter(id=PartyID, IsApprovedParty=0)
+
+                            query = q1.union(q2)
                             
                         else:
                             q1 = M_PartyType.objects.filter(

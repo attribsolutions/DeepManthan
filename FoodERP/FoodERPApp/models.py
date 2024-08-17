@@ -454,6 +454,7 @@ class M_Pages(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Module = models.ForeignKey(H_Modules, related_name='PagesModule', on_delete=models.PROTECT)
+    IsSweetPOSPage = models.BooleanField(default=False)
 
     class Meta:
         db_table = "M_Pages"
@@ -702,6 +703,7 @@ class M_Items(models.Model):
     CItemID = models.IntegerField(default=False,null=True,blank=True)
     SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
     IsCBMItem  = models.BooleanField(default=False)
+    IsMixItem = models.BooleanField(default=False)
     class Meta:
         constraints = [
             UniqueConstraint(fields=['Company', 'SAPItemCode'], name='unique_company_sapitemcode')

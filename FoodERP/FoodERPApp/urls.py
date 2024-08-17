@@ -739,7 +739,9 @@ urlpatterns = [
             #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
              
 #ItemSupplier
-              url(r'ItemSupplier$',ItemSupplierView.as_view()),   
+              url(r'ItemSupplier$',ItemSupplierView.as_view()), 
+              url(r'OrderItemSupplierMaster$',OrderItemSupplier.as_view()), 
+                
                 
 
 
