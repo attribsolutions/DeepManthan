@@ -71,104 +71,103 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
                                     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
-                                                
-                    for b in OrderItemQuery:
-                        Customer=b.CustomerID
-                        Item= b.ItemID 
-                        
-                        obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
-                                            from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
-                                            O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
-                                            (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
-                                            (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
-                                            ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitIDD,M_Items.BaseUnitID_id UnitID
-                                            from O_BatchWiseLiveStock 
-                                            join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
-                                            join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
-                                            left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
-                                            join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
-                                            join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
-                                            where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])     
-
-                        stockDatalist = list()
-                        if not obatchwisestockquery:
-                            stockDatalist =[]
-                        else:   
-                            for d in obatchwisestockquery:
-                                stockDatalist.append({
-                                    "id": d.id,
-                                    "Item":d.ItemID,
-                                    "BatchDate":d.BatchDate,
-                                    "BatchCode":d.BatchCode,
-                                    "SystemBatchDate":d.SystemBatchDate,
-                                    "SystemBatchCode":d.SystemBatchCode,
-                                    "LiveBatche" : d.LiveBatcheid,
-                                    "LiveBatcheMRPID" : d.LiveBatcheMRPID,
-                                    "LiveBatcheGSTID" : d.LiveBatcheGSTID,
-                                    "Rate":round(d.Rate,2),
-                                    "MRP" : d.MRP,
-                                    "GST" : d.GST,
-                                    "UnitName":d.BaseUnitConversion, 
-                                    "BaseUnitQuantity":d.BaseUnitQuantity,
-                                    
-                                    })
-                        
-                        # =====================Current Discount================================================
-                        TodaysDiscount = DiscountMaster(
-                            b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
-
-                        DiscountType = TodaysDiscount[0]['DiscountType']
-                        Discount = TodaysDiscount[0]['TodaysDiscount']
-
-                        OrderItemDetails.append({
+                    if OrderItemQuery:                            
+                        for b in OrderItemQuery:
+                            Customer=b.CustomerID
+                            Item= b.ItemID 
                             
-                            "id": b.id,
-                            "Item": b.ItemID,
-                            "ItemName": b.ItemName,
-                            "Quantity": b.Quantity,
-                            "MRP": b.MRP_id,
-                            "MRPValue": b.MRPValue,
-                            "Rate": b.Rate,
-                            "Unit": b.Unit_id,
-                            "UnitName": b.BaseUnitConversion,
-                            "DeletedMCUnitsUnitID": b.MUnitID,
-                            "ConversionUnit": b.ConversionUnit,
-                            "BaseUnitQuantity": b.BaseUnitQuantity,
-                            "GST": b.GST_id,
-                            "HSNCode": b.HSNCode,
-                            "GSTPercentage": b.GSTPercentage,
-                            "Margin": b.MarginID,
-                            "MarginValue": b.Margin,
-                            "BasicAmount": b.BasicAmount,
-                            "GSTAmount": b.GSTAmount,
-                            "CGST": b.CGST,
-                            "SGST": b.SGST,
-                            "IGST": b.IGST,
-                            "CGSTPercentage": b.CGSTPercentage,
-                            "SGSTPercentage": b.SGSTPercentage,
-                            "IGSTPercentage": b.IGSTPercentage,
-                            "Amount": b.Amount,
-                            "DiscountType" : DiscountType,
-                            "Discount" : Discount,
-                            "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
-                            "StockDetails":stockDatalist
-                        })
+                            obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
+                                                from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
+                                                O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
+                                                (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
+                                                (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
+                                                ,O_BatchWiseLiveStock.BaseUnitQuantity,MC_ItemUnits.BaseUnitConversion ,MC_ItemUnits.UnitID_id UnitIDD,M_Items.BaseUnitID_id UnitID
+                                                from O_BatchWiseLiveStock 
+                                                join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id
+                                                join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
+                                                left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
+                                                join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
+                                                join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
+                                                where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])     
 
-                    OrderdataList.append({
-                        "OrderIDs":OrderID,
-                        "OrderDate" :  b.OrderDate,
-                        "CustomerName" : b.CustomerName,
-                        "IsTCSParty" : b.IsTCSParty,
-                        "CustomerPAN" : b.PAN,
-                        "CustomerGSTIN" : b.GSTIN,
-                        "CustomerID" : Customer,
-                        "OrderNumber" : b.FullOrderNumber,
-                        "OrderItemDetails":OrderItemDetails
-                    })
+                            stockDatalist = list()
+                            if not obatchwisestockquery:
+                                stockDatalist =[]
+                            else:   
+                                for d in obatchwisestockquery:
+                                    stockDatalist.append({
+                                        "id": d.id,
+                                        "Item":d.ItemID,
+                                        "BatchDate":d.BatchDate,
+                                        "BatchCode":d.BatchCode,
+                                        "SystemBatchDate":d.SystemBatchDate,
+                                        "SystemBatchCode":d.SystemBatchCode,
+                                        "LiveBatche" : d.LiveBatcheid,
+                                        "LiveBatcheMRPID" : d.LiveBatcheMRPID,
+                                        "LiveBatcheGSTID" : d.LiveBatcheGSTID,
+                                        "Rate":round(d.Rate,2),
+                                        "MRP" : d.MRP,
+                                        "GST" : d.GST,
+                                        "UnitName":d.BaseUnitConversion, 
+                                        "BaseUnitQuantity":d.BaseUnitQuantity,
+                                        
+                                        })
+                            
+                            # =====================Current Discount================================================
+                            TodaysDiscount = DiscountMaster(
+                                b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
 
-            log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                            DiscountType = TodaysDiscount[0]['DiscountType']
+                            Discount = TodaysDiscount[0]['TodaysDiscount']
 
+                            OrderItemDetails.append({
+                                
+                                "id": b.id,
+                                "Item": b.ItemID,
+                                "ItemName": b.ItemName,
+                                "Quantity": b.Quantity,
+                                "MRP": b.MRP_id,
+                                "MRPValue": b.MRPValue,
+                                "Rate": b.Rate,
+                                "Unit": b.Unit_id,
+                                "UnitName": b.BaseUnitConversion,
+                                "DeletedMCUnitsUnitID": b.MUnitID,
+                                "ConversionUnit": b.ConversionUnit,
+                                "BaseUnitQuantity": b.BaseUnitQuantity,
+                                "GST": b.GST_id,
+                                "HSNCode": b.HSNCode,
+                                "GSTPercentage": b.GSTPercentage,
+                                "Margin": b.MarginID,
+                                "MarginValue": b.Margin,
+                                "BasicAmount": b.BasicAmount,
+                                "GSTAmount": b.GSTAmount,
+                                "CGST": b.CGST,
+                                "SGST": b.SGST,
+                                "IGST": b.IGST,
+                                "CGSTPercentage": b.CGSTPercentage,
+                                "SGSTPercentage": b.SGSTPercentage,
+                                "IGSTPercentage": b.IGSTPercentage,
+                                "Amount": b.Amount,
+                                "DiscountType" : DiscountType,
+                                "Discount" : Discount,
+                                "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
+                                "StockDetails":stockDatalist
+                            })
+                        OrderdataList.append({
+                                "OrderIDs":OrderID,
+                                "OrderDate" :  b.OrderDate,
+                                "CustomerName" : b.CustomerName,
+                                "IsTCSParty" : b.IsTCSParty,
+                                "CustomerPAN" : b.PAN,
+                                "CustomerGSTIN" : b.GSTIN,
+                                "CustomerID" : Customer,
+                                "OrderNumber" : b.FullOrderNumber,
+                                "OrderItemDetails":OrderItemDetails
+                            })
+
+                        log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
