@@ -73,6 +73,7 @@ class OrderListFilterView(CreateAPIView):
                         z = Customer
                         log_entry = create_transaction_logNew(request, Orderdata,x,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(x),173,0,FromDate,ToDate,z)
 
+
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
 
@@ -90,18 +91,23 @@ class OrderListFilterView(CreateAPIView):
                 else:  # OrderType -2 Sales Order
                     # Pradnya :  OrderType=2 filter remove form all ORM Query coz parasnath purches order is katraj div sale order
                     if(CustomerType == ''):  # all
+                        
                         aaa = Q()
                     else:
                         CustomerType_list = CustomerType.split(",")
                         aaa = Q(Customer__PriceList_id__in=CustomerType_list)
 
                     if(Customer == ''):
-
+                        q0 = MC_PartySubParty.objects.filter(Party=Supplier).values('SubParty')
+                        q1 = T_Orders.objects.filter(
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier,Customer_id__in=q0).select_related('Customer').filter(aaa)
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
                             POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa)
-                        q = query.union(queryForOpenPO)
+                        q2 = query.union(queryForOpenPO)
+                        q = q2.union(q1)
+
                     else:
 
                         query = T_Orders.objects.filter(OrderDate__range=[
