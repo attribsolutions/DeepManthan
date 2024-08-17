@@ -89,5 +89,17 @@ class  M_BOMSerializerSecond001(serializers.ModelSerializer):
 class StockQtyserializer(serializers.Serializer):
     id = serializers.IntegerField()
     actualStock = serializers.DecimalField(max_digits=10, decimal_places=3)
-    Item_id=serializers.IntegerField()        
-             
+    Item_id=serializers.IntegerField()  
+     
+class BOMReportSerializer(serializers.Serializer):
+    BOM_id = serializers.IntegerField()
+    PartyID = serializers.IntegerField()
+    PartyName = serializers.CharField()
+    CategoryName = serializers.CharField()
+    BOMItem = serializers.CharField()
+    LOTQuantity = serializers.FloatField()
+    Ingrediance = serializers.CharField()
+    Quantity = serializers.FloatField()
+    # UnitId = serializers.IntegerField()  # This corresponds to the primary key of MC_ItemUnits
+    UnitName=serializers.CharField()
+    QuantityTotal = serializers.FloatField()

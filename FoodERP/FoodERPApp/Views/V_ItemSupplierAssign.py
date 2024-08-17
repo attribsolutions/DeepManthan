@@ -79,5 +79,73 @@ class ItemSupplierView(CreateAPIView):
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
+class OrderItemSupplier(CreateAPIView):
+    permission_classes=(IsAuthenticated,)        
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                ItemSupplier_Data=JSONParser().parse(request)
+                FromDate = ItemSupplier_Data['FromDate']
+                ToDate = ItemSupplier_Data['ToDate']
+                Company = ItemSupplier_Data['CompanyID']
+                Party = ItemSupplier_Data['PartyID']
+
+                ItemSupplierquery= T_Orders.objects.raw('''SELECT 1 id ,ifNULL(s.id,0)itemSupplierid,Quantity,
+                M_Items.Name MaterialName,s.Name ItemSupplierName, M_Items.id ItemID,
+                SUM(TC_OrderItems.QtyInNo)QtyInNo,SUM(TC_OrderItems.QtyInKg)QtyInKg,SUM(TC_OrderItems.QtyInBox)QtyInBox
+                FROM T_Orders
+                join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
+                join M_Items on M_Items.id=TC_OrderItems.Item_id  
+                LEFT JOIN M_ItemSupplier I ON I.item_id=M_Items.id 
+                left join M_Parties s on I.Supplier_id=s.id                 
+                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s
+                Group By M_Items.id,s.id order by s.id desc''',[FromDate,ToDate,Party])
+                # CustomPrint(ItemSupplierquery.query)              
+                if ItemSupplierquery:                   
+                    Supplier_List=list()  
+                    ItemData = []
+                    TempItemSupplierID="" 
+                                  
+                    for row in  ItemSupplierquery:
+                        # print(TempItemSupplierID ,row.itemSupplierid)
+                        if TempItemSupplierID == row.itemSupplierid:                            
+                            # if row.PartyId:
+                            ItemData.append({  
+                                    "SKUName": row.MaterialName,                                    
+                                    "QtyInNo": float(row.QtyInNo),
+                                    "QtyInKg": float(row.QtyInKg),
+                                    "QtyInBox": float(row.QtyInBox),   
+                                        })
+                        else:                            
+                            ItemData = []
+                            TempItemSupplierID=row.itemSupplierid 
+                            # if row.PartyId:
+                            ItemData.append({
+                                    "SKUName": row.MaterialName,                                    
+                                    "QtyInNo": float(row.QtyInNo),
+                                    "QtyInKg": float(row.QtyInKg),
+                                    "QtyInBox": float(row.QtyInBox)                                    
+                                    
+                                        })
+                                                        
+                        
+                            Supplier_List.append({  
+                                                                                
+                                "SupplierName": row.ItemSupplierName,                                     
+                                "ItemDetails":ItemData 
+                            })          
+                    
+                    log_entry = create_transaction_logNew(request, ItemSupplier_Data, Party, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)    
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Supplier_List})
+                log_entry = create_transaction_logNew(request, ItemSupplier_Data, Party, "Order Summary Not available",31,0) 
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Not available', 'Data' : []})   
+        except Exception as e:
+            return JsonResponse({'StatusCode':400,'Status':True,'Message':Exception(e), 'Data':[]})
+
+
+
+
+        
 
 

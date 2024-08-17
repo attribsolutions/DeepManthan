@@ -20,15 +20,30 @@ class RateListView(CreateAPIView):
         try:
             with transaction.atomic():
                 EffectiveFrom = Rate_Data['EffectiveFrom']
-                POSRateType = Rate_Data['POSRateType']
-
+                POSRateType = Rate_Data['POSRateType'] 
+                
                 today = today = date.today()
-
-                q0 = '''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(B.id,%s,2,0,0),0) PrimaryRate
+                GroupTypeid = 5 
+                
+                # ---- Order By Sequence  
+                joinsforgroupsubgroup = f'''
+                    LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = B.id AND MC_ItemGroupDetails.GroupType_id = {GroupTypeid}
+                    LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
+                    LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
+                '''   
+                orderby = f'''
+                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence
+                '''   
+                
+                q0 = f'''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(B.id,%s,2,0,0),0) PrimaryRate,M_Group.Name as GroupName,MC_SubGroup.Name as SubGroupName
                                                     FROM FoodERP.M_ChannelWiseItems A 
                                                     join FoodERP.M_Items B on A.Item_id = B.id
+                                                    {joinsforgroupsubgroup}
                                                     left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0 and C.EffectiveFrom = %s and C.POSRateType = %s 
-                                                    where PartyType_id=19 '''
+                                                    where A.PartyType_id=19 
+                                                    {orderby}
+                                                    '''
+                                                                         
                 params = [today, EffectiveFrom, POSRateType]
                 
                 q1 = M_SPOSRateMaster.objects.raw(q0,params)
@@ -39,12 +54,14 @@ class RateListView(CreateAPIView):
                         "ItemName":a.ItemName,
                         "Rate": a.Rate,
                         "IsChangeRateToDefault": a.IsChangeRateToDefault,
-                        "PrimaryRate": a.PrimaryRate
+                        "PrimaryRate": a.PrimaryRate,
+                        "GroupName":a.GroupName,
+                        "SubGroupName":a.SubGroupName
                     })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
 class RateSaveView(CreateAPIView):
     permission_classes = (IsAuthenticated,)

@@ -975,19 +975,20 @@ class SummaryReportView(CreateAPIView):
                     PartyIDs = p.split(",")
                 
                 # OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id join M_Items on M_Items.id=TC_OrderItems.Item_id join M_Parties s on T_Orders.Supplier_id=s.id join M_Parties c on T_Orders.Customer_id=c.id left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where TC_InvoicesReferences.Order_id is null and OrderDate between %s and %s and c.PriceList_id in %s'''
-                OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,V.Name ItemSupplier,TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  
+                OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,
+                MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,
+                c.Name CustomerName, TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  
                 FROM T_Orders 
                 left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id and TC_InvoicesReferences.Order_id is null
                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
-                join M_Items on M_Items.id=TC_OrderItems.Item_id 
-                Left JOIN M_ItemSupplier I ON I.Item_id=TC_OrderItems.Item_id 
-                Left JOIN M_Parties V ON I.Supplier_id=V.id
+                join M_Items on M_Items.id=TC_OrderItems.Item_id                             
                 join M_Parties s on T_Orders.Supplier_id=s.id 
                 join M_Parties c on T_Orders.Customer_id=c.id 
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-                where  OrderDate between %s and %s''' 
+                where  OrderDate between %s and %s
+                Group By M_Items.id ,T_Orders.id''' 
 
                 if OrderType == 1:
                     if Party == "":
@@ -1037,8 +1038,7 @@ class SummaryReportView(CreateAPIView):
                             "OrderNo": row.OrderNo,
                             "OrderDate": row.OrderDate,
                             "SupplierName": row.SupplierName,
-                            "CustomerName": row.CustomerName,
-                            "ItemSupplier":row.ItemSupplier,
+                            "CustomerName": row.CustomerName,                            
                             "Product": row.GroupName,
                             "SubProduct": row.SubGroup,
                             "SKUName": row.MaterialName,

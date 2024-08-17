@@ -268,6 +268,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerNewUpdated(pageaccessquery,  many=True).data
             
+            # print(PageAccessSerializer)
+            
             RoleAccess={}
             for x in RolePageAccessSerializer:
                 string = x['Name']
@@ -338,7 +340,14 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerAddPage(pageaccessquery,many=True).data
-            Moduledata.append({
+            
+            PageAccess={}
+            for x in PageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                PageAccess[f"PageAccess_{string}"] = stringID  
+                 
+            Moduledata.append ({
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['id'],
@@ -360,22 +369,9 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RoleAccess_IsMultipleInvoicePrint":0,
                 "RoleAccess_IsShowOnMenuForList":0,
                 "RoleAccess_IsShowOnMenuForMaster":0,
-                "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
-                "PageAccess_IsSave": PageAccessSerializer[1]['id'],
-                "PageAccess_IsView": PageAccessSerializer[2]['id'],
-                "PageAccess_IsEdit": PageAccessSerializer[3]['id'],
-                "PageAccess_IsDelete": PageAccessSerializer[4]['id'],
-                "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
-                "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
-                "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
-                "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
-                "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
-                "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
-                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id']
-                   
+                **{f"{key}": value for key, value in PageAccess.items()}                   
             })
-
+             
         response = {
             "StatusCode": 200,
             "Status": True,
