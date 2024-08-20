@@ -66,11 +66,11 @@ class UserListView(CreateAPIView):
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']        
                 
-                # if (RoleID == 1):
-                #     Usersdata = M_Users.objects.all()
-                # else:                
-                #     Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
-                # Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
+                if (RoleID == 1):
+                    Usersdata = M_Users.objects.all()
+                else:                
+                     
+                    Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
                 SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
                 RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
                 RoleID_list = [int(x) for x in RoleID_List.split(",")]
