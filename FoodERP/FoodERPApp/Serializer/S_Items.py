@@ -95,7 +95,7 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem','IsMixItem' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
@@ -181,7 +181,9 @@ class ItemSerializer(serializers.ModelSerializer):
         # add IsCBMItem for update
         instance.IsCBMItem=validated_data.get(
             'IsCBMItem',instance.IsCBMItem)
-            
+        # add IsMixItem for update
+        instance.IsMixItem=validated_data.get(
+            'IsMixItem', instance.IsMixItem)    
         instance.save()
         
         for a in instance.ItemCategoryDetails.all():
@@ -518,6 +520,7 @@ class ItemWiseUpdateSerializer(serializers.Serializer):
     ShelfLife =  serializers.CharField(max_length=200) 
     SAPUnitID = serializers.CharField(max_length=200)
     IsCBMItem=serializers.BooleanField(default=False)
+    IsMixItem=serializers.BooleanField(default=False)
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = ItemWiseUpdateSerializer(read_only=True)
