@@ -75,7 +75,6 @@ class OrderListFilterView(CreateAPIView):
 
                 if(OrderType == 1):  # OrderType -1 PO Order
                     if(Supplier == ''):
-
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Customer_id=Customer, OrderType=1)
                         queryForOpenPO = T_Orders.objects.filter(
@@ -96,12 +95,16 @@ class OrderListFilterView(CreateAPIView):
                         aaa = Q(Customer__PriceList_id__in=CustomerType_list)
 
                     if(Customer == ''):
-
+                        q0 = MC_PartySubParty.objects.filter(Party=Supplier).values('SubParty')
+                        q1 = T_Orders.objects.filter(
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier,Customer_id__in=q0).select_related('Customer').filter(aaa)
                         query = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa)
                         queryForOpenPO = T_Orders.objects.filter(
                             POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa)
-                        q = query.union(queryForOpenPO)
+                        q2 = query.union(queryForOpenPO)
+                        q = q2.union(q1)
+
                     else:
 
                         query = T_Orders.objects.filter(OrderDate__range=[
