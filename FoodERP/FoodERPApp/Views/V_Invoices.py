@@ -36,24 +36,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                 
                 OrderdataList = list()
                 
-                
-                # if POOrderIDs != '':
-                #     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
-                #     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                #     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                #     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                # else:
-                #     query = T_Orders.objects.filter(OrderDate=FromDate,Supplier=Party,Customer=Customer)
-                #     Serializedata = OrderserializerforInvoice(query,many=True).data
-                #     Order_list = list()
-                #     for x in Serializedata:
-                #         Order_list.append(x['id'])
-                        
-                #     OrderQuery=T_Orders.objects.raw("SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID FROM T_Orders join M_Parties on M_Parties.id=T_Orders.Supplier_id where T_Orders.id IN %s group by T_Orders.Supplier_id;",[Order_list])
-                #     OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True)
-                #     OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                #     OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                       
                 for OrderID in Order_list: 
                     OrderItemDetails = list()
                     OrderItemQuery=TC_OrderItems.objects.raw('''SELECT TC_OrderItems.id,M_Items.id ItemID,M_Items.Name ItemName,TC_OrderItems.Quantity ,MRP_id,MRPValue,Rate,Unit_id,
@@ -71,7 +53,9 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
                                     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
-                    if OrderItemQuery:                            
+                                       
+                    if OrderItemQuery:
+
                         for b in OrderItemQuery:
                             Customer=b.CustomerID
                             Item= b.ItemID 
@@ -164,11 +148,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "OrderNumber" : b.FullOrderNumber,
                                 "OrderItemDetails":OrderItemDetails
                             })
-                if OrderdataList:
-                    log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party), 32, 0, 0, 0, 0)         
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
-                else:
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                    else :
+                        log_entry = create_transaction_logNew(request, Orderdata, 0,'Record Not Found', 32, 0, 0, 0, 0)
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+                log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party), 32, 0, 0, 0, 0)         
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
