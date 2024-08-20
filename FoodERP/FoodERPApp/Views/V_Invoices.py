@@ -164,9 +164,10 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "OrderNumber" : b.FullOrderNumber,
                                 "OrderItemDetails":OrderItemDetails
                             })
-
-                        log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party),32,0,0,0,0)         
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                if OrderdataList:
+                    log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party), 32, 0, 0, 0, 0)         
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
+                else:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
