@@ -36,12 +36,12 @@ class M_PagesView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,p.IsEditPopuporComponent,p.CountLabel,p.ShowCountLabel,RP.Name RelatedPageName,M_PageType.Name PageTypeName FROM M_Pages p join H_Modules m on p.Module_id= m.ID left join M_Pages RP on p.RelatedPageID=RP.id join M_PageType on M_PageType.id= p.pagetype  Order By m.DisplayIndex,p.DisplayIndex ''')
+                query = M_Pages.objects.raw('''SELECT p.id,p.Name,p.PageHeading,p.PageDescription,p.PageDescriptionDetails,p.isActive,p.DisplayIndex,p.Icon,p.ActualPagePath,m.ID ModuleID,m.Name ModuleName,p.RelatedPageID,p.IsDivisionRequired,p.IsEditPopuporComponent,p.CountLabel,p.ShowCountLabel,RP.Name RelatedPageName,M_PageType.Name PageTypeName,p.IsSweetPOSPage FROM M_Pages p join H_Modules m on p.Module_id= m.ID left join M_Pages RP on p.RelatedPageID=RP.id join M_PageType on M_PageType.id= p.pagetype  Order By m.DisplayIndex,p.DisplayIndex ''')
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
                     HPagesserialize_data = M_PagesSerializer(
-                        query, many=True).data
+                        query, many=True).data 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': HPagesserialize_data})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -100,12 +100,14 @@ class M_PagesViewSecond(RetrieveAPIView):
     'CreatedBy',
     'CreatedOn',
     'UpdatedBy',
-    'UpdatedOn'
+    'UpdatedOn',
+    # add IsSweetPOSPage flag
+    'IsSweetPOSPage' 
 )
                 
-                if not HPagesdata:
+                if not HPagesdata: 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
-                else:    
+                else:     
                     PageListData = list()
                     # HPagesserialize_data = M_PagesSerializer(
                     #     HPagesdata, many=True).data
@@ -244,8 +246,7 @@ class M_PagesViewSecond(RetrieveAPIView):
                                     "Alignment":c['Alignment'],
                                     "FieldValidationlist":FieldValidations_Serializer
                                     
-                                })    
-                        
+                                })     
                         
                         PageListData.append({
 
@@ -275,7 +276,9 @@ class M_PagesViewSecond(RetrieveAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
-                        })
+                            # add IsSweetPOSPage Flag
+                            "IsSweetPOSPage":a['IsSweetPOSPage'],
+                        })  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PageListData[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
@@ -289,7 +292,7 @@ class M_PagesViewSecond(RetrieveAPIView):
                 Pages_Serializer = M_PagesSerializer1(
                     PagesdataByID, data=Pagesdata)
                 if Pages_Serializer.is_valid():
-                    Pages_Serializer.save()
+                    Pages_Serializer.save() 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Page Updated Successfully', 'Data': []})
                 else:
                     transaction.set_rollback(True)
@@ -385,8 +388,7 @@ where MC_PagePageAccess.Page_id=%s''', [id])
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
-class ControlTypeMasterView(CreateAPIView):
-    
+class ControlTypeMasterView(CreateAPIView):    
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
     
