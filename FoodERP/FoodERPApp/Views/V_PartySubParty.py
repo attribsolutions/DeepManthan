@@ -74,11 +74,17 @@ class PartySubPartyViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 query= MC_PartySubParty.objects.filter(Party=id)
+                # CustomPrint(query.query)
                 SubPartySerializer = PartySubpartySerializerSecond(query, many=True).data
+                # CustomPrint(SubPartySerializer)
                 query1= MC_PartySubParty.objects.filter(SubParty=id).values('Party_id')
+                # CustomPrint(query1.query)
                 query2 = M_Parties.objects.filter(id__in=query1,PartyType__IsVendor=1).select_related('PartyType')
-                query3 =  MC_PartySubParty.objects.filter(Party__in=query2)
+                # CustomPrint(query2.query)
+                query3 =  MC_PartySubParty.objects.filter(Party__in=query2,SubParty=id)
+                # CustomPrint(query3.query)
                 PartySerializer = PartySubpartySerializerSecond(query3, many=True).data
+                # CustomPrint(PartySerializer)
                 
                 SubPartyList = list()
                 for a in PartySerializer:
@@ -135,15 +141,15 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     Party__PartyType__IsVendor=1,
                                     Party__PartyAddress__IsDefault=1
                                     ).select_related('Party', 'Party__PartyType','Party__PartyAddress').annotate(
-        PartyId=F('Party__id'),
-        PartyName=F('Party__Name'),
-        GSTIN = F('Party__GSTIN'),
-        PAN= F('Party__PAN'),
-        PartyTypeID=F('Party__SkyggeID'),
-        SkyggeID=F('Party__SkyggeID'),
-        FSSAINo=F('Party__PartyAddress__FSSAINo'),
-        FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
-    ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
+                                    PartyId=F('Party__id'),
+                                    PartyName=F('Party__Name'),
+                                    GSTIN = F('Party__GSTIN'),
+                                    PAN= F('Party__PAN'),
+                                    PartyTypeID=F('Party__SkyggeID'),
+                                    SkyggeID=F('Party__SkyggeID'),
+                                    FSSAINo=F('Party__PartyAddress__FSSAINo'),
+                                    FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
+                                ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
                     
                 elif(Type==2): #Supplier
                     Query = MC_PartySubParty.objects.filter(
