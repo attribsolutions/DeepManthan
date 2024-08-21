@@ -67,7 +67,8 @@ class UserListView(CreateAPIView):
                 CompanyID=Logindata['CompanyID']        
                 
                 if (RoleID == 1):
-                    Usersdata = M_Users.objects.all()
+                    employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
+                    Usersdata = M_Users.objects.filter(Employee__in=employees) 
                 else:                
                      
                     Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
