@@ -213,7 +213,7 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'UnitName':  a.UnitName,
                             'UnitOptions' : ItemUnitDetails
                         })
-                    log_entry = create_transaction_logNew(request,0, Party,'StockAdjustment:'+BatchCodelist,407,0)
+                    log_entry = create_transaction_logNew(request,0, Party,BatchCodelist,407,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
                 log_entry = create_transaction_logNew(request,0, Party,'Stock Not available',407,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available', 'Data': []})
