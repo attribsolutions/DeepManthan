@@ -1,15 +1,16 @@
 from django.http import JsonResponse
+from datetime import timedelta
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.authentication import BasicAuthentication
-from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
+from FoodERPApp.Views.V_CommFunction import *
 from FoodERPApp.models import *
 from FoodERPApp.Serializer.S_PartyItems import *
 from FoodERPApp.Serializer.S_Orders import *
 from ..models import  *
-from SweetPOS.Serializer.S_SPOSstock import SPOSstockSerializer, SPOSStockReportSerializer
+from SweetPOS.Serializer.S_SPOSstock import *
 from django.db.models import *
 from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from datetime import date
@@ -30,19 +31,22 @@ class StockView(CreateAPIView):
                 IsStockAdjustment=FranchiseStockdata['IsStockAdjustment']
                 IsAllStockZero = FranchiseStockdata['IsAllStockZero']
 
-                T_StockEntryList = list()
-                Stock_serializer = SPOSstockSerializer(data=FranchiseStockdata, many=True)
-
+                T_SPOS_StockEntryList = list()
+              
                 for a in FranchiseStockdata['StockItems']:
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
-                    UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
+
+                    if IsStockAdjustment:
+                        UnitwiseQuantityConversionobject = UnitwiseQuantityConversion( a['Item'], a['Quantity'], a['Unit'], 0, 0, 0, 0 )
+                    else:
+                        UnitwiseQuantityConversionobject = UnitwiseQuantityConversion( a['Item'], a['Quantity'], 0, a['Unit'], 0, 0, 0)
+
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     Item=a['Item']
                     if Mode == 2:
                         query3 = T_SPOSStock.objects.filter(Party=Party).aggregate(total=Sum('BaseUnitQuantity'))
                     else:
                         query3 = T_SPOSStock.objects.filter(Party=Party,id=a['BatchCodeID']).aggregate(total=Sum('BaseUnitQuantity'))
-
                     if query3['total']:
                         totalstock=float(query3['total'])
                     else:
@@ -52,7 +56,7 @@ class StockView(CreateAPIView):
                     a['StockDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
 
-                    T_StockEntryList.append({
+                    T_SPOS_StockEntryList.append({
                     "StockDate":StockDate,    
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
@@ -68,17 +72,18 @@ class StockView(CreateAPIView):
                     "Difference" : round(BaseUnitQuantity,3)-totalstock,
                     "IsStockAdjustment" : IsStockAdjustment
                     })
-                Stock_serializer = SPOSstockSerializer(data=T_StockEntryList, many=True)
-                
-                if Stock_serializer.is_valid():
-                    Stock_serializer.save()
+          
+                    StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
+                       
+                    if StockEntrySerializer.is_valid():
+                        StockEntrySerializer.save()
                   
                     log_entry = create_transaction_logNew(request, FranchiseStockdata, FranchiseStockdata['PartyID'],'Franchise Items Save Successfully',87,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Save Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(Stock_serializer.errors),34,0)
+                    log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(StockEntrySerializer.errors),34,0)
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Stock_serializer.errors, 'Data': []})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': StockEntrySerializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
@@ -155,3 +160,64 @@ class SPOSStockReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+        
+        
+ 
+class SPOSStockAdjustmentView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request, id=0,Party=0):
+        try:
+            with transaction.atomic():
+                query=O_SPOSDateWiseLiveStock.objects.raw('''SELECT D.id, D.Item, M_Items.Name AS ItemName,D.StockDate,D.ClosingBalance Quantity, M_Units.id AS UnitID, M_Units.Name AS UnitName, 
+                                                            (SELECT  MRPValue FROM SweetPOS.T_SPOSStock WHERE StockDate = CURRENT_DATE  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)MRP,
+                                                            (SELECT  BatchCode FROM SweetPOS.T_SPOSStock WHERE StockDate = CURRENT_DATE  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)BatchCode
+                                                            FROM SweetPOS.O_SPOSDateWiseLiveStock D
+                                                            JOIN FoodERP.M_Items ON M_Items.id = D.Item
+                                                            JOIN FoodERP.M_Units ON M_Units.id = D.Unit
+                                                            WHERE D.StockDate = CURRENT_DATE  and D.Item=%s and D.Party=%s
+                                                            ''',([id],[Party],[id],[Party],[id],[Party]))                                                      
+                if query:
+                    BatchCodelist = list()
+                    for a in query:
+                        Unitquery = MC_ItemUnits.objects.raw('''SELECT MC_ItemUnits.id, M_Units.Name AS UnitName, MC_ItemUnits.BaseUnitQuantity, MC_ItemUnits.IsBase
+                                                            FROM MC_ItemUnits 
+                                                            JOIN M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
+                                                            WHERE MC_ItemUnits.Item_id = %s AND MC_ItemUnits.IsDeleted = 0''',([id]))
+                        if Unitquery:
+                            ItemUnitDetails = list()
+                            for c in Unitquery:
+                                ItemUnitDetails.append({
+                                "Unit": c.id,
+                                "BaseUnitQuantity": c.BaseUnitQuantity,
+                                "IsBase": c.IsBase,
+                                "UnitName": c.BaseUnitConversion,    
+                            })
+                        BatchCodelist.append({
+                            'id':  a.id,
+                            'Item':  a.Item,
+                            'ItemName':  a.ItemName,
+                            'OriginalBaseUnitQuantity': a.Quantity,
+                            'BaseUnitQuantity': a.Quantity,
+                            'BatchDate': a.StockDate,
+                            'BatchCode':  a.BatchCode,
+                            'MRP':  a.MRP,
+                            'SystemBatchDate':  a.StockDate,
+                            'SystemBatchCode':  a.BatchCode,
+                            'MRPValue': "",
+                            'MRPID':  "",
+                            'GSTID':  "",
+                            'GSTPercentage':  "",
+                            'UnitID':  a.UnitID,
+                            'UnitName':  a.UnitName,
+                            'UnitOptions' : ItemUnitDetails
+                        })
+                    log_entry = create_transaction_logNew(request,0, Party,'StockAdjustment:'+BatchCodelist,407,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
+                log_entry = create_transaction_logNew(request,0, Party,'Stock Not available',407,0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'GETStockAdjustment:'+str(),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
