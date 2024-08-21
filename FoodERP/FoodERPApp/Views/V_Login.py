@@ -66,21 +66,22 @@ class UserListView(CreateAPIView):
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']        
                 
-                # if (RoleID == 1):
-                #     Usersdata = M_Users.objects.all()
-                # else:                
-                #     Usersdata = M_Users.objects.filter(CreatedBy=UserID)    
-                # Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
-                SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
-                RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
-                RoleID_list = [int(x) for x in RoleID_List.split(",")]
-                # print(RoleID_list)
-                if RoleID in RoleID_list:                    
-                    Clause= {'Employee__CreatedBy': UserID}
-                else:
-                    Clause= {}
-                employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
-                Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)               
+                if (RoleID == 1):
+                    employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
+                    Usersdata = M_Users.objects.filter(Employee__in=employees) 
+                else:                
+                     
+                    Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
+                    SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
+                    RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
+                    RoleID_list = [int(x) for x in RoleID_List.split(",")]
+                    # print(RoleID_list)
+                    if RoleID in RoleID_list:                    
+                        Clause= {'Employee__CreatedBy': UserID}
+                    else:
+                        Clause= {}
+                    employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
+                    Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)               
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
                     UserData = list()
