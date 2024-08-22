@@ -20,5 +20,11 @@ class M_MRPsSerializerSecond(serializers.Serializer):
     CreatedBy = serializers.IntegerField()
     CreatedOn = serializers.DateTimeField()
     CommonID= serializers.IntegerField() 
+     
     
-  
+class MRPListDetailsSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    EffectiveDate = serializers.DateField()
+    CommonID = serializers.IntegerField()
+    CompanyName = serializers.CharField(max_length=100)
+    ItemName = serializers.CharField(max_length=100)
