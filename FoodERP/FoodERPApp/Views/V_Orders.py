@@ -990,8 +990,7 @@ class SummaryReportView(CreateAPIView):
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-                where  OrderDate between %s and %s
-                Group By M_Items.id ,T_Orders.id''' 
+                where  OrderDate between %s and %s''' 
 
                 if OrderType == 1:
                     if Party == "":
@@ -1012,22 +1011,25 @@ class SummaryReportView(CreateAPIView):
                         if Employee == 0:
                             OrderQuery += " "
                         else:
-                            OrderQuery += " and T_Orders.Supplier_id in %s"
+                            OrderQuery += " and Supplier_id in %s"
                     else:
-                        OrderQuery += " and T_Orders.Supplier_id=%s"
+                        OrderQuery += " and Supplier_id=%s"
                         x = Party
 
                 if Party != "" and Employee >0:
                         # OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist,Party])
                         OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,Party])
+                        CustomPrint(OrderQueryresults)
                         
                 elif Party != "":
                         # OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist,Party])
                         OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,Party])
                         
                 elif Employee >0:
+                        # CustomPrint("Shruti")
                         # OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist, PartyIDs])
                         OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,PartyIDs])
+                        # CustomPrint(OrderQueryresults)
                     
                 else:
                         # OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])  
