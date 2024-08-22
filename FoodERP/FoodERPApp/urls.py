@@ -527,7 +527,7 @@ urlpatterns = [
             url(r'Mrps$',M_MRPsView.as_view()),
             url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
             url(r'DeleteMrpOnList/([0-9]+)$',M_MRPsViewThird.as_view()),
-            url(r'MrpsListDetails$',GetMRPListDetailsView.as_view()),
+            url(r'MrpsListDetails$',GetMRPListDetailsView.as_view()), 
     
 # Margins
             url(r'Margins$',M_MarginsView.as_view()),
