@@ -26,7 +26,10 @@ class DivisionsSerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id','Name','PartyType','GSTIN','PartyAddress','SAPPartyCode']
         
-        
+class PartySerializer1(serializers.ModelSerializer):    
+    class Meta:
+        model =  M_Parties
+        fields = ['id','Name']        
 class PartyaddressSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
