@@ -45,16 +45,16 @@ class M_ItemTag(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
             print('ItemTag API EndTime: ',datetime.now())
-            log_entry = create_transaction_logNew(request,0, 0,'ItemTagList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'ItemTagList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 class MCUnitDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
     def post(self, request):
+        MaterialIssueIDdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                MaterialIssueIDdata = JSONParser().parse(request)
                 ItemID = MaterialIssueIDdata['Item']   
                 Itemsquery = MC_ItemUnits.objects.filter(Item=ItemID,IsDeleted=0)
                 if Itemsquery.exists():
@@ -70,10 +70,10 @@ class MCUnitDetailsView(CreateAPIView):
                             "PODefaultUnit": d['PODefaultUnit'],
                             "SODefaultUnit": d['SODefaultUnit'],         
                         })
-                log_entry = create_transaction_logNew(request, {'ItemID':ItemID}, 0, '',101,0)
+                log_entry = create_transaction_logNew(request, MaterialIssueIDdata, 0, '',101,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UnitDetails})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'UnitDetails of Items:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, MaterialIssueIDdata, 0,'UnitDetails of Items:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
         
 class M_ItemsFilterView(CreateAPIView):
@@ -83,10 +83,10 @@ class M_ItemsFilterView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request, id=0 ):
+        Logindata = JSONParser().parse(request)
         try:
             with transaction.atomic():
                 print("ItemFilterAPI StartTime : ",datetime.now())
-                Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']
@@ -177,7 +177,7 @@ class M_ItemsFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
             print("ItemFilterAPI EndTime : ",datetime.now())
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemList:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, Logindata, 0,'ItemList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 #---- M_Items Save Class
@@ -187,12 +187,11 @@ class M_ItemsView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        Itemsdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
                 
                 print("ItemSaveAPI StartTime : ",datetime.now())
-                
-                Itemsdata = JSONParser().parse(request)
                 
                 query = M_Units.objects.filter(id=Itemsdata['BaseUnitID']).values('Name')
                 BaseUnitName = query[0]['Name']
@@ -228,7 +227,7 @@ class M_ItemsView(CreateAPIView):
         
         except Exception as e:
             print("ItemSaveAPI EndTime : ",datetime.now())
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, Itemsdata, 0,'ItemSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 # Get and Update M_Items
@@ -442,15 +441,15 @@ class M_ItemsViewSecond(CreateAPIView):
         except Exception as e:
             
             print("ItemSingleGETAPI EndTime : ",datetime.now())
-            log_entry = create_transaction_logNew(request,0, 0,'Item SingleGETmethod :'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'Item SingleGETmethod :'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
 # update M_Items 
     @transaction.atomic()
     def put(self, request, id=0):
+        M_Itemsdata = JSONParser().parse(request)
         try:
             with transaction.atomic(): 
-                M_Itemsdata = JSONParser().parse(request)
                 
                 M_ItemsdataByID = M_Items.objects.get(id=id)
                 query = M_Units.objects.filter(id=M_Itemsdata['BaseUnitID']).values('Name')
@@ -480,7 +479,7 @@ class M_ItemsViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': M_Items_Serializer.errors,'Data' :[]})
                 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, M_Itemsdata, 0,'ItemEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
@@ -498,7 +497,7 @@ class M_ItemsViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,"Item used in another table",8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Item used in another table', 'Data': []}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemDelete:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemDelete:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
 
 class M_ImageTypesView(CreateAPIView):
@@ -639,9 +638,10 @@ class ItemWiseUpdateView(CreateAPIView):
 
     @transaction.atomic() 
     def post(self, request, id=0):
+        Item_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Item_data = JSONParser().parse(request)
+                
                 Type = Item_data['Type']
                 GroupTypeID = Item_data['GroupType']
                 
@@ -673,7 +673,7 @@ class ItemWiseUpdateView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemWiseBulkUpdate:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, Item_data, 0,'ItemWiseBulkUpdate:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 class ItemWiseSaveView(CreateAPIView):
@@ -681,9 +681,9 @@ class ItemWiseSaveView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Item_data  = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Item_data  = JSONParser().parse(request)
                 ItemType = Item_data ['Type']
                 Updated_data = Item_data ['UpdatedData']
                 Created_By = request.user.id 
@@ -722,7 +722,7 @@ class ItemWiseSaveView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Item_data, 0, f'Type: {ItemType} ItemID: {ItemID}', 350, 0)       
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': f'{ItemType} Updated Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemDataSave:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, Item_data, 0,'ItemDataSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 500, 'Status': True, 'Message': Exception(e), 'Data': []})
         
 
@@ -760,7 +760,7 @@ class ImageUploadsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  ItemImages_Serializer.errors, 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'ImageUploadMethod:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'ImageUploadMethod:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []}) 
 
     
@@ -777,7 +777,7 @@ class ImageUploadsView(CreateAPIView):
             log_entry = create_transaction_logNew(request,ItemImagedata, 0,'Group Not available',265,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'GroupGETMethod'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})        
 
 
