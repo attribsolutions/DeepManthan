@@ -26,7 +26,10 @@ class DivisionsSerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id','Name','PartyType','GSTIN','PartyAddress','SAPPartyCode']
         
-        
+class PartySerializer1(serializers.ModelSerializer):    
+    class Meta:
+        model =  M_Parties
+        fields = ['id','Name']        
 class PartyaddressSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
@@ -410,17 +413,21 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
        
         if query[0]['IsVendor'] == True:
-            for PartySubParty in validated_data['PartySubParty']:
-                query =MC_PartySubParty.objects.filter(Party=instance,SubParty=PartySubParty['Party']).delete()
-                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=PartySubParty['Party'], **PartySubParty)  
+            for PartySubParty_data in validated_data['PartySubParty']:
+                Sub_Party = PartySubParty_data.pop('Party', None)
+                DeleteData = PartySubParty_data.pop('Delete', None)
+                
+                query = MC_PartySubParty.objects.filter(Party=instance, SubParty=Sub_Party).delete()
+                if DeleteData == 0:
+                    PartySubParty=MC_PartySubParty.objects.create(Party=instance, SubParty=Sub_Party, **PartySubParty_data)  
         else: 
-          
-            for PartySubParty in validated_data['PartySubParty']:
-                query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
-     
-                if PartySubParty['Delete']== 0 :
-                    del PartySubParty['Delete']
-                    PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty) 
+            for PartySubParty_data in validated_data['PartySubParty']:
+                Main_Party = PartySubParty_data.pop('Party', None)
+                DeleteFlag = PartySubParty_data.pop('Delete', None)
+                
+                query = MC_PartySubParty.objects.filter(Party=Main_Party, SubParty=instance).delete()
+                if DeleteFlag == 0:
+                   PartySubParty = MC_PartySubParty.objects.create(SubParty=instance, Party=Main_Party, **PartySubParty_data)
 
-        return instance        
-        
+        return instance
+    
