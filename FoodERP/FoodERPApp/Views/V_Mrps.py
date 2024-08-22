@@ -163,16 +163,11 @@ class GetMRPListDetailsView(CreateAPIView):
              with transaction.atomic():
                 EffectiveDate = MRPListData.get('EffectiveDate')
                 CommonID = MRPListData.get('CommonID')  
-                 
-                  # Convert CommonID to integer if it is a string
-                if CommonID is not None:
-                    CommonID = int(CommonID)
-
-            # Check for EffectiveDate and CommonID conditions
-                if not EffectiveDate or CommonID is None:
-                    print("CommonID",CommonID)
+                  
+                # Check for EffectiveDate and CommonID conditions ... CommonID is 0 or > 0
+                if not EffectiveDate or CommonID is None: 
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'EffectiveDate and CommonID are required and CommonID must not be 0.', 'Data': []})
-    
+
                 query = f'''
                    SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
                         FROM M_MRPMaster 

@@ -12,6 +12,13 @@ class M_GstHsnCodeSerializer(serializers.ModelSerializer):
         model =  M_GSTHSNCode
         fields = '__all__'
         
+        
+class MRPGSTHSNSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    EffectiveDate = serializers.DateField()
+    CommonID = serializers.IntegerField()
+    CompanyName = serializers.CharField(max_length=100)
+    ItemName = serializers.CharField(max_length=100)
 
 
   
