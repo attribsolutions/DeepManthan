@@ -538,6 +538,7 @@ urlpatterns = [
             url(r'GstHsnCode$',M_GstHsnCodeView.as_view()),
             url(r'GstHsnCode/([0-9]+)$', M_GSTHSNCodeViewSecond.as_view()),
             url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
+            url(r'GetGSTHSNCodeDetails$',GetGSTHSNCodeDetailsView.as_view()),
     
 # GetMRP 
             
