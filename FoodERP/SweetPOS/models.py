@@ -268,7 +268,7 @@ class M_SPOSRateMaster(models.Model):
 
 
 class M_ConsumerMobile(models.Model):    
-    Mobile = models.IntegerField()    
+    Mobile =   models.CharField(max_length=100)
     IsLinkToBill = models.BooleanField(default=False)
 
     class Meta:
