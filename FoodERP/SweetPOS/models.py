@@ -265,3 +265,11 @@ class M_SPOSRateMaster(models.Model):
 
     class Meta:
         db_table="M_SPOSRateMaster"
+
+
+class M_ConsumerMobile(models.Model):    
+    Mobile =   models.CharField(max_length=100)
+    IsLinkToBill = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "M_ConsumerMobile"
