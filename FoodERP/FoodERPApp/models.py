@@ -367,7 +367,8 @@ class M_Users(AbstractBaseUser):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Employee = models.ForeignKey(M_Employees, related_name='UserEmployee', on_delete=models.PROTECT)
-
+    # POSRateType = models.ForeignKey(M_GeneralMaster, related_name='POSRateType', on_delete=models.DO_NOTHING,blank=True, null=True)
+    POSRateType =models.IntegerField(blank=True, null=True)
 
     USERNAME_FIELD = 'LoginName'
     REQUIRED_FIELDS = []
