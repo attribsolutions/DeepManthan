@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from FoodERPApp.Views.V_CommFunction import UnitwiseQuantityConversion, create_transaction_logNew
 from FoodERPApp.models import *
-from SweetPOS.Serializer.S_SPOSInvoices import SPOSInvoiceSerializer
+from SweetPOS.Serializer.S_SPOSInvoices import *
 # from SweetPOS.Serializer.S_SPOSInvoices import SaleItemSerializer
 from rest_framework import status
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
@@ -585,3 +585,66 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
         except Exception as e:
                     log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(e), 33, 0)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+        
+class MobileNumberSaveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        Mobile_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                Mobile_serializer = MobileSerializer(data=Mobile_Data)
+                if Mobile_serializer.is_valid():
+                    Mobile = Mobile_serializer.save()
+                    LastInsertID = Mobile.id
+                    log_entry = create_transaction_logNew(request, Mobile_Data, 0, '', 411, LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Mobile Save Successfully','TransactionID':LastInsertID, 'Data':[]})
+                else:
+                    log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'ConsumerMobileSave:'+str(Mobile_serializer.errors), 34, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Mobile_serializer.errors, 'Data':[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'ConsumerMobileSave:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+        
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                query = M_ConsumerMobile.objects.filter(IsLinkToBill=False)
+                if query:
+                    Mobile_serializer = MobileSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request, Mobile_serializer, 0, '', 412, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Mobile_serializer})
+                log_entry = create_transaction_logNew(request, Mobile_serializer, 0, 'Mobile Number not available', 412, 0)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data' : []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'Get All Mobile Number:'+str(e), 408, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+        
+
+class MobileNumberUpdateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def put(self, request,id=0):
+        Mobile_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                MobileByID = M_ConsumerMobile.objects.get(id=id)
+                Mobile_Serializer = MobileSerializer(
+                    MobileByID, data=Mobile_Data)
+                if Mobile_Serializer.is_valid():
+                    Mobile_Serializer.save()
+                    log_entry = create_transaction_logNew(request, Mobile_Data, 0, '', 413, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Mobile Updated Successfully','Data' :[]})
+                else:
+                    log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'Consumer Mobile Update:'+str(Mobile_Serializer.errors), 412, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Mobile_Serializer.errors, 'Data' :[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'Consumer Mobile Update:'+str(e), 412, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
+
