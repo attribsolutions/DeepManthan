@@ -41,9 +41,10 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN FoodERP.M_Routes ON D.Route_id = M_Routes.id 
                                 LEFT JOIN FoodERP.TC_GRNReferences ON TC_GRNReferences.Invoice_id = A.id 
                                 LEFT JOIN FoodERP.T_GRNs ON GRN_id = T_GRNs.ID
-                                JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy
+                                -- JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy -- Comment For changing M_SweetPOSUser to M_Users
+                                LEFT JOIN FoodERP.M_Users M ON M.id = A.CreatedBy
                                 WHERE A.InvoiceDate BETWEEN %s AND %s and A.IsDeleted=0'''
-                parameters = [FromDate,ToDate]
+                parameters = [FromDate,ToDate] 
                 if int(Party) > 0: 
                     Invoicequery += ' AND Sup.id = %s'
                     SPOSInvoicequery += ' AND Sup.id = %s'

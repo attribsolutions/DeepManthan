@@ -40,6 +40,11 @@ class DiscountMastergo(CreateAPIView):
                 PartyType = Discountdata["PartyType"]
                 PriceList = Discountdata["PriceList"] 
                 Customer = Discountdata["Customer"]
+                
+                if PartyType == 19:
+                    GroupType_id = 5
+                else:
+                    GroupType_id = 1
 
                 #for log 
                 if Customer == '':
@@ -65,10 +70,9 @@ class DiscountMastergo(CreateAPIView):
                     LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s 
                     LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id is null AND PartyType_id = %s and PriceList_id=%s 
                     AND FromDate = %s AND ToDate = %s and IsDeleted=0
-                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
+                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE  MC_PartyItems.Item_id IS NOT NULL ORDER BY M_Items.Sequence)a''', ([Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [Party], [PartyType], [PriceList], [FromDate], [ToDate]))
-
+                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE  MC_PartyItems.Item_id IS NOT NULL ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence)a''', ([Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [Party], [PartyType], [PriceList], [FromDate], [ToDate],[GroupType_id]))
                 else:
                     Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
                     (case WHEN RecordCount =1 then oldDiscountType else  DiscountType end)DiscountType,
@@ -91,12 +95,12 @@ class DiscountMastergo(CreateAPIView):
                     AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id = %s
                     AND PartyType_id = %s and PriceList_id=%s
                     AND FromDate = %s AND ToDate = %s and IsDeleted=0
-                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
+                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
                     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
                     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                     WHERE  MC_PartyItems.Item_id IS NOT NULL
-                    ORDER BY M_Items.Sequence)a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate]))
+                    ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence)a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate],[GroupType_id]))
                 # CustomPrint(Discountquery.query)
 
                 
