@@ -26,12 +26,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         Roles_data = validated_data.pop('UserRole')
-        POSRate_Type = validated_data.pop('POSRateType')
         user = M_Users.objects.create_user(**validated_data)
 
-        if POSRate_Type:
-            user.POSRateType = POSRate_Type
-            user.save()
         for Role_data in Roles_data:
             MC_UserRoles.objects.create(User=user, **Role_data)
         return user
