@@ -190,6 +190,7 @@ class UserListViewSecond(CreateAPIView):
                         'CreatedOn': a["CreatedOn"],
                         'UpdatedBy': a["UpdatedBy"],
                         'UpdatedOn': a["UpdatedOn"],
+                        'POSRateType': a['POSRateType'],
                         'Employee': a["Employee"]["id"],
                         'EmployeeName': a["Employee"]["Name"],
                         'EmployeeMobile': a["Employee"]["Mobile"],

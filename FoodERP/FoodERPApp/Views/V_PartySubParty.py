@@ -150,7 +150,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     FSSAINo=F('Party__PartyAddress__FSSAINo'),
                                     FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
                                 ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
-                    
+                    CustomPrint(Query.query)
                 elif(Type==2): #Supplier
                     Query = MC_PartySubParty.objects.filter(
                                     SubParty=id,
@@ -216,12 +216,43 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
         FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
     ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
+                elif(Type==6): #Vendor & Division
                     
-
+                    Query1 = MC_PartySubParty.objects.filter(
+                                    SubParty=id,
+                                    Party__PartyType__IsVendor=1,                                    
+                                    Party__PartyAddress__IsDefault=1                                   
+                                    ).select_related('Party', 'Party__PartyType','Party__PartyAddress').annotate(
+                                    PartyId=F('Party__id'),
+                                    PartyName=F('Party__Name'),
+                                    GSTIN = F('Party__GSTIN'),
+                                    PAN= F('Party__PAN'),
+                                    PartyTypeID=F('Party__SkyggeID'),
+                                    SkyggeID=F('Party__SkyggeID'),
+                                    FSSAINo=F('Party__PartyAddress__FSSAINo'),
+                                    FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
+                                ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')    
+                    Query2 = MC_PartySubParty.objects.filter(
+                                    Party=id,
+                                    SubParty__PartyType__IsDivision=1,                                    
+                                    SubParty__PartyAddress__IsDefault=1                                   
+                                    ).select_related('SubParty', 'SubParty__PartyType','SubParty__PartyAddress').annotate(
+                                    PartyId=F('SubParty__id'),
+                                    PartyName=F('SubParty__Name'),
+                                    GSTIN = F('SubParty__GSTIN'),
+                                    PAN= F('SubParty__PAN'),
+                                    PartyTypeID=F('SubParty__SkyggeID'),
+                                    SkyggeID=F('SubParty__SkyggeID'),
+                                    FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
+                                    FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
+                                ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
+                    Query=Query1.union(Query2)
+                   
+                
                 if Query:
                     ListData = list()
                     for a in Query: 
-                        
+                        # CustomPrint(a)
                         ListData.append({
                             "id": a['PartyId'],
                             "Name": a['PartyName'],
