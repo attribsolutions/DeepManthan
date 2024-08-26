@@ -218,7 +218,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
     ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
                 elif(Type==6): #Vendor & Division
                     
-                    Query = MC_PartySubParty.objects.filter(
+                    Query1 = MC_PartySubParty.objects.filter(
                                     SubParty=id,
                                     Party__PartyType__IsVendor=1,                                    
                                     Party__PartyAddress__IsDefault=1                                   
@@ -232,7 +232,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     FSSAINo=F('Party__PartyAddress__FSSAINo'),
                                     FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
                                 ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')    
-                    Query1 = MC_PartySubParty.objects.filter(
+                    Query2 = MC_PartySubParty.objects.filter(
                                     Party=id,
                                     SubParty__PartyType__IsDivision=1,                                    
                                     SubParty__PartyAddress__IsDefault=1                                   
@@ -246,12 +246,12 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
                                     FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
                                 ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
-                    Query3=Query.union(Query1)
-                    CustomPrint(Query1.query)
+                    Query=Query1.union(Query2)
+                   
                 
-                if Query3:
+                if Query:
                     ListData = list()
-                    for a in Query3: 
+                    for a in Query: 
                         # CustomPrint(a)
                         ListData.append({
                             "id": a['PartyId'],
