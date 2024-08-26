@@ -293,8 +293,10 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     parties = M_Parties.objects.filter(id=Party).values('Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
+
                     # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
                     CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
+
                     party = Party
                     customer = customers[0]['id']
                     b['PartyName'] = parties[0]['Name']
