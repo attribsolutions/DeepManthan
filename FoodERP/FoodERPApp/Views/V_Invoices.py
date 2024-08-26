@@ -239,8 +239,7 @@ class InvoiceListFilterView(CreateAPIView):
 class InvoiceListFilterViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
-
-
+ 
     @transaction.atomic()
     def post(self, request, id=0):
         Invoicedata = JSONParser().parse(request)
@@ -294,7 +293,10 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     parties = M_Parties.objects.filter(id=Party).values('Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
-                    CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName')
+
+                    # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
+                    CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
+
                     party = Party
                     customer = customers[0]['id']
                     b['PartyName'] = parties[0]['Name']
@@ -309,14 +311,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CreatedBy'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
-                    Spos_Invoices.append(b)
+                    Spos_Invoices.append(b) 
                 combined_invoices = []
                 for aa in Invoices_query:
                         aa['CreatedBy'] = 0
                         aa['Identify_id'] = 1 
                         combined_invoices.append(aa)
-                combined_invoices.extend(Spos_Invoices)
-                        
+                combined_invoices.extend(Spos_Invoices) 
                 InvoiceListData = list()
                 for a in combined_invoices:
                         Invoice_serializer = list()
@@ -370,7 +371,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "DataRecovery": a['DataRecovery'],
                                 "MobileNo":a['MobileNo']
                                 
-                            })
+                            }) 
                 if InvoiceListData:
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})

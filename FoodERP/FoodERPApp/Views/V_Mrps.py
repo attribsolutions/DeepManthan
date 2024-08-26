@@ -20,7 +20,10 @@ class M_MRPsView(CreateAPIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.CommonID >0 AND M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
+                # M_MRPMaster.CommonID >0 Comment on 21-08-2024
+                # MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.CommonID >0 AND M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
+               
+                MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
                 
                 if not MRPdata:
                     log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",119,0)
@@ -149,8 +152,54 @@ class M_MRPsViewThird(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'MRP used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'MRPID':id}, 0,'MRPID:'+str(id),123,0)
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','DeleteID':id,'Data':[]})
-           
-            
+          
+class GetMRPListDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,) 
+     
+    @transaction.atomic()
+    def post(self, request):
+        MRPListData=JSONParser().parse(request)
+        try:
+             with transaction.atomic():
+                EffectiveDate = MRPListData.get('EffectiveDate')
+                CommonID = MRPListData.get('CommonID')  
+                  
+                # Check for EffectiveDate and CommonID conditions ... CommonID is 0 or > 0
+                if not EffectiveDate or CommonID is None: 
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'EffectiveDate and CommonID are required and CommonID must not be 0.', 'Data': []})
+
+                query = f'''
+                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
+                        FROM M_MRPMaster 
+                        left join C_Companies on C_Companies.id = M_MRPMaster.Company_id 
+                        left join M_Parties a on a.id = M_MRPMaster.Division_id 
+                        left join M_Parties on M_Parties.id = M_MRPMaster.Party_id 
+                        left join M_Items i on M_MRPMaster.Item_id=i.id
+                        where M_MRPMaster.IsDeleted=0  
+                        AND M_MRPMaster.EffectiveDate='{EffectiveDate}' AND M_MRPMaster.CommonID=%s
+                        -- group by EffectiveDate,Party_id,Division_id,CommonID 
+                        Order BY EffectiveDate Desc
+                '''   
+                
+                MRPListDataQuery = M_MRPMaster.objects.raw(query, [CommonID])  
+               
+                if list(MRPListDataQuery):
+                     
+                        MRPListdata_Serializer = MRPListDetailsSerializer(MRPListDataQuery, many=True).data
+                    
+                        # ---- transaction_logNew add 406 in m_transactiontype and TransactionCategory from m_generalmaster
+                        log_entry = create_transaction_logNew(request, MRPListData, 0, '', 406, 0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPListdata_Serializer})
+                
+                else:
+                        #---- transaction_logNew 7 in m_transactiontype for Data Not available
+                        log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+"MRP Details Not available", 7, 0)
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
+                
+        except Exception as e:
+            # ---- Exception 33 for Exception in m_transactiontype
+            log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+ str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []}) 
                 
 
     

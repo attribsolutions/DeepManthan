@@ -472,6 +472,8 @@ urlpatterns = [
             url(r'ItemUnitsForMobileApp$', MC_ItemUnitsView.as_view()),
             # Select Item and Get MCItemUnits
             # url(r'GetItemUnits$',M_ItemsViewThird.as_view()),
+            # url(r'GetMRPDetails$',GetMRPDetailsView.as_view()),
+            # url(r'GetMRPListDetails$',GetMRPListDetailsView.as_view()),
 
 #DiscountMaster
             url(r'DiscountMasterSave$',DiscountMasterSaveView.as_view()),
@@ -525,6 +527,7 @@ urlpatterns = [
             url(r'Mrps$',M_MRPsView.as_view()),
             url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
             url(r'DeleteMrpOnList/([0-9]+)$',M_MRPsViewThird.as_view()),
+            url(r'MrpsListDetails$',GetMRPListDetailsView.as_view()), 
     
 # Margins
             url(r'Margins$',M_MarginsView.as_view()),
@@ -535,6 +538,7 @@ urlpatterns = [
             url(r'GstHsnCode$',M_GstHsnCodeView.as_view()),
             url(r'GstHsnCode/([0-9]+)$', M_GSTHSNCodeViewSecond.as_view()),
             url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
+            url(r'GetGSTHSNCodeDetails$',GetGSTHSNCodeDetailsView.as_view()),
     
 # GetMRP 
             
