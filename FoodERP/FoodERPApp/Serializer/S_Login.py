@@ -38,6 +38,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         
+        
         # for (key, value) in validated_data.items():
         #     setattr(instance, key, value)
 
@@ -55,6 +56,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'UpdatedBy', instance.UpdatedBy)
         instance.Employee_id = validated_data.get(
             'Employee_id', instance.Employee_id)
+        instance.POSRateType = validated_data.get(
+            'POSRateType', instance.POSRateType)
         
         # password = validated_data.pop('password', None)
         # if password is not None:
