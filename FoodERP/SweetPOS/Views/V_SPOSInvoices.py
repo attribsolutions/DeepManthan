@@ -379,8 +379,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "InvoiceUploads" : InvoiceUploads,
                             "BankData":BankData
                                                         
-                        })
-                        print("InvoiceData",InvoiceData)
+                        }) 
                     log_entry = create_transaction_logNew(request,0, a.Party, A+','+"InvoiceID:"+str(id),int(B),0,0,0,a.Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 log_entry = create_transaction_logNew(request,0, a.Party, "Invoice Not available",int(B),0,0,0,a.Customer)
