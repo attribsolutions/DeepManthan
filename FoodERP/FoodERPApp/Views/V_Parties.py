@@ -23,10 +23,11 @@ class DivisionsView(CreateAPIView):
     def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Divisiondata = M_PartyType.objects.filter(IsDivision=id)
+                Divisiondata = M_PartyType.objects.filter(IsDivision=id, IsRetailer=0)
+                # CustomPrint(Divisiondata.query)
                 aa = M_Parties.objects.filter(PartyType__in=Divisiondata)
                 if aa.exists():
-                    Division_serializer = DivisionsSerializer(aa, many=True)
+                    Division_serializer = PartySerializer1(aa, many=True)
 
                     log_entry = create_transaction_logNew(request, {'DivisonID':id}, 0,'',89,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Division_serializer.data})

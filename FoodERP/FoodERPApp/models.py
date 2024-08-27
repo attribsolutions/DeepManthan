@@ -324,7 +324,7 @@ class UserManager(BaseUserManager):
     https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example
     '''
 
-    def create_user(self,  LoginName, Employee, isActive, isSendOTP, AdminPassword, isLoginUsingMobile, isLoginUsingEmail, CreatedBy,  UpdatedBy, password=None):
+    def create_user(self,  LoginName, Employee, isActive, isSendOTP, AdminPassword, isLoginUsingMobile, isLoginUsingEmail, CreatedBy,  UpdatedBy, POSRateType, password=None):
         """
         Create and return a `User` with  username and password.
         """
@@ -342,6 +342,7 @@ class UserManager(BaseUserManager):
             isLoginUsingMobile=isLoginUsingMobile,
             CreatedBy=CreatedBy,
             UpdatedBy=UpdatedBy,
+            POSRateType=POSRateType
 
 
 

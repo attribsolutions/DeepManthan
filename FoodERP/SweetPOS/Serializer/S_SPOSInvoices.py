@@ -41,3 +41,11 @@ class SaleItemSerializer(serializers.Serializer):
     TotalQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
     UnitName = serializers.CharField(max_length=200)
 
+
+class MobileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = M_ConsumerMobile
+        fields = '__all__'
+
+  
