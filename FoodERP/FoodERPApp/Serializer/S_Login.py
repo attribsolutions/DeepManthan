@@ -27,11 +27,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         Roles_data = validated_data.pop('UserRole')
         user = M_Users.objects.create_user(**validated_data)
+
         for Role_data in Roles_data:
             MC_UserRoles.objects.create(User=user, **Role_data)
         return user
     
     def update(self, instance, validated_data):
+        
         
         # for (key, value) in validated_data.items():
         #     setattr(instance, key, value)
@@ -49,7 +51,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
         instance.Employee_id = validated_data.get(
-            'Employee_id', instance.Employee_id)                       
+            'Employee_id', instance.Employee_id)
+        instance.POSRateType = validated_data.get(
+            'POSRateType', instance.POSRateType)
         
         # password = validated_data.pop('password', None)
         # if password is not None:
