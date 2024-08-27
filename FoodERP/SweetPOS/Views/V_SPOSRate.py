@@ -74,7 +74,7 @@ class RateSaveView(CreateAPIView):
 
                 item_ids = [item['ItemID'] for item in Rate_data]
 
-                M_SPOSRateMaster.objects.filter(ItemID__in=item_ids, IsDeleted=0, POSRateType=Rate_data[0]['POSRateType'],EffectiveFrom=Rate_data[0]['EffectiveFrom']).update(IsDeleted=1)
+                M_SPOSRateMaster.objects.filter(ItemID__in=item_ids, POSRateType=Rate_data[0]['POSRateType']).update(IsDeleted=1)
 
                 Rate_serializer = RateSerializer(data=Rate_data, many=True)
                 if Rate_serializer.is_valid():
