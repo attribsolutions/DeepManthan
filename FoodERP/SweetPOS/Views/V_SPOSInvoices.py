@@ -211,7 +211,7 @@ Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M
 custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress,
 partyaddr.FSSAINo PartyFSSAI,partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState
 ,IU.AckNo, IU.Irn, IU.QRCodeUrl, IU.EInvoicePdf, IU.EwayBillNo, IU.EwayBillUrl, IU.EInvoiceCreatedBy, IU.EInvoiceCreatedOn, IU.EwayBillCreatedBy, IU.EwayBillCreatedOn, IU.EInvoiceCanceledBy, IU.EInvoiceCanceledOn, IU.EwayBillCanceledBy, IU.EwayBillCanceledOn, 
-IU.EInvoiceIsCancel, IU.EwayBillIsCancel
+IU.EInvoiceIsCancel, IU.EwayBillIsCancel,c.name as CompanyName
 FROM SweetPOS.T_SPOSInvoices SPOSInv
 join FoodERP.M_Parties cust on cust.id=SPOSInv.Customer
 join FoodERP.M_Parties party on party.id=SPOSInv.Party 
@@ -223,8 +223,9 @@ left join FoodERP.MC_PartyBanks on MC_PartyBanks.Party_id=SPOSInv.Party and MC_P
 left join FoodERP.M_Bank on M_Bank.id=MC_PartyBanks.Bank_id
 left join FoodERP.M_States custstate on custstate.id=cust.State_id
 left join FoodERP.M_States partystate on partystate.id=party.State_id
-left join FoodERP.TC_InvoiceUploads IU on IU.Invoice_id=SPOSInv.id                                                           
-where SPOSInv.id={id}''')
+left join FoodERP.TC_InvoiceUploads IU on IU.Invoice_id=SPOSInv.id    
+left join FoodERP.C_Companies c on cust.Company_id=c.id                                                       
+where SPOSInv.id={id}''') 
                 # print(InvoiceQuery.query)
                 if InvoiceQuery:
                     # InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
@@ -371,12 +372,14 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "DriverName":a.DriverName,
                             "VehicleNo": a.VehicleNumber,
                             "CreatedOn" : a.CreatedOn,
+                            # Add Company Name
+                            "CompanyName":a.CompanyName,
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
                             "InvoiceUploads" : InvoiceUploads,
                             "BankData":BankData
                                                         
-                        })
+                        }) 
                     log_entry = create_transaction_logNew(request,0, a.Party, A+','+"InvoiceID:"+str(id),int(B),0,0,0,a.Customer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceData[0]})
                 log_entry = create_transaction_logNew(request,0, a.Party, "Invoice Not available",int(B),0,0,0,a.Customer)
