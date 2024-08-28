@@ -375,6 +375,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "CreatedOn" : a.CreatedOn,
                             # Add Company Name
                             "CompanyName":a.CompanyName,
+                            "CashierName" :a.CashierName,
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
                             "InvoiceUploads" : InvoiceUploads,
