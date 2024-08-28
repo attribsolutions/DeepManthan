@@ -108,11 +108,12 @@ class SPOSLog_inView(CreateAPIView):
                     obj = M_SweetPOSLogin(**SPOSLog_in_data)
                     obj.save(using='sweetpos_db')
                     
-                    responce=M_SweetPOSRoleAccess.objects.using('sweetpos_db').get(Party=Division)
-                    responce_serializer=SPOSRoleAccessSerializer(responce).data
+                    # responce=M_SweetPOSRoleAccess.objects.using('sweetpos_db').get(Party=Division)
+                    
+                    # responce_serializer=SPOSRoleAccessSerializer(responce).data
                     
                     log_entry = create_transaction_logNew(request, SPOSLog_in_data,0,'',348,0)
-                    return JsonResponse({"Success":True,"status_code":200,"msg":"Loged In Successfully..!","RoleAccess": responce_serializer})
+                    return JsonResponse({"Success":True,"Status":200,"Message":"Loged In Successfully..!"})
                     
 
         except Exception as e:
