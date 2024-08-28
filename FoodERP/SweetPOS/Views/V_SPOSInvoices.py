@@ -373,8 +373,9 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "DriverName":a.DriverName,
                             "VehicleNo": a.VehicleNumber,
                             "CreatedOn" : a.CreatedOn,
-                            # Add Company Name
+                            # Add Company Name and CashierName
                             "CompanyName":a.CompanyName,
+                            "CashierName" :a.CashierName,
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
                             "InvoiceUploads" : InvoiceUploads,
