@@ -270,7 +270,7 @@ order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
     LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
     LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
     WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
-    order by M_Group.id, MC_SubGroup.id ,M_Items.id,A.id''')
+    order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
                        
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
                     CustomPrint(Itemquery.query)
